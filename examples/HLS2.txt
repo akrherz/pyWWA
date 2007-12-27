@@ -1,0 +1,418 @@
+535 
+ACUS74 KHGX 192015 CCA
+PSHHGX
+
+POST TROPICAL CYCLONE REPORT...HUMBERTO 
+(ADDITION OF UNOFFICIAL REPORTS AND GALVESTON COUNTY DAMAGE)
+NATIONAL WEATHER SERVICE HOUSTON/GALVESTON TX
+315 PM CDT WED SEP 19 2007
+
+NOTE:  THE DATA SHOWN HERE ARE PRELIMINARY...AND SUBJECT TO UPDATES 
+AND CORRECTIONS AS APPROPRIATE.
+
+
+COUNTIES INCLUDED:
+BRAZOS...BURLESON...MADISON...HOUSTON...TRINITY...POLK...WASHINGTON...SAN 
+JACINTO...WALKER...GRIMES...MONTGOMERY...AUSTIN...WALLER...HARRIS...LIBERTY
+...COLORADO...JACKSON...WHARTON...MATAGORDA...FORT BEND...BRAZORIA...GALVESTON
+...CHAMBERS.
+
+
+A. LOWEST SEA LEVEL PRESSURE/MAXIMUM SUSTAINED WINDS AND PEAK GUSTS
+---------------------------------------------------------------------
+OFFICIAL OBSERVATIONS...
+NOTE: ANEMOMETER HEIGHT IS 10 METERS AND WIND AVERAGING IS 2 MINUTES
+---------------------------------------------------------------------
+LOCATION  ID   MIN     DATE/     MAX      DATE/     PEAK     DATE/
+LAT  LON       PRES    TIME      SUST     TIME      GUST     TIME
+DEG DECIMAL    (MB)    (UTC)     (KT)     (UTC)     (KT)     (UTC)
+---------------------------------------------------------------------
+KIAH - BUSH INTERCONTINENTAL AIRPORT 
+29.59 -95.21  1012.2  12/2153   030/013  12/1131   030/013  12/1131
+
+KHOU - HOUSTON HOBBY AIRPORT
+29.38 -95.16  1011.8  13/0153   050/016  12/2053   050/021  12/2053
+
+KDWH - TOMBALL 
+30.04 -95.33  1011.5  13/0709   050/010  13/0453   050/010  13/0453
+
+KPSX - PALACIOS
+28.43 -96.15  1011.0  12/2153   010/014  12/1653   010/019  12/1653
+
+KLBX - LAKE JACKSON/ANGLETON
+29.06 -95.27  1010.2  12/2353   350/015  13/0015   350/024  13/015
+
+KLVJ - PEARLAND
+29.31 -95.14  1011.2  13/0153   010/016  13/0210   010/021  13/0153
+
+KSGR - SUGARLAND
+29.37 -95.39  1012.5  12/2153   020/013  12/1728   030/019  13/0042
+
+KUTS - HUNTSVILLE
+30.44 -95.35  1013.1  12/2153   010/006  12/0553   010/006  12/0553
+
+KCXO - CONROE
+30.21 -95.24  1012.3  12/2153   360/010  12/1753   360/010  12/1753
+
+KGLS - GALVESTON
+29.16 -94.51  1007.0  13/0252   030/030  13/0323   030/044  13/0321
+
+KCLL - COLLEGE STATION
+30.34 -96.21  1012.8  12/2253   020/011  12/0953   020/011  12/0953
+
+                                                        
+REMARKS: NONE.
+
+UNOFFICIAL OBSERVATIONS...
+NOTE: UNKNOWN ANEMOMETER HEIGHT AND WIND AVERAGING PERIOD.
+---------------------------------------------------------------------
+LOCATION  ID   MIN     DATE/     MAX      DATE/     PEAK     DATE/
+LAT  LON       PRES    TIME      SUST     TIME      GUST     TIME
+DEG DECIMAL    (MB)    (UTC)     (KT)     (UTC)     (KT)     (UTC)
+---------------------------------------------------------------------
+KBYY- BAY CITY
+28.58 -95.51  1010.8  12/2105   360/013  12/1945  350/020   13/0005
+                                                        
+KARM - WHARTON
+29.15 -96.09  1011.9  12/2124   010/012  12/2204  010/016   12/2204 
+
+K11R - BRENHAM
+30.13 -96.23  1013.2  12/2202   010/010  12/1859  020/014   12/1939
+
+JBHT2 - JAMAICA BEACH
+29.12 -94.59  1007.3  13/0214   030/030  13/0047  330/035   13/0336 
+                               
+TXDOT 3300 - GALVESTON CAUSEWAY
+29.29 -94.87    M        M       M /011  13/0240   M /033   13/0218
+
+TXDOT 4240 - JAMAICA BEACH
+29.08 -95.12    M        M       M /020  13/0159   M /031   13/0209
+
+TXDOT 4260 - BOLIVAR AT LOOP 108
+29.37 -94.77    M        M       M /035  13/0353   M /043   13/0410
+
+TXDOT 4280 - ROLLOVER PASS AT GILCHRIST
+ M      M       M        M       M /048  13/0624   M /058   13/0640
+
+
+
+ADDITIONAL UNOFFICIAL OBSERVATIONS...
+---------------------------------
+LOCATION         PEAK      DATE/
+                 GUST      TIME
+                 (KT)      (UTC)
+---------------------------------
+
+KEMAH          360/030    13/0400
+
+TEXAS CITY     360/022    13/0030
+
+HITCHCOCK      045/038    13/0230
+
+LEAGUE CITY    360/024    13/0415
+
+ALVIN          340/013    13/0215
+
+                              
+REMARKS: ABOVE OBSERVATIONS ARE APPROXIMATE MEASUREMENTS WITH NO DATA
+QUALITY CONTROL.
+
+M DENOTES MISSING OR UNAVAILABLE DATA.
+
+B. MARINE OBSERVATIONS...
+NOTE:  ANEMOMETER HEIGHT IN METERS AND WIND AVERAGING PERIOD IN
+MINUTES INDICATED UNDER MAXIMUM SUSTAINED WIND.
+---------------------------------------------------------------------
+LOCATION  ID   MIN     DATE/     MAX      DATE/     PEAK     DATE/
+LAT  LON       PRES    TIME      SUST     TIME      GUST     TIME
+DEG DECIMAL    (MB)    (UTC)     (KT)     (UTC)     (KT)     (UTC)
+---------------------------------------------------------------------
+42035  22 NM EAST OF GALVESTON
+29.22 -94.40   991.7   13/0450  120/050  13/0410   120/064  13/0405 
+                                 05/10
+
+42019  60 NM SOUTH OF FREEPORT
+27.91 -95.36  1007.3   12/1250  280/024  12/1820   280/029  12/1529 
+                                 05/10
+
+UNOFFICIAL MARINE OBSERVATIONS...
+NOTE: UNKNOWN ANEMOMETER HEIGHT. WIND AVERAGED OVER SIX MINUTE PERIODS.
+---------------------------------------------------------------------
+LOCATION  ID   MIN     DATE/     MAX      DATE/     PEAK     DATE/
+LAT  LON       PRES    TIME      SUST     TIME      GUST     TIME
+DEG DECIMAL    (MB)    (UTC)     (KT)     (UTC)     (KT)     (UTC)
+---------------------------------------------------------------------
+GALVESTON BAY - MORGANS POINT
+29.41 -94.59  1009.5   13/0600  040/016  12/2000   040/021  13/0200 
+                                
+
+GALVESTON BAY - EAGLE POINT
+27.30 -94.54  1007.8   13/0518  030/028  13/0130   040/033  13/0200 
+                                 
+
+GALVESTON BAY - NORTH JETTY 
+29.21 -94.44  1003.4   13/0406  020/043  13/0412   020/052  13/0424 
+                                 
+
+GALVESTON BAY - SOUTH JETTY 
+29.20 -94.42  1003.4   13/0500  100/045  13/0400   100/065  13/0200
+                                
+
+GALVESTON BAY - PIER 21
+29.19 -94.47  1005.1   13/0348    N/A      N/A       N/A       N/A
+
+
+GALVESTON BAY - ROLLOVER PASS
+29.31 -94.31   N/A       N/A    360/052  13/0624   360/066  13/0624 
+                                 
+
+GALVESTON BAY - PLEASURE PIER
+29.17 -94.47  1003.7   13/0406  030/043  13/0336   020/056  13/0348 
+                                 
+
+USCG FREEPORT
+28.57 -95.18  1008.5   13/0012  030/021  12/2124   020/029  12/2124 
+                                 
+
+
+REMARKS: NONE 
+
+
+C. STORM TOTAL RAINFALL FROM 0600 UTC SEPTEMBER 12 UNTIL 0559 UTC 
+SEPTEMBER 13 2007
+---------------------------------------------------------------------
+CITY/TOWN                   COUNTY               ID         
+RAINFALL    
+LAT LON                                                       (IN)
+DEG DECIMAL                                                         
+        
+---------------------------------------------------------------------
+BUSH-INTERCONTINENTAL       HARRIS               KIAH         0.24             
+29.59  -95.21
+
+HOUSTON HOBBY AIRPORT       HARRIS               KHOU         0.44               
+29.38  -95.16
+
+TOMBALL                     HARRIS               KDWH         0.47              
+30.04  -95.33
+
+PALACIOS                   MATAGORDA             KPSX         0.02              
+28.43  -96.15
+
+LAKE JACKSON/ANGLETON      BRAZORIA              KLBX         1.55             
+29.06  -95.27
+
+PEARLAND                   BRAZORIA              KLVJ         1.09             
+29.31  -95.14
+
+SUGARLAND                  FORT BEND             KSGR         0.12              
+29.37  -95.39
+
+HUNTSVILLE                  WALKER               KUTS         0.01               
+30.44  -95.35
+
+LEAGUE CITY                GALVESTON             KHGX         1.88              
+29.48  -95.05
+
+CONROE                     MONTGOMERY            KCXO         0.22              
+30.21  -95.24
+
+GALVESTON                  GALVESTON             KGLS         4.53             
+29.16  -94.51
+
+COLLEGE STATION             BRAZOS               KCLL         0.00              
+30.34  -96.21
+
+
+UNOFFICIAL STORM TOTAL RAINFALL FROM 0600 UTC SEPTEMBER 12 UNTIL 0559 UTC 
+SEPTEMBER 13 2007
+-------------------------------------------------------------------------
+
+CITY/TOWN                   COUNTY               ID         
+RAINFALL    
+LAT LON                                                       (IN)
+DEG DECIMAL                                                         
+        
+---------------------------------------------------------------------
+
+
+ALVIN                      BRAZORIA             ALVT2         1.08
+
+
+BAYTOWN                    HARRIS               BATT2         0.70
+
+
+BRENHAM                    WASHINGTON           BHMT2         0.20
+
+
+FREEPORT                   BRAZORIA             DOWT2         2.01
+
+
+GALVESTON CG STATION       GALVESTON            GLST2         6.50
+
+
+JAMAICA BEACH              GALVESTON            JBHT2         5.80
+
+
+LAKE LIVINGSTON            SAN JACINTO          LVDT2         0.16
+
+
+MATAGORDA                  MATAGORDA            MTGT2         0.36
+
+
+NEW CANEY                  MONTGOMERY           NCAT2         0.40
+
+
+SUGARLAND                   FORT BEND           SUGT2         0.15
+
+
+KEMAH                       GALVESTON                         1.83
+
+
+TEXAS CITY                  GALVESTON                         2.68
+
+
+HITCHCOCK                   GALVESTON                         1.97
+
+
+LEAGUE CITY                 GALVESTON                         1.67
+
+
+FRIENDSWOOD                 GALVESTON                         0.93
+
+
+ALVIN                       BRAZORIA                          0.71
+
+
+GALVESTON CAUSEWAY          GALVESTON                         3.23
+
+
+JAMAICA BEACH               GALVESTON                         4.84
+
+
+BOLIVAR AT LOOP 108         GALVESTON                         7.01
+
+
+ROLLOVER PASS AT GILCHRIST  GALVESTON                         8.31
+
+
+21ST STREET AT HARBOR SIDE  GALVESTON                         5.08
+
+
+REMARKS: NONE.
+
+
+D. INLAND FLOODING...
+------------------
+GALVESTON...TIDAL FLOODING ALONG THE WEST END OF GALVESTON ISLAND WAS LIMITED 
+TO THE OVER-TOPPING OF VARIOUS PIERS AND BULKHEADS. A FEW LOW LYING AREAS AND STREETS
+ALONG AND NEAR THE BAY SIDE OF THE ISLAND RECEIVING MINOR FLOODING DUE TO HEAVY 
+THUNDERSTORM RAINFALL.
+
+CHAMBERS...NO OFFICIAL REPORTS OF FLOODING.
+
+REMARKS: NONE.
+
+E. MAXIMUM STORM SURGE AND PRIMARY WATER LEVEL...
+OFFICIAL TIDE GAUGES NOTED WITH LEADING "G"
+---------------------------------------------------------------------
+
+COUNTY            CITY/TOWN            SURGE   PWL    DATE    BEACH 
+ 
+                  OR LOCATION           (FT)  (FT)    TIME   EROSION
+---------------------------------------------------------------------
+HARRIS            EAGLE POINT           1.52  2.71  13/0212   MINOR
+  
+
+HARRIS            MORGANS POINT         0.71  2.01  13/0254   MINOR 
+  
+
+GALVESTON         NORTH JETTY           1.23  2.95  12/2236   MINOR 
+  
+
+GALVESTON         SOUTH JETTY            N/A  3.24  12/2230   MINOR
+
+
+GALVESTON   G       PIER 21             2.18  3.05  13/0506   MINOR
+
+
+GALVESTON   G     PLEASURE PIER         1.65  3.62  12/2236   MINOR
+
+
+GALVESTON         ROLLOVER PASS         2.86  4.33  13/0842   MINOR
+
+
+GALVESTON         JAMAICA BEACH         2.52  3.42  13/0350   MINOR 
+
+
+
+REMARKS: DATUM REFERENCE OF MLLW.
+
+F. TORNADOES...
+
+NO OFFICIAL TORNADOES.
+
+G. STORM IMPACTS BY COUNTY...
+---------------------------------------------------------------------
+
+COUNTY           DEATHS           INJURIES              EVACUATIONS 
+   
+DESCRIPTION
+---------------------------------------------------------------------
+GALVESTON          0                 0                      0
+
+10 SINGLE FAMILY HOMES WERE COMPLETELY DESTROYED, 14 RECEIVED MAJOR 
+DAMAGE, AND 48 RECEIVED MINOR DAMAGE. 5 MOBILE HOMES RECEIVED MAJOR 
+DAMAGE, AND 3 HAD MINOR DAMAGE. 5,000 HOMES WERE ISOLATED DUE TO
+ROAD CLOSURES. ESTIMATED REPAIR COSTS AROUND THE BOLIVAR PENINSULA
+AND HIGH ISLAND IS AT LEAST $520,000.
+
+WIDESPREAD DAMAGE WAS FOUND IN HIGH ISLAND WITH MANY TREES UPROOTED 
+AND SNAPPED LIMBS.  LARGER SNAPPED TREE TRUNKS WERE FOUND IN HIGH 
+ISLAND NEAR SEVERAL CHURCHES AND HOMES.  HIGH ISLAND HIGH SCHOOL HAD 
+SEVERAL LIGHT POLES SNAPPED AT THE STADIUM.  A COUPLE OF HOMES IN 
+THIS AREA HAD SHINGLES MISSING AND ROOF DAMAGE.  FURTHER INTO TOWN 
+THE LOCAL HOTEL HAD ROOF DAMAGE WITH PART OF IT MISSING.  THE AWNING 
+FROM THE GAS STATION HAD ALSO COLLAPSED.  MANY OF THE UPROOTED TREES 
+WERE MOST LIKELY DUE TO STRONG WINDS COUPLED WITH SATURATED GROUND.
+THE DAMAGE ALL LEANED IN ONE DIRECTION TOWARDS THE SOUTH TO SOUTHWEST
+INDICATING STRAIGHT LINE WINDS FROM THE WESTERN EYE WALL OF THE
+HURRICANE. THE DAMAGE WAS NOT FOUND TO BE TWISTED OR LEANING IN
+DIFFERENT DIRECTIONS INDICATING TORNADO DAMAGE.
+
+POWER POLE DAMAGE CONTINUED ALONG HIGHWAY 87 TOWARDS CANAL CITY 
+AND GILCHRIST.  SOME HOMES SUSTAINED MINOR ROOF DAMAGE WITH SHINGLES 
+MISSING BUT THERE APPEARED TO BE NO STRUCTURAL DAMAGE.  LITTLE TO NO 
+DAMAGE WAS NOTED ALONG BOLIVAR PENINSULA.
+
+
+CHAMBERS           0                 0                      0    
+
+
+LITTLE DAMAGE WAS NOTED IN THE COMMUNITIES OF WINNIE AND 
+STOWELL WITH MAINLY A FEW TREES UPROOTED WITH MAINLY LIMBS FALLEN.  
+SATURATED GROUNDS COULD HAVE CONTRIBUTED TO TREES BECOMING UPROOTED 
+EASILY.  SNAPPED POWER POLES WERE NOTED TO BEGIN ABOUT 8 MILES SOUTH 
+OF STOWELL EAST OF THE ANAHUAC NATIONAL WILDLIFE REFUGE ALONG 
+HIGHWAY 124.  DAMAGE TO POWER POLES WAS NOTED TO CONTINUE SOUTH 
+ALONG HIGHWAY 124 TOWARDS HIGH ISLAND.  
+
+
+REMARKS...OVERALL DAMAGE WAS INDICATIVE OF 60 TO 70 MPH WINDS OR
+STRONG TROPICAL STORM FORCE WINDS FROM JUST EAST OF CANAL CITY TO
+ABOUT 6 MILES NORTH OF HIGH ISLAND...INCLUDING THE COMMUNITY OF
+HIGH ISLAND. GUSTS NEAR 80 TO 85 MPH OR HURRICANE FORCE WINDS WERE
+POSSIBLE IN HIGH ISLAND GIVEN EXTENSIVE DAMAGE TO POWER
+POLES...ROOF DAMAGE TO THE HOTEL...TREE TRUNKS BEING SNAPPED AND
+THE GAS STATION AWNING COLLAPSING.
+
+
+&&
+
+
+BLOOD/OVERPECK/LICHTER
+
+$$
+
+
+
