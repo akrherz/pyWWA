@@ -7,7 +7,7 @@ import smtplib
 from email.MIMEText import MIMEText
 
 import pg
-mydb = pg.connect('postgis', '10.10.10.20')
+mydb = pg.connect('postgis', 'iem20')
 #mydb = pg.connect('postgis')
 
 from twisted.words.protocols.jabber import client, jid
