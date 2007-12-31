@@ -4,16 +4,14 @@ import sys, re, mx.DateTime, string, dbflib, shapelib, zipfile, os, logging
 import shutil, StringIO, traceback
 import smtplib
 from email.MIMEText import MIMEText
-from settings import *
 from pyIEM import wellknowntext
+import secret
 
 # Changedir to /tmp
 os.chdir("/tmp")
 
 import pg
-mydb = pg.connect(dbname=postgis_dbname, host=postgis_host,
-       port=postgis_port, opt=postgis_opt, tty=postgis_tty,
-       user=postgis_user, passwd=postgis_passwd)
+mydb = pg.connect(secret.dbname, secret.dbhost, user=secret.dbuser)
 
 FORMAT = "%(asctime)-15s:: %(message)s"
 logging.basicConfig(filename='/mesonet/data/logs/%s/ingestRC.log' \
@@ -24,15 +22,6 @@ logger.setLevel(logging.INFO)
 
 errors = StringIO.StringIO()
 
-try:
-  import pg
-  postgisdb = pg.connect(dbname=postgis_dbname, host=postgis_host,
-        port=postgis_port, opt=postgis_opt, tty=postgis_tty,
-        user=postgis_user, passwd=postgis_passwd)
-except:
-  errors.write("\nWarn: Can't connect to Postgis. Disabling Postgis.\n")
-  traceback.print_exc(errors)
-  HAVE_POSTGIS = 0
 
 # Called if we want to email any errors that occured....
 def emailErrors(raw):
@@ -45,12 +34,12 @@ def emailErrors(raw):
 
   msg = MIMEText("%s\n\n>RAW DATA\n\n%s" % (errstr, raw) )
   msg['subject'] = 'STOIAparse.py Traceback'
-  msg['From'] = errors_from
-  msg['To'] = errors_to[0]
+  msg['From'] = "ldm@mesonet.agron.iastate.edu"
+  msg['To'] = "akrherz@iastate.edu"
 
   s = smtplib.SMTP()
   s.connect()
-  s.sendmail(errors_from, errors_to, msg.as_string())
+  s.sendmail(msg["From"], msg["To"], msg.as_string())
   s.close()
 
 def findString(cond, sstr):
@@ -205,7 +194,6 @@ if (__name__ == "__main__"):
   except:
     traceback.print_exc(file=errors)
 
-  if (EMAIL_ERRORS):
-    emailErrors(raw)
+  emailErrors(raw)
 
   sys.exit(0)
