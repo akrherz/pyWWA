@@ -5,7 +5,6 @@ import smtplib
 from email.MIMEText import MIMEText
 
 import secret, os
-from settings import *
 from common import *
 from pyIEM.nws import TextProduct
 from pyIEM import iemdb, ldmbridge
