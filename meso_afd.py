@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # Process special AFD for BMX
 
 import sys, re
