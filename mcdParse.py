@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # Parse MCD to iembot
 
 import sys, re, pdb, mx.DateTime
