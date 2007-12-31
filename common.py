@@ -2,33 +2,36 @@
 
 from twisted.internet import reactor
 from twisted.words.xish import domish
+from twisted.python import log
+#from twisted.words.xish.xmlstream import STREAM_END_EVENT
 
-import secret, logging
+import secret
 
 class JabberClient:
-    xmlstream = None
 
     def __init__(self, myJid):
         self.myJid = myJid
+        self.xmlstream = None
+        self.authenticated = False
 
+    def authd(self,xs):
+        log.msg("Logged into Jabber Chat Server!")
 
-    def authd(self,xmlstream):
-        logging.info("Logged into Jabber Chat Server!")
-        self.xmlstream = xmlstream
+        self.xmlstream = xs
         self.xmlstream.rawDataInFn = self.rawDataInFn
         self.xmlstream.rawDataOutFn = self.rawDataOutFn
-
         presence = domish.Element(('jabber:client','presence'))
         presence.addElement('status').addContent('Online')
-        xmlstream.send(presence)
+        self.xmlstream.send(presence)
+        self.authenticated = True
 
-        #xmlstream.addObserver('/message',  self.debug)
-        #xmlstream.addObserver('/presence', self.debug)
-        #xmlstream.addObserver('/iq',       self.debug)
+    def _disconnect(self, xs):
+        log.msg("SETTING authenticated to false!")
+        self.authenticated = False
 
     def sendMessage(self, body, html=None):
-        if (self.xmlstream is None):
-            logging.info("xmlstream is None, so lets try again!")
+        if (not self.authenticated):
+            log.msg("No Connection, Lets wait and try later...")
             reactor.callLater(3, self.sendMessage, body, html)
             return
         message = domish.Element(('jabber:client','message'))
@@ -43,7 +46,7 @@ class JabberClient:
 
 
     def debug(self, elem):
-        logging.info( elem.toXml().encode('utf-8') )
+        log.msg( elem.toXml().encode('utf-8') )
 
     def rawDataInFn(self, data):
         print 'RECV', unicode(data,'utf-8','ignore').encode('ascii', 'replace')
