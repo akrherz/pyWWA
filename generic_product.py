@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # Generic Text product to iembot
 
 import sys, re, os
