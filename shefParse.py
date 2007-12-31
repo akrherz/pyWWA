@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 
 import sys, sys, os
 import traceback
