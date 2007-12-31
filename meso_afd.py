@@ -3,7 +3,7 @@
 import sys, re
 import traceback
 import StringIO
-from settings import *
+import secret
 from pyIEM import nws_text
 from pyxmpp.jid import JID
 from pyxmpp.jabber.simple import send_message
@@ -13,16 +13,8 @@ errors = StringIO.StringIO()
 
 raw = sys.stdin.read()
 
-if (HAVE_POSTGIS):
-    try:
-        import pg
-        postgisdb = pg.connect(dbname=postgis_dbname, host=postgis_host,
-          port=postgis_port, opt=postgis_opt, tty=postgis_tty,
-          user=postgis_user, passwd=postgis_passwd)
-    except:
-        errors.write("\nWarn: Can't connect to Postgis. Disabling Postgis.\n")
-        traceback.print_exc(errors)
-        HAVE_POSTGIS = 0
+import pg
+postgisdb = pg.connect(secret.dbname, secret.dbhost, user=secret.dbuser)
 
 def calldb(sql):
     if (not HAVE_POSTGIS):
