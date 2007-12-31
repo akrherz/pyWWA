@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # Ingest LSRs!!!
 # Daryl Herzmann 9 May 2005
 
