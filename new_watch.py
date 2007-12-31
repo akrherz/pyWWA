@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # Parse Watch Data!  Oye!
 
 import sys, logging
