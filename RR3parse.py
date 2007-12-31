@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 
 import sys, os, string, traceback
 from pyIEM import shefReport, iemAccess, iemAccessOb, ldmbridge
