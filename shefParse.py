@@ -4,10 +4,9 @@ import traceback
 from pyIEM import shefReport, ldmbridge
 from twisted.python import log
 from twisted.internet import reactor
-from settings import *
 import smtplib, StringIO
 from email.MIMEText import MIMEText
-
+import secret
 
 log.startLogging( open('/tmp/shefParse.log','a') )
 
@@ -19,12 +18,12 @@ class myProductIngestor(ldmbridge.LDMProductReceiver):
 
     msg = MIMEText("%s\n\n>RAW DATA\n\n%s" % (errstr, raw.replace("\015\015\012", "\n") ) )
     msg['subject'] = 'shefParse.py Traceback'
-    msg['From'] = errors_from
-    msg['To'] = errors_to[0]
+    msg['From'] = "ldm@mesonet.agron.iastate.edu"
+    msg['To'] = "akrherz@iastate.edu"
 
     s = smtplib.SMTP()
     s.connect()
-    s.sendmail(errors_from, errors_to, msg.as_string())
+    s.sendmail(msg["From"], msg["To"], msg.as_string())
     s.close()
     reactor.stop()
 
