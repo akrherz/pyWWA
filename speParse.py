@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # Parse SPENES to iembot
 
 import sys, re, pdb, mx.DateTime
