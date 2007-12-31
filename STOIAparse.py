@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # Need something to ingest Iowa Road Conditions
 
 import sys, re, mx.DateTime, string, dbflib, shapelib, zipfile, os, logging
