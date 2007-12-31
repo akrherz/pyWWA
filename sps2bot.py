@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # Send SPS messages to iembot
 
 import sys, StringIO, logging, re, traceback, mx.DateTime
@@ -13,7 +12,7 @@ from pyIEM import iemdb, ldmbridge
 i = iemdb.iemdb(secret.dbhost)
 postgis = i['postgis']
 
-from twisted.words.protocols.jabber import client, jid
+from twisted.words.protocols.jabber import client, jid, xmlstream
 from twisted.words.xish import domish
 from twisted.internet import reactor
 
@@ -127,6 +126,7 @@ factory.addBootstrap('//event/stream/authd',jabber.authd)
 factory.addBootstrap("//event/client/basicauth/invaliduser", jabber.debug)
 factory.addBootstrap("//event/client/basicauth/authfailed", jabber.debug)
 factory.addBootstrap("//event/stream/error", jabber.debug)
+factory.addBootstrap(xmlstream.STREAM_END_EVENT, jabber._disconnect )
 
 reactor.connectTCP(secret.connect_chatserver,5222,factory)
 
