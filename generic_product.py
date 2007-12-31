@@ -5,7 +5,6 @@ import traceback
 import StringIO, logging
 import mx.DateTime
 import secret
-from settings import *
 from common import *
 from pyIEM.nws import TextProduct
 from email.MIMEText import MIMEText
@@ -135,6 +134,7 @@ def real_process(raw):
     if (pil == "FTM"):
       sqlraw = re.sub("[^\n\ra-zA-Z0-9:\.,\s\$\*]", "", sqlraw)
 
+    postgis_dsn = "dbname=%s host=%s" % (secret.dbname, secret.dbhost)
     conn = psycopg2.connect( postgis_dsn )
     curs = conn.cursor()
     sql = "INSERT into text_products(product) values ('%s')" % (sqlraw,)
