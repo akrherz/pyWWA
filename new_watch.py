@@ -18,7 +18,6 @@ import traceback
 from email.MIMEText import MIMEText
 
 # Non standard Stuff
-from settings import *
 from pyIEM import stationTable, utils
 
 KM_SM = 1.609347
