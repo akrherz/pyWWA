@@ -17,9 +17,6 @@ import pg
 postgisdb = pg.connect(secret.dbname, secret.dbhost, user=secret.dbuser)
 
 def calldb(sql):
-    if (not HAVE_POSTGIS):
-        return
-
     try:
         postgisdb.query(sql)
     except:
@@ -28,9 +25,6 @@ def calldb(sql):
         errors.write("\n-----------\n")
 
 def querydb(sql):
-    if (not HAVE_POSTGIS):
-        return []
-
     try:
         return postgisdb.query(sql).dictresult()
     except:
@@ -41,9 +35,9 @@ def querydb(sql):
     return []
 
 def sendJabberMessage(jabberTxt):
-    jid=JID(jabber_from_jid)
-    recpt=JID(jabber_to_jid)
-    send_message(jid, jabber_passwd, recpt, jabberTxt, 'Ba')
+    jid=JID("iembot_ingestor@%s/Ingestor" % (secret.chatserver,) )
+    recpt=JID("iembot@%s/Echobot" % (secret.chatserver,) )
+    send_message(jid, secret.iembot_ingest_password, recpt, jabberTxt, 'Ba')
 
 def process(raw):
     afos = sys.argv[1]
