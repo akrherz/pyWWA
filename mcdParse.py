@@ -4,10 +4,10 @@ import sys, re, pdb, mx.DateTime
 import traceback, StringIO
 import smtplib
 from email.MIMEText import MIMEText
+import secret
 
 import pg
-mydb = pg.connect('postgis', 'iem20')
-#mydb = pg.connect('postgis')
+mydb = pg.connect('postgis', secret.dbhost)
 
 from twisted.words.protocols.jabber import client, jid
 from twisted.words.xish import domish
