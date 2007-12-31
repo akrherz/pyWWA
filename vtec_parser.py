@@ -3,23 +3,22 @@
 from twisted.words.protocols.jabber import client, jid, xmlstream
 from twisted.words.xish import domish
 from twisted.internet import reactor
+from twisted.python import log
+import os
+log.startLogging(open('/mesonet/data/logs/%s/vtec_parser.log' % (os.getenv("USER"),), 'a'))
+log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
 
 from pyIEM import  ldmbridge
 from pyIEM.nws import TextProduct
 import secret
 from common import *
-import pg, os
+import pg
 postgis = pg.connect(secret.dbname, secret.dbhost, user=secret.dbuser)
 
-import re, logging, mx.DateTime, traceback, StringIO
+import re, mx.DateTime, traceback, StringIO
 import smtplib
 from email.MIMEText import MIMEText
 
-""" My logger """
-logging.basicConfig(filename='/mesonet/data/logs/%s/vtec_parser.log' % (os.getenv("USER"), ), filemode='a')
-logger=logging.getLogger()
-logger.addHandler(logging.StreamHandler())
-logger.setLevel(logging.INFO)
 
 offsets = {
  'EDT': 4,
@@ -44,7 +43,7 @@ class myProductIngestor(ldmbridge.LDMProductReceiver):
         except:
             io = StringIO.StringIO()
             traceback.print_exc(file=io)
-            logger.error( io.getvalue() )
+            log.msg( io.getvalue() )
             msg = MIMEText("%s\n\n>RAW DATA\n\n%s"%(io.getvalue(),buf.replace("\015\015\012", "\n") ))
             msg['subject'] = 'vtec_parse.py Traceback'
             msg['From'] = "ldm@mesonet.agron.iastate.edu"
@@ -56,7 +55,7 @@ class myProductIngestor(ldmbridge.LDMProductReceiver):
             s.close()
 
     def connectionLost(self,reason):
-        logger.info("LDM Closed PIPE")
+        log.msg("LDM Closed PIPE")
         
 
 def real_processor(buf):
@@ -64,7 +63,7 @@ def real_processor(buf):
     sqlraw = re.sub("'", "\\'", buf)
     sqlraw = sqlraw.replace("\015\015\012", "\n")
     text_product = TextProduct.TextProduct( buf )
-    logger.info( str(text_product) )
+    log.msg( str(text_product) )
     jabberMessages = []
     jabberMessagesHTML = []
     arSQL = []
@@ -116,7 +115,7 @@ def real_processor(buf):
                 if (ugc_dict.has_key(cnty)):
                     name = ugc_dict[cnty]
                 else:
-                    logger.info("ERROR: Unknown ugc %s" % (cnty,))
+                    log.msg("ERROR: Unknown ugc %s" % (cnty,))
                     name = "((%s))" % (cnty,)
                 countyState[stateAB].append(name)
             # Test for affectedWFOS
@@ -292,7 +291,7 @@ rs = postgis.query(sql).dictresult()
 for i in range(len(rs)):
     nwsli_dict[ rs[i]['nwsli'] ] = rs[i]['rname']
 
-myJid = jid.JID('iembot_ingest@%s/ingest_%s' % (secret.chatserver, mx.DateTime.gmt().ticks() ) )
+myJid = jid.JID('iembot_ingest@%s/vtecparser_%s' % (secret.chatserver, mx.DateTime.gmt().ticks() ) )
 factory = client.basicClientFactory(myJid, secret.iembot_ingest_password)
 
 jabber = JabberClient(myJid)
@@ -301,6 +300,7 @@ factory.addBootstrap('//event/stream/authd',jabber.authd)
 factory.addBootstrap("//event/client/basicauth/invaliduser", jabber.debug)
 factory.addBootstrap("//event/client/basicauth/authfailed", jabber.debug)
 factory.addBootstrap("//event/stream/error", jabber.debug)
+factory.addBootstrap(xmlstream.STREAM_END_EVENT, jabber._disconnect )
 
 reactor.connectTCP(secret.connect_chatserver,5222,factory)
 
