@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 
 from twisted.words.protocols.jabber import client, jid, xmlstream
 from twisted.words.xish import domish
