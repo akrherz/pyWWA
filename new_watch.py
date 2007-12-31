@@ -1,5 +1,11 @@
 # Parse Watch Data!  Oye!
 
+from twisted.python import log
+import os
+log.startLogging(open('/mesonet/data/logs/%s/new_watch.log' % (os.getenv("USER"),), 'a'))
+log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
+
+
 import sys, logging
 import re
 import mapscript
@@ -14,7 +20,6 @@ from email.MIMEText import MIMEText
 # Non standard Stuff
 from settings import *
 from pyIEM import stationTable, utils
-from twisted.python import log
 
 KM_SM = 1.609347
 
@@ -31,11 +36,6 @@ from twisted.internet import reactor
 
 
 errors = StringIO.StringIO()
-logging.basicConfig(filename='/tmp/new_watch.log',
-                    filemode='a')
-logger=logging.getLogger()
-logger.addHandler(logging.StreamHandler())
-logger.setLevel(logging.INFO)
 
 qu = 0
 
