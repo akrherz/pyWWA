@@ -1,8 +1,13 @@
 # Generic Text product to iembot
 
-import sys, re, os
+from twisted.python import log
+import os
+log.startLogging(open('/mesonet/data/logs/%s/gp.log' % (os.getenv("USER"),), 'a'))
+log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
+
+import sys, re
 import traceback
-import StringIO, logging
+import StringIO
 import mx.DateTime
 import secret
 from common import *
@@ -41,10 +46,6 @@ from twisted.internet import reactor
 
 
 errors = StringIO.StringIO()
-logging.basicConfig(filename='/mesonet/data/logs/%s/gp.log' % (os.getenv("USER"), ), filemode='a')
-logger=logging.getLogger()
-logger.addHandler(logging.StreamHandler())
-logger.setLevel(logging.INFO)
 
 class myProductIngestor(ldmbridge.LDMProductReceiver):
 
@@ -54,7 +55,7 @@ class myProductIngestor(ldmbridge.LDMProductReceiver):
         except:
             io = StringIO.StringIO()
             traceback.print_exc(file=io)
-            logger.error( io.getvalue() )
+            log.msg( io.getvalue() )
             msg = MIMEText("%s\n\n>RAW DATA\n\n%s"%(io.getvalue(),buf.replace("\015\015\012", "\n") ))
             msg['subject'] = 'generic_product.py Traceback'
             msg['From'] = "ldm@mesonet.agron.iastate.edu"
@@ -66,7 +67,7 @@ class myProductIngestor(ldmbridge.LDMProductReceiver):
             s.close()
 
     def connectionLost(self,reason):
-        logger.info("LDM Closed PIPE")
+        log.msg("LDM Closed PIPE")
 
 
 prodDefinitions = {
@@ -166,7 +167,7 @@ def real_process(raw):
         if (len(seg.ugc) == 0):
             continue
         if (len(seg.hvtec) > 0 and ['FLW','FFA','FLS'].__contains__(pil)): # Handled by other app
-            logger.info("HVTEC FOUND!, skipping")
+            log.msg("HVTEC FOUND!, skipping")
             continue
         counties = countyText(seg.ugc)
         if (counties.strip() == ""):
