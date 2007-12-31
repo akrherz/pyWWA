@@ -92,6 +92,7 @@ prodDefinitions = {
 
 ugc_dict = {}
 sql = "SELECT name, ugc from nws_ugc WHERE name IS NOT Null"
+postgis_dsn = "dbname=%s host=%s" % (secret.dbname, secret.dbhost)
 conn = psycopg2.connect( postgis_dsn )
 curs = conn.cursor()
 curs.execute( sql )
