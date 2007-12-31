@@ -291,7 +291,7 @@ rs = postgis.query(sql).dictresult()
 for i in range(len(rs)):
     nwsli_dict[ rs[i]['nwsli'] ] = rs[i]['rname']
 
-myJid = jid.JID('iembot_ingest@%s/vtecparser_%s' % (secret.chatserver, mx.DateTime.gmt().ticks() ) )
+myJid = jid.JID('iembot_ingest@%s/vtecparser_%s' % (secret.chatserver, mx.DateTime.gmt().strftime("%Y%m%d%H%M%S") ) )
 factory = client.basicClientFactory(myJid, secret.iembot_ingest_password)
 
 jabber = JabberClient(myJid)
