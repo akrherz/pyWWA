@@ -16,7 +16,6 @@ from twisted.internet import reactor
 raw = sys.stdin.read()
 
 qu = 0
-_CHATSERVER = "localhost"
 
 class JabberClient:
     xmlstream = None
@@ -47,7 +46,7 @@ class JabberClient:
             return
 
         message = domish.Element(('jabber:client','message'))
-        message['to'] = "iembot@%s" % (_CHATSERVER,)
+        message['to'] = "iembot@%s" % (secret.chatserver,)
         message['type'] = 'chat'
         message.addElement('body',None,body)
 
@@ -109,7 +108,7 @@ def killer():
         reactor.stop()
     reactor.callLater(10, killer)
 
-myJid = jid.JID('iembot_ingest@%s/ingestor_%s' % (_CHATSERVER, mx.DateTime.now().ticks() ) )
+myJid = jid.JID('iembot_ingest@%s/ingestor_%s' % (secret.chatserver, mx.DateTime.now().ticks() ) )
 factory = client.basicClientFactory(myJid, secret.iembot_ingest_password)
 
 jabber = JabberClient(myJid)
@@ -119,7 +118,7 @@ factory.addBootstrap("//event/client/basicauth/invaliduser", jabber.debug)
 factory.addBootstrap("//event/client/basicauth/authfailed", jabber.debug)
 factory.addBootstrap("//event/stream/error", jabber.debug)
 
-reactor.connectTCP(_CHATSERVER,5222,factory)
+reactor.connectTCP(secret.chatserver,5222,factory)
 reactor.callLater(0, process, raw)
 reactor.callLater(10, killer)
 reactor.run()
