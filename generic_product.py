@@ -89,6 +89,7 @@ prodDefinitions = {
     'CAE': 'Child Amber Alert (CAE)',
     'ADR': 'Administrative Message (ADR)',
     'TOE': 'Telephone Outage Emergency (TOE)',
+    'LAE': 'Local Area Emergency (LAE)',
 }
 
 ugc_dict = {}
