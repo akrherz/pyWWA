@@ -1,28 +1,34 @@
-#!/usr/bin/env python
-
-import  sys, re, string, os, traceback, StringIO
-from pyIEM import iemAccess, iemAccessOb, mesonet, ldmbridge
-from twisted.python import log
+from twisted.words.protocols.jabber import client, jid, xmlstream
+from twisted.words.xish import domish
 from twisted.internet import reactor
+from twisted.python import log
+import os
+log.startLogging(open('/mesonet/data/logs/%s/metarObFe.log' % (os.getenv("USER"),), 'a'))
+log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
+
+
+import  sys, re, string, traceback, StringIO
+from pyIEM import iemAccess, iemAccessOb, mesonet, ldmbridge, iemdb
 from twisted.enterprise import adbapi
 from metar import Metar
 from email.MIMEText import MIMEText
 import smtplib, secret, mx.DateTime
+from common import *
 
 
 dbpool = adbapi.ConnectionPool("psycopg2", database='iem', host=secret.dbhost)
 
 iemaccess = iemAccess.iemAccess()
-log.startLogging( open('/tmp/metarParse.log','a') )
 
-regression = 0
-if (len(sys.argv) > 1): # We are in regression mode
-    regression = 1
+windAlerts = {}
 
 class myProductIngestor(ldmbridge.LDMProductReceiver):
 
     def connectionLost(self, reason):
         print 'connectionLost', reason
+        reactor.callLater(2, self.shutdown)
+
+    def shutdown(self):
         reactor.callWhenRunning(reactor.stop)
 
     def processData(self, buf):
@@ -65,15 +71,11 @@ def real_processor(buf):
         try:
           mtr = Metar.Metar(clean_metar)
         except Metar.ParserError:
-          o = open('/tmp/metarParseFail.txt', 'a')
-          o.write("\n\n\n--------------------------------------\n")
-          traceback.print_exc(file=o)
-          o.write(clean_metar)
-          o.close()
+          io = StringIO.StringIO()
+          traceback.print_exc(file=io)
+          log.msg( io.getvalue() )
+          log.msg(clean_metar)
           continue
-        if (regression):
-            continue
-
 
         iemid = mtr.station_id[-3:]
         if (mtr.station_id[0] == "X"): # West Texas Mesonet
@@ -103,19 +105,69 @@ def real_processor(buf):
         iem.data['raw'] = clean_metar
         iem.updateDatabase(None, dbpool)
 
-        if mtr.wind_gust:
-            log.msg("%s-%s-%s-%s\n" \
-           % ('PGUST:', mtr.station_id, mtr.wind_gust.value("KT"), mtr.time))
-            d = {}
-            d['stationID'] = mtr.station_id
-            d['peak_gust'] = mtr.wind_gust.value("KT")
-            d['peak_ts'] = mtr.time.strftime("%Y-%m-%d %H:%M:%S")
-            iem.updateDatabasePeakWind(iemaccess.iemdb, d, dbpool)
+        # Search for Peak wind gust info....
+        if (mtr.wind_gust or mtr.wind_speed_peak):
+            d = 0
+            if (mtr.wind_gust):
+                v = mtr.wind_gust.value("KT")
+                if (mtr.wind_dir):
+                    d = mtr.wind_dir.value()
+                t = mtr.time
+            if (mtr.wind_speed_peak):
+                v = mtr.wind_speed_peak.value("KT")
+                d = mtr.wind_dir_peak.value()
+                t = mtr.peak_wind_time
+
+            # We store a key for this event
+            key = "%s;%s;%s" % (mtr.station_id, v, t)
+            log.msg("PEAK GUST FOUND: %s %s %s %s" % (mtr.station_id, v, t, clean_metar))
+            if (v > 50 and not windAlerts.has_key(key)):
+                windAlerts[key] = 1
+                sendWindAlert(iemid, v, d, t, clean_metar)
+
+
+            d0 = {}
+            d0['stationID'] = mtr.station_id
+            d0['peak_gust'] = d
+            d0['peak_ts'] = t.strftime("%Y-%m-%d %H:%M:%S")
+            iem.updateDatabasePeakWind(iemaccess.iemdb, d0, dbpool)
+
 
         del mtr, iem
     del tokens, metars, dataSect
 
+def sendWindAlert(iemid, v, d, t, clean_metar):
+    i = iemdb.iemdb(dhost=secret.dbhost)
+    mesosite = i['mesosite']
+    rs = mesosite.query("SELECT wfo, state, name from stations \
+           WHERE id = '%s' " % (iemid,) ).dictresult()
+    if (len(rs) == 0):
+      print "I not find WFO for sid: %s " % (iemid,)
+      return
+    wfo = rs[0]['wfo']
+    st = rs[0]['state']
+    nm = rs[0]['name']
+
+    jabberTxt = "%s: %s,%s (%s) ASOS reports gust of %s knots from %s @ %s\n%s"\
+            % (wfo, nm, st, iemid, v, mesonet.drct2dirTxt(d), \
+               t.strftime("%H%MZ"), clean_metar )
+
+    jabber.sendMessage(jabberTxt)
+
+myJid = jid.JID('iembot_ingest@%s/metarParse_%s' % (secret.chatserver, mx.DateTime.gmt().strftime("%Y%m%d%H%M%S") ) )
+factory = client.basicClientFactory(myJid, secret.iembot_ingest_password)
+jabber = JabberClient(myJid)
+factory.addBootstrap('//event/stream/authd',jabber.authd)
+factory.addBootstrap("//event/client/basicauth/invaliduser", jabber.debug)
+factory.addBootstrap("//event/client/basicauth/authfailed", jabber.debug)
+factory.addBootstrap("//event/stream/error", jabber.debug)
+factory.addBootstrap(xmlstream.STREAM_END_EVENT, jabber._disconnect )
+reactor.connectTCP(secret.connect_chatserver,5222,factory)
+
+
 fact = ldmbridge.LDMProductFactory( myProductIngestor() )
+
+
 
 reactor.run()
 
