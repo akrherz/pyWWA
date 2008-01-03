@@ -1,23 +1,45 @@
+# Copyright (c) 2005 Iowa State University
+# http://mesonet.agron.iastate.edu/ -- mailto:akrherz@iastate.edu
+#
+# This program is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free Software
+# Foundation; either version 2 of the License, or (at your option) any later
+# version.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along with
+# this program; if not, write to the Free Software Foundation, Inc.,
+# 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+""" VTEC product ingestor """
 
+__revision__ = '$id$'
+
+# Twisted Python imports
 from twisted.words.protocols.jabber import client, jid, xmlstream
 from twisted.words.xish import domish
 from twisted.internet import reactor
 from twisted.python import log
-import os
-log.startLogging(open('/mesonet/data/logs/%s/vtec_parser.log' % (os.getenv("USER"),), 'a'))
-log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
 
-from pyIEM import  ldmbridge
-from pyIEM.nws import TextProduct
-import secret
-from common import *
-import pg
-postgis = pg.connect(secret.dbname, secret.dbhost, user=secret.dbuser)
-
-import re, mx.DateTime, traceback, StringIO
-import smtplib
+# Standard Python modules
+import os, re, traceback, StringIO, smtplib
 from email.MIMEText import MIMEText
 
+# Python 3rd Party Add-Ons
+import mx.DateTime, pg
+
+# pyWWA stuff
+from support import ldmbridge, TextProduct
+import secret
+from common import *
+
+log.startLogging(open('/mesonet/data/logs/%s/vtec_parser.log' \
+    % (os.getenv("USER"),), 'a'))
+log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
+
+POSTGIS = pg.connect(secret.dbname, secret.dbhost, user=secret.dbuser)
 
 offsets = {
  'EDT': 4,
@@ -43,7 +65,8 @@ class myProductIngestor(ldmbridge.LDMProductReceiver):
             io = StringIO.StringIO()
             traceback.print_exc(file=io)
             log.msg( io.getvalue() )
-            msg = MIMEText("%s\n\n>RAW DATA\n\n%s"%(io.getvalue(),buf.replace("\015\015\012", "\n") ))
+            msg = MIMEText("%s\n\n>RAW DATA\n\n%s" % (io.getvalue(),
+                   buf.replace("\015\015\012", "\n") ) )
             msg['subject'] = 'vtec_parse.py Traceback'
             msg['From'] = "ldm@mesonet.agron.iastate.edu"
             msg['To'] = "akrherz@iastate.edu"
@@ -70,8 +93,12 @@ def real_processor(buf):
 
 
     for seg in text_product.segments:
-        if (len(seg.vtec) == 0 and len(seg.ugc) > 0 and not ["MWS","FLS","FLW"].__contains__(text_product.afos[:3]) ):
-            jabberTxt = "%s: iembot encounted a VTEC product (%s) error. Missing or incomplete VTEC encoding in segment (%s)" % (text_product.source[1:], text_product.afos , text_product.sections[0].replace("\n", " ") )
+        if (len(seg.vtec) == 0 and len(seg.ugc) > 0 
+        and not ["MWS","FLS","FLW"].__contains__(text_product.afos[:3]) ):
+            jabberTxt = "%s: iembot encounted a VTEC product (%s) error. \
+Missing or incomplete VTEC encoding in segment (%s)" % \
+                (text_product.source[1:], text_product.afos ,
+                 text_product.sections[0].replace("\n", " ") )
             #jabber.sendMessage(jabberTxt, jabberTxt)
             raise NoVTECFoundError("No VTEC coding found for this segment")
 
@@ -133,6 +160,7 @@ def real_processor(buf):
                     rname = "the "+ nwsli_dict[nwsli]
                 jabberDict['county'] = rname
 
+            # BUG, this should be VTEC time
             warning_tables = ["warnings", "warnings_%s" % (text_product.issueTime.year)]
         
             """
@@ -267,9 +295,8 @@ def real_processor(buf):
     for m in range(len(jabberMessages)):
         jabber.sendMessage(jabberMessages[m], jabberMessagesHTML[m])
 
-    global postgis
     for sql in arSQL:
-        postgis.query( sql )
+        POSTGIS.query( sql )
 
 
 
@@ -277,7 +304,7 @@ def real_processor(buf):
 ugc_dict = {}
 ugc2wfo = {}
 sql = "SELECT name, ugc, wfo from nws_ugc WHERE name IS NOT Null"
-rs = postgis.query(sql).dictresult()
+rs = POSTGIS.query(sql).dictresult()
 for i in range(len(rs)):
     name = (rs[i]["name"]).replace("\x92"," ")
     ugc_dict[ rs[i]['ugc'] ] = name
@@ -286,7 +313,7 @@ for i in range(len(rs)):
 """ Load up H-VTEC NWSLI reference """
 nwsli_dict = {}
 sql = "SELECT nwsli, river_name || ' ' || proximity || ' ' || name || ' ['||state||']' as rname from hvtec_nwsli"
-rs = postgis.query(sql).dictresult()
+rs = POSTGIS.query(sql).dictresult()
 for i in range(len(rs)):
     nwsli_dict[ rs[i]['nwsli'] ] = rs[i]['rname']
 
