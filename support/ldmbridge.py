@@ -28,7 +28,7 @@ class LDMProductReceiver(basic.LineReceiver):
     def connectionLost(self, reason):
         raise NotImplementedError
 
-    def processData(self, data):
+    def process_data(self, data):
         raise NotImplementedError
 
 class LDMProductFactory( stdio.StandardIO ):
