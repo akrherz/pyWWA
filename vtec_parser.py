@@ -15,7 +15,7 @@
 # 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 """ VTEC product ingestor """
 
-__revision__ = '$id$'
+__revision__ = '$Id$'
 
 # Twisted Python imports
 from twisted.words.protocols.jabber import client, jid, xmlstream
