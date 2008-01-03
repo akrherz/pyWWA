@@ -148,8 +148,11 @@ def sendWindAlert(iemid, v, d, t, clean_metar):
     st = rs[0]['state']
     nm = rs[0]['name']
 
-    jabberTxt = "%s: %s,%s (%s) ASOS reports gust of %s knots from %s @ %s\n%s"\
-            % (wfo, nm, st, iemid, v, mesonet.drct2dirTxt(d), \
+    extra = ""
+    if (clean_metar.find("$") > 0):
+      extra = "(Caution: Maintenance Check Indicator)"
+    jabberTxt = "%s: %s,%s (%s) ASOS %s reports gust of %s knots from %s @ %s\n%s"\
+            % (wfo, nm, st, iemid, extra, v, mesonet.drct2dirTxt(d), \
                t.strftime("%H%MZ"), clean_metar )
 
     jabber.sendMessage(jabberTxt)
