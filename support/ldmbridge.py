@@ -19,10 +19,10 @@ class LDMProductReceiver(basic.LineReceiver):
         if (len(tokens) == 1):
             self.productBuffer += data
         else:
-            reactor.callLater(0,self.processData,self.productBuffer + tokens[0])
+            reactor.callLater(0,self.process_data,self.productBuffer + tokens[0])
             self.productBuffer = tokens[-1]
             for token in tokens[1:-1]:
-                reactor.callLater(0, self.processData, token)
+                reactor.callLater(0, self.process_data, token)
         del tokens           
 
     def connectionLost(self, reason):

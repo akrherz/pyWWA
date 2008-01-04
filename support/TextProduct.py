@@ -22,6 +22,9 @@ class TextProduct:
         for cb in parseCallbacks:
             apply( cb )
 
+    def sqlraw(self):
+        return re.sub("'", "\\'", self.raw)
+
     def figureFcster(self):
         self.fcster = string.strip( (self.sections[-1]).replace("\n","") )[:24]
 
