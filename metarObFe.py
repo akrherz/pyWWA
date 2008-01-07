@@ -101,7 +101,7 @@ def real_processor(buf):
             iem.data['alti'] = mtr.press.value("IN")
         iem.data['phour'] = 0
         if mtr.precip_1hr:
-            iem.data['phour'] = mtr.precip_1hr.value("CM") * 10.0
+            iem.data['phour'] = mtr.precip_1hr.value("IN")
         iem.data['raw'] = clean_metar
         iem.updateDatabase(None, dbpool)
 
