@@ -1,8 +1,20 @@
-# Ingest LSRs!!!
-# Daryl Herzmann 9 May 2005
+# Copyright (c) 2005 Iowa State University
+# http://mesonet.agron.iastate.edu/ -- mailto:akrherz@iastate.edu
+#
+# This program is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free Software
+# Foundation; either version 2 of the License, or (at your option) any later
+# version.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along with
+# this program; if not, write to the Free Software Foundation, Inc.,
+# 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+""" LSR product ingestor """
 
-# CREATE TABLE lsrs ( valid timestamp with time zone, type char(1), magnitude real, city varchar(32), county varchar(32), state char(2), source varchar(32), remark text, wfo char(3));
-# SELECT AddGeometryColumn('postgis', 'lsrs', 'geom', 4326, 'POINT', 2);
 
 # Standard python imports
 import sys, re, traceback, StringIO, logging, pickle, os
@@ -10,132 +22,35 @@ from email.MIMEText import MIMEText
 import smtplib
 
 # Third party python stuff
-import mx.DateTime, pg
+import mx.DateTime
+from twisted.python import log
+from twisted.enterprise import adbapi
 from twisted.words.protocols.jabber import client, jid, xmlstream
-from twisted.words.xish import domish
 from twisted.internet import reactor
 
 # IEM python Stuff
-from common import *
+import common
 import secret
-from pyIEM import nws_text,  ldmbridge
+from support import TextProduct,  ldmbridge, reference
 
-postgisdb = pg.connect(host=secret.dbhost,user=secret.dbuser,dbname=secret.dbname)
-
+DBPOOL = adbapi.ConnectionPool("psycopg2", database=secret.dbname, 
+                               host=secret.dbhost)
 
 
 errors = StringIO.StringIO()
 
-logging.basicConfig(filename='/mesonet/data/logs/%s/lsrParse.log' % (os.getenv("USER"), ), filemode='a')
-logger=logging.getLogger()
-logger.addHandler(logging.StreamHandler())
-logger.setLevel(logging.INFO)
+log.startLogging(open('/mesonet/data/logs/%s/lsrParse.log' \
+    % (os.getenv("USER"),), 'a'))
+log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
 
-hailsize = {
- 0.25 : "pea",
- 0.50 : "marble",
- 0.75 : "penny",
- 0.88 : "nickel",
- 1.00 : "quarter",
- 1.25 : "half dollar",
- 1.50 : "ping pong ball",
- 1.75 : "golf ball",
- 2.00 : "egg",
- 2.50 : "tennis ball",
- 2.75 : "baseball",
- 3.00 : "teacup",
- 4.00 : "grapefruit",
- 4.50 : "softball"}
 
-events = {
- 'BLOWING SNOW': 'a',
- 'DRIFTING SNOW': 'a',
- 'HIGH SUST WINDS': 'A',
- 'DOWNBURST': 'B',
- 'FUNNEL CLOUD': 'C',
- 'FUNNEL': 'C',
- 'TSTM WND DMG': 'D',
- 'TREES DOWN': 'D',
- 'TSTM WIND DMG': 'D',
- 'FLOOD': 'E',
- 'FLOODING': 'E',
- 'FLASH FLOOD' : 'F',
- 'MAJ FLASH FLD': 'F',
- 'TSTM WND GST': 'G',
- 'TSTM WIND': 'G',
- 'TSTM WIND GST': 'G',
- 'HAIL': 'H',
- 'MARINE HAIL': 'H',
- 'EXCESSIVE HEAT': 'I',
- 'DENSE FOG': 'J',
- 'LIGHTNING STRIKE': 'K',
- 'LIGHTNING': 'L',
- 'MARINE TSTM WND': 'M',
- 'MARINE TSTM WIND': 'M',
- 'NON-TSTM WND GST': 'N',
- 'NON TSTM WND GST': 'N',
- 'NON-TSTM WND DMG': 'O',
- 'NON TSTM WND DMG': 'O',
- 'NON-TSTM DMG GST': 'O',
- 'NON TSTM DMG GST': 'O',
- 'NON-TSTM DMG': 'O',
- 'NON-TSTM WND': 'O',
- 'HIGH WINDS': 'O',
- 'WND DAMAGE': 'O',
- 'RIP CURRENTS': 'P',
- 'RIP CURRENT': 'P',
- 'HIGH SURF': 'P',
- 'TROPICAL STORM': 'Q',
- 'HEAVY RAIN': 'R',
- 'SNOW': 'S',
- 'SLEET': 's',
- 'MODERATE SLEET': 's',
- 'HEAVY SLEET': 's',
- 'HEAVY SNOW': 'S',
- 'TORNADO' : 'T',
- 'WILDFIRE' : 'U',
- 'FIRE' : 'U',
- 'AVALANCHE': 'V',
- 'WALL CLOUD': 'X',
- 'WATER SPOUT': 'W',
- 'WATERSPOUT': 'W',
- 'BLIZZARD' : 'Z',
- 'HURRICANE': '0',
- 'STORM SURGE': '1',
- 'DUST STORM': '2',
- 'SPRINKLES - FEW': '3',
- 'HIGH ASTR TIDES': '4',
- 'LOW ASTR TIDES': '4',
- 'FREEZING RAIN': '5',
- 'FREEZING DRIZZLE': '5',
- 'ICE STORM': '5',
- 'ICING ON ROADS': '5',
- 'EXTREME COLD': '6',
- 'FREEZE': '6',
- 'EXTR WIND CHILL': '7',
- 'WILDFIRE': '8',
-}
-
-#for k in events.keys():
-#  print "\"%s\" => Array(\"name\" => \"%s\")," % (events[k], k)
-#sys.exit()
-
-offsets = {
- 'EDT': 4,
- 'CDT': 5, 'EST': 5,
- 'MDT': 6, 'CST': 6,
- 'PDT': 7, 'MST': 7,
- 'ADT': 8, 'PST': 8,
- 'HDT': 9, 'AST': 9,
-           'HST':10
-}
 
 # Cheap datastore for LSRs to avoid Dups!
 lsrdb = {}
 try:
-  lsrdb = pickle.load( open('lsrdb.p') )
+    lsrdb = pickle.load( open('lsrdb.p') )
 except:
-  pass
+    pass
 
 def cleandb():
     thres = mx.DateTime.gmt() - mx.DateTime.RelativeDateTime(hours=48)
@@ -145,7 +60,7 @@ def cleandb():
             del lsrdb[key]
 
     fin_size = len(lsrdb.keys())
-    logger.info("Called cleandb()  init_size: %s  final_size: %s" % (init_size, fin_size) )
+    log.msg("Called cleandb()  init_size: %s  final_size: %s" % (init_size, fin_size) )
     pickle.dump(lsrdb, open('lsrdb.p','w'))
 
     # Call Again in 30 minutes
@@ -155,13 +70,13 @@ def cleandb():
 # LDM Ingestor
 class myProductIngestor(ldmbridge.LDMProductReceiver):
 
-    def processData(self, buf):
+    def process_data(self, buf):
         try:
             real_processor(buf)
         except:
             io = StringIO.StringIO()
             traceback.print_exc(file=io)
-            logger.error( io.getvalue() )
+            log.msg( io.getvalue() )
             msg = MIMEText("%s\n\n>RAW DATA\n\n%s"%(io.getvalue(),buf.replace("\015\015\012", "\n") ))
             msg['subject'] = 'lsrParse.py Traceback'
             msg['From'] = "ldm@mesonet.agron.iastate.edu"
@@ -173,12 +88,12 @@ class myProductIngestor(ldmbridge.LDMProductReceiver):
             s.close()
 
     def connectionLost(self,reason):
-        logger.info("LDM Closed PIPE")
+        log.msg("LDM Closed PIPE")
 
 
 def real_processor(raw):
     raw = raw.replace("\015\015\012", "\n")
-    nws = nws_text.nws_text(raw)
+    nws = TextProduct.TextProduct(raw)
     # Need to find wfo
     tokens = re.findall("LSR([A-Z][A-Z][A-Z,0-9])\n", raw)
     wfo = tokens[0]
@@ -187,7 +102,7 @@ def real_processor(raw):
     #if (len(re.findall("NY[0-9]",wfo)) > 0):  
     #    return
 
-    tsoff = mx.DateTime.RelativeDateTime(hours= offsets[nws.z])
+    tsoff = mx.DateTime.RelativeDateTime(hours= reference.offsets[nws.z])
 
     #isSummary = 0
     #tokens = re.findall("SUMMARY", raw)
@@ -195,7 +110,6 @@ def real_processor(raw):
     #    isSummary = 1
 
     #if (nws.issued < (mx.DateTime.gmt() - mx.DateTime.RelativeDateTime(hours=6))):
-    #    logger.info("OLD! %s" % (nws.issued,) )
     #    isSummary = 1
 
     goodies = "\n".join( nws.sections[3:] )
@@ -252,10 +166,10 @@ def real_processor(raw):
         remark = re.sub("[\s]{2,}", " ", remark)
         remark = remark.replace("&", "&amp;").replace(">", "&gt;").replace("<","&lt;")
         gmt_ts = ts + tsoff
-        dbtype = events[type]
+        dbtype = reference.lsr_events[type]
         mag_long = ""
-        if (type == "HAIL" and hailsize.has_key(float(mag))):
-            mag_long = "of %s size (%s) " % (hailsize[float(mag)], magf)
+        if (type == "HAIL" and reference.hailsize.has_key(float(mag))):
+            mag_long = "of %s size (%s) " % (reference.hailsize[float(mag)], magf)
         elif (mag != 0):
             mag_long = "of %s " % (magf,)
         time_fmt = "%I:%M %p"
@@ -265,13 +179,13 @@ def real_processor(raw):
         # We have all we need now
         unique_key = "%s_%s_%s_%s_%s_%s" % (gmt_ts, type, city, lat, lon, magf)
         if (lsrdb.has_key(unique_key)):
-            logger.info("DUP! %s" % (unique_key,))
+            log.msg("DUP! %s" % (unique_key,))
             continue
         lsrdb[ unique_key ] = mx.DateTime.gmt()
 
         jm = "%s:%s [%s Co, %s] %s reports %s %sat %s %s -- %s http://mesonet.agron.iastate.edu/cow/maplsr.phtml?lat0=%s&amp;lon0=-%s&amp;ts=%s" % (wfo, city, cnty, st, source, type, mag_long, ts.strftime(time_fmt), nws.z, remark, lat, lon, gmt_ts.strftime("%Y-%m-%d%%20%H:%M"))
         jmhtml = "%s [%s Co, %s] %s <a href='http://mesonet.agron.iastate.edu/cow/maplsr.phtml?lat0=%s&amp;lon0=-%s&amp;ts=%s'>reports %s %s</a>at %s %s -- %s" % ( city, cnty, st, source, lat, lon, gmt_ts.strftime("%Y-%m-%d%%20%H:%M"), type, mag_long, ts.strftime(time_fmt), nws.z, remark)
-        logger.info(jm +"\n")
+        log.msg(jm +"\n")
         sql = "INSERT into lsrs_%s (valid, type, magnitude, city, county, state, \
          source, remark, geom, wfo, typetext) values ('%s+00', '%s', %s, '%s', '%s', '%s', \
          '%s', '%s', 'SRID=4326;POINT(-%s %s)', '%s', '%s')" % \
@@ -279,13 +193,13 @@ def real_processor(raw):
            re.sub("'", "\\'", remark), lon, lat, wfo, type)
         jabber.sendMessage(jm,jmhtml)
         sentMessages += 1
-        postgisdb.query(sql)
+        DBPOOL.runOperation(sql)
 
 
 myJid = jid.JID('iembot_ingest@%s/lsrParse_%s' % (secret.chatserver, mx.DateTime.gmt().ticks() ) )
 factory = client.basicClientFactory(myJid, secret.iembot_ingest_password)
 
-jabber = JabberClient(myJid)
+jabber = common.JabberClient(myJid)
 
 factory.addBootstrap('//event/stream/authd',jabber.authd)
 factory.addBootstrap("//event/client/basicauth/invaliduser", jabber.debug)
