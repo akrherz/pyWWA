@@ -354,6 +354,19 @@ eventid=%(eventid)s&amp;significance=%(significance)s'>%(product)s</a>\
                 log.msg("Updating SVS For:"+ ugc_limiter[:-1] )
                 DBPOOL.runOperation( sql )
 
+    # Update polygon if necessary
+    if (vtec.action != "NEW" and seg.giswkt is not None):
+        for tbl in warning_tables:
+            sql = "UPDATE %s SET svs = \
+              (CASE WHEN (svs IS NULL) THEN '__' ELSE svs END) \
+               || '%s' || '__' WHERE eventid = %s and wfo = '%s' \
+               and phenomena = '%s' and significance = '%s' \
+               and gtype = 'P'" %\
+               (tbl, text_product.sqlraw(), vtec.ETN, vtec.office, \
+                vtec.phenomena, vtec.significance )
+            log.msg("Updating SVS For Polygon")
+            DBPOOL.runOperation( sql )
+   
 
 """ Load me up with NWS dictionaries! """
 ugc_dict = {}
