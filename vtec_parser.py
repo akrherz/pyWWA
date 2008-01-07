@@ -199,7 +199,9 @@ Missing or incomplete VTEC encoding in segment (%s)" % \
         #   3. Format Jabber message
         if (vtec.action == "NEW" or vtec.action == "EXB" or \
             vtec.action == "EXA"):
-            if (vtec.endTS == None):
+            if (vtec.beginTS is None):
+               vtec.beginTS = text_product.issueTime
+            if (vtec.endTS is None):
                 vtec.endTS = vtec.beginTS + mx.DateTime.RelativeDateTime(days=1)
             bts = vtec.beginTS
             if (vtec.action == "EXB" or vtec.action == "EXA"):
