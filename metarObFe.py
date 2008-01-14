@@ -66,7 +66,7 @@ def real_processor(buf):
         if (len(metar) < 10):
             continue
         clean_metar = re.sub("\s+", " ", metar.strip())
-        if (clean_metar[0] not in ("K","X")):
+        if (len(clean_metar) == 0 or clean_metar[0] not in ("K","X")):
             continue
         try:
           mtr = Metar.Metar(clean_metar)
