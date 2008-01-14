@@ -10,14 +10,11 @@ import traceback
 import StringIO
 import mx.DateTime
 import secret
-from common import *
-from pyIEM.nws import TextProduct
 from email.MIMEText import MIMEText
 import smtplib
 
-from pyIEM import iemdb, ldmbridge
-#i = iemdb.iemdb(secret.dbhost)
-#postgis = i['postgis']
+import common
+from support import ldmbridge, TextProduct
 import psycopg2
 
 errors = StringIO.StringIO()
@@ -41,7 +38,6 @@ routes = {'TCPAT[0-9]': gulfwfo,
           'SWODY[1-2]': spcwfo,}
 
 from twisted.words.protocols.jabber import client, jid
-from twisted.words.xish import domish
 from twisted.internet import reactor
 
 
@@ -49,7 +45,7 @@ errors = StringIO.StringIO()
 
 class myProductIngestor(ldmbridge.LDMProductReceiver):
 
-    def processData(self, buf):
+    def process_data(self, buf):
         try:
             real_process(buf)
         except:
@@ -67,6 +63,7 @@ class myProductIngestor(ldmbridge.LDMProductReceiver):
             s.close()
 
     def connectionLost(self,reason):
+        log.msg(reason)
         log.msg("LDM Closed PIPE")
 
 
@@ -136,8 +133,8 @@ def countyText(u):
         countyState[stateAB].append(name)
 
     for st in countyState.keys():
-       countyState[stateAB].sort()
-       c +=" %s [%s] and" %(", ".join(countyState[st]), st)
+        countyState[stateAB].sort()
+        c +=" %s [%s] and" %(", ".join(countyState[st]), st)
     return c[:-4]
 
 
@@ -150,7 +147,7 @@ def real_process(raw):
     raw = raw.replace("'", "\\'")
     sqlraw = raw.replace("\015\015\012", "\n").replace("\000", "").strip()
     if (pil == "FTM"):
-      sqlraw = re.sub("[^\n\ra-zA-Z0-9:\.,\s\$\*]", "", sqlraw)
+        sqlraw = re.sub("[^\n\ra-zA-Z0-9:\.,\s\$\*]", "", sqlraw)
 
     postgis_dsn = "dbname=%s host=%s" % (secret.dbname, secret.dbhost)
     conn = psycopg2.connect( postgis_dsn )
@@ -241,7 +238,7 @@ def real_process(raw):
 myJid = jid.JID('iembot_ingest@%s/gp_%s' % (secret.chatserver, mx.DateTime.now().ticks() ) )
 factory = client.basicClientFactory(myJid, secret.iembot_ingest_password)
 
-jabber = JabberClient(myJid)
+jabber = common.JabberClient(myJid)
 
 factory.addBootstrap('//event/stream/authd',jabber.authd)
 factory.addBootstrap("//event/client/basicauth/invaliduser", jabber.debug)
