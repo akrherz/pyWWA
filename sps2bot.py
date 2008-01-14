@@ -1,31 +1,46 @@
-# Send SPS messages to iembot
+# Copyright (c) 2005 Iowa State University
+# http://mesonet.agron.iastate.edu/ -- mailto:akrherz@iastate.edu
+#
+# This program is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free Software
+# Foundation; either version 2 of the License, or (at your option) any later
+# version.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along with
+# this program; if not, write to the Free Software Foundation, Inc.,
+# 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+""" SPS product ingestor """
 
-import sys, StringIO, logging, re, traceback, mx.DateTime
+from twisted.python import log
+import os
+log.startLogging(open('/mesonet/data/logs/%s/sps2bot.log' \
+    % (os.getenv("USER"),), 'a'))
+log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
+
+import StringIO, traceback, mx.DateTime
 import smtplib
 from email.MIMEText import MIMEText
 
-import secret, os
-from common import *
-from pyIEM.nws import TextProduct
-from pyIEM import iemdb, ldmbridge
-i = iemdb.iemdb(secret.dbhost)
-postgis = i['postgis']
+import secret
+import common
+from support import TextProduct, ldmbridge
+import pg
+POSTGIS = pg.connect(secret.dbname, secret.dbhost, user=secret.dbuser)
 
 from twisted.words.protocols.jabber import client, jid, xmlstream
-from twisted.words.xish import domish
 from twisted.internet import reactor
 
 
 errors = StringIO.StringIO()
-logging.basicConfig(filename='/mesonet/data/logs/%s/sps2bot.log' % (os.getenv("USER"), ), filemode='a')
-logger=logging.getLogger()
-logger.addHandler(logging.StreamHandler())
-logger.setLevel(logging.INFO)
 
 
 ugc_dict = {}
 sql = "SELECT name, ugc from nws_ugc WHERE name IS NOT Null"
-rs = postgis.query(sql).dictresult()
+rs = POSTGIS.query(sql).dictresult()
 for i in range(len(rs)):
     name = (rs[i]["name"]).replace("\x92"," ")
     ugc_dict[ rs[i]['ugc'] ] = name
@@ -45,8 +60,8 @@ def countyText(u):
         countyState[stateAB].append(name)
 
     for st in countyState.keys():
-       countyState[stateAB].sort()
-       c +=" %s [%s] and" %(", ".join(countyState[st]), st)
+        countyState[stateAB].sort()
+        c +=" %s [%s] and" %(", ".join(countyState[st]), st)
     return c[:-4]
 
 offsets = {
@@ -64,13 +79,13 @@ offsets = {
 # LDM Ingestor
 class myProductIngestor(ldmbridge.LDMProductReceiver):
 
-    def processData(self, buf):
+    def process_data(self, buf):
         try:
             real_process(buf)
         except:
             io = StringIO.StringIO()
             traceback.print_exc(file=io)
-            logger.error( io.getvalue() )
+            log.msg( io.getvalue() )
             msg = MIMEText("%s\n\n>RAW DATA\n\n%s"%(io.getvalue(),buf.replace("\015\015\012", "\n") ))
             msg['subject'] = 'sps2bot.py Traceback'
             msg['From'] = "ldm@mesonet.agron.iastate.edu"
@@ -82,7 +97,8 @@ class myProductIngestor(ldmbridge.LDMProductReceiver):
             s.close()
 
     def connectionLost(self,reason):
-        logger.info("LDM Closed PIPE")
+        log.msg(reason)
+        log.msg("LDM Closed PIPE")
 
 
 def real_process(raw):
@@ -103,15 +119,15 @@ def real_process(raw):
 
 
         sql = "INSERT into text_products(product) values ('%s')" % (sqlraw,)
-        postgis.query(sql)
+        POSTGIS.query(sql)
         sql = "select last_value from text_products_id_seq"
-        rs = postgis.query(sql).dictresult()
+        rs = POSTGIS.query(sql).dictresult()
         id = rs[0]['last_value']
 
         mess = "%s: %s issues %s for %s %s http://mesonet.agron.iastate.edu/p.php?id=%s" % (prod.source[1:], \
            prod.source[1:], headline, counties, expire, id)
         htmlmess = "%s issues <a href='http://mesonet.agron.iastate.edu/p.php?id=%s'>%s</a> for %s %s" % ( prod.source[1:], id, headline, counties, expire)
-        logger.info(mess)
+        log.msg(mess)
 
         jabber.sendMessage(mess, htmlmess)
 
@@ -119,7 +135,7 @@ def real_process(raw):
 myJid = jid.JID('iembot_ingest@%s/sps2bot_%s' % (secret.chatserver, mx.DateTime.now().ticks() ) )
 factory = client.basicClientFactory(myJid, secret.iembot_ingest_password)
 
-jabber = JabberClient(myJid)
+jabber = common.JabberClient(myJid)
 
 factory.addBootstrap('//event/stream/authd',jabber.authd)
 factory.addBootstrap("//event/client/basicauth/invaliduser", jabber.debug)
