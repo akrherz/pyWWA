@@ -123,7 +123,7 @@ Missing or incomplete VTEC encoding in segment (%s)" % \
     # A segment could have multiple vtec codes :)
     for vtec in seg.vtec:
         if (vtec.status == "T"):
-            continue
+            return
         ugc = seg.ugc
         hvtec = seg.hvtec
 
