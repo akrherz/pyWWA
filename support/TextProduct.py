@@ -22,6 +22,10 @@ class TextProduct:
         for cb in parseCallbacks:
             apply( cb )
 
+    def get_product_id(self):
+        return "%s-%s-%s-%s" % (self.issueTime.strftime("%Y%m%d%H%M"),\
+                self.source, self.wmo, self.afos)
+
     def sqlraw(self):
         return re.sub("'", "\\'", self.raw)
 
@@ -34,7 +38,7 @@ class TextProduct:
     def findAFOS(self):
         """ Determine the AFOS header from the NWS text product """
         tokens = re.findall("^([A-Z0-9]{4,6})$", self.sections[0], re.M)
-        if (len(tokens) == 1):
+        if (len(tokens) > 0):
             self.afos = tokens[0]
 
     def findWMO(self,):
@@ -72,23 +76,24 @@ afos: %(afos)s
         return s
 
     def findIssueTime(self):
+        """ Too much fun, we need to determine when this text product was
+            issued.  We'll first look to see if it is explicitly said."""
+
+        # Search out the WMO header first, this had better always be there
+        # We only care about the first hit in the file, searching from top
         dRE = "^[A-Z0-9]{6} [A-Z]{4} ([0-3][0-9])([0-2][0-9])([0-5][0-9])"
         tokens = re.findall(dRE , self.raw, re.M)
         iDay = int(tokens[0][0])
         iHour = int(tokens[0][1])
         iMinute = int(tokens[0][2])
 
-        #if (len(self.sections) == 1):
-        #    return
-        # Now we need to go and figure out when this was valid!
-        #tokens = re.split("\n", self.sections[0:2])
-        #s = tokens[-1]
-        #if (s[0] == "/"):
-        #    s = tokens[-2]
-        # Lets do this correctly
-        tokens = re.findall("^([0-9]+) (AM|PM) ([A-Z][A-Z][A-Z]) [A-Z][A-Z][A-Z] ([A-Z][A-Z][A-Z]) ([0-9]+) ([1-2][0-9][0-9][0-9])$", self.raw, re.M)
+        # Now lets look for a local timestamp in the product MND or elsewhere
+        time_re = "^([0-9]+) (AM|PM) ([A-Z][A-Z][A-Z]) [A-Z][A-Z][A-Z] ([A-Z][A-Z][A-Z]) ([0-9]+) ([1-2][0-9][0-9][0-9])$"
+        tokens = re.findall(time_re, self.raw, re.M)
+        # If we don't find anything, lets default to now, its the best
         if (len(tokens) == 0):
-            return None
+            hack_time = mx.DateTime.utc().strftime("%I%M %p GMT %a %b %d %Y")
+            tokens = re.findall(time_re, hack_time.upper(), re.M)
         # [('1249', 'AM', 'EDT', 'JUL', '1', '2005')]
         self.z = tokens[0][2]
         if (len(tokens[0][0]) < 3):
@@ -111,6 +116,8 @@ afos: %(afos)s
             now += mx.DateTime.RelativeDateTime(hours=+8)
         elif (self.z == "AST"):
             now += mx.DateTime.RelativeDateTime(hours=+9)
+        elif (self.z == "GMT"):
+            pass
         else:
             print "Unknown TZ: %s " % (self.z,)
 
