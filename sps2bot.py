@@ -106,6 +106,11 @@ def real_process(raw):
     sqlraw = sqlraw.replace("\015\015\012", "\n")
     prod = TextProduct.TextProduct(raw)
 
+    product_id = prod.get_product_id()
+    sql = "INSERT into text_products(product, product_id) \
+      values ('%s','%s')" % (sqlraw, product_id)
+    POSTGIS.query(sql)
+
     for seg in prod.segments:
         headline = "[NO HEADLINE FOUND IN SPS]"
         if (len(seg.headlines) > 0):
@@ -118,14 +123,8 @@ def real_process(raw):
             expire = "till "+ (seg.ugcExpire - mx.DateTime.RelativeDateTime(hours= offsets[prod.z] )).strftime("%-I:%M %p ")+ prod.z
 
 
-        sql = "INSERT into text_products(product) values ('%s')" % (sqlraw,)
-        POSTGIS.query(sql)
-        sql = "select last_value from text_products_id_seq"
-        rs = POSTGIS.query(sql).dictresult()
-        id = rs[0]['last_value']
-
-        mess = "%s: %s issues %s for %s %s http://mesonet.agron.iastate.edu/p.php?id=%s" % (prod.source[1:], \
-           prod.source[1:], headline, counties, expire, id)
+        mess = "%s: %s issues %s for %s %s http://mesonet.agron.iastate.edu/p.php?pid=%s" % (prod.source[1:], \
+           prod.source[1:], headline, counties, expire, product_id)
         htmlmess = "%s issues <a href='http://mesonet.agron.iastate.edu/p.php?id=%s'>%s</a> for %s %s" % ( prod.source[1:], id, headline, counties, expire)
         log.msg(mess)
 
