@@ -1,13 +1,35 @@
-# Parse MCD to iembot
+# Copyright (c) 2005 Iowa State University
+# http://mesonet.agron.iastate.edu/ -- mailto:akrherz@iastate.edu
+#
+# This program is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free Software
+# Foundation; either version 2 of the License, or (at your option) any later
+# version.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along with
+# this program; if not, write to the Free Software Foundation, Inc.,
+# 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+""" MCD product ingestor """
+
+from twisted.python import log
+import os
+log.startLogging(open('/mesonet/data/logs/%s/mcdParse.log' \
+    % (os.getenv("USER"),), 'a'))
+log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
 
 import sys, re, pdb, mx.DateTime
 import traceback, StringIO
 import smtplib
 from email.MIMEText import MIMEText
 import secret
+from support import TextProduct
 
 import pg
-mydb = pg.connect('postgis', secret.dbhost)
+POSTGIS = pg.connect(secret.dbname, secret.dbhost, user=secret.dbuser)
 
 from twisted.words.protocols.jabber import client, jid
 from twisted.words.xish import domish
@@ -83,21 +105,22 @@ def real_process(raw):
     num = tokens[0]
 
     sqlraw = raw.replace("'", "\\'")
-    sql = "INSERT into text_products(product) values ('%s')" % (sqlraw,)
-    mydb.query(sql)
-    sql = "select last_value from text_products_id_seq"
-    rs = mydb.query(sql).dictresult()
-    id = rs[0]['last_value']
-    
+    sqlraw = sqlraw.replace("\015\015\012", "\n")
+    prod = TextProduct.TextProduct(raw)
 
+    product_id = prod.get_product_id()
+    sql = "INSERT into text_products(product, product_id) \
+      values ('%s','%s')" % (sqlraw, product_id)
+    POSTGIS.query(sql)
 
     tokens = re.findall("ATTN\.\.\.WFO\.\.\.([\.,A-Z]*)", raw)
     tokens = re.findall("([A-Z][A-Z][A-Z])", tokens[0])
     for wfo in tokens:
         qu += 1
-        body = "%s: Storm Prediction Center issues Mesoscale Discussion http://www.spc.noaa.gov/products/md/md%s.html http://mesonet.agron.iastate.edu/p.php?id=%s" % \
-         (wfo, num, id)
-        htmlbody = "Storm Prediction Center issues <a href='http://www.spc.noaa.gov/products/md/md%s.html'>Mesoscale Discussion #%s</a> (<a href='http://mesonet.agron.iastate.edu/p.php?id=%s'>View text</a>)" %(num,num,id)
+        body = "%s: Storm Prediction Center issues Mesoscale Discussion http://www.spc.noaa.gov/products/md/md%s.html http://mesonet.agron.iastate.edu/p.php?pid=%s" % \
+         (wfo, num, product_id)
+        htmlbody = "Storm Prediction Center issues <a href='http://www.spc.noaa.gov/products/md/md%s.html'>Mesoscale Discussion #%s</a> (<a href='http://mesonet.agron.iastate.edu/p.php?pid=%s'>View text</a>)" %(num,num,product_id)
+        print body
         jabber.sendMessage(body, htmlbody)
 
 
