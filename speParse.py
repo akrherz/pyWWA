@@ -1,4 +1,25 @@
-# Parse SPENES to iembot
+# Copyright (c) 2005 Iowa State University
+# http://mesonet.agron.iastate.edu/ -- mailto:akrherz@iastate.edu
+#
+# This program is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free Software
+# Foundation; either version 2 of the License, or (at your option) any later
+# version.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along with
+# this program; if not, write to the Free Software Foundation, Inc.,
+# 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+""" SPENES product ingestor """
+
+from twisted.python import log
+import os
+log.startLogging(open('/mesonet/data/logs/%s/speParse.log' \
+    % (os.getenv("USER"),), 'a'))
+log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
 
 import sys, re, pdb, mx.DateTime
 import traceback, StringIO
@@ -6,12 +27,14 @@ import smtplib
 import secret
 from email.MIMEText import MIMEText
 
+
 from twisted.words.protocols.jabber import client, jid
 from twisted.words.xish import domish
 from twisted.internet import reactor
 
+from support import TextProduct
 import pg
-postgis = pg.connect(secret.dbname, secret.dbhost, user=secret.dbuser)
+POSTGIS = pg.connect(secret.dbname, secret.dbhost, user=secret.dbuser)
 
 
 raw = sys.stdin.read()
@@ -68,7 +91,7 @@ def process(raw):
         io = StringIO.StringIO()
         traceback.print_exc(file=io)
         msg = MIMEText("%s\n\n>RAW DATA\n\n%s"%(io.getvalue(),raw))
-        msg['subject'] = 'mcdParse.py Traceback'
+        msg['subject'] = 'speParse.py Traceback'
         msg['From'] = "ldm@mesonet.agron.iastate.edu"
         msg['To'] = "akrherz@iastate.edu"
 
@@ -80,13 +103,13 @@ def process(raw):
 
 def real_process(raw):
     global qu
-    sqlraw = raw.replace("'", "\\'")
-    sql = "INSERT into text_products(product) values ('%s')" % (sqlraw,)
-    postgis.query(sql)
-    sql = "select last_value from text_products_id_seq"
-    rs = postgis.query(sql).dictresult()
-    id = rs[0]['last_value']
+    sqlraw = raw.replace("'", "\\'").replace("\015\015\012", "\n")
+    prod = TextProduct.TextProduct(raw)
 
+    product_id = prod.get_product_id()
+    sql = "INSERT into text_products(product, product_id) \
+      values ('%s','%s')" % (sqlraw, product_id)
+    POSTGIS.query(sql)
 
     tokens = re.findall("ATTN (WFOS|RFCS)(.*)", raw)
     for tpair in tokens:
@@ -94,9 +117,10 @@ def real_process(raw):
             wfos = re.findall("([A-Z][A-Z][A-Z])", tpair[1])
             for wfo in wfos:
                 qu += 1
-                body = "%s: NESDIS issues Satellite Precipitation Estimates http://mesonet.agron.iastate.edu/p.php?id=%s" % \
-         (wfo, id)
-                htmlbody = "NESDIS issues <a href='http://mesonet.agron.iastate.edu/p.php?id=%s'>Satellite Precipitation Estimates</a>" %(id,)
+                body = "%s: NESDIS issues Satellite Precipitation Estimates http://mesonet.agron.iastate.edu/p.php?pid=%s" % \
+         (wfo, product_id)
+                htmlbody = "NESDIS issues <a href='http://mesonet.agron.iastate.edu/p.php?pid=%s'>Satellite Precipitation Estimates</a>" %(product_id,)
+                print body
                 jabber.sendMessage(body, htmlbody)
 
 
