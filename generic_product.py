@@ -16,6 +16,11 @@ import smtplib
 import common
 from support import ldmbridge, TextProduct
 import psycopg2
+from twisted.enterprise import adbapi
+
+DBPOOL = adbapi.ConnectionPool("psycopg2", database=secret.dbname, 
+                               host=secret.dbhost)
+
 
 errors = StringIO.StringIO()
 
@@ -149,25 +154,18 @@ def real_process(raw):
     if (pil == "FTM"):
         sqlraw = re.sub("[^\n\ra-zA-Z0-9:\.,\s\$\*]", "", sqlraw)
 
-    postgis_dsn = "dbname=%s host=%s" % (secret.dbname, secret.dbhost)
-    conn = psycopg2.connect( postgis_dsn )
-    curs = conn.cursor()
-    sql = "INSERT into text_products(product) values ('%s')" % (sqlraw,)
-    curs.execute( sql )
-    oid = curs.lastrowid
-    sql = "select id from text_products WHERE oid = %s" % (oid,)
-    curs.execute( sql )
-    id = curs.fetchone()[0]
-    conn.commit()
-    del conn
+    product_id = prod.get_product_id()
+    sql = "INSERT into text_products(product, product_id) \
+      values ('%s','%s')" % (sqlraw, product_id)
+    DBPOOL.runOperation(sql)
 
     if ( ["CAE", "AFD","FTM","AWU","HWO","NOW","HLS","PSH","NOW","PNS","RER","ADM"].__contains__(pil) ):
-        mess = "%s: %s issues %s http://mesonet.agron.iastate.edu/p.php?id=%s" % \
-          (wfo, wfo, pil, id)
+        mess = "%s: %s issues %s http://mesonet.agron.iastate.edu/p.php?pid=%s" % \
+          (wfo, wfo, pil, product_id)
         prodtxt = "(%s)" % (pil,)
         if (prodDefinitions.has_key(pil)):
             prodtxt = prodDefinitions[pil]
-        htmlmess = "%s issues <a href=\"http://mesonet.agron.iastate.edu/p.php?id=%s\">%s</a> " % (wfo, id, prodtxt)
+        htmlmess = "%s issues <a href=\"http://mesonet.agron.iastate.edu/p.php?pid=%s\">%s</a> " % (wfo, product_id, prodtxt)
         if (not ["HWO","NOW"].__contains__(pil) and len(prod.segments) > 0 and len(prod.segments[0].headlines) > 0 and len(prod.segments[0].headlines[0]) < 200 ):
           htmlmess += "... %s ..." % (prod.segments[0].headlines[0],)
 
@@ -189,12 +187,12 @@ def real_process(raw):
         if (seg.ugcExpire is not None):
             expire = "till "+ (seg.ugcExpire - mx.DateTime.RelativeDateTime(hours= offsets[prod.z] )).strftime("%-I:%M %p ")+ prod.z
 
-        mess = "%s: %s issues %s for %s %s http://mesonet.agron.iastate.edu/p.php?id=%s" % \
-          (wfo, wfo, pil, counties, expire, id)
+        mess = "%s: %s issues %s for %s %s http://mesonet.agron.iastate.edu/p.php?pid=%s" % \
+          (wfo, wfo, pil, counties, expire, product_id)
         prodtxt = "(%s)" % (pil,)
         if (prodDefinitions.has_key(pil)):
             prodtxt = prodDefinitions[pil]
-        htmlmess = "%s issues <a href=\"http://mesonet.agron.iastate.edu/p.php?id=%s\">%s</a> for %s %s" % (wfo, id, prodtxt, counties, expire)
+        htmlmess = "%s issues <a href=\"http://mesonet.agron.iastate.edu/p.php?pid=%s\">%s</a> for %s %s" % (wfo, product_id, prodtxt, counties, expire)
 
         jabber.sendMessage(mess, htmlmess)
 
@@ -204,12 +202,12 @@ def real_process(raw):
 
     if (pil == "TCM" or pil == "TCP" or pil == "TCD"):
         tokens = re.findall("(.*) (DISCUSSION|INTERMEDIATE ADVISORY|FORECAST/ADVISORY|ADVISORY|MEMEME) NUMBER\s+([0-9]+)", raw.replace("PUBLIC ADVISORY", "ZZZ MEMEME") )
-        mess = "%s: %s issues %s http://mesonet.agron.iastate.edu/p.php?id=%s" % \
-          (wfo, wfo, pil, id)
+        mess = "%s: %s issues %s http://mesonet.agron.iastate.edu/p.php?pid=%s" % \
+          (wfo, wfo, pil, product_id)
         prodtxt = "(%s)" % (pil,)
         if (prodDefinitions.has_key(pil)):
             prodtxt = prodDefinitions[pil]
-        htmlmess = "%s issues <a href=\"http://mesonet.agron.iastate.edu/p.php?id=%s\">%s</a> " % (wfo, id, prodtxt)
+        htmlmess = "%s issues <a href=\"http://mesonet.agron.iastate.edu/p.php?pid=%s\">%s</a> " % (wfo, product_id, prodtxt)
 
         jabber.sendMessage(mess, htmlmess)
 
@@ -217,9 +215,9 @@ def real_process(raw):
     for key in routes.keys():
         if (re.match(key, prod.afos)):
             for wfo2 in routes[key]:
-                mess = "%s: %s http://mesonet.agron.iastate.edu/p.php?id=%s" % \
-                 (wfo2, prod.afos, id)
-                htmlmess = "<a href=\"http://mesonet.agron.iastate.edu/p.php?id=%s\">%s</a>" % (id, prodtxt)
+                mess = "%s: %s http://mesonet.agron.iastate.edu/p.php?pid=%s" % \
+                 (wfo2, prod.afos, product_id)
+                htmlmess = "<a href=\"http://mesonet.agron.iastate.edu/p.php?pid=%s\">%s</a>" % (product_id, prodtxt)
                 if (len(tokens) > 0):
                     tt = tokens[0][0]
                     what = tokens[0][1]
@@ -228,8 +226,8 @@ def real_process(raw):
                         tokens2 = re.findall("(PUBLIC ADVISORY) NUMBER\s+([0-9]+) FOR (.*)", raw)
                         what = tokens2[0][0]
                         tt = tokens2[0][2]
-                    mess = "%s: National Hurricane Center issues %s #%s for %s http://mesonet.agron.iastate.edu/p.php?id=%s" % (wfo2, what, tnum, tt, id)
-                    htmlmess = "National Hurricane Center issues <a href=\"http://mesonet.agron.iastate.edu/p.php?id=%s\">%s #%s</a> for %s" % ( id, what, tnum, tt)
+                    mess = "%s: National Hurricane Center issues %s #%s for %s http://mesonet.agron.iastate.edu/p.php?pid=%s" % (wfo2, what, tnum, tt, product_id)
+                    htmlmess = "National Hurricane Center issues <a href=\"http://mesonet.agron.iastate.edu/p.php?pid=%s\">%s #%s</a> for %s" % ( product_id, what, tnum, tt)
                 #print htmlmess, mess
                 jabber.sendMessage(mess, htmlmess)
 
