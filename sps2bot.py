@@ -131,7 +131,8 @@ def real_process(raw):
         jabber.sendMessage(mess, htmlmess)
 
 
-myJid = jid.JID('iembot_ingest@%s/sps2bot_%s' % (secret.chatserver, mx.DateTime.now().ticks() ) )
+myJid = jid.JID('iembot_ingest@%s/sps2bot_%s' \
+   % (secret.chatserver, mx.DateTime.gmt().strftime("%Y%m%d%H%M%S") ) )
 factory = client.basicClientFactory(myJid, secret.iembot_ingest_password)
 
 jabber = common.JabberClient(myJid)
