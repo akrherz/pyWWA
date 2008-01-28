@@ -125,7 +125,7 @@ def real_process(raw):
 
         mess = "%s: %s issues %s for %s %s http://mesonet.agron.iastate.edu/p.php?pid=%s" % (prod.source[1:], \
            prod.source[1:], headline, counties, expire, product_id)
-        htmlmess = "%s issues <a href='http://mesonet.agron.iastate.edu/p.php?id=%s'>%s</a> for %s %s" % ( prod.source[1:], id, headline, counties, expire)
+        htmlmess = "%s issues <a href='http://mesonet.agron.iastate.edu/p.php?pid=%s'>%s</a> for %s %s" % ( prod.source[1:], product_id, headline, counties, expire)
         log.msg(mess)
 
         jabber.sendMessage(mess, htmlmess)
