@@ -17,7 +17,7 @@
 
 
 # Standard python imports
-import sys, re, traceback, StringIO, logging, pickle, os
+import re, traceback, StringIO, logging, pickle, os
 from email.MIMEText import MIMEText
 import smtplib
 
@@ -196,7 +196,8 @@ def real_processor(raw):
         DBPOOL.runOperation(sql)
 
 
-myJid = jid.JID('iembot_ingest@%s/lsrParse_%s' % (secret.chatserver, mx.DateTime.gmt().ticks() ) )
+myJid = jid.JID('iembot_ingest@%s/lsrParse_%s' \
+    % (secret.chatserver, mx.DateTime.gmt().strftime("%Y%m%d%H%M%S") ) )
 factory = client.basicClientFactory(myJid, secret.iembot_ingest_password)
 
 jabber = common.JabberClient(myJid)
