@@ -14,7 +14,7 @@ from email.MIMEText import MIMEText
 import smtplib
 
 import common
-from support import ldmbridge, TextProduct
+from support import ldmbridge, TextProduct, reference
 import psycopg2
 from twisted.enterprise import adbapi
 
@@ -24,15 +24,6 @@ DBPOOL = adbapi.ConnectionPool("psycopg2", database=secret.dbname,
 
 errors = StringIO.StringIO()
 
-offsets = {
- 'EDT': 4,
- 'CDT': 5, 'EST': 5,
- 'MDT': 6, 'CST': 6,
- 'PDT': 7, 'MST': 7,
- 'ADT': 8, 'PST': 8,
- 'HDT': 9, 'AST': 9,
-           'HST':10,
-}
 
 gulfwfo = ['KEY', 'SJU', 'TBW', 'TAE', 'JAX', 'MOB', 'HGX', 'CRP','BMX','EWX', 'FWD', 'SHV', 'JAN', 'LIX', 'LCH', 'FFC', 'MFL', 'MLB','CHS','CAE','RAH','ILM','AKQ']
 spcwfo = ['RNK',]
@@ -185,7 +176,7 @@ def real_process(raw):
             counties = "entire area"
         expire = ""
         if (seg.ugcExpire is not None):
-            expire = "till "+ (seg.ugcExpire - mx.DateTime.RelativeDateTime(hours= offsets[prod.z] )).strftime("%-I:%M %p ")+ prod.z
+            expire = "till "+ (seg.ugcExpire - mx.DateTime.RelativeDateTime(hours= reference.offsets[prod.z] )).strftime("%-I:%M %p ")+ prod.z
 
         mess = "%s: %s issues %s for %s %s http://mesonet.agron.iastate.edu/p.php?pid=%s" % \
           (wfo, wfo, pil, counties, expire, product_id)

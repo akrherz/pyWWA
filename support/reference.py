@@ -84,11 +84,13 @@ lsr_events = {
 }
 
 offsets = {
+ 'GMT': 0,
  'EDT': 4,
  'CDT': 5, 'EST': 5,
  'MDT': 6, 'CST': 6,
  'PDT': 7, 'MST': 7,
  'ADT': 8, 'PST': 8,
  'HDT': 9, 'AST': 9,
-           'HST':10
+           'HST':10,
+ 'SST':11,
 }
