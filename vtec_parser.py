@@ -31,7 +31,7 @@ from email.MIMEText import MIMEText
 import mx.DateTime, pg
 
 # pyWWA stuff
-from support import ldmbridge, TextProduct
+from support import ldmbridge, TextProduct, reference
 import secret
 import common
 
@@ -43,15 +43,6 @@ POSTGIS = pg.connect(secret.dbname, secret.dbhost, user=secret.dbuser)
 DBPOOL = adbapi.ConnectionPool("psycopg2", database=secret.dbname, host=secret.dbhost)
 URLBASE = 'http://mesonet.agron.iastate.edu/GIS/apps/rview/warnings_cat.phtml'
 
-OFFSETS = {
- 'EDT': 4,
- 'CDT': 5, 'EST': 5,
- 'MDT': 6, 'CST': 6,
- 'PDT': 7, 'MST': 7,
- 'ADT': 8, 'PST': 8,
- 'HDT': 9, 'AST': 9,
-           'HST':10,
-}
 
 class NoVTECFoundError(Exception):
     """ Exception place holder """
@@ -97,7 +88,7 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
 def segment_processor(text_product, i):
     """ The real data processor here """
     gmtnow = mx.DateTime.gmt()
-    local_offset = mx.DateTime.RelativeDateTime(hours= OFFSETS[text_product.z])
+    local_offset = mx.DateTime.RelativeDateTime(hours= reference.offsets[text_product.z])
     seg = text_product.segments[i]
 
     # A segment must have UGC
