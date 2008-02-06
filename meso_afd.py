@@ -32,9 +32,9 @@ import traceback
 from email.MIMEText import MIMEText
 
 # Non standard Stuff
-from support import TextProduct
+from support import TextProduct, ldmbridge
+import common
 
-KM_SM = 1.609347
 
 # Database Connections
 import pg, secret
@@ -42,84 +42,36 @@ POSTGIS = pg.connect(secret.dbname, secret.dbhost, user=secret.dbuser)
 
 errors = StringIO.StringIO()
 
-from twisted.words.protocols.jabber import client, jid
+from twisted.words.protocols.jabber import client, jid, xmlstream
 from twisted.words.xish import domish
 from twisted.internet import reactor
 
 
 errors = StringIO.StringIO()
 
+class MyProductIngestor(ldmbridge.LDMProductReceiver):
+    """ I receive products from ldmbridge and process them 1 by 1 :) """
+
+    def connectionLost(self, reason):
+        """ I lost my connection, should I do anything else? """
+        log.msg("LDM Closed PIPE")
 
 
-qu = 0
+    def process_data(self, raw):
+        try:
+            real_process(raw)
+        except:
+            io = StringIO.StringIO()
+            traceback.print_exc(file=io)
+            msg = MIMEText("%s\n\n>RAW DATA\n\n%s"%(io.getvalue(),raw))
+            msg['subject'] = 'meso_afd.py Traceback'
+            msg['From'] = "ldm@mesonet.agron.iastate.edu"
+            msg['To'] = "akrherz@iastate.edu"
 
-class JabberClient:
-    xmlstream = None
-
-    def __init__(self, myJid):
-        self.myJid = myJid
-
-
-    def authd(self,xmlstream):
-        print "authenticated"
-        self.xmlstream = xmlstream
-        presence = domish.Element(('jabber:client','presence'))
-        xmlstream.send(presence)
-
-        xmlstream.addObserver('/message',  self.debug)
-        xmlstream.addObserver('/presence', self.debug)
-        xmlstream.addObserver('/iq',       self.debug)
-
-    def debug(self, elem):
-        print elem.toXml().encode('utf-8')
-        print "="*20
-
-    def sendMessage(self, body, htmlbody):
-        global qu
-        while (self.xmlstream is None):
-            print "xmlstream is None, so lets try again!"
-            reactor.callLater(3, self.sendMessage, body, htmlbody)
-            return
-
-        message = domish.Element(('jabber:client','message'))
-        message['to'] = "iembot@%s" % (secret.chatserver,)
-        message['type'] = 'chat'
-        message.addElement('body',None,body)
-
-        html = domish.Element(('http://jabber.org/protocol/xhtml-im','html'))
-        body = domish.Element(('http://www.w3.org/1999/xhtml','body'))
-        body.addRawXml( htmlbody )
-        html.addChild(body)
-        message.addChild(html)
-        print message.toXml()
-        self.xmlstream.send(message)
-        qu -= 1
-        print "queue2", qu
-
-def killer():
-    global qu
-    print "queue", qu
-    if (qu == 0):
-        reactor.stop()
-    reactor.callLater(10, killer)
-
-
-def process(raw):
-    try:
-        #raw = raw.replace("\015\015\012", "\n")
-        real_process(raw)
-    except:
-        io = StringIO.StringIO()
-        traceback.print_exc(file=io)
-        msg = MIMEText("%s\n\n>RAW DATA\n\n%s"%(io.getvalue(),raw))
-        msg['subject'] = 'meso_afd.py Traceback'
-        msg['From'] = "ldm@mesonet.agron.iastate.edu"
-        msg['To'] = "akrherz@iastate.edu"
-
-        s = smtplib.SMTP()
-        s.connect()
-        s.sendmail(msg["From"], msg["To"], msg.as_string())
-        s.close()
+            s = smtplib.SMTP()
+            s.connect()
+            s.sendmail(msg["From"], msg["To"], msg.as_string())
+            s.close()
 
 
 
@@ -128,13 +80,14 @@ def real_process(raw):
     pil = tp.afos[:3]
     wfo = tp.afos[3:]
     sqlraw = raw.replace("'", "\\'")
+    prod = TextProduct.TextProduct(raw)
+    product_id = prod.get_product_id()
+    print product_id
 
     tokens = re.findall("\.UPDATE\.\.\.MESOSCALE UPDATE", raw)
     if (len(tokens) == 0):
         return
 
-    prod = TextProduct.TextProduct(raw)
-    product_id = prod.get_product_id()
     sql = "INSERT into text_products(product, product_id) \
       values ('%s','%s')" % (sqlraw, product_id)
     POSTGIS.query(sql)
@@ -144,23 +97,22 @@ def real_process(raw):
     messHTML = "%s issues <a href=\"http://mesonet.agron.iastate.edu/p.php?pid=%s \">Mesoscale Forecast Discussion</a>" % \
         (wfo, product_id)
     jabber.sendMessage(mess, messHTML)
-    global qu
-    qu += 1
 
-raw = sys.stdin.read()
 
-myJid = jid.JID('iembot_ingest@%s/meso_afd_%s' % (secret.chatserver, mx.DateTime.now().ticks() ) )
+myJid = jid.JID('iembot_ingest@%s/meso_afd_%s' % \
+      (secret.chatserver, mx.DateTime.gmt().strftime("%Y%m%d%H%M%S") ) )
 factory = client.basicClientFactory(myJid, secret.iembot_ingest_password)
 
-jabber = JabberClient(myJid)
+jabber = common.JabberClient(myJid)
 
-factory.addBootstrap('//event/stream/authd',jabber.authd)
+factory.addBootstrap('//event/stream/authd', jabber.authd)
 factory.addBootstrap("//event/client/basicauth/invaliduser", jabber.debug)
 factory.addBootstrap("//event/client/basicauth/authfailed", jabber.debug)
 factory.addBootstrap("//event/stream/error", jabber.debug)
+factory.addBootstrap(xmlstream.STREAM_END_EVENT, jabber._disconnect )
 
-reactor.connectTCP(secret.chatserver,5222,factory)
-reactor.callLater(0, process, raw)
-reactor.callLater(10, killer)
+reactor.connectTCP(secret.connect_chatserver, 5222, factory)
+
+ldm = ldmbridge.LDMProductFactory( MyProductIngestor() )
 reactor.run()
 
