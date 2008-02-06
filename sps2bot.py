@@ -27,7 +27,7 @@ from email.MIMEText import MIMEText
 
 import secret
 import common
-from support import TextProduct, ldmbridge
+from support import TextProduct, ldmbridge, reference
 import pg
 POSTGIS = pg.connect(secret.dbname, secret.dbhost, user=secret.dbuser)
 
@@ -64,15 +64,6 @@ def countyText(u):
         c +=" %s [%s] and" %(", ".join(countyState[st]), st)
     return c[:-4]
 
-offsets = {
- 'EDT': 4,
- 'CDT': 5, 'EST': 5,
- 'MDT': 6, 'CST': 6,
- 'PDT': 7, 'MST': 7,
- 'ADT': 8, 'PST': 8,
- 'HDT': 9, 'AST': 9,
-           'HST':10,
-}
 
 
 
@@ -120,7 +111,7 @@ def real_process(raw):
             counties = "entire area"
         expire = ""
         if (seg.ugcExpire is not None):
-            expire = "till "+ (seg.ugcExpire - mx.DateTime.RelativeDateTime(hours= offsets[prod.z] )).strftime("%-I:%M %p ")+ prod.z
+            expire = "till "+ (seg.ugcExpire - mx.DateTime.RelativeDateTime(hours= reference.offsets[prod.z] )).strftime("%-I:%M %p ")+ prod.z
 
 
         mess = "%s: %s issues %s for %s %s http://mesonet.agron.iastate.edu/p.php?pid=%s" % (prod.source[1:], \
