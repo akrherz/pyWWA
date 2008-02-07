@@ -85,6 +85,7 @@ lsr_events = {
 
 offsets = {
  'GMT': 0,
+ 'CHDT': 1, 'CHST': 2,
  'EDT': 4,
  'CDT': 5, 'EST': 5,
  'MDT': 6, 'CST': 6,

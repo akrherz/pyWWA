@@ -78,7 +78,7 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
 def real_process(raw):
     tp = TextProduct.TextProduct(raw)
     pil = tp.afos[:3]
-    wfo = tp.afos[3:]
+    toroom = tp.get_iembot_source()
     sqlraw = raw.replace("'", "\\'")
     prod = TextProduct.TextProduct(raw)
     product_id = prod.get_product_id()
@@ -93,9 +93,9 @@ def real_process(raw):
     POSTGIS.query(sql)
 
     mess = "%s: %s issues Mesoscale %s http://mesonet.agron.iastate.edu/p.php?pid=%s" % \
-        (wfo, wfo, pil, product_id)
-    messHTML = "%s issues <a href=\"http://mesonet.agron.iastate.edu/p.php?pid=%s \">Mesoscale Forecast Discussion</a>" % \
-        (wfo, product_id)
+        (toroom, toroom, pil, product_id)
+    messHTML = "%s issues <a href=\"http://mesonet.agron.iastate.edu/p.php?pid=%s\">Mesoscale Forecast Discussion</a>" % \
+        (toroom, product_id)
     jabber.sendMessage(mess, messHTML)
 
 

@@ -1,6 +1,6 @@
 
 import re, mx.DateTime, string
-from support import ugc, vtec, hvtec
+from support import ugc, vtec, hvtec, reference
 
 class TextProduct:
 
@@ -22,9 +22,14 @@ class TextProduct:
         for cb in parseCallbacks:
             apply( cb )
 
+    def get_iembot_source(self):
+        if (self.source is None or len(self.source) != 4): return None
+        return self.source[1:]
+
     def get_product_id(self):
-        return "%s-%s-%s-%s" % (self.issueTime.strftime("%Y%m%d%H%M"),\
+        s = "%s-%s-%s-%s" % (self.issueTime.strftime("%Y%m%d%H%M"),\
                 self.source, self.wmo, self.afos)
+        return s.strip()
 
     def sqlraw(self):
         return re.sub("'", "\\'", self.raw)
@@ -37,7 +42,9 @@ class TextProduct:
 
     def findAFOS(self):
         """ Determine the AFOS header from the NWS text product """
-        tokens = re.findall("^([A-Z0-9]{4,6})$", self.sections[0], re.M)
+        data = "\n".join([line.strip() 
+                         for line in self.sections[0].split("\n")])
+        tokens = re.findall("^([A-Z0-9 ]{4,6})$", data, re.M)
         if (len(tokens) > 0):
             self.afos = tokens[0]
 
@@ -88,7 +95,7 @@ afos: %(afos)s
         iMinute = int(tokens[0][2])
 
         # Now lets look for a local timestamp in the product MND or elsewhere
-        time_re = "^([0-9]+) (AM|PM) ([A-Z][A-Z][A-Z]) [A-Z][A-Z][A-Z] ([A-Z][A-Z][A-Z]) ([0-9]+) ([1-2][0-9][0-9][0-9])$"
+        time_re = "^([0-9]+) (AM|PM) ([A-Z][A-Z][A-Z]?T) [A-Z][A-Z][A-Z] ([A-Z][A-Z][A-Z]) ([0-9]+) ([1-2][0-9][0-9][0-9])$"
         tokens = re.findall(time_re, self.raw, re.M)
         # If we don't find anything, lets default to now, its the best
         if (len(tokens) == 0):
@@ -104,20 +111,8 @@ afos: %(afos)s
             m = tokens[0][0][-2:]
         dstr = "%s:%s %s %s %s %s" % (h, m, tokens[0][1], tokens[0][3], tokens[0][4], tokens[0][5])
         now = mx.DateTime.strptime(dstr, "%I:%M %p %b %d %Y")
-        if (self.z == "EDT"):
-            now += mx.DateTime.RelativeDateTime(hours=+4)
-        elif (self.z == "EST" or self.z == "CDT"):
-            now += mx.DateTime.RelativeDateTime(hours=+5)
-        elif (self.z == "CST" or self.z == "MDT"):
-            now += mx.DateTime.RelativeDateTime(hours=+6)
-        elif (self.z == "MST" or self.z == "PDT"):
-            now += mx.DateTime.RelativeDateTime(hours=+7)
-        elif (self.z == "PST" or self.z == "ADT"):
-            now += mx.DateTime.RelativeDateTime(hours=+8)
-        elif (self.z == "AST"):
-            now += mx.DateTime.RelativeDateTime(hours=+9)
-        elif (self.z == "GMT"):
-            pass
+        if reference.offsets.has_key(self.z):
+            now += mx.DateTime.RelativeDateTime(hours=reference.offsets[self.z])
         else:
             print "Unknown TZ: %s " % (self.z,)
 
