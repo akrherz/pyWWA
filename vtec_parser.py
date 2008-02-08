@@ -107,7 +107,7 @@ def segment_processor(text_product, i):
 Missing or incomplete VTEC encoding in segment (%s)" % \
             (text_product.source[1:], text_product.afos ,
              text_product.sections[0].replace("\n", " ") )
-        jabber.sendMessage(msg)
+        #jabber.sendMessage(msg)
         raise NoVTECFoundError("No VTEC coding found for this segment")
 
 
