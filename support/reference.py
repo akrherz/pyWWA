@@ -87,6 +87,7 @@ offsets = {
  'GMT': 0,
  'CHDT': -8, 'CHST': -9, 'LST': -10,
  'AKST': 9, 'AKDT': 8,
+ 'VDT': 3, 'VST': 4,
  'EDT': 4,
  'CDT': 5, 'EST': 5,
  'MDT': 6, 'CST': 6,
