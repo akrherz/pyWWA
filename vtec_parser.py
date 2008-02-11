@@ -96,7 +96,7 @@ def segment_processor(text_product, i):
         return
     
     # Firstly, certain products may not contain VTEC, silently return
-    if (["MWS","FLS","FLW"].__contains__(text_product.afos[:3])):
+    if (["MWS","FLS","FLW","CFW"].__contains__(text_product.afos[:3])):
         if (len(seg.vtec) == 0):
             log.msg("I FOUND NO VTEC, BUT THAT IS OK")
             return
