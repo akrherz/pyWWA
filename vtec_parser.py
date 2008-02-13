@@ -83,7 +83,16 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
     def connectionLost(self, reason):
         """ I lost my connection, should I do anything else? """
         log.msg("LDM Closed PIPE")
-        
+
+def alert_error(tp, errorText):
+    msg = "%s: iembot processing error:\nProduct: %s\nError:%s" % \
+            (tp.get_iembot_source(), \
+             tp.get_product_id(), errorText )
+
+    htmlmsg = "<span style='color: #FF0000; font-weight: bold;'>\
+iembot processing error:</span><br />Product: %s<br />Error: %s" % \
+            (tp.get_product_id(), errorText )
+    jabber.sendMessage(msg, htmlmsg)
 
 def segment_processor(text_product, i):
     """ The real data processor here """
@@ -103,11 +112,8 @@ def segment_processor(text_product, i):
 
     # If we found no VTEC and it has UGC, we complain about this
     if (len(seg.vtec) == 0):
-        msg = "%s: iembot encounted a VTEC product (%s) error. \
-Missing or incomplete VTEC encoding in segment (%s)" % \
-            (text_product.source[1:], text_product.afos ,
-             text_product.sections[0].replace("\n", " ") )
-        #jabber.sendMessage(msg)
+        alert_error(text_product, 
+         "Missing or incomplete VTEC encoding in segment number %s" % (i+1,))
         raise NoVTECFoundError("No VTEC coding found for this segment")
 
 
