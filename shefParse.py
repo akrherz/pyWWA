@@ -18,7 +18,8 @@
 
 import sys, sys, os
 import traceback
-from pyIEM import shefReport, ldmbridge
+from pyIEM import shefReport, iemAccessOb, mesonet
+from support import ldmbridge
 from twisted.python import log
 from twisted.internet import reactor
 import smtplib, StringIO
@@ -29,25 +30,37 @@ log.startLogging(open('/mesonet/data/logs/%s/shefParse.log' \
     % (os.getenv("USER"),), 'a'))
 log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
 
+from twisted.enterprise import adbapi
+dbpool = adbapi.ConnectionPool("psycopg2", database='iem', host=secret.dbhost)
 
-found_vars = {}
+mapping = {
+  "HGIRZ": "rstage",
+  "HGIRG": "rstage",
+  "HG": "rstage",
+  "PPHRG": "phour",
+  "raw": "raw",
+  "TAIRG": "tmpf",
+  "TA": "tmpf",
+  -1: "", -2: "", -3: "", -4: "", -5: "",
+  "TX": "max_tmpf",
+  "TN": "min_tmpf",
+  "SD": "snowd",
+  "PP": "pday",
+  "SW": "snoww",
+  "SF": "snow",
+  "PCIRG": "", "PPCRG": "", "TWIRG": "", "VBIRG": "", "HTIRG": "",
+  "HPIRG": "", "PPDRG": "", "PPQRG": "", "PPDRP": "", "PPQRP": "",
+  "AD": "", "SFK": "", "UP": "", "US": "", "UR": "", "PPQ": "",
+  "EP": "", "SFQ": "",
+}
 
 class myProductIngestor(ldmbridge.LDMProductReceiver):
 
-  def emailErrors(self, errstr, raw):
 
-    msg = MIMEText("%s\n\n>RAW DATA\n\n%s" % (errstr, raw.replace("\015\015\012", "\n") ) )
-    msg['subject'] = 'shefParse.py Traceback'
-    msg['From'] = "ldm@mesonet.agron.iastate.edu"
-    msg['To'] = "akrherz@iastate.edu"
+  def connectionLost(self, reason):
+    log.msg("LDM Closed PIPE")
 
-    s = smtplib.SMTP()
-    s.connect()
-    s.sendmail(msg["From"], msg["To"], msg.as_string())
-    s.close()
-    reactor.stop()
-
-  def processData(self, buf):
+  def process_data(self, buf):
     cstr = StringIO.StringIO()
     try:
       self.real_process(buf, cstr)
@@ -55,23 +68,54 @@ class myProductIngestor(ldmbridge.LDMProductReceiver):
       traceback.print_exc(file=cstr)
       cstr.seek(0)
       errstr = cstr.read()
-      self.emailErrors(errstr, buf)
-      return
+      #log.msg("_________ERROR__________")
+      log.msg( errstr )
+      #log.msg("RAW DATA\n%s" % (buf.replace("\015\015\012", "\n"),))
+      #log.msg("_________END__________")
+      
 
   def real_process(self, buf, cstr):
     sreport = shefReport.shefReport(buf, cstr )
 
     for sid in sreport.db.keys():  # Get all stations in this report
-
+      # Prevent Cross Pollenation for now?
+      if (len(sid) != 5):
+        continue
+      isCOOP = 0
+      state = mesonet.nwsli2state[ sid[-2:]]
       for ts in sreport.db[sid].keys():  # Each Time
         if (ts == 'writets'):
           continue
-        for var in sreport.db[sid][ts].keys(): # Each var
-          found_vars[ var ] = 1
+        iemob = iemAccessOb.iemAccessOb(sid)
+        iemob.data['ts'] = ts
+        iemob.data['year'] = ts.year
+        for var in sreport.db[sid][ts].keys():
+          if (var in ['TX','TN','PP']):
+            isCOOP = 1
+          if (mapping.has_key(var)):
+            iemob.data[ mapping[var] ] = cleaner(sreport.db[sid][ts][var])
+          else:
+            print "Couldn't map var", var
+            mapping[var] = ""
+        if (isCOOP):
+          print "FIND COOP?", sid, ts
+          iemob.set_network(state+"_COOP")
+        elif (state == "IA"):
+          iemob.set_network("DCP")
+        else:
+          del iemob
+          continue
+        iemob.updateDatabaseSummaryTemps(None, dbpool)
+        iemob.updateDatabase(None, dbpool)
+        del iemob
 
-def writeVars():
-  print found_vars.keys()
+def cleaner(v):
+  if (v == "" or v is None or v == "M"):
+    return -99
+  if (v.upper() == "T"):
+    return 0.0001
+  return v.replace("F","")
+
 #
 fact = ldmbridge.LDMProductFactory( myProductIngestor() )
-reactor.callLater(60, writeVars)
 reactor.run()
