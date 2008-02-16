@@ -70,7 +70,7 @@ class myProductIngestor(ldmbridge.LDMProductReceiver):
       errstr = cstr.read()
       #log.msg("_________ERROR__________")
       log.msg( errstr )
-      #log.msg("RAW DATA\n%s" % (buf.replace("\015\015\012", "\n"),))
+      log.msg("|%s|" % (buf.replace("\015\015\012", "\n"),))
       #log.msg("_________END__________")
       
 
