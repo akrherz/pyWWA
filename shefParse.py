@@ -35,7 +35,7 @@ dbpool = adbapi.ConnectionPool("psycopg2", database='iem', host=secret.dbhost)
 
 multiplier = {
   "US" : 0.87,  # Convert MPH to KNT
-  "USIRG": 0.87
+  "USIRG": 0.87,
 }
 
 mapping = {
@@ -50,7 +50,7 @@ mapping = {
   "TX": "max_tmpf",
   "TN": "min_tmpf",
   "SD": "snowd",
-  "PP": "pday", "PA": "pres",
+  "PP": "pday", "PA": "pres", "PPD": "pday",
   "SW": "snoww", "USIRG": "sknt",
   "SF": "snow", "UD": "drct", "UG": "gust",
   "PCIRG": "", "PPCRG": "", "TWIRG": "", "VBIRG": "", "HTIRG": "",
@@ -122,7 +122,10 @@ class myProductIngestor(ldmbridge.LDMProductReceiver):
         iemob.data['year'] = ts.year
 
         for var in sreport.db[sid][ts].keys():
-          iemob.data[ mapping[var] ] = cleaner(sreport.db[sid][ts][var]) * multiplier[var]
+          if (var == "raw"):
+            iemob.data[ mapping[var] ] = sreport.db[sid][ts][var]
+          else:
+            iemob.data[ mapping[var] ] = cleaner(sreport.db[sid][ts][var]) * multiplier[var]
 
         iemob.updateDatabaseSummaryTemps(None, dbpool)
         iemob.updateDatabase(None, dbpool)
@@ -133,7 +136,7 @@ def cleaner(v):
     return -99
   if (v.upper() == "T"):
     return 0.0001
-  return v.replace("F","")
+  return float(v.replace("F",""))
 
 #
 fact = ldmbridge.LDMProductFactory( myProductIngestor() )
