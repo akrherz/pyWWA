@@ -33,6 +33,11 @@ log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
 from twisted.enterprise import adbapi
 dbpool = adbapi.ConnectionPool("psycopg2", database='iem', host=secret.dbhost)
 
+multiplier = {
+  "US" : 0.87,  # Convert MPH to KNT
+  "USIRG": 0.87
+}
+
 mapping = {
   "HGIRZ": "rstage",
   "HGIRG": "rstage",
@@ -45,14 +50,15 @@ mapping = {
   "TX": "max_tmpf",
   "TN": "min_tmpf",
   "SD": "snowd",
-  "PP": "pday",
-  "SW": "snoww", "USIRG": "sped",
+  "PP": "pday", "PA": "pres",
+  "SW": "snoww", "USIRG": "sknt",
   "SF": "snow", "UD": "drct", "UG": "gust",
   "PCIRG": "", "PPCRG": "", "TWIRG": "", "VBIRG": "", "HTIRG": "",
   "HPIRG": "", "PPDRG": "", "PPQRG": "", "PPDRP": "", "PPQRP": "",
-  "AD": "", "SFK": "", "UP": "", "US": "sped", "UR": "", "PPQ": "",
+  "AD": "", "SFK": "", "UP": "", "US": "sknt", "UR": "", "PPQ": "",
   "EP": "", "SFQ": "",
 }
+mystates = ['IA', 'ND','SD','NE','KS','MO','MN','WI','IL','IN','OH','MI']
 
 class myProductIngestor(ldmbridge.LDMProductReceiver):
 
@@ -86,25 +92,38 @@ class myProductIngestor(ldmbridge.LDMProductReceiver):
       for ts in sreport.db[sid].keys():  # Each Time
         if (ts == 'writets'):
           continue
-        iemob = iemAccessOb.iemAccessOb(sid)
-        iemob.data['ts'] = ts
-        iemob.data['year'] = ts.year
+
+        # Loop thru vars to see if we have a COOP site?
         for var in sreport.db[sid][ts].keys():
           if (var in ['TX','TN','PP']):
             isCOOP = 1
-          if (mapping.has_key(var)):
-            iemob.data[ mapping[var] ] = cleaner(sreport.db[sid][ts][var])
-          else:
+          if (not mapping.has_key(var)):
             print "Couldn't map var", var
             mapping[var] = ""
-        if (isCOOP):
+          if (not multiplier.has_key(var)):
+            multiplier[var] = 1.0
+
+
+        # Deterime if we want to waste the DB's time
+        # If COOP in MW, process it
+        if (isCOOP and state in mystates):
           print "FIND COOP?", sid, ts
-          iemob.set_network(state+"_COOP")
+          network = state+"_COOP"
+        # We are left with DCPs in Iowa
         elif (state == "IA"):
-          iemob.set_network("DCP")
+          network = "DCP"
+        # Everybody else can go away :)
         else:
-          del iemob
           continue
+
+        # Lets do this, finally.
+        iemob = iemAccessOb.iemAccessOb(sid, network)
+        iemob.data['ts'] = ts
+        iemob.data['year'] = ts.year
+
+        for var in sreport.db[sid][ts].keys():
+          iemob.data[ mapping[var] ] = cleaner(sreport.db[sid][ts][var]) * multiplier[var]
+
         iemob.updateDatabaseSummaryTemps(None, dbpool)
         iemob.updateDatabase(None, dbpool)
         del iemob
