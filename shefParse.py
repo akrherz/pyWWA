@@ -94,6 +94,9 @@ class myProductIngestor(ldmbridge.LDMProductReceiver):
       if (len(sid) != 5):
         continue
       isCOOP = 0
+      if (not mesonet.nwsli2state.has_key(sid[-2:])):
+        print "UNKNOWN SID STATE CODE [%s]" % (sid,)
+        continue
       state = mesonet.nwsli2state[ sid[-2:]]
       for ts in sreport.db[sid].keys():  # Each Time
         if (ts == 'writets'):
