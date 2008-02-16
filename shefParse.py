@@ -36,6 +36,11 @@ dbpool = adbapi.ConnectionPool("psycopg2", database='iem', host=secret.dbhost)
 multiplier = {
   "US" : 0.87,  # Convert MPH to KNT
   "USIRG": 0.87,
+  "UG": 0.87,
+  "UGIRG": 0.87,
+  "UP": 0.87,
+  "UPIRG": 0.87,
+  "UPVRG": 0.87,
 }
 
 mapping = {
@@ -49,10 +54,11 @@ mapping = {
   -1: "", -2: "", -3: "", -4: "", -5: "",
   "TX": "max_tmpf",
   "TN": "min_tmpf",
-  "SD": "snowd",
+  "SD": "snowd", "XR": "relh",
   "PP": "pday", "PA": "pres", "PPD": "pday",
   "SW": "snoww", "USIRG": "sknt",
-  "SF": "snow", "UD": "drct", "UG": "gust",
+  "SF": "snow", "UD": "drct", "UG": "gust", "UDIRG": "drct",
+  "UPIRG": "gust", "UPVRG": "gust",
   "PCIRG": "", "PPCRG": "", "TWIRG": "", "VBIRG": "", "HTIRG": "",
   "HPIRG": "", "PPDRG": "", "PPQRG": "", "PPDRP": "", "PPQRP": "",
   "AD": "", "SFK": "", "UP": "", "US": "sknt", "UR": "", "PPQ": "",
