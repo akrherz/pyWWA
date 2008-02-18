@@ -63,7 +63,8 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
         except:
             io = StringIO.StringIO()
             traceback.print_exc(file=io)
-            msg = MIMEText("%s\n\n>RAW DATA\n\n%s"%(io.getvalue(),raw))
+            msg = MIMEText("%s\n\n>RAW DATA\n\n%s"%(io.getvalue(),
+                           raw.replace("\015\015\012", "\n")))
             msg['subject'] = 'meso_afd.py Traceback'
             msg['From'] = "ldm@mesonet.agron.iastate.edu"
             msg['To'] = "akrherz@iastate.edu"
