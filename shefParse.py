@@ -18,7 +18,7 @@
 
 import sys, sys, os
 import traceback
-from pyIEM import shefReport, iemAccessOb, mesonet
+from pyIEM import shefReport, iemAccessOb, mesonet, iemdb
 from support import ldmbridge
 from twisted.python import log
 from twisted.internet import reactor
@@ -32,6 +32,8 @@ log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
 
 from twisted.enterprise import adbapi
 dbpool = adbapi.ConnectionPool("psycopg2", database='iem', host=secret.dbhost)
+i = iemdb.iemdb()
+iemaccess = i['iem']
 
 multiplier = {
   "US" : 0.87,  # Convert MPH to KNT
@@ -129,7 +131,7 @@ class myProductIngestor(ldmbridge.LDMProductReceiver):
         iemob = iemAccessOb.iemAccessOb(sid, network)
         iemob.data['ts'] = ts
         iemob.data['year'] = ts.year
-
+        iemob.load_and_compare(iemaccess)
         for var in sreport.db[sid][ts].keys():
           if (var == "raw"):
             iemob.data[ mapping[var] ] = sreport.db[sid][ts][var]
