@@ -130,6 +130,7 @@ def real_processor(buf):
             d0['stationID'] = mtr.station_id
             d0['peak_gust'] = d
             d0['peak_ts'] = t.strftime("%Y-%m-%d %H:%M:%S")
+            d0['year'] = t.strftime("%Y")
             iem.updateDatabasePeakWind(iemaccess.iemdb, d0, dbpool)
 
 
