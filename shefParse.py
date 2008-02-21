@@ -67,6 +67,7 @@ mapping = {
   "EP": "", "SFQ": "",
 }
 mystates = ['IA', 'ND','SD','NE','KS','MO','MN','WI','IL','IN','OH','MI']
+EMAILS = 10
 
 class myProductIngestor(ldmbridge.LDMProductReceiver):
 
@@ -86,7 +87,19 @@ class myProductIngestor(ldmbridge.LDMProductReceiver):
       log.msg( errstr )
       log.msg("|%s|" % (buf.replace("\015\015\012", "\n"),))
       #log.msg("_________END__________")
-      
+      msg = MIMEText("%s\n\n>RAW DATA\n\n%s" % (errstr,
+           buf.replace("\015\015\012", "\n") ) )
+      msg['subject'] = 'shefParse.py Traceback'
+      msg['From'] = "ldm@mesonet.agron.iastate.edu"
+      msg['To'] = "akrherz@iastate.edu"
+      global EMAILS
+      if (EMAILS > 0):
+        smtp = smtplib.SMTP()
+        smtp.connect()
+        smtp.sendmail(msg["From"], msg["To"], msg.as_string())
+        smtp.close()
+      EMAILS -= 1
+      log.msg("EMAILS [%s]" % (EMAILS,))
 
   def real_process(self, buf, cstr):
     sreport = shefReport.shefReport(buf, cstr )
