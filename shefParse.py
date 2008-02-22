@@ -146,6 +146,8 @@ class myProductIngestor(ldmbridge.LDMProductReceiver):
         iemob.data['year'] = ts.year
         iemob.load_and_compare(iemaccess)
         for var in sreport.db[sid][ts].keys():
+          if sreport.db[sid][ts][var] is None:
+            continue
           if (var == "raw"):
             iemob.data[ mapping[var] ] = sreport.db[sid][ts][var]
           else:
