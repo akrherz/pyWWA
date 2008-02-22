@@ -160,7 +160,7 @@ def cleaner(v):
     return -99
   if (v.upper() == "T"):
     return 0.0001
-  return float(v.replace("F",""))
+  return float(v.replace("F","").replace("Q",""))
 
 #
 fact = ldmbridge.LDMProductFactory( myProductIngestor() )
