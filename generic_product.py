@@ -98,6 +98,7 @@ prodDefinitions = {
     'RHW': 'Radiological Hazard Warning (RHW)',
     'SPW': 'Shelter In Place Warning (SPW)',
     'VOW': 'Volcano Warning (VOW)',
+    'ZFP': 'Zone Forecast Package (ZFP)',
 }
 
 ugc_dict = {}
@@ -150,7 +151,7 @@ def real_process(raw):
       values ('%s','%s')" % (sqlraw, product_id)
     DBPOOL.runOperation(sql)
 
-    if ( ["CAE", "AFD","FTM","AWU","HWO","NOW","HLS","PSH","NOW","PNS","RER","ADM"].__contains__(pil) ):
+    if ( ["ZFP", "CAE", "AFD","FTM","AWU","HWO","NOW","HLS","PSH","NOW","PNS","RER","ADM"].__contains__(pil) ):
         mess = "%s: %s issues %s http://mesonet.agron.iastate.edu/p.php?pid=%s" % \
           (wfo, wfo, pil, product_id)
         prodtxt = "(%s)" % (pil,)
