@@ -158,7 +158,7 @@ def real_process(raw):
         if (prodDefinitions.has_key(pil)):
             prodtxt = prodDefinitions[pil]
         htmlmess = "%s issues <a href=\"http://mesonet.agron.iastate.edu/p.php?pid=%s\">%s</a> " % (wfo, product_id, prodtxt)
-        if (not ["HWO","NOW"].__contains__(pil) and len(prod.segments) > 0 and len(prod.segments[0].headlines) > 0 and len(prod.segments[0].headlines[0]) < 200 ):
+        if (not ["HWO","NOW","ZFP"].__contains__(pil) and len(prod.segments) > 0 and len(prod.segments[0].headlines) > 0 and len(prod.segments[0].headlines[0]) < 200 ):
           htmlmess += "... %s ..." % (prod.segments[0].headlines[0],)
 
         jabber.sendMessage(mess, htmlmess)
