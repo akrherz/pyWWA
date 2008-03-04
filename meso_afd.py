@@ -85,7 +85,8 @@ def real_process(raw):
     product_id = prod.get_product_id()
     print product_id
 
-    tokens = re.findall("\.UPDATE\.\.\.MESOSCALE UPDATE", raw)
+    #tokens = re.findall("\.UPDATE\.\.\.MESOSCALE UPDATE", raw)
+    tokens = re.findall("MESOSCALE UPDATE", raw)
     if (len(tokens) == 0):
         return
 
