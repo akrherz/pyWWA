@@ -80,7 +80,7 @@ def real_process(raw):
     tp = TextProduct.TextProduct(raw)
     pil = tp.afos[:3]
     toroom = tp.get_iembot_source()
-    sqlraw = raw.replace("'", "\\'")
+    sqlraw = raw.replace("'", "\\'").replace("\015\015\012", "\n")
     prod = TextProduct.TextProduct(raw)
     product_id = prod.get_product_id()
     print product_id
