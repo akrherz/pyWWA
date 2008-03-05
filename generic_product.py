@@ -99,6 +99,8 @@ prodDefinitions = {
     'SPW': 'Shelter In Place Warning (SPW)',
     'VOW': 'Volcano Warning (VOW)',
     'ZFP': 'Zone Forecast Package (ZFP)',
+    'PFM': 'Point Forecast Matrices (PFM)',
+    'SFT': 'State Forecast Tabular Product (SFT)',
 }
 
 ugc_dict = {}
