@@ -383,7 +383,7 @@ sql = "SELECT nwsli, \
  from hvtec_nwsli"
 rs = POSTGIS.query(sql).dictresult()
 for i in range(len(rs)):
-    nwsli_dict[ rs[i]['nwsli'] ] = rs[i]['rname']
+    nwsli_dict[ rs[i]['nwsli'] ] = (rs[i]['rname']).replace("&"," and ")
 
 myJid = jid.JID('iembot_ingest@%s/vtecparser_%s' % \
       (secret.chatserver, mx.DateTime.gmt().strftime("%Y%m%d%H%M%S") ) )
