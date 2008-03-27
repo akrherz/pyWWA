@@ -301,7 +301,8 @@ till %(ets)s" % jmsg_dict
                     DBPOOL.runOperation( sql )
 
             # If this is the only county, we can cancel the polygon too
-            if (len(seg.vtec) == 1):
+            if (len(text_product.segments) == 1):
+                log.msg("Updating Polygon as well")
                 for tbl in warning_tables:
                     sql = "UPDATE %s SET status = '%s', expire = '%s+00', \
                      updated = '%s+00' WHERE gtype = 'P' and wfo = '%s' \
