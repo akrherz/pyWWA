@@ -103,6 +103,7 @@ prodDefinitions = {
     'SFT': 'State Forecast Tabular Product (SFT)',
     'SRF': 'Surf Zone Forecast (SRF)',
     'CWF': 'Coastal Waters Forecast (CWF)',
+    'RVS': 'Hydrologic Statement (RVS)',
 }
 
 ugc_dict = {}
