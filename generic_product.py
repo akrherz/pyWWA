@@ -102,6 +102,7 @@ prodDefinitions = {
     'PFM': 'Point Forecast Matrices (PFM)',
     'SFT': 'State Forecast Tabular Product (SFT)',
     'SRF': 'Surf Zone Forecast (SRF)',
+    'CWF': 'Coastal Waters Forecast (CWF)',
 }
 
 ugc_dict = {}
@@ -154,7 +155,7 @@ def real_process(raw):
       values ('%s','%s')" % (sqlraw, product_id)
     DBPOOL.runOperation(sql)
 
-    if ( ["SRF", "SFT", "PFM", "ZFP", "CAE", "AFD","FTM","AWU","HWO","NOW","HLS","PSH","NOW","PNS","RER","ADM"].__contains__(pil) ):
+    if ( ["CWF", "SRF", "SFT", "PFM", "ZFP", "CAE", "AFD","FTM","AWU","HWO","NOW","HLS","PSH","NOW","PNS","RER","ADM"].__contains__(pil) ):
         mess = "%s: %s issues %s http://mesonet.agron.iastate.edu/p.php?pid=%s" % \
           (wfo, wfo, pil, product_id)
         prodtxt = "(%s)" % (pil,)
