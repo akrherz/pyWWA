@@ -22,11 +22,15 @@ iemaccess = iemAccess.iemAccess()
 
 windAlerts = {}
 
+TORNADO_RE = re.compile(r" +FC |TORNADO")
+FUNNEL_RE = re.compile(r" FC |FUNNEL")
+HAIL_RE = re.compile(r"GR")
+
 class myProductIngestor(ldmbridge.LDMProductReceiver):
 
     def connectionLost(self, reason):
         print 'connectionLost', reason
-        reactor.callLater(2, self.shutdown)
+        reactor.callLater(5, self.shutdown)
 
     def shutdown(self):
         reactor.callWhenRunning(reactor.stop)
@@ -105,6 +109,18 @@ def real_processor(buf):
         iem.data['raw'] = clean_metar
         iem.updateDatabase(None, dbpool)
 
+        # Search for tornado
+        if (len(TORNADO_RE.findall(clean_metar)) > 0):
+            sendAlert(iemid, "Tornado", clean_metar)
+        elif (len(FUNNEL_RE.findall(clean_metar)) > 0):
+            sendAlert(iemid, "Funnel", clean_metar)
+        else:
+            for weatheri in mtr.weather:
+                for x in weatheri:
+                    if x is not None and "GR" in x:
+                        sendAlert(iemid, "Hail", clean_metar)
+           
+
         # Search for Peak wind gust info....
         if (mtr.wind_gust or mtr.wind_speed_peak):
             d = 0
@@ -136,6 +152,28 @@ def real_processor(buf):
 
         del mtr, iem
     del tokens, metars, dataSect
+
+def sendAlert(iemid, what, clean_metar):
+    print "ALERTING"
+    i = iemdb.iemdb(dhost=secret.dbhost)
+    mesosite = i['mesosite']
+    rs = mesosite.query("SELECT wfo, state, name from stations \
+           WHERE id = '%s' " % (iemid,) ).dictresult()
+    if (len(rs) == 0):
+      print "I not find WFO for sid: %s " % (iemid,)
+      rs = [{'wfo': 'XXX', 'state': 'XX', 'name': 'XXXX'},]
+    wfo = rs[0]['wfo']
+    st = rs[0]['state']
+    nm = rs[0]['name']
+
+    extra = ""
+    if (clean_metar.find("$") > 0):
+      extra = "(Caution: Maintenance Check Indicator)"
+    jabberTxt = "%s: %s,%s (%s) ASOS %s reports %s\n%s"\
+            % (wfo, nm, st, iemid, extra, what, clean_metar )
+
+    jabber.sendMessage(jabberTxt)
+
 
 def sendWindAlert(iemid, v, d, t, clean_metar):
     i = iemdb.iemdb(dhost=secret.dbhost)
