@@ -2,6 +2,8 @@
 import re, mx.DateTime, string
 from support import ugc, vtec, hvtec, reference
 
+TORNADO = re.compile(r"(STORM\W+CAPABLE\W+OF\W+PRODUCING|REPORTED|INDICATED?)\W+A\W+TORNADO")
+
 class TextProduct:
 
     def __init__(self, raw):
@@ -21,6 +23,7 @@ class TextProduct:
             self.findWMO, self.findAFOS, self.figureFcster]
         for cb in parseCallbacks:
             apply( cb )
+
 
     def get_iembot_source(self):
         if (self.source is None or len(self.source) != 4): return None
@@ -136,6 +139,14 @@ class TextProductSegment:
         self.ugcExpire = None
 
         self.parse()
+
+    def svs_search(self):
+        """ Special search the product for special text """
+        sections = self.raw.split("\n\n")
+        for s in sections:
+            if len(TORNADO.findall(s)) > 0:
+                return " ..."+ s.replace("\n", " ")
+        return ""
 
     def parse(self):
         u = ugc.ugc( self.raw )

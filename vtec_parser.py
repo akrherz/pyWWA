@@ -126,7 +126,7 @@ def segment_processor(text_product, i):
 
         # Set up Jabber Dict for stuff to fill in
         jmsg_dict = {'wfo': vtec.office, 'product': vtec.productString(),
-             'county': '', 'sts': ' ', 'ets': ' ', 
+             'county': '', 'sts': ' ', 'ets': ' ', 'svs_special': '',
              'year': mx.DateTime.now().year, 'phenomena': vtec.phenomena,
              'eventid': vtec.ETN, 'significance': vtec.significance,
              'urlbase': URLBASE}
@@ -146,6 +146,9 @@ def segment_processor(text_product, i):
         else:
             jmsg_dict['ets'] =  "%s%s" % \
                 ((vtec.endTS - local_offset).strftime(efmt), text_product.z)
+
+        if (vtec.phenomena in ['MA','TO','SV']):
+            jmsg_dict['svs_special'] = seg.svs_search()
 
         # We need to get the County Name
         countyState = {}
@@ -237,11 +240,11 @@ vtec.action, text_product.issueTime, fcster, cnty, vtec.significance)
                 jabberTxt = "%(w)s: %(wfo)s %(product)s%(sts)sfor \
 %(county)s till %(ets)s %(urlbase)s?year=%(year)s&amp;wfo=%(wfo)s&amp;\
 phenomena=%(phenomena)s&amp;eventid=%(eventid)s&amp;\
-significance=%(significance)s" % jmsg_dict
+significance=%(significance)s %(svs_special)s" % jmsg_dict
                 jabberHTML = "%(wfo)s <a href='%(urlbase)s?year=%(year)s\
 &amp;wfo=%(wfo)s&amp;phenomena=%(phenomena)s&amp;eventid=%(eventid)s&amp;\
 significance=%(significance)s'>%(product)s</a>%(sts)sfor %(county)s \
-till %(ets)s" % jmsg_dict
+till %(ets)s %(svs_special)s" % jmsg_dict
                 jabber.sendMessage(jabberTxt, jabberHTML)
 
         elif (vtec.action == "CON"):
@@ -270,11 +273,11 @@ till %(ets)s" % jmsg_dict
             jabberTxt = "%(wfo)s: %(wfo)s %(product)s%(sts)sfor \
 %(county)s till %(ets)s %(urlbase)s?year=%(year)s&amp;wfo=%(wfo)s&amp;\
 phenomena=%(phenomena)s&amp;eventid=%(eventid)s&amp;\
-significance=%(significance)s" % jmsg_dict
+significance=%(significance)s %(svs_special)s" % jmsg_dict
             jabberHTML = "%(wfo)s <a href='%(urlbase)s?year=%(year)s\
 &amp;wfo=%(wfo)s&amp;phenomena=%(phenomena)s&amp;eventid=%(eventid)s&amp;\
 significance=%(significance)s'>%(product)s</a>%(sts)sfor %(county)s \
-till %(ets)s" % jmsg_dict
+till %(ets)s %(svs_special)s" % jmsg_dict
             jabber.sendMessage(jabberTxt, jabberHTML)
 #--
 
@@ -315,21 +318,21 @@ till %(ets)s" % jmsg_dict
             jmsg_dict['action'] = "cancels"
             fmt = "%(w)s: %(wfo)s  %(product)s for %(county)s \
 %(urlbase)s?year=%(year)s&amp;wfo=%(wfo)s&amp;phenomena=%(phenomena)s&amp;\
-eventid=%(eventid)s&amp;significance=%(significance)s"
+eventid=%(eventid)s&amp;significance=%(significance)s %(svs_special)s"
             htmlfmt = "%(wfo)s <a href='%(urlbase)s?year=%(year)s&amp;\
 wfo=%(wfo)s&amp;phenomena=%(phenomena)s&amp;eventid=%(eventid)s&amp;\
-significance=%(significance)s'>%(product)s</a> for %(county)s"
+significance=%(significance)s'>%(product)s</a> for %(county)s %(svs_special)s"
             if (vtec.action == "EXT" and vtec.beginTS != None):
                 jmsg_dict['sts'] = " valid at %s%s " % ( \
                 (vtec.beginTS - local_offset).strftime(efmt), text_product.z )
                 fmt = "%(w)s: %(wfo)s  %(product)s for %(county)s\
 %(sts)still %(ets)s %(urlbase)s?year=%(year)s&amp;wfo=%(wfo)s&amp;\
 phenomena=%(phenomena)s&amp;eventid=%(eventid)s&amp;\
-significance=%(significance)s"
+significance=%(significance)s %(svs_special)s"
                 htmlfmt = "%(wfo)s <a href='%(urlbase)s?\
 year=%(year)s&amp;wfo=%(wfo)s&amp;phenomena=%(phenomena)s&amp;\
 eventid=%(eventid)s&amp;significance=%(significance)s'>%(product)s</a>\
- for %(county)s%(sts)still %(ets)s"
+ for %(county)s%(sts)still %(ets)s %(svs_special)s"
             elif (vtec.action == "EXT"):
                 fmt += " till %(ets)s"
                 htmlfmt += " till %(ets)s"
