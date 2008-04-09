@@ -238,9 +238,9 @@ vtec.action, text_product.issueTime, fcster, cnty, vtec.significance)
             for w in affectedWFOS.keys():
                 jmsg_dict['w'] = w
                 jabberTxt = "%(w)s: %(wfo)s %(product)s%(sts)sfor \
-%(county)s till %(ets)s %(urlbase)s?year=%(year)s&amp;wfo=%(wfo)s&amp;\
+%(county)s till %(ets)s %(svs_special)s %(urlbase)s?year=%(year)s&amp;wfo=%(wfo)s&amp;\
 phenomena=%(phenomena)s&amp;eventid=%(eventid)s&amp;\
-significance=%(significance)s %(svs_special)s" % jmsg_dict
+significance=%(significance)s" % jmsg_dict
                 jabberHTML = "%(wfo)s <a href='%(urlbase)s?year=%(year)s\
 &amp;wfo=%(wfo)s&amp;phenomena=%(phenomena)s&amp;eventid=%(eventid)s&amp;\
 significance=%(significance)s'>%(product)s</a>%(sts)sfor %(county)s \
@@ -271,9 +271,9 @@ till %(ets)s %(svs_special)s" % jmsg_dict
                     DBPOOL.runOperation( sql )
 
             jabberTxt = "%(wfo)s: %(wfo)s %(product)s%(sts)sfor \
-%(county)s till %(ets)s %(urlbase)s?year=%(year)s&amp;wfo=%(wfo)s&amp;\
+%(county)s till %(ets)s %(svs_special)s %(urlbase)s?year=%(year)s&amp;wfo=%(wfo)s&amp;\
 phenomena=%(phenomena)s&amp;eventid=%(eventid)s&amp;\
-significance=%(significance)s %(svs_special)s" % jmsg_dict
+significance=%(significance)s" % jmsg_dict
             jabberHTML = "%(wfo)s <a href='%(urlbase)s?year=%(year)s\
 &amp;wfo=%(wfo)s&amp;phenomena=%(phenomena)s&amp;eventid=%(eventid)s&amp;\
 significance=%(significance)s'>%(product)s</a>%(sts)sfor %(county)s \
@@ -316,19 +316,19 @@ till %(ets)s %(svs_special)s" % jmsg_dict
                     DBPOOL.runOperation( sql )
 
             jmsg_dict['action'] = "cancels"
-            fmt = "%(w)s: %(wfo)s  %(product)s for %(county)s \
+            fmt = "%(w)s: %(wfo)s  %(product)s for %(county)s %(svs_special)s \
 %(urlbase)s?year=%(year)s&amp;wfo=%(wfo)s&amp;phenomena=%(phenomena)s&amp;\
-eventid=%(eventid)s&amp;significance=%(significance)s %(svs_special)s"
+eventid=%(eventid)s&amp;significance=%(significance)s"
             htmlfmt = "%(wfo)s <a href='%(urlbase)s?year=%(year)s&amp;\
 wfo=%(wfo)s&amp;phenomena=%(phenomena)s&amp;eventid=%(eventid)s&amp;\
 significance=%(significance)s'>%(product)s</a> for %(county)s %(svs_special)s"
             if (vtec.action == "EXT" and vtec.beginTS != None):
                 jmsg_dict['sts'] = " valid at %s%s " % ( \
                 (vtec.beginTS - local_offset).strftime(efmt), text_product.z )
-                fmt = "%(w)s: %(wfo)s  %(product)s for %(county)s\
+                fmt = "%(w)s: %(wfo)s  %(product)s for %(county)s %(svs_special)s\
 %(sts)still %(ets)s %(urlbase)s?year=%(year)s&amp;wfo=%(wfo)s&amp;\
 phenomena=%(phenomena)s&amp;eventid=%(eventid)s&amp;\
-significance=%(significance)s %(svs_special)s"
+significance=%(significance)s"
                 htmlfmt = "%(wfo)s <a href='%(urlbase)s?\
 year=%(year)s&amp;wfo=%(wfo)s&amp;phenomena=%(phenomena)s&amp;\
 eventid=%(eventid)s&amp;significance=%(significance)s'>%(product)s</a>\

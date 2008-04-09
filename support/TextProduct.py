@@ -146,7 +146,7 @@ class TextProductSegment:
         sections = self.raw.split("\n\n")
         for s in sections:
             if len(TORNADO.findall(s)) > 0:
-                return " ..."+ s.replace("\n", " ")
+                return " ..."+ re.sub("\s+", " ", s.replace("\n", " "))
         return ""
 
     def parse(self):
