@@ -147,7 +147,7 @@ def segment_processor(text_product, i):
             jmsg_dict['ets'] =  "%s%s" % \
                 ((vtec.endTS - local_offset).strftime(efmt), text_product.z)
 
-        if (vtec.phenomena in ['MA','TO','SV']):
+        if (vtec.phenomena in ['TO',] and vtec.significance == 'W'):
             jmsg_dict['svs_special'] = seg.svs_search()
 
         # We need to get the County Name

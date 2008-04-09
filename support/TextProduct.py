@@ -2,7 +2,8 @@
 import re, mx.DateTime, string
 from support import ugc, vtec, hvtec, reference
 
-TORNADO = re.compile(r"(STORM\W+CAPABLE\W+OF\W+PRODUCING|REPORTED|INDICATED?)\W+A\W+TORNADO")
+#TORNADO = re.compile(r"(STORM\W+CAPABLE\W+OF\W+PRODUCING|REPORTED|INDICATED?)\W+A\W+TORNADO")
+TORNADO = re.compile(r"^AT |^\* AT")
 
 class TextProduct:
 
