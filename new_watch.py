@@ -120,7 +120,7 @@ def real_process(raw):
 
     report = raw.replace("\015\015\012", "").replace("\n", "").replace("'", " ")
     # Set up Station Table!
-    st = stationTable.stationTable("./support/spcwatch.tbl")
+    st = stationTable.stationTable("/home/ldm/pyWWA/support/spcwatch.tbl")
 
     # Determine the Saw number
     saw = re.findall("SAW([0-9])", report)[0][0]
