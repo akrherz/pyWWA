@@ -137,7 +137,7 @@ def real_processor(buf):
             # We store a key for this event
             key = "%s;%s;%s" % (mtr.station_id, v, t)
             log.msg("PEAK GUST FOUND: %s %s %s %s" % (mtr.station_id, v, t, clean_metar))
-            if (v > 50 and not windAlerts.has_key(key)):
+            if (v >= 50 and not windAlerts.has_key(key)):
                 windAlerts[key] = 1
                 sendWindAlert(iemid, v, d, t, clean_metar)
 
