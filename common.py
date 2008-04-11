@@ -3,7 +3,8 @@
 from twisted.internet import reactor
 from twisted.words.xish import domish
 from twisted.python import log
-#from twisted.words.xish.xmlstream import STREAM_END_EVENT
+from twisted.words.xish.xmlstream import STREAM_END_EVENT
+from twisted.internet.task import LoopingCall
 
 import secret
 
@@ -24,6 +25,13 @@ class JabberClient:
         presence.addElement('status').addContent('Online')
         self.xmlstream.send(presence)
         self.authenticated = True
+
+        lc = LoopingCall(self.keepalive)
+        lc.start(60)
+        self.addObserver(STREAM_END_EVENT, lambda _: lc.stop())
+
+    def keepalive(self):
+        self.xmlstream.send(' ')
 
     def _disconnect(self, xs):
         log.msg("SETTING authenticated to false!")
@@ -51,4 +59,5 @@ class JabberClient:
     def rawDataInFn(self, data):
         print 'RECV', unicode(data,'utf-8','ignore').encode('ascii', 'replace')
     def rawDataOutFn(self, data):
+        if (data == ' '): return 
         print 'SEND', unicode(data,'utf-8','ignore').encode('ascii', 'replace')
