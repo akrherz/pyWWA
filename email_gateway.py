@@ -1,13 +1,11 @@
 # Route emails into iemchat, hmmmmm
 
+import secret
 import email, tempfile
 import mimetypes, mx.DateTime
 import sys, os, datetime, re, StringIO, traceback, smtplib
 from email.MIMEText import MIMEText
 
-srvlkp = {
-  'af5f5e': {'pil': 'HPAPSR',},
-}
 
 os.chdir("/home/ldm/pyWWA/")
 
@@ -19,7 +17,7 @@ def process_message( data ):
   # messages are keyed based on
   # akrherz+service@host
   service = msg['to'].split("@")[0].split("+")[1]
-  pil = srvlkp[service]['pil']
+  pil = secret.srvlkp[service]['pil']
 
   ts = mx.DateTime.gmt().strftime("%d%H%M")
   edesc = "109 \nZZZZ63 K%s %s\n%s\n\n" % (pil[3:], ts, pil)
