@@ -6,7 +6,7 @@ import sys, os, datetime, re, StringIO, traceback, smtplib
 from email.MIMEText import MIMEText
 
 srvlkp = {
-  'af5af5e': {'pil': 'HPAPSR',},
+  'af5f5e': {'pil': 'HPAPSR',},
 }
 
 os.chdir("/home/ldm/pyWWA/")
