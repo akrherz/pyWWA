@@ -117,8 +117,8 @@ def real_process(raw):
     tokens = re.findall("([A-Z][A-Z][A-Z])", tokens[0])
     for wfo in tokens:
         qu += 1
-        body = "%s: Storm Prediction Center issues Mesoscale Discussion http://www.spc.noaa.gov/products/md/md%s.html http://mesonet.agron.iastate.edu/p.php?pid=%s" % \
-         (wfo, num, product_id)
+        body = "%s: Storm Prediction Center issues Mesoscale Discussion http://www.spc.noaa.gov/products/md/md%s.html" % \
+         (wfo, num)
         htmlbody = "Storm Prediction Center issues <a href='http://www.spc.noaa.gov/products/md/md%s.html'>Mesoscale Discussion #%s</a> (<a href='http://mesonet.agron.iastate.edu/p.php?pid=%s'>View text</a>)" %(num,num,product_id)
         print body
         jabber.sendMessage(body, htmlbody)
