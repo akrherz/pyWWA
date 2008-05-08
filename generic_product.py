@@ -106,6 +106,7 @@ prodDefinitions = {
     'RVS': 'Hydrologic Statement (RVS)',
     'HPA': 'High Pollution Advisory (HPA)',
     'RTP': 'Regional Temperature and Precipitation (RTP)',
+    'FWF': 'Fire Weather Planning Forecast (FWF)',
 }
 
 ugc_dict = {}
@@ -158,7 +159,7 @@ def real_process(raw):
       values ('%s','%s')" % (sqlraw, product_id)
     DBPOOL.runOperation(sql)
 
-    if ( ["RTP", "HPA", "CWF", "SRF", "SFT", "PFM", "ZFP", "CAE", "AFD","FTM","AWU","HWO","NOW","HLS","PSH","NOW","PNS","RER","ADM"].__contains__(pil) ):
+    if ( ["FWF", "RTP", "HPA", "CWF", "SRF", "SFT", "PFM", "ZFP", "CAE", "AFD","FTM","AWU","HWO","NOW","HLS","PSH","NOW","PNS","RER","ADM"].__contains__(pil) ):
         mess = "%s: %s issues %s http://mesonet.agron.iastate.edu/p.php?pid=%s" % \
           (wfo, wfo, pil, product_id)
         prodtxt = "(%s)" % (pil,)
