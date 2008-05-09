@@ -54,6 +54,7 @@ lsr_events = {
  'HIGH SURF': 'P',
  'TROPICAL STORM': 'Q',
  'HEAVY RAIN': 'R',
+ 'RAIN': 'R',
  'SNOW': 'S',
  'SLEET': 's',
  'MODERATE SLEET': 's',
