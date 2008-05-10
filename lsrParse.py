@@ -43,7 +43,7 @@ log.startLogging(open('/mesonet/data/logs/%s/lsrParse.log' \
     % (os.getenv("USER"),), 'a'))
 log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
 
-
+class ProcessingException(Exception): pass
 
 # Cheap datastore for LSRs to avoid Dups!
 lsrdb = {}
@@ -60,7 +60,7 @@ def cleandb():
             del lsrdb[key]
 
     fin_size = len(lsrdb.keys())
-    log.msg("Called cleandb()  init_size: %s  final_size: %s" % (init_size, fin_size) )
+    log.msg("cleandb() init_size: %s final_size: %s" % (init_size, fin_size))
     # Non blocking hackery
     reactor.callInThread(pickledb)
 
@@ -75,62 +75,46 @@ class myProductIngestor(ldmbridge.LDMProductReceiver):
 
     def process_data(self, buf):
         try:
-            real_processor(buf)
+            raw = buf.replace("\015\015\012", "\n")
+            real_processor(raw)
+        except ProcessingException, msg:
+            send_iemchat_error(raw, msg)
         except:
             io = StringIO.StringIO()
             traceback.print_exc(file=io)
             log.msg( io.getvalue() )
-            msg = MIMEText("%s\n\n>RAW DATA\n\n%s"%(io.getvalue(),buf.replace("\015\015\012", "\n") ))
-            msg['subject'] = 'lsrParse.py Traceback'
+            msg = MIMEText("%s\n\n>RAW DATA\n\n%s"%(io.getvalue(),raw ))
+            msg['subject'] = 'Unhandled lsrParse.py Traceback'
             msg['From'] = "ldm@mesonet.agron.iastate.edu"
             msg['To'] = "akrherz@iastate.edu"
 
             smtp.sendmail("mailhub.iastate.edu", msg["From"], msg["To"], msg)
-            # Lets see if we can send an error, even
-            try:
-                send_iemchat_error(buf)
-            except:
-                bogus = 1
 
     def connectionLost(self,reason):
         log.msg("LDM Closed PIPE")
 
 
-def send_iemchat_error(raw):
-    raw = raw.replace("\015\015\012", "\n")
+def send_iemchat_error(raw, msgtxt):
     nws = TextProduct.TextProduct(raw)
 
-    msg = "%s: iembot processing error:\nProduct: %s" % \
+    msg = "%s: iembot processing error:\nProduct: %s\nError: %s" % \
             (nws.get_iembot_source(), \
-             nws.get_product_id() )
+             nws.get_product_id(), msgtxt )
 
     htmlmsg = "<span style='color: #FF0000; font-weight: bold;'>\
-iembot processing error:</span><br />Product: %s<br />Daryl should be \
-here shortly to clarify the error, thank you." % \
-            (nws.get_product_id() )
+iembot processing error:</span><br/>Product: %s<br/>Error: %s" % \
+            (nws.get_product_id(), msgtxt )
     jabber.sendMessage(msg, htmlmsg)
+    jabber.sendMessage(msg, htmlmsg, 'iowamesonet')
 
 
 def real_processor(raw):
-    raw = raw.replace("\015\015\012", "\n")
     nws = TextProduct.TextProduct(raw)
     # Need to find wfo
     tokens = re.findall("LSR([A-Z][A-Z][A-Z,0-9])\n", raw)
     wfo = tokens[0]
 
-    # Old hack?
-    #if (len(re.findall("NY[0-9]",wfo)) > 0):  
-    #    return
-
     tsoff = mx.DateTime.RelativeDateTime(hours= reference.offsets[nws.z])
-
-    #isSummary = 0
-    #tokens = re.findall("SUMMARY", raw)
-    #if (len(tokens) > 0):
-    #    isSummary = 1
-
-    #if (nws.issued < (mx.DateTime.gmt() - mx.DateTime.RelativeDateTime(hours=6))):
-    #    isSummary = 1
 
     goodies = "\n".join( nws.sections[3:] )
     data = re.split("&&", goodies)
@@ -138,7 +122,6 @@ def real_processor(raw):
 
     _state = 0
     i = 0
-    sentMessages = 0
     while (i < len(lines)):
         # Line must start with a number?
         if (len(lines[i]) < 40 or (re.match("[0-9]", lines[i][0]) == None)):
@@ -177,19 +160,24 @@ def real_processor(raw):
             if (len(lines) == i):
                 break
             #print i, lines[i], len(lines[i])
-            if (len(lines[i]) == 0 or lines[i][0] == " " or lines[i][0] == "\n"):
+            if (len(lines[i]) == 0 or [" ","\n"].__contains__(lines[i][0]) ):
                 remark += lines[i]
             else:
                 break
 
         remark = remark.lower().strip()
         remark = re.sub("[\s]{2,}", " ", remark)
-        remark = remark.replace("&", "&amp;").replace(">", "&gt;").replace("<","&lt;")
+        remark = remark.replace("&", "&amp;")
+        remark = remark.replace(">", "&gt;").replace("<","&lt;")
+
         gmt_ts = ts + tsoff
+        if not reference.lsr_events.has_key(type):
+            raise ProcessingException, "Unknown LSR typecode '%s'" % (type,)
         dbtype = reference.lsr_events[type]
         mag_long = ""
         if (type == "HAIL" and reference.hailsize.has_key(float(mag))):
-            mag_long = "of %s size (%s) " % (reference.hailsize[float(mag)], magf)
+            haildesc = reference.hailsize[float(mag)]
+            mag_long = "of %s size (%s) " % (haildesc, magf)
         elif (mag != 0):
             mag_long = "of %s " % (magf,)
         time_fmt = "%I:%M %p"
@@ -203,18 +191,30 @@ def real_processor(raw):
             continue
         lsrdb[ unique_key ] = mx.DateTime.gmt()
 
-        jm = "%s:%s [%s Co, %s] %s reports %s %sat %s %s -- %s http://mesonet.agron.iastate.edu/cow/maplsr.phtml?lat0=%s&amp;lon0=-%s&amp;ts=%s" % (wfo, city, cnty, st, source, type, mag_long, ts.strftime(time_fmt), nws.z, remark, lat, lon, gmt_ts.strftime("%Y-%m-%d%%20%H:%M"))
-        jmhtml = "%s [%s Co, %s] %s <a href='http://mesonet.agron.iastate.edu/cow/maplsr.phtml?lat0=%s&amp;lon0=-%s&amp;ts=%s'>reports %s %s</a>at %s %s -- %s" % ( city, cnty, st, source, lat, lon, gmt_ts.strftime("%Y-%m-%d%%20%H:%M"), type, mag_long, ts.strftime(time_fmt), nws.z, remark)
-        log.msg(jm +"\n")
-        sql = "INSERT into lsrs_%s (valid, type, magnitude, city, county, state, \
-         source, remark, geom, wfo, typetext) values ('%s+00', '%s', %s, '%s', '%s', '%s', \
-         '%s', '%s', 'SRID=4326;POINT(-%s %s)', '%s', '%s')" % \
-          (gmt_ts.year, gmt_ts.strftime("%Y-%m-%d %H:%M"), dbtype, mag, city.replace("'","\\'"), re.sub("'", "\\'",cnty), st, source, \
-           re.sub("'", "\\'", remark), lon, lat, wfo, type)
+        uri = url_builder(lat,lon,gmt_ts.strftime("%Y-%m-%d%%20%H:%M"))
+        jm = "%s:%s [%s Co, %s] %s reports %s %sat %s %s -- %s %s" % \
+             (wfo, city, cnty, st, source, type, mag_long, \
+              ts.strftime(time_fmt), nws.z, remark, uri)
+        jmhtml = \
+          "%s [%s Co, %s] %s <a href='%s'>reports %s %s</a>at %s %s -- %s" %\
+          (city, cnty, st, source, uri, type, mag_long, \
+           ts.strftime(time_fmt), nws.z, remark)
         jabber.sendMessage(jm,jmhtml)
-        sentMessages += 1
+
+        sql = "INSERT into lsrs_%s (valid, type, magnitude, city, \
+               county, state, source, remark, geom, wfo, typetext) \
+               values ('%s+00', '%s', %s, '%s', '%s', '%s', \
+               '%s', '%s', 'SRID=4326;POINT(-%s %s)', '%s', '%s')" % \
+          (gmt_ts.year, gmt_ts.strftime("%Y-%m-%d %H:%M"), dbtype, mag, \
+           city.replace("'","\\'"), re.sub("'", "\\'",cnty), st, source, \
+           re.sub("'", "\\'", remark), lon, lat, wfo, type)
+
         DBPOOL.runOperation(sql)
 
+def url_builder(lat,lon,ts):
+    uri = "http://mesonet.agron.iastate.edu/cow/maplsr.phtml"
+    uri += "?lat0=%s&amp;lon0=-%s&amp;ts=%s" % (lat,lon,ts)
+    return uri
 
 myJid = jid.JID('iembot_ingest@%s/lsrParse_%s' \
     % (secret.chatserver, mx.DateTime.gmt().strftime("%Y%m%d%H%M%S") ) )
