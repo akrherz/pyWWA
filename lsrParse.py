@@ -19,12 +19,12 @@
 # Standard python imports
 import re, traceback, StringIO, logging, pickle, os
 from email.MIMEText import MIMEText
-import smtplib
 
 # Third party python stuff
 import mx.DateTime
 from twisted.python import log
 from twisted.enterprise import adbapi
+from twisted.mail import smtp
 from twisted.words.protocols.jabber import client, jid, xmlstream
 from twisted.internet import reactor
 
@@ -61,11 +61,14 @@ def cleandb():
 
     fin_size = len(lsrdb.keys())
     log.msg("Called cleandb()  init_size: %s  final_size: %s" % (init_size, fin_size) )
-    pickle.dump(lsrdb, open('lsrdb.p','w'))
+    # Non blocking hackery
+    reactor.callInThread(pickledb)
 
     # Call Again in 30 minutes
     reactor.callLater(60*30, cleandb) 
 
+def pickledb():
+    pickle.dump(lsrdb, open('lsrdb.p','w'))
 
 # LDM Ingestor
 class myProductIngestor(ldmbridge.LDMProductReceiver):
@@ -82,13 +85,30 @@ class myProductIngestor(ldmbridge.LDMProductReceiver):
             msg['From'] = "ldm@mesonet.agron.iastate.edu"
             msg['To'] = "akrherz@iastate.edu"
 
-            s = smtplib.SMTP()
-            s.connect()
-            s.sendmail(msg["From"], msg["To"], msg.as_string())
-            s.close()
+            smtp.sendmail("mailhub.iastate.edu", msg["From"], msg["To"], msg)
+            # Lets see if we can send an error, even
+            try:
+                send_iemchat_error(buf)
+            except:
+                bogus = 1
 
     def connectionLost(self,reason):
         log.msg("LDM Closed PIPE")
+
+
+def send_iemchat_error(raw):
+    raw = raw.replace("\015\015\012", "\n")
+    nws = TextProduct.TextProduct(raw)
+
+    msg = "%s: iembot processing error:\nProduct: %s" % \
+            (nws.get_iembot_source(), \
+             nws.get_product_id() )
+
+    htmlmsg = "<span style='color: #FF0000; font-weight: bold;'>\
+iembot processing error:</span><br />Product: %s<br />Daryl should be \
+here shortly to clarify the error, thank you." % \
+            (nws.get_product_id() )
+    jabber.sendMessage(msg, htmlmsg)
 
 
 def real_processor(raw):
