@@ -37,13 +37,13 @@ class JabberClient:
         log.msg("SETTING authenticated to false!")
         self.authenticated = False
 
-    def sendMessage(self, body, html=None):
+    def sendMessage(self, body, html=None, to_user='iembot'):
         if (not self.authenticated):
             log.msg("No Connection, Lets wait and try later...")
-            reactor.callLater(3, self.sendMessage, body, html)
+            reactor.callLater(3, self.sendMessage, body, html, to_user)
             return
         message = domish.Element(('jabber:client','message'))
-        message['to'] = 'iembot@%s' % (secret.chatserver,)
+        message['to'] = '%s@%s' % (to_user, secret.chatserver)
         message['type'] = 'chat'
 
         # message.addElement('subject',None,subject)
