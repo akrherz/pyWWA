@@ -160,11 +160,12 @@ def real_process(raw):
     DBPOOL.runOperation(sql)
 
     if ( ["FWF", "RTP", "HPA", "CWF", "SRF", "SFT", "PFM", "ZFP", "CAE", "AFD","FTM","AWU","HWO","NOW","HLS","PSH","NOW","PNS","RER","ADM"].__contains__(pil) ):
-        mess = "%s: %s issues %s http://mesonet.agron.iastate.edu/p.php?pid=%s" % \
-          (wfo, wfo, pil, product_id)
         prodtxt = "(%s)" % (pil,)
         if (prodDefinitions.has_key(pil)):
             prodtxt = prodDefinitions[pil]
+
+        mess = "%s: %s issues %s http://mesonet.agron.iastate.edu/p.php?pid=%s" % \
+          (wfo, wfo, prodtxt, product_id)
         htmlmess = "%s issues <a href=\"http://mesonet.agron.iastate.edu/p.php?pid=%s\">%s</a> " % (wfo, product_id, prodtxt)
         if (not ["HWO","NOW","ZFP"].__contains__(pil) and len(prod.segments) > 0 and len(prod.segments[0].headlines) > 0 and len(prod.segments[0].headlines[0]) < 200 ):
           htmlmess += "... %s ..." % (prod.segments[0].headlines[0],)
@@ -187,11 +188,11 @@ def real_process(raw):
         if (seg.ugcExpire is not None):
             expire = "till "+ (seg.ugcExpire - mx.DateTime.RelativeDateTime(hours= reference.offsets[prod.z] )).strftime("%-I:%M %p ")+ prod.z
 
-        mess = "%s: %s issues %s for %s %s http://mesonet.agron.iastate.edu/p.php?pid=%s" % \
-          (wfo, wfo, pil, counties, expire, product_id)
         prodtxt = "(%s)" % (pil,)
         if (prodDefinitions.has_key(pil)):
             prodtxt = prodDefinitions[pil]
+        mess = "%s: %s issues %s for %s %s http://mesonet.agron.iastate.edu/p.php?pid=%s" % \
+          (wfo, wfo, prodtxt, counties, expire, product_id)
         htmlmess = "%s issues <a href=\"http://mesonet.agron.iastate.edu/p.php?pid=%s\">%s</a> for %s %s" % (wfo, product_id, prodtxt, counties, expire)
 
         jabber.sendMessage(mess, htmlmess)
