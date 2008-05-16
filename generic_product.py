@@ -107,6 +107,7 @@ prodDefinitions = {
     'HPA': 'High Pollution Advisory (HPA)',
     'RTP': 'Regional Temperature and Precipitation (RTP)',
     'FWF': 'Fire Weather Planning Forecast (FWF)',
+    'DGT': 'Drought Information (DGT)',
 }
 
 ugc_dict = {}
@@ -159,7 +160,7 @@ def real_process(raw):
       values ('%s','%s')" % (sqlraw, product_id)
     DBPOOL.runOperation(sql)
 
-    if ( ["FWF", "RTP", "HPA", "CWF", "SRF", "SFT", "PFM", "ZFP", "CAE", "AFD","FTM","AWU","HWO","NOW","HLS","PSH","NOW","PNS","RER","ADM"].__contains__(pil) ):
+    if ( ["DGT", "FWF", "RTP", "HPA", "CWF", "SRF", "SFT", "PFM", "ZFP", "CAE", "AFD","FTM","AWU","HWO","NOW","HLS","PSH","NOW","PNS","RER","ADM"].__contains__(pil) ):
         prodtxt = "(%s)" % (pil,)
         if (prodDefinitions.has_key(pil)):
             prodtxt = prodDefinitions[pil]
