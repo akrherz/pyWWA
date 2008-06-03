@@ -1,18 +1,35 @@
-# Parse Watch Data!  Oye!
+# Copyright (c) 2005 Iowa State University
+# http://mesonet.agron.iastate.edu/ -- mailto:akrherz@iastate.edu
+#
+# This program is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free Software
+# Foundation; either version 2 of the License, or (at your option) any later
+# version.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along with
+# this program; if not, write to the Free Software Foundation, Inc.,
+# 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+""" SPC Watch Ingestor """
+
+__revision__ = '$Id: new_watch.py 3160 2008-04-09 23:31:06Z akrherz $'
+
 
 from twisted.python import log
 import os
-log.startLogging(open('/mesonet/data/logs/%s/new_watch.log' % (os.getenv("USER"),), 'a'))
+log.startLogging(open('/mesonet/data/logs/%s/new_watch.log' % \
+                 (os.getenv("USER"),), 'a') )
 log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
 
 
-import sys, logging
+import sys
 import re
-import mapscript
 import math
 import smtplib
 import mx.DateTime
-import sys
 import StringIO
 import traceback
 from email.MIMEText import MIMEText
@@ -24,8 +41,8 @@ KM_SM = 1.609347
 
 # Database Connections
 import pg, secret
-mydb = pg.connect(secret.dbname, secret.dbhost, user=secret.dbuser)
-mydb.query("SET TIME ZONE 'GMT'")
+POSTGIS = pg.connect(secret.dbname, secret.dbhost, user=secret.dbuser)
+POSTGIS.query("SET TIME ZONE 'GMT'")
 
 errors = StringIO.StringIO()
 
@@ -33,7 +50,7 @@ from twisted.words.protocols.jabber import client, jid
 from twisted.words.xish import domish
 from twisted.internet import reactor
 
-
+IEM_URL = "http://mesonet.agron.iastate.edu/GIS/apps/rview/watch.phtml"
 errors = StringIO.StringIO()
 
 qu = 0
@@ -45,7 +62,7 @@ class JabberClient:
         self.myJid = myJid
 
 
-    def authd(self,xmlstream):
+    def authd(self, xmlstream):
         print "authenticated"
         self.xmlstream = xmlstream
         presence = domish.Element(('jabber:client','presence'))
@@ -69,7 +86,7 @@ class JabberClient:
         message = domish.Element(('jabber:client','message'))
         message['to'] = "iembot@%s" % (secret.chatserver,)
         message['type'] = 'chat'
-        message.addElement('body',None,body)
+        message.addElement('body', None, body)
 
         html = domish.Element(('http://jabber.org/protocol/xhtml-im','html'))
         body = domish.Element(('http://www.w3.org/1999/xhtml','body'))
@@ -84,6 +101,7 @@ class JabberClient:
 
 
 def cancel_watch(report, ww_num):
+    """ Cancel a watch please """
     tokens = re.findall("KWNS ([0-3][0-9])([0-9][0-9])([0-9][0-9])", report)
     day1 = int(tokens[0][0])
     hour1 = int(tokens[0][1])
@@ -96,7 +114,7 @@ def cancel_watch(report, ww_num):
               % (tbl, ts.strftime("%Y-%m-%d %H:%M"), 
                ww_num, ts.year)
         log.msg(sql)
-        mydb.query(sql)
+        POSTGIS.query(sql)
 
 def process(raw):
     try:
@@ -126,7 +144,8 @@ def real_process(raw):
     saw = re.findall("SAW([0-9])", report)[0][0]
 
     # Determine the Watch type
-    tokens = re.findall("WW ([0-9]*) (TEST)? ?(SEVERE TSTM|TORNADO|SEVERE THUNDERSTORM)", report)
+    myre = "WW ([0-9]*) (TEST)? ?(SEVERE TSTM|TORNADO|SEVERE THUNDERSTORM)"
+    tokens = re.findall(myre, report)
     if (tokens[0][1] == "TEST"):
         print 'TEST watch found'
         return
@@ -247,16 +266,22 @@ def real_process(raw):
 
     # Delete from currents
     sql = "DELETE from watches_current WHERE sel = 'SEL%s'" % (saw,)
-    mydb.query(sql)
+    POSTGIS.query(sql)
+
+    # Delete from archive, since maybe it is a correction....
+    sql = "DELETE from watches WHERE num = %s and \
+           extract(year from issued) = %s" % (ww_num, sTS.year)
+    POSTGIS.query(sql)
 
     # Insert into our watches table
     for tbl in ('watches', 'watches_current'):
         sql = "INSERT into %s(sel, issued, expired, type, report, geom, num) \
-   VALUES('SEL%s','%s','%s','%s','%s','SRID=4326;MULTIPOLYGON(((%s)))', %s)" % \
-   (tbl, saw, \
-   sTS.strftime("%Y-%m-%d %H:%M"), eTS.strftime("%Y-%m-%d %H:%M"), types[ww_type], \
-   raw.replace("'","\\'"), wkt, ww_num)
-        mydb.query(sql)
+               VALUES('SEL%s','%s','%s','%s','%s',\
+               'SRID=4326;MULTIPOLYGON(((%s)))', %s)" % \
+               (tbl, saw, sTS.strftime("%Y-%m-%d %H:%M"), \
+                eTS.strftime("%Y-%m-%d %H:%M"), types[ww_type], \
+                raw.replace("'","\\'"), wkt, ww_num)
+        POSTGIS.query(sql)
 
     # Figure out WFOs affected...
     jabberTxt = "SPC issues %s watch till %sZ http://www.spc.noaa.gov/products/watch/ww%04i.html" % (ww_type, eTS.strftime("%H:%M"), int(ww_num) )
@@ -265,12 +290,12 @@ def real_process(raw):
         jabberTxt += ", new watch replaces "+ jabberReplacesTxt[:-1]
         jabberTxtHTML += ", new watch replaces "+ jabberReplacesTxt[:-1]
 
-    jabberTxt += " (http://mesonet.agron.iastate.edu/GIS/apps/rview/watch.phtml?year=%s&amp;num=%s) " % (sTS.year, ww_num)
-    jabberTxtHTML += " (<a href=\"http://mesonet.agron.iastate.edu/GIS/apps/rview/watch.phtml?year=%s&amp;num=%s\">Watch Quickview</a>) " % (sTS.year, ww_num)
+    jabberTxt += " ( %s?year=%s&amp;num=%s ) " % (IEM_URL, sTS.year, ww_num)
+    jabberTxtHTML += " (<a href=\"%s?year=%s&amp;num=%s\">Watch Quickview</a>) " % (IEM_URL, sTS.year, ww_num)
 
     sql = "SELECT distinct wfo from nws_ugc WHERE \
          contains('SRID=4326;MULTIPOLYGON(((%s)))', geom)" % (wkt,)
-    rs = mydb.query(sql).dictresult()
+    rs = POSTGIS.query(sql).dictresult()
     global qu
     for i in range(len(rs)):
         qu += 1
@@ -297,7 +322,7 @@ factory.addBootstrap('//event/stream/authd',jabber.authd)
 factory.addBootstrap("//event/client/basicauth/invaliduser", jabber.debug)
 factory.addBootstrap("//event/client/basicauth/authfailed", jabber.debug)
 factory.addBootstrap("//event/stream/error", jabber.debug)
-reactor.connectTCP(secret.chatserver,5222,factory)
+reactor.connectTCP(secret.chatserver, 5222, factory)
 reactor.callLater(0, process, raw)
 reactor.callLater(10, killer)
 reactor.run()
