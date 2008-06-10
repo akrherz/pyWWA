@@ -189,10 +189,12 @@ def segment_processor(text_product, i):
                 flood_text = seg.bullets[3]
                 forecast_text = seg.bullets[4]
                 sql = "INSERT into riverpro(nwsli, stage_text, \
-                  flood_text, forecast_text) VALUES ('%s','%s','%s','%s') \
+                  flood_text, forecast_text, severity) VALUES \
+                  ('%s','%s','%s','%s','%s') \
                   " % (nwsli, stage_text.replace("'","\\'"), \
                        flood_text.replace("'","\\'"), \
-                       forecast_text.replace("'","\\'") )
+                       forecast_text.replace("'","\\'"),\
+                       hvtec[0].severity )
                 DBPOOL.runOperation( sql )
           
 
