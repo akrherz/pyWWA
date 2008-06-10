@@ -136,10 +136,14 @@ class TextProductSegment:
         self.ugc = []
         self.vtec = []
         self.hvtec = []
+        self.bullets = []
         self.giswkt = None
         self.ugcExpire = None
 
         self.parse()
+
+    def bullet_splitter(self):
+        self.bullets = re.findall("\* ([^\*]*)", self.raw.replace("\n"," ") )
 
     def get_hvtec_nwsli(self):
         if (len(self.hvtec) == 0):

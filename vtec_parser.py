@@ -183,6 +183,18 @@ def segment_processor(text_product, i):
             if (nwsli_dict.has_key(nwsli)):
                 rname = "the "+ nwsli_dict[nwsli]
             jmsg_dict['county'] = rname
+            seg.bullet_splitter()
+            if (len(seg.bullets) > 4):
+                stage_text = seg.bullets[1]
+                flood_text = seg.bullets[3]
+                forecast_text = seg.bullets[4]
+                sql = "INSERT into riverpro(nwsli, stage_text, \
+                  flood_text, forecast_text) VALUES ('%s','%s','%s','%s') \
+                  " % (nwsli, stage_text.replace("'","\\'"), \
+                       flood_text.replace("'","\\'"), \
+                       forecast_text.replace("'","\\'") )
+                DBPOOL.runOperation( sql )
+          
 
         # Figure out which tables we need to update, have to do 2 :)
         warning_tables = ["warnings", "warnings_%s" % 
