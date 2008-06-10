@@ -213,11 +213,11 @@ def segment_processor(text_product, i):
                 fcster = re.sub("'", " ", text_product.fcster)
                 sql = "INSERT into %s (issue, expire, report, \
 significance, geom, phenomena, gtype, wfo, eventid, status, updated, \
-fcster) VALUES ('%s+00','%s+00','%s','%s','%s','%s','%s', '%s',%s,'%s', \
-'%s+00', '%s')" \
+fcster, hvtec_nwsli) VALUES ('%s+00','%s+00','%s','%s','%s','%s','%s', \
+'%s',%s,'%s', '%s+00', '%s', '%s')" \
    % (tbl, bts, vtec.endTS , text_product.sqlraw(), vtec.significance, \
       seg.giswkt, vtec.phenomena, 'P', vtec.office, vtec.ETN, vtec.action, \
-      text_product.issueTime, fcster )
+      text_product.issueTime, fcster, seg.get_hvtec_nwsli() )
                 DBPOOL.runOperation( sql )
 
             # Insert Counties
@@ -227,13 +227,14 @@ fcster) VALUES ('%s+00','%s+00','%s','%s','%s','%s','%s', '%s',%s,'%s', \
                     fcster = re.sub("'", " ", text_product.fcster)
   
                     sql = "INSERT into %s (issue,expire,report, geom, \
-phenomena, gtype, wfo, eventid, status,updated, fcster, ugc, significance) \
-VALUES('%s+00', '%s+00', '%s',\
+phenomena, gtype, wfo, eventid, status,updated, fcster, ugc, significance,\
+hvtec_nwsli) VALUES('%s+00', '%s+00', '%s',\
 (select geom from nws_ugc WHERE ugc = '%s' LIMIT 1), \
-'%s', 'C', '%s',%s,'%s','%s+00', '%s', '%s','%s')" % \
+'%s', 'C', '%s',%s,'%s','%s+00', '%s', '%s','%s', '%s')" % \
 (tbl, bts, vtec.endTS, text_product.sqlraw(), cnty, \
 vtec.phenomena, vtec.office, vtec.ETN, \
-vtec.action, text_product.issueTime, fcster, cnty, vtec.significance)
+vtec.action, text_product.issueTime, fcster, cnty, vtec.significance, \
+seg.get_hvtec_nwsli() )
                     DBPOOL.runOperation( sql )
             for w in affectedWFOS.keys():
                 jmsg_dict['w'] = w

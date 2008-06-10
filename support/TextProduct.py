@@ -141,6 +141,11 @@ class TextProductSegment:
 
         self.parse()
 
+    def get_hvtec_nwsli(self):
+        if (len(self.hvtec) == 0):
+            return ""
+        return self.hvtec[0].nwsli
+
     def svs_search(self):
         """ Special search the product for special text """
         sections = self.raw.split("\n\n")
