@@ -61,9 +61,21 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
         """ Process the product """
         try:
             text_product = TextProduct.TextProduct( buf )
+            skip_con = False
+            if (text_product.afos[:3] == "FLS" and 
+                len(text_product.segments) > 4):
+                skip_con = True
+
             log.msg( str(text_product) )
             for j in range(len(text_product.segments)):
-                segment_processor(text_product, j)
+                segment_processor(text_product, j, skip_con)
+
+            if skip_con:
+                wfo = text_product.get_iembot_source()
+                jabber_txt = "%s: %s has sent an updated FLS product (continued products were not reported here).  Consult this website for more details. http://mesonet.agron.iastate.edu/river/wfo.phtml?wfo=%s" % (wfo, wfo, wfo)
+                jabber_html = "%s has sent an updated FLS product (continued products were not reported here).  Consult <a href=\"http://mesonet.agron.iastate.edu/river/wfo.phtml?wfo=%s\">this website</a> for more details." % (wfo, wfo)
+                jabber.sendMessage(jabber_txt, jabber_html)
+               
 
         except:
             sio = StringIO.StringIO()
@@ -94,7 +106,7 @@ iembot processing error:</span><br />Product: %s<br />Error: %s" % \
             (tp.get_product_id(), errorText )
     jabber.sendMessage(msg, htmlmsg)
 
-def segment_processor(text_product, i):
+def segment_processor(text_product, i, skip_con):
     """ The real data processor here """
     gmtnow = mx.DateTime.gmt()
     local_offset = mx.DateTime.RelativeDateTime(hours= reference.offsets[text_product.z])
@@ -297,7 +309,8 @@ significance=%(significance)s" % jmsg_dict
 &amp;wfo=%(wfo)s&amp;phenomena=%(phenomena)s&amp;eventid=%(eventid)s&amp;\
 significance=%(significance)s'>%(product)s</a>%(sts)sfor %(county)s \
 till %(ets)s %(svs_special)s" % jmsg_dict
-            jabber.sendMessage(jabberTxt, jabberHTML)
+            if not skip_con:
+                jabber.sendMessage(jabberTxt, jabberHTML)
 #--
 
         elif (vtec.action in ["CAN", "EXP", "UPG", "EXT"] ):
