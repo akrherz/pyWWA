@@ -186,8 +186,12 @@ def segment_processor(text_product, i):
             seg.bullet_splitter()
             if (len(seg.bullets) > 4):
                 stage_text = seg.bullets[1]
-                flood_text = seg.bullets[3]
-                forecast_text = seg.bullets[4]
+                flood_text = ""
+                forecast_text = ""
+                for qqq in range(len(seg.bullets)):
+                    if (seg.bullets[qqq].strip().find("FLOOD STAGE") == 0):
+                        flood_text = seg.bullets[qqq]
+                        forecast_text = seg.bullets[qqq+1]
                 sql = "INSERT into riverpro(nwsli, stage_text, \
                   flood_text, forecast_text, severity) VALUES \
                   ('%s','%s','%s','%s','%s') \
