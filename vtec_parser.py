@@ -197,13 +197,18 @@ def segment_processor(text_product, i, skip_con):
             jmsg_dict['county'] = rname
             seg.bullet_splitter()
             if (len(seg.bullets) > 3):
-                stage_text = seg.bullets[1]
+                stage_text = ""
                 flood_text = ""
                 forecast_text = ""
                 for qqq in range(len(seg.bullets)):
                     if (seg.bullets[qqq].strip().find("FLOOD STAGE") == 0):
                         flood_text = seg.bullets[qqq]
-                        forecast_text = seg.bullets[qqq+1]
+                    if (seg.bullets[qqq].strip().find("FORECAST") == 0):
+                        forecast_text = seg.bullets[qqq]
+                    if (seg.bullets[qqq].strip().find("AT ") == 0):
+                        stage_text = seg.bullets[qqq]
+
+
                 sql = "INSERT into riverpro(nwsli, stage_text, \
                   flood_text, forecast_text, severity) VALUES \
                   ('%s','%s','%s','%s','%s') \
