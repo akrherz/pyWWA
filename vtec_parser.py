@@ -196,7 +196,7 @@ def segment_processor(text_product, i, skip_con):
                 rname = "the "+ nwsli_dict[nwsli]
             jmsg_dict['county'] = rname
             seg.bullet_splitter()
-            if (len(seg.bullets) > 4):
+            if (len(seg.bullets) > 3):
                 stage_text = seg.bullets[1]
                 flood_text = ""
                 forecast_text = ""
