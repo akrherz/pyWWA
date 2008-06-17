@@ -22,7 +22,6 @@ log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
 
 import sys, logging
 import re
-import mapscript
 import math
 import smtplib
 import mx.DateTime
