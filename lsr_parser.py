@@ -95,7 +95,7 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
             log.msg( sio.getvalue() )
             msg = MIMEText("%s\n\n>RAW DATA\n\n%s" % (sio.getvalue(), raw) )
             msg['subject'] = 'Unhandled lsrParse.py Traceback'
-            msg['From'] = "ldm@mesonet.agron.iastate.edu"
+            msg['From'] = secret.parser_user
             msg['To'] = "akrherz@iastate.edu"
 
             smtp.sendmail("mailhub.iastate.edu", msg["From"], msg["To"], msg)
@@ -189,7 +189,7 @@ class LSR:
 
     def url_builder(self):
         """ URL builder """
-        uri = "http://mesonet.agron.iastate.edu/cow/maplsr.phtml"
+        uri = secret.MAP_LSR
         uri += "?lat0=%s&amp;lon0=-%s&amp;ts=%s" % \
                (self.lat,self.lon,self.gts.strftime("%Y-%m-%d%%20%H:%M"))
         return uri
