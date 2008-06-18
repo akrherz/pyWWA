@@ -50,7 +50,7 @@ class myProductIngestor(ldmbridge.LDMProductReceiver):
             log.msg( io.getvalue() )
             msg = MIMEText("%s\n\n>RAW DATA\n\n%s"%(io.getvalue(),buf.replace("\015\015\012", "\n") ))
             msg['subject'] = 'generic_product.py Traceback'
-            msg['From'] = "ldm@mesonet.agron.iastate.edu"
+            msg['From'] = secret.parser_user
             msg['To'] = "akrherz@iastate.edu"
 
             s = smtplib.SMTP()
@@ -165,9 +165,9 @@ def real_process(raw):
         if (prodDefinitions.has_key(pil)):
             prodtxt = prodDefinitions[pil]
 
-        mess = "%s: %s issues %s http://mesonet.agron.iastate.edu/p.php?pid=%s" % \
-          (wfo, wfo, prodtxt, product_id)
-        htmlmess = "%s issues <a href=\"http://mesonet.agron.iastate.edu/p.php?pid=%s\">%s</a> " % (wfo, product_id, prodtxt)
+        mess = "%s: %s issues %s %s?pid=%s" % \
+          (wfo, wfo, prodtxt, secret.PROD_URL, product_id)
+        htmlmess = "%s issues <a href=\"%s?pid=%s\">%s</a> " % (wfo, secret.PROD_URL, product_id, prodtxt)
         if (not ["HWO","NOW","ZFP"].__contains__(pil) and len(prod.segments) > 0 and len(prod.segments[0].headlines) > 0 and len(prod.segments[0].headlines[0]) < 200 ):
           htmlmess += "... %s ..." % (prod.segments[0].headlines[0],)
 
@@ -192,9 +192,9 @@ def real_process(raw):
         prodtxt = "(%s)" % (pil,)
         if (prodDefinitions.has_key(pil)):
             prodtxt = prodDefinitions[pil]
-        mess = "%s: %s issues %s for %s %s http://mesonet.agron.iastate.edu/p.php?pid=%s" % \
-          (wfo, wfo, prodtxt, counties, expire, product_id)
-        htmlmess = "%s issues <a href=\"http://mesonet.agron.iastate.edu/p.php?pid=%s\">%s</a> for %s %s" % (wfo, product_id, prodtxt, counties, expire)
+        mess = "%s: %s issues %s for %s %s %s?pid=%s" % \
+          (wfo, wfo, prodtxt, counties, expire, secret.PROD_URL, product_id)
+        htmlmess = "%s issues <a href=\"%s?pid=%s\">%s</a> for %s %s" % (wfo, secret.PROD_URL, product_id, prodtxt, counties, expire)
 
         jabber.sendMessage(mess, htmlmess)
 
@@ -204,12 +204,12 @@ def real_process(raw):
 
     if (pil == "TCM" or pil == "TCP" or pil == "TCD"):
         tokens = re.findall("(.*) (DISCUSSION|INTERMEDIATE ADVISORY|FORECAST/ADVISORY|ADVISORY|MEMEME) NUMBER\s+([0-9]+)", raw.replace("PUBLIC ADVISORY", "ZZZ MEMEME") )
-        mess = "%s: %s issues %s http://mesonet.agron.iastate.edu/p.php?pid=%s" % \
-          (wfo, wfo, pil, product_id)
+        mess = "%s: %s issues %s %s?pid=%s" % \
+          (wfo, wfo, pil, secret.PROD_URL, product_id)
         prodtxt = "(%s)" % (pil,)
         if (prodDefinitions.has_key(pil)):
             prodtxt = prodDefinitions[pil]
-        htmlmess = "%s issues <a href=\"http://mesonet.agron.iastate.edu/p.php?pid=%s\">%s</a> " % (wfo, product_id, prodtxt)
+        htmlmess = "%s issues <a href=\"%s?pid=%s\">%s</a> " % (wfo, secret.PROD_URL, product_id, prodtxt)
 
         jabber.sendMessage(mess, htmlmess)
 
@@ -217,9 +217,9 @@ def real_process(raw):
     for key in routes.keys():
         if (re.match(key, prod.afos)):
             for wfo2 in routes[key]:
-                mess = "%s: %s http://mesonet.agron.iastate.edu/p.php?pid=%s" % \
-                 (wfo2, prod.afos, product_id)
-                htmlmess = "<a href=\"http://mesonet.agron.iastate.edu/p.php?pid=%s\">%s</a>" % (product_id, prodtxt)
+                mess = "%s: %s %s?pid=%s" % \
+                 (wfo2, prod.afos, secret.PROD_URL, product_id)
+                htmlmess = "<a href=\"%s?pid=%s\">%s</a>" % (secret.PROD_URL, product_id, prodtxt)
                 if (len(tokens) > 0):
                     tt = tokens[0][0]
                     what = tokens[0][1]
@@ -228,8 +228,8 @@ def real_process(raw):
                         tokens2 = re.findall("(PUBLIC ADVISORY) NUMBER\s+([0-9]+) FOR (.*)", raw)
                         what = tokens2[0][0]
                         tt = tokens2[0][2]
-                    mess = "%s: National Hurricane Center issues %s #%s for %s http://mesonet.agron.iastate.edu/p.php?pid=%s" % (wfo2, what, tnum, tt, product_id)
-                    htmlmess = "National Hurricane Center issues <a href=\"http://mesonet.agron.iastate.edu/p.php?pid=%s\">%s #%s</a> for %s" % ( product_id, what, tnum, tt)
+                    mess = "%s: National Hurricane Center issues %s #%s for %s %s?pid=%s" % (wfo2, what, tnum, tt, secret.PROD_URL, product_id)
+                    htmlmess = "National Hurricane Center issues <a href=\"%s?pid=%s\">%s #%s</a> for %s" % ( secret.PROD_URL, product_id, what, tnum, tt)
                 #print htmlmess, mess
                 jabber.sendMessage(mess, htmlmess)
 
