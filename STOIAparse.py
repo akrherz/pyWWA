@@ -34,7 +34,7 @@ def emailErrors(raw):
 
   msg = MIMEText("%s\n\n>RAW DATA\n\n%s" % (errstr, raw) )
   msg['subject'] = 'STOIAparse.py Traceback'
-  msg['From'] = "ldm@mesonet.agron.iastate.edu"
+  msg['From'] = secret.parser_user
   msg['To'] = "akrherz@iastate.edu"
 
   s = smtplib.SMTP()
