@@ -47,7 +47,7 @@ if (__name__ == "__main__"):
     traceback.print_exc(file=io)
     msg = MIMEText("%s\n" % (io.getvalue(),) )
     msg['subject'] = 'iembot gateway traceback'
-    msg['From'] = "ldm@mesonet.agron.iastate.edu"
+    msg['From'] = secret.parser_user
     msg['To'] = "akrherz@iastate.edu"
 
     s = smtplib.SMTP()

@@ -90,7 +90,7 @@ class myProductIngestor(ldmbridge.LDMProductReceiver):
       msg = MIMEText("%s\n\n>RAW DATA\n\n%s" % (errstr,
            buf.replace("\015\015\012", "\n") ) )
       msg['subject'] = 'shefParse.py Traceback'
-      msg['From'] = "ldm@mesonet.agron.iastate.edu"
+      msg['From'] = secret.parser_user
       msg['To'] = "akrherz@iastate.edu"
       global EMAILS
       if (EMAILS > 0):
