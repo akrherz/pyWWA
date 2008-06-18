@@ -92,7 +92,7 @@ def process(raw):
         traceback.print_exc(file=io)
         msg = MIMEText("%s\n\n>RAW DATA\n\n%s"%(io.getvalue(),raw))
         msg['subject'] = 'speParse.py Traceback'
-        msg['From'] = "ldm@mesonet.agron.iastate.edu"
+        msg['From'] = secret.parser_user
         msg['To'] = "akrherz@iastate.edu"
 
         s = smtplib.SMTP()
@@ -117,9 +117,9 @@ def real_process(raw):
             wfos = re.findall("([A-Z][A-Z][A-Z])", tpair[1])
             for wfo in wfos:
                 qu += 1
-                body = "%s: NESDIS issues Satellite Precipitation Estimates http://mesonet.agron.iastate.edu/p.php?pid=%s" % \
-         (wfo, product_id)
-                htmlbody = "NESDIS issues <a href='http://mesonet.agron.iastate.edu/p.php?pid=%s'>Satellite Precipitation Estimates</a>" %(product_id,)
+                body = "%s: NESDIS issues Satellite Precipitation Estimates %s?pid=%s" % \
+         (wfo, secret.PROD_URL, product_id)
+                htmlbody = "NESDIS issues <a href='%s?pid=%s'>Satellite Precipitation Estimates</a>" %(secret.PROD_URL, product_id,)
                 print body
                 jabber.sendMessage(body, htmlbody)
 
