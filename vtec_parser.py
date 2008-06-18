@@ -71,8 +71,8 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
 
             if skip_con:
                 wfo = text_product.get_iembot_source()
-                jabber_txt = "%s: %s has sent an updated FLS product (continued products were not reported here).  Consult this website for more details. http://mesonet.agron.iastate.edu/river/wfo.phtml?wfo=%s" % (wfo, wfo, wfo)
-                jabber_html = "%s has sent an updated FLS product (continued products were not reported here).  Consult <a href=\"http://mesonet.agron.iastate.edu/river/wfo.phtml?wfo=%s\">this website</a> for more details." % (wfo, wfo)
+                jabber_txt = "%s: %s has sent an updated FLS product (continued products were not reported here).  Consult this website for more details. %s?wfo=%s" % (wfo, wfo, secret.RIVER_APP, wfo)
+                jabber_html = "%s has sent an updated FLS product (continued products were not reported here).  Consult <a href=\"%s?wfo=%s\">this website</a> for more details." % (wfo, secret.RIVER_APP, wfo)
                 jabber.sendMessage(jabber_txt, jabber_html)
                
 
@@ -83,7 +83,7 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
             msg = MIMEText("%s\n\n>RAW DATA\n\n%s" % (sio.getvalue(),
                    buf.replace("\015\015\012", "\n") ) )
             msg['subject'] = 'vtec_parse.py Traceback'
-            msg['From'] = "ldm@mesonet.agron.iastate.edu"
+            msg['From'] = secret.parser_user
             msg['To'] = "akrherz@iastate.edu"
 
             smtp = smtplib.SMTP()
