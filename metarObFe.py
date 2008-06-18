@@ -44,7 +44,7 @@ class myProductIngestor(ldmbridge.LDMProductReceiver):
             log.msg( io.getvalue() )
             msg = MIMEText("%s\n\n>RAW DATA\n\n%s"%(io.getvalue(),buf.replace("\015\015\012", "\n") ))
             msg['subject'] = 'metarObFe.py Traceback'
-            msg['From'] = "ldm@mesonet.agron.iastate.edu"
+            msg['From'] = secret.parser_user
             msg['To'] = "akrherz@iastate.edu"
 
             s = smtplib.SMTP()
