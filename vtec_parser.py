@@ -41,7 +41,6 @@ log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
 
 POSTGIS = pg.connect(secret.dbname, secret.dbhost, user=secret.dbuser)
 DBPOOL = adbapi.ConnectionPool("psycopg2", database=secret.dbname, host=secret.dbhost)
-URLBASE = 'http://mesonet.agron.iastate.edu/GIS/apps/rview/warnings_cat.phtml'
 
 
 class NoVTECFoundError(Exception):
@@ -141,7 +140,7 @@ def segment_processor(text_product, i, skip_con):
              'county': '', 'sts': ' ', 'ets': ' ', 'svs_special': '',
              'year': mx.DateTime.now().year, 'phenomena': vtec.phenomena,
              'eventid': vtec.ETN, 'significance': vtec.significance,
-             'urlbase': URLBASE}
+             'urlbase': secret.VTEC_APP}
 
         if (vtec.beginTS != None and \
             vtec.beginTS > (gmtnow + mx.DateTime.RelativeDateTime(hours=+1))):
