@@ -50,7 +50,7 @@ from twisted.words.protocols.jabber import client, jid
 from twisted.words.xish import domish
 from twisted.internet import reactor
 
-IEM_URL = "http://mesonet.agron.iastate.edu/GIS/apps/rview/watch.phtml"
+IEM_URL = secret.WATCH_URL
 errors = StringIO.StringIO()
 
 qu = 0
@@ -125,7 +125,7 @@ def process(raw):
         traceback.print_exc(file=io)
         msg = MIMEText("%s\n\n>RAW DATA\n\n%s"%(io.getvalue(),raw))
         msg['subject'] = 'new_watch.py Traceback'
-        msg['From'] = "ldm@mesonet.agron.iastate.edu"
+        msg['From'] = secret.parser_user
         msg['To'] = "akrherz@iastate.edu"
 
         s = smtplib.SMTP()
