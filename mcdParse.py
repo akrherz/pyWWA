@@ -90,7 +90,7 @@ def process(raw):
         traceback.print_exc(file=io)
         msg = MIMEText("%s\n\n>RAW DATA\n\n%s"%(io.getvalue(),raw))
         msg['subject'] = 'mcdParse.py Traceback'
-        msg['From'] = "ldm@mesonet.agron.iastate.edu"
+        msg['From'] = secret.parser_user
         msg['To'] = "akrherz@iastate.edu"
 
         s = smtplib.SMTP()
@@ -119,7 +119,7 @@ def real_process(raw):
         qu += 1
         body = "%s: Storm Prediction Center issues Mesoscale Discussion http://www.spc.noaa.gov/products/md/md%s.html" % \
          (wfo, num)
-        htmlbody = "Storm Prediction Center issues <a href='http://www.spc.noaa.gov/products/md/md%s.html'>Mesoscale Discussion #%s</a> (<a href='http://mesonet.agron.iastate.edu/p.php?pid=%s'>View text</a>)" %(num,num,product_id)
+        htmlbody = "Storm Prediction Center issues <a href='http://www.spc.noaa.gov/products/md/md%s.html'>Mesoscale Discussion #%s</a> (<a href='%s?pid=%s'>View text</a>)" %(num,num, secret.parser_user, product_id)
         print body
         jabber.sendMessage(body, htmlbody)
 
