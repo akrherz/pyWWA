@@ -79,7 +79,7 @@ class myProductIngestor(ldmbridge.LDMProductReceiver):
             log.msg( io.getvalue() )
             msg = MIMEText("%s\n\n>RAW DATA\n\n%s"%(io.getvalue(),buf.replace("\015\015\012", "\n") ))
             msg['subject'] = 'sps2bot.py Traceback'
-            msg['From'] = "ldm@mesonet.agron.iastate.edu"
+            msg['From'] = secret.parser_user
             msg['To'] = "akrherz@iastate.edu"
 
             s = smtplib.SMTP()
@@ -114,9 +114,10 @@ def real_process(raw):
             expire = "till "+ (seg.ugcExpire - mx.DateTime.RelativeDateTime(hours= reference.offsets[prod.z] )).strftime("%-I:%M %p ")+ prod.z
 
 
-        mess = "%s: %s issues %s for %s %s http://mesonet.agron.iastate.edu/p.php?pid=%s" % (prod.source[1:], \
-           prod.source[1:], headline, counties, expire, product_id)
-        htmlmess = "%s issues <a href='http://mesonet.agron.iastate.edu/p.php?pid=%s'>%s</a> for %s %s" % ( prod.source[1:], product_id, headline, counties, expire)
+        mess = "%s: %s issues %s for %s %s %s?pid=%s" % (prod.source[1:], \
+           prod.source[1:], headline, counties, expire, secret.PROD_URL, \
+           product_id)
+        htmlmess = "%s issues <a href='%s?pid=%s'>%s</a> for %s %s" % ( prod.source[1:], secret.PROD_URL, product_id, headline, counties, expire)
         log.msg(mess)
 
         jabber.sendMessage(mess, htmlmess)
