@@ -65,7 +65,7 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
             msg = MIMEText("%s\n\n>RAW DATA\n\n%s"%(io.getvalue(),
                            raw.replace("\015\015\012", "\n")))
             msg['subject'] = 'meso_afd.py Traceback'
-            msg['From'] = "ldm@mesonet.agron.iastate.edu"
+            msg['From'] = secret.parser_user
             msg['To'] = "akrherz@iastate.edu"
 
             s = smtplib.SMTP()
@@ -93,10 +93,10 @@ def real_process(raw):
       values ('%s','%s')" % (sqlraw, product_id)
     POSTGIS.query(sql)
 
-    mess = "%s: %s issues Mesoscale %s http://mesonet.agron.iastate.edu/p.php?pid=%s" % \
-        (toroom, toroom, pil, product_id)
-    messHTML = "%s issues <a href=\"http://mesonet.agron.iastate.edu/p.php?pid=%s\">Mesoscale Forecast Discussion</a>" % \
-        (toroom, product_id)
+    mess = "%s: %s issues Mesoscale %s %s?pid=%s" % \
+        (toroom, toroom, pil, secret.parser_user, product_id)
+    messHTML = "%s issues <a href=\"%s?pid=%s\">Mesoscale Forecast Discussion</a>" % \
+        (toroom, secret.parser_user, product_id)
     jabber.sendMessage(mess, messHTML)
 
 
