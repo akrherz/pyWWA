@@ -16,15 +16,26 @@ class TextProduct:
         self.segments = []
         self.fcster = None
         self.z = None
+        self.product_header = None
 
         self.raw = raw.strip().replace("\015\015\012", "\n") # to unix
         self.sections = self.raw.split("\n\n")
         
         parseCallbacks = [self.findIssueTime, self.findSegments, self.findIDD,
-            self.findWMO, self.findAFOS, self.figureFcster]
+            self.findWMO, self.findAFOS, self.figureFcster, self.find_pheader]
         for cb in parseCallbacks:
             apply( cb )
 
+    def find_pheader(self):
+        """ Figure out what the WMO AND MND area and save it for database
+            updates where we don't want to save the entire SVS! """
+        if (len(self.sections) < 2):
+            return
+
+        if len( self.sections[0].split("\n") ) > 3:
+            self.product_header = self.sections[0]
+        else:
+            self.product_header = "\n\n".join(self.sections[0:2])
 
     def get_iembot_source(self):
         if (self.source is None or len(self.source) != 4):
