@@ -27,7 +27,12 @@ class TextProduct:
 
 
     def get_iembot_source(self):
-        if (self.source is None or len(self.source) != 4): return None
+        if (self.source is None or len(self.source) != 4):
+            return None
+        # This is a hack for now, will have to think some more about
+        # what to do with the conflict between PABR and KABR
+        if (self.source == "PABR"):
+            return "XXX"
         return self.source[1:]
 
     def get_product_id(self):
