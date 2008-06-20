@@ -49,7 +49,7 @@ class ProcessingException(Exception):
 LSRDB = {}
 try:
     LSRDB = pickle.load( open('lsrdb.p') )
-finally:
+except:
     log.msg("Error Loading LSRBD")
 
 def cleandb():
