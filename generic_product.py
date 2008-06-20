@@ -149,7 +149,7 @@ def real_process(raw):
     # Pick product key and routing from first argument
     prod = TextProduct.TextProduct(raw)
     pil = prod.afos[:3]
-    wfo = prod.source[1:]
+    wfo = prod.get_iembot_source()
     raw = raw.replace("'", "\\'")
     sqlraw = raw.replace("\015\015\012", "\n").replace("\000", "").strip()
     if (pil == "FTM"):
