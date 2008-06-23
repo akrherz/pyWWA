@@ -124,6 +124,8 @@ def segment_processor(text_product, i, skip_con):
 
     # If we found no VTEC and it has UGC, we complain about this
     if (len(seg.vtec) == 0):
+        if text_product.get_iembot_source() == 'JSJ':
+            return
         alert_error(text_product, 
          "Missing or incomplete VTEC encoding in segment number %s" % (i+1,))
         raise NoVTECFoundError("No VTEC coding found for this segment")
