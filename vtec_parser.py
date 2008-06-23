@@ -111,6 +111,7 @@ def segment_processor(text_product, i, skip_con):
     local_offset = mx.DateTime.RelativeDateTime(hours= reference.offsets[text_product.z])
     seg = text_product.segments[i]
 
+
     # A segment must have UGC
     if (len(seg.ugc) == 0):
         return
@@ -127,7 +128,14 @@ def segment_processor(text_product, i, skip_con):
          "Missing or incomplete VTEC encoding in segment number %s" % (i+1,))
         raise NoVTECFoundError("No VTEC coding found for this segment")
 
+    # New policy, we only insert the relevant stuff!
+    if (i == 0):
+        product_text = text_product.sqlraw()
+    else:
+        product_text = "%s\n\n%s\n\n&&\n\n%s" % (text_product.product_header, \
+                    re.sub("'", "\\'", seg.raw), text_product.fcster)
 
+    end_ts = None
     # A segment could have multiple vtec codes :)
     for vtec in seg.vtec:
         if (vtec.status == "T"):
@@ -218,12 +226,9 @@ def segment_processor(text_product, i, skip_con):
                 DBPOOL.runOperation( sql )
           
 
-        # Figure out which tables we need to update, have to do 2 :)
-        warning_tables = ["warnings", "warnings_%s" % 
-                                          (text_product.issueTime.year,)]
+        warning_table = "warnings_%s" % (text_product.issueTime.year,)
         if (vtec.beginTS is not None):
-            warning_tables = ['warnings', "warnings_%s" % 
-                                          (vtec.beginTS.year,)]
+            warning_table = "warnings_%s" % (vtec.beginTS.year,)
         
         #  NEW - New Warning
         #  EXB - Extended both in area and time (new area means new entry)
@@ -241,35 +246,33 @@ def segment_processor(text_product, i, skip_con):
             if (vtec.action == "EXB" or vtec.action == "EXA"):
                 bts = text_product.issueTime
         # Insert Polygon
-            for tbl in warning_tables:
-                if (seg.giswkt == None):
-                    continue
-                fcster = re.sub("'", " ", text_product.fcster)
-                sql = "INSERT into %s (issue, expire, report, \
+            if (seg.giswkt == None):
+                continue
+            fcster = re.sub("'", " ", text_product.fcster)
+            sql = "INSERT into %s (issue, expire, report, \
 significance, geom, phenomena, gtype, wfo, eventid, status, updated, \
 fcster, hvtec_nwsli) VALUES ('%s+00','%s+00','%s','%s','%s','%s','%s', \
 '%s',%s,'%s', '%s+00', '%s', '%s')" \
-   % (tbl, bts, vtec.endTS , text_product.sqlraw(), vtec.significance, \
+   % (warning_table, bts, vtec.endTS , text_product.sqlraw(), vtec.significance, \
       seg.giswkt, vtec.phenomena, 'P', vtec.office, vtec.ETN, vtec.action, \
       text_product.issueTime, fcster, seg.get_hvtec_nwsli() )
-                DBPOOL.runOperation( sql )
+            DBPOOL.runOperation( sql )
 
             # Insert Counties
             for k in range(len(ugc)):
                 cnty = ugc[k]
-                for tbl in warning_tables:
-                    fcster = re.sub("'", " ", text_product.fcster)
+                fcster = re.sub("'", " ", text_product.fcster)
   
-                    sql = "INSERT into %s (issue,expire,report, geom, \
+                sql = "INSERT into %s (issue,expire,report, geom, \
 phenomena, gtype, wfo, eventid, status,updated, fcster, ugc, significance,\
 hvtec_nwsli) VALUES('%s+00', '%s+00', '%s',\
 (select geom from nws_ugc WHERE ugc = '%s' LIMIT 1), \
 '%s', 'C', '%s',%s,'%s','%s+00', '%s', '%s','%s', '%s')" % \
-(tbl, bts, vtec.endTS, text_product.sqlraw(), cnty, \
+(warning_table, bts, vtec.endTS, text_product.sqlraw(), cnty, \
 vtec.phenomena, vtec.office, vtec.ETN, \
 vtec.action, text_product.issueTime, fcster, cnty, vtec.significance, \
 seg.get_hvtec_nwsli() )
-                    DBPOOL.runOperation( sql )
+                DBPOOL.runOperation( sql )
             for w in affectedWFOS.keys():
                 jmsg_dict['w'] = w
                 jabberTxt = "%(w)s: %(wfo)s %(product)s%(sts)sfor \
@@ -286,24 +289,22 @@ till %(ets)s %(svs_special)s" % jmsg_dict
         # Lets find our county and update it with action
         # Not worry about polygon at the moment.
             for cnty in ugc:
-                for tbl in warning_tables:
-                    sql = "UPDATE %s SET status = '%s', updated = '%s+00' \
+                sql = "UPDATE %s SET status = '%s', updated = '%s+00' \
                         WHERE ugc = '%s' and wfo = '%s' and eventid = %s and \
                       phenomena = '%s' and significance = '%s'" % \
-              (tbl, vtec.action, text_product.issueTime, cnty, \
+              (warning_table, vtec.action, text_product.issueTime, cnty, \
                vtec.office, vtec.ETN,\
                             vtec.phenomena, vtec.significance)
-                    DBPOOL.runOperation( sql )
+                DBPOOL.runOperation( sql )
 
             if (len(seg.vtec) == 1):
-                for tbl in warning_tables:
-                    sql = "UPDATE %s SET status = '%s',  \
+                sql = "UPDATE %s SET status = '%s',  \
                      updated = '%s+00' WHERE gtype = 'P' and wfo = '%s' \
                      and eventid = %s and phenomena = '%s' \
-                     and significance = '%s'" % (tbl, vtec.action, \
+                     and significance = '%s'" % (warning_table, vtec.action, \
        text_product.issueTime, vtec.office, \
        vtec.ETN, vtec.phenomena, vtec.significance)
-                    DBPOOL.runOperation( sql )
+                DBPOOL.runOperation( sql )
 
             jabberTxt = "%(wfo)s: %(wfo)s %(product)s%(sts)sfor \
 %(county)s till %(ets)s %(svs_special)s %(urlbase)s?year=%(year)s&amp;wfo=%(wfo)s&amp;\
@@ -329,27 +330,25 @@ till %(ets)s %(svs_special)s" % jmsg_dict
                 issueSpecial = "'%s+00'" % (vtec.beginTS,)
         # Lets cancel county
             for cnty in ugc:
-                for tbl in warning_tables:
-                    sql = "UPDATE %s SET status = '%s', expire = '%s+00',\
+                sql = "UPDATE %s SET status = '%s', expire = '%s+00',\
                        updated = '%s+00', issue = %s WHERE ugc = '%s' and \
                      wfo = '%s' and eventid = %s and phenomena = '%s' \
                      and significance = '%s'" % \
-             (tbl, vtec.action, end_ts, text_product.issueTime, issueSpecial, \
+             (warning_table, vtec.action, end_ts, text_product.issueTime, issueSpecial, \
               cnty, vtec.office, vtec.ETN, \
               vtec.phenomena, vtec.significance)
-                    DBPOOL.runOperation( sql )
+                DBPOOL.runOperation( sql )
 
             # If this is the only county, we can cancel the polygon too
             if (len(text_product.segments) == 1):
                 log.msg("Updating Polygon as well")
-                for tbl in warning_tables:
-                    sql = "UPDATE %s SET status = '%s', expire = '%s+00', \
+                sql = "UPDATE %s SET status = '%s', expire = '%s+00', \
                      updated = '%s+00' WHERE gtype = 'P' and wfo = '%s' \
                      and eventid = %s and phenomena = '%s' \
-                     and significance = '%s'" % (tbl, vtec.action, end_ts, \
+                     and significance = '%s'" % (warning_table, vtec.action, end_ts, \
       text_product.issueTime, vtec.office, vtec.ETN, \
       vtec.phenomena, vtec.significance)
-                    DBPOOL.runOperation( sql )
+                DBPOOL.runOperation( sql )
 
             jmsg_dict['action'] = "cancels"
             fmt = "%(w)s: %(wfo)s  %(product)s for %(county)s %(svs_special)s \
@@ -382,30 +381,76 @@ eventid=%(eventid)s&amp;significance=%(significance)s'>%(product)s</a>\
             for cnty in ugc:
                 ugc_limiter += "'%s'," % (cnty,)
 
-            for tbl in warning_tables:
-                sql = "UPDATE %s SET svs = \
+            sql = "UPDATE %s SET svs = \
                   (CASE WHEN (svs IS NULL) THEN '__' ELSE svs END) \
                    || '%s' || '__' WHERE eventid = %s and wfo = '%s' \
                    and phenomena = '%s' and significance = '%s' \
                    and ugc IN (%s)" % \
-                   (tbl, text_product.sqlraw(), vtec.ETN, vtec.office, \
+                   (warning_table, text_product.sqlraw(), vtec.ETN, vtec.office, \
                     vtec.phenomena, vtec.significance, ugc_limiter[:-1] )
-                log.msg("Updating SVS For:"+ ugc_limiter[:-1] )
-                DBPOOL.runOperation( sql )
+            log.msg("Updating SVS For:"+ ugc_limiter[:-1] )
+            DBPOOL.runOperation( sql )
 
     # Update polygon if necessary
     if (vtec.action != "NEW" and seg.giswkt is not None):
-        for tbl in warning_tables:
-            sql = "UPDATE %s SET svs = \
+        sql = "UPDATE %s SET svs = \
               (CASE WHEN (svs IS NULL) THEN '__' ELSE svs END) \
                || '%s' || '__' WHERE eventid = %s and wfo = '%s' \
                and phenomena = '%s' and significance = '%s' \
                and gtype = 'P'" %\
-               (tbl, text_product.sqlraw(), vtec.ETN, vtec.office, \
+               (warning_table, text_product.sqlraw(), vtec.ETN, vtec.office, \
                 vtec.phenomena, vtec.significance )
-            log.msg("Updating SVS For Polygon")
+        log.msg("Updating SVS For Polygon")
+        DBPOOL.runOperation( sql )
+
+    # New fancy SBW Stuff!
+    if seg.giswkt is not None:
+        # If we are dropping the product and there is only 1 segment
+        # We need not wait for more action, we do two things
+        # 1. Update the polygon_end to cancel time for the last polygon
+        # 2. Update everybodies expiration time, product changed yo!
+        if vtec.action in ["CAN", "UPG"] and len(text_product.segments) == 1:
+             sql = "UPDATE sbw_%s SET \
+                polygon_end = (CASE WHEN polygon_end = expire\
+                               THEN '%s+00' ELSE polygon_end END), \
+                expire = '%s+00' WHERE \
+                eventid = %s and wfo = '%s' \
+                and phenomena = '%s' and significance = '%s'" % \
+                (text_product.issueTime.year, \
+                text_product.issueTime, text_product.issueTime, \
+                vtec.ETN, vtec.office, vtec.phenomena, vtec.significance)
+             DBPOOL.runOperation( sql )
+
+        # If we are VTEC CON, then we need to find the last polygon
+        # and update its expiration time, since we have new info!
+        if vtec.action == "CON":
+            sql = "UPDATE sbw_%s SET polygon_end = '%s+00' WHERE \
+                polygon_end = expire and eventid = %s and wfo = '%s' \
+                and phenomena = '%s' and significance = '%s'" % \
+                (text_product.issueTime.year, text_product.issueTime, \
+                vtec.ETN, vtec.office, vtec.phenomena, vtec.significance)
             DBPOOL.runOperation( sql )
-   
+
+
+        my_sts = "'%s+00'" % (vtec.beginTS,)
+        if vtec.beginTS is None:
+             my_sts = "(SELECT issue from sbw_%s WHERE eventid = %s \
+              and wfo = '%s' and phenomena = '%s' and significance = '%s' \
+              LIMIT 1)" % (text_product.issueTime.year, vtec.ETN, vtec.office, \
+              vtec.phenomena, vtec.significance)
+
+        if vtec.action not in ['CAN', 'EXP', 'UPG', 'EXT']:
+            sql = "INSERT into sbw_%s(wfo, eventid, significance, phenomena,\
+                issue, expire, init_expire, polygon_begin, polygon_end, geom, \
+                status, report) VALUES ('%s',\
+                '%s','%s','%s', %s,'%s+00','%s+00','%s+00','%s+00', \
+                '%s','%s','%s')" % \
+                 (text_product.issueTime.year, vtec.office, vtec.ETN, \
+                 vtec.significance, vtec.phenomena, my_sts, vtec.endTS, \
+                 vtec.endTS, (vtec.beginTS or text_product.issueTime), \
+                 vtec.endTS, seg.giswkt, vtec.action, product_text)
+            DBPOOL.runOperation(sql)
+
 
 """ Load me up with NWS dictionaries! """
 ugc_dict = {}
