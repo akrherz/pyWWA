@@ -159,6 +159,9 @@ def real_process(raw):
     product_id = prod.get_product_id()
     sql = "INSERT into text_products(product, product_id) \
       values ('%s','%s')" % (sqlraw, product_id)
+    if (len(prod.segments) > 0 and prod.segments[0].giswkt):
+        sql = "INSERT into text_products(product, product_id, geom) \
+      values ('%s','%s','%s')" % (sqlraw, product_id, prod.segments[0].giswkt)
     DBPOOL.runOperation(sql)
 
     if ( ["DGT", "FWF", "RTP", "HPA", "CWF", "SRF", "SFT", "PFM", "ZFP", "CAE", "AFD","FTM","AWU","HWO","NOW","HLS","PSH","NOW","PNS","RER","ADM"].__contains__(pil) ):
