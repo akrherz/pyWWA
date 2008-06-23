@@ -161,7 +161,7 @@ def real_process(raw):
       values ('%s','%s')" % (sqlraw, product_id)
     DBPOOL.runOperation(sql)
 
-    if ( ["MWS", "DGT", "FWF", "RTP", "HPA", "CWF", "SRF", "SFT", "PFM", "ZFP", "CAE", "AFD","FTM","AWU","HWO","NOW","HLS","PSH","NOW","PNS","RER","ADM"].__contains__(pil) ):
+    if ( ["DGT", "FWF", "RTP", "HPA", "CWF", "SRF", "SFT", "PFM", "ZFP", "CAE", "AFD","FTM","AWU","HWO","NOW","HLS","PSH","NOW","PNS","RER","ADM"].__contains__(pil) ):
         prodtxt = "(%s)" % (pil,)
         if (prodDefinitions.has_key(pil)):
             prodtxt = prodDefinitions[pil]
@@ -179,6 +179,9 @@ def real_process(raw):
     # Now, lets look at segments ?
     for seg in prod.segments:
         if (len(seg.ugc) == 0):
+            continue
+        if (len(seg.vtec) > 0 and ['MWS',].__contains__(pil)): # Handled by other app
+            log.msg("VTEC FOUND!, skipping")
             continue
         if (len(seg.hvtec) > 0 and ['FLW','FFA','FLS'].__contains__(pil)): # Handled by other app
             log.msg("HVTEC FOUND!, skipping")
