@@ -440,8 +440,39 @@ eventid=%(eventid)s&amp;significance=%(significance)s'>%(product)s</a>\
               and wfo = '%s' and phenomena = '%s' and significance = '%s' \
               LIMIT 1)" % (text_product.issueTime.year, vtec.ETN, vtec.office, \
               vtec.phenomena, vtec.significance)
+        my_ets = "'%s+00'" % (vtec.endTS,)
+        if vtec.endTS is None:
+             my_ets = "(SELECT expire from sbw_%s WHERE eventid = %s \
+              and wfo = '%s' and phenomena = '%s' and significance = '%s' \
+              LIMIT 1)" % (text_product.issueTime.year, vtec.ETN, vtec.office, \
+              vtec.phenomena, vtec.significance)
 
-        if vtec.action not in ['CAN', 'EXP', 'UPG', 'EXT']:
+        if vtec.action in ['CAN',]:
+            sql = "INSERT into sbw_%s(wfo, eventid, significance, phenomena,\
+                issue, expire, init_expire, polygon_begin, polygon_end, geom, \
+                status, report) VALUES ('%s',\
+                '%s','%s','%s', %s,'%s+00','%s+00','%s+00','%s+00', \
+                '%s','%s','%s')" % \
+                 (text_product.issueTime.year, vtec.office, vtec.ETN, \
+                 vtec.significance, vtec.phenomena, my_sts, \
+                 text_product.issueTime, (vtec.endTS or my_ets), \
+                 text_product.issueTime, text_product.issueTime, \
+                  seg.giswkt, vtec.action, product_text)
+
+        elif vtec.action in ['EXP', 'UPG', 'EXT']:
+            sql = "INSERT into sbw_%s(wfo, eventid, significance, phenomena,\
+                issue, expire, init_expire, polygon_begin, polygon_end, geom, \
+                status, report) VALUES ('%s',\
+                '%s','%s','%s', %s,'%s+00','%s+00','%s+00','%s+00', \
+                '%s','%s','%s')" % \
+                 (text_product.issueTime.year, vtec.office, vtec.ETN, \
+                 vtec.significance, vtec.phenomena, my_sts, \
+                 (vtec.endTS or my_ets), \
+                 (vtec.endTS or my_ets), \
+                 (vtec.endTS or text_product.issueTime), \
+                 (vtec.endTS or text_product.issueTime), \
+                  seg.giswkt, vtec.action, product_text)
+        else:
             sql = "INSERT into sbw_%s(wfo, eventid, significance, phenomena,\
                 issue, expire, init_expire, polygon_begin, polygon_end, geom, \
                 status, report) VALUES ('%s',\
@@ -451,7 +482,7 @@ eventid=%(eventid)s&amp;significance=%(significance)s'>%(product)s</a>\
                  vtec.significance, vtec.phenomena, my_sts, vtec.endTS, \
                  vtec.endTS, (vtec.beginTS or text_product.issueTime), \
                  vtec.endTS, seg.giswkt, vtec.action, product_text)
-            DBPOOL.runOperation(sql)
+        DBPOOL.runOperation(sql)
 
 
 """ Load me up with NWS dictionaries! """
