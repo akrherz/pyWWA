@@ -231,7 +231,6 @@ def segment_processor(text_product, i, skip_con):
         warning_table = "warnings_%s" % (text_product.issueTime.year,)
         if (vtec.beginTS is not None):
             warning_table = "warnings_%s" % (vtec.beginTS.year,)
-        
         #  NEW - New Warning
         #  EXB - Extended both in area and time (new area means new entry)
         #  EXA - Extended in area, which means new entry
@@ -247,18 +246,17 @@ def segment_processor(text_product, i, skip_con):
             bts = vtec.beginTS
             if (vtec.action == "EXB" or vtec.action == "EXA"):
                 bts = text_product.issueTime
-        # Insert Polygon
-            if (seg.giswkt == None):
-                continue
             fcster = re.sub("'", " ", text_product.fcster)
-            sql = "INSERT into %s (issue, expire, report, \
+        # Insert Polygon
+            if (seg.giswkt != None):
+                sql = "INSERT into %s (issue, expire, report, \
 significance, geom, phenomena, gtype, wfo, eventid, status, updated, \
 fcster, hvtec_nwsli) VALUES ('%s+00','%s+00','%s','%s','%s','%s','%s', \
 '%s',%s,'%s', '%s+00', '%s', '%s')" \
    % (warning_table, bts, vtec.endTS , text_product.sqlraw(), vtec.significance, \
       seg.giswkt, vtec.phenomena, 'P', vtec.office, vtec.ETN, vtec.action, \
       text_product.issueTime, fcster, seg.get_hvtec_nwsli() )
-            DBPOOL.runOperation( sql )
+                DBPOOL.runOperation( sql )
 
             # Insert Counties
             for k in range(len(ugc)):
