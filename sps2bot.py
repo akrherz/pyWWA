@@ -98,9 +98,14 @@ def real_process(raw):
     prod = TextProduct.TextProduct(raw)
 
     product_id = prod.get_product_id()
-    sql = "INSERT into text_products(product, product_id) \
+    if (prod.segments[0].giswkt):
+        sql = "INSERT into text_products(product, product_id, geom) \
+      values ('%s','%s', '%s')" % (sqlraw, product_id,prod.segments[0].giswkt )
+        POSTGIS.query(sql)
+    else:
+        sql = "INSERT into text_products(product, product_id) \
       values ('%s','%s')" % (sqlraw, product_id)
-    POSTGIS.query(sql)
+        POSTGIS.query(sql)
 
     for seg in prod.segments:
         headline = "[NO HEADLINE FOUND IN SPS]"
