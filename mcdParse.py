@@ -119,7 +119,7 @@ def real_process(raw):
         qu += 1
         body = "%s: Storm Prediction Center issues Mesoscale Discussion http://www.spc.noaa.gov/products/md/md%s.html" % \
          (wfo, num)
-        htmlbody = "Storm Prediction Center issues <a href='http://www.spc.noaa.gov/products/md/md%s.html'>Mesoscale Discussion #%s</a> (<a href='%s?pid=%s'>View text</a>)" %(num,num, secret.parser_user, product_id)
+        htmlbody = "Storm Prediction Center issues <a href='http://www.spc.noaa.gov/products/md/md%s.html'>Mesoscale Discussion #%s</a> (<a href='%s?pid=%s'>View text</a>)" %(num,num, secret.PROD_URL, product_id)
         print body
         jabber.sendMessage(body, htmlbody)
 
