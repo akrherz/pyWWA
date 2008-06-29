@@ -265,8 +265,8 @@ def real_processor(nws):
               lsr.typetext, mag_long, \
               lsr.lts.strftime(time_fmt), nws.z, lsr.remark, uri)
         jabber_html = \
-          "%s [%s Co, %s] %s <a href='%s'>reports %s %s</a>at %s %s -- %s" % \
-          (lsr.city, lsr.county, lsr.state, lsr.source, uri, lsr.typetext, \
+          "%s: %s [%s Co, %s] %s <a href='%s'>reports %s %s</a>at %s %s -- %s" % \
+          (wfo,lsr.city, lsr.county, lsr.state, lsr.source, uri, lsr.typetext, \
            mag_long, lsr.lts.strftime(time_fmt), nws.z, lsr.remark)
         jabber.sendMessage(jabber_text, jabber_html)
 
