@@ -82,6 +82,7 @@ lsr_events = {
  'FREEZE': '6',
  'EXTR WIND CHILL': '7',
  'WILDFIRE': '8',
+ 'SEICHE': '9',
 }
 
 offsets = {
