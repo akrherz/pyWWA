@@ -180,7 +180,8 @@ def segment_processor(text_product, i, skip_con):
             if (not countyState.has_key(stateAB)):
                 countyState[stateAB] = []
             if (ugc2wfo.has_key(cnty)):
-                affectedWFOS[ ugc2wfo[cnty] ] = 1
+                for c in ugc2wfo[cnty]:
+                    affectedWFOS[ c ] = 1
             if (ugc_dict.has_key(cnty)):
                 name = ugc_dict[cnty]
             else:
@@ -190,7 +191,7 @@ def segment_processor(text_product, i, skip_con):
         # Test for affectedWFOS
         if (len(affectedWFOS) == 0):
             affectedWFOS[ vtec.office ] = 1
-
+        
         for st in countyState.keys():
             countyState[stateAB].sort()
             jmsg_dict['county']+=" %s [%s] and" % \
@@ -490,7 +491,7 @@ sql = "SELECT name, ugc, wfo from nws_ugc WHERE name IS NOT Null"
 rs = POSTGIS.query(sql).dictresult()
 for i in range(len(rs)):
     ugc_dict[ rs[i]['ugc'] ] = (rs[i]["name"]).replace("\x92"," ")
-    ugc2wfo[ rs[i]['ugc'] ] = rs[i]['wfo'][:3]
+    ugc2wfo[ rs[i]['ugc'] ] = re.findall(r'([A-Z][A-Z][A-Z])',rs[i]['wfo'])
 
 """ Load up H-VTEC NWSLI reference """
 nwsli_dict = {}
