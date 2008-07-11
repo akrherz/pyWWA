@@ -113,7 +113,10 @@ class myProductIngestor(ldmbridge.LDMProductReceiver):
         print "UNKNOWN SID STATE CODE [%s]" % (sid,)
         continue
       state = mesonet.nwsli2state[ sid[-2:]]
-      for ts in sreport.db[sid].keys():  # Each Time
+      # We need to sort the times, so that we don't process old data?
+      times = sreport.db[sid].keys()
+      times.sort()
+      for ts in times:  # Each Time
         if (ts == 'writets'):
           continue
 
