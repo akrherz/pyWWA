@@ -109,6 +109,7 @@ prodDefinitions = {
     'FWF': 'Fire Weather Planning Forecast (FWF)',
     'DGT': 'Drought Information (DGT)',
     'MWS': 'Marine Weather Statement (MWS)',
+    'AQA': 'Air Quality Alert (AQA)',
 }
 
 ugc_dict = {}
@@ -164,7 +165,7 @@ def real_process(raw):
       values ('%s','%s','%s')" % (sqlraw, product_id, prod.segments[0].giswkt)
     DBPOOL.runOperation(sql)
 
-    if ( ["DGT", "FWF", "RTP", "HPA", "CWF", "SRF", "SFT", "PFM", "ZFP", "CAE", "AFD","FTM","AWU","HWO","NOW","HLS","PSH","NOW","PNS","RER","ADM"].__contains__(pil) ):
+    if ( ["AQA","DGT", "FWF", "RTP", "HPA", "CWF", "SRF", "SFT", "PFM", "ZFP", "CAE", "AFD","FTM","AWU","HWO","NOW","HLS","PSH","NOW","PNS","RER","ADM"].__contains__(pil) ):
         prodtxt = "(%s)" % (pil,)
         if (prodDefinitions.has_key(pil)):
             prodtxt = prodDefinitions[pil]
