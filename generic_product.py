@@ -31,6 +31,7 @@ spcwfo = ['RNK',]
 routes = {'TCPAT[0-9]': gulfwfo,
           'TCMAT[0-9]': gulfwfo,
           'TCDAT[0-9]': gulfwfo,
+          'DSAAT': gulfwfo,
           'SWODY[1-2]': spcwfo,}
 
 from twisted.words.protocols.jabber import client, jid
@@ -110,6 +111,7 @@ prodDefinitions = {
     'DGT': 'Drought Information (DGT)',
     'MWS': 'Marine Weather Statement (MWS)',
     'AQA': 'Air Quality Alert (AQA)',
+    'DSA': 'Tropical Disturbance Statement (DSA)',
 }
 
 ugc_dict = {}
@@ -165,7 +167,7 @@ def real_process(raw):
       values ('%s','%s','%s')" % (sqlraw, product_id, prod.segments[0].giswkt)
     DBPOOL.runOperation(sql)
 
-    if ( ["AQA","DGT", "FWF", "RTP", "HPA", "CWF", "SRF", "SFT", "PFM", "ZFP", "CAE", "AFD","FTM","AWU","HWO","NOW","HLS","PSH","NOW","PNS","RER","ADM"].__contains__(pil) ):
+    if ( ["DSA","AQA","DGT", "FWF", "RTP", "HPA", "CWF", "SRF", "SFT", "PFM", "ZFP", "CAE", "AFD","FTM","AWU","HWO","NOW","HLS","PSH","NOW","PNS","RER","ADM"].__contains__(pil) ):
         prodtxt = "(%s)" % (pil,)
         if (prodDefinitions.has_key(pil)):
             prodtxt = prodDefinitions[pil]
