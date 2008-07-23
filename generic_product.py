@@ -31,6 +31,7 @@ spcwfo = ['RNK',]
 routes = {'TCPAT[0-9]': gulfwfo,
           'TCMAT[0-9]': gulfwfo,
           'TCDAT[0-9]': gulfwfo,
+          'TCEAT[0-9]': gulfwfo,
           'DSAAT': gulfwfo,
           'SWODY[1-2]': spcwfo,}
 
@@ -112,6 +113,7 @@ prodDefinitions = {
     'MWS': 'Marine Weather Statement (MWS)',
     'AQA': 'Air Quality Alert (AQA)',
     'DSA': 'Tropical Disturbance Statement (DSA)',
+    'TCE': 'Tropical Cyclone Position Estimate (TCE)',
 }
 
 ugc_dict = {}
@@ -167,7 +169,7 @@ def real_process(raw):
       values ('%s','%s','%s')" % (sqlraw, product_id, prod.segments[0].giswkt)
     DBPOOL.runOperation(sql)
 
-    if ( ["DSA","AQA","DGT", "FWF", "RTP", "HPA", "CWF", "SRF", "SFT", "PFM", "ZFP", "CAE", "AFD","FTM","AWU","HWO","NOW","HLS","PSH","NOW","PNS","RER","ADM"].__contains__(pil) ):
+    if ( ["TCE","DSA","AQA","DGT", "FWF", "RTP", "HPA", "CWF", "SRF", "SFT", "PFM", "ZFP", "CAE", "AFD","FTM","AWU","HWO","NOW","HLS","PSH","NOW","PNS","RER","ADM"].__contains__(pil) ):
         prodtxt = "(%s)" % (pil,)
         if (prodDefinitions.has_key(pil)):
             prodtxt = prodDefinitions[pil]
