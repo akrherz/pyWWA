@@ -18,8 +18,7 @@
 # Get the logger going, asap
 import os
 from twisted.python import log
-log.startLogging(open('/mesonet/data/logs/%s/lsrParse.log' \
-    % (os.getenv("USER"),), 'a'))
+log.startLogging(open('logs/lsrParse.log'), 'a'))
 log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
 
 # Standard python imports

@@ -17,8 +17,7 @@
 
 from twisted.python import log
 import os
-log.startLogging(open('/mesonet/data/logs/%s/sps2bot.log' \
-    % (os.getenv("USER"),), 'a'))
+log.startLogging(open('logs/sps2bot.log'), 'a'))
 log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
 
 import StringIO, traceback, mx.DateTime
@@ -127,9 +126,9 @@ def real_process(raw):
 
         jabber.sendMessage(mess, htmlmess)
 
-
-myJid = jid.JID('iembot_ingest@%s/sps2bot_%s' \
-   % (secret.chatserver, mx.DateTime.gmt().strftime("%Y%m%d%H%M%S") ) )
+myJid = jid.JID('%s@%s/sps2bot_%s' % \
+      (secret.iembot_ingest_user, secret.chatserver, \
+       mx.DateTime.gmt().strftime("%Y%m%d%H%M%S") ) )
 factory = client.basicClientFactory(myJid, secret.iembot_ingest_password)
 
 jabber = common.JabberClient(myJid)

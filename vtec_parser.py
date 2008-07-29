@@ -35,8 +35,7 @@ from support import ldmbridge, TextProduct, reference
 import secret
 import common
 
-log.startLogging(open('/mesonet/data/logs/%s/vtec_parser.log' \
-    % (os.getenv("USER"),), 'a'))
+log.startLogging(open('logs/vtec_parser.log'), 'a'))
 log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
 
 POSTGIS = pg.connect(secret.dbname, secret.dbhost, user=secret.dbuser)
@@ -502,8 +501,9 @@ rs = POSTGIS.query(sql).dictresult()
 for i in range(len(rs)):
     nwsli_dict[ rs[i]['nwsli'] ] = (rs[i]['rname']).replace("&"," and ")
 
-myJid = jid.JID('iembot_ingest@%s/vtecparser_%s' % \
-      (secret.chatserver, mx.DateTime.gmt().strftime("%Y%m%d%H%M%S") ) )
+myJid = jid.JID('%s@%s/vtecparser_%s' % \
+      (secret.iembot_ingest_user, secret.chatserver, \
+       mx.DateTime.gmt().strftime("%Y%m%d%H%M%S") ) )
 factory = client.basicClientFactory(myJid, secret.iembot_ingest_password)
 
 jabber = common.JabberClient(myJid)

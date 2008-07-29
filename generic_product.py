@@ -2,7 +2,7 @@
 
 from twisted.python import log
 import os
-log.startLogging(open('/mesonet/data/logs/%s/gp.log' % (os.getenv("USER"),), 'a'))
+log.startLogging(open('logs/gp.log'), 'a'))
 log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
 
 import re

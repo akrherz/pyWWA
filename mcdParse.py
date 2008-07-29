@@ -17,8 +17,7 @@
 
 from twisted.python import log
 import os
-log.startLogging(open('/mesonet/data/logs/%s/mcdParse.log' \
-    % (os.getenv("USER"),), 'a'))
+log.startLogging(open('logs/mcdParse.log'), 'a'))
 log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
 
 import sys, re, pdb, mx.DateTime

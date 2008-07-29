@@ -17,8 +17,7 @@
 
 from twisted.python import log
 import os
-log.startLogging(open('/mesonet/data/logs/%s/speParse.log' \
-    % (os.getenv("USER"),), 'a'))
+log.startLogging(open('logs/speParse.log'), 'a'))
 log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
 
 import sys, re, pdb, mx.DateTime
@@ -131,7 +130,9 @@ def killer():
         reactor.stop()
     reactor.callLater(10, killer)
 
-myJid = jid.JID('iembot_ingest@%s/spe_%s' % (secret.chatserver, mx.DateTime.now().ticks() ) )
+myJid = jid.JID('%s@%s/spe_%s' % \
+      (secret.iembot_ingest_user, secret.chatserver, \
+       mx.DateTime.gmt().strftime("%Y%m%d%H%M%S") ) )
 factory = client.basicClientFactory(myJid, secret.iembot_ingest_password)
 
 jabber = JabberClient(myJid)

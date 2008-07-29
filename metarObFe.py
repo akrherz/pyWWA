@@ -3,7 +3,7 @@ from twisted.words.xish import domish
 from twisted.internet import reactor
 from twisted.python import log
 import os
-log.startLogging(open('/mesonet/data/logs/%s/metarObFe.log' % (os.getenv("USER"),), 'a'))
+log.startLogging(open('logs/metarObFe.log'), 'a'))
 log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
 
 

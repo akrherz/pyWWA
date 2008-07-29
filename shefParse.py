@@ -26,8 +26,7 @@ import smtplib, StringIO
 from email.MIMEText import MIMEText
 import secret
 
-log.startLogging(open('/mesonet/data/logs/%s/shefParse.log' \
-    % (os.getenv("USER"),), 'a'))
+log.startLogging(open('logs/shefParse.log'), 'a'))
 log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
 
 from twisted.enterprise import adbapi

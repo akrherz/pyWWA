@@ -20,8 +20,7 @@ __revision__ = '$Id: new_watch.py 3160 2008-04-09 23:31:06Z akrherz $'
 
 from twisted.python import log
 import os
-log.startLogging(open('/mesonet/data/logs/%s/new_watch.log' % \
-                 (os.getenv("USER"),), 'a') )
+log.startLogging(open('logs/new_watch.log'), 'a') )
 log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
 
 
