@@ -283,9 +283,9 @@ def real_processor(nws):
 myJid = jid.JID('%s@%s/lsr_parse_%s' % \
       (secret.iembot_ingest_user, secret.chatserver, \
        mx.DateTime.gmt().strftime("%Y%m%d%H%M%S") ) )
-factory = client.basicClientFactory(my_jid, secret.iembot_ingest_password)
+factory = client.basicClientFactory(myJid, secret.iembot_ingest_password)
 
-jabber = common.JabberClient(my_jid)
+jabber = common.JabberClient(myJid)
 
 factory.addBootstrap('//event/stream/authd', jabber.authd)
 factory.addBootstrap("//event/client/basicauth/invaliduser", jabber.debug)
