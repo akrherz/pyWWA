@@ -38,7 +38,6 @@ import secret
 from support import TextProduct,  ldmbridge, reference
 
 DBPOOL = adbapi.ConnectionPool("psycopg2", database=secret.dbname, host=secret.dbhost, password=secret.dbpass)
-                               host=secret.dbhost)
 
 class ProcessingException(Exception):
     """ Generic Exception for processing errors I can handle"""
