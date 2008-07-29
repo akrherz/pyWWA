@@ -18,8 +18,7 @@ from support import ldmbridge, TextProduct, reference
 import psycopg2
 from twisted.enterprise import adbapi
 
-DBPOOL = adbapi.ConnectionPool("psycopg2", database=secret.dbname, 
-                               host=secret.dbhost)
+DBPOOL = adbapi.ConnectionPool("psycopg2", database=secret.dbname, host=secret.dbhost, password=secret.dbpass)
 
 
 errors = StringIO.StringIO()
