@@ -38,8 +38,8 @@ import common
 log.startLogging(open('logs/vtec_parser.log','a'))
 log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
 
-POSTGIS = pg.connect(secret.dbname, secret.dbhost, user=secret.dbuser)
-DBPOOL = adbapi.ConnectionPool("psycopg2", database=secret.dbname, host=secret.dbhost)
+POSTGIS = pg.connect(secret.dbname, secret.dbhost, user=secret.dbuser, passwd=secret.dbpass)
+DBPOOL = adbapi.ConnectionPool("psycopg2", database=secret.dbname, host=secret.dbhost, password=secret.dbpass)
 
 
 class NoVTECFoundError(Exception):

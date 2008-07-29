@@ -40,7 +40,7 @@ KM_SM = 1.609347
 
 # Database Connections
 import pg, secret
-POSTGIS = pg.connect(secret.dbname, secret.dbhost, user=secret.dbuser)
+POSTGIS = pg.connect(secret.dbname, secret.dbhost, user=secret.dbuser, passwd=secret.dbpass)
 POSTGIS.query("SET TIME ZONE 'GMT'")
 
 errors = StringIO.StringIO()

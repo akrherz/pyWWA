@@ -37,7 +37,7 @@ import common
 
 # Database Connections
 import pg, secret
-POSTGIS = pg.connect(secret.dbname, secret.dbhost, user=secret.dbuser)
+POSTGIS = pg.connect(secret.dbname, secret.dbhost, user=secret.dbuser, passwd=secret.dbpass)
 
 errors = StringIO.StringIO()
 

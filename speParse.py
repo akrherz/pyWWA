@@ -33,7 +33,7 @@ from twisted.internet import reactor
 
 from support import TextProduct
 import pg
-POSTGIS = pg.connect(secret.dbname, secret.dbhost, user=secret.dbuser)
+POSTGIS = pg.connect(secret.dbname, secret.dbhost, user=secret.dbuser, passwd=secret.dbpass)
 
 
 raw = sys.stdin.read()

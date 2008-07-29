@@ -28,7 +28,7 @@ import secret
 import common
 from support import TextProduct, ldmbridge, reference
 import pg
-POSTGIS = pg.connect(secret.dbname, secret.dbhost, user=secret.dbuser)
+POSTGIS = pg.connect(secret.dbname, secret.dbhost, user=secret.dbuser, passwd=secret.dbpass)
 
 from twisted.words.protocols.jabber import client, jid, xmlstream
 from twisted.internet import reactor
