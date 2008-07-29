@@ -17,7 +17,7 @@
 
 from twisted.python import log
 import os
-log.startLogging(open('logs/speParse.log'), 'a'))
+log.startLogging(open('logs/speParse.log'), 'a')
 log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
 
 import sys, re, pdb, mx.DateTime

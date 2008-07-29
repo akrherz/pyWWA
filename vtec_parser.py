@@ -35,7 +35,7 @@ from support import ldmbridge, TextProduct, reference
 import secret
 import common
 
-log.startLogging(open('logs/vtec_parser.log'), 'a'))
+log.startLogging(open('logs/vtec_parser.log'), 'a')
 log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
 
 POSTGIS = pg.connect(secret.dbname, secret.dbhost, user=secret.dbuser)
