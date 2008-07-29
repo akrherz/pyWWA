@@ -37,7 +37,7 @@ class JabberClient:
         log.msg("SETTING authenticated to false!")
         self.authenticated = False
 
-    def sendMessage(self, body, html=None, to_user='iembot'):
+    def sendMessage(self, body, html=None, to_user=secret.iembot_user):
         if (not self.authenticated):
             log.msg("No Connection, Lets wait and try later...")
             reactor.callLater(3, self.sendMessage, body, html, to_user)
