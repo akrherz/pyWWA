@@ -17,7 +17,7 @@
 
 from twisted.python import log
 import os
-log.startLogging(open('logs/sps2bot.log','a')
+log.startLogging(open('logs/sps2bot.log','a'))
 log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
 
 import StringIO, traceback, mx.DateTime
