@@ -94,14 +94,15 @@ def real_process(raw):
     POSTGIS.query(sql)
 
     mess = "%s: %s issues Mesoscale %s %s?pid=%s" % \
-        (toroom, toroom, pil, secret.parser_user, product_id)
+        (toroom, toroom, pil, secret.PROD_URL, product_id)
     messHTML = "%s issues <a href=\"%s?pid=%s\">Mesoscale Forecast Discussion</a>" % \
-        (toroom, secret.parser_user, product_id)
+        (toroom, secret.PROD_URL, product_id)
     jabber.sendMessage(mess, messHTML)
 
 
-myJid = jid.JID('iembot_ingest@%s/meso_afd_%s' % \
-      (secret.chatserver, mx.DateTime.gmt().strftime("%Y%m%d%H%M%S") ) )
+myJid = jid.JID('%s@%s/meso_afd_%s' % \
+      (secret.iembot_ingest_user, secret.chatserver, \
+       mx.DateTime.gmt().strftime("%Y%m%d%H%M%S") ) )
 factory = client.basicClientFactory(myJid, secret.iembot_ingest_password)
 
 jabber = common.JabberClient(myJid)

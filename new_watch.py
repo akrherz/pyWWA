@@ -313,7 +313,9 @@ def killer():
 
 raw = sys.stdin.read()
 
-myJid = jid.JID('iembot_ingest@%s/new_watch_%s' % (secret.chatserver, mx.DateTime.now().ticks() ) )
+myJid = jid.JID('%s@%s/watch_%s' % \
+      (secret.iembot_ingest_user, secret.chatserver, \
+       mx.DateTime.gmt().strftime("%Y%m%d%H%M%S") ) )
 factory = client.basicClientFactory(myJid, secret.iembot_ingest_password)
 
 jabber = JabberClient(myJid)

@@ -247,8 +247,9 @@ def real_process(raw):
 
 
 
-myJid = jid.JID('iembot_ingest@%s/gp_%s' % \
-  (secret.chatserver, mx.DateTime.gmt().strftime("%Y%m%d%H%M%S") ) )
+myJid = jid.JID('%s@%s/gp_%s' % \
+      (secret.iembot_ingest_user, secret.chatserver, \
+       mx.DateTime.gmt().strftime("%Y%m%d%H%M%S") ) )
 factory = client.basicClientFactory(myJid, secret.iembot_ingest_password)
 
 jabber = common.JabberClient(myJid)

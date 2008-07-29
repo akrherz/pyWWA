@@ -131,7 +131,9 @@ def killer():
         reactor.stop()
     reactor.callLater(10, killer)
 
-myJid = jid.JID('iembot_ingest@%s/ingestor_%s' % (secret.chatserver, mx.DateTime.now().ticks() ) )
+myJid = jid.JID('%s@%s/mcdparse_%s' % \
+      (secret.iembot_ingest_user, secret.chatserver, \
+       mx.DateTime.gmt().strftime("%Y%m%d%H%M%S") ) )
 factory = client.basicClientFactory(myJid, secret.iembot_ingest_password)
 
 jabber = JabberClient(myJid)

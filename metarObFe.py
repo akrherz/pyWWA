@@ -196,7 +196,9 @@ def sendWindAlert(iemid, v, d, t, clean_metar):
 
     jabber.sendMessage(jabberTxt)
 
-myJid = jid.JID('iembot_ingest@%s/metarParse_%s' % (secret.chatserver, mx.DateTime.gmt().strftime("%Y%m%d%H%M%S") ) )
+myJid = jid.JID('%s@%s/metar_%s' % \
+      (secret.iembot_ingest_user, secret.chatserver, \
+       mx.DateTime.gmt().strftime("%Y%m%d%H%M%S") ) )
 factory = client.basicClientFactory(myJid, secret.iembot_ingest_password)
 jabber = JabberClient(myJid)
 factory.addBootstrap('//event/stream/authd',jabber.authd)

@@ -282,8 +282,9 @@ def real_processor(nws):
         DBPOOL.runOperation(sql)
 
 
-my_jid = jid.JID('iembot_ingest@%s/lsr_parser_%s' \
-    % (secret.chatserver, mx.DateTime.gmt().strftime("%Y%m%d%H%M%S") ) )
+myJid = jid.JID('%s@%s/lsr_parse_%s' % \
+      (secret.iembot_ingest_user, secret.chatserver, \
+       mx.DateTime.gmt().strftime("%Y%m%d%H%M%S") ) )
 factory = client.basicClientFactory(my_jid, secret.iembot_ingest_password)
 
 jabber = common.JabberClient(my_jid)
