@@ -85,6 +85,16 @@ def process_message( data ):
     htmlbody = "TBW has updated the <a href=\"http://www.srh.noaa.gov/tbw/html/tbw/Graphicast.php\">GraphiCast</a>"
     jabber.sendMessage(body, htmlbody)
     return
+  if (pil == "TBW-1"):
+    body = "TBW: Updated Graphical Daily Weather Hazards http://www.srh.noaa.gov/tbw/html/tbw/ghwo.htm"
+    htmlbody = "TBW has updated the <a href=\"http://www.srh.noaa.gov/tbw/html/tbw/ghwo.htm\">Graphical Daily Weather Hazards</a>"
+    jabber.sendMessage(body, htmlbody)
+    return
+  if (pil == "TBW-2"):
+    body = "TBW: Updated Graphical Tropical Weather Hazards http://www.srh.noaa.gov/tbw/html/tbw/ghls.htm"
+    htmlbody = "TBW has updated the <a href=\"http://www.srh.noaa.gov/tbw/html/tbw/ghls.htm\">Graphical Tropical Weather Hazards</a>"
+    jabber.sendMessage(body, htmlbody)
+    return
 
   ts = mx.DateTime.gmt().strftime("%d%H%M")
   edesc = "109 \nZZZZ63 K%s %s\n%s\n\n" % (pil[3:], ts, pil)
