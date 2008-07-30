@@ -273,7 +273,7 @@ factory.addBootstrap("//event/client/basicauth/authfailed", jabber.debug)
 factory.addBootstrap("//event/stream/error", jabber.debug)
 factory.addBootstrap(xmlstream.STREAM_END_EVENT, jabber._disconnect )
 
-reactor.connectTCP(secret.chatserver,5222,factory)
+reactor.connectTCP(secret.connect_chatserver,5222,factory)
 
 ldm = ldmbridge.LDMProductFactory( myProductIngestor() )
 reactor.run()

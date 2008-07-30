@@ -135,7 +135,7 @@ factory.addBootstrap("//event/client/basicauth/invaliduser", jabber.debug)
 factory.addBootstrap("//event/client/basicauth/authfailed", jabber.debug)
 factory.addBootstrap("//event/stream/error", jabber.debug)
 
-reactor.connectTCP(secret.chatserver,5222,factory)
+reactor.connectTCP(secret.connect_chatserver,5222,factory)
 reactor.callLater(0, process)
 reactor.callLater(10, killer)
 reactor.run()
