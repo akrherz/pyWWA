@@ -23,27 +23,23 @@ from twisted.internet import reactor
 from twisted.python import log
 from twisted.enterprise import adbapi
 
+# Standard Python modules
+import os, re, traceback, StringIO, smtplib
+from email.MIMEText import MIMEText
 
-import os
+# Python 3rd Party Add-Ons
+import mx.DateTime, pg, psycopg2
+
+# pyWWA stuff
+from support import ldmbridge, TextProduct, reference
+import secret
+import common
+
 log.startLogging(open('logs/gp.log', 'a'))
 log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
 
-import re
-import traceback
-import StringIO
-import mx.DateTime
-import secret
-from email.MIMEText import MIMEText
-import smtplib
-
-import common
-from support import ldmbridge, TextProduct, reference
-import psycopg2
 
 DBPOOL = adbapi.ConnectionPool("psycopg2", database=secret.dbname, host=secret.dbhost, password=secret.dbpass)
-
-
-errors = StringIO.StringIO()
 
 
 gulfwfo = ['KEY', 'SJU', 'TBW', 'TAE', 'JAX', 'MOB', 'HGX', 'CRP','BMX','EWX', 'FWD', 'SHV', 'JAN', 'LIX', 'LCH', 'FFC', 'MFL', 'MLB','CHS','CAE','RAH','ILM','AKQ']
@@ -57,8 +53,6 @@ routes = {'TCPAT[0-9]': gulfwfo,
           'SWODY[1-2]': spcwfo,}
 
 
-
-errors = StringIO.StringIO()
 
 class myProductIngestor(ldmbridge.LDMProductReceiver):
 
