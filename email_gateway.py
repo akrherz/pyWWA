@@ -12,7 +12,7 @@ from twisted.words.protocols.jabber import client, jid
 from twisted.words.xish import domish
 from twisted.internet import reactor
 
-qu = 0
+qu = 1
 class JabberClient:
     xmlstream = None
 
@@ -52,7 +52,7 @@ class JabberClient:
         html.addChild(body)
         message.addChild(html)
         self.xmlstream.send(message)
-        qu -= 1
+        qu = 0
 
 def process():
   try:
