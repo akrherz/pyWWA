@@ -119,9 +119,9 @@ def process_message( data ):
 def killer():
     global qu
     print "queue", qu
-    if (qu == 0):
-        reactor.stop()
-    reactor.callLater(10, killer)
+    #if (qu == 0):
+    reactor.stop()
+    #reactor.callLater(10, killer)
 
 myJid = jid.JID('%s@%s/ingestor_%s' % \
       (secret.iembot_ingest_user, secret.chatserver, \
@@ -137,7 +137,7 @@ factory.addBootstrap("//event/stream/error", jabber.debug)
 
 reactor.connectTCP(secret.connect_chatserver,5222,factory)
 reactor.callLater(0, process)
-reactor.callLater(10, killer)
+reactor.callLater(60, killer)
 reactor.run()
 
 
