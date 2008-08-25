@@ -7,20 +7,20 @@ from email.MIMEText import MIMEText
 from pyIEM import wellknowntext
 import secret
 
-# Changedir to /tmp
-os.chdir("/tmp")
 
 import pg
 mydb = pg.connect(secret.dbname, secret.dbhost, user=secret.dbuser)
 
 FORMAT = "%(asctime)-15s:: %(message)s"
-logging.basicConfig(filename='logs/ingestRC.log', filemode='a', format=FORMAT)
+logging.basicConfig(filename='logs/ingestRC.log', filemode='a+', format=FORMAT)
 logger=logging.getLogger()
 logger.addHandler(logging.StreamHandler())
 logger.setLevel(logging.INFO)
 
 errors = StringIO.StringIO()
 
+# Changedir to /tmp
+os.chdir("/tmp")
 
 # Called if we want to email any errors that occured....
 def emailErrors(raw):
