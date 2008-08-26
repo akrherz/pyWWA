@@ -41,8 +41,11 @@ log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
 
 DBPOOL = adbapi.ConnectionPool("psycopg2", database=secret.dbname, host=secret.dbhost, password=secret.dbpass)
 
-
-gulfwfo = ['KEY', 'SJU', 'TBW', 'TAE', 'JAX', 'MOB', 'HGX', 'CRP','BMX','EWX', 'FWD', 'SHV', 'JAN', 'LIX', 'LCH', 'FFC', 'MFL', 'MLB','CHS','CAE','RAH','ILM','AKQ']
+# These are the offices which get all hurricane stuff
+gulfwfo = ['KEY', 'SJU', 'TBW', 'TAE', 'JAX', 'MOB', 'HGX', 'CRP', 'BMX',
+    'EWX', 'FWD', 'SHV', 'JAN', 'LIX', 'LCH', 'FFC', 'MFL', 'MLB', 'CHS',
+    'CAE', 'RAH', 'ILM', 'AKQ']
+# These offices get all SPC stuff...
 spcwfo = ['RNK',]
 
 routes = {'TCPAT[0-9]': gulfwfo,
@@ -52,7 +55,9 @@ routes = {'TCPAT[0-9]': gulfwfo,
           'DSAAT': gulfwfo,
           'SWODY[1-2]': spcwfo,}
 
-
+SIMPLE_PRODUCTS = ["TCE", "DSA", "AQA", "DGT", "FWF", "RTP", "HPA", "CWF", 
+            "SRF", "SFT", "PFM", "ZFP", "CAE", "AFD", "FTM", "AWU", "HWO",
+            "NOW", "HLS", "PSH", "NOW", "PNS", "RER", "ADM"]
 
 class myProductIngestor(ldmbridge.LDMProductReceiver):
 
@@ -165,15 +170,22 @@ def countyText(u):
 
 
 def real_process(raw):
-    # Pick product key and routing from first argument
+    """ The real processor of the raw data, fun! """
+
     prod = TextProduct.TextProduct(raw)
     pil = prod.afos[:3]
     wfo = prod.get_iembot_source()
+
     raw = raw.replace("'", "\\'")
     sqlraw = raw.replace("\015\015\012", "\n").replace("\000", "").strip()
+
+    # FTM sometimes have 'garbage' characters included, get em out
     if (pil == "FTM"):
         sqlraw = re.sub("[^\n\ra-zA-Z0-9:\.,\s\$\*]", "", sqlraw)
 
+    # TODO: If there are no segments, send an alert to room and daryl!
+
+    # Always insert the product into the text archive database
     product_id = prod.get_product_id()
     sql = "INSERT into text_products(product, product_id) \
       values ('%s','%s')" % (sqlraw, product_id)
@@ -181,19 +193,33 @@ def real_process(raw):
         sql = "INSERT into text_products(product, product_id, geom) \
       values ('%s','%s','%s')" % (sqlraw, product_id, prod.segments[0].giswkt)
     DBPOOL.runOperation(sql)
+    myurl = "%s?pid=%s" % (secret.PROD_URL, product_id)
 
-    if ( ["TCE","DSA","AQA","DGT", "FWF", "RTP", "HPA", "CWF", "SRF", "SFT", "PFM", "ZFP", "CAE", "AFD","FTM","AWU","HWO","NOW","HLS","PSH","NOW","PNS","RER","ADM"].__contains__(pil) ):
+    # Just send with optional headline to rooms...
+    if ( SIMPLE_PRODUCTS.__contains__(pil) ):
         prodtxt = "(%s)" % (pil,)
         if (prodDefinitions.has_key(pil)):
             prodtxt = prodDefinitions[pil]
 
-        mess = "%s: %s issues %s %s?pid=%s" % \
-          (wfo, wfo, prodtxt, secret.PROD_URL, product_id)
-        htmlmess = "%s issues <a href=\"%s?pid=%s\">%s</a> " % (wfo, secret.PROD_URL, product_id, prodtxt)
-        if (not ["HWO","NOW","ZFP"].__contains__(pil) and len(prod.segments) > 0 and len(prod.segments[0].headlines) > 0 and len(prod.segments[0].headlines[0]) < 200 ):
-          htmlmess += "... %s ..." % (prod.segments[0].headlines[0],)
+        mess = "%s: %s issues %s %s" % \
+          (wfo, wfo, prodtxt, myurl)
+        htmlmess = "%s issues <a href=\"%s\">%s</a> " % (wfo, myurl, prodtxt)
+        if (not ["HWO","NOW","ZFP"].__contains__(pil) and 
+         len(prod.segments) > 0 and 
+         len(prod.segments[0].headlines) > 0 and 
+         len(prod.segments[0].headlines[0]) < 200 ):
+            htmlmess += "... %s ..." % (prod.segments[0].headlines[0],)
 
         jabber.sendMessage(mess, htmlmess)
+
+        # Also send message to any 'subscribing WFO chatrooms'
+        for key in routes.keys():
+            if (re.match(key, prod.afos)):
+                for wfo2 in routes[key]:
+                    mess = "%s: %s issues %s %s" % \
+                       (wfo2, wfo, prodtxt, myurl)
+                    jabber.sendMessage(mess, htmlmess)
+        # We are done for this product
         return
 
 
@@ -217,9 +243,9 @@ def real_process(raw):
         prodtxt = "(%s)" % (pil,)
         if (prodDefinitions.has_key(pil)):
             prodtxt = prodDefinitions[pil]
-        mess = "%s: %s issues %s for %s %s %s?pid=%s" % \
-          (wfo, wfo, prodtxt, counties, expire, secret.PROD_URL, product_id)
-        htmlmess = "%s issues <a href=\"%s?pid=%s\">%s</a> for %s %s" % (wfo, secret.PROD_URL, product_id, prodtxt, counties, expire)
+        mess = "%s: %s issues %s for %s %s %s" % \
+          (wfo, wfo, prodtxt, counties, expire, myurl)
+        htmlmess = "%s issues <a href=\"%s\">%s</a> for %s %s" % (wfo, myurl, prodtxt, counties, expire)
 
         jabber.sendMessage(mess, htmlmess)
 
@@ -229,12 +255,12 @@ def real_process(raw):
 
     if (pil == "TCM" or pil == "TCP" or pil == "TCD"):
         tokens = re.findall("(.*) (DISCUSSION|INTERMEDIATE ADVISORY|FORECAST/ADVISORY|ADVISORY|MEMEME) NUMBER\s+([0-9]+)", raw.replace("PUBLIC ADVISORY", "ZZZ MEMEME") )
-        mess = "%s: %s issues %s %s?pid=%s" % \
-          (wfo, wfo, pil, secret.PROD_URL, product_id)
+        mess = "%s: %s issues %s %s" % \
+          (wfo, wfo, pil, myurl)
         prodtxt = "(%s)" % (pil,)
         if (prodDefinitions.has_key(pil)):
             prodtxt = prodDefinitions[pil]
-        htmlmess = "%s issues <a href=\"%s?pid=%s\">%s</a> " % (wfo, secret.PROD_URL, product_id, prodtxt)
+        htmlmess = "%s issues <a href=\"%s\">%s</a> " % (wfo, myurl, prodtxt)
 
         jabber.sendMessage(mess, htmlmess)
 
@@ -242,9 +268,9 @@ def real_process(raw):
     for key in routes.keys():
         if (re.match(key, prod.afos)):
             for wfo2 in routes[key]:
-                mess = "%s: %s %s?pid=%s" % \
-                 (wfo2, prod.afos, secret.PROD_URL, product_id)
-                htmlmess = "<a href=\"%s?pid=%s\">%s</a>" % (secret.PROD_URL, product_id, prodtxt)
+                mess = "%s: %s %s" % \
+                 (wfo2, prod.afos, myurl)
+                htmlmess = "<a href=\"%s\">%s</a>" % (myurl, prodtxt)
                 if (len(tokens) > 0):
                     tt = tokens[0][0]
                     what = tokens[0][1]
@@ -253,8 +279,8 @@ def real_process(raw):
                         tokens2 = re.findall("(PUBLIC ADVISORY) NUMBER\s+([0-9]+) FOR (.*)", raw)
                         what = tokens2[0][0]
                         tt = tokens2[0][2]
-                    mess = "%s: National Hurricane Center issues %s #%s for %s %s?pid=%s" % (wfo2, what, tnum, tt, secret.PROD_URL, product_id)
-                    htmlmess = "National Hurricane Center issues <a href=\"%s?pid=%s\">%s #%s</a> for %s" % ( secret.PROD_URL, product_id, what, tnum, tt)
+                    mess = "%s: National Hurricane Center issues %s #%s for %s %s" % (wfo2, what, tnum, tt, myurl)
+                    htmlmess = "National Hurricane Center issues <a href=\"%s\">%s #%s</a> for %s" % ( myurl, what, tnum, tt)
                 #print htmlmess, mess
                 jabber.sendMessage(mess, htmlmess)
 
