@@ -52,12 +52,13 @@ routes = {'TCPAT[0-9]': gulfwfo,
           'TCMAT[0-9]': gulfwfo,
           'TCDAT[0-9]': gulfwfo,
           'TCEAT[0-9]': gulfwfo,
+          'TCUAT[0-9]': gulfwfo,
           'DSAAT': gulfwfo,
           'SWODY[1-2]': spcwfo,}
 
 SIMPLE_PRODUCTS = ["TCE", "DSA", "AQA", "DGT", "FWF", "RTP", "HPA", "CWF", 
             "SRF", "SFT", "PFM", "ZFP", "CAE", "AFD", "FTM", "AWU", "HWO",
-            "NOW", "HLS", "PSH", "NOW", "PNS", "RER", "ADM"]
+            "NOW", "HLS", "PSH", "NOW", "PNS", "RER", "ADM", "TCU"]
 
 class myProductIngestor(ldmbridge.LDMProductReceiver):
 
@@ -84,6 +85,7 @@ class myProductIngestor(ldmbridge.LDMProductReceiver):
 
 
 prodDefinitions = {
+    'TCU': 'Tropical Cyclone Update (TCU)',
     'HLS': 'Hurricane Local Statement (HLS)',
     'NOW': 'Short-term Forecast (NOW)',
     'HWO': 'Hazardous Weather Outlook (HWO)',
@@ -167,6 +169,10 @@ def countyText(u):
         c +=" %s [%s] and" %(", ".join(countyState[st]), st)
     return c[:-4]
 
+def centertext(txt):
+    if (txt == "NHC"): return "National Hurricane Center"
+    if (txt == "WNH"): return "Hydrometeorological Prediction Center"
+    return "%s" % (txt,)
 
 
 def real_process(raw):
@@ -203,7 +209,7 @@ def real_process(raw):
 
         mess = "%s: %s issues %s %s" % \
           (wfo, wfo, prodtxt, myurl)
-        htmlmess = "%s issues <a href=\"%s\">%s</a> " % (wfo, myurl, prodtxt)
+        htmlmess = "%s issues <a href=\"%s\">%s</a> " % (centertext(wfo), myurl, prodtxt)
         if (not ["HWO","NOW","ZFP"].__contains__(pil) and 
          len(prod.segments) > 0 and 
          len(prod.segments[0].headlines) > 0 and 
@@ -225,14 +231,19 @@ def real_process(raw):
 
     # Now, lets look at segments ?
     for seg in prod.segments:
+        # The segment needs to have ugc codes
         if (len(seg.ugc) == 0):
             continue
-        if (len(seg.vtec) > 0 and ['MWS',].__contains__(pil)): # Handled by other app
+        # If the product has VTEC, it is handled by the vtec ingestor
+        if (len(seg.vtec) > 0 and ['MWS',].__contains__(pil)):
             log.msg("VTEC FOUND!, skipping")
             continue
-        if (len(seg.hvtec) > 0 and ['FLW','FFA','FLS'].__contains__(pil)): # Handled by other app
+
+        # If the product has HVTEC, it is handled by other ingestor too
+        if (len(seg.hvtec) > 0 and ['FLW','FFA','FLS'].__contains__(pil)):
             log.msg("HVTEC FOUND!, skipping")
             continue
+
         counties = countyText(seg.ugc)
         if (counties.strip() == ""):
             counties = "entire area"
@@ -254,15 +265,13 @@ def real_process(raw):
 # TROPICAL STORM BARRY INTERMEDIATE ADVISORY NUMBER   2A
 
     if (pil == "TCM" or pil == "TCP" or pil == "TCD"):
-        tokens = re.findall("(.*) (DISCUSSION|INTERMEDIATE ADVISORY|FORECAST/ADVISORY|ADVISORY|MEMEME) NUMBER\s+([0-9]+)", raw.replace("PUBLIC ADVISORY", "ZZZ MEMEME") )
-        mess = "%s: %s issues %s %s" % \
-          (wfo, wfo, pil, myurl)
+        mess = "%s: %s issues %s %s" % (wfo, wfo, pil, myurl)
         prodtxt = "(%s)" % (pil,)
         if (prodDefinitions.has_key(pil)):
             prodtxt = prodDefinitions[pil]
         htmlmess = "%s issues <a href=\"%s\">%s</a> " % (wfo, myurl, prodtxt)
-
         jabber.sendMessage(mess, htmlmess)
+
 
 
     for key in routes.keys():
@@ -271,6 +280,7 @@ def real_process(raw):
                 mess = "%s: %s %s" % \
                  (wfo2, prod.afos, myurl)
                 htmlmess = "<a href=\"%s\">%s</a>" % (myurl, prodtxt)
+                tokens = re.findall("(.*) (DISCUSSION|INTERMEDIATE ADVISORY|FORECAST/ADVISORY|ADVISORY|MEMEME) NUMBER\s+([0-9]+)", raw.replace("PUBLIC ADVISORY", "ZZZ MEMEME") )
                 if (len(tokens) > 0):
                     tt = tokens[0][0]
                     what = tokens[0][1]
@@ -279,8 +289,8 @@ def real_process(raw):
                         tokens2 = re.findall("(PUBLIC ADVISORY) NUMBER\s+([0-9]+) FOR (.*)", raw)
                         what = tokens2[0][0]
                         tt = tokens2[0][2]
-                    mess = "%s: National Hurricane Center issues %s #%s for %s %s" % (wfo2, what, tnum, tt, myurl)
-                    htmlmess = "National Hurricane Center issues <a href=\"%s\">%s #%s</a> for %s" % ( myurl, what, tnum, tt)
+                    mess = "%s: %s issues %s #%s for %s %s" % (wfo2, centertext(wfo), what, tnum, tt, myurl)
+                    htmlmess = "%s issues <a href=\"%s\">%s #%s</a> for %s" % ( centertext(wfo), myurl, what, tnum, tt)
                 #print htmlmess, mess
                 jabber.sendMessage(mess, htmlmess)
 
