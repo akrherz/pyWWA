@@ -489,7 +489,7 @@ ugc2wfo = {}
 sql = "SELECT name, ugc, wfo from nws_ugc WHERE name IS NOT Null"
 rs = POSTGIS.query(sql).dictresult()
 for i in range(len(rs)):
-    ugc_dict[ rs[i]['ugc'] ] = (rs[i]["name"]).replace("\x92"," ")
+    ugc_dict[ rs[i]['ugc'] ] = (rs[i]["name"]).replace("\x92"," ").replace("\xc2"," ")
     ugc2wfo[ rs[i]['ugc'] ] = re.findall(r'([A-Z][A-Z][A-Z])',rs[i]['wfo'])
 
 """ Load up H-VTEC NWSLI reference """
