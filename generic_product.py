@@ -58,7 +58,7 @@ routes = {'TCPAT[0-9]': gulfwfo,
 
 SIMPLE_PRODUCTS = ["TCE", "DSA", "AQA", "DGT", "FWF", "RTP", "HPA", "CWF", 
             "SRF", "SFT", "PFM", "ZFP", "CAE", "AFD", "FTM", "AWU", "HWO",
-            "NOW", "HLS", "PSH", "NOW", "PNS", "RER", "ADM", "TCU"]
+            "NOW", "PSH", "NOW", "PNS", "RER", "ADM", "TCU"]
 
 class myProductIngestor(ldmbridge.LDMProductReceiver):
 
