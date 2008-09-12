@@ -235,7 +235,7 @@ def real_process(raw):
         if (len(seg.ugc) == 0):
             continue
         # If the product has VTEC, it is handled by the vtec ingestor
-        if (len(seg.vtec) > 0 and ['MWS',].__contains__(pil)):
+        if (len(seg.vtec) > 0 and ['MWS','HLS'].__contains__(pil)):
             log.msg("VTEC FOUND!, skipping")
             continue
 
