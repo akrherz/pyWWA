@@ -56,6 +56,7 @@ lsr_events = {
  'HEAVY RAIN': 'R',
  'RAIN': 'R',
  'SNOW': 'S',
+ 'STORM TOTAL SNOW': 'S',
  'SLEET': 's',
  'MODERATE SLEET': 's',
  'HEAVY SLEET': 's',
