@@ -256,7 +256,6 @@ def really_process(data):
         if (mvar == ""):
           # Lets try some hacks
           mvar = re.sub('IR[ZG]+','', var)
-          print "Swapping", var, "for", mvar
         iemob.data[ mvar ] = cleaner(mydata[sid][ts][var]) * multiplier[var]
 
       iemob.updateDatabaseSummaryTemps(None, dbpool)
