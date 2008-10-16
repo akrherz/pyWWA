@@ -252,7 +252,12 @@ def really_process(data):
       iemob.data['year'] = ts.year
       iemob.load_and_compare(iemaccess)
       for var in mydata[sid][ts].keys():
-        iemob.data[ mapping[var] ] = cleaner(mydata[sid][ts][var]) * multiplier[var]
+        mvar = mapping[var]
+        if (mvar == ""):
+          # Lets try some hacks
+          mvar = re.sub('IR[ZG]+','', var)
+          print "Swapping", var, "for", mvar
+        iemob.data[ mvar ] = cleaner(mydata[sid][ts][var]) * multiplier[var]
 
       iemob.updateDatabaseSummaryTemps(None, dbpool)
       iemob.updateDatabase(None, dbpool)
