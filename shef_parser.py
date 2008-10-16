@@ -43,6 +43,7 @@ multiplier = {
   "USIRZZ": 0.87,
   "UG": 0.87,
   "UGIRG": 0.87,
+  "UGIRGZ": 0.87,
   "UGIRZZ": 0.87,
   "UP": 0.87,
   "UPIRG": 0.87,
@@ -54,6 +55,7 @@ multiplier = {
 mapping = {
   "HGIRZ": "rstage",
   "HGIRG": "rstage",
+  "HGIRGZ": "rstage",
   "HG": "rstage",
 
   "PPHRG": "phour", 
@@ -62,6 +64,7 @@ mapping = {
   "TD": "dwpf",
  
   "TAIRG": "tmpf",
+  "TAIRGZ": "tmpf",
   "TAIRZZ": "tmpf", 
   "TA": "tmpf",
 
@@ -82,13 +85,16 @@ mapping = {
   "SDIRGZ": "snowd", 
  
   "XR": "relh",
+  "XRIRGZ": "relh",
 
   "PA": "pres", 
+  "PAIRGZ": "pres", 
 
   "SW": "snoww",
   "SWIRZZ": "snoww",
 
   "USIRG": "sknt",
+  "USIRGZ": "sknt",
   "US": "sknt",
   "USIRZZ": "sknt",
  
