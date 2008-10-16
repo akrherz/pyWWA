@@ -39,17 +39,8 @@ os.chdir("/home/ldm/pyWWA/shef_workspace")
 
 multiplier = {
   "US" : 0.87,  # Convert MPH to KNT
-  "USIRG": 0.87,
-  "USIRZZ": 0.87,
   "UG": 0.87,
-  "UGIRG": 0.87,
-  "UGIRGZ": 0.87,
-  "UGIRZZ": 0.87,
   "UP": 0.87,
-  "UPIRG": 0.87,
-  "UPIRZZ": 0.87,
-  "UPVRG": 0.87,
-  "UPVRZZ": 0.87,
 }
 
 mapping = {
@@ -58,10 +49,13 @@ mapping = {
   "HGIRGZ": "rstage",
   "HG": "rstage",
 
+  "PPHRGZ": "phour",
   "PPHRG": "phour", 
   "PPH": "phour",
 
   "TD": "dwpf",
+  "TDIRGZ": "dwpf",
+  "TDIRZZ": "dwpf",
  
   "TAIRG": "tmpf",
   "TAIRGZ": "tmpf",
@@ -226,8 +220,8 @@ def really_process(data):
         if (not mapping.has_key(var)):
           print "Couldn't map var: %s for SID: %s" % (var, sid)
           mapping[var] = ""
-        if (not multiplier.has_key(var)):
-          multiplier[var] = 1.0
+        if (not multiplier.has_key(var[:2])):
+          multiplier[var[:2]] = 1.0
         dbpool2.runOperation("INSERT into raw%s(station, valid, key, value) \
           VALUES('%s','%s+00', '%s', '%s')" % (ts.year, sid, \
           ts.strftime("%Y-%m-%d %H:%M"), var, mydata[sid][ts][var]))
@@ -248,15 +242,11 @@ def really_process(data):
       # Lets do this, finally.
       #print "ACTUALLY PROCESSED", sid, network
       iemob = iemAccessOb.iemAccessOb(sid, network)
-      iemob.data['ts'] = ts
+      iemob.setObTimeGMT(ts)
       iemob.data['year'] = ts.year
       iemob.load_and_compare(iemaccess)
       for var in mydata[sid][ts].keys():
-        mvar = mapping[var]
-        if (mvar == ""):
-          # Lets try some hacks
-          mvar = re.sub('IR[ZG]+','', var)
-        iemob.data[ mvar ] = cleaner(mydata[sid][ts][var]) * multiplier[var]
+        iemob.data[ mapping[var] ] = cleaner(mydata[sid][ts][var]) * multiplier[var[:2]]
 
       iemob.updateDatabaseSummaryTemps(None, dbpool)
       iemob.updateDatabase(None, dbpool)
