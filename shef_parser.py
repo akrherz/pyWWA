@@ -16,7 +16,7 @@
 """ SHEF product ingestor """
 
 
-import sys, sys, os
+import sys, sys, os, re
 import traceback
 from pyIEM import shefReport, iemAccessOb, mesonet, iemdb
 from support import ldmbridge
