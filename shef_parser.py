@@ -66,9 +66,11 @@ mapping = {
   "TA": "tmpf",
 
   "TAIRZNZ": "min_tmpf", 
+  "TAIRGN": "min_tmpf", 
   "TN": "min_tmpf",
 
   "TAIRZXZ": "max_tmpf",
+  "TAIRGX": "max_tmpf",
   "TX": "max_tmpf",
 
   "PPDRZZ": "pday",
@@ -107,6 +109,7 @@ mapping = {
   "URIRZZ": "max_drct",
 }
 mystates = ['IA', 'ND','SD','NE','KS','MO','MN','WI','IL','IN','OH','MI']
+coopVars = ['TAIRGX', 'TAIRGN', 'TAIRZNZ','TAIRZXZ', 'PPDRZZ']
 EMAILS = 10
 
 class SHEFIT(protocol.ProcessProtocol):
@@ -212,7 +215,7 @@ def really_process(data):
       #print sid, ts, mydata[sid][ts].keys()
       # Loop thru vars to see if we have a COOP site?
       for var in mydata[sid][ts].keys():
-        if (var in ['TAIRZZ','TAIRZNZ','TAIRZXZ', 'PPDRZZ']):
+        if (var in coopVars):
           isCOOP = 1
         if (not mapping.has_key(var)):
           print "Couldn't map var: %s for SID: %s" % (var, sid)
