@@ -28,7 +28,7 @@ class JabberClient:
 
         lc = LoopingCall(self.keepalive)
         lc.start(60)
-        self.addObserver(STREAM_END_EVENT, lambda _: lc.stop())
+        self.xmlstream.addObserver(STREAM_END_EVENT, lambda _: lc.stop())
 
     def keepalive(self):
         self.xmlstream.send(' ')
