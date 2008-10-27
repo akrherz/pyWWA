@@ -124,6 +124,7 @@ def real_processor(buf):
         # Search for Peak wind gust info....
         if (mtr.wind_gust or mtr.wind_speed_peak):
             d = 0
+            v = 0
             if (mtr.wind_gust):
                 v = mtr.wind_gust.value("KT")
                 if (mtr.wind_dir):
