@@ -130,9 +130,13 @@ def real_processor(buf):
                     d = mtr.wind_dir.value()
                 t = mtr.time
             if (mtr.wind_speed_peak):
-                v = mtr.wind_speed_peak.value("KT")
-                d = mtr.wind_dir_peak.value()
-                t = mtr.peak_wind_time
+                v1 = mtr.wind_speed_peak.value("KT")
+                d1 = mtr.wind_dir_peak.value()
+                t1 = mtr.peak_wind_time
+                if (v1 > v):
+                    v = v1
+                    d = d1
+                    t = t1
 
             # We store a key for this event
             key = "%s;%s;%s" % (mtr.station_id, v, t)
