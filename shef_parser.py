@@ -26,7 +26,7 @@ import smtplib, StringIO
 from email.MIMEText import MIMEText
 import secret, mx.DateTime
 
-log.startLogging(open('logs/shefParse.log', 'a'))
+log.startLogging(open('logs/shef_parser.log', 'a'))
 log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
 
 from twisted.enterprise import adbapi
@@ -50,6 +50,7 @@ mapping = {
   "HG": "rstage",
 
   "PPHRGZ": "phour",
+  "PPHRPZ": "phour",
   "PPHRG": "phour", 
   "PPH": "phour",
 
@@ -112,6 +113,11 @@ mystates = ['IA', 'ND','SD','NE','KS','MO','MN','WI','IL','IN','OH','MI']
 coopVars = ['TAIRGX', 'TAIRGN', 'TAIRZNZ','TAIRZXZ', 'PPDRZZ']
 EMAILS = 10
 
+class myIEMOB(iemAccessOb.iemAccessOb):
+
+  def execQuery(self, sql, db, dbpool):
+    dbpool.runOperation( sql ).addErrback( email_error, sql)
+
 class SHEFIT(protocol.ProcessProtocol):
 
   def __init__(self,shefdata):
@@ -131,6 +137,22 @@ class SHEFIT(protocol.ProcessProtocol):
   def outConnectionLost(self):
     really_process(self.data)
 
+def email_error(message, product_text):
+  global EMAILS
+  log.msg( message )
+  EMAILS -= 1
+  if (EMAILS < 0):
+    return
+
+  msg = MIMEText("Exception:\n%s\n\nRaw Product:\n%s" \
+                 % (message, product_text))
+  msg['subject'] = 'shef_parser.py Traceback'
+  msg['From'] = secret.parser_user
+  msg['To'] = 'akrherz@iastate.edu'
+  smtp = smtplib.SMTP()
+  smtp.connect()
+  smtp.sendmail(msg['From'], msg['To'], msg.as_string())
+  smtp.close()
 
 class myProductIngestor(ldmbridge.LDMProductReceiver):
 
@@ -139,32 +161,16 @@ class myProductIngestor(ldmbridge.LDMProductReceiver):
     log.msg("LDM Closed PIPE")
 
   def process_data(self, buf):
-    cstr = StringIO.StringIO()
     try:
-      self.real_process(buf, cstr)
+      self.real_process(buf)
     except:
+      cstr = StringIO.StringIO()
       traceback.print_exc(file=cstr)
       cstr.seek(0)
       errstr = cstr.read()
-      #log.msg("_________ERROR__________")
-      log.msg( errstr )
-      log.msg("|%s|" % (buf.replace("\015\015\012", "\n"),))
-      #log.msg("_________END__________")
-      msg = MIMEText("%s\n\n>RAW DATA\n\n%s" % (errstr,
-           buf.replace("\015\015\012", "\n") ) )
-      msg['subject'] = 'shefParse.py Traceback'
-      msg['From'] = secret.parser_user
-      msg['To'] = "akrherz@iastate.edu"
-      global EMAILS
-      if (EMAILS > 0):
-        smtp = smtplib.SMTP()
-        smtp.connect()
-        smtp.sendmail(msg["From"], msg["To"], msg.as_string())
-        smtp.close()
-      EMAILS -= 1
-      log.msg("EMAILS [%s]" % (EMAILS,))
+      email_error(errstr, buf)
 
-  def real_process(self, buf, cstr):
+  def real_process(self, buf):
     s = SHEFIT(buf.replace("\003", "").replace("\001", "").replace("\015\015\012", "\n") )
     reactor.spawnProcess(s, "shefit", ["shefit"], {})
 
@@ -224,7 +230,8 @@ def really_process(data):
           multiplier[var[:2]] = 1.0
         dbpool2.runOperation("INSERT into raw%s(station, valid, key, value) \
           VALUES('%s','%s+00', '%s', '%s')" % (ts.year, sid, \
-          ts.strftime("%Y-%m-%d %H:%M"), var, mydata[sid][ts][var]))
+          ts.strftime("%Y-%m-%d %H:%M"), var, \
+          mydata[sid][ts][var])).addErrback(email_error, data)
 
       #print sid, state, isCOOP
       # Deterime if we want to waste the DB's time
@@ -241,7 +248,7 @@ def really_process(data):
 
       # Lets do this, finally.
       #print "ACTUALLY PROCESSED", sid, network
-      iemob = iemAccessOb.iemAccessOb(sid, network)
+      iemob = myIEMOB(sid, network)
       iemob.setObTimeGMT(ts)
       iemob.data['year'] = ts.year
       iemob.load_and_compare(iemaccess)
