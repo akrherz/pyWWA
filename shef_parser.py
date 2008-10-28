@@ -15,39 +15,51 @@
 # 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 """ SHEF product ingestor """
 
-
-import sys, sys, os, re
-import traceback
-from pyIEM import shefReport, iemAccessOb, mesonet, iemdb
-from support import ldmbridge
+# Setup Standard Logging we use
 from twisted.python import log
-from twisted.internet import reactor, utils, protocol
-import smtplib, StringIO
-from email.MIMEText import MIMEText
-import secret, mx.DateTime
-
 log.startLogging(open('logs/shef_parser.log', 'a'))
 log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
 
-from twisted.enterprise import adbapi
-dbpool = adbapi.ConnectionPool("psycopg2", database='iem', host=secret.dbhost)
-dbpool2 = adbapi.ConnectionPool("psycopg2", database='hads', host=secret.dbhost)
-i = iemdb.iemdb()
-iemaccess = i['iem']
+# System Imports
+import os, traceback, smtplib, StringIO
+from email.mime.text import MIMEText
 
+# Stuff I wrote
+from pyIEM import iemAccessOb, mesonet, iemdb
+from support import ldmbridge
+import secret
+
+# Third Party Stuff
+from twisted.internet import reactor, protocol
+from twisted.enterprise import adbapi
+import mx.DateTime
+
+
+# Setup Database Links
+ACCESSDB = adbapi.ConnectionPool("psycopg2", database='iem', host=secret.dbhost)
+HADSDB = adbapi.ConnectionPool("psycopg2", database='hads', host=secret.dbhost)
+i = iemdb.iemdb()
+IEMACCESS = i['iem']
+
+# Necessary for the shefit program to run A-OK
 os.chdir("/home/ldm/pyWWA/shef_workspace")
 
-multiplier = {
+MULTIPLIER = {
   "US" : 0.87,  # Convert MPH to KNT
   "UG": 0.87,
   "UP": 0.87,
+  "UR": 10,
 }
 
-mapping = {
+# Ugly hack on how we map SHEFIT vars to iemaccess variables
+MAPPING = {
   "HGIRZ": "rstage",
   "HGIRG": "rstage",
   "HGIRGZ": "rstage",
   "HG": "rstage",
+
+  "HPIRGZ": "rstage",
+  "HPIRPZ": "rstage",
 
   "PPHRGZ": "phour",
   "PPHRPZ": "phour",
@@ -74,7 +86,9 @@ mapping = {
   "PPDRZZ": "pday",
   "PPD": "pday",
   "PP": "pday",
- 
+
+  "RWIRGZ": "srad",
+
   "SD": "snowd", 
   "SDIRZZ": "snowd", 
   "SDIRGZ": "snowd", 
@@ -98,174 +112,211 @@ mapping = {
 
   "UD": "drct", 
   "UDIRG": "drct",
+  "UDIRGZ": "drct",
   "UDIRZZ": "drct",
 
   "UG": "gust", 
   "UGIRZZ": "gust",
 
+  "UPHRGZ": "max_sknt",
   "UPIRG": "max_sknt",
   "UPVRG": "max_sknt",
+  "UPVRGZ": "max_sknt",
+  "UPJRGZ": "max_sknt",
   "UPIRZZ": "max_sknt",
 
   "URIRZZ": "max_drct",
+  "URHRGZ": "max_drct",
 }
-mystates = ['IA', 'ND','SD','NE','KS','MO','MN','WI','IL','IN','OH','MI']
-coopVars = ['TAIRGX', 'TAIRGN', 'TAIRZNZ','TAIRZXZ', 'PPDRZZ']
+
+COOPSTATES = ['IA', 'ND', 'SD', 'NE', 'KS', 'MO',
+            'MN', 'WI', 'IL', 'IN', 'OH', 'MI']
+COOPVARS = ['TAIRGX', 'TAIRGN', 'TAIRZNZ', 'TAIRZXZ', 'PPDRZZ']
 EMAILS = 10
 
-class myIEMOB(iemAccessOb.iemAccessOb):
+class MyIEMOB(iemAccessOb.iemAccessOb):
+    """
+    Override the iemAccessOb class with my own query engine, so that we 
+    can capture errors for now!
+    """
 
-  def execQuery(self, sql, db, dbpool):
-    dbpool.runOperation( sql ).addErrback( email_error, sql)
+    def execQuery(self, sql, dbase, dbpool):
+        """
+        Execute queries with an error callback!
+        """
+        dbpool.runOperation( sql ).addErrback( email_error, sql)
 
 class SHEFIT(protocol.ProcessProtocol):
+    """
+    My process protocol for dealing with the SHEFIT program from the NWS
+    """
 
-  def __init__(self,shefdata):
-    self.shefdata = shefdata
-    self.data = ""
+    def __init__(self, shefdata):
+        self.shefdata = shefdata
+        self.data = ""
 
-  def connectionMade(self):
-    #print "SENDING", self.shefdata
-    self.transport.write(self.shefdata)
-    self.transport.closeStdin()
+    def connectionMade(self):
+        #print "sending %d bytes!" % len(self.shefdata)
+        #print "SENDING", self.shefdata
+        self.transport.write(self.shefdata)
+        self.transport.closeStdin()
 
-  def outReceived(self, data):
-    #print "GOT", data
-    self.data = self.data + data
+    def outReceived(self, data):
+        #print "GOT", data
+        self.data = self.data + data
+
+    def errReceived(self, data):
+        print "errReceived! with %d bytes!" % len(data)
+        print data
+
+#    def processEnded(self, status):
+#        print "debug: type(status): %s" % type(status.value)
+#        print "error: exitCode: %s" % status.value.exitCode
 
 
-  def outConnectionLost(self):
-    really_process(self.data)
+    def outConnectionLost(self):
+        if self.data == "":
+            rejects = open("empty.shef", 'a')
+            rejects.write( self.shefdata +"\003")
+            rejects.close()
+            return
+        try:
+            really_process(self.data)
+        except Exception,myexp:
+            email_error(myexp, self.shefdata)
 
 def email_error(message, product_text):
-  global EMAILS
-  log.msg( message )
-  EMAILS -= 1
-  if (EMAILS < 0):
-    return
+    global EMAILS
+    log.msg( message )
+    EMAILS -= 1
+    if (EMAILS < 0):
+        return
 
-  msg = MIMEText("Exception:\n%s\n\nRaw Product:\n%s" \
+    msg = MIMEText("Exception:\n%s\n\nRaw Product:\n%s" \
                  % (message, product_text))
-  msg['subject'] = 'shef_parser.py Traceback'
-  msg['From'] = secret.parser_user
-  msg['To'] = 'akrherz@iastate.edu'
-  smtp = smtplib.SMTP()
-  smtp.connect()
-  smtp.sendmail(msg['From'], msg['To'], msg.as_string())
-  smtp.close()
+    msg['subject'] = 'shef_parser.py Traceback'
+    msg['From'] = secret.parser_user
+    msg['To'] = 'akrherz@iastate.edu'
+    smtp = smtplib.SMTP()
+    smtp.connect()
+    smtp.sendmail(msg['From'], msg['To'], msg.as_string())
+    smtp.close()
+
+def clnstr(buf):
+    buf = buf.replace("\015\015\012", "\n")
+    buf = buf.replace("\003", "")
+    return buf.replace("\001", "")
 
 class myProductIngestor(ldmbridge.LDMProductReceiver):
 
 
-  def connectionLost(self, reason):
-    log.msg("LDM Closed PIPE")
+    def connectionLost(self, reason):
+        log.msg("LDM Closed PIPE")
 
-  def process_data(self, buf):
-    try:
-      self.real_process(buf)
-    except:
-      cstr = StringIO.StringIO()
-      traceback.print_exc(file=cstr)
-      cstr.seek(0)
-      errstr = cstr.read()
-      email_error(errstr, buf)
-
-  def real_process(self, buf):
-    s = SHEFIT(buf.replace("\003", "").replace("\001", "").replace("\015\015\012", "\n") )
-    reactor.spawnProcess(s, "shefit", ["shefit"], {})
+    def process_data(self, buf):
+        """
+        I am called from the ldmbridge when data is ahoy
+        """
+        shef = SHEFIT( clnstr(buf) )
+        reactor.spawnProcess(shef, "shefit", ["shefit"], {})
 
 def i_want_site(sid):
-  """ Return bool if I want to actually process this site """
-  if (len(sid) != 5):
-    return 0
-  if (not mesonet.nwsli2state.has_key(sid[-2:])):
-    return 0
+    """ Return bool if I want to actually process this site """
+    if (len(sid) != 5):
+        return 0
+    if (not mesonet.nwsli2state.has_key(sid[-2:])):
+        return 0
 
-  state = mesonet.nwsli2state[ sid[-2:]]
-  if (not state in mystates):
-    return 0
+    state = mesonet.nwsli2state[ sid[-2:]]
+    if (not state in COOPSTATES):
+        return 0
 
-  return 1
+    return 1
 
 def really_process(data):
-  # Now we loop over the data we got :)
-  mydata = {}
-  for line in data.split("\n"):
-    tokens = line.split()
-    if len(tokens) < 7:
-      continue
-    sid = tokens[0]
-    if (not i_want_site(sid)):
-      #print "I DONT WANT", sid
-      continue
-    if (not mydata.has_key(sid)):
-      mydata[sid] = {}
-    try:
-      ts = mx.DateTime.strptime("%s %s" % (tokens[1], tokens[2]), "%Y-%m-%d %H:%M:%S")
-    except:
-      print "DateParse error", tokens
-      return
-    if (not mydata[sid].has_key(ts)):
-      mydata[sid][ts] = {}
-    v = tokens[5]
-    val = tokens[6]
-    mydata[sid][ts][v] = val
+    """
+    This processes the output we get from the SHEFIT program
+    """
+    # Now we loop over the data we got :)
+    mydata = {}
+    for line in data.split("\n"):
+        # Skip blank output lines
+        if line.strip() == "":
+            continue
+        tokens = line.split()
+        if len(tokens) < 7:
+            print "NO ENOUGH TOKENS", line
+            continue
+        sid = tokens[0]
+        if (not i_want_site(sid)):
+            continue
+        if (not mydata.has_key(sid)):
+            mydata[sid] = {}
+        dstr = "%s %s" % (tokens[1], tokens[2])
+        ts = mx.DateTime.strptime(dstr, "%Y-%m-%d %H:%M:%S")
+        if (not mydata[sid].has_key(ts)):
+            mydata[sid][ts] = {}
 
-  for sid in mydata.keys():  # Get all stations in this report
+        varname = tokens[5]
+        value = float(tokens[6])
+        mydata[sid][ts][varname] = value
+
+    # Now we process each station we found in the report! :)
+    for sid in mydata.keys():
+        times = mydata[sid].keys()
+        times.sort()
+        for ts in times:
+            process_site(sid, ts, mydata[sid][ts])
+
+
+def process_site(sid, ts, data):
+    """ 
+    I process a dictionary of data for a particular site
+    """
     isCOOP = 0
     state = mesonet.nwsli2state[ sid[-2:]]
-    # We need to sort the times, so that we don't process old data?
-    times = mydata[sid].keys()
-    times.sort()
-    for ts in times:  # Each Time
-      #print sid, ts, mydata[sid][ts].keys()
-      # Loop thru vars to see if we have a COOP site?
-      for var in mydata[sid][ts].keys():
-        if (var in coopVars):
-          isCOOP = 1
-        if (not mapping.has_key(var)):
-          print "Couldn't map var: %s for SID: %s" % (var, sid)
-          mapping[var] = ""
-        if (not multiplier.has_key(var[:2])):
-          multiplier[var[:2]] = 1.0
-        dbpool2.runOperation("INSERT into raw%s(station, valid, key, value) \
-          VALUES('%s','%s+00', '%s', '%s')" % (ts.year, sid, \
-          ts.strftime("%Y-%m-%d %H:%M"), var, \
-          mydata[sid][ts][var])).addErrback(email_error, data)
+    #print sid, ts, mydata[sid][ts].keys()
+    # Loop thru vars to see if we have a COOP site?
+    for var in data.keys():
+        if (var in COOPVARS):
+            isCOOP = 1
+        if (not MAPPING.has_key(var)):
+            print "Couldn't map var: %s for SID: %s" % (var, sid)
+            MAPPING[var] = ""
+        if (not MULTIPLIER.has_key(var[:2])):
+            MULTIPLIER[var[:2]] = 1.0
+        HADSDB.runOperation("INSERT into raw%s \
+            (station, valid, key, value) \
+            VALUES('%s','%s+00', '%s', '%s')" % (ts.year, sid, \
+            ts.strftime("%Y-%m-%d %H:%M"), var, \
+            data[var])).addErrback(email_error, data)
 
-      #print sid, state, isCOOP
-      # Deterime if we want to waste the DB's time
-      # If COOP in MW, process it
-      if (isCOOP):
-        print "FIND COOP?", sid, ts, mydata[sid][ts].keys()
-        network = state+"_COOP"
-      # We are left with DCPs in Iowa
-      elif (state == "IA"):
+    #print sid, state, isCOOP
+    # Deterime if we want to waste the DB's time
+    # If COOP in MW, process it
+    if (isCOOP):
+        print "FIND COOP?", sid, ts, data.keys()
+        network = "%s_COOP" % (state,)
+    # We are left with DCPs in Iowa
+    elif (state == "IA"):
         network = "DCP"
-      # Everybody else can go away :)
-      else:
-        continue
+    # Everybody else can go away :)
+    else:
+        return
 
-      # Lets do this, finally.
-      #print "ACTUALLY PROCESSED", sid, network
-      iemob = myIEMOB(sid, network)
-      iemob.setObTimeGMT(ts)
-      iemob.data['year'] = ts.year
-      iemob.load_and_compare(iemaccess)
-      for var in mydata[sid][ts].keys():
-        iemob.data[ mapping[var] ] = cleaner(mydata[sid][ts][var]) * multiplier[var[:2]]
+    # Lets do this, finally.
+    #print "ACTUALLY PROCESSED", sid, network
+    iemob = MyIEMOB(sid, network)
+    iemob.setObTimeGMT(ts)
+    iemob.data['year'] = ts.year
+    iemob.load_and_compare(IEMACCESS)
+    for var in data.keys():
+        myval = data[var] * MULTIPLIER[var[:2]]
+        iemob.data[ MAPPING[var] ] = myval
+    iemob.updateDatabaseSummaryTemps(None, ACCESSDB)
+    iemob.updateDatabase(None, ACCESSDB)
 
-      iemob.updateDatabaseSummaryTemps(None, dbpool)
-      iemob.updateDatabase(None, dbpool)
-
-      del iemob
-
-def cleaner(v):
-  if (v == "" or v is None or v == "M"):
-    return -99
-  if (v.upper() == "T"):
-    return 0.0001
-  return float(v.replace("F","").replace("Q",""))
+    del iemob
 
 #
 fact = ldmbridge.LDMProductFactory( myProductIngestor() )
