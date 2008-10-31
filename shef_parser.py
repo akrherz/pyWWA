@@ -1,4 +1,4 @@
-# Copyright (c) 2005 Iowa State University
+# Copyright (c) 2005-2008 Iowa State University
 # http://mesonet.agron.iastate.edu/ -- mailto:akrherz@iastate.edu
 #
 # This program is free software; you can redistribute it and/or modify it under
@@ -21,7 +21,7 @@ log.startLogging(open('logs/shef_parser.log', 'a'))
 log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
 
 # System Imports
-import os, traceback, smtplib, StringIO
+import os, smtplib
 from email.mime.text import MIMEText
 
 # Stuff I wrote
@@ -38,7 +38,7 @@ import mx.DateTime
 # Setup Database Links
 ACCESSDB = adbapi.ConnectionPool("psycopg2", database='iem', host=secret.dbhost)
 HADSDB = adbapi.ConnectionPool("psycopg2", database='hads', host=secret.dbhost)
-i = iemdb.iemdb()
+i = iemdb.iemdb(secret.dbhost)
 IEMACCESS = i['iem']
 
 # Necessary for the shefit program to run A-OK
@@ -152,20 +152,32 @@ class SHEFIT(protocol.ProcessProtocol):
     """
 
     def __init__(self, shefdata):
+        """
+        Constructor
+        """
         self.shefdata = shefdata
         self.data = ""
 
     def connectionMade(self):
+        """
+        Fired when the program starts up and wants stdin
+        """
         #print "sending %d bytes!" % len(self.shefdata)
         #print "SENDING", self.shefdata
         self.transport.write(self.shefdata)
         self.transport.closeStdin()
 
     def outReceived(self, data):
+        """
+        Save the stdout we get from the program for later processing
+        """
         #print "GOT", data
         self.data = self.data + data
 
     def errReceived(self, data):
+        """
+        In case something comes to stderr 
+        """
         print "errReceived! with %d bytes!" % len(data)
         print data
 
@@ -175,6 +187,9 @@ class SHEFIT(protocol.ProcessProtocol):
 
 
     def outConnectionLost(self):
+        """
+        Once the program is done, we need to do something with the data
+        """
         if self.data == "":
             rejects = open("empty.shef", 'a')
             rejects.write( self.shefdata +"\003")
@@ -186,6 +201,9 @@ class SHEFIT(protocol.ProcessProtocol):
             email_error(myexp, self.shefdata)
 
 def email_error(message, product_text):
+    """
+    Generic something to send email error messages 
+    """
     global EMAILS
     log.msg( message )
     EMAILS -= 1
@@ -207,7 +225,7 @@ def clnstr(buf):
     buf = buf.replace("\003", "")
     return buf.replace("\001", "")
 
-class myProductIngestor(ldmbridge.LDMProductReceiver):
+class MyProductIngestor(ldmbridge.LDMProductReceiver):
 
 
     def connectionLost(self, reason):
@@ -253,20 +271,20 @@ def really_process(data):
         if (not mydata.has_key(sid)):
             mydata[sid] = {}
         dstr = "%s %s" % (tokens[1], tokens[2])
-        ts = mx.DateTime.strptime(dstr, "%Y-%m-%d %H:%M:%S")
-        if (not mydata[sid].has_key(ts)):
-            mydata[sid][ts] = {}
+        tstamp = mx.DateTime.strptime(dstr, "%Y-%m-%d %H:%M:%S")
+        if (not mydata[sid].has_key(tstamp)):
+            mydata[sid][tstamp] = {}
 
         varname = tokens[5]
         value = float(tokens[6])
-        mydata[sid][ts][varname] = value
+        mydata[sid][tstamp][varname] = value
 
     # Now we process each station we found in the report! :)
     for sid in mydata.keys():
         times = mydata[sid].keys()
         times.sort()
-        for ts in times:
-            process_site(sid, ts, mydata[sid][ts])
+        for tstamp in times:
+            process_site(sid, tstamp, mydata[sid][tstamp])
 
 
 def process_site(sid, ts, data):
@@ -319,5 +337,5 @@ def process_site(sid, ts, data):
     del iemob
 
 #
-fact = ldmbridge.LDMProductFactory( myProductIngestor() )
+fact = ldmbridge.LDMProductFactory( MyProductIngestor() )
 reactor.run()
