@@ -117,8 +117,8 @@ def process_site(metar):
     if (len(metar) < 10):
         return
 
-    # Remove any multiple whitespace
-    clean_metar = re.sub("\s+", " ", metar.strip())
+    # Remove any multiple whitespace, bad chars
+    clean_metar = (re.sub("\s+", " ", metar.strip())).encode('ascii','replace')
     # Only process US obs for now ....
     if (len(clean_metar) == 0 or clean_metar[0] not in ("K","X")):
         return
