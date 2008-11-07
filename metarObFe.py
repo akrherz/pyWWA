@@ -88,7 +88,8 @@ class myProductIngestor(ldmbridge.LDMProductReceiver):
 
     def processData(self, buf):
         try:
-            real_processor(buf)
+            buf = unicode(buf, errors='ignore')
+            real_processor( buf.encode('ascii', 'ignore') )
         except Exception, myexp:
             email_error(myexp, buf)
 
