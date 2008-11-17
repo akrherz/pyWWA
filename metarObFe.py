@@ -162,7 +162,7 @@ def process_site(metar):
     iem.data['phour'] = 0
     if mtr.precip_1hr:
         iem.data['phour'] = mtr.precip_1hr.value("IN")
-    iem.data['raw'] = clean_metar
+    iem.data['raw'] = clean_metar.replace("'", "")
     iem.updateDatabase(None, dbpool)
 
     # Search for tornado
