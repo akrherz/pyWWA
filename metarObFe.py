@@ -223,7 +223,9 @@ def process_site(metar):
 
 def sendAlert(iemid, what, clean_metar):
     print "ALERTING"
-    mesosite = pg.connect('mesosite', secret.dbhost)
+    mesosite = pg.connect('mesosite')
+    if ISIEM:
+        mesosite = pg.connect('mesosite', secret.dbhost)
     rs = mesosite.query("SELECT wfo, state, name from stations \
            WHERE id = '%s' " % (iemid,) ).dictresult()
     if (len(rs) == 0):
@@ -246,7 +248,9 @@ def sendWindAlert(iemid, v, d, t, clean_metar):
     """
     Send a wind alert please
     """
-    mesosite = pg.connect('mesosite', secret.dbhost)
+    mesosite = pg.connect('mesosite')
+    if ISIEM:
+        mesosite = pg.connect('mesosite', secret.dbhost)
     rs = mesosite.query("SELECT wfo, state, name from stations \
            WHERE id = '%s' " % (iemid,) ).dictresult()
     if (len(rs) == 0):
