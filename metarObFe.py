@@ -43,6 +43,11 @@ FUNNEL_RE = re.compile(r" FC |FUNNEL")
 HAIL_RE = re.compile(r"GR")
 EMAILS = 10
 
+# Grrrr, hack to keep iemingest in check
+ISIEM = True
+if (secret.chatserver == "nwschat.weather.gov"):
+  ISIEM = False
+
 def email_error(message, product_text):
     """
     Generic something to send email error messages 
@@ -144,7 +149,8 @@ def process_site(metar):
                   mtr.time.day, mtr.time.hour, mtr.time.minute)
 
     iem.setObTimeGMT(gts)
-    iem.load_and_compare(iemaccess)
+    if ISIEM:
+        iem.load_and_compare(iemaccess)
     if (mtr.temp):
         iem.data['tmpf'] = mtr.temp.value("F")
     if (mtr.dewpt):
@@ -163,7 +169,8 @@ def process_site(metar):
     if mtr.precip_1hr:
         iem.data['phour'] = mtr.precip_1hr.value("IN")
     iem.data['raw'] = clean_metar.replace("'", "")
-    iem.updateDatabase(None, dbpool)
+    if ISIEM:
+        iem.updateDatabase(None, dbpool)
 
     # Search for tornado
     if (len(TORNADO_RE.findall(clean_metar)) > 0):
@@ -203,13 +210,13 @@ def process_site(metar):
             windAlerts[key] = 1
             sendWindAlert(iemid, v, d, t, clean_metar)
 
-
-        d0 = {}
-        d0['stationID'] = mtr.station_id
-        d0['peak_gust'] = v
-        d0['peak_ts'] = t.strftime("%Y-%m-%d %H:%M:%S")
-        d0['year'] = t.strftime("%Y")
-        iem.updateDatabasePeakWind(iemaccess, d0, dbpool)
+        if ISIEM:
+            d0 = {}
+            d0['stationID'] = mtr.station_id
+            d0['peak_gust'] = v
+            d0['peak_ts'] = t.strftime("%Y-%m-%d %H:%M:%S")
+            d0['year'] = t.strftime("%Y")
+            iem.updateDatabasePeakWind(iemaccess, d0, dbpool)
 
 
     del mtr, iem
