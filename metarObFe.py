@@ -27,7 +27,7 @@ from pyIEM import iemAccessOb, mesonet, ldmbridge, iemdb
 from twisted.enterprise import adbapi
 from metar import Metar
 from email.MIMEText import MIMEText
-import smtplib, secret, mx.DateTime
+import smtplib, secret, mx.DateTime, pg
 from common import *
 
 
@@ -223,8 +223,7 @@ def process_site(metar):
 
 def sendAlert(iemid, what, clean_metar):
     print "ALERTING"
-    i = iemdb.iemdb(dhost=secret.dbhost)
-    mesosite = i['mesosite']
+    mesosite = pg.connect('mesosite', secret.dbhost)
     rs = mesosite.query("SELECT wfo, state, name from stations \
            WHERE id = '%s' " % (iemid,) ).dictresult()
     if (len(rs) == 0):
@@ -247,8 +246,7 @@ def sendWindAlert(iemid, v, d, t, clean_metar):
     """
     Send a wind alert please
     """
-    i = iemdb.iemdb(dhost=secret.dbhost)
-    mesosite = i['mesosite']
+    mesosite = pg.connect('mesosite', secret.dbhost)
     rs = mesosite.query("SELECT wfo, state, name from stations \
            WHERE id = '%s' " % (iemid,) ).dictresult()
     if (len(rs) == 0):
