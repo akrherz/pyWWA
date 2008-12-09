@@ -69,7 +69,7 @@ class JabberClient:
             return
 
         message = domish.Element(('jabber:client','message'))
-        message['to'] = "iembot@%s" % (secret.chatserver,)
+        message['to'] = "%s@%s" % (secret.iembot_user, secret.chatserver)
         message['type'] = 'chat'
         message.addElement('body',None,body)
 
