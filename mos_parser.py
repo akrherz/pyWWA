@@ -83,9 +83,8 @@ def section_parser(sect):
       if (len(line) < 10):
         continue
       vname = line[:3].replace("/","_")
-      if (vname == "ZSN"):
-        print "DARYL", lines
-        return
+      if (vname == "X_N"):
+        vname = "N_X"
       vals = re.findall("(...)", line[4:])
       for i in range(len(vals)):
         if vname == "T06" and [0,6,12,18].__contains__(times[i+1].hour):
