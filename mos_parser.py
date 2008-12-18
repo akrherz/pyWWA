@@ -106,7 +106,7 @@ def section_parser(sect):
       if (ts == initts):
         continue
       fst = "INSERT into t%s (station, model, runtime, ftime," % (initts.year,)
-      sst = "VALUES('%s','%s','%s','%s'," % (station, model, initts, ts)
+      sst = "VALUES('%s','%s','%s+00','%s+00'," % (station, model, initts, ts)
       for vname in data[ts].keys():
         fst += " %s," % (vname,)
         sst += " '%s'," % (data[ts][vname],)
