@@ -206,6 +206,8 @@ def real_processor(nws):
     _state = 0
     i = 0
     time_floor = mx.DateTime.now() - mx.DateTime.RelativeDateTime(hours=12)
+    min_time = mx.DateTime.DateTime(2040,1,1)
+    max_time = mx.DateTime.DateTime(1970,1,1)
     while (i < len(lines)):
         # Line must start with a number?
         if (len(lines[i]) < 40 or (re.match("[0-9]", lines[i][0]) == None)):
@@ -215,6 +217,10 @@ def real_processor(nws):
         lsr = LSR()
         lsr.consume_lines( lines[i], lines[i+1])
         lsr.set_gts(tsoff)
+        if (lsr.gts > max_time):
+            max_time = lsr.gts
+        if (lsr.gts < min_time):
+            min_time = lsr.gts
 
         i += 1
 
@@ -279,6 +285,16 @@ def real_processor(nws):
 
         DBPOOL.runOperation(sql)
 
+    if (nws.raw.find("...SUMMARY") > 1):
+        uri = secret.MAP_LSR
+        uri += "?lat0=%s&amp;lon0=-%s&amp;ts=%s&amp;ts2=%s" % \
+             (lsr.lat,lsr.lon,min_time.strftime("%Y-%m-%d%%20%H:%M"),\
+              max_time.strftime("%Y-%m-%d%%20%H:%M") )
+        jabber_text = "%s: %s issues Summary Local Storm Report %s" % \
+           (wfo, wfo, uri)
+        jabber_html = "%s issues <a href='%s'>Summary Local Storm Report</a>"\
+            % (wfo, uri)
+        jabber.sendMessage(jabber_text, jabber_html)
 
 myJid = jid.JID('%s@%s/lsr_parse_%s' % \
       (secret.iembot_ingest_user, secret.chatserver, \
