@@ -287,9 +287,9 @@ def real_processor(nws):
 
     if (nws.raw.find("...SUMMARY") > 1):
         uri = secret.MAP_LSR
-        uri += "?lat0=%s&amp;lon0=-%s&amp;ts=%s&amp;ts2=%s" % \
+        uri += "?lat0=%s&amp;lon0=-%s&amp;ts=%s&amp;ts2=%s&amp;wfo=%s" % \
              (lsr.lat,lsr.lon,min_time.strftime("%Y-%m-%d%%20%H:%M"),\
-              max_time.strftime("%Y-%m-%d%%20%H:%M") )
+              max_time.strftime("%Y-%m-%d%%20%H:%M"), wfo )
         jabber_text = "%s: %s issues Summary Local Storm Report %s" % \
            (wfo, wfo, uri)
         jabber_html = "%s issues <a href='%s'>Summary Local Storm Report</a>"\
