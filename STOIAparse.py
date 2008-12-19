@@ -47,7 +47,7 @@ def findString(cond, sstr):
   return False
 
 def figureCondition(condition, conditions):
-  for typ in ["Closed", "Travel Advisory", "CC Ice", "CC Snow", "CC_Slush",
+  for typ in ["Closed", "Travel Advisory", "CC Ice", "CC Snow", "CC Slush",
            "CC Mixed", "MC Ice", "MC Snow", "MC Slush", "MC Mixed",
            "PC Ice", "PC Snow", "PC Slush", "PC Mixed", "CC Frost",
            "MC Frost", "PC Frost", "Wet", "Normal", "No Conditions Reproted"]:
