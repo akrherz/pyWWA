@@ -55,6 +55,14 @@ class ProcessingError(Exception):
 class MyProductIngestor(ldmbridge.LDMProductReceiver):
     """ I receive products from ldmbridge and process them 1 by 1 :) """
 
+    def connectionLost(self, reason):
+        print 'connectionLost', reason
+        reactor.callLater(5, self.shutdown)
+
+    def shutdown(self):
+        reactor.callWhenRunning(reactor.stop)
+
+
     def process_data(self, buf):
         """ Process the product """
         try:
@@ -89,10 +97,6 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
             smtp.connect()
             smtp.sendmail(msg["From"], msg["To"], msg.as_string())
             smtp.close()
-
-    def connectionLost(self, reason):
-        """ I lost my connection, should I do anything else? """
-        log.msg("LDM Closed PIPE")
 
 def alert_error(tp, errorText):
     msg = "%s: iembot processing error:\nProduct: %s\nError:%s" % \
