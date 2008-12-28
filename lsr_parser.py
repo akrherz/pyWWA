@@ -16,13 +16,12 @@
 """ LSR product ingestor """
 
 # Get the logger going, asap
-import os
 from twisted.python import log
 log.startLogging(open('logs/lsrParse.log', 'a'))
 log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
 
 # Standard python imports
-import re, traceback, StringIO, pickle
+import re, pickle
 from email.MIMEText import MIMEText
 
 # Third party python stuff
@@ -38,6 +37,7 @@ import secret
 from support import TextProduct,  ldmbridge, reference
 
 DBPOOL = adbapi.ConnectionPool("psycopg2", database=secret.dbname, host=secret.dbhost, password=secret.dbpass)
+EMAILS = 10
 
 class ProcessingException(Exception):
     """ Generic Exception for processing errors I can handle"""
@@ -72,13 +72,31 @@ def pickledb():
     """ Dump our database to a flat file """
     pickle.dump(LSRDB, open('lsrdb.p','w'))
 
+def email_error(message, product_text):
+    """
+    Generic something to send email error messages 
+    """
+    global EMAILS
+    log.msg( message )
+    EMAILS -= 1
+    if (EMAILS < 0):
+        return
+
+    msg = MIMEText("Exception:\n%s\n\nRaw Product:\n%s" \
+                 % (message, product_text))
+    msg['subject'] = 'lsr_parser.py Traceback'
+    msg['From'] = secret.parser_user
+    msg['To'] = 'akrherz@iastate.edu'
+    smtp.sendmail("mailhub.iastate.edu", msg["From"], msg["To"], msg)
+
+
 class MyProductIngestor(ldmbridge.LDMProductReceiver):
     """ I process products handed off to me from faithful LDM """
 
     def process_data(self, buf):
         """ @buf: String that is a Text Product """
         if (len(buf) < 50):
-            log.msg("Too short LSR product founded:\n%s" % (buf,))
+            log.msg("Too short LSR product found:\n%s" % (buf,))
             return
 
         raw = buf.replace("\015\015\012", "\n")
@@ -87,21 +105,16 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
             real_processor(nws)
         except ProcessingException, msg:
             send_iemchat_error(nws, msg)
-        except:
-            sio = StringIO.StringIO()
-            traceback.print_exc(file=sio)
-            log.msg( sio.getvalue() )
-            msg = MIMEText("%s\n\n>RAW DATA\n\n%s" % (sio.getvalue(), raw) )
-            msg['subject'] = 'Unhandled lsrParse.py Traceback'
-            msg['From'] = secret.parser_user
-            msg['To'] = "akrherz@iastate.edu"
-
-            smtp.sendmail("mailhub.iastate.edu", msg["From"], msg["To"], msg)
+        except Exception,myexp:
+            email_error(myexp, buf)
 
     def connectionLost(self, reason):
-        """ I should probably do other things """
-        log.msg(reason)
-        log.msg("LDM Closed PIPE")
+        print 'connectionLost', reason
+        reactor.callLater(5, self.shutdown)
+
+    def shutdown(self):
+        reactor.callWhenRunning(reactor.stop)
+
 
 
 def send_iemchat_error(nws, msgtxt):
@@ -206,8 +219,10 @@ def real_processor(nws):
     _state = 0
     i = 0
     time_floor = mx.DateTime.now() - mx.DateTime.RelativeDateTime(hours=12)
-    min_time = mx.DateTime.DateTime(2040,1,1)
-    max_time = mx.DateTime.DateTime(1970,1,1)
+    min_time = mx.DateTime.DateTime(2040, 1, 1)
+    max_time = mx.DateTime.DateTime(1970, 1, 1)
+    duplicates = 0
+    new_reports = 0
     while (i < len(lines)):
         # Line must start with a number?
         if (len(lines[i]) < 40 or (re.match("[0-9]", lines[i][0]) == None)):
@@ -258,7 +273,9 @@ def real_processor(nws):
 
         if (LSRDB.has_key(unique_key)):
             log.msg("DUP! %s" % (unique_key,))
+            duplicates += 1
             continue
+        new_reports += 1
         LSRDB[ unique_key ] = mx.DateTime.gmt()
 
         mag_long = lsr.mag_string()
@@ -283,17 +300,22 @@ def real_processor(nws):
            lsr.state, lsr.source, \
            re.sub("'", "\\'", lsr.remark), lsr.lon, lsr.lat, wfo, lsr.typetext)
 
-        DBPOOL.runOperation(sql)
+        DBPOOL.runOperation(sql).addErrback( email_error, sql)
 
     if (nws.raw.find("...SUMMARY") > 1):
+        extra_text = ""
+        if (duplicates > 0):
+            extra_text = ", %s out of %s reports were previously \
+sent and not repeated here." % (duplicates, duplicates + new_reports)
+
         uri = secret.MAP_LSR
         uri += "?lat0=%s&amp;lon0=-%s&amp;ts=%s&amp;ts2=%s&amp;wfo=%s" % \
              (lsr.lat,lsr.lon,min_time.strftime("%Y-%m-%d%%20%H:%M"),\
               max_time.strftime("%Y-%m-%d%%20%H:%M"), wfo )
-        jabber_text = "%s: %s issues Summary Local Storm Report %s" % \
-           (wfo, wfo, uri)
-        jabber_html = "%s issues <a href='%s'>Summary Local Storm Report</a>"\
-            % (wfo, uri)
+        jabber_text = "%s: %s issues Summary Local Storm Report %s%s" % \
+           (wfo, wfo, uri, extra_text)
+        jabber_html = "%s issues <a href='%s'>Summary Local Storm Report</a>%s"\
+            % (wfo, uri, extra_text)
         jabber.sendMessage(jabber_text, jabber_html)
 
 myJid = jid.JID('%s@%s/lsr_parse_%s' % \
@@ -310,7 +332,7 @@ factory.addBootstrap("//event/stream/error", jabber.debug)
 
 reactor.connectTCP(secret.connect_chatserver, 5222, factory)
 
-ldm = ldmbridge.LDMProductFactory( MyProductIngestor() )
+LDM = ldmbridge.LDMProductFactory( MyProductIngestor() )
 reactor.callLater( 20, cleandb)
 reactor.run()
 
