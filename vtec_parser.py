@@ -41,6 +41,7 @@ log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
 POSTGIS = pg.connect(secret.dbname, secret.dbhost, user=secret.dbuser, passwd=secret.dbpass)
 DBPOOL = adbapi.ConnectionPool("psycopg2", database=secret.dbname, host=secret.dbhost, password=secret.dbpass)
 
+EMAILS = 10
 
 class NoVTECFoundError(Exception):
     """ Exception place holder """
@@ -49,6 +50,23 @@ class NoVTECFoundError(Exception):
 class ProcessingError(Exception):
     """ Exception place holder """
     pass
+
+def email_error(message, product_text):
+    """
+    Generic something to send email error messages 
+    """
+    global EMAILS
+    log.msg( message )
+    EMAILS -= 1
+    if (EMAILS < 0):
+        return
+
+    msg = MIMEText("Exception:\n%s\n\nRaw Product:\n%s" \
+                 % (message, product_text))
+    msg['subject'] = 'vtec_parser.py Traceback'
+    msg['From'] = secret.parser_user
+    msg['To'] = 'akrherz@iastate.edu'
+    smtp.sendmail("mailhub.iastate.edu", msg["From"], msg["To"], msg)
 
 
 # LDM Ingestor
@@ -83,20 +101,8 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
                 jabber.sendMessage(jabber_txt, jabber_html)
                
 
-        except:
-            sio = StringIO.StringIO()
-            traceback.print_exc(file=sio)
-            log.msg( sio.getvalue() )
-            msg = MIMEText("%s\n\n>RAW DATA\n\n%s" % (sio.getvalue(),
-                   buf.replace("\015\015\012", "\n") ) )
-            msg['subject'] = 'vtec_parse.py Traceback'
-            msg['From'] = secret.parser_user
-            msg['To'] = "akrherz@iastate.edu"
-
-            smtp = smtplib.SMTP()
-            smtp.connect()
-            smtp.sendmail(msg["From"], msg["To"], msg.as_string())
-            smtp.close()
+        except Exception, myexp:
+            email_error(myexp, buf)
 
 def alert_error(tp, errorText):
     msg = "%s: iembot processing error:\nProduct: %s\nError:%s" % \
@@ -229,7 +235,7 @@ def segment_processor(text_product, i, skip_con):
                        flood_text.replace("'","\\'"), \
                        forecast_text.replace("'","\\'"),\
                        hvtec[0].severity )
-                DBPOOL.runOperation( sql )
+                DBPOOL.runOperation( sql ).addErrback( email_error, sql)
           
 
         warning_table = "warnings_%s" % (text_product.issueTime.year,)
@@ -260,7 +266,7 @@ fcster, hvtec_nwsli) VALUES ('%s+00','%s+00','%s','%s','%s','%s','%s', \
    % (warning_table, bts, vtec.endTS , text_product.sqlraw(), vtec.significance, \
       seg.giswkt, vtec.phenomena, 'P', vtec.office, vtec.ETN, vtec.action, \
       text_product.issueTime, fcster, seg.get_hvtec_nwsli() )
-                DBPOOL.runOperation( sql )
+                DBPOOL.runOperation( sql ).addErrback( email_error, sql)
 
             # Insert Counties
             for k in range(len(ugc)):
@@ -276,7 +282,7 @@ hvtec_nwsli) VALUES('%s+00', '%s+00', '%s',\
 vtec.phenomena, vtec.office, vtec.ETN, \
 vtec.action, text_product.issueTime, fcster, cnty, vtec.significance, \
 seg.get_hvtec_nwsli() )
-                DBPOOL.runOperation( sql )
+                DBPOOL.runOperation( sql ).addErrback( email_error, sql)
             for w in affectedWFOS.keys():
                 jmsg_dict['w'] = w
                 jabberTxt = "%(w)s: %(wfo)s %(product)s%(sts)sfor \
@@ -299,7 +305,7 @@ till %(ets)s %(svs_special)s" % jmsg_dict
               (warning_table, vtec.action, text_product.issueTime, cnty, \
                vtec.office, vtec.ETN,\
                             vtec.phenomena, vtec.significance)
-                DBPOOL.runOperation( sql )
+                DBPOOL.runOperation( sql ).addErrback( email_error, sql)
 
             if (len(seg.vtec) == 1):
                 sql = "UPDATE %s SET status = '%s',  \
@@ -308,7 +314,7 @@ till %(ets)s %(svs_special)s" % jmsg_dict
                      and significance = '%s'" % (warning_table, vtec.action, \
        text_product.issueTime, vtec.office, \
        vtec.ETN, vtec.phenomena, vtec.significance)
-                DBPOOL.runOperation( sql )
+                DBPOOL.runOperation( sql ).addErrback( email_error, sql)
 
             jabberTxt = "%(wfo)s: %(wfo)s %(product)s%(sts)sfor \
 %(county)s till %(ets)s %(svs_special)s %(urlbase)s?year=%(year)s&amp;wfo=%(wfo)s&amp;\
@@ -341,7 +347,7 @@ till %(ets)s %(svs_special)s" % jmsg_dict
              (warning_table, vtec.action, end_ts, text_product.issueTime, issueSpecial, \
               cnty, vtec.office, vtec.ETN, \
               vtec.phenomena, vtec.significance)
-                DBPOOL.runOperation( sql )
+                DBPOOL.runOperation( sql ).addErrback( email_error, sql)
 
             # If this is the only county, we can cancel the polygon too
             if (len(text_product.segments) == 1):
@@ -352,7 +358,7 @@ till %(ets)s %(svs_special)s" % jmsg_dict
                      and significance = '%s'" % (warning_table, vtec.action, end_ts, \
       text_product.issueTime, vtec.office, vtec.ETN, \
       vtec.phenomena, vtec.significance)
-                DBPOOL.runOperation( sql )
+                DBPOOL.runOperation( sql ).addErrback( email_error, sql)
 
             jmsg_dict['action'] = "cancels"
             fmt = "%(w)s: %(wfo)s  %(product)s for %(county)s %(svs_special)s \
@@ -393,7 +399,7 @@ eventid=%(eventid)s&amp;significance=%(significance)s'>%(product)s</a>\
                    (warning_table, text_product.sqlraw(), vtec.ETN, vtec.office, \
                     vtec.phenomena, vtec.significance, ugc_limiter[:-1] )
             log.msg("Updating SVS For:"+ ugc_limiter[:-1] )
-            DBPOOL.runOperation( sql )
+            DBPOOL.runOperation( sql ).addErrback( email_error, sql)
 
     # Update polygon if necessary
     if (vtec.action != "NEW" and seg.giswkt is not None):
@@ -405,7 +411,7 @@ eventid=%(eventid)s&amp;significance=%(significance)s'>%(product)s</a>\
                (warning_table, text_product.sqlraw(), vtec.ETN, vtec.office, \
                 vtec.phenomena, vtec.significance )
         log.msg("Updating SVS For Polygon")
-        DBPOOL.runOperation( sql )
+        DBPOOL.runOperation( sql ).addErrback( email_error, sql)
 
     # New fancy SBW Stuff!
     if seg.giswkt is not None:
@@ -423,7 +429,7 @@ eventid=%(eventid)s&amp;significance=%(significance)s'>%(product)s</a>\
                 (text_product.issueTime.year, \
                 text_product.issueTime, text_product.issueTime, \
                 vtec.ETN, vtec.office, vtec.phenomena, vtec.significance)
-             DBPOOL.runOperation( sql )
+             DBPOOL.runOperation( sql ).addErrback( email_error, sql)
 
         # If we are VTEC CON, then we need to find the last polygon
         # and update its expiration time, since we have new info!
@@ -433,7 +439,7 @@ eventid=%(eventid)s&amp;significance=%(significance)s'>%(product)s</a>\
                 and phenomena = '%s' and significance = '%s'" % \
                 (text_product.issueTime.year, text_product.issueTime, \
                 vtec.ETN, vtec.office, vtec.phenomena, vtec.significance)
-            DBPOOL.runOperation( sql )
+            DBPOOL.runOperation( sql ).addErrback( email_error, sql)
 
 
         my_sts = "'%s+00'" % (vtec.beginTS,)
@@ -484,7 +490,7 @@ eventid=%(eventid)s&amp;significance=%(significance)s'>%(product)s</a>\
                  vtec.significance, vtec.phenomena, my_sts, vtec.endTS, \
                  vtec.endTS, (vtec.beginTS or text_product.issueTime), \
                  vtec.endTS, seg.giswkt, vtec.action, product_text)
-        DBPOOL.runOperation(sql)
+        DBPOOL.runOperation(sql).addErrback( email_error, sql)
 
 
 """ Load me up with NWS dictionaries! """
