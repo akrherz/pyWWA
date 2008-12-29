@@ -22,9 +22,10 @@ from twisted.words.protocols.jabber import client, jid, xmlstream
 from twisted.internet import reactor
 from twisted.python import log
 from twisted.enterprise import adbapi
+from twisted.mail import smtp
 
 # Standard Python modules
-import os, re, traceback, StringIO, smtplib
+import os, re, traceback, StringIO
 from email.MIMEText import MIMEText
 
 # Python 3rd Party Add-Ons
@@ -58,30 +59,42 @@ routes = {'TCPAT[0-9]': gulfwfo,
 
 SIMPLE_PRODUCTS = ["TCE", "DSA", "AQA", "DGT", "FWF", "RTP", "HPA", "CWF", 
             "SRF", "SFT", "PFM", "ZFP", "CAE", "AFD", "FTM", "AWU", "HWO",
-            "NOW", "PSH", "NOW", "PNS", "RER", "ADM", "TCU"]
+            "NOW", "PSH", "NOW", "PNS", "RER", "ADM", "TCU", "RVF"]
+
+EMAILS = 10
+
+def email_error(message, product_text):
+    """
+    Generic something to send email error messages 
+    """
+    global EMAILS
+    log.msg( message )
+    EMAILS -= 1
+    if (EMAILS < 0):
+        return
+
+    msg = MIMEText("Exception:\n%s\n\nRaw Product:\n%s" \
+                 % (message, product_text))
+    msg['subject'] = 'generic_product.py Traceback'
+    msg['From'] = secret.parser_user
+    msg['To'] = 'akrherz@iastate.edu'
+    smtp.sendmail("mailhub.iastate.edu", msg["From"], msg["To"], msg)
+
 
 class myProductIngestor(ldmbridge.LDMProductReceiver):
 
     def process_data(self, buf):
         try:
             real_process(buf)
-        except:
-            io = StringIO.StringIO()
-            traceback.print_exc(file=io)
-            log.msg( io.getvalue() )
-            msg = MIMEText("%s\n\n>RAW DATA\n\n%s"%(io.getvalue(),buf.replace("\015\015\012", "\n") ))
-            msg['subject'] = 'generic_product.py Traceback'
-            msg['From'] = secret.parser_user
-            msg['To'] = "akrherz@iastate.edu"
+        except Exception, myexp:
+            email_error(myexp, buf)
 
-            s = smtplib.SMTP()
-            s.connect()
-            s.sendmail(msg["From"], msg["To"], msg.as_string())
-            s.close()
+    def connectionLost(self, reason):
+        print 'connectionLost', reason
+        reactor.callLater(5, self.shutdown)
 
-    def connectionLost(self,reason):
-        log.msg(reason)
-        log.msg("LDM Closed PIPE")
+    def shutdown(self):
+        reactor.callWhenRunning(reactor.stop)
 
 
 prodDefinitions = {
@@ -134,6 +147,7 @@ prodDefinitions = {
     'AQA': 'Air Quality Alert (AQA)',
     'DSA': 'Tropical Disturbance Statement (DSA)',
     'TCE': 'Tropical Cyclone Position Estimate (TCE)',
+    'RVF': 'River Forecast (RVF)',
 }
 
 ugc_dict = {}
@@ -198,7 +212,7 @@ def real_process(raw):
     if (len(prod.segments) > 0 and prod.segments[0].giswkt):
         sql = "INSERT into text_products(product, product_id, geom) \
       values ('%s','%s','%s')" % (sqlraw, product_id, prod.segments[0].giswkt)
-    DBPOOL.runOperation(sql)
+    DBPOOL.runOperation(sql).addErrback( email_error, sql)
     myurl = "%s?pid=%s" % (secret.PROD_URL, product_id)
 
     # Just send with optional headline to rooms...
