@@ -261,29 +261,36 @@ def real_process(raw):
                 return
             hsas = re.findall("HSA:([A-Z]{3}) ", seg.raw)
             prodtxt = prodDefinitions[pil]
-            mess = "%s: %s issues %s for " % \
+            mess = "%s: %s issues %s" % \
               (wfo, wfo, prodtxt)
             htmlmess = "%s issues <a href=\"%s\">%s</a> for " \
                % (wfo, myurl, prodtxt)
             usednwsli = {}
             hsa_cnt = -1
+            rivers = {}
             for nwsli in tokens:
                 if usednwsli.has_key(nwsli):
                     continue
                 usednwsli[nwsli] = 1
                 hsa_cnt += 1
-                rname = "((%s))" % (nwsli,)
                 if (nwsli_dict.has_key(nwsli)):
-                    rname = "the "+ nwsli_dict[nwsli]
-                mess += "%s (%s), " % (rname, nwsli)
+                    rname = nwsli_dict[nwsli]['rname']
+                    r = nwsli_dict[nwsli]['river']
+                else:
+                    rname = "((%s))" % (nwsli,)
+                    r = "Unknown River"
+                if not rivers.has_key(r):
+                    rivers[r] = "<br/>%s " % (r,)
                 if len(hsas) > hsa_cnt and \
                    reference.wfo_dict.has_key( hsas[hsa_cnt] ):
                     uri = AHPS_TEMPLATE[ reference.wfo_dict[hsas[hsa_cnt]]['region'] ] %\
                         (hsas[hsa_cnt].lower(), nwsli.lower() ) 
-                    htmlmess += "<a href=\"%s\">%s</a> (%s), " % (uri, rname, nwsli)
+                    rivers[r] += "<a href=\"%s\">%s</a> (%s), " % (uri, rname, nwsli)
                 else:
-                    htmlmess += "%s (%s), " % (rname, nwsli)
-            jabber.sendMessage(mess[:-2] +" "+ myurl, htmlmess[:-2])
+                    rivers[r] += "%s (%s), " % (rname, nwsli)
+            for r in rivers.keys():
+                htmlmess += " %s" % (rivers[r][:-2],)
+            jabber.sendMessage(mess[:-1] +" "+ myurl, htmlmess[:-1])
             continue
 
 # PUBLIC ADVISORY NUMBER 10 FOR REMNANTS OF BARRY
@@ -384,12 +391,14 @@ def real_process(raw):
 
 """ Load up H-VTEC NWSLI reference """
 nwsli_dict = {}
-sql = "SELECT nwsli, \
- river_name || ' ' || proximity || ' ' || name || ' ['||state||']' as rname \
+sql = "SELECT nwsli, river_name as r, \
+ proximity || ' ' || name || ' ['||state||']' as rname \
  from hvtec_nwsli"
 rs = POSTGIS.query(sql).dictresult()
 for i in range(len(rs)):
-    nwsli_dict[ rs[i]['nwsli'] ] = (rs[i]['rname']).replace("&"," and ")
+    nwsli_dict[ rs[i]['nwsli'] ] = {
+      'rname': (rs[i]['rname']).replace("&"," and "), 
+      'river': (rs[i]['r']).replace("&"," and ") }
 
 
 
