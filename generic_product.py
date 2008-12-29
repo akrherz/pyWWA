@@ -63,6 +63,15 @@ SIMPLE_PRODUCTS = ["TCE", "DSA", "AQA", "DGT", "FWF", "RTP", "HPA", "CWF",
 
 EMAILS = 10
 
+AHPS_TEMPLATE = {
+  'CR': 'http://www.crh.noaa.gov/ahps2/hydrograph.php?wfo=%s&amp;gage=%s&amp;view=1,1,1,1,1,1,1,1',
+  'SR': 'http://ahps.srh.noaa.gov/ahps2/hydrograph.php?wfo=%s&amp;gage=%s&amp;view=1,1,1,1,1,1,1,1',
+  'ER': 'http://newweb.erh.noaa.gov/ahps2/hydrograph.php?wfo=%s&amp;gage=%s&amp;view=1,1,1,1,1,1,1,1',
+  'WR': 'http://ahps2.wrh.noaa.gov/ahps2/hydrograph.php?wfo=%s&amp;gage=%s&amp;view=1,1,1,1,1,1,1,1',
+  'PR': 'http://aprfc.arh.noaa.gov/ahps2/hydrograph.php?wfo=%s&amp;gage=%s&amp;view=1,1,1,1,1,1,1,1',
+}
+
+
 def email_error(message, product_text):
     """
     Generic something to send email error messages 
@@ -250,21 +259,30 @@ def real_process(raw):
             if (len(tokens) == 0):
                 print 'Whoa, did not find NWSLI?', seg
                 return
+            hsas = re.findall("HSA:([A-Z]{3}) ", seg.raw)
             prodtxt = prodDefinitions[pil]
             mess = "%s: %s issues %s for " % \
               (wfo, wfo, prodtxt)
-            htmlmess = "%s issues <a href=\"%s\">%s</a> for" \
+            htmlmess = "%s issues <a href=\"%s\">%s</a> for " \
                % (wfo, myurl, prodtxt)
             usednwsli = {}
+            hsa_cnt = -1
             for nwsli in tokens:
                 if usednwsli.has_key(nwsli):
                     continue
                 usednwsli[nwsli] = 1
+                hsa_cnt += 1
                 rname = "((%s))" % (nwsli,)
                 if (nwsli_dict.has_key(nwsli)):
                     rname = "the "+ nwsli_dict[nwsli]
                 mess += "%s (%s), " % (rname, nwsli)
-                htmlmess += "%s (%s), " % (rname, nwsli)
+                if len(hsas) > hsa_cnt and \
+                   reference.wfo_dict.has_key( hsas[hsa_cnt] ):
+                    uri = AHPS_TEMPLATE[ reference.wfo_dict[hsas[hsa_cnt]]['region'] ] %\
+                        (hsas[hsa_cnt].lower(), nwsli.lower() ) 
+                    htmlmess += "<a href=\"%s\">%s</a> (%s), " % (uri, rname, nwsli)
+                else:
+                    htmlmess += "%s (%s), " % (rname, nwsli)
             jabber.sendMessage(mess[:-2] +" "+ myurl, htmlmess[:-2])
             continue
 
