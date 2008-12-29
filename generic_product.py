@@ -250,16 +250,18 @@ def real_process(raw):
             if (len(tokens) == 0):
                 print 'Whoa, did not find NWSLI?', seg
                 return
-            nwsli = tokens[0]
-            rname = "((%s))" % (nwsli,)
-            if (nwsli_dict.has_key(nwsli)):
-                rname = "the "+ nwsli_dict[nwsli]
             prodtxt = prodDefinitions[pil]
-            mess = "%s: %s issues %s for %s (%s) %s" % \
-              (wfo, wfo, prodtxt, rname, nwsli, myurl)
-            htmlmess = "%s issues <a href=\"%s\">%s</a> for %s (%s)" \
-               % (wfo, myurl, prodtxt, rname, nwsli)
-            jabber.sendMessage(mess, htmlmess)
+            mess = "%s: %s issues %s for " % \
+              (wfo, wfo, prodtxt)
+            htmlmess = "%s issues <a href=\"%s\">%s</a> for" \
+               % (wfo, myurl, prodtxt)
+            for nwsli in tokens:
+                rname = "((%s))" % (nwsli,)
+                if (nwsli_dict.has_key(nwsli)):
+                    rname = "the "+ nwsli_dict[nwsli]
+                mess += "%s (%s), " % (rname, nwsli)
+                htmlmess += "%s (%s), " % (rname, nwsli)
+            jabber.sendMessage(mess[:-2] +" "+ myurl, htmlmess[:-2])
             continue
 
 # PUBLIC ADVISORY NUMBER 10 FOR REMNANTS OF BARRY
