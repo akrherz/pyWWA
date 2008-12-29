@@ -255,7 +255,11 @@ def real_process(raw):
               (wfo, wfo, prodtxt)
             htmlmess = "%s issues <a href=\"%s\">%s</a> for" \
                % (wfo, myurl, prodtxt)
+            usednwsli = {}
             for nwsli in tokens:
+                if usednwsli.has_key(nwsli):
+                    continue
+                usednwsli[nwsli] = 1
                 rname = "((%s))" % (nwsli,)
                 if (nwsli_dict.has_key(nwsli)):
                     rname = "the "+ nwsli_dict[nwsli]
