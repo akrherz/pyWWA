@@ -39,7 +39,7 @@ import common
 log.startLogging(open('logs/gp.log', 'a'))
 log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
 
-
+POSTGIS = pg.connect(secret.dbname, secret.dbhost, user=secret.dbuser, passwd=secret.dbpass)
 DBPOOL = adbapi.ConnectionPool("psycopg2", database=secret.dbname, host=secret.dbhost, password=secret.dbpass)
 
 # These are the offices which get all hurricane stuff
@@ -59,7 +59,7 @@ routes = {'TCPAT[0-9]': gulfwfo,
 
 SIMPLE_PRODUCTS = ["TCE", "DSA", "AQA", "DGT", "FWF", "RTP", "HPA", "CWF", 
             "SRF", "SFT", "PFM", "ZFP", "CAE", "AFD", "FTM", "AWU", "HWO",
-            "NOW", "PSH", "NOW", "PNS", "RER", "ADM", "TCU", "RVF"]
+            "NOW", "PSH", "NOW", "PNS", "RER", "ADM", "TCU"]
 
 EMAILS = 10
 
@@ -245,6 +245,57 @@ def real_process(raw):
 
     # Now, lets look at segments ?
     for seg in prod.segments:
+        if (pil == "RVF"):
+            tokens = re.findall("\.E ([A-Z0-9]{5}) ", seg.raw)
+            if (len(tokens) == 0):
+                print 'Whoa, did not find NWSLI?', seg
+                return
+            nwsli = tokens[0]
+            rname = "((%s))" % (nwsli,)
+            if (nwsli_dict.has_key(nwsli)):
+                rname = "the "+ nwsli_dict[nwsli]
+            prodtxt = prodDefinitions[pil]
+            mess = "%s: %s issues %s for %s (%s) %s" % \
+              (wfo, wfo, prodtxt, rname, nwsli, myurl)
+            htmlmess = "%s issues <a href=\"%s\">%s</a> for %s (%s)" \
+               % (wfo, myurl, prodtxt, rname, nwsli)
+            jabber.sendMessage(mess, htmlmess)
+            continue
+
+# PUBLIC ADVISORY NUMBER 10 FOR REMNANTS OF BARRY
+# TROPICAL DEPRESSION BARRY ADVISORY NUMBER   5
+# TROPICAL STORM BARRY INTERMEDIATE ADVISORY NUMBER   2A
+
+    if (pil == "TCM" or pil == "TCP" or pil == "TCD"):
+        mess = "%s: %s issues %s %s" % (wfo, wfo, pil, myurl)
+        prodtxt = "(%s)" % (pil,)
+        if (prodDefinitions.has_key(pil)):
+            prodtxt = prodDefinitions[pil]
+        htmlmess = "%s issues <a href=\"%s\">%s</a> " % (wfo, myurl, prodtxt)
+        jabber.sendMessage(mess, htmlmess)
+
+
+
+    for key in routes.keys():
+        if (re.match(key, prod.afos)):
+            for wfo2 in routes[key]:
+                mess = "%s: %s %s" % \
+                 (wfo2, prod.afos, myurl)
+                htmlmess = "<a href=\"%s\">%s</a>" % (myurl, prodtxt)
+                tokens = re.findall("(.*) (DISCUSSION|INTERMEDIATE ADVISORY|FORECAST/ADVISORY|ADVISORY|MEMEME) NUMBER\s+([0-9]+)", raw.replace("PUBLIC ADVISORY", "ZZZ MEMEME") )
+                if (len(tokens) > 0):
+                    tt = tokens[0][0]
+                    what = tokens[0][1]
+                    tnum = tokens[0][2]
+                    if (tokens[0][1] == "MEMEME"):
+                        tokens2 = re.findall("(PUBLIC ADVISORY) NUMBER\s+([0-9]+) FOR (.*)", raw)
+                        what = tokens2[0][0]
+                        tt = tokens2[0][2]
+                    mess = "%s: %s issues %s #%s for %s %s" % (wfo2, centertext(wfo), what, tnum, tt, myurl)
+                    htmlmess = "%s issues <a href=\"%s\">%s #%s</a> for %s" % ( centertext(wfo), myurl, what, tnum, tt)
+                #print htmlmess, mess
+                jabber.sendMessage(mess, htmlmess)
+
         # The segment needs to have ugc codes
         if (len(seg.ugc) == 0):
             continue
@@ -271,7 +322,6 @@ def real_process(raw):
         mess = "%s: %s issues %s for %s %s %s" % \
           (wfo, wfo, prodtxt, counties, expire, myurl)
         htmlmess = "%s issues <a href=\"%s\">%s</a> for %s %s" % (wfo, myurl, prodtxt, counties, expire)
-
         jabber.sendMessage(mess, htmlmess)
 
 # PUBLIC ADVISORY NUMBER 10 FOR REMNANTS OF BARRY
@@ -307,6 +357,15 @@ def real_process(raw):
                     htmlmess = "%s issues <a href=\"%s\">%s #%s</a> for %s" % ( centertext(wfo), myurl, what, tnum, tt)
                 #print htmlmess, mess
                 jabber.sendMessage(mess, htmlmess)
+
+""" Load up H-VTEC NWSLI reference """
+nwsli_dict = {}
+sql = "SELECT nwsli, \
+ river_name || ' ' || proximity || ' ' || name || ' ['||state||']' as rname \
+ from hvtec_nwsli"
+rs = POSTGIS.query(sql).dictresult()
+for i in range(len(rs)):
+    nwsli_dict[ rs[i]['nwsli'] ] = (rs[i]['rname']).replace("&"," and ")
 
 
 
