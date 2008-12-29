@@ -22,6 +22,7 @@ from twisted.words.protocols.jabber import client, jid, xmlstream
 from twisted.internet import reactor
 from twisted.python import log
 from twisted.enterprise import adbapi
+from twisted.mail import smtp
 
 # Standard Python modules
 import os, re, traceback, StringIO, smtplib
