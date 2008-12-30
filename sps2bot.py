@@ -21,21 +21,23 @@ log.startLogging(open('logs/sps2bot.log','a'))
 log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
 
 import StringIO, traceback, mx.DateTime
-import smtplib
 from email.MIMEText import MIMEText
 
 import secret
-import common
+import common, pg
 from support import TextProduct, ldmbridge, reference
-import pg
-POSTGIS = pg.connect(secret.dbname, secret.dbhost, user=secret.dbuser, passwd=secret.dbpass)
 
 from twisted.words.protocols.jabber import client, jid, xmlstream
 from twisted.internet import reactor
+from twisted.mail import smtp
+from twisted.enterprise import adbapi
+
+POSTGIS = pg.connect(secret.dbname, secret.dbhost, user=secret.dbuser, passwd=secret.dbpass)
+DBPOOL = adbapi.ConnectionPool("psycopg2", database=secret.dbname, host=secret.dbhost, password=secret.dbpass)
 
 
 errors = StringIO.StringIO()
-
+EMAILS = 10
 
 ugc_dict = {}
 sql = "SELECT name, ugc from nws_ugc WHERE name IS NOT Null"
@@ -64,6 +66,24 @@ def countyText(u):
     return c[:-4]
 
 
+def email_error(message, product_text):
+    """
+    Generic something to send email error messages 
+    """
+    global EMAILS
+    #io = StringIO.StringIO()
+    #traceback.print_exc(file=io)
+    #log.msg( message )
+    EMAILS -= 1
+    if (EMAILS < 0):
+        return
+
+    msg = MIMEText("Exception:\n%s\n\nRaw Product:\n%s" \
+                 % (message, product_text))
+    msg['subject'] = 'sps2bot.py Traceback'
+    msg['From'] = secret.parser_user
+    msg['To'] = 'akrherz@iastate.edu'
+    smtp.sendmail("mailhub.iastate.edu", msg["From"], msg["To"], msg)
 
 
 # LDM Ingestor
@@ -72,23 +92,15 @@ class myProductIngestor(ldmbridge.LDMProductReceiver):
     def process_data(self, buf):
         try:
             real_process(buf)
-        except:
-            io = StringIO.StringIO()
-            traceback.print_exc(file=io)
-            log.msg( io.getvalue() )
-            msg = MIMEText("%s\n\n>RAW DATA\n\n%s"%(io.getvalue(),buf.replace("\015\015\012", "\n") ))
-            msg['subject'] = 'sps2bot.py Traceback'
-            msg['From'] = secret.parser_user
-            msg['To'] = "akrherz@iastate.edu"
+        except Exception, myexp:
+            email_error(myexp, buf)
 
-            s = smtplib.SMTP()
-            s.connect()
-            s.sendmail(msg["From"], msg["To"], msg.as_string())
-            s.close()
+    def connectionLost(self, reason):
+        print 'connectionLost', reason
+        reactor.callLater(5, self.shutdown)
 
-    def connectionLost(self,reason):
-        log.msg(reason)
-        log.msg("LDM Closed PIPE")
+    def shutdown(self):
+        reactor.callWhenRunning(reactor.stop)
 
 
 def real_process(raw):
@@ -100,11 +112,11 @@ def real_process(raw):
     if (prod.segments[0].giswkt):
         sql = "INSERT into text_products(product, product_id, geom) \
       values ('%s','%s', '%s')" % (sqlraw, product_id,prod.segments[0].giswkt )
-        POSTGIS.query(sql)
+        DBPOOL.runOperation(sql).addErrback( email_error, sql)
     else:
         sql = "INSERT into text_products(product, product_id) \
       values ('%s','%s')" % (sqlraw, product_id)
-        POSTGIS.query(sql)
+        DBPOOL.runOperation(sql).addErrback( email_error, sql)
 
     for seg in prod.segments:
         headline = "[NO HEADLINE FOUND IN SPS]"
