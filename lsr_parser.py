@@ -170,7 +170,7 @@ class LSR:
         self.lon = tokens[1][:-1]
 
         self.magf = (line2[12:29]).strip()
-        self.mag = re.sub("(ACRE|INCHES|INCH|MPH|U|FT|F|E|M|TRACE)", "", self.magf)
+        self.mag = re.sub("(ACRE|INCHES|INCH|MPH|KTS|U|FT|F|E|M|TRACE)", "", self.magf)
         if (self.mag == ""):
             self.mag = 0
         self.county = (line2[29:48]).strip().title()
