@@ -102,12 +102,17 @@ class vtec:
         self.status = tokens[0][1]
         self.action = tokens[0][2]
         self.office = tokens[0][3][1:]
+        self.office4 = tokens[0][3]
         self.phenomena = tokens[0][4]
         self.significance = tokens[0][5]
         self.ETN = int(tokens[0][6])
         self.beginTS = contime( tokens[0][7] )
         self.endTS   = contime( tokens[0][8] )
-        
+
+    def url(self, year):
+        """ Generate a VTEC url string needed """
+        return "%s-%s-%s-%s-%s-%s-%04i" % (year, self.status, self.action,\
+               self.office4, self.phenomena, self.significance, self.ETN)
 
     def __str__(self):
         return self.raw
