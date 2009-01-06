@@ -136,9 +136,12 @@ def segment_processor(text_product, i, skip_con):
     if (len(seg.vtec) == 0):
         if text_product.get_iembot_source() == 'JSJ':
             return
-        alert_error(text_product, 
+        if text_product.issueTime.year < 2005:
+            text_product.generate_fake_vtec()
+        else:
+            alert_error(text_product, 
          "Missing or incomplete VTEC encoding in segment number %s" % (i+1,))
-        raise NoVTECFoundError("No VTEC coding found for this segment")
+            raise NoVTECFoundError("No VTEC coding found for this segment")
 
     # New policy, we only insert the relevant stuff!
     if (i == 0):
@@ -158,9 +161,9 @@ def segment_processor(text_product, i, skip_con):
         # Set up Jabber Dict for stuff to fill in
         jmsg_dict = {'wfo': vtec.office, 'product': vtec.productString(),
              'county': '', 'sts': ' ', 'ets': ' ', 'svs_special': '',
-             'year': mx.DateTime.now().year, 'phenomena': vtec.phenomena,
+             'year': text_product.issueTime.year, 'phenomena': vtec.phenomena,
              'eventid': vtec.ETN, 'significance': vtec.significance,
-             'urlbase': secret.VTEC_APP}
+             'url': "%s%s.html" % (secret.VTEC_APP, vtec.url(text_product.issueTime.year)) }
 
         if (vtec.beginTS != None and \
             vtec.beginTS > (gmtnow + mx.DateTime.RelativeDateTime(hours=+1))):
@@ -240,8 +243,6 @@ def segment_processor(text_product, i, skip_con):
           
 
         warning_table = "warnings_%s" % (text_product.issueTime.year,)
-        if (vtec.beginTS is not None):
-            warning_table = "warnings_%s" % (vtec.beginTS.year,)
         #  NEW - New Warning
         #  EXB - Extended both in area and time (new area means new entry)
         #  EXA - Extended in area, which means new entry
@@ -287,12 +288,8 @@ seg.get_hvtec_nwsli() )
             for w in affectedWFOS.keys():
                 jmsg_dict['w'] = w
                 jabberTxt = "%(w)s: %(wfo)s %(product)s%(sts)sfor \
-%(county)s till %(ets)s %(svs_special)s %(urlbase)s?year=%(year)s&amp;wfo=%(wfo)s&amp;\
-phenomena=%(phenomena)s&amp;eventid=%(eventid)s&amp;\
-significance=%(significance)s" % jmsg_dict
-                jabberHTML = "%(wfo)s <a href='%(urlbase)s?year=%(year)s\
-&amp;wfo=%(wfo)s&amp;phenomena=%(phenomena)s&amp;eventid=%(eventid)s&amp;\
-significance=%(significance)s'>%(product)s</a>%(sts)sfor %(county)s \
+%(county)s till %(ets)s %(svs_special)s %(url)s" % jmsg_dict
+                jabberHTML = "%(wfo)s <a href='%(url)s'>%(product)s</a>%(sts)sfor %(county)s \
 till %(ets)s %(svs_special)s" % jmsg_dict
                 jabber.sendMessage(jabberTxt, jabberHTML)
 
@@ -318,12 +315,8 @@ till %(ets)s %(svs_special)s" % jmsg_dict
                 DBPOOL.runOperation( sql ).addErrback( email_error, sql)
 
             jabberTxt = "%(wfo)s: %(wfo)s %(product)s%(sts)sfor \
-%(county)s till %(ets)s %(svs_special)s %(urlbase)s?year=%(year)s&amp;wfo=%(wfo)s&amp;\
-phenomena=%(phenomena)s&amp;eventid=%(eventid)s&amp;\
-significance=%(significance)s" % jmsg_dict
-            jabberHTML = "%(wfo)s <a href='%(urlbase)s?year=%(year)s\
-&amp;wfo=%(wfo)s&amp;phenomena=%(phenomena)s&amp;eventid=%(eventid)s&amp;\
-significance=%(significance)s'>%(product)s</a>%(sts)sfor %(county)s \
+%(county)s till %(ets)s %(svs_special)s %(url)s" % jmsg_dict
+            jabberHTML = "%(wfo)s <a href='%(url)s'>%(product)s</a>%(sts)sfor %(county)s \
 till %(ets)s %(svs_special)s" % jmsg_dict
             if not skip_con:
                 jabber.sendMessage(jabberTxt, jabberHTML)
@@ -363,21 +356,14 @@ till %(ets)s %(svs_special)s" % jmsg_dict
 
             jmsg_dict['action'] = "cancels"
             fmt = "%(w)s: %(wfo)s  %(product)s for %(county)s %(svs_special)s \
-%(urlbase)s?year=%(year)s&amp;wfo=%(wfo)s&amp;phenomena=%(phenomena)s&amp;\
-eventid=%(eventid)s&amp;significance=%(significance)s"
-            htmlfmt = "%(wfo)s <a href='%(urlbase)s?year=%(year)s&amp;\
-wfo=%(wfo)s&amp;phenomena=%(phenomena)s&amp;eventid=%(eventid)s&amp;\
-significance=%(significance)s'>%(product)s</a> for %(county)s %(svs_special)s"
+%(url)s"
+            htmlfmt = "%(wfo)s <a href='%(url)s'>%(product)s</a> for %(county)s %(svs_special)s"
             if (vtec.action == "EXT" and vtec.beginTS != None):
                 jmsg_dict['sts'] = " valid at %s%s " % ( \
                 (vtec.beginTS - local_offset).strftime(efmt), text_product.z )
                 fmt = "%(w)s: %(wfo)s  %(product)s for %(county)s %(svs_special)s\
-%(sts)still %(ets)s %(urlbase)s?year=%(year)s&amp;wfo=%(wfo)s&amp;\
-phenomena=%(phenomena)s&amp;eventid=%(eventid)s&amp;\
-significance=%(significance)s"
-                htmlfmt = "%(wfo)s <a href='%(urlbase)s?\
-year=%(year)s&amp;wfo=%(wfo)s&amp;phenomena=%(phenomena)s&amp;\
-eventid=%(eventid)s&amp;significance=%(significance)s'>%(product)s</a>\
+%(sts)still %(ets)s %(url)s"
+                htmlfmt = "%(wfo)s <a href='%(url)s'>%(product)s</a>\
  for %(county)s%(sts)still %(ets)s %(svs_special)s"
             elif (vtec.action == "EXT"):
                 fmt += " till %(ets)s"
