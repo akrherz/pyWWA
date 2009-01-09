@@ -127,7 +127,6 @@ prodDefinitions = {
     'ADR': 'Administrative Message (ADR)',
     'TOE': 'Telephone Outage Emergency (TOE)',
     'LAE': 'Local Area Emergency (LAE)',
-    'ADR': 'Administrative Message (ADR)',
     'AVA': 'Avalanche Watch (AVA)',
     'AVW': 'Avalanche Warning (AVW)',
     'CDW': 'Civil Danger Warning (CDW)',
@@ -253,8 +252,8 @@ def real_process(raw):
 
 
     # Now, lets look at segments ?
-    for seg in prod.segments:
-        if (pil == "RVF"):
+    if (pil == "RVF"):
+        for seg in prod.segments:
             tokens = re.findall("\.E ([A-Z0-9]{5}) ", seg.raw)
             if (len(tokens) == 0):
                 print 'Whoa, did not find NWSLI?', seg
@@ -327,6 +326,8 @@ def real_process(raw):
                 #print htmlmess, mess
                 jabber.sendMessage(mess, htmlmess)
 
+
+    for seg in prod.segments:
         # The segment needs to have ugc codes
         if (len(seg.ugc) == 0):
             continue
