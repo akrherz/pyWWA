@@ -69,7 +69,7 @@ def section_parser(sect):
     metadata = re.findall("([A-Z0-9]{4})\s+(...) MOS GUIDANCE\s+([01]?[0-9])/([0-3][0-9])/([0-9]{4})\s+([0-2][0-9]00) UTC", sect)
     (station, model, month, day, year, hhmm) = metadata[0]
     initts = mx.DateTime.DateTime(int(year), int(month), int(day), int(hhmm[:2]))
-    print "PROCESS", station, model, initts
+    #print "PROCESS", station, model, initts
 
     times = [initts,]
     data = {}
