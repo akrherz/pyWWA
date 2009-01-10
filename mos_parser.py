@@ -43,14 +43,18 @@ DBPOOL = adbapi.ConnectionPool("psycopg2", database="mos", host=secret.dbhost, p
 class myProductIngestor(ldmbridge.LDMProductReceiver):
 
     def process_data(self, buf):
-        try:
-            real_process(buf)
-        except Exception,myexp:
-            email_error(myexp, buf)
+        #try:
+        real_process(buf)
+        #except Exception,myexp:
+        #    email_error(myexp, buf)
 
-    def connectionLost(self,reason):
-        log.msg(reason)
-        log.msg("LDM Closed PIPE")
+    def connectionLost(self, reason):
+        print 'connectionLost', reason
+        reactor.callLater(5, self.shutdown)
+    
+    def shutdown(self):
+        reactor.callWhenRunning(reactor.stop)
+
 
 
 def real_process(raw):
@@ -62,7 +66,7 @@ def real_process(raw):
 
 def section_parser(sect):
     """ Actually process a section, getting closer :) """
-    metadata = re.findall("([A-Z0-9]{4})\s+(...) MOS GUIDANCE\s+([01][0-9])/([0-3][0-9])/([0-9]{4})\s+([0-2][0-9]00) UTC", sect)
+    metadata = re.findall("([A-Z0-9]{4})\s+(...) MOS GUIDANCE\s+([01]?[0-9])/([0-3][0-9])/([0-9]{4})\s+([0-2][0-9]00) UTC", sect)
     (station, model, month, day, year, hhmm) = metadata[0]
     initts = mx.DateTime.DateTime(int(year), int(month), int(day), int(hhmm[:2]))
     print "PROCESS", station, model, initts
