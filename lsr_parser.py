@@ -72,7 +72,7 @@ def pickledb():
     """ Dump our database to a flat file """
     pickle.dump(LSRDB, open('lsrdb.p','w'))
 
-def email_error(message, product_text):
+def email_error(message, product_text, lsr=None):
     """
     Generic something to send email error messages 
     """
@@ -82,8 +82,8 @@ def email_error(message, product_text):
     if (EMAILS < 0):
         return
 
-    msg = MIMEText("Exception:\n%s\n\nRaw Product:\n%s" \
-                 % (message, product_text))
+    msg = MIMEText("Exception:\n%s\n\nRaw Product:\n%s\n%s" \
+                 % (message, product_text, lsr))
     msg['subject'] = 'lsr_parser.py Traceback'
     msg['From'] = secret.parser_user
     msg['To'] = 'akrherz@iastate.edu'
@@ -106,7 +106,7 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
         except ProcessingException, msg:
             send_iemchat_error(nws, msg)
         except Exception,myexp:
-            email_error(myexp, buf)
+            email_error(myexp, buf, nws)
 
     def connectionLost(self, reason):
         print 'connectionLost', reason
@@ -148,12 +148,17 @@ class LSR:
         self.mag = None
         self.state = None
         self.source = None
+        self.raw = None
+
+    def __str__(self):
+        return self.raw
 
     def consume_lines(self, line1, line2):
         """ Consume the first line of a LSR statement """
         #0914 PM     HAIL             SHAW                    33.60N 90.77W
         #04/29/2005  1.00 INCH        BOLIVAR            MS   EMERGENCY MNGR
-      
+        self.raw = "%s\n%s" % (line1, line2)
+
         time_parts = re.split(" ", line1)
         hour12 = time_parts[0][:-2]
         minute = time_parts[0][-2:]
@@ -300,7 +305,7 @@ def real_processor(nws):
            lsr.state, lsr.source, \
            re.sub("'", "\\'", lsr.remark), lsr.lon, lsr.lat, wfo, lsr.typetext)
 
-        DBPOOL.runOperation(sql).addErrback( email_error, sql)
+        DBPOOL.runOperation(sql).addErrback( email_error, sql, lsr)
 
     if (nws.raw.find("...SUMMARY") > 1):
         extra_text = ""
