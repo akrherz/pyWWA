@@ -156,7 +156,8 @@ def process_site(metar):
         the length of the raw data, if greater, take the temps """
     if iem.data['old_ts'] and (iem.data['ts'] == iem.data['old_ts']) and \
        (len(iem.data['raw']) > len(cmetar)):
-        print "Duplicate METAR %s" % (iemid,)
+        print "Duplicate METAR %s OLD: %s NEW: %s" % (iemid, \
+               iem.data['raw'], cmetar)
     else:
         if (mtr.temp):
             iem.data['tmpf'] = mtr.temp.value("F")
