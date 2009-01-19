@@ -151,10 +151,18 @@ def process_site(metar):
     iem.setObTimeGMT(gts)
     if ISIEM:
         iem.load_and_compare(iemaccess)
-    if (mtr.temp):
-        iem.data['tmpf'] = mtr.temp.value("F")
-    if (mtr.dewpt):
-        iem.data['dwpf'] = mtr.dewpt.value("F")
+    cmetar = clean_metar.replace("'", "")
+    """ Need to figure out if we have a duplicate ob, if so, check
+        the length of the raw data, if greater, take the temps """
+    if iem.data['old_ts'] and (iem.data['ts'] == iem.data['old_ts']) and \
+       (len(iem.data['raw']) > len(cmetar)):
+        print "Duplicate METAR %s" % (iemid,)
+    else:
+        if (mtr.temp):
+            iem.data['tmpf'] = mtr.temp.value("F")
+        if (mtr.dewpt):
+            iem.data['dwpf'] = mtr.dewpt.value("F")
+    iem.data['raw'] = cmetar
     if mtr.wind_speed:
         iem.data['sknt'] = mtr.wind_speed.value("KT")
     if mtr.wind_gust:
@@ -168,7 +176,6 @@ def process_site(metar):
     iem.data['phour'] = 0
     if mtr.precip_1hr:
         iem.data['phour'] = mtr.precip_1hr.value("IN")
-    iem.data['raw'] = clean_metar.replace("'", "")
     if ISIEM:
         iem.updateDatabase(None, dbpool)
 
