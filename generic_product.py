@@ -59,7 +59,7 @@ routes = {'TCPAT[0-9]': gulfwfo,
 
 SIMPLE_PRODUCTS = ["TCE", "DSA", "AQA", "DGT", "FWF", "RTP", "HPA", "CWF", 
             "SRF", "SFT", "PFM", "ZFP", "CAE", "AFD", "FTM", "AWU", "HWO",
-            "NOW", "PSH", "NOW", "PNS", "RER", "ADM", "TCU"]
+            "NOW", "PSH", "NOW", "PNS", "RER", "ADM", "TCU", "RVA"]
 
 EMAILS = 10
 
@@ -156,6 +156,7 @@ prodDefinitions = {
     'DSA': 'Tropical Disturbance Statement (DSA)',
     'TCE': 'Tropical Cyclone Position Estimate (TCE)',
     'RVF': 'River Forecast (RVF)',
+    'RVA': 'Hydrologic Summary (RVA)',
 }
 
 ugc_dict = {}
