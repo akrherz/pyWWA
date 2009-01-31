@@ -59,7 +59,8 @@ routes = {'TCPAT[0-9]': gulfwfo,
 
 SIMPLE_PRODUCTS = ["TCE", "DSA", "AQA", "DGT", "FWF", "RTP", "HPA", "CWF", 
             "SRF", "SFT", "PFM", "ZFP", "CAE", "AFD", "FTM", "AWU", "HWO",
-            "NOW", "PSH", "NOW", "PNS", "RER", "ADM", "TCU", "RVA", "EQR"]
+            "NOW", "PSH", "NOW", "PNS", "RER", "ADM", "TCU", "RVA", "EQR",
+            "OEP"]
 
 EMAILS = 10
 
@@ -86,8 +87,8 @@ def email_error(message, product_text):
                  % (message, product_text))
     msg['subject'] = 'generic_product.py Traceback'
     msg['From'] = secret.parser_user
-    msg['To'] = 'akrherz@iastate.edu'
-    smtp.sendmail("mailhub.iastate.edu", msg["From"], msg["To"], msg)
+    msg['To'] = secret.error_email
+    smtp.sendmail("localhost", msg["From"], msg["To"], msg)
 
 
 class myProductIngestor(ldmbridge.LDMProductReceiver):
@@ -158,6 +159,7 @@ prodDefinitions = {
     'RVF': 'River Forecast (RVF)',
     'RVA': 'Hydrologic Summary (RVA)',
     'EQR': 'Earthquake Report (EQR)',
+    'OEP': 'TAF Collaboration Product (OEP)',
 }
 
 ugc_dict = {}
@@ -205,6 +207,9 @@ def real_process(raw):
     prod = TextProduct.TextProduct(raw)
     pil = prod.afos[:3]
     wfo = prod.get_iembot_source()
+    # sigh, can't use originating center for the route
+    if (pil == "OEP"):
+        wfo = prod.afos[3:]
 
     raw = raw.replace("'", "\\'")
     sqlraw = raw.replace("\015\015\012", "\n").replace("\000", "").strip()
