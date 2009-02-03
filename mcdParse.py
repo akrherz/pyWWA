@@ -52,8 +52,8 @@ def email_error(message, product_text):
                  % (message, product_text))
     msg['subject'] = 'mcd_parser.py Traceback'
     msg['From'] = secret.parser_user
-    msg['To'] = 'akrherz@iastate.edu'
-    smtp.sendmail("mailhub.iastate.edu", msg["From"], msg["To"], msg)
+    msg['To'] = secret.error_email
+    smtp.sendmail("localhost", msg["From"], msg["To"], msg)
 
 # LDM Ingestor
 class MyProductIngestor(ldmbridge.LDMProductReceiver):
@@ -61,7 +61,7 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
 
     def connectionLost(self, reason):
         print 'connectionLost', reason
-        reactor.callLater(5, self.shutdown)
+        reactor.callLater(15, self.shutdown)
 
     def shutdown(self):
         reactor.callWhenRunning(reactor.stop)
