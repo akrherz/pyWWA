@@ -305,7 +305,7 @@ def process_site(sid, ts, data):
             MULTIPLIER[var[:2]] = 1.0
         HADSDB.runOperation("INSERT into raw%s \
             (station, valid, key, value) \
-            VALUES('%s','%s+00', '%s', '%s')" % (ts.year, sid, \
+            VALUES('%s','%s+00', '%s', '%s')" % (ts.strftime("%Y_%m"), sid, \
             ts.strftime("%Y-%m-%d %H:%M"), var, \
             data[var])).addErrback(email_error, data)
 
