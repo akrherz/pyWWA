@@ -60,7 +60,7 @@ routes = {'TCPAT[0-9]': gulfwfo,
 SIMPLE_PRODUCTS = ["TCE", "DSA", "AQA", "DGT", "FWF", "RTP", "HPA", "CWF", 
             "SRF", "SFT", "PFM", "ZFP", "CAE", "AFD", "FTM", "AWU", "HWO",
             "NOW", "PSH", "NOW", "PNS", "RER", "ADM", "TCU", "RVA", "EQR",
-            "OEP", "SIG", "VAA"]
+            "OEP", "SIG", "VAA", "RVF"]
 
 EMAILS = 10
 
