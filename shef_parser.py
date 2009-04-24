@@ -227,9 +227,12 @@ def clnstr(buf):
 
 class MyProductIngestor(ldmbridge.LDMProductReceiver):
 
-
     def connectionLost(self, reason):
-        log.msg("LDM Closed PIPE")
+        print 'connectionLost', reason
+        reactor.callLater(5, self.shutdown)
+
+    def shutdown(self):
+        reactor.callWhenRunning(reactor.stop)
 
     def process_data(self, buf):
         """
