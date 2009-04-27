@@ -317,8 +317,8 @@ sent and not repeated here." % (duplicates, duplicates + new_reports)
         uri += "?lat0=%s&amp;lon0=-%s&amp;ts=%s&amp;ts2=%s&amp;wfo=%s" % \
              (lsr.lat,lsr.lon,min_time.strftime("%Y-%m-%d%%20%H:%M"),\
               max_time.strftime("%Y-%m-%d%%20%H:%M"), wfo )
-        jabber_text = "%s: %s issues Summary Local Storm Report %s%s" % \
-           (wfo, wfo, uri, extra_text)
+        jabber_text = "%s: %s issues Summary Local Storm Report %s %s" % \
+           (wfo, wfo, extra_text, uri)
         jabber_html = "%s issues <a href='%s'>Summary Local Storm Report</a>%s"\
             % (wfo, uri, extra_text)
         jabber.sendMessage(jabber_text, jabber_html)
