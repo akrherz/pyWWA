@@ -19,7 +19,6 @@ __revision__ = '$Id: new_watch.py 3160 2008-04-09 23:31:06Z akrherz $'
 
 
 from twisted.python import log
-import os
 log.startLogging(open('logs/new_watch.log', 'a'))
 log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
 
@@ -27,10 +26,10 @@ log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
 import sys
 import re
 import math
-import smtplib
 import mx.DateTime
 import StringIO
 import traceback
+import common
 from email.MIMEText import MIMEText
 
 # Non standard Stuff
@@ -46,57 +45,11 @@ POSTGIS.query("SET TIME ZONE 'GMT'")
 errors = StringIO.StringIO()
 
 from twisted.words.protocols.jabber import client, jid
-from twisted.words.xish import domish
 from twisted.internet import reactor
+from twisted.mail import smtp
 
 IEM_URL = secret.WATCH_URL
 errors = StringIO.StringIO()
-
-qu = 0
-
-class JabberClient:
-    xmlstream = None
-
-    def __init__(self, myJid):
-        self.myJid = myJid
-
-
-    def authd(self, xmlstream):
-        print "authenticated"
-        self.xmlstream = xmlstream
-        presence = domish.Element(('jabber:client','presence'))
-        xmlstream.send(presence)
-
-        xmlstream.addObserver('/message',  self.debug)
-        xmlstream.addObserver('/presence', self.debug)
-        xmlstream.addObserver('/iq',       self.debug)
-
-    def debug(self, elem):
-        print elem.toXml().encode('utf-8')
-        print "="*20
-
-    def sendMessage(self, body, htmlbody):
-        global qu
-        while (self.xmlstream is None):
-            print "xmlstream is None, so lets try again!"
-            reactor.callLater(3, self.sendMessage, body, htmlbody)
-            return
-
-        message = domish.Element(('jabber:client','message'))
-        message['to'] = "iembot@%s" % (secret.chatserver,)
-        message['type'] = 'chat'
-        message.addElement('body', None, body)
-
-        html = domish.Element(('http://jabber.org/protocol/xhtml-im','html'))
-        body = domish.Element(('http://www.w3.org/1999/xhtml','body'))
-        body.addRawXml( htmlbody )
-        html.addChild(body)
-        message.addChild(html)
-        print message.toXml()
-        self.xmlstream.send(message)
-        qu -= 1
-        print "queue2", qu
-
 
 
 def cancel_watch(report, ww_num):
@@ -125,12 +78,8 @@ def process(raw):
         msg = MIMEText("%s\n\n>RAW DATA\n\n%s"%(io.getvalue(),raw))
         msg['subject'] = 'new_watch.py Traceback'
         msg['From'] = secret.parser_user
-        msg['To'] = "akrherz@iastate.edu"
-
-        s = smtplib.SMTP()
-        s.connect()
-        s.sendmail(msg["From"], msg["To"], msg.as_string())
-        s.close()
+        msg['To'] = secret.error_email
+        smtp.sendmail("localhost", msg["From"], msg["To"], msg)
 
 
 def real_process(raw):
@@ -218,12 +167,12 @@ def real_process(raw):
     log.msg("LOC2 OFF %s [%s,%s] lat: %s lon %s" % (loc2, loc2_displacement, loc2_vector, lat2, lon2))
 
     # Now we compute orientations
-    if (lon2 == lon1): #same as EW
+    if lon2 == lon1: #same as EW
         orientation = "EAST AND WEST"
-    if (lat1 == lat2): #same as NS
+    if lat1 == lat2: #same as NS
         orientation = "NORTH AND SOUTH"
 
-    if (orientation == "EAST AND WEST"):
+    if orientation == "EAST AND WEST":
         lat11 = lat1
         lat12 = lat1
         lat21 = lat2
@@ -233,7 +182,7 @@ def real_process(raw):
         lon21 = lon2 - (box_radius * KM_SM) / (111.11 * math.cos(math.radians(lat2)))
         lon22 = lon2 + (box_radius * KM_SM) / (111.11 * math.cos(math.radians(lat2)))
 
-    elif (orientation == "NORTH AND SOUTH"):
+    elif orientation == "NORTH AND SOUTH":
         lon11 = lon1
         lon12 = lon1
         lon21 = lon2
@@ -243,9 +192,9 @@ def real_process(raw):
         lat21 = lat2 + (box_radius * KM_SM) / 111.11
         lat22 = lat2 - (box_radius * KM_SM) / 111.11
 
-    elif (orientation == "EITHER SIDE"):
+    elif orientation == "EITHER SIDE":
         slope = (lat2 - lat1)/(lon2 - lon1)
-        angle =( math.pi / 2.0) - math.fabs( math.atan(slope))
+        angle = (math.pi / 2.0) - math.fabs( math.atan(slope))
         x = box_radius * math.cos(angle)
         y = box_radius * math.sin(angle)
         if (slope < 0):
@@ -283,31 +232,29 @@ def real_process(raw):
         POSTGIS.query(sql)
 
     # Figure out WFOs affected...
-    jabberTxt = "SPC issues %s watch till %sZ http://www.spc.noaa.gov/products/watch/ww%04i.html" % (ww_type, eTS.strftime("%H:%M"), int(ww_num) )
-    jabberTxtHTML = "Storm Prediction Center issues <a href=\"http://www.spc.noaa.gov/products/watch/ww%04i.html\">%s watch</a> till %s UTC " % (int(ww_num), ww_type, eTS.strftime("%H:%M") )
+    jabberTxt = "SPC issues %s watch till %sZ" % \
+                 (ww_type, eTS.strftime("%H:%M") )
+    jabberTxtHTML = "Storm Prediction Center issues \
+<a href=\"http://www.spc.noaa.gov/products/watch/ww%04i.html\">%s watch</a>\
+ till %s UTC " % (int(ww_num), ww_type, eTS.strftime("%H:%M") )
     if (jabberReplacesTxt != ""):
         jabberTxt += ", new watch replaces "+ jabberReplacesTxt[:-1]
         jabberTxtHTML += ", new watch replaces "+ jabberReplacesTxt[:-1]
 
-    jabberTxt += " ( %s?year=%s&amp;num=%s ) " % (IEM_URL, sTS.year, ww_num)
+    jabberTxt += " http://www.spc.noaa.gov/products/watch/ww%04i.html" % (int(ww_num), )
     jabberTxtHTML += " (<a href=\"%s?year=%s&amp;num=%s\">Watch Quickview</a>) " % (IEM_URL, sTS.year, ww_num)
 
+    # Figure out who should get notification of the watch...
     sql = "SELECT distinct wfo from nws_ugc WHERE \
          contains('SRID=4326;MULTIPOLYGON(((%s)))', geom)" % (wkt,)
     rs = POSTGIS.query(sql).dictresult()
-    global qu
     for i in range(len(rs)):
-        qu += 1
         wfo = rs[i]['wfo']
         mess = "%s: %s" % (wfo, jabberTxt)
         jabber.sendMessage(mess, jabberTxtHTML)
 
 def killer():
-    global qu
-    print "queue", qu
-    if (qu == 0):
-        reactor.stop()
-    reactor.callLater(10, killer)
+    reactor.stop()
 
 
 raw = sys.stdin.read()
@@ -317,13 +264,13 @@ myJid = jid.JID('%s@%s/watch_%s' % \
        mx.DateTime.gmt().strftime("%Y%m%d%H%M%S") ) )
 factory = client.basicClientFactory(myJid, secret.iembot_ingest_password)
 
-jabber = JabberClient(myJid)
+jabber = common.JabberClient(myJid)
 
-factory.addBootstrap('//event/stream/authd',jabber.authd)
+factory.addBootstrap('//event/stream/authd', jabber.authd)
 factory.addBootstrap("//event/client/basicauth/invaliduser", jabber.debug)
 factory.addBootstrap("//event/client/basicauth/authfailed", jabber.debug)
 factory.addBootstrap("//event/stream/error", jabber.debug)
 reactor.connectTCP(secret.connect_chatserver, 5222, factory)
 reactor.callLater(0, process, raw)
-reactor.callLater(10, killer)
+reactor.callLater(30, killer)
 reactor.run()
