@@ -88,6 +88,7 @@ def real_process(raw):
 
     tokens = re.findall("ATTN\.\.\.WFO\.\.\.([\.,A-Z]*)", raw)
     tokens = re.findall("([A-Z][A-Z][A-Z])", tokens[0])
+    tokens.append("SPC")
     for wfo in tokens:
         body = "%s: Storm Prediction Center issues Mesoscale Discussion http://www.spc.noaa.gov/products/md/md%s.html" % \
          (wfo, num)
