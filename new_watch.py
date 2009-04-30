@@ -252,6 +252,8 @@ def real_process(raw):
         wfo = rs[i]['wfo']
         mess = "%s: %s" % (wfo, jabberTxt)
         jabber.sendMessage(mess, jabberTxtHTML)
+    mess = "%s: %s" % ('SPC', jabberTxt)
+    jabber.sendMessage(mess, jabberTxtHTML)
 
 def killer():
     reactor.stop()
