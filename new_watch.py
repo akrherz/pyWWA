@@ -255,7 +255,7 @@ def real_process(raw):
 
     # Special message for SPC
     lines = raw.split("\n")
-    mess = "SPC: SPC issues %s http://www.spc.noaa.gov/products/watch/ww%04i.html" % (lines[4], int(ww_num) )
+    mess = "SPC: SPC issues %s http://www.spc.noaa.gov/products/watch/ww%04i.html" % (lines[5], int(ww_num) )
     jabber.sendMessage(mess)
 
 def killer():
