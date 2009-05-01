@@ -252,8 +252,11 @@ def real_process(raw):
         wfo = rs[i]['wfo']
         mess = "%s: %s" % (wfo, jabberTxt)
         jabber.sendMessage(mess, jabberTxtHTML)
-    mess = "%s: %s" % ('SPC', jabberTxt)
-    jabber.sendMessage(mess, jabberTxtHTML)
+
+    # Special message for SPC
+    lines = raw.split("\n")
+    mess = "SPC: SPC issues %s http://www.spc.noaa.gov/products/watch/ww%04i.html" % (lines[4], int(ww_num) )
+    jabber.sendMessage(mess)
 
 def killer():
     reactor.stop()
