@@ -97,7 +97,7 @@ def real_process(raw):
 
     # Figure out which areas SPC is interested in, default to WFOs
     affected = ", ".join(tokens)
-    sections = raw.split("\n\n")
+    sections = sqlraw.split("\n\n")
     for sect in sections:
         if sect.find("AREAS AFFECTED...") == 0:
             affected = sect[17:]
