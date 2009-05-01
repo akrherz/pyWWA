@@ -88,13 +88,15 @@ def real_process(raw):
 
     tokens = re.findall("ATTN\.\.\.WFO\.\.\.([\.,A-Z]*)", raw)
     tokens = re.findall("([A-Z][A-Z][A-Z])", tokens[0])
-    tokens.append("SPC")
     for wfo in tokens:
         body = "%s: Storm Prediction Center issues Mesoscale Discussion http://www.spc.noaa.gov/products/md/md%s.html" % \
          (wfo, num)
         htmlbody = "Storm Prediction Center issues <a href='http://www.spc.noaa.gov/products/md/md%s.html'>Mesoscale Discussion #%s</a> (<a href='%s?pid=%s'>View text</a>)" %(num,num, secret.PROD_URL, product_id)
         jabber.sendMessage(body, htmlbody)
 
+    # Special Message for SPC
+    body = "SPC: SPC issues Mesoscale Discussion for %s http://www.spc.noaa.gov/products/md/md%s.html" % (", ".join(tokens), num)
+    jabber.sendMessage(body)
 
 myJid = jid.JID('%s@%s/mcdparse_%s' % \
       (secret.iembot_ingest_user, secret.chatserver, \
