@@ -86,6 +86,7 @@ def real_process(raw):
       values ('%s','%s')" % (sqlraw, product_id)
     POSTGIS.query(sql)
 
+    # Figure out which WFOs SPC wants to alert...
     tokens = re.findall("ATTN\.\.\.WFO\.\.\.([\.,A-Z]*)", raw)
     tokens = re.findall("([A-Z][A-Z][A-Z])", tokens[0])
     for wfo in tokens:
@@ -94,8 +95,15 @@ def real_process(raw):
         htmlbody = "Storm Prediction Center issues <a href='http://www.spc.noaa.gov/products/md/md%s.html'>Mesoscale Discussion #%s</a> (<a href='%s?pid=%s'>View text</a>)" %(num,num, secret.PROD_URL, product_id)
         jabber.sendMessage(body, htmlbody)
 
+    # Figure out which areas SPC is interested in, default to WFOs
+    affected = ", ".join(tokens)
+    sections = raw.split("\n\n")
+    for sect in sections:
+        if sect.find("AREAS AFFECTED...") == 0:
+            affected = sect[17:]
+
     # Special Message for SPC
-    body = "SPC: SPC issues Mesoscale Discussion for %s http://www.spc.noaa.gov/products/md/md%s.html" % (", ".join(tokens), num)
+    body = "SPC: SPC issues Mesoscale Discussion for %s http://www.spc.noaa.gov/products/md/md%s.html" % (affected, num)
     jabber.sendMessage(body)
 
 myJid = jid.JID('%s@%s/mcdparse_%s' % \
