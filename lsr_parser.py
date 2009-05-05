@@ -203,11 +203,12 @@ class LSR:
         """ Set GTS via an offset """
         self.gts = self.lts + tsoff
 
-    def url_builder(self):
+    def url_builder(self, wfo):
         """ URL builder """
         uri = secret.MAP_LSR
-        uri += "?lat0=%s&amp;lon0=-%s&amp;ts=%s" % \
-               (self.lat,self.lon,self.gts.strftime("%Y-%m-%d%%20%H:%M"))
+        uri += "?lat0=%s&amp;lon0=-%s&amp;ts=%s&amp;wfo=%s" % \
+               (self.lat,self.lon,self.gts.strftime("%Y-%m-%d%%20%H:%M"),\
+                wfo)
         return uri
 
 
@@ -284,9 +285,9 @@ def real_processor(nws):
         LSRDB[ unique_key ] = mx.DateTime.gmt()
 
         mag_long = lsr.mag_string()
-        uri = lsr.url_builder()
+        uri = lsr.url_builder(wfo)
 
-        jabber_text = "%s:%s [%s Co, %s] %s reports %s %sat %s %s -- %s %s" % \
+        jabber_text = "%s: %s [%s Co, %s] %s reports %s %sat %s %s -- %s %s" % \
              (wfo, lsr.city, lsr.county, lsr.state, lsr.source, \
               lsr.typetext, mag_long, \
               lsr.lts.strftime(time_fmt), nws.z, lsr.remark, uri)
