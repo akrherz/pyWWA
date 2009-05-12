@@ -80,9 +80,10 @@ def consumer(category, lons, lats):
         geometry += "%.2f %.2f," % (lons[i], lats[i])
     geometry = geometry[:-1] + " )))"
     sql = "select distinct wfo from nws_ugc \
-       WHERE st_overlaps(geomFromEWKT('SRID=4326;%s'), geom) and \
+       WHERE ( st_overlaps(geomFromEWKT('SRID=4326;%s'), geom) or \
+       st_contains(geomFromEWKT('SRID=4326;%s'), geom) )and \
        polygon_class = 'C'" % \
-       (geometry,)
+       (geometry, geometry)
 
     rs = POSTGIS.query(sql).dictresult()
     affectedWFOS = []
