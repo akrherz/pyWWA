@@ -82,8 +82,8 @@ def email_error(message, product_text):
                  % (message, product_text))
     msg['subject'] = 'sps2bot.py Traceback'
     msg['From'] = secret.parser_user
-    msg['To'] = 'akrherz@iastate.edu'
-    smtp.sendmail("mailhub.iastate.edu", msg["From"], msg["To"], msg)
+    msg['To'] = secret.error_email
+    smtp.sendmail("localhost", msg["From"], msg["To"], msg)
 
 
 # LDM Ingestor
@@ -109,6 +109,19 @@ def real_process(raw):
     prod = TextProduct.TextProduct(raw)
 
     product_id = prod.get_product_id()
+    if len(prod.segments) == 0:
+        # Send the office an alert that they probably don't have a trailing
+        # $$
+        print "Missing $$ detected", product_id
+        mess = "%s: iembot failed to process product: %s\nError: %s" % \
+               (prod.get_iembot_source(), product_id, "Missing $$")
+        htmlmess = "<span style='color: #FF0000; font-weight: bold;'>\
+iembot processing error:</span><br />Product: %s<br />Error: %s" % \
+            (product_id, "Missing $$")
+        jabber.sendMessage(mess, htmlmess)
+        return
+
+
     if (prod.segments[0].giswkt):
         sql = "INSERT into text_products(product, product_id, geom) \
       values ('%s','%s', '%s')" % (sqlraw, product_id,prod.segments[0].giswkt )
@@ -120,8 +133,10 @@ def real_process(raw):
 
     for seg in prod.segments:
         headline = "[NO HEADLINE FOUND IN SPS]"
-        if (len(seg.headlines) > 0):
+        if len(seg.headlines) > 0:
             headline = (seg.headlines[0]).replace("\n", " ")
+        elif raw.find("SPECIAL WEATHER STATEMENT") > 0:
+            headline = "Special Weather Statement"
         counties = countyText(seg.ugc)
         if (counties.strip() == ""):
             counties = "entire area"
