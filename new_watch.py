@@ -68,6 +68,9 @@ def cancel_watch(report, ww_num):
         log.msg(sql)
         POSTGIS.query(sql)
 
+    msg = "SPC: SPC cancels WW %s http://www.spc.noaa.gov/products/watch/ww%04i.html" % ( ww_num, int(ww_num) )
+    jabber.sendMessage( msg )
+
 def process(raw):
     try:
         #raw = raw.replace("\015\015\012", "\n")
