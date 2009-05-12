@@ -243,16 +243,18 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
 
 def i_want_site(sid):
     """ Return bool if I want to actually process this site """
+    if sid in ['3SE','3OI']:
+        return True
     if (len(sid) != 5):
-        return 0
+        return False
     if (not mesonet.nwsli2state.has_key(sid[-2:])):
-        return 0
+        return False
 
     state = mesonet.nwsli2state[ sid[-2:]]
     if (not state in COOPSTATES):
-        return 0
+        return False
 
-    return 1
+    return True
 
 def really_process(data):
     """
@@ -269,7 +271,7 @@ def really_process(data):
             print "NO ENOUGH TOKENS", line
             continue
         sid = tokens[0]
-        if (not i_want_site(sid)):
+        if not i_want_site(sid):
             continue
         if (not mydata.has_key(sid)):
             mydata[sid] = {}
@@ -295,7 +297,10 @@ def process_site(sid, ts, data):
     I process a dictionary of data for a particular site
     """
     isCOOP = 0
-    state = mesonet.nwsli2state[ sid[-2:]]
+    if sid in ['3SE','3OI']:
+        state = "IA"
+    else:
+        state = mesonet.nwsli2state[ sid[-2:]]
     #print sid, ts, mydata[sid][ts].keys()
     # Loop thru vars to see if we have a COOP site?
     for var in data.keys():
