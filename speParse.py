@@ -24,8 +24,8 @@ import sys, re, pdb, mx.DateTime
 import traceback, StringIO
 import smtplib
 import secret
+import common
 from email.MIMEText import MIMEText
-
 
 from twisted.words.protocols.jabber import client, jid
 from twisted.words.xish import domish
@@ -35,51 +35,7 @@ from support import TextProduct
 import pg
 POSTGIS = pg.connect(secret.dbname, secret.dbhost, user=secret.dbuser, passwd=secret.dbpass)
 
-
 raw = sys.stdin.read()
-
-qu = 0
-
-class JabberClient:
-    xmlstream = None
-
-    def __init__(self, myJid):
-        self.myJid = myJid
-
-
-    def authd(self,xmlstream):
-        print "authenticated"
-        self.xmlstream = xmlstream
-        presence = domish.Element(('jabber:client','presence'))
-        xmlstream.send(presence)
-
-        xmlstream.addObserver('/message',  self.debug)
-        xmlstream.addObserver('/presence', self.debug)
-        xmlstream.addObserver('/iq',       self.debug)
-
-    def debug(self, elem):
-        print elem.toXml().encode('utf-8')
-        print "="*20
-
-    def sendMessage(self, body, htmlbody):
-        global qu
-        while (self.xmlstream is None):
-            print "xmlstream is None, so lets try again!"
-            reactor.callLater(3, self.sendMessage, body, htmlbody)
-            return
-
-        message = domish.Element(('jabber:client','message'))
-        message['to'] = "%s@%s" % (secret.iembot_user, secret.chatserver)
-        message['type'] = 'chat'
-        message.addElement('body',None,body)
-
-        html = domish.Element(('http://jabber.org/protocol/xhtml-im','html'))
-        body = domish.Element(('http://www.w3.org/1999/xhtml','body'))
-        body.addRawXml( htmlbody )
-        html.addChild(body)
-        message.addChild(html)
-        self.xmlstream.send(message)
-        qu -= 1
 
 
 
@@ -92,7 +48,7 @@ def process(raw):
         msg = MIMEText("%s\n\n>RAW DATA\n\n%s"%(io.getvalue(),raw))
         msg['subject'] = 'speParse.py Traceback'
         msg['From'] = secret.parser_user
-        msg['To'] = "akrherz@iastate.edu"
+        msg['To'] = secret.error_email
 
         s = smtplib.SMTP()
         s.connect()
@@ -101,7 +57,6 @@ def process(raw):
 
 
 def real_process(raw):
-    global qu
     sqlraw = raw.replace("'", "\\'").replace("\015\015\012", "\n")
     prod = TextProduct.TextProduct(raw)
 
@@ -112,30 +67,23 @@ def real_process(raw):
 
     tokens = re.findall("ATTN (WFOS|RFCS)(.*)", raw)
     for tpair in tokens:
-        if (tpair[0] == "WFOS"):
-            wfos = re.findall("([A-Z][A-Z][A-Z])", tpair[1])
-            for wfo in wfos:
-                qu += 1
-                body = "%s: NESDIS issues Satellite Precipitation Estimates %s?pid=%s" % \
+        wfos = re.findall("([A-Z]+)\.\.\.", tpair[1])
+        for wfo in wfos:
+            body = "%s: NESDIS issues Satellite Precipitation Estimates %s?pid=%s" % \
          (wfo, secret.PROD_URL, product_id)
-                htmlbody = "NESDIS issues <a href='%s?pid=%s'>Satellite Precipitation Estimates</a>" %(secret.PROD_URL, product_id,)
-                print body
-                jabber.sendMessage(body, htmlbody)
+            htmlbody = "NESDIS issues <a href='%s?pid=%s'>Satellite Precipitation Estimates</a>" %(secret.PROD_URL, product_id,)
+            jabber.sendMessage(body, htmlbody)
 
 
 def killer():
-    global qu
-    print "queue", qu
-    if (qu == 0):
-        reactor.stop()
-    reactor.callLater(10, killer)
+    reactor.stop()
 
 myJid = jid.JID('%s@%s/spe_%s' % \
       (secret.iembot_ingest_user, secret.chatserver, \
        mx.DateTime.gmt().strftime("%Y%m%d%H%M%S") ) )
 factory = client.basicClientFactory(myJid, secret.iembot_ingest_password)
 
-jabber = JabberClient(myJid)
+jabber = common.JabberClient(myJid)
 
 factory.addBootstrap('//event/stream/authd',jabber.authd)
 factory.addBootstrap("//event/client/basicauth/invaliduser", jabber.debug)
@@ -144,7 +92,7 @@ factory.addBootstrap("//event/stream/error", jabber.debug)
 
 reactor.connectTCP(secret.connect_chatserver,5222,factory)
 reactor.callLater(0, process, raw)
-reactor.callLater(10, killer)
+reactor.callLater(30, killer)
 reactor.run()
 
 
