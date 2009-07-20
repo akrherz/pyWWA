@@ -39,7 +39,7 @@ import common
 log.startLogging(open('logs/dsm.log','a'))
 log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
 
-DBPOOL = adbapi.ConnectionPool("psycopg2", "iem", 
+DBPOOL = adbapi.ConnectionPool("psycopg2", database="iem", 
                                host=secret.dbhost, password=secret.dbpass)
 EMAILS = 10
 
@@ -86,7 +86,10 @@ def real_parser(buf):
     # Split lines
     raw = buf.replace("\015\015\012", "\n")
     lines = raw.split("\n")
-    meat = ("".join(lines[2:])).split("=")
+    if len(lines[3]) < 10:
+        meat = ("".join(lines[4:])).split("=")
+    else:
+        meat = ("".join(lines[3:])).split("=")
     for data in meat:
         if data == "":
             continue
@@ -95,24 +98,25 @@ def real_parser(buf):
 PARSER_RE = re.compile("""^(?P<id>[A-Z][A-Z0-9]{3})\s+
    DS\s+
    (COR\s)?
+   ([0-9]{4}\s)?
    (?P<day>\d\d)/(?P<month>\d\d)\s?
    (?P<high>-?\d+)(?P<hightime>[0-9]{4})/\s?
    (?P<low>-?\d+)(?P<lowtime>[0-9]{4})//\s?
-   (?P<coophigh>-?\d+)/\s?
-   (?P<cooplow>-?\d+)//
+   (?P<coophigh>(-?\d+|M))/\s?
+   (?P<cooplow>(-?\d+|M))//
    (?P<minslp>[0-9]{3,4})(?P<slptime>[0-9]{4})/
    (?P<precip>T|M|[0-9]{,4})/
-   (?P<p01>T|M|[0-9]{,4})/(?P<p02>T|M|[0-9]{,4})/(?P<p03>T|M|[0-9]{,4})/
-   (?P<p04>T|M|[0-9]{,4})/(?P<p05>T|M|[0-9]{,4})/(?P<p06>T|M|[0-9]{,4})/
-   (?P<p07>T|M|[0-9]{,4})/(?P<p08>T|M|[0-9]{,4})/(?P<p09>T|M|[0-9]{,4})/
-   (?P<p10>T|M|[0-9]{,4})/(?P<p11>T|M|[0-9]{,4})/(?P<p12>T|M|[0-9]{,4})/
-   (?P<p13>T|M|[0-9]{,4})/(?P<p14>T|M|[0-9]{,4})/(?P<p15>T|M|[0-9]{,4})/
-   (?P<p16>T|M|[0-9]{,4})/(?P<p17>T|M|[0-9]{,4})/(?P<p18>T|M|[0-9]{,4})/
-   (?P<p19>T|M|[0-9]{,4})/(?P<p20>T|M|[0-9]{,4})/(?P<p21>T|M|[0-9]{,4})/
-   (?P<p22>T|M|[0-9]{,4})/(?P<p23>T|M|[0-9]{,4})/(?P<p24>T|M|[0-9]{,4})/
-   (?P<avg_sped>\d+)/
-   (?P<drct_sped_max>[0-9]{2})(?P<sped_max>[0-9]{2})(?P<time_sped_max>[0-9]{4})/
-   (?P<drct_gust_max>[0-9]{2})(?P<sped_gust_max>[0-9]{2})(?P<time_gust_max>[0-9]{4})
+ (?P<p01>T|M|\-|[0-9]{,4})/(?P<p02>T|M|\-|[0-9]{,4})/(?P<p03>T|M|\-|[0-9]{,4})/
+ (?P<p04>T|M|\-|[0-9]{,4})/(?P<p05>T|M|\-|[0-9]{,4})/(?P<p06>T|M|\-|[0-9]{,4})/
+ (?P<p07>T|M|\-|[0-9]{,4})/(?P<p08>T|M|\-|[0-9]{,4})/(?P<p09>T|M|\-|[0-9]{,4})/
+ (?P<p10>T|M|\-|[0-9]{,4})/(?P<p11>T|M|\-|[0-9]{,4})/(?P<p12>T|M|\-|[0-9]{,4})/
+ (?P<p13>T|M|\-|[0-9]{,4})/(?P<p14>T|M|\-|[0-9]{,4})/(?P<p15>T|M|\-|[0-9]{,4})/
+ (?P<p16>T|M|\-|[0-9]{,4})/(?P<p17>T|M|\-|[0-9]{,4})/(?P<p18>T|M|\-|[0-9]{,4})/
+ (?P<p19>T|M|\-|[0-9]{,4})/(?P<p20>T|M|\-|[0-9]{,4})/(?P<p21>T|M|\-|[0-9]{,4})/
+ (?P<p22>T|M|\-|[0-9]{,4})/(?P<p23>T|M|\-|[0-9]{,4})/(?P<p24>T|M|\-|[0-9]{,4})/
+   (?P<avg_sped>[0-9]{3})?/?
+   (?P<drct_sped_max>[0-9]{2})?(?P<sped_max>[0-9]{2})?(?P<time_sped_max>[0-9]{4})?/?
+   (?P<drct_gust_max>[0-9]{2})?(?P<sped_gust_max>[0-9]{2})?(?P<time_gust_max>[0-9]{4})?
 """, re.VERBOSE)
 
 def process_dsm(data):
