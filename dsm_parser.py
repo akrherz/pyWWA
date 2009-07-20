@@ -116,10 +116,34 @@ PARSER_RE = re.compile("""^(?P<id>[A-Z][A-Z0-9]{3})\s+
 """, re.VERBOSE)
 
 def process_dsm(data):
-    print data
     m = PARSER_RE.match( data )
-    print m.groupdict()
+    if m is None:
+        email_error("DSM RE Match Failure", data)
+        return
+    dict = m.groupdict()
+    if dict['id'][0] != "K":
+        return
+    # Figure out the timestamp
+    now = mx.DateTime.now()
+    ts = now + mx.DateTime.RelativeDateTime(day=int(dict['day']),
+               month=int(dict['month']))
+    if ts.month == 12 and now.month == 1:
+        ts -= mx.DateTime.RelativeDateTime(years=1)
+    updater = []
+    if dict['high'] != "M":
+        updater.append("max_tmpf = %s" % (dict['high'],))
+    if dict['low'] != "M":
+        updater.append("min_tmpf = %s" % (dict['low'],))
+    if dict['precip'] != "M" and dict['precip'] != "T":
+        updater.append("pday = %s" % (float(dict['precip']) / 100.0,))
+    if dict['precip'] == "T":
+        updater.append("pday = 0.0001")
 
+    sql = "UPDATE summary_%s SET %s WHERE station = '%s' and day = '%s'" % (
+         ts.year, " , ".join(updater), dict['id'][1:], ts.strftime("%Y-%m-%d"))
+    print "%s %s %s %s %s" % (dict['id'], ts.strftime("%Y-%m-%d"),
+          dict['high'], dict['low'], dict['precip'] )
+    DBPOOL.runOperation( sql ).addErrback( email_error, sql)
 
 ldm = ldmbridge.LDMProductFactory( MyProductIngestor() )
 reactor.run()
