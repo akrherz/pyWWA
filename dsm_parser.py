@@ -100,8 +100,8 @@ PARSER_RE = re.compile("""^(?P<id>[A-Z][A-Z0-9]{3})\s+
    (COR\s)?
    ([0-9]{4}\s)?
    (?P<day>\d\d)/(?P<month>\d\d)\s?
-   (?P<high>(-?\d+|M))(?P<hightime>[0-9]{4})?/\s?
-   (?P<low>(-?\d+|M))(?P<lowtime>[0-9]{4})?//\s?
+   ((?P<highmiss>M)|((?P<high>(-?\d+))(?P<hightime>[0-9]{4})))/\s?
+   ((?P<lowmiss>M)|((?P<low>(-?\d+))(?P<lowtime>[0-9]{4})))//\s?
    (?P<coophigh>(-?\d+|M))/\s?
    (?P<cooplow>(-?\d+|M))//
    (?P<minslp>M|[0-9]{3,4})(?P<slptime>[0-9]{4})?/
@@ -135,9 +135,9 @@ def process_dsm(data):
     if ts.month == 12 and now.month == 1:
         ts -= mx.DateTime.RelativeDateTime(years=1)
     updater = []
-    if dict['high'] != "M":
+    if dict.has_key('high') and dict['high'] != "M":
         updater.append("max_tmpf = %s" % (dict['high'],))
-    if dict['low'] != "M":
+    if dict.has_key('low') and dict['low'] != "M":
         updater.append("min_tmpf = %s" % (dict['low'],))
     if dict['precip'] != "M" and dict['precip'] != "T":
         updater.append("pday = %s" % (float(dict['precip']) / 100.0,))
