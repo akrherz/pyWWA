@@ -100,8 +100,8 @@ PARSER_RE = re.compile("""^(?P<id>[A-Z][A-Z0-9]{3})\s+
    (COR\s)?
    ([0-9]{4}\s)?
    (?P<day>\d\d)/(?P<month>\d\d)\s?
-   (?P<high>-?\d+)(?P<hightime>[0-9]{4})/\s?
-   (?P<low>-?\d+)(?P<lowtime>[0-9]{4})//\s?
+   (?P<high>(-?\d+|M))(?P<hightime>[0-9]{4})?/\s?
+   (?P<low>(-?\d+|M))(?P<lowtime>[0-9]{4})?//\s?
    (?P<coophigh>(-?\d+|M))/\s?
    (?P<cooplow>(-?\d+|M))//
    (?P<minslp>[0-9]{3,4})(?P<slptime>[0-9]{4})/
@@ -122,6 +122,7 @@ PARSER_RE = re.compile("""^(?P<id>[A-Z][A-Z0-9]{3})\s+
 def process_dsm(data):
     m = PARSER_RE.match( data )
     if m is None:
+        print "FAIL!", data
         email_error("DSM RE Match Failure", data)
         return
     dict = m.groupdict()
