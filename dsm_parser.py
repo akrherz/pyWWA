@@ -135,11 +135,11 @@ def process_dsm(data):
     if ts.month == 12 and now.month == 1:
         ts -= mx.DateTime.RelativeDateTime(years=1)
     updater = []
-    if dict['high'] != "M":
+    if dict['high'] is not None and dict['high'] != "M":
         updater.append("max_tmpf = %s" % (dict['high'],))
-    if dict['low'] != "M":
+    if dict['low'] is not None and dict['low'] != "M":
         updater.append("min_tmpf = %s" % (dict['low'],))
-    if dict['precip'] != "M" and dict['precip'] != "T":
+    if dict['precip'] is not None and dict['precip'] not in ["M","T"]:
         updater.append("pday = %s" % (float(dict['precip']) / 100.0,))
     if dict['precip'] == "T":
         updater.append("pday = 0.0001")
