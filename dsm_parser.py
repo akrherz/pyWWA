@@ -148,7 +148,8 @@ def process_dsm(data):
          ts.year, " , ".join(updater), dict['id'][1:], ts.strftime("%Y-%m-%d"))
     print "%s %s %s %s %s" % (dict['id'], ts.strftime("%Y-%m-%d"),
           dict['high'], dict['low'], dict['precip'] )
-    DBPOOL.runOperation( sql ).addErrback( email_error, sql)
+    if len(updater) > 0:
+        DBPOOL.runOperation( sql ).addErrback( email_error, sql)
 
 ldm = ldmbridge.LDMProductFactory( MyProductIngestor() )
 reactor.run()
