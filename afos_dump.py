@@ -83,7 +83,7 @@ def real_parser(buf):
     nws.findAFOS()
 
     DBPOOL.runOperation("""INSERT into products(pil,data)
-      VALUES('%s','%s')""" % (nws.afos.strip(), buf) ).addErrback( email_error, buf)
+      VALUES('%s','%s')""" % (nws.afos.strip(), nws.raw) ).addErrback( email_error, buf)
 
 
 ldm = ldmbridge.LDMProductFactory( MyProductIngestor() )
