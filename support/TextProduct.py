@@ -7,7 +7,7 @@ TORNADO = re.compile(r"^AT |^\* AT")
 
 class TextProduct:
 
-    def __init__(self, raw):
+    def __init__(self, raw, bypass=False):
         self.idd = None
         self.wmo = None
         self.source = None
@@ -20,11 +20,14 @@ class TextProduct:
 
         self.raw = raw.strip().replace("\015\015\012", "\n") # to unix
         self.sections = self.raw.split("\n\n")
-        
-        parseCallbacks = [self.findIssueTime, self.findSegments, self.findIDD,
-            self.findWMO, self.findAFOS, self.figureFcster, self.find_pheader]
-        for cb in parseCallbacks:
-            apply( cb )
+
+        if not bypass:     
+            parseCallbacks = [self.findIssueTime, self.findSegments, 
+                self.findIDD, self.findWMO, self.findAFOS, self.figureFcster, 
+                self.find_pheader]
+            for cb in parseCallbacks:
+                apply( cb )
+
 
     def find_pheader(self):
         """ Figure out what the WMO AND MND area and save it for database
@@ -101,6 +104,44 @@ afos: %(afos)s
             s += "+--- segment %s |||| %s" % (i, seg,)
             i += 1
         return s
+
+    def generate_fake_vtec(self):
+        """ I generate a fake VTEC ...
+            is for non VTEC products prior to 2005, I think :) """
+        r = self.raw.replace("NOON", "1200 PM").replace("MIDNIGHT", "1200 AM").replace("VALID UNTIL", "UNTIL")
+        dre = "\*\s+UNTIL\s+([0-9]{1,4})\s+(AM|PM)\s+([A-Z]{3,4})"
+        tokens = re.findall(dre, r)
+        if (len(tokens[0][0]) < 3):
+            h = int(tokens[0][0])
+            m = 0
+        else:
+            h = int(tokens[0][0][:-2])
+            m = int(tokens[0][0][-2:])
+        if tokens[0][1] == "AM" and h == 12:
+            h = 0
+        if tokens[0][1] == "PM" and h < 12:
+            h += 12
+        # Figure local issued time
+        issue = self.issueTime - mx.DateTime.RelativeDateTime(hours=reference.offsets[self.z])
+        expire = issue + mx.DateTime.RelativeDateTime(hour=h, minute=m)
+        if (expire < issue):
+            expire += mx.DateTime.RelativeDateTime(days=1)
+        expireZ = expire + mx.DateTime.RelativeDateTime(hours=reference.offsets[self.z])
+        print issue, expire, expireZ, self.z
+
+        if (self.afos[:3] == "SVR"):
+            typ = "SV"
+        elif (self.afos[:3] == "TOR"):
+            typ = "TO"
+        elif (self.afos[:3] == "FFW"):
+            typ = "FF"
+      
+
+        fake = "/O.NEW.%s.%s.W.0000.%s-%s/" % (self.source, typ, \
+               self.issueTime.strftime("%y%m%dT%H%MZ"), \
+               expireZ.strftime("%y%m%dT%H%MZ") )
+        print 'Fake VTEC', fake
+        self.segments[0].vtec.append( vtec.vtec(fake) )
 
     def findIssueTime(self):
         """ Too much fun, we need to determine when this text product was
