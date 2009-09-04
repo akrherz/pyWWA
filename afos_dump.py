@@ -81,9 +81,12 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
 def real_parser(buf):
     nws = TextProduct.TextProduct( buf, bypass=True)
     nws.findAFOS()
+    data = re.sub("'", "\\'",nws.raw)
+    data = re.sub("\001", "", data)
 
     DBPOOL.runOperation("""INSERT into products(pil,data)
-      VALUES('%s','%s')""" % (nws.afos.strip(), re.sub("'", "\\'",nws.raw)) ).addErrback( email_error, buf)
+      VALUES('%s','%s')""" % (nws.afos.strip(), 
+      data) ).addErrback( email_error, buf)
 
 
 ldm = ldmbridge.LDMProductFactory( MyProductIngestor() )
