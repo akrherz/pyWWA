@@ -82,7 +82,8 @@ def real_parser(buf):
     nws = TextProduct.TextProduct( buf, bypass=True)
     nws.findAFOS()
     data = re.sub("'", "\\'",nws.raw)
-    data = re.sub("\001", "", data)
+    data = re.sub("\x01", "", data)
+    data = re.sub("\x00", "", data)
 
     DBPOOL.runOperation("""INSERT into products(pil,data)
       VALUES('%s','%s')""" % (nws.afos.strip(), 
