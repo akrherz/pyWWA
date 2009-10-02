@@ -28,7 +28,7 @@ from twisted.enterprise import adbapi
 from metar import Metar
 from email.MIMEText import MIMEText
 import smtplib, secret, mx.DateTime, pg
-from common import *
+import common
 
 
 dbpool = adbapi.ConnectionPool("psycopg2", database='iem', host=secret.dbhost)
@@ -236,9 +236,10 @@ def process_site(metar):
 
 def sendAlert(iemid, what, clean_metar):
     print "ALERTING"
-    mesosite = pg.connect('mesosite')
     if ISIEM:
         mesosite = pg.connect('mesosite', secret.dbhost)
+    else:
+        mesosite = pg.connect('mesosite')
     rs = mesosite.query("SELECT wfo, state, name from stations \
            WHERE id = '%s' " % (iemid,) ).dictresult()
     if (len(rs) == 0):
@@ -261,9 +262,10 @@ def sendWindAlert(iemid, v, d, t, clean_metar):
     """
     Send a wind alert please
     """
-    mesosite = pg.connect('mesosite')
     if ISIEM:
         mesosite = pg.connect('mesosite', secret.dbhost)
+    else:
+        mesosite = pg.connect('mesosite')
     rs = mesosite.query("SELECT wfo, state, name from stations \
            WHERE id = '%s' " % (iemid,) ).dictresult()
     if (len(rs) == 0):
@@ -286,7 +288,7 @@ myJid = jid.JID('%s@%s/metar_%s' % \
       (secret.iembot_ingest_user, secret.chatserver, \
        mx.DateTime.gmt().strftime("%Y%m%d%H%M%S") ) )
 factory = client.basicClientFactory(myJid, secret.iembot_ingest_password)
-jabber = JabberClient(myJid)
+jabber = common.JabberClient(myJid)
 factory.addBootstrap('//event/stream/authd',jabber.authd)
 factory.addBootstrap("//event/client/basicauth/invaliduser", jabber.debug)
 factory.addBootstrap("//event/client/basicauth/authfailed", jabber.debug)
