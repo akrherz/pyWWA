@@ -147,6 +147,10 @@ def process_site(metar):
     iem = MyIEMOB(iemid)
     gts = mx.DateTime.DateTime( mtr.time.year, mtr.time.month, 
                   mtr.time.day, mtr.time.hour, mtr.time.minute)
+    # Make sure that the ob is not from the future!
+    if gts > (mx.DateTime.gmt() + mx.DateTime.RelativeDateTime(hours=1)):
+        log.msg("%s METAR [%s] timestamp in the future!" % (iemid, gts))
+        return
 
     iem.setObTimeGMT(gts)
     if ISIEM:
