@@ -30,7 +30,6 @@ from email.MIMEText import MIMEText
 import smtplib, secret, mx.DateTime, pg
 import common
 
-
 dbpool = adbapi.ConnectionPool("psycopg2", database='iem', host=secret.dbhost)
 
 i = iemdb.iemdb(dhost=secret.dbhost)
