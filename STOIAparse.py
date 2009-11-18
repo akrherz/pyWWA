@@ -51,18 +51,18 @@ def figureCondition(condition, conditions):
            "CC Mixed", "MC Ice", "MC Snow", "MC Slush", "MC Mixed",
            "PC Ice", "PC Snow", "PC Slush", "PC Mixed", "CC Frost",
            "MC Frost", "PC Frost", "Wet", "Normal", "No Conditions Reproted"]:
-    if (findString(condition, typ)):
-      if (not conditions.has_key(typ)):
+    if (findString(condition, typ.upper())):
+      if (not conditions.has_key(typ.upper())):
         logger.info("Unknown Condition: %s\n" % (typ,) )
         rs = mydb.query("SELECT max(code) as m from roads_conditions").dictresult()
         newID = int( rs[0]["m"] ) + 1
         mydb.query("INSERT into roads_conditions VALUES (%s, '%s') " % \
           (newID, typ) )
-        conditions[typ] = newID
+        conditions[typ.upper()] = newID
 
-      return conditions[typ]
+      return conditions[typ.upper()]
 
-  return conditions["Normal"]
+  return conditions["NORMAL"]
 
 
 def process(raw):
@@ -71,14 +71,14 @@ def process(raw):
   condcodes = {}
   rs = mydb.query("SELECT * from roads_conditions").dictresult()
   for i in range(len(rs)):
-    conditions[ rs[i]["label"] ] = rs[i]["code"]
-    condcodes[ int(rs[i]["code"]) ] = rs[i]["label"]
+    conditions[ rs[i]["label"].upper() ] = rs[i]["code"]
+    condcodes[ int(rs[i]["code"]) ] = rs[i]["label"].upper()
 
   # Load up dictionary of roads...
   roads = {}
   rs = mydb.query("SELECT * from roads_base").dictresult()
   for i in range(len(rs)):
-    roads["%s%s" % (rs[i]["major"], rs[i]["minor"])] = rs[i]["segid"]
+    roads["%s%s" % (rs[i]["major"], rs[i]["minor"].upper())] = rs[i]["segid"]
 
   # Figure out when this report is valid
   tokens = re.findall("([0-1][0-9])([0-9][0-9]) ([A|P]M) C[D|S]T [A-Z][A-Z][A-Z] ([A-Z][A-Z][A-Z]) ([0-9]+) (2[0-9][0-9][0-9])\n", raw)
@@ -110,8 +110,8 @@ def process(raw):
     # Now we are going to do things by type!
     roadCondCode = figureCondition(condition, conditions)
     #print roadCondCode, condition, condcodes[roadCondCode]
-    towingProhibited = findString(condition, "Towing Prohibited")
-    limitedVis = findString(condition, "Limited Vis.")
+    towingProhibited = findString(condition, "TOWING PROHIBITED")
+    limitedVis = findString(condition, "LIMITED VIS.")
   
     rkey = "%s%s" % (major, minor)
     if (not roads.has_key(rkey)):
