@@ -81,7 +81,7 @@ def process(raw):
     roads["%s%s" % (rs[i]["major"], rs[i]["minor"].upper())] = rs[i]["segid"]
 
   # Figure out when this report is valid
-  tokens = re.findall("([0-1][0-9])([0-9][0-9]) ([A|P]M) C[D|S]T [A-Z][A-Z][A-Z] ([A-Z][A-Z][A-Z]) ([0-9]+) (2[0-9][0-9][0-9])\n", raw)
+  tokens = re.findall("([0-9]{1,2})([0-9][0-9]) ([AP]M) C[DS]T [A-Z][A-Z][A-Z] ([A-Z][A-Z][A-Z]) ([0-9]+) (2[0-9][0-9][0-9])\n", raw)
   # tokens is like [('08', '52', 'AM', 'NOV', '23', '2004')]
   hroffset = 0
   if (tokens[0][2] == "PM" and int(tokens[0][0]) < 12):
