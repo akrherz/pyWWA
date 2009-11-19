@@ -97,7 +97,7 @@ def process(raw):
   logger.info("PROCESSING STOIA: %s" % (ts,))
 
   # Lets start our processing
-  lines = re.split("\n", raw)
+  lines = re.split("\n", raw[ raw.find("*"):])
   for line in lines:
     if (len(line) < 20 or line[0] == "*" or line[6] != " " or line[7] == " "):
       continue
