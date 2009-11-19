@@ -104,7 +104,7 @@ def process(raw):
     if (line[0] != " "):
       major = (line[:6]).strip()
     minor = (line[7:40]).strip().upper()
-    condition = (line[40:]).strip()
+    condition = (line[40:]).strip().upper()
 
     #----------------------------------------
     # Now we are going to do things by type!
