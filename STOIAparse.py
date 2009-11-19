@@ -103,7 +103,7 @@ def process(raw):
       continue
     if (line[0] != " "):
       major = (line[:6]).strip()
-    minor = (line[7:40]).strip()
+    minor = (line[7:40]).strip().upper()
     condition = (line[40:]).strip()
 
     #----------------------------------------
