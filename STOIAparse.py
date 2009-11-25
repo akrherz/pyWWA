@@ -86,6 +86,8 @@ def process(raw):
   hroffset = 0
   if (tokens[0][2] == "PM" and int(tokens[0][0]) < 12):
     hroffset = 12
+  if (tokens[0][2] == "AM" and int(tokens[0][0]) == 12):
+    hroffset = -12
   hr = int(tokens[0][0]) + hroffset
   mi = int(tokens[0][1])
   mod = {"JAN": 1, "FEB": 2, "MAR": 3, "APR": 4, "MAY": 5, "JUN": 6, "JUL": 7,
