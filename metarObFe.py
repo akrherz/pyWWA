@@ -185,7 +185,8 @@ def process_site(metar):
     for i in range(len(mtr.sky)):
         (c,h,b) = mtr.sky[i]
         iem.data['skyc%s' % (i+1)] = c
-        iem.data['skyl%s' % (i+1)] = h.value("FT")
+        if h is not None:
+            iem.data['skyl%s' % (i+1)] = h.value("FT")
 
     if ISIEM:
         iem.updateDatabase(None, dbpool)
