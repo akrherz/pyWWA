@@ -84,7 +84,7 @@ class JabberClient:
             #http://tinyurl.com/api-create.php?url="+url
             client.getPage("http://api.bit.ly/shorten?version=2.0.1&longUrl=%s&login=iembot&apiKey=%s" % (url, secret.bitly_key) ).addCallback(self.tweet, " ".join(body.split(" ")[:-1]))
         else:
-            self.tweet("", None, body)
+            self.tweet(None, body)
 
     def findurl(self, message):
         """Extract URL from message"""
