@@ -181,6 +181,12 @@ def process_site(metar):
     iem.data['phour'] = 0
     if mtr.precip_1hr:
         iem.data['phour'] = mtr.precip_1hr.value("IN")
+    # Do something with sky coverage
+    for i in range(len(mtr.sky)):
+        (c,h,b) = mtr.sky[i]
+        iem.data['skyc%s' % (i+1)] = c
+        iem.data['skyl%s' % (i+1)] = h.value("FT")
+
     if ISIEM:
         iem.updateDatabase(None, dbpool)
 
