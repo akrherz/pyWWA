@@ -258,7 +258,7 @@ def sendAlert(iemid, what, clean_metar):
     extra = ""
     if (clean_metar.find("$") > 0):
         extra = "(Caution: Maintenance Check Indicator)"
-    jtxt = "%s: %s,%s (%s) ASOS %s reports %s\n%s"\
+    jtxt = "%s: %s,%s (%s) ASOS %s reports %s\n%s http://mesonet.agron.iastate.edu/ASOS/current.phtml"\
             % (wfo, nm, st, iemid, extra, what, clean_metar )
 
     jabber.sendMessage(jtxt)
