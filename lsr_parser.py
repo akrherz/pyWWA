@@ -205,10 +205,13 @@ class LSR:
 
     def url_builder(self, wfo):
         """ URL builder """
-        uri = secret.MAP_LSR
-        uri += "?lat0=%s&amp;lon0=-%s&amp;ts=%s&amp;wfo=%s" % \
-               (self.lat,self.lon,self.gts.strftime("%Y-%m-%d%%20%H:%M"),\
-                wfo)
+        #uri = secret.MAP_LSR
+        #uri += "?lat0=%s&amp;lon0=-%s&amp;ts=%s&amp;wfo=%s" % \
+        #       (self.lat,self.lon,self.gts.strftime("%Y-%m-%d%%20%H:%M"),\
+        #        wfo)
+        uri =  "%s#%s/%s/%s" % (secret.MAP_LSR, wfo, 
+                self.gts.strftime("%Y%m%d%H%M"),
+                self.gts.strftime("%Y%m%d%H%M") )
         return uri
 
 
@@ -314,10 +317,13 @@ def real_processor(nws):
             extra_text = ", %s out of %s reports were previously \
 sent and not repeated here." % (duplicates, duplicates + new_reports)
 
-        uri = secret.MAP_LSR
-        uri += "?lat0=%s&amp;lon0=-%s&amp;ts=%s&amp;ts2=%s&amp;wfo=%s" % \
-             (lsr.lat,lsr.lon,min_time.strftime("%Y-%m-%d%%20%H:%M"),\
-              max_time.strftime("%Y-%m-%d%%20%H:%M"), wfo )
+        #uri = secret.MAP_LSR
+        #uri += "?lat0=%s&amp;lon0=-%s&amp;ts=%s&amp;ts2=%s&amp;wfo=%s" % \
+        #     (lsr.lat,lsr.lon,min_time.strftime("%Y-%m-%d%%20%H:%M"),\
+        #      max_time.strftime("%Y-%m-%d%%20%H:%M"), wfo )
+        uri =  "%s#%s/%s/%s" % (secret.MAP_LSR, wfo, 
+               min_time.strftime("%Y%m%d%H%M"),
+               max_time.strftime("%Y%m%d%H%M") )
         jabber_text = "%s: %s issues Summary Local Storm Report %s %s" % \
            (wfo, wfo, extra_text, uri)
         jabber_html = "%s issues <a href='%s'>Summary Local Storm Report</a>%s"\
