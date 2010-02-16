@@ -142,6 +142,8 @@ def process_site(metar):
     iemid = mtr.station_id[-3:]
     if (mtr.station_id[0] == "X"): # West Texas Mesonet
         iemid = mtr.station_id
+    if (mtr.station_id[0] == "P"): # Pacific Region
+        iemid = mtr.station_id
 
     iem = MyIEMOB(iemid)
     gts = mx.DateTime.DateTime( mtr.time.year, mtr.time.month, 
