@@ -126,7 +126,7 @@ def process_site(metar):
     metar = metar.encode('latin-1').replace('\xa0', " ")
     clean_metar = re.sub("\s+", " ", metar.strip())
     # Only process US obs for now ....
-    if (len(clean_metar) == 0 or clean_metar[0] not in ("K","X")):
+    if (len(clean_metar) == 0 or clean_metar[0] not in ("K","X","P")):
         return
 
     try:
