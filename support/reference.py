@@ -35,6 +35,7 @@ lsr_events = {
  'MARINE HAIL': 'H',
  'EXCESSIVE HEAT': 'I',
  'DENSE FOG': 'J',
+ 'FOG': 'J',
  'LIGHTNING STRIKE': 'K',
  'LIGHTNING': 'L',
  'MARINE TSTM WND': 'M',
