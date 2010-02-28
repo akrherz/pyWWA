@@ -4,7 +4,7 @@ from support import ugc, vtec, hvtec, reference
 
 #TORNADO = re.compile(r"(STORM\W+CAPABLE\W+OF\W+PRODUCING|REPORTED|INDICATED?)\W+A\W+TORNADO")
 TORNADO = re.compile(r"^AT |^\* AT")
-WINDHAIL = re.compile("WIND\.\.\.HAIL (?P<wind>[0-9]+)MPH (?P<hail>[0-9\.])IN")
+WINDHAIL = re.compile(".*WIND\.\.\.HAIL (?P<wind>[0-9]+)MPH (?P<hail>[0-9\.]+)IN")
 class TextProduct:
 
     def __init__(self, raw, bypass=False):
