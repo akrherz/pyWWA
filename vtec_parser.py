@@ -445,38 +445,41 @@ till %(ets)s %(svs_special)s" % jmsg_dict
         if vtec.action in ['CAN',]:
             sql = "INSERT into sbw_%s(wfo, eventid, significance, phenomena,\
                 issue, expire, init_expire, polygon_begin, polygon_end, geom, \
-                status, report) VALUES ('%s',\
+                status, report, windtag, hailtag) VALUES ('%s',\
                 '%s','%s','%s', %s,'%s+00','%s+00','%s+00','%s+00', \
-                '%s','%s','%s')" % \
+                '%s','%s','%s',%s,%s)" % \
                  (text_product.issueTime.year, vtec.office, vtec.ETN, \
                  vtec.significance, vtec.phenomena, my_sts, \
                  text_product.issueTime, (vtec.endTS or my_ets), \
                  text_product.issueTime, text_product.issueTime, \
-                  seg.giswkt, vtec.action, product_text)
+                  seg.giswkt, vtec.action, product_text,
+                 (seg.windtag or 'Null'), (seg.hailtag or 'Null'))
 
         elif vtec.action in ['EXP', 'UPG', 'EXT']:
             sql = "INSERT into sbw_%s(wfo, eventid, significance, phenomena,\
                 issue, expire, init_expire, polygon_begin, polygon_end, geom, \
-                status, report) VALUES ('%s',\
+                status, report, windtag, hailtag) VALUES ('%s',\
                 '%s','%s','%s', %s,'%s+00','%s+00','%s+00','%s+00', \
-                '%s','%s','%s')" % \
+                '%s','%s','%s',%s,%s)" % \
                  (text_product.issueTime.year, vtec.office, vtec.ETN, \
                  vtec.significance, vtec.phenomena, my_sts, \
                  (vtec.endTS or my_ets), \
                  (vtec.endTS or my_ets), \
                  (vtec.endTS or text_product.issueTime), \
                  (vtec.endTS or text_product.issueTime), \
-                  seg.giswkt, vtec.action, product_text)
+                  seg.giswkt, vtec.action, product_text,
+                  (seg.windtag or 'Null'), (seg.hailtag or 'Null'))
         else:
             sql = "INSERT into sbw_%s(wfo, eventid, significance, phenomena,\
                 issue, expire, init_expire, polygon_begin, polygon_end, geom, \
-                status, report) VALUES ('%s',\
+                status, report, windtag, hailtag) VALUES ('%s',\
                 '%s','%s','%s', %s,'%s+00','%s+00','%s+00','%s+00', \
-                '%s','%s','%s')" % \
+                '%s','%s','%s',%s,%s)" % \
                  (text_product.issueTime.year, vtec.office, vtec.ETN, \
                  vtec.significance, vtec.phenomena, my_sts, vtec.endTS, \
                  vtec.endTS, (vtec.beginTS or text_product.issueTime), \
-                 vtec.endTS, seg.giswkt, vtec.action, product_text)
+                 vtec.endTS, seg.giswkt, vtec.action, product_text,
+                 (seg.windtag or 'Null'), (seg.hailtag or 'Null'))
         DBPOOL.runOperation(sql).addErrback( email_error, sql)
 
 
