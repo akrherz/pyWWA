@@ -13,7 +13,10 @@ def lookup_touches(ugc):
   sql = """select ugc from nws_ugc WHERE ugc != '%s' and 
         ST_Touches(geom, (select geom from nws_ugc WHERE ugc = '%s' LIMIT 1))""" % (
       ugc, ugc)
-  rs = postgis.query( sql ).dictresult()
+  try:
+    rs = postgis.query( sql ).dictresult()
+  except:
+    return
   for i in range(len(rs)):
     touches[ ugc ].append( rs[i]['ugc'] )
 
@@ -47,7 +50,8 @@ for i in range(len(rs)):
           lookup_touches( rs3[z]['ugc'] )
         ugcs.append( rs3[z]['ugc'] )
       for ugc in ugcs:
-        warning = [ugc,]
+        # Hack to make the array always 2+ in size
+        warning = [ugc,'ZZZ']
         for ugc2 in touches[ugc]:
           if ugc2 in ugcs:
             warning.append( ugc2 )
