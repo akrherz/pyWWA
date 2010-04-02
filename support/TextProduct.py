@@ -263,7 +263,7 @@ class TextProductSegment:
         g += ")))"
         self.giswkt = g
         # Look for new WIND...HAIL stuff
-        if len(rend2) > 0:
+        if len(rend2) > 1:
             m = WINDHAIL.match( rend2[1] )
             if m:
                 d = m.groupdict()
