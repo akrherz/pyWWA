@@ -263,12 +263,13 @@ class TextProductSegment:
         g += ")))"
         self.giswkt = g
         # Look for new WIND...HAIL stuff
-        m = WINDHAIL.match( rend2[1] )
-        if m:
-            d = m.groupdict()
-            self.windtag = d['wind']
-            self.haildirtag = d['haildir']
-            self.hailtag = d['hail']
+        if len(rend2) > 0:
+            m = WINDHAIL.match( rend2[1] )
+            if m:
+                d = m.groupdict()
+                self.windtag = d['wind']
+                self.haildirtag = d['haildir']
+                self.hailtag = d['hail']
 
     def __str__(self,):
         s = """
