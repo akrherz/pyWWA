@@ -36,6 +36,7 @@ from support import ldmbridge, TextProduct, reference
 import secret
 import common
 
+
 log.startLogging(open('logs/vtec_parser.log','a'))
 log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
 
@@ -66,8 +67,8 @@ def email_error(message, product_text):
                  % (message, product_text))
     msg['subject'] = 'vtec_parser.py Traceback'
     msg['From'] = secret.parser_user
-    msg['To'] = 'akrherz@iastate.edu'
-    smtp.sendmail("mailhub.iastate.edu", msg["From"], msg["To"], msg)
+    msg['To'] = secret.error_email
+    smtp.sendmail("localhost", msg["From"], msg["To"], msg)
 
 
 # LDM Ingestor
@@ -76,7 +77,7 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
 
     def connectionLost(self, reason):
         print 'connectionLost', reason
-        reactor.callLater(5, self.shutdown)
+        reactor.callLater(7, self.shutdown)
 
     def shutdown(self):
         reactor.callWhenRunning(reactor.stop)
@@ -114,6 +115,33 @@ def alert_error(tp, errorText):
 iembot processing error:</span><br />Product: %s<br />Error: %s" % \
             (tp.get_product_id(), errorText )
     jabber.sendMessage(msg, htmlmsg)
+
+def ugc_to_text(ugclist):
+    """
+    Need a helper function to convert an array of ugc codes to a textual
+    representation
+    """
+    states = {}
+    for ugc in ugclist:
+        stabbr = ugc[:2]
+        if not states.has_key(stabbr):
+            states[stabbr] = []
+        if not ugc_dict.has_key(ugc):
+            log.msg("ERROR: Unknown ugc %s" % (ugc,))
+            name = "((%s))" % (ugc,)
+        else:
+            name = ugc_dict[ugc]
+        states[stabbr].append(name)
+
+    txt = []
+    for st in states.keys():
+        states[st].sort()
+        str = " %s [%s]" % (", ".join(states[st]), st)
+        if len(str) > 350:
+            str = " %s counties/zones in [%s]" % (len(states[st]), st)
+        txt.append(str)
+
+    return " and".join(txt)
 
 def segment_processor(text_product, i, skip_con):
     """ The real data processor here """
@@ -160,10 +188,11 @@ def segment_processor(text_product, i, skip_con):
 
         # Set up Jabber Dict for stuff to fill in
         jmsg_dict = {'wfo': vtec.office, 'product': vtec.productString(),
-             'county': '', 'sts': ' ', 'ets': ' ', 'svs_special': '',
+             'county': ugc_to_text(ugc), 'sts': ' ', 'ets': ' ', 
+             'svs_special': '',
              'year': text_product.issueTime.year, 'phenomena': vtec.phenomena,
              'eventid': vtec.ETN, 'significance': vtec.significance,
-             'url': "%s%s.html" % (secret.VTEC_APP, vtec.url(text_product.issueTime.year)) }
+             'url': "%s#%s" % (secret.VTEC_APP, vtec.url(text_product.issueTime.year)) }
 
         if (vtec.beginTS != None and \
             vtec.beginTS > (gmtnow + mx.DateTime.RelativeDateTime(hours=+1))):
@@ -185,32 +214,20 @@ def segment_processor(text_product, i, skip_con):
             jmsg_dict['svs_special'] = seg.svs_search()
 
         # We need to get the County Name
-        countyState = {}
         affectedWFOS = {}
         for k in range(len(ugc)):
             cnty = ugc[k]
-            stateAB = cnty[:2]
-            if (not countyState.has_key(stateAB)):
-                countyState[stateAB] = []
             if (ugc2wfo.has_key(cnty)):
                 for c in ugc2wfo[cnty]:
                     affectedWFOS[ c ] = 1
-            if (ugc_dict.has_key(cnty)):
-                name = ugc_dict[cnty]
-            else:
-                log.msg("ERROR: Unknown ugc %s" % (cnty,))
-                name = "((%s))" % (cnty,)
-            countyState[stateAB].append(name)
+
         # Test for affectedWFOS
         if (len(affectedWFOS) == 0):
             affectedWFOS[ vtec.office ] = 1
-        
-        for st in countyState.keys():
-            countyState[stateAB].sort()
-            jmsg_dict['county']+=" %s [%s] and" % \
-                  (", ".join(countyState[st]), st)
 
-        jmsg_dict['county'] = jmsg_dict['county'][:-4]
+        if text_product.afos[:3] == "RFW" and vtec.office in ['AMA','LUB','MAF','EPZ','ABQ','TWC','PSR','FGZ','VEF']:
+            affectedWFOS["RGN3FWX"] = 1
+
         # Check for Hydro-VTEC stuff
         if (len(hvtec) > 0 and hvtec[0].nwsli != "00000"):
             nwsli = hvtec[0].nwsli
@@ -293,7 +310,7 @@ seg.get_hvtec_nwsli() )
 till %(ets)s %(svs_special)s" % jmsg_dict
                 jabber.sendMessage(jabberTxt, jabberHTML)
 
-        elif (vtec.action == "CON"):
+        elif (vtec.action in ["CON", "COR"] ):
         # Lets find our county and update it with action
         # Not worry about polygon at the moment.
             for cnty in ugc:
@@ -314,12 +331,14 @@ till %(ets)s %(svs_special)s" % jmsg_dict
        vtec.ETN, vtec.phenomena, vtec.significance)
                 DBPOOL.runOperation( sql ).addErrback( email_error, sql)
 
-            jabberTxt = "%(wfo)s: %(wfo)s %(product)s%(sts)sfor \
+            for w in affectedWFOS.keys():
+                jmsg_dict['w'] = w
+                jabberTxt = "%(w)s: %(wfo)s %(product)s%(sts)sfor \
 %(county)s till %(ets)s %(svs_special)s %(url)s" % jmsg_dict
-            jabberHTML = "%(wfo)s <a href='%(url)s'>%(product)s</a>%(sts)sfor %(county)s \
+                jabberHTML = "%(wfo)s <a href='%(url)s'>%(product)s</a>%(sts)sfor %(county)s \
 till %(ets)s %(svs_special)s" % jmsg_dict
-            if not skip_con:
-                jabber.sendMessage(jabberTxt, jabberHTML)
+                if not skip_con:
+                    jabber.sendMessage(jabberTxt, jabberHTML)
 #--
 
         elif (vtec.action in ["CAN", "EXP", "UPG", "EXT"] ):
@@ -355,19 +374,19 @@ till %(ets)s %(svs_special)s" % jmsg_dict
                 DBPOOL.runOperation( sql ).addErrback( email_error, sql)
 
             jmsg_dict['action'] = "cancels"
-            fmt = "%(w)s: %(wfo)s  %(product)s for %(county)s %(svs_special)s \
-%(url)s"
+            fmt = "%(w)s: %(wfo)s  %(product)s for %(county)s %(svs_special)s "
             htmlfmt = "%(wfo)s <a href='%(url)s'>%(product)s</a> for %(county)s %(svs_special)s"
             if (vtec.action == "EXT" and vtec.beginTS != None):
                 jmsg_dict['sts'] = " valid at %s%s " % ( \
                 (vtec.beginTS - local_offset).strftime(efmt), text_product.z )
                 fmt = "%(w)s: %(wfo)s  %(product)s for %(county)s %(svs_special)s\
-%(sts)still %(ets)s %(url)s"
+%(sts)still %(ets)s"
                 htmlfmt = "%(wfo)s <a href='%(url)s'>%(product)s</a>\
  for %(county)s%(sts)still %(ets)s %(svs_special)s"
             elif (vtec.action == "EXT"):
                 fmt += " till %(ets)s"
                 htmlfmt += " till %(ets)s"
+            fmt += " %(url)s"
             if (vtec.action != 'UPG'):
                 for w in affectedWFOS.keys():
                     jmsg_dict['w'] = w
