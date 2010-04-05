@@ -4,7 +4,7 @@ from support import ugc, vtec, hvtec, reference
 
 #TORNADO = re.compile(r"(STORM\W+CAPABLE\W+OF\W+PRODUCING|REPORTED|INDICATED?)\W+A\W+TORNADO")
 TORNADO = re.compile(r"^AT |^\* AT")
-WINDHAIL = re.compile(".*WIND\.\.\.HAIL (?P<wind>[0-9]+)MPH (?P<haildir>[><]?)(?P<hail>[0-9\.]+)IN")
+WINDHAIL = re.compile(".*WIND\.\.\.HAIL (?P<winddir>[><]?)(?P<wind>[0-9]+)MPH (?P<haildir>[><]?)(?P<hail>[0-9\.]+)IN")
 class TextProduct:
 
     def __init__(self, raw, bypass=False):
@@ -199,6 +199,7 @@ class TextProductSegment:
         self.windtag = None
         self.hailtag = None
         self.haildirtag = None
+        self.winddirtag = None
         self.parse()
 
     def bullet_splitter(self):
@@ -269,6 +270,7 @@ class TextProductSegment:
                 d = m.groupdict()
                 self.windtag = d['wind']
                 self.haildirtag = d['haildir']
+                self.winddirtag = d['winddir']
                 self.hailtag = d['hail']
 
     def __str__(self,):
