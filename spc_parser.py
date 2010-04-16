@@ -174,6 +174,8 @@ for portions of %s %s" % (channelprefix, wfo, cat, wfo, url)
     for twt in rlkp.keys():
         common.tweet( rlkp[twt], twt, url )
 
+    # Generic for SPC
+    twt = "The Storm Prediction Center issues %s Outlook" %( product_descript, )    common.tweet(['SPC',], twt, url)
 
 myJid = jid.JID('%s@%s/spc_parser_%s' % \
       (secret.iembot_ingest_user, secret.chatserver, \
