@@ -170,8 +170,8 @@ class LSR:
 
         lalo = line1[53:]
         tokens = lalo.strip().split()
-        self.lat = tokens[0][:-1]
-        self.lon = tokens[1][:-1]
+        self.lat = float(tokens[0][:-1])
+        self.lon = float(tokens[1][:-1])
 
         self.magf = (line2[12:29]).strip()
         self.mag = re.sub("(ACRE|INCHES|INCH|MILE|MPH|KTS|U|FT|F|E|M|TRACE)", "", self.magf)
@@ -302,7 +302,7 @@ def real_processor(nws):
         twt = "%s [%s Co, %s] %s reports %s %sat %s %s" % (lsr.city, lsr.county, lsr.state, lsr.source, 
               lsr.typetext, mag_long, 
               lsr.lts.strftime(time_fmt), nws.z)
-        common.tweet([wfo,], twt, uri, {'lat': lsr.lat, 'long': lsr.lon})
+        common.tweet([wfo,], twt, uri, {'lat': `lsr.lat`, 'long': "-%s" % (lsr.lon,)})
 
         sql = "INSERT into lsrs_%s (valid, type, magnitude, city, \
                county, state, source, remark, geom, wfo, typetext) \
