@@ -69,7 +69,7 @@ def cancel_watch(report, ww_num):
         POSTGIS.query(sql)
 
     msg = "SPC: SPC cancels WW %s http://www.spc.noaa.gov/products/watch/ww%04i.html" % ( ww_num, int(ww_num) )
-    jabber.sendMessage( msg )
+    jabber.sendMessage( msg , msg)
 
 def process(raw):
     try:
@@ -251,15 +251,20 @@ def real_process(raw):
     sql = "SELECT distinct wfo from nws_ugc WHERE \
          contains('SRID=4326;MULTIPOLYGON(((%s)))', geom)" % (wkt,)
     rs = POSTGIS.query(sql).dictresult()
+    channels = ['SPC']
     for i in range(len(rs)):
         wfo = rs[i]['wfo']
+        channels.append( wfo )
         mess = "%s: %s" % (wfo, jabberTxt)
         jabber.sendMessage(mess, jabberTxtHTML)
 
     # Special message for SPC
     lines = raw.split("\n")
-    mess = "SPC: SPC issues %s http://www.spc.noaa.gov/products/watch/ww%04i.html" % (lines[5], int(ww_num) )
-    jabber.sendMessage(mess)
+    twt = lines[5]
+    url = "http://www.spc.noaa.gov/products/watch/ww%04i.html" % (int(ww_num),)
+    tokens.append("SPC")
+    common.tweet(channels, twt, url)
+
 
 def killer():
     reactor.stop()
