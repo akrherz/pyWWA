@@ -153,6 +153,10 @@ iembot processing error:</span><br />Product: %s<br />Error: %s" % \
 
         jabber.sendMessage(mess, htmlmess)
 
+        twt = "%s for %s %s" % (headline, counties, expire)
+        url = "%s?pid=%s" % (secret.PROD_URL, product_id)
+        common.tweet([prod.source[1:],], twt, url)
+
 myJid = jid.JID('%s@%s/sps2bot_%s' % \
       (secret.iembot_ingest_user, secret.chatserver, \
        mx.DateTime.gmt().strftime("%Y%m%d%H%M%S") ) )
