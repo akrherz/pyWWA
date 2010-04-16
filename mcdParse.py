@@ -95,6 +95,7 @@ def real_process(raw):
         htmlbody = "Storm Prediction Center issues <a href='http://www.spc.noaa.gov/products/md/md%s.html'>Mesoscale Discussion #%s</a> (<a href='%s?pid=%s'>View text</a>)" %(num,num, secret.PROD_URL, product_id)
         jabber.sendMessage(body, htmlbody)
 
+
     # Figure out which areas SPC is interested in, default to WFOs
     affected = ", ".join(tokens)
     sections = sqlraw.split("\n\n")
@@ -102,9 +103,11 @@ def real_process(raw):
         if sect.find("AREAS AFFECTED...") == 0:
             affected = sect[17:]
 
-    # Special Message for SPC
-    body = "SPC: SPC issues Mesoscale Discussion for %s http://www.spc.noaa.gov/products/md/md%s.html" % (affected, num)
-    jabber.sendMessage(body)
+    # Twitter this
+    twt = "Mesoscale Discussion %s for %s" % (num, affected)
+    url = "http://www.spc.noaa.gov/products/md/md%s.html" % (num, )
+    tokens.append("SPC")
+    common.tweet(tokens, twt, url) 
 
 myJid = jid.JID('%s@%s/mcdparse_%s' % \
       (secret.iembot_ingest_user, secret.chatserver, \
