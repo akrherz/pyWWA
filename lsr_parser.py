@@ -302,7 +302,7 @@ def real_processor(nws):
         twt = "%s [%s Co, %s] %s reports %s %sat %s %s" % (lsr.city, lsr.county, lsr.state, lsr.source, 
               lsr.typetext, mag_long, 
               lsr.lts.strftime(time_fmt), nws.z)
-        common.tweet([wfo,], twt, uri)
+        common.tweet([wfo,], twt, uri, {'lat': lsr.lat, 'long': lsr.long})
 
         sql = "INSERT into lsrs_%s (valid, type, magnitude, city, \
                county, state, source, remark, geom, wfo, typetext) \
