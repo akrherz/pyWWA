@@ -66,13 +66,20 @@ def real_process(raw):
     POSTGIS.query(sql)
 
     tokens = re.findall("ATTN (WFOS|RFCS)(.*)", raw)
+    channels = []
     for tpair in tokens:
         wfos = re.findall("([A-Z]+)\.\.\.", tpair[1])
         for wfo in wfos:
+            channels.append( wfo )
             body = "%s: NESDIS issues Satellite Precipitation Estimates %s?pid=%s" % \
          (wfo, secret.PROD_URL, product_id)
             htmlbody = "NESDIS issues <a href='%s?pid=%s'>Satellite Precipitation Estimates</a>" %(secret.PROD_URL, product_id,)
             jabber.sendMessage(body, htmlbody)
+
+    twt = "NESDIS issues Satellite Precipitation Estimates"
+    url = "%s?pid=%s" % (secret.PROD_URL, product_id)
+    common.tweet(channels, twt, url)
+
 
 
 def killer():
