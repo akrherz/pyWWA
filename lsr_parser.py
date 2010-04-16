@@ -128,7 +128,6 @@ def send_iemchat_error(nws, msgtxt):
 iembot processing error</span><br/>Product: %s<br/>Error: %s""" % \
             (nws.get_product_id(), msgtxt )
     jabber.sendMessage(msg, htmlmsg)
-    jabber.sendMessage(msg, htmlmsg, 'iowamesonet')
 
 class LSR:
     """ Object to hold a LSR and be more 00 with things """
@@ -178,6 +177,7 @@ class LSR:
         self.mag = re.sub("(ACRE|INCHES|INCH|MILE|MPH|KTS|U|FT|F|E|M|TRACE)", "", self.magf)
         if (self.mag == ""):
             self.mag = 0
+        print "mag: |%s| magf: |%s|" % (self.mag, self.magf)
         self.county = (line2[29:48]).strip().title()
         self.state = line2[48:50]
         self.source = (line2[53:]).strip().lower()
@@ -299,6 +299,10 @@ def real_processor(nws):
           (wfo,lsr.city, lsr.county, lsr.state, lsr.source, uri, lsr.typetext, \
            mag_long, lsr.lts.strftime(time_fmt), nws.z, lsr.remark)
         jabber.sendMessage(jabber_text, jabber_html)
+        twt = "%s [%s Co, %s] %s reports %s %sat %s %s" % (lsr.city, lsr.county, lsr.state, lsr.source, 
+              lsr.typetext, mag_long, 
+              lsr.lts.strftime(time_fmt), nws.z)
+        common.tweet([wfo,], twt, uri)
 
         sql = "INSERT into lsrs_%s (valid, type, magnitude, city, \
                county, state, source, remark, geom, wfo, typetext) \
@@ -329,6 +333,8 @@ sent and not repeated here." % (duplicates, duplicates + new_reports)
         jabber_html = "%s issues <a href='%s'>Summary Local Storm Report</a>%s"\
             % (wfo, uri, extra_text)
         jabber.sendMessage(jabber_text, jabber_html)
+        twt = "Summary Local Storm Report"
+        common.tweet([wfo,], twt, uri)
 
 myJid = jid.JID('%s@%s/lsr_parse_%s' % \
       (secret.iembot_ingest_user, secret.chatserver, \
