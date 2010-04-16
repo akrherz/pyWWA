@@ -151,6 +151,7 @@ def real_parser(buf):
 
     msgs = {}
     htmlmsgs = {}
+    twts = {}
     for cat in ['SLGT','MDT','HIGH','CRIT','EXTM']:
         for z in wfos[cat]:
             for wfo in z:
@@ -159,14 +160,20 @@ for portions of %s %s" % (channelprefix, wfo, cat, wfo, url)
                 htmlmsgs[wfo] = "The Storm Prediction Center issues \
 <a href=\"%s\">%s %s Risk</a> for portions of %s's area" % (url, \
   product_descript, codes[cat], wfo)
+                twts[wfo] = "SPC issues Day 1 %s risk" % (cat,)
 
     for wfo in msgs.keys():
         jabber.sendMessage( msgs[wfo], htmlmsgs[wfo] )
 
-    # Generic alert for SPC
-    msg = "SPC: The Storm Prediction Center issues %s Outlook %s" % \
-       ( product_descript, url )
-    jabber.sendMessage( msg )
+    # Fancy pants twitter logic
+    rlkp = {}
+    for wfo in twts.keys():
+        if not rlkp.has_key(twts[wfo]):
+            rlkp[ twts[wfo] ] = []
+        rlkp[ twts[wfo] ].append( wfo )
+    for twt in rlkp.keys():
+        common.tweet( rlkp[twt], twt, url )
+
 
 myJid = jid.JID('%s@%s/spc_parser_%s' % \
       (secret.iembot_ingest_user, secret.chatserver, \
