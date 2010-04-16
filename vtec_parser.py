@@ -101,7 +101,9 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
                 jabber_txt = "%s: %s has sent an updated FLS product (continued products were not reported here).  Consult this website for more details. %s?wfo=%s" % (wfo, wfo, secret.RIVER_APP, wfo)
                 jabber_html = "%s has sent an updated FLS product (continued products were not reported here).  Consult <a href=\"%s?wfo=%s\">this website</a> for more details." % (wfo, secret.RIVER_APP, wfo)
                 jabber.sendMessage(jabber_txt, jabber_html)
-               
+                twt = "Updated Flood Statement"
+                uri = "%s?wfo=%s" % (secret.RIVER_APP, wfo)
+                common.tweet([wfo,], twt, uri)
 
         except Exception, myexp:
             email_error(myexp, buf)
@@ -302,13 +304,18 @@ vtec.phenomena, vtec.office, vtec.ETN, \
 vtec.action, text_product.issueTime, fcster, cnty, vtec.significance, \
 seg.get_hvtec_nwsli() )
                 DBPOOL.runOperation( sql ).addErrback( email_error, sql)
+            channels = []
             for w in affectedWFOS.keys():
+                channels.append(w)
                 jmsg_dict['w'] = w
                 jabberTxt = "%(w)s: %(wfo)s %(product)s%(sts)sfor \
 %(county)s till %(ets)s %(svs_special)s %(url)s" % jmsg_dict
                 jabberHTML = "%(wfo)s <a href='%(url)s'>%(product)s</a>%(sts)sfor %(county)s \
 till %(ets)s %(svs_special)s" % jmsg_dict
                 jabber.sendMessage(jabberTxt, jabberHTML)
+            twt = "%(product)s%(sts)sfor %(county)s till %(ets)s" % jmsg_dict
+            url = jmsg_dict["url"]
+            common.tweet(channels, twt, url)
 
         elif (vtec.action in ["CON", "COR"] ):
         # Lets find our county and update it with action
@@ -331,6 +338,7 @@ till %(ets)s %(svs_special)s" % jmsg_dict
        vtec.ETN, vtec.phenomena, vtec.significance)
                 DBPOOL.runOperation( sql ).addErrback( email_error, sql)
 
+            channels = []
             for w in affectedWFOS.keys():
                 jmsg_dict['w'] = w
                 jabberTxt = "%(w)s: %(wfo)s %(product)s%(sts)sfor \
@@ -339,6 +347,10 @@ till %(ets)s %(svs_special)s" % jmsg_dict
 till %(ets)s %(svs_special)s" % jmsg_dict
                 if not skip_con:
                     jabber.sendMessage(jabberTxt, jabberHTML)
+                    channels.append(w)
+            twt = "%(product)s%(sts)sfor %(county)s till %(ets)s" % jmsg_dict
+            url = jmsg_dict["url"]
+            common.tweet(channels, twt, url)
 #--
 
         elif (vtec.action in ["CAN", "EXP", "UPG", "EXT"] ):
@@ -388,9 +400,14 @@ till %(ets)s %(svs_special)s" % jmsg_dict
                 htmlfmt += " till %(ets)s"
             fmt += " %(url)s"
             if (vtec.action != 'UPG'):
+                channels = []
                 for w in affectedWFOS.keys():
                     jmsg_dict['w'] = w
                     jabber.sendMessage(fmt % jmsg_dict, htmlfmt % jmsg_dict)
+                    channels.append( w )
+                twt = "%(product)s%(sts)sfor %(county)s till %(ets)s" % jmsg_dict
+                url = jmsg_dict["url"]
+                common.tweet(channels, twt, url)
 
         if (vtec.action != "NEW"):
             ugc_limiter = ""
