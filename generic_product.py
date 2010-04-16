@@ -108,6 +108,7 @@ class myProductIngestor(ldmbridge.LDMProductReceiver):
 
 
 prodDefinitions = {
+    'TCM': 'Tropical Storm Forecast (TCM)',
     'TCU': 'Tropical Cyclone Update (TCU)',
     'HLS': 'Hurricane Local Statement (HLS)',
     'NOW': 'Short-term Forecast (NOW)',
@@ -249,6 +250,7 @@ def real_process(raw):
 
         jabber.sendMessage(mess, htmlmess)
 
+        channels = [wfo,]
         # Also send message to any 'subscribing WFO chatrooms'
         for key in routes.keys():
             if (re.match(key, prod.afos)):
@@ -256,6 +258,11 @@ def real_process(raw):
                     mess = "%s: %s issues %s %s" % \
                        (wfo2, wfo, prodtxt, myurl)
                     jabber.sendMessage(mess, htmlmess)
+                    channels.append( wfo2 )
+
+        twt = prodtxt
+        url = myurl
+        common.tweet(channels, twt, url)
         # We are done for this product
         return
 
@@ -312,11 +319,13 @@ def real_process(raw):
             prodtxt = prodDefinitions[pil]
         htmlmess = "%s issues <a href=\"%s\">%s</a> " % (wfo, myurl, prodtxt)
         jabber.sendMessage(mess, htmlmess)
-
+        
+        common.tweet([wfo], prodtxt, myurl)
 
 
     for key in routes.keys():
         if (re.match(key, prod.afos)):
+            channels = []
             for wfo2 in routes[key]:
                 mess = "%s: %s %s" % \
                  (wfo2, prod.afos, myurl)
@@ -334,6 +343,9 @@ def real_process(raw):
                     htmlmess = "%s issues <a href=\"%s\">%s #%s</a> for %s" % ( centertext(wfo), myurl, what, tnum, tt)
                 #print htmlmess, mess
                 jabber.sendMessage(mess, htmlmess)
+                channels.append( wfo2 )
+            twt = "%s issues %s %s for %s" % (centertext(wfo), what, tnum, tt)
+            common.tweet(channels, twt, myurl)
 
 
     for seg in prod.segments:
@@ -364,6 +376,8 @@ def real_process(raw):
           (wfo, wfo, prodtxt, counties, expire, myurl)
         htmlmess = "%s issues <a href=\"%s\">%s</a> for %s %s" % (wfo, myurl, prodtxt, counties, expire)
         jabber.sendMessage(mess, htmlmess)
+        twt = "%s for %s %s" % (prodtxt, counties, expire)
+        common.tweet([wfo,], twt, myurl)
 
 # PUBLIC ADVISORY NUMBER 10 FOR REMNANTS OF BARRY
 # TROPICAL DEPRESSION BARRY ADVISORY NUMBER   5
@@ -376,11 +390,13 @@ def real_process(raw):
             prodtxt = prodDefinitions[pil]
         htmlmess = "%s issues <a href=\"%s\">%s</a> " % (wfo, myurl, prodtxt)
         jabber.sendMessage(mess, htmlmess)
+        common.tweet([wfo,], prodtxt, myurl)
 
 
 
     for key in routes.keys():
         if (re.match(key, prod.afos)):
+            channels = []
             for wfo2 in routes[key]:
                 mess = "%s: %s %s" % \
                  (wfo2, prod.afos, myurl)
@@ -398,6 +414,9 @@ def real_process(raw):
                     htmlmess = "%s issues <a href=\"%s\">%s #%s</a> for %s" % ( centertext(wfo), myurl, what, tnum, tt)
                 #print htmlmess, mess
                 jabber.sendMessage(mess, htmlmess)
+                channels.append( wfo2 )
+            twt = "%s issues %s %s for %s" % (centertext(wfo), what, tnum, tt)
+            common.tweet(channels, twt, myurl)
 
 """ Load up H-VTEC NWSLI reference """
 nwsli_dict = {}
