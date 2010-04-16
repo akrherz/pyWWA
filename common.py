@@ -25,8 +25,49 @@ WFOS = [ 'APX', 'DLH', 'GRR',
  'HGX', 'CRP', 'BRO', 'MRX', 'OHX', 'MEG', 'PBZ', 'BUF', 'ALY', 'BGM', 'OKX',
  'REV', 'VEF', 'RIW', 'BYZ', 'JAN', 'CAR', 'GYX', 'BOX', 'SHV', 'LCH', 'LIX',
  'LMK', 'JKL', 'BOI', 'PIH', 'KEY', 'HFO', 'MLB', 'LZK', 'HUN', 'DMX',
- 'SPC', 'NHC']
+ 'SPC', 'NHC', 'TEST']
 
+TWUSERS = {}
+for wfo in WFOS:
+    TWUSERS[wfo] = twitter.Twitter('iembot_%s' % (wfo.lower(),) , 
+                   secret.twitter_pass)
+
+BITLY = "http://api.bit.ly/shorten?version=2.0.1&longUrl=%s&login=iembot&apiKey="+ secret.bitly_key
+
+def tweet(channels, msg, url, extras={}):
+    """
+    Method to publish twitter messages
+    """
+    if secret.DISARM:
+        channels = ['TEST',]
+
+    if url:
+        url = url.replace("&amp;", "&").replace("#","%23")
+        client.getPage(BITLY % (url, ) ).addCallback(reallytweet, 
+           channels, msg, extras ).addErrback(reallytweet,
+           channels, msg, extras )
+    else:
+        reallytweet(None, channels, msg, extras)
+
+def reallytweet(json, channels, msg, extras):
+    """
+    Actually, really publish this time!
+    """
+    if json:
+        j = simplejson.loads( json )
+        tinyurl = j['results'][ j['results'].keys()[0] ]['shortUrl']
+    else:
+        tinyurl = ""
+    # We are finally ready to tweet!
+    for channel in channels:
+        if not TWUSERS.has_key(channel):
+            print "Unknown Twitter Channel, %s" % (channel,)
+            continue
+        twt = "#%s %s %s" % (channel, msg[:112], tinyurl)
+        TWUSERS[channel].update( twt, None, extras).addCallback(tb, channel, twt)
+
+def tb(x, channel, twt):
+    print "TWEET [%s] RES: %s" % (twt, x) 
 
 class JabberClient:
 
@@ -34,10 +75,6 @@ class JabberClient:
         self.myJid = myJid
         self.xmlstream = None
         self.authenticated = False
-        self.twit = {}
-        for wfo in WFOS:
-            self.twit[wfo] = twitter.Twitter('iembot_%s' % (wfo.lower(),) , 
-                secret.twitter_pass)
 
     def authd(self,xs):
         log.msg("Logged into Jabber Chat Server!")
@@ -61,7 +98,7 @@ class JabberClient:
         log.msg("SETTING authenticated to false!")
         self.authenticated = False
 
-    def sendMessage(self, body, html=None, to_user=secret.iembot_user):
+    def sendMessage(self, body, html, to_user=secret.iembot_user):
         if (not self.authenticated):
             log.msg("No Connection, Lets wait and try later...")
             reactor.callLater(3, self.sendMessage, body, html, to_user)
@@ -77,41 +114,17 @@ class JabberClient:
         b.addRawXml( html or body )
         self.xmlstream.send(message)
 
-        url = self.findurl(body)
-        if url:
-            #url = urllib.quote_plus(url)
-            url = url.replace("&amp;", "&").replace("#","%23")
-            #http://tinyurl.com/api-create.php?url="+url
-            client.getPage("http://api.bit.ly/shorten?version=2.0.1&longUrl=%s&login=iembot&apiKey=%s" % (url, secret.bitly_key) ).addCallback(self.tweet, " ".join(body.split(" ")[:-1]))
-        else:
-            self.tweet(None, body)
 
-    def findurl(self, message):
-        """Extract URL from message"""
-        tokens = message.split(" ")
-        if len(tokens) == 0:
-            return None
-        if tokens[-1][:4] != "http":
-            return None
-        return tokens[-1]
+    #def findurl(self, message):
+    #    """Extract URL from message"""
+    #    tokens = message.split(" ")
+    #    if len(tokens) == 0:
+    #        return None
+    #    if tokens[-1][:4] != "http":
+    #        return None
+    #    return tokens[-1]
 
-    def tweet(self, json, body):
-        if json:
-            j = simplejson.loads( json )
-            tinyurl = j['results'][ j['results'].keys()[0] ]['shortUrl']
-        else:
-            tinyurl = ""
-        wfo = body[:3].upper()
-        if not self.twit.has_key(wfo):
-            print "Unknown Twitter Channel, %s" % (wfo,)
-            return
-        if not secret.DISARM:
-            self.twit[wfo].update("#%s %s" % (body[:112], tinyurl) ).addCallback(self.tb)
-        else:
-            print "TWEET HERE!"
 
-    def tb(self,x):
-        print 'TWITTER RESPONSE ', x
 
     def debug(self, elem):
         log.msg( elem.toXml().encode('utf-8') )

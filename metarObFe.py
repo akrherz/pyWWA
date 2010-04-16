@@ -85,7 +85,7 @@ class myProductIngestor(ldmbridge.LDMProductReceiver):
 
     def connectionLost(self, reason):
         print 'connectionLost', reason
-        reactor.callLater(5, self.shutdown)
+        reactor.callLater(10, self.shutdown)
 
     def shutdown(self):
         reactor.callWhenRunning(reactor.stop)
@@ -243,16 +243,17 @@ def process_site(metar):
     del mtr, iem
 
 def sendAlert(iemid, what, clean_metar):
-    print "ALERTING"
+    print "ALERTING for [%s]" % (iemid,)
     if ISIEM:
         mesosite = pg.connect('mesosite', secret.dbhost)
     else:
         mesosite = pg.connect('mesosite')
-    rs = mesosite.query("SELECT wfo, state, name from stations \
-           WHERE id = '%s' " % (iemid,) ).dictresult()
-    if (len(rs) == 0):
+    rs = mesosite.query("""SELECT wfo, state, name, x(geom) as lon,
+           y(geom) as lat from stations 
+           WHERE id = '%s' """ % (iemid,) ).dictresult()
+    if len(rs) == 0:
         print "I not find WFO for sid: %s " % (iemid,)
-        rs = [{'wfo': 'XXX', 'state': 'XX', 'name': 'XXXX'},]
+        return
     wfo = rs[0]['wfo']
     st = rs[0]['state']
     nm = rs[0]['name']
@@ -263,19 +264,25 @@ def sendAlert(iemid, what, clean_metar):
     jtxt = "%s: %s,%s (%s) ASOS %s reports %s\n%s http://mesonet.agron.iastate.edu/ASOS/current.phtml"\
             % (wfo, nm, st, iemid, extra, what, clean_metar )
 
-    jabber.sendMessage(jtxt)
+    jabber.sendMessage(jtxt, jtxt)
+
+    twt = "%s,%s (%s) ASOS reports %s" % (nm, st, iemid, what)
+    url = "http://mesonet.agron.iastate.edu/ASOS/current.phtml?network=%s_ASOS" % (st.upper(),)
+    common.tweet([wfo], twt, url, {'lat': `rs[0]['lat']`, 'long': `rs[0]['lon']`})
 
 
 def sendWindAlert(iemid, v, d, t, clean_metar):
     """
     Send a wind alert please
     """
+    print "ALERTING for [%s]" % (iemid,)
     if ISIEM:
         mesosite = pg.connect('mesosite', secret.dbhost)
     else:
         mesosite = pg.connect('mesosite')
-    rs = mesosite.query("SELECT wfo, state, name from stations \
-           WHERE id = '%s' " % (iemid,) ).dictresult()
+    rs = mesosite.query("""SELECT wfo, state, name, x(geom) as lon,
+           y(geom) as lat from stations 
+           WHERE id = '%s' """ % (iemid,) ).dictresult()
     if (len(rs) == 0):
         print "I not find WFO for sid: %s " % (iemid,)
         return
@@ -289,8 +296,12 @@ def sendWindAlert(iemid, v, d, t, clean_metar):
     jtxt = "%s: %s,%s (%s) ASOS %s reports gust of %s knots from %s @ %s\n%s"\
             % (wfo, nm, st, iemid, extra, v, mesonet.drct2dirTxt(d), \
                t.strftime("%H%MZ"), clean_metar )
-    jabber.sendMessage(jtxt)
+    jabber.sendMessage(jtxt, jtxt)
 
+    twt = "%s,%s (%s) ASOS reports gust of %s knots from %s @ %s" % (nm, 
+     st, iemid, v, mesonet.drct2dirTxt(d), t.strftime("%H%MZ"))
+    url = "http://mesonet.agron.iastate.edu/ASOS/current.phtml?network=%s_ASOS" % (st.upper(),)
+    common.tweet([wfo], twt, url, {'lat': `rs[0]['lat']`, 'long': `rs[0]['lon']`})
 
 myJid = jid.JID('%s@%s/metar_%s' % \
       (secret.iembot_ingest_user, secret.chatserver, \
