@@ -46,6 +46,13 @@ def email_error(message, product_text):
     """
     Generic something to send email error messages 
     """
+    # Write file out to log
+    gts = mx.DateTime.gmt()
+    o = open("data/fail_%s.txt" % (gts.strftime("%Y%m%d"),), 'a')
+    o.write( product_text )
+    o.write("\003")
+    o.close()
+
     global EMAILS
     log.msg( message )
     EMAILS -= 1
