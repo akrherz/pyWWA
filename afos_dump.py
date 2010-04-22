@@ -86,6 +86,8 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
             email_error(myexp, buf)
 
 def real_parser(buf):
+    if buf.strip() == "":
+      return
     nws = TextProduct.TextProduct( buf, bypass=True)
     nws.findAFOS()
     data = re.sub("'", "\\'",nws.raw)
