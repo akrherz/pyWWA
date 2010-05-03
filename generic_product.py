@@ -60,7 +60,7 @@ routes = {'TCPAT[0-9]': gulfwfo,
 SIMPLE_PRODUCTS = ["TCE", "DSA", "AQA", "DGT", "FWF", "RTP", "HPA", "CWF", 
             "SRF", "SFT", "PFM", "ZFP", "CAE", "AFD", "FTM", "AWU", "HWO",
             "NOW", "PSH", "NOW", "PNS", "RER", "ADM", "TCU", "RVA", "EQR",
-            "OEP", "SIG", "VAA", "RVF"]
+            "OEP", "SIG", "VAA", "RVF", "PWO"]
 
 EMAILS = 10
 
@@ -108,6 +108,7 @@ class myProductIngestor(ldmbridge.LDMProductReceiver):
 
 
 prodDefinitions = {
+    'PWO': 'Public Severe Weather Outlook (PWO)',
     'TCM': 'Tropical Storm Forecast (TCM)',
     'TCU': 'Tropical Cyclone Update (TCU)',
     'HLS': 'Hurricane Local Statement (HLS)',
@@ -199,6 +200,8 @@ def countyText(u):
     return c[:-4]
 
 def centertext(txt):
+    if (txt == "SPC"): return "Storm Prediction Center"
+    if (txt == "WNS"): return "Storm Prediction Center"
     if (txt == "NHC"): return "National Hurricane Center"
     if (txt == "WNH"): return "Hydrometeorological Prediction Center"
     return "%s" % (txt,)
