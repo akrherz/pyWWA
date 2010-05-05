@@ -62,6 +62,7 @@ _phenDict = {
 'MS': 'Marine Dense Smoke',
 'MH': 'Marine Ashfall',
 'RB': 'Small Craft for Rough',
+'RP': 'Rip Currents',
 'SB': 'Snow and Blowing',
 'SC': 'Small Craft',
 'SE': 'Hazardous Seas',
