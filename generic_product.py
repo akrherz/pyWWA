@@ -60,7 +60,7 @@ routes = {'TCPAT[0-9]': gulfwfo,
 SIMPLE_PRODUCTS = ["TCE", "DSA", "AQA", "DGT", "FWF", "RTP", "HPA", "CWF", 
             "SRF", "SFT", "PFM", "ZFP", "CAE", "AFD", "FTM", "AWU", "HWO",
             "NOW", "PSH", "NOW", "PNS", "RER", "ADM", "TCU", "RVA", "EQR",
-            "OEP", "SIG", "VAA", "RVF", "PWO"]
+            "OEP", "SIG", "VAA", "RVF", "PWO", "TWO"]
 
 EMAILS = 10
 
@@ -108,6 +108,7 @@ class myProductIngestor(ldmbridge.LDMProductReceiver):
 
 
 prodDefinitions = {
+    'TWO': 'Tropical Weather Outlook (TWO)',
     'PWO': 'Public Severe Weather Outlook (PWO)',
     'TCM': 'Tropical Storm Forecast (TCM)',
     'TCU': 'Tropical Cyclone Update (TCU)',
