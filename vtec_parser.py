@@ -247,7 +247,7 @@ def segment_processor(text_product, i, skip_con):
                         flood_text = seg.bullets[qqq]
                     if (seg.bullets[qqq].strip().find("FORECAST") == 0):
                         forecast_text = seg.bullets[qqq]
-                    if (seg.bullets[qqq].strip().find("AT ") == 0):
+                    if seg.bullets[qqq].strip().find("AT ") == 0 and stage_text == "":
                         stage_text = seg.bullets[qqq]
 
 
