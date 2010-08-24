@@ -151,3 +151,35 @@ grant select on watches to apache;
 
 CREATE UNIQUE INDEX watches_idx ON watches USING btree (issued, num);
 
+---
+--- HVTEC Table
+---
+CREATE TABLE hvtec_nwsli (
+    nwsli character(5),
+    river_name character varying(128),
+    proximity character varying(16),
+    name character varying(128),
+    state character(2)
+);
+
+select addgeometrycolumn('','hvtec_nwsli','geom',4326,'POINT',2);
+grant select on hvtec_nwsli to apache;
+
+---
+--- UGC Lookup Table
+---
+CREATE TABLE nws_ugc (
+    gid integer NOT NULL,
+    polygon_class character varying(1),
+    ugc character varying(6),
+    name character varying(238),
+    state character varying(2),
+    time_zone character varying(2),
+    wfo character varying(9),
+    fe_area character varying(2)
+);
+
+select addgeometrycolumn('','nws_ugc','geom',4326,'MULTIPOLYGON',2);
+select addgeometrycolumn('','nws_ugc','centroid',4326,'POINT',2);
+grant select on nws_ugc to apache;
+
