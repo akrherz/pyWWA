@@ -35,7 +35,7 @@ CREATE RULE replace_riverpro AS ON INSERT TO riverpro WHERE (EXISTS (SELECT 1 FR
 ---
 --- VTEC Table
 ---
-CREATE TABLE warnings_2008 (
+CREATE TABLE warnings (
     id serial,
     issue timestamp with time zone,
     expire timestamp with time zone,
@@ -54,20 +54,28 @@ CREATE TABLE warnings_2008 (
     significance character(1),
     hvtec_nwsli character(5)
 ) WITH OIDS;
-select addgeometrycolumn('','warnings_2008','geom',4326,'MULTIPOLYGON',2);
+select addgeometrycolumn('','warnings','geom',4326,'MULTIPOLYGON',2);
 
-grant select on warnings_2008 to apache;
+grant select on warnings to apache;
 
-create index warnings_2008_idx 
-   on warnings_2008(wfo,eventid,significance,phenomena);
+CREATE table warnings_2010() inherits (warnings);
 
+create index warnings_2010_idx 
+   on warnings_2010(wfo,eventid,significance,phenomena);
 
+grant select on warnings_2010 to apache;
 
+CREATE table warnings_2011() inherits (warnings);
+
+create index warnings_2011_idx 
+   on warnings_2011(wfo,eventid,significance,phenomena);
+
+grant select on warnings_2011 to apache;
 
 ---
 --- Storm Based Warnings Geo Tables
 ---
-create table sbw_2008(
+create table sbw(
   wfo char(3),
   eventid smallint,
   significance char(1),
@@ -78,13 +86,21 @@ create table sbw_2008(
   expire timestamp with time zone,
   polygon_begin timestamp with time zone,
   polygon_end timestamp with time zone,
-  report text
+  report text,
+  windtag real,
+  hailtag real
 ) WITH OIDS;
-select addgeometrycolumn('','sbw_2008','geom',4326,'MULTIPOLYGON',2);
+select addgeometrycolumn('','sbw','geom',4326,'MULTIPOLYGON',2);
 
-grant select on sbw_2008 to apache;
+grant select on sbw to apache;
 
-create index sbw_2008_idx on sbw_2008(wfo,eventid,significance,phenomena);
+CREATE table sbw_2010() inherits (sbw);
+create index sbw_2010_idx on sbw_2010(wfo,eventid,significance,phenomena);
+grant select on sbw_2010 to apache;
+
+CREATE table sbw_2011() inherits (sbw);
+create index sbw_2011_idx on sbw_2011(wfo,eventid,significance,phenomena);
+grant select on sbw_2011 to apache;
 
 
 ---
@@ -106,9 +122,17 @@ select addgeometrycolumn('','lsrs','geom',4326,'POINT',2);
 
 grant select on lsrs to apache;
 
-CREATE INDEX lsrs_bogus_idx ON lsrs USING btree (oid);
-CREATE INDEX lsrs_valid_idx ON lsrs USING btree (valid);
-CREATE INDEX lsrs_wfo_idx ON lsrs USING btree (wfo);
+CREATE table lsrs_2010() inherits (lsrs);
+grant select on lsrs_2010 to apache;
+CREATE INDEX lsrs_2010_bogus_idx ON lsrs USING btree (oid);
+CREATE INDEX lsrs_2010_valid_idx ON lsrs USING btree (valid);
+CREATE INDEX lsrs_2010_wfo_idx ON lsrs USING btree (wfo);
+
+CREATE table lsrs_2011() inherits (lsrs);
+grant select on lsrs_2011 to apache;
+CREATE INDEX lsrs_2011_bogus_idx ON lsrs USING btree (oid);
+CREATE INDEX lsrs_2011_valid_idx ON lsrs USING btree (valid);
+CREATE INDEX lsrs_2011_wfo_idx ON lsrs USING btree (wfo);
 
 ---
 --- watches
