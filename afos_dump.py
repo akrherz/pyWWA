@@ -28,7 +28,7 @@ import os, re, traceback, StringIO, smtplib
 from email.MIMEText import MIMEText
 
 # Python 3rd Party Add-Ons
-import mx.DateTime, pg
+import mx.DateTime
 
 # pyWWA stuff
 from support import ldmbridge, TextProduct, reference
@@ -90,13 +90,13 @@ def real_parser(buf):
       return
     nws = TextProduct.TextProduct( buf, bypass=True)
     nws.findAFOS()
-    data = re.sub("'", "\\'",nws.raw)
-    data = re.sub("\x01", "", data)
-    data = re.sub("\x00", "", data)
+    #data = re.sub("'", "\\'",nws.raw)
+    #data = re.sub("\x01", "", data)
+    #data = re.sub("\x00", "", data)
 
     DBPOOL.runOperation("""INSERT into products(pil,data)
-      VALUES('%s','%s')""" % (nws.afos.strip(), 
-      data) ).addErrback( email_error, buf)
+      VALUES(%s,%s)""",  (nws.afos.strip(), nws.raw) 
+     ).addErrback( email_error, buf)
 
 
 ldm = ldmbridge.LDMProductFactory( MyProductIngestor() )
