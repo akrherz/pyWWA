@@ -12,17 +12,16 @@ import mimetypes
 import mimetools
 import logging
 
-#from oauth import oauth
+from oauth import oauth
 
 from twisted.internet import defer, reactor
 from twisted.web import client
 
 import txml
 
-#SIGNATURE_METHOD = oauth.OAuthSignatureMethod_HMAC_SHA1()
-SIGNATURE_METHOD = 'PLAINTEXT'
+SIGNATURE_METHOD = oauth.OAuthSignatureMethod_HMAC_SHA1()
 
-BASE_URL="https://twitter.com"
+BASE_URL="https://api.twitter.com"
 SEARCH_URL="http://search.twitter.com/search.atom"
 
 
@@ -460,7 +459,7 @@ class Twitter(object):
 
         return self.__get_maybe_paging(url, delegate, params, txml.PagedUserList, extra_args, page_delegate)
 
-    def list_followers(self, delegate, user=None, params=None, extra_args=None, page_delegate=None):
+    def list_followers(self, delegate, user=None, params={}, extra_args=None, page_delegate=None):
         """Get the list of followers for a user.
 
         Calls the delegate with each user object found."""
@@ -542,9 +541,10 @@ class TwitterFeed(Twitter):
     def _rtfeed(self, url, delegate, args):
         if args:
             url += '?' + self._urlencode(args)
+        headers = self._makeAuthHeader("GET", url, args)
         print 'Fetching', url
         return downloadPage(url, txml.HoseFeed(delegate), agent=self.agent,
-                                   headers=self.__makeAuthHeader()).deferred
+                                   headers=headers).deferred
 
 
     def sample(self, delegate, args=None):

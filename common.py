@@ -12,25 +12,16 @@ import secret
 from twittytwister import twitter
 import urllib
 import simplejson
+import pg
+from oauth import oauth
 
-WFOS = [ 'APX', 'DLH', 'GRR',
- 'FGZ', 'TAE', 'BMX', 'PSR', 'TWC', 'SGX', 'HNX', 'EKA', 'LOX', 'GLD', 'PHI',
- 'TBW', 'MFL', 'IWX', 'IND', 'ILN', 'EAX', 'ICT', 'DDC', 'DTX', 'FGF', 'ARX',
- 'FSD', 'BIS', 'GID', 'JAX', 'OAX', 'CYS', 'ILX', 'LSX', 'MTR', 'STO', 'BOU',
- 'LOT', 'TOP', 'SGF', 'CLE', 'MPX', 'RAH', 'LBF', 'EPZ', 'LKN', 'TSA', 'CTP',
- 'SJU', 'UNR', 'SEW', 'MKX', 'AFC', 'AJK', 'AFG', 'OUN', 'MFR', 'PDT', 'MOB',
- 'RLX', 'GRB', 'MQT', 'ABR', 'OTX', 'PQR', 'BTV', 'LWX', 'FFC', 'GJT', 'PUB',
- 'GGW', 'ABQ', 'CAE', 'CHS', 'GSP', 'PAH', 'DVN', 'GUM', 'JSJ', 'RNK', 'AKQ',
- 'SLC', 'AMA', 'LUB', 'FWD', 'MAF', 'SJT', 'MHX', 'ILM', 'TFX', 'MSO', 'EWX',
- 'HGX', 'CRP', 'BRO', 'MRX', 'OHX', 'MEG', 'PBZ', 'BUF', 'ALY', 'BGM', 'OKX',
- 'REV', 'VEF', 'RIW', 'BYZ', 'JAN', 'CAR', 'GYX', 'BOX', 'SHV', 'LCH', 'LIX',
- 'LMK', 'JKL', 'BOI', 'PIH', 'KEY', 'HFO', 'MLB', 'LZK', 'HUN', 'DMX',
- 'SPC', 'NHC', 'TEST']
+mesosite = pg.connect("mesosite", "iemdb", user='nobody')
+OAUTH_TOKENS = {}
+rs = mesosite.query("SELECT * from oauth_tokens").dictresult()
+for i in range(len(rs)):
+  OAUTH_TOKENS[ rs[i]['username'] ] = oauth.OAuthToken(rs[i]['token'], rs[i]['secret'])
 
-TWUSERS = {}
-for wfo in WFOS:
-    TWUSERS[wfo] = twitter.Twitter('iembot_%s' % (wfo.lower(),) , 
-                   secret.twitter_pass)
+OAUTH_CONSUMER = oauth.OAuthConsumer(secret.consumer_key, secret.consumer_secret)
 
 BITLY = "http://api.bit.ly/shorten?version=2.0.1&longUrl=%s&login=iembot&apiKey="+ secret.bitly_key
 
@@ -60,11 +51,12 @@ def reallytweet(json, channels, msg, extras):
         tinyurl = ""
     # We are finally ready to tweet!
     for channel in channels:
-        if not TWUSERS.has_key(channel):
-            print "Unknown Twitter Channel, %s" % (channel,)
+        tuser = "iembot_%s" % (channel.lower(),)
+        if not OAUTH_TOKENS.has_key(tuser):
+            print "Unknown Twitter User, %s" % (tuser,)
             continue
         twt = "#%s %s %s" % (channel, msg[:112], tinyurl)
-        TWUSERS[channel].update( twt, None, extras).addCallback(tb, channel, twt)
+        twitter.Twitter(consumer=OAUTH_CONSUMER, token=OAUTH_TOKENS[tuser]).update( twt, None, extras).addCallback(tb, channel, twt)
 
 def tb(x, channel, twt):
     print "TWEET [%s] RES: %s" % (twt, x) 
