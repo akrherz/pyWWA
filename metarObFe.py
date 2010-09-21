@@ -233,7 +233,7 @@ def process_site(metar):
 
         if ISIEM:
             d0 = {}
-            d0['stationID'] = mtr.station_id
+            d0['stationID'] = mtr.station_id[1:]
             d0['peak_gust'] = v
             d0['peak_drct'] = d
             d0['peak_ts'] = t.strftime("%Y-%m-%d %H:%M:%S")
