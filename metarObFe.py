@@ -236,7 +236,7 @@ def process_site(metar):
             d0['stationID'] = mtr.station_id[1:]
             d0['peak_gust'] = v
             d0['peak_drct'] = d
-            d0['peak_ts'] = t.strftime("%Y-%m-%d %H:%M:%S")
+            d0['peak_ts'] = t.strftime("%Y-%m-%d %H:%M:%S")+"+00"
             d0['year'] = t.strftime("%Y")
             iem.updateDatabasePeakWind(iemaccess, d0, dbpool)
 
