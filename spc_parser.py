@@ -189,7 +189,7 @@ def real_parser(buf):
     # Remove any previous data
     POSTGIS.query("""DELETE from spc_outlooks where valid = '%(valid)s+00' 
     and expire = '%(expire)s+00' 
-    and outlook_type = '%(outlook_type)s'""" % metadata)
+    and outlook_type = '%(outlook_type)s' and day = '%(day)s'""" % metadata)
 
     wfos = {'TSTM': [], 'EXTM': [], 'SLGT': [], 'CRIT': [], 'MDT': [], 
             'HIGH': [] }
