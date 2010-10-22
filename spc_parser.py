@@ -49,7 +49,7 @@ POSTGIS = pg.connect(secret.dbname, secret.dbhost, user=secret.dbuser,
                      passwd=secret.dbpass)
 DBPOOL = adbapi.ConnectionPool("psycopg2", database=secret.dbname, 
                                host=secret.dbhost, password=secret.dbpass)
-EMAILS = 10
+os.environ['EMAILS'] = "10"
 
 
 
@@ -69,9 +69,20 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
 
     def process_data(self, buf):
         """ Process the product """
-        real_parser(buf)
+        try:
+            real_parser(buf)
+        except Exception, myexp:
+            common.email_error(myexp, buf)
 
-def consumer(category, lons, lats):
+def consumer(category, metadata, lons, lats):
+    """
+    Do the geometric stuff we care about, including storage
+    """
+    # Here is a hack to account for when there is only two points
+    # in the polygon.
+    if len(lons) == 2:
+        lons.append( lons[-1] + 0.01 )
+        lats.append( lats[-1] + 0.01 )
     if lons[0] != lons[-1]:
         lons.append( lons[0] )
         lats.append( lats[0] )
@@ -79,6 +90,17 @@ def consumer(category, lons, lats):
     for i in range(len(lons)):
         geometry += "%.2f %.2f," % (lons[i], lats[i])
     geometry = geometry[:-1] + " )))"
+    # Insert geometry into database table please
+    sql = """INSERT into spc_outlooks(issue, valid, expire,
+        category, category_type, day, outlook_type, geom)
+    VALUES ('%s+00', '%s+00', '%s+00', '%s', '%s', '%s', '%s', 
+    'SRID=4326;%s')""" % (
+            metadata['issue'], metadata['valid'], metadata['expire'],
+            category, metadata['category_type'], metadata['day'], 
+            metadata['outlook_type'], geometry)
+    DBPOOL.runOperation( sql ).addErrback(common.email_error, sql)
+    
+    # Search for WFOs
     sql = "select distinct wfo from nws_ugc \
        WHERE ( st_overlaps(geomFromEWKT('SRID=4326;%s'), geom) or \
        st_contains(geomFromEWKT('SRID=4326;%s'), geom) )and \
@@ -90,14 +112,15 @@ def consumer(category, lons, lats):
     for i in range(len(rs)):
         affectedWFOS.append( rs[i]['wfo'] )
 
-    print "Category: %s Lons: %s Lats: %s WFOS: %s" % (category, lons, lats, \
-        affectedWFOS)
+    print "Category Type: %s Category: %s #Lons: %s #Lats: %s #WFOS: %s" % (
+        metadata['category_type'], category, len(lons), len(lats), 
+        len(affectedWFOS))
     return affectedWFOS
-   
 
-def real_parser(buf):
-    buf = buf.replace("\015\015\012", "\n")
-    tp = TextProduct.TextProduct(buf)
+def find_issue_expire(buf, tp):
+    """
+    Determine the period this product is valid for
+    """
     tokens = re.findall("VALID TIME ([0-9]{6})Z - ([0-9]{6})Z", buf)
     day1 = int(tokens[0][0][:2])
     hour1 = int(tokens[0][0][2:4])
@@ -111,41 +134,103 @@ def real_parser(buf):
         valid += mx.DateTime.RelativeDateTime(months=1)
     if day2 < tp.issueTime.day and day2 == 1:
         expire += mx.DateTime.RelativeDateTime(months=1)
+    return valid, expire
+
+def real_parser(buf):
+    buf = buf.replace("\015\015\012", "\n")
+    tp = TextProduct.TextProduct(buf)
+    valid, expire = find_issue_expire(buf, tp)
+
+    metadata = {'valid': valid, 'expire': expire, 'issue': tp.issueTime}
 
     if tp.afos == "PTSDY1":
+        metadata['day'] = '1'
+        metadata['outlook_type'] = 'C'
         channelprefix = ""
         product_descript = "Day 1 Convective"
         url = "http://www.spc.noaa.gov/products/outlook/archive/%s/day1otlk_%s.html" % (valid.year, valid.strftime("%Y%m%d_%H%M") )
+    if tp.afos == "PTSDY2":
+        metadata['day'] = '2'
+        metadata['outlook_type'] = 'C'
+        channelprefix = ""
+        product_descript = "Day 2 Convective"
+        url = "http://www.spc.noaa.gov/products/outlook/archive/%s/day2otlk_%s.html" % (valid.year, valid.strftime("%Y%m%d_%H%M") )
+    if tp.afos == "PTSDY3":
+        metadata['day'] = '3'
+        metadata['outlook_type'] = 'C'
+        channelprefix = ""
+        product_descript = "Day 3 Convective"
+        url = "http://www.spc.noaa.gov/products/outlook/archive/%s/day3otlk_%s.html" % (valid.year, valid.strftime("%Y%m%d_%H%M") )
+    if tp.afos == "PTSD48":
+        metadata['day'] = '4'
+        metadata['outlook_type'] = 'C'
+        channelprefix = ""
+        product_descript = "Day 4-8 Convective"
+        url = "http://www.spc.noaa.gov/products/exper/day4-8/archive/%s/day4-8_%s.html" % (valid.year, valid.strftime("%Y%m%d_%H%M") )
     if tp.afos == "PFWFD1":
+        metadata['day'] = '1'
+        metadata['outlook_type'] = 'F'
         channelprefix = "DAY1FWX"
         product_descript = "Day 1 Fire"
         url = "http://www.spc.noaa.gov/products/fire_wx/%s/%s.html" % (valid.year, valid.strftime("%y%m%d") )
+    if tp.afos == "PFWFD2":
+        metadata['day'] = '2'
+        metadata['outlook_type'] = 'F'
+        channelprefix = "DAY2FWX"
+        product_descript = "Day 2 Fire"
+        url = "http://www.spc.noaa.gov/products/fire_wx/%s/%s.html" % (valid.year, valid.strftime("%y%m%d") )
+    if tp.afos == "PFWF38":
+        metadata['day'] = '3'
+        metadata['outlook_type'] = 'F'
+        channelprefix = "DAY3FWX"
+        product_descript = "Day 3-8 Fire"
+        url = "http://www.spc.noaa.gov/products/fire_wx/%s/%s.html" % (valid.year, valid.strftime("%y%m%d") )
 
-    wfos = {'TSTM': [], 'EXTM': [], 'SLGT': [], 'CRIT': [], 'MDT': [], 'HIGH': [] }
+    # Remove any previous data
+    POSTGIS.query("""DELETE from spc_outlooks where valid = '%(valid)s+00' 
+    and expire = '%(expire)s+00' 
+    and outlook_type = '%(outlook_type)s'""" % metadata)
 
-    category = None
-    for line in buf.split("\n"):
-        if re.match("^(EXTM|SLGT|MDT|HIGH|CRIT|TSTM) ", line) is not None:
-            if category:
-                wfos[category].append( consumer(category, lons, lats) )
-            category = line.split()[0]
-            lats = []
-            lons = []
-        if category is None:
-            continue
-        tokens = re.findall("([0-9]{8})", line)
-        for t in tokens:
-            if t == "99999999":
+    wfos = {'TSTM': [], 'EXTM': [], 'SLGT': [], 'CRIT': [], 'MDT': [], 
+            'HIGH': [] }
+
+    # First we split the product by &&
+    for segment in buf.split("&&")[:-1]:
+        # We need to figure out the probabilistic or category
+        tokens = re.findall("\.\.\. (.*) \.\.\.", segment)
+        metadata['category_type'] = tokens[0][0]
+        # Now we loop over the lines looking for data
+        category = None
+        for line in segment.split("\n"):
+            if re.match("^(D[3-8]|EXTM|SLGT|MDT|HIGH|CRIT|TSTM|0\.[0-9][0-9]) ", line) is not None:
+                if category is not None:
+                    awfos = consumer(category, metadata, lons, lats)
+                    if wfos.has_key( category ):
+                        wfos[category].append( awfos )
+                category = line.split()[0]
+                lats = []
+                lons = []
+            if category is None:
                 continue
-            lats.append( float(t[:4]) / 100.0 )
-            lon = float(t[4:]) / 100.0
-            if int(t[4]) < 3:
-                lons.append( -1.0 * (lon + 100.0) )
-            else:
-                lons.append( -1.0 * lon )
-    if category:
-        wfos[category].append( consumer(category, lons, lats) )
+            tokens = re.findall("([0-9]{8})", line)
+            for t in tokens:
+                if t == "99999999":
+                    continue
+                lats.append( float(t[:4]) / 100.0 )
+                lon = float(t[4:]) / 100.0
+                if int(t[4]) < 3:
+                    lons.append( -1.0 * (lon + 100.0) )
+                else:
+                    lons.append( -1.0 * lon )
+        if category is not None:
+            awfos = consumer(category, metadata, lons, lats)
+            if wfos.has_key( category ):
+                wfos[category].append( awfos )
 
+    # Only tweet or Jabber for Day1, for now
+    if tp.afos not in ('PTSDY1','PFWFD1'):
+        return
+    
     codes = {'SLGT': "Slight", 'MDT': "Moderate", 'HIGH': 'High', 'CRIT': 'Critical', 'EXTM': 'Extreme'}
 
 

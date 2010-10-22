@@ -1,4 +1,21 @@
 ---
+--- SPC Convective Outlooks (created: 22 Oct 2010)
+---
+DROP TABLE spc_outlooks;
+CREATE TABLE spc_outlooks (
+  issue timestamp with time zone,
+  valid timestamp with time zone,
+  expire timestamp with time zone,
+  category varchar(4),
+  category_type char(1),
+  day smallint,
+  outlook_type char(1)
+);
+SELECT addGeometryColumn('', 'spc_outlooks', 'geom', 4326, 'MULTIPOLYGON', 2);
+GRANT SELECT on spc_outlooks to apache,nobody;
+CREATE index spc_outlooks_valid_idx on spc_outlooks(valid);
+
+---
 --- Text Products
 ---
 CREATE TABLE text_products (
@@ -169,7 +186,7 @@ grant select on hvtec_nwsli to apache;
 --- UGC Lookup Table
 ---
 CREATE TABLE nws_ugc (
-    gid integer NOT NULL,
+    gid serial,
     polygon_class character varying(1),
     ugc character varying(6),
     name character varying(238),

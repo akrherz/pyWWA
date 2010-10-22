@@ -12,6 +12,12 @@ import secret
 from twittytwister import twitter
 import urllib
 import simplejson
+import traceback
+import sys
+import os
+import StringIO
+from email.MIMEText import MIMEText
+import base64
 import pg
 from oauth import oauth
 
@@ -25,13 +31,45 @@ OAUTH_CONSUMER = oauth.OAuthConsumer(secret.consumer_key, secret.consumer_secret
 
 BITLY = "http://api.bit.ly/shorten?version=2.0.1&longUrl=%s&login=iembot&apiKey="+ secret.bitly_key
 
+def email_error(exp, message):
+    """
+    Helper function to generate error emails when necessary and hopefully
+    not flood!
+    """
+    # Always log a message about our fun
+    cstr = StringIO.StringIO()
+    traceback.print_exc(file=cstr)
+    cstr.seek(0)
+    tbstr = cstr.read()
+    log.msg( tbstr )
+    log.msg( message )
+
+    # Now, we may email....
+    if int(os.environ['EMAILS']) < 0:
+        return
+    os.environ['EMAILS'] = str( int(os.environ["EMAILS"]) - 1 )
+
+    msg = MIMEText("""
+Emails Left: %s  Host: %s
+
+Exception:
+%s
+%s
+
+Message:
+%s""" % (os.environ["EMAILS"], os.environ["HOSTNAME"], tbstr, exp, message))
+    msg['subject'] = '%s Traceback' % (sys.argv[0],)
+    msg['From'] = secret.parser_user
+    msg['To'] = secret.error_email
+    smtp.sendmail("localhost", msg["From"], msg["To"], msg)
+
 def tweet(channels, msg, url, extras={}):
     """
     Method to publish twitter messages
     """
     if secret.DISARM:
         channels = ['TEST',]
-
+    return
     if url:
         url = url.replace("&amp;", "&").replace("#","%23")
         client.getPage(BITLY % (url, ) ).addCallback(reallytweet, 
