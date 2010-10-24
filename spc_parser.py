@@ -214,7 +214,13 @@ def real_parser(buf):
                 continue
             tokens = re.findall("([0-9]{8})", line)
             for t in tokens:
+                # new segment
                 if t == "99999999":
+                    awfos = consumer(category, metadata, lons, lats)
+                    if wfos.has_key( category ):
+                        wfos[category].append( awfos )
+                    lats = []
+                    lons = []
                     continue
                 lats.append( float(t[:4]) / 100.0 )
                 lon = float(t[4:]) / 100.0
