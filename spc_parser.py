@@ -31,6 +31,7 @@ from email.MIMEText import MIMEText
 # Python 3rd Party Add-Ons
 import mx.DateTime, pg
 
+
 # pyWWA stuff
 from support import ldmbridge, TextProduct, reference, spcpts
 import secret
@@ -52,7 +53,7 @@ DBPOOL = adbapi.ConnectionPool("psycopg2", database=secret.dbname,
 os.environ['EMAILS'] = "10"
 
 
-
+WAITFOR = 20
 
 
 # LDM Ingestor

@@ -86,16 +86,16 @@ def rightpoint(segment):
         right = [x0 , y0 + dy*0.5]
 
     
-    fp = "%s.png" % (segment[0,1],)
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
-    ax.plot( segment[:,0], segment[:,1], color='r' )
-    x,y = CONUSPOLY.exterior.xy
-    ax.plot(x, y, color='b')
-    ax.scatter( right[0], right[1] )
+    #fp = "%s.png" % (segment[0,1],)
+    #fig = plt.figure()
+    #ax = fig.add_subplot(111)
+    #ax.plot( segment[:,0], segment[:,1], color='r' )
+    #x,y = CONUSPOLY.exterior.xy
+    #ax.plot(x, y, color='b')
+    #ax.scatter( right[0], right[1] )
     
-    ax.plot( segment[0,0], segment[0,1], marker="+", color='#000000')
-    fig.savefig(fp)
+    #ax.plot( segment[0,0], segment[0,1], marker="+", color='#000000')
+    #fig.savefig(fp)
         
     return Point( right )
     
@@ -148,7 +148,7 @@ class SPCPTS(object):
         self.find_outlooks( tp )
     
     def draw_outlooks(self):
-        
+
         i = 0
         for outlook in self.outlooks:
             fig = plt.figure()
@@ -241,6 +241,11 @@ class SPCPTS(object):
         segments = str2pts( data  )
         print 'Found %s line segments' % (len(segments),)
         mypoly = CONUSPOLY
+        geomc = None
+        polygons = None
+        collection = None
+        rpt = None
+        geom_array = None
         # Now we loop over the segments
         for segment in segments:
             # Check to see if we have a polygon, if so, our work is done!
@@ -275,3 +280,9 @@ class SPCPTS(object):
             x,y = mypoly.exterior.xy
             ar = zip(x,y)
             self.outlooks.append( SPCOutlook(category, threshold, Polygon( ar ) ) )
+        del mypoly
+        del geomc
+        del polygons
+        del geom_array
+        del collection
+        del rpt
