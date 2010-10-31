@@ -122,7 +122,7 @@ def str2pts(s):
     return segments
 
 def read_poly():
-    _shp = shapelib.open('conus.shp')
+    _shp = shapelib.open('/home/ldm/pyWWA/conus.shp')
     _poly = _shp.read_object(0)
     _data = numpy.array( _poly.vertices()[0] )
     return Polygon( _data )
