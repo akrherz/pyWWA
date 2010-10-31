@@ -110,8 +110,7 @@ def real_parser(buf):
     buf = buf.replace("\015\015\012", "\n")
     tp = TextProduct.TextProduct(buf)
     spc = spcpts.SPCPTS( tp )
-    spc.draw_outlooks()
-    return
+    #spc.draw_outlooks()
 
     # Remove any previous data
     POSTGIS.query("""DELETE from spc_outlooks where valid = '%s+00' 
