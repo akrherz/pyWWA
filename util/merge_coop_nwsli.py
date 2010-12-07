@@ -55,3 +55,5 @@ for line in open('/home/ldm/logs/shef_parser.log'):
     print 'Added %s [%s]' % (nwsli, sites[nwsli]['name'])
     
 MESOSITE.commit()
+os.unlink('/home/ldm/logs/shef_parser.log')
+os.system('kill -1 /home/ldm/shef_parser.pid')
