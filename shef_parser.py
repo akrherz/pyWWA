@@ -250,9 +250,10 @@ def i_want_site(sid):
     if (not mesonet.nwsli2state.has_key(sid[-2:])):
         return False
 
-    state = mesonet.nwsli2state[ sid[-2:]]
-    if (not state in COOPSTATES):
-        return False
+    # We want all state's COOP data now :)
+    #state = mesonet.nwsli2state[ sid[-2:]]
+    #if (not state in COOPSTATES):
+    #    return False
 
     return True
 
