@@ -56,4 +56,4 @@ for line in open('/home/ldm/logs/shef_parser.log'):
     
 MESOSITE.commit()
 os.unlink('/home/ldm/logs/shef_parser.log')
-os.system('kill -1 /home/ldm/shef_parser.pid')
+os.system('kill -1 `cat /home/ldm/shef_parser.pid`')
