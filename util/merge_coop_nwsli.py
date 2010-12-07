@@ -15,7 +15,7 @@ for line in open('coop_nwsli.txt'):
     if name == "":
         name = tokens[1]
     
-    sites[ tokens[0] ] = {'name': name,
+    sites[ tokens[0] ] = {'name': name.replace("'", ''),
                           'lat': tokens[6],
                           'lon': tokens[7],
                           'state': tokens[8], 
