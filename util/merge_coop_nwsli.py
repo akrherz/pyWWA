@@ -11,8 +11,11 @@ for line in open('coop_nwsli.txt'):
     tokens = line.split("|")
     if len(tokens) < 9:
         continue
+    name = tokens[4]
+    if name == "":
+        name = tokens[1]
     
-    sites[ tokens[0] ] = {'name': tokens[4],
+    sites[ tokens[0] ] = {'name': name,
                           'lat': tokens[6],
                           'lon': tokens[7],
                           'state': tokens[8], 
