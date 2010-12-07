@@ -47,7 +47,6 @@ for line in open('/home/ldm/logs/shef_parser.log'):
           '%s_COOP' % (sites[nwsli]['state'],), gtxt))
         mcursor.close()
     except:
-        continue
         pass
     MESOSITE.commit()
     
