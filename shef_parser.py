@@ -24,6 +24,10 @@ log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
 import os, smtplib
 from email.mime.text import MIMEText
 
+o = open("shef_parser.pid",'w')
+o.write("%s" % ( os.getpid(),) )
+o.close()
+
 # Stuff I wrote
 from pyIEM import iemAccessOb, mesonet, iemdb
 from support import ldmbridge
