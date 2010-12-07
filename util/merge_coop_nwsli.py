@@ -47,5 +47,6 @@ for line in open('/home/ldm/logs/shef_parser.log'):
         pass
     cmd = "/usr/bin/env python /var/www/scripts/util/addSiteMesosite.py %s_COOP %s" % (sites[nwsli]['state'], nwsli)
     os.system(cmd)
+    print 'Added %s [%s]' % (nwsli, sites[nwsli]['name'])
     
 MESOSITE.commit()
