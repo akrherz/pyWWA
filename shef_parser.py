@@ -333,6 +333,8 @@ def process_site(tp, sid, ts, data):
     # We are left with DCPs in Iowa
     elif (state == "IA"):
         network = "DCP"
+    elif state in ['IL','MO','KS','NE','SD','ND','MN','WI']:
+        network = "%s_DCP" % (state,)
     # Everybody else can go away :)
     else:
         return
@@ -345,8 +347,8 @@ def process_site(tp, sid, ts, data):
     if not iemob.load_and_compare(IEMACCESS):
         #print 'Unknown StationID %s %s' %  (sid,  tp.get_product_id() )
         HADSDB.runOperation("""
-            INSERT into unknown(nwsli, product) values ('%s', '%s')
-        """ % (sid, tp.get_product_id() ))
+            INSERT into unknown(nwsli, product, network) values ('%s', '%s', '%s')
+        """ % (sid, tp.get_product_id() , network))
 
     for var in data.keys():
         myval = data[var] * MULTIPLIER[var[:2]]
