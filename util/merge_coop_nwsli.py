@@ -43,7 +43,8 @@ for row in hcursor:
     elif row[2].find("DCP") > -1 and sites[nwsli]['program'].find("GOES") > -1:
         network = row[2]
     else:
-        print 'CONFLICT [%s] Program [%s] Parser [%s]' % (nwsli, sites[nwsli]['program'], row[2])
+        print 'CONFLICT [%s] Program [%s] Parser [%s] %s' % (nwsli, 
+                    sites[nwsli]['program'], row[2], row[1])
         continue
     # Now, we insert
     mcursor = MESOSITE.cursor()
