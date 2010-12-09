@@ -30,7 +30,7 @@ o.close()
 
 # Stuff I wrote
 from pyIEM import iemAccessOb, mesonet, iemdb
-from support import ldmbridge
+from support import ldmbridge, TextProduct
 import secret
 
 # Third Party Stuff
@@ -155,11 +155,11 @@ class SHEFIT(protocol.ProcessProtocol):
     My process protocol for dealing with the SHEFIT program from the NWS
     """
 
-    def __init__(self, shefdata):
+    def __init__(self, tp):
         """
         Constructor
         """
-        self.shefdata = shefdata
+        self.tp = tp
         self.data = ""
 
     def connectionMade(self):
@@ -168,7 +168,7 @@ class SHEFIT(protocol.ProcessProtocol):
         """
         #print "sending %d bytes!" % len(self.shefdata)
         #print "SENDING", self.shefdata
-        self.transport.write(self.shefdata)
+        self.transport.write( self.tp.raw )
         self.transport.closeStdin()
 
     def outReceived(self, data):
@@ -196,15 +196,15 @@ class SHEFIT(protocol.ProcessProtocol):
         """
         if self.data == "":
             rejects = open("empty.shef", 'a')
-            rejects.write( self.shefdata +"\003")
+            rejects.write( self.tp.raw +"\003")
             rejects.close()
             return
         try:
-            really_process(self.data)
+            really_process(self.tp, self.data)
         except Exception,myexp:
-            email_error(myexp, self.shefdata)
+            email_error(myexp, self.tp.raw)
 
-def email_error(message, product_text):
+def email_error(message, product_text, tp=None):
     """
     Generic something to send email error messages 
     """
@@ -214,8 +214,8 @@ def email_error(message, product_text):
     if (EMAILS < 0):
         return
 
-    msg = MIMEText("Exception:\n%s\n\nRaw Product:\n%s" \
-                 % (message, product_text))
+    msg = MIMEText("Exception:\n%s\n\nRaw Product:\n%s" % ( 
+                 message, tp or product_text))
     msg['subject'] = 'shef_parser.py Traceback'
     msg['From'] = secret.parser_user
     msg['To'] = 'akrherz@iastate.edu'
@@ -242,7 +242,8 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
         """
         I am called from the ldmbridge when data is ahoy
         """
-        shef = SHEFIT( clnstr(buf) )
+        tp = TextProduct.TextProduct( clnstr(buf) )
+        shef = SHEFIT( tp )
         reactor.spawnProcess(shef, "shefit", ["shefit"], {})
 
 def i_want_site(sid):
@@ -261,7 +262,7 @@ def i_want_site(sid):
 
     return True
 
-def really_process(data):
+def really_process(tp, data):
     """
     This processes the output we get from the SHEFIT program
     """
@@ -294,10 +295,10 @@ def really_process(data):
         times = mydata[sid].keys()
         times.sort()
         for tstamp in times:
-            process_site(sid, tstamp, mydata[sid][tstamp])
+            process_site(tp, sid, tstamp, mydata[sid][tstamp])
 
 
-def process_site(sid, ts, data):
+def process_site(tp, sid, ts, data):
     """ 
     I process a dictionary of data for a particular site
     """
@@ -316,17 +317,17 @@ def process_site(sid, ts, data):
             MAPPING[var] = ""
         if (not MULTIPLIER.has_key(var[:2])):
             MULTIPLIER[var[:2]] = 1.0
-        HADSDB.runOperation("INSERT into raw%s \
-            (station, valid, key, value) \
-            VALUES('%s','%s+00', '%s', '%s')" % (ts.strftime("%Y_%m"), sid, \
-            ts.strftime("%Y-%m-%d %H:%M"), var, \
-            data[var])).addErrback(email_error, data)
+        HADSDB.runOperation("""INSERT into raw%s 
+            (station, valid, key, value) 
+            VALUES('%s','%s+00', '%s', '%s')""" % (ts.strftime("%Y_%m"), sid, 
+            ts.strftime("%Y-%m-%d %H:%M"), var, 
+            data[var])).addErrback(email_error, data, tp)
 
     #print sid, state, isCOOP
     # Deterime if we want to waste the DB's time
     # If COOP in MW, process it
     if (isCOOP):
-        print "FIND COOP?", sid, ts, data.keys()
+        print "COOP? %s %s %s" %  (sid, tp.get_product_id(), data.keys())
         network = "%s_COOP" % (state,)
     # We are left with DCPs in Iowa
     elif (state == "IA"):
@@ -340,7 +341,9 @@ def process_site(sid, ts, data):
     iemob = MyIEMOB(sid, network)
     iemob.setObTimeGMT(ts)
     iemob.data['year'] = ts.year
-    iemob.load_and_compare(IEMACCESS)
+    if not iemob.load_and_compare(IEMACCESS):
+        print 'Unknown StationID %s %s' %  (sid,  tp.get_product_id() )
+
     for var in data.keys():
         myval = data[var] * MULTIPLIER[var[:2]]
         iemob.data[ MAPPING[var] ] = myval
