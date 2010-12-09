@@ -330,12 +330,9 @@ def process_site(tp, sid, ts, data):
     if (isCOOP):
         print "COOP? %s %s %s" %  (sid, tp.get_product_id(), data.keys())
         network = "%s_COOP" % (state,)
-    # We are left with DCPs in Iowa
-    elif (state == "IA"):
-        network = "DCP"
+    # We are left with DCP
     else:
         network = "%s_DCP" % (state,)
-
 
     # Lets do this, finally.
     #print "ACTUALLY PROCESSED", sid, network
