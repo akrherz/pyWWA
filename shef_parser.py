@@ -333,11 +333,9 @@ def process_site(tp, sid, ts, data):
     # We are left with DCPs in Iowa
     elif (state == "IA"):
         network = "DCP"
-    elif state in ['IL','MO','KS','NE','SD','ND','MN','WI']:
-        network = "%s_DCP" % (state,)
-    # Everybody else can go away :)
     else:
-        return
+        network = "%s_DCP" % (state,)
+
 
     # Lets do this, finally.
     #print "ACTUALLY PROCESSED", sid, network
