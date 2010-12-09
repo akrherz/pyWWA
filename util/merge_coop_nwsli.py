@@ -7,7 +7,7 @@ HADS = iemdb.connect('hads', bypass=False)
 hcursor = HADS.cursor()
 hcursor2 = HADS.cursor()
 
-darylpass = getpass.getpass("PASS?")
+#darylpass = getpass.getpass("PASS?")
 
 # Load up our database
 sites = {}
@@ -69,7 +69,7 @@ for row in hcursor:
     mcursor.execute("""
     INSERT into stations(id, name, state, country, network, online, geom) VALUES
     (%s, %s, %s, 'US', %s, 't', %s)
-    """, (nwsli, sites[nwsli]['name'], sites[nwsli]['state'],
+    """, (nwsli, sites[nwsli]['name'][:40], sites[nwsli]['state'],
           network, gtxt))
     mcursor.close()
     MESOSITE.commit()
