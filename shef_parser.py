@@ -213,9 +213,10 @@ def email_error(message, product_text, tp=None):
     EMAILS -= 1
     if (EMAILS < 0):
         return
-
-    msg = MIMEText("Exception:\n%s\n\nRaw Product:\n%s" % ( 
-                 message, tp or product_text))
+    if tp is not None:
+        product_text = tp.raw
+    msg = MIMEText("Exception:\n%s\n\nRaw Product:\n%s\n%s" % ( 
+                 message, tp or "", product_text))
     msg['subject'] = 'shef_parser.py Traceback'
     msg['From'] = secret.parser_user
     msg['To'] = 'akrherz@iastate.edu'
@@ -342,7 +343,10 @@ def process_site(tp, sid, ts, data):
     iemob.setObTimeGMT(ts)
     iemob.data['year'] = ts.year
     if not iemob.load_and_compare(IEMACCESS):
-        print 'Unknown StationID %s %s' %  (sid,  tp.get_product_id() )
+        #print 'Unknown StationID %s %s' %  (sid,  tp.get_product_id() )
+        HADSDB.runOperation("""
+            INSERT into unknown(nwsli, product) values ('%s', '%s')
+        """ % (sid, tp.get_product_id() ))
 
     for var in data.keys():
         myval = data[var] * MULTIPLIER[var[:2]]

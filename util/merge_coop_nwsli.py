@@ -3,7 +3,9 @@
 
 import re, iemdb, os
 MESOSITE = iemdb.connect('mesosite', bypass=False)
-
+HADS = iemdb.connect('hads', bypass=False)
+hcursor = HADS.cursor()
+hcursor2 = HADS.cursor()
 
 # Load up our database
 sites = {}
@@ -24,11 +26,9 @@ for line in open('coop_nwsli.txt'):
 
     
 # Look for sites 
-for line in open('/home/ldm/logs/shef_parser.log'):
-    tokens = re.findall("stationID: ([A-Z1-9]{5}) ", line)
-    if len(tokens) == 0:
-        continue
-    nwsli = tokens[0]
+hcursor.execute("""SELECT nwsli, product from unknown""")
+for row in hcursor:
+    nwsli = row[0]
     if not sites.has_key(nwsli):
         print 'MISSING %s' % (nwsli,)
         sites[nwsli] = {'skip': True}
@@ -49,11 +49,13 @@ for line in open('/home/ldm/logs/shef_parser.log'):
     except:
         pass
     MESOSITE.commit()
+    hcursor2.execute("""DELETE from unknown where nwsli = '%s'""" % (nwsli,))
     
     cmd = "/usr/bin/env python /var/www/scripts/util/addSiteMesosite.py %s_COOP %s" % (sites[nwsli]['state'], nwsli)
     os.system(cmd)
     print 'Added %s [%s]' % (nwsli, sites[nwsli]['name'])
     
 MESOSITE.commit()
-os.unlink('/home/ldm/logs/shef_parser.log')
-os.system('kill -1 `cat /home/ldm/shef_parser.pid`')
+HADS.commit()
+#os.unlink('/home/ldm/logs/shef_parser.log')
+#os.system('kill -1 `cat /home/ldm/shef_parser.pid`')
