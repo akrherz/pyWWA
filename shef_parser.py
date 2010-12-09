@@ -311,7 +311,7 @@ def process_site(tp, sid, ts, data):
     #print sid, ts, mydata[sid][ts].keys()
     # Loop thru vars to see if we have a COOP site?
     for var in data.keys():
-        if (var in COOPVARS):
+        if var in COOPVARS and tp.afos[:3] not in ['RR5',]:
             isCOOP = 1
         if (not MAPPING.has_key(var)):
             print "Couldn't map var: %s for SID: %s" % (var, sid)
