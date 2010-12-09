@@ -1,11 +1,13 @@
 # Need to check the log files for shef parser and create new sites 
 # within database based on what we find
 
-import re, iemdb, os
+import re, iemdb, os, getpass, urllib2, base64, re
 MESOSITE = iemdb.connect('mesosite', bypass=False)
 HADS = iemdb.connect('hads', bypass=False)
 hcursor = HADS.cursor()
 hcursor2 = HADS.cursor()
+
+darylpass = getpass.getpass("PASS?")
 
 # Load up our database
 sites = {}
@@ -25,13 +27,27 @@ for line in open('coop_nwsli.txt'):
                           'skip': False,
                           }
 
+def ask_nws(nwsli):
     
+    URL = "https://ops13jweb.nws.noaa.gov/nwsli/liu/AsciiReport.jsp?v_sid=%s&v_wfo=&v_city=&v_county=&v_state=&v_region=&v_declat=&v_declon=&v_pgma=&v_pid=&v_owner=&orderBy=sid#" % (nwsli,)
+    username = 'daryl.herzmann'
+    req = urllib2.Request(URL)
+    
+    base64string = base64.encodestring(
+                '%s:%s' % (username, darylpass))[:-1]
+    authheader =  "Basic %s" % base64string
+    req.add_header("Authorization", authheader)
+    data = urllib2.urlopen(req).read()
+    print re.findall("<pre>(*)</pre>")
+    sys.exit()
+
 # Look for sites 
 hcursor.execute("""SELECT nwsli, product, network from unknown""")
 for row in hcursor:
     nwsli = row[0]
     if not sites.has_key(nwsli):
         print 'MISSING %s' % (nwsli,)
+        #ask_nws(nwsli)
         sites[nwsli] = {'skip': True}
         continue
     if sites[nwsli]['skip']:
@@ -49,15 +65,13 @@ for row in hcursor:
     # Now, we insert
     mcursor = MESOSITE.cursor()
     gtxt = 'SRID=4326;POINT(%s %s)' % (sites[nwsli]['lon'], sites[nwsli]['lat'])
-    try:
-        mcursor.execute("""
+    
+    mcursor.execute("""
     INSERT into stations(id, name, state, country, network, online, geom) VALUES
     (%s, %s, %s, 'US', %s, 't', %s)
     """, (nwsli, sites[nwsli]['name'], sites[nwsli]['state'],
           network, gtxt))
-        mcursor.close()
-    except:
-        pass
+    mcursor.close()
     MESOSITE.commit()
     hcursor2.execute("""DELETE from unknown where nwsli = '%s'""" % (nwsli,))
     
