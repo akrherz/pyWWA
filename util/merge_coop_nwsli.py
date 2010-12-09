@@ -21,12 +21,13 @@ for line in open('coop_nwsli.txt'):
                           'lat': tokens[6],
                           'lon': tokens[7],
                           'state': tokens[8], 
+                          'program': tokens[15],
                           'skip': False,
                           }
 
     
 # Look for sites 
-hcursor.execute("""SELECT nwsli, product from unknown""")
+hcursor.execute("""SELECT nwsli, product, network from unknown""")
 for row in hcursor:
     nwsli = row[0]
     if not sites.has_key(nwsli):
@@ -36,6 +37,14 @@ for row in hcursor:
     if sites[nwsli]['skip']:
         continue
     sites[nwsli]['skip'] = True
+    
+    if row[2].find("COOP") > -1 and sites[nwsli]['program'].find("COOP") > -1:
+        network = row[2]
+    elif row[2].find("DCP") > -1 and sites[nwsli]['program'].find("GOES") > -1:
+        network = row[2]
+    else:
+        print 'CONFLICT [%s] Program [%s] Parser [%s]' % (nwsli, sites[nwsli]['program'], row[2])
+        continue
     # Now, we insert
     mcursor = MESOSITE.cursor()
     gtxt = 'SRID=4326;POINT(%s %s)' % (sites[nwsli]['lon'], sites[nwsli]['lat'])
@@ -44,7 +53,7 @@ for row in hcursor:
     INSERT into stations(id, name, state, country, network, online, geom) VALUES
     (%s, %s, %s, 'US', %s, 't', %s)
     """, (nwsli, sites[nwsli]['name'], sites[nwsli]['state'],
-          '%s_COOP' % (sites[nwsli]['state'],), gtxt))
+          network, gtxt))
         mcursor.close()
     except:
         pass
