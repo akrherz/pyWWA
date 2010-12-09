@@ -40,7 +40,7 @@ for row in hcursor:
     
     if row[2].find("COOP") > -1 and sites[nwsli]['program'].find("COOP") > -1:
         network = row[2]
-    elif row[2].find("DCP") > -1 and sites[nwsli]['program'] in ["GOES","ALERT"] > -1:
+    elif row[2].find("DCP") > -1 and sites[nwsli]['program'].find("COOP") == -1:
         network = row[2]
     else:
         print 'CONFLICT [%s] Program [%s] Parser [%s] %s' % (nwsli, 
@@ -63,7 +63,7 @@ for row in hcursor:
     
     cmd = "/usr/bin/env python /var/www/scripts/util/addSiteMesosite.py %s %s" % (network, nwsli)
     os.system(cmd)
-    print 'Added %s [%s]' % (nwsli, sites[nwsli]['name'])
+    print 'Added %s %s [%s]' % (nwsli, network, sites[nwsli]['name'])
     
 MESOSITE.commit()
 HADS.commit()
