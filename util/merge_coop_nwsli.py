@@ -60,7 +60,7 @@ for row in hcursor:
     MESOSITE.commit()
     hcursor2.execute("""DELETE from unknown where nwsli = '%s'""" % (nwsli,))
     
-    cmd = "/usr/bin/env python /var/www/scripts/util/addSiteMesosite.py %s_COOP %s" % (sites[nwsli]['state'], nwsli)
+    cmd = "/usr/bin/env python /var/www/scripts/util/addSiteMesosite.py %s %s" % (network, nwsli)
     os.system(cmd)
     print 'Added %s [%s]' % (nwsli, sites[nwsli]['name'])
     
