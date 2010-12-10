@@ -67,6 +67,9 @@ for row in hcursor:
     gtxt = 'SRID=4326;POINT(%s %s)' % (sites[nwsli]['lon'], sites[nwsli]['lat'])
     
     mcursor.execute("""
+    DELETE from stations where id = %s and network = %s
+    """, (nwsli, network))
+    mcursor.execute("""
     INSERT into stations(id, name, state, country, network, online, geom) VALUES
     (%s, %s, %s, 'US', %s, 't', %s)
     """, (nwsli, sites[nwsli]['name'][:40], sites[nwsli]['state'],
