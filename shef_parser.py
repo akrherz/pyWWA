@@ -339,7 +339,7 @@ def process_site(tp, sid, ts, data):
     iemob = MyIEMOB(sid, network)
     iemob.setObTimeGMT(ts)
     iemob.data['year'] = ts.year
-    if not iemob.load_and_compare(IEMACCESS):
+    if not iemob.load_and_compare(IEMACCESS) and ts.strftime("%Y%m%d") == mx.DateTime.now().strftime("%Y%m%d"):
         #print 'Unknown StationID %s %s' %  (sid,  tp.get_product_id() )
         HADSDB.runOperation("""
             INSERT into unknown(nwsli, product, network) values ('%s', '%s', '%s')
