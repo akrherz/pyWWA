@@ -2,6 +2,7 @@
 # within database based on what we find
 
 import re, iemdb, os, getpass, urllib2, base64, re
+from pyIEM import mesonet
 MESOSITE = iemdb.connect('mesosite', bypass=False)
 HADS = iemdb.connect('hads', bypass=False)
 hcursor = HADS.cursor()
@@ -46,7 +47,8 @@ hcursor.execute("""SELECT nwsli, product, network from unknown""")
 for row in hcursor:
     nwsli = row[0]
     if not sites.has_key(nwsli):
-        print 'MISSING %s' % (nwsli,)
+        state = mesonet.nwsli2state[ nwsli[-2:] ]
+        print 'MISSING %s %s %s' % (state, nwsli, row[1])
         #ask_nws(nwsli)
         sites[nwsli] = {'skip': True}
         continue
