@@ -58,6 +58,8 @@ for row in hcursor:
         network = row[2]
     elif row[2].find("DCP") > -1 and sites[nwsli]['program'].find("COOP") == -1:
         network = row[2]
+    elif row[2].find("DCP") > -1 and sites[nwsli]['program'] == 'UCOOP':
+        network = row[2]
     else:
         print 'CONFLICT [%s] Program [%s] Parser [%s] %s' % (nwsli, 
                     sites[nwsli]['program'], row[2], row[1])
