@@ -48,6 +48,16 @@ IEMACCESS = i['iem']
 # Necessary for the shefit program to run A-OK
 os.chdir("/home/ldm/pyWWA/shef_workspace")
 
+# Load up 3 char lookup :(
+CHAR3LOOKUP = {}
+for line in open('../util/coop_nwsli.txt'):
+    tokens = line.split("|")
+    if len(tokens) < 9:
+        continue
+    if len(tokens[0]) == 3:
+        CHAR3LOOKUP[ tokens[0] ] = tokens[8]
+
+
 MULTIPLIER = {
   "US" : 0.87,  # Convert MPH to KNT
   "UG": 0.87,
@@ -278,8 +288,8 @@ def really_process(tp, data):
             print "NO ENOUGH TOKENS", line
             continue
         sid = tokens[0]
-        if not i_want_site(sid):
-            continue
+        #if not i_want_site(sid):
+        #    continue
         if (not mydata.has_key(sid)):
             mydata[sid] = {}
         dstr = "%s %s" % (tokens[1], tokens[2])
@@ -304,10 +314,21 @@ def process_site(tp, sid, ts, data):
     I process a dictionary of data for a particular site
     """
     isCOOP = 0
-    if sid in ['3SE','3OI']:
-        state = "IA"
+    if len(sid) == 3:
+        if CHAR3LOOKUP.has_key(sid):
+            state = CHAR3LOOKUP[sid]
+        else:
+            print 'Unknown 3 CHAR ID: %s' % (sid,)
+            return    
+    elif len(sid) == 5:
+        if mesonet.nwsli2state.has_key( sid[-2:]):
+            state = mesonet.nwsli2state[ sid[-2:]]
+        else:
+            print 'Unknown 5 CHAR State ID: %s' % (sid,)
+            return 
     else:
-        state = mesonet.nwsli2state[ sid[-2:]]
+        print 'Unknown ID: %s' % (sid,)
+        return
     #print sid, ts, mydata[sid][ts].keys()
     # Loop thru vars to see if we have a COOP site?
     for var in data.keys():
