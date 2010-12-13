@@ -318,16 +318,16 @@ def process_site(tp, sid, ts, data):
         if CHAR3LOOKUP.has_key(sid):
             state = CHAR3LOOKUP[sid]
         else:
-            print 'Unknown 3 CHAR ID: %s' % (sid,)
+            print 'Unknown 3 CHAR ID: %s %s' % (sid, tp.get_product_id())
             return    
     elif len(sid) == 5:
         if mesonet.nwsli2state.has_key( sid[-2:]):
             state = mesonet.nwsli2state[ sid[-2:]]
         else:
-            print 'Unknown 5 CHAR State ID: %s' % (sid,)
+            print 'Unknown 5 CHAR State ID: %s %s' % (sid, tp.get_product_id())
             return 
     else:
-        print 'Unknown ID: %s' % (sid,)
+        print 'Unknown ID: %s %s' % (sid, tp.get_product_id())
         return
     #print sid, ts, mydata[sid][ts].keys()
     # Loop thru vars to see if we have a COOP site?
