@@ -27,6 +27,20 @@ for line in open('coop_nwsli.txt'):
                           'program': tokens[15],
                           'skip': False,
                           }
+for line in open('aux_nwsli.csv'):
+    tokens = line.split(",")
+    if len(tokens) < 5:
+        continue
+    sid = tokens[0]
+    if sites.has_key(sid):
+        continue
+    sites[ sid ] = {'name': tokens[3].replace("'", ''),
+                          'lat': tokens[5],
+                          'lon': 0 - float(tokens[6]),
+                          'state': tokens[4], 
+                          'program': None,
+                          'skip': False,
+                    }
 
 def ask_nws(nwsli):
     
@@ -56,7 +70,9 @@ for row in hcursor:
         continue
     sites[nwsli]['skip'] = True
     
-    if row[2].find("COOP") > -1 and sites[nwsli]['program'].find("COOP") > -1:
+    if sites[nwsli]['program'] is None:
+        network = row[2]
+    elif row[2].find("COOP") > -1 and sites[nwsli]['program'].find("COOP") > -1:
         network = row[2]
     elif row[2].find("DCP") > -1 and sites[nwsli]['program'].find("COOP") == -1:
         network = row[2]
