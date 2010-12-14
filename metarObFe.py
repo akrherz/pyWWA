@@ -153,7 +153,7 @@ def process_site(metar):
     if not LOC2NETWORK.has_key(iemid):
         print 'Unknown stationID: %s' % (iemid,)
         return
-    network = LOC2NETWORK[iemdb]
+    network = LOC2NETWORK[iemid]
 
     iem = MyIEMOB(iemid, network)
     gts = mx.DateTime.DateTime( mtr.time.year, mtr.time.month, 
