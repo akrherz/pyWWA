@@ -61,7 +61,7 @@ hcursor.execute("""SELECT nwsli, product, network from unknown""")
 for row in hcursor:
     nwsli = row[0]
     if not sites.has_key(nwsli):
-        state = mesonet.nwsli2state[ nwsli[-2:] ]
+        state = mesonet.nwsli2state.get(nwsli[-2:], "  ")
         print 'MISSING %s %s %s' % (state, nwsli, row[1])
         #ask_nws(nwsli)
         sites[nwsli] = {'skip': True}
