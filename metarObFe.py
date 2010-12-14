@@ -34,6 +34,12 @@ dbpool = adbapi.ConnectionPool("psycopg2", database='iem', host=secret.dbhost)
 
 i = iemdb.iemdb(dhost=secret.dbhost)
 iemaccess = i['iem']
+mesosite = i['mesosite']
+LOC2NETWORK = {}
+rs = mesosite.query("""SELECT id, network from stations where network ~* 'ASOS' or network = 'AWOS'
+    or network = 'WTM'""").dictresult()
+for i in range(len(rs)):
+    LOC2NETWORK[ rs[i]['id'] ] = rs[i]['network']
 
 windAlerts = {}
 
@@ -144,8 +150,12 @@ def process_site(metar):
         iemid = mtr.station_id
     if (mtr.station_id[0] == "P"): # Pacific Region
         iemid = mtr.station_id
+    if not LOC2NETWORK.has_key(iemid):
+        print 'Unknown stationID: %s' % (iemid,)
+        return
+    network = LOC2NETWORK[iemdb]
 
-    iem = MyIEMOB(iemid)
+    iem = MyIEMOB(iemid, network)
     gts = mx.DateTime.DateTime( mtr.time.year, mtr.time.month, 
                   mtr.time.day, mtr.time.hour, mtr.time.minute)
     # Make sure that the ob is not from the future!
