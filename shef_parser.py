@@ -308,6 +308,13 @@ def really_process(tp, data):
         for tstamp in times:
             process_site(tp, sid, tstamp, mydata[sid][tstamp])
 
+def enter_unknown(sid, tp, network):
+    """
+    Enter some info about a site ID we know nothing of...
+    """
+    HADSDB.runOperation("""
+            INSERT into unknown(nwsli, product, network) values ('%s', '%s', '%s')
+        """ % (sid, tp.get_product_id() , network))
 
 def process_site(tp, sid, ts, data):
     """ 
@@ -318,16 +325,16 @@ def process_site(tp, sid, ts, data):
         if CHAR3LOOKUP.has_key(sid):
             state = CHAR3LOOKUP[sid]
         else:
-            print 'Unknown 3 CHAR ID: %s %s' % (sid, tp.get_product_id())
+            enter_unknown(sid, tp, "")
             return    
     elif len(sid) == 5:
         if mesonet.nwsli2state.has_key( sid[-2:]):
             state = mesonet.nwsli2state[ sid[-2:]]
         else:
-            print 'Unknown 5 CHAR State ID: %s %s' % (sid, tp.get_product_id())
+            enter_unknown(sid, tp, "")
             return 
     else:
-        print 'Unknown ID: %s %s' % (sid, tp.get_product_id())
+        enter_unknown(sid, tp, "")
         return
     #print sid, ts, mydata[sid][ts].keys()
     # Loop thru vars to see if we have a COOP site?
@@ -362,10 +369,8 @@ def process_site(tp, sid, ts, data):
     iemob.data['year'] = ts.year
     if not iemob.load_and_compare(IEMACCESS) and ts.strftime("%Y%m%d") == mx.DateTime.now().strftime("%Y%m%d"):
         #print 'Unknown StationID %s %s' %  (sid,  tp.get_product_id() )
-        HADSDB.runOperation("""
-            INSERT into unknown(nwsli, product, network) values ('%s', '%s', '%s')
-        """ % (sid, tp.get_product_id() , network))
-
+        enter_unknown(sid, tp, network)
+        
     for var in data.keys():
         myval = data[var] * MULTIPLIER[var[:2]]
         iemob.data[ MAPPING[var] ] = myval
