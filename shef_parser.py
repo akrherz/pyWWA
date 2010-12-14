@@ -48,15 +48,11 @@ IEMACCESS = i['iem']
 # Necessary for the shefit program to run A-OK
 os.chdir("/home/ldm/pyWWA/shef_workspace")
 
-# Load up 3 char lookup :(
-CHAR3LOOKUP = {}
-for line in open('../util/coop_nwsli.txt'):
-    tokens = line.split("|")
-    if len(tokens) < 9:
-        continue
-    if len(tokens[0]) == 3:
-        CHAR3LOOKUP[ tokens[0] ] = tokens[8]
-
+# Load up our lookup table of stations to networks
+LOC2STATE = {}
+rs = IEMACCESS.query("SELECT id, network from stations WHERE network ~* 'COOP' or network ~* 'DCP' ").dictresult()
+for i in range(len(rs)):
+    LOC2STATE[ rs[i]['id'] ] = rs[i]['network']
 
 MULTIPLIER = {
   "US" : 0.87,  # Convert MPH to KNT
@@ -320,22 +316,10 @@ def process_site(tp, sid, ts, data):
     """ 
     I process a dictionary of data for a particular site
     """
-    isCOOP = 0
-    if len(sid) == 3:
-        if CHAR3LOOKUP.has_key(sid):
-            state = CHAR3LOOKUP[sid]
-        else:
-            enter_unknown(sid, tp, "")
-            return    
-    elif len(sid) == 5:
-        if mesonet.nwsli2state.has_key( sid[-2:]):
-            state = mesonet.nwsli2state[ sid[-2:]]
-        else:
-            enter_unknown(sid, tp, "")
-            return 
-    else:
-        enter_unknown(sid, tp, "")
+    if len(sid) > 8:
+        print 'Too long ID: %s Prod: %s' % (sid, tp.get_product_id())
         return
+    isCOOP = 0
     #print sid, ts, mydata[sid][ts].keys()
     # Loop thru vars to see if we have a COOP site?
     for var in data.keys():
@@ -352,6 +336,16 @@ def process_site(tp, sid, ts, data):
             ts.strftime("%Y-%m-%d %H:%M"), var, 
             data[var])).addErrback(email_error, data, tp)
 
+    # Figure out which state this sensor is in :/
+    if len(sid) == 5 and mesonet.nwsli2state.has_key( sid[-2:]):
+        state = mesonet.nwsli2state[ sid[-2:]]
+    elif LOC2STATE.has_key(sid):
+        state = LOC2STATE[ sid ]
+        
+    if not LOC2STATE.has_key(sid):
+        enter_unknown(sid, tp, "")
+        return 
+    
     #print sid, state, isCOOP
     # Deterime if we want to waste the DB's time
     # If COOP in MW, process it
