@@ -105,7 +105,8 @@ for row in hcursor:
         cmd = "/usr/bin/env python /var/www/scripts/util/addSiteMesosite.py %s %s" % (network, nwsli)
         os.system(cmd)
         print 'Added %s %s [%s]' % (nwsli, network, sites[nwsli]['name'])
-    
+
+hcursor2.close()
 MESOSITE.commit()
 HADS.commit()
 #os.unlink('/home/ldm/logs/shef_parser.log')
