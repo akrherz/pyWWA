@@ -368,6 +368,7 @@ def process_site(tp, sid, ts, data):
     for var in data.keys():
         myval = data[var] * MULTIPLIER[var[:2]]
         iemob.data[ MAPPING[var] ] = myval
+    iemob.data['raw'] = tp.get_product_id()
     iemob.updateDatabaseSummaryTemps(None, ACCESSDB)
     iemob.updateDatabase(None, ACCESSDB)
 
