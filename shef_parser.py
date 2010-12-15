@@ -61,15 +61,22 @@ MULTIPLIER = {
   "UR": 10,
 }
 
-# Ugly hack on how we map SHEFIT vars to iemaccess variables
+"""
+Some notes on the SHEF codes translated to something IEM Access can handle, for now
+
+First two chars are physical extent code
+
+"""
 MAPPING = {
   "HGIRZ": "rstage",
+  "HGIRZZ": "rstage",
   "HGIRG": "rstage",
   "HGIRGZ": "rstage",
   "HG": "rstage",
 
   "HPIRGZ": "rstage",
   "HPIRPZ": "rstage",
+  "HPIRZZ": "rstage",
 
   "PPHRGZ": "phour",
   "PPHRPZ": "phour",
@@ -323,7 +330,7 @@ def process_site(tp, sid, ts, data):
     #print sid, ts, mydata[sid][ts].keys()
     # Loop thru vars to see if we have a COOP site?
     for var in data.keys():
-        if var in COOPVARS and tp.afos[:3] not in ['RR5',]:
+        if var in COOPVARS and tp.afos[:3] not in ['RR5','RRS']:
             isCOOP = 1
         if (not MAPPING.has_key(var)):
             print "Couldn't map var: %s for SID: %s" % (var, sid)
