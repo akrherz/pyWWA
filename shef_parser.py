@@ -50,9 +50,9 @@ os.chdir("/home/ldm/pyWWA/shef_workspace")
 
 # Load up our lookup table of stations to networks
 LOC2STATE = {}
-rs = IEMACCESS.query("SELECT id, network from stations WHERE network ~* 'COOP' or network ~* 'DCP' ").dictresult()
+rs = IEMACCESS.query("SELECT id, network, state from stations WHERE network ~* 'COOP' or network ~* 'DCP' ").dictresult()
 for i in range(len(rs)):
-    LOC2STATE[ rs[i]['id'] ] = rs[i]['network']
+    LOC2STATE[ rs[i]['id'] ] = rs[i]['state']
 
 MULTIPLIER = {
   "US" : 0.87,  # Convert MPH to KNT
@@ -332,6 +332,7 @@ def process_site(tp, sid, ts, data):
 
     state = LOC2STATE.get( sid )
     if state is None:
+        print 'Unknown state [%s]' % (sid,)
         enter_unknown(sid, tp, "")
         return 
     
