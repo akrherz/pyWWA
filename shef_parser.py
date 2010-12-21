@@ -315,7 +315,7 @@ def process_site(tp, sid, ts, data):
 
     # Our simple determination if the site is a COOP site
     isCOOP = False
-    if tp.afos[:3] in ['RR2', 'RR3']:
+    if tp.afos[:3] in ['RR2', 'RR3'] and tp.afos not in ['RR2LAX',]:
         isCOOP = True
 
     for var in data.keys():
@@ -331,8 +331,11 @@ def process_site(tp, sid, ts, data):
             data[var])).addErrback(email_error, data, tp)
 
     state = LOC2STATE.get( sid )
+    # TODO, someday support processing these stranger locations
+    if state is None and len(sid) == 8 and sid[0] == 'X':
+        return
     if state is None:
-        print 'Unknown state [%s]' % (sid,)
+        print 'Unknown station [%s]' % (sid,)
         enter_unknown(sid, tp, "")
         return 
     
