@@ -85,6 +85,12 @@ lsr_events = {
  'EXTR WIND CHILL': '7',
  'WILDFIRE': '8',
  'SEICHE': '9',
+ 'VOLCANIC ASHFALL': 'z',
+ 'TSUNAMI': 'y',
+ 'DEBRIS FLOW': 'x',
+ 'COASTAL FLOOD': 'v',
+ 'LAKESHORE FLOOD': 'u',
+ 'SNEAKER WAVE': 't', 
 }
 
 offsets = {
