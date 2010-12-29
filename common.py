@@ -69,7 +69,7 @@ def tweet(channels, msg, url, extras={}):
     """
     if secret.DISARM:
         channels = ['TEST',]
-    return
+
     if url:
         url = url.replace("&amp;", "&").replace("#","%23")
         client.getPage(BITLY % (url, ) ).addCallback(reallytweet, 

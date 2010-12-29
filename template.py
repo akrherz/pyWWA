@@ -82,7 +82,7 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
             email_error(myexp, buf)
 
 def real_parser(buf):
-    jabber.sendMessage(buf)
+    jabber.sendMessage(buf, buf)
 
 myJid = jid.JID('%s@%s/template_%s' % \
       (secret.iembot_ingest_user, secret.chatserver, \
