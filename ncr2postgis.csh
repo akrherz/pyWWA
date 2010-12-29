@@ -5,7 +5,7 @@ cat > $radfile
 
 source /mesonet/nawips/Gemenviron
 
-gpnids_vg << EOF > /tmp/log.$$
+/home/ldm/bin/gpnids_vg << EOF > /tmp/log.$$
  RADFIL   = /tmp/$radfile
  RADTIM   =
  TITLE    = 1
