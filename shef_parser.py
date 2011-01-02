@@ -148,9 +148,6 @@ MAPPING = {
   "URHRGZ": "max_drct",
 }
 
-COOPSTATES = ['IA', 'ND', 'SD', 'NE', 'KS', 'MO',
-            'MN', 'WI', 'IL', 'IN', 'OH', 'MI']
-COOPVARS = ['TAIRGX', 'TAIRGN', 'TAIRZNZ', 'TAIRZXZ', 'PPDRZZ']
 EMAILS = 10
 
 class MyIEMOB(iemAccessOb.iemAccessOb):
@@ -305,8 +302,21 @@ def enter_unknown(sid, tp, network):
     Enter some info about a site ID we know nothing of...
     """
     HADSDB.runOperation("""
-            INSERT into unknown(nwsli, product, network) values ('%s', '%s', '%s')
+            INSERT into unknown(nwsli, product, network) 
+            values ('%s', '%s', '%s')
         """ % (sid, tp.get_product_id() , network))
+
+def checkvars( vars ):
+    """
+    Check variables to see if we have a COOP or DCP site
+    """
+    for v in vars:
+        # Definitely DCP
+        if v[:2] in ['HG',]:
+            return False
+        if v[:2] in ['SF','SD','PP']:
+            return True
+    return False
 
 def process_site(tp, sid, ts, data):
     """ 
@@ -315,7 +325,9 @@ def process_site(tp, sid, ts, data):
 
     # Our simple determination if the site is a COOP site
     isCOOP = False
-    if tp.afos[:3] in ['RR2', 'RR3'] and tp.afos not in ['RR2LAX',]:
+    if tp.afos[:3] == 'RR3':
+        isCOOP = True
+    if tp.afos[:3] in ['RR1', 'RR2'] and checkvars( data.keys() ):
         isCOOP = True
 
     for var in data.keys():
