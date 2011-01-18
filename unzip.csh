@@ -1,3 +1,5 @@
+#!/bin/csh
+
 # Argument is the filename base!
 set fn="$1"
 set mydir="/home/ldm/data/${fn:h}"

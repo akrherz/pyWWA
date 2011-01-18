@@ -1,3 +1,4 @@
+#!/bin/csh
 # Generate a geo-referenced image for DMX
 # Daryl Herzmann 17 Jun 2003
 
