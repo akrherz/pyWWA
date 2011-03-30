@@ -146,9 +146,7 @@ def process_site(metar):
 
     # Determine the ID, unfortunately I use 3 char ids for now :(
     iemid = mtr.station_id[-3:]
-    if (mtr.station_id[0] == "X"): # West Texas Mesonet
-        iemid = mtr.station_id
-    if (mtr.station_id[0] == "P"): # Pacific Region
+    if (mtr.station_id[0] in ["X","P","T"]): # West Texas Mesonet, Pacific, Puerto Rico
         iemid = mtr.station_id
     if not LOC2NETWORK.has_key(iemid):
         print 'Unknown stationID: %s' % (iemid,)
