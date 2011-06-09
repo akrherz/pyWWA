@@ -50,9 +50,16 @@ os.chdir("/home/ldm/pyWWA/shef_workspace")
 
 # Load up our lookup table of stations to networks
 LOC2STATE = {}
-rs = IEMACCESS.query("SELECT id, network, state from stations WHERE network ~* 'COOP' or network ~* 'DCP' ").dictresult()
+LOC2NETWORK = {}
+rs = IEMACCESS.query("""SELECT id, network, state from stations 
+    WHERE network ~* 'COOP' or network ~* 'DCP' ORDER by network ASC""").dictresult()
 for i in range(len(rs)):
-    LOC2STATE[ rs[i]['id'] ] = rs[i]['state']
+    id = rs[i]['id']
+    LOC2STATE[ id ] = rs[i]['state']
+    if LOC2NETWORK.has_key(id):
+        del LOC2NETWORK[id]
+    else:
+        LOC2NETWORK[id] = rs[i]['network']
 
 MULTIPLIER = {
   "US" : 0.87,  # Convert MPH to KNT
@@ -327,7 +334,7 @@ def process_site(tp, sid, ts, data):
     isCOOP = False
     if tp.afos[:3] == 'RR3':
         isCOOP = True
-    if tp.afos[:3] in ['RR1', 'RR2'] and checkvars( data.keys() ):
+    elif tp.afos[:3] in ['RR1', 'RR2'] and checkvars( data.keys() ):
         isCOOP = True
 
     for var in data.keys():
@@ -354,13 +361,16 @@ def process_site(tp, sid, ts, data):
     #print sid, state, isCOOP
     # Deterime if we want to waste the DB's time
     # If COOP in MW, process it
-    if isCOOP:
-        print "COOP? %s %s %s" %  (sid, tp.get_product_id(), data.keys())
-        network = "%s_COOP" % (state,)
-    # We are left with DCP
-    else:
-        network = "%s_DCP" % (state,)
+    network = LOC2STATE.get(sid)
+    if not network:
+        if isCOOP:
+            print "COOP? %s %s %s" %  (sid, tp.get_product_id(), data.keys())
+            network = "%s_COOP" % (state,)
+        # We are left with DCP
+        else:
+            network = "%s_DCP" % (state,)
 
+    
     # Lets do this, finally.
     #print "ACTUALLY PROCESSED", sid, network
     iemob = MyIEMOB(sid, network)
