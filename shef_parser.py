@@ -357,7 +357,7 @@ def process_site(tp, sid, ts, data):
     if state is None and len(sid) == 8 and sid[0] == 'X':
         return
     if state is None:
-        if not UNKNOWN.get(sid):
+        if UNKNOWN.get(sid) is None:
             print 'Unknown station [%s]' % (sid,)
             enter_unknown(sid, tp, "")
         else:
@@ -367,7 +367,7 @@ def process_site(tp, sid, ts, data):
     #print sid, state, isCOOP
     # Deterime if we want to waste the DB's time
     # If COOP in MW, process it
-    network = LOC2STATE.get(sid)
+    network = LOC2NETWORK.get(sid)
     if not network:
         if isCOOP:
             print "COOP? %s %s %s" %  (sid, tp.get_product_id(), data.keys())
