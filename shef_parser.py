@@ -44,6 +44,7 @@ ACCESSDB = adbapi.ConnectionPool("psycopg2", database='iem', host=secret.dbhost)
 HADSDB = adbapi.ConnectionPool("psycopg2", database='hads', host=secret.dbhost)
 i = iemdb.iemdb(secret.dbhost)
 IEMACCESS = i['iem']
+MESOSITE = i['iem']
 
 # Necessary for the shefit program to run A-OK
 os.chdir("/home/ldm/pyWWA/shef_workspace")
@@ -51,7 +52,7 @@ os.chdir("/home/ldm/pyWWA/shef_workspace")
 # Load up our lookup table of stations to networks
 LOC2STATE = {}
 LOC2NETWORK = {}
-rs = IEMACCESS.query("""SELECT id, network, state from stations 
+rs = MESOSITE.query("""SELECT id, network, state from stations 
     WHERE network ~* 'COOP' or network ~* 'DCP' ORDER by network ASC""").dictresult()
 for i in range(len(rs)):
     id = rs[i]['id']
@@ -60,6 +61,7 @@ for i in range(len(rs)):
         del LOC2NETWORK[id]
     else:
         LOC2NETWORK[id] = rs[i]['network']
+MESOSITE.close()
 
 MULTIPLIER = {
   "US" : 0.87,  # Convert MPH to KNT
