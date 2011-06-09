@@ -52,6 +52,7 @@ os.chdir("/home/ldm/pyWWA/shef_workspace")
 # Load up our lookup table of stations to networks
 LOC2STATE = {}
 LOC2NETWORK = {}
+UNKNOWN = {}
 rs = MESOSITE.query("""SELECT id, network, state from stations 
     WHERE network ~* 'COOP' or network ~* 'DCP' ORDER by network ASC""").dictresult()
 for i in range(len(rs)):
@@ -356,8 +357,11 @@ def process_site(tp, sid, ts, data):
     if state is None and len(sid) == 8 and sid[0] == 'X':
         return
     if state is None:
-        print 'Unknown station [%s]' % (sid,)
-        enter_unknown(sid, tp, "")
+        if not UNKNOWN.get(sid):
+            print 'Unknown station [%s]' % (sid,)
+            enter_unknown(sid, tp, "")
+        else:
+            UNKNOWN[sid] = 1
         return 
     
     #print sid, state, isCOOP
