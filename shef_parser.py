@@ -360,7 +360,6 @@ def process_site(tp, sid, ts, data):
         if UNKNOWN.get(sid) is None:
             print 'Unknown station [%s]' % (sid,)
             enter_unknown(sid, tp, "")
-        else:
             UNKNOWN[sid] = 1
         return 
     
