@@ -253,7 +253,7 @@ class TextProductSegment:
         rend2 = re.split("TIME...MOT...LOC", rend[1])
         if (len(rend2) > 1):
             rend[1] = rend2[0]
-        pairs = re.findall("([0-9]+) ([0-9]+)", rend[1])
+        pairs = re.findall("([0-9]+)\s+([0-9]+)", rend[1])
 
         g = "SRID=4326;MULTIPOLYGON((("
         for pr in pairs:
