@@ -54,7 +54,8 @@ LOC2STATE = {}
 LOC2NETWORK = {}
 UNKNOWN = {}
 rs = MESOSITE.query("""SELECT id, network, state from stations 
-    WHERE network ~* 'COOP' or network ~* 'DCP' ORDER by network ASC""").dictresult()
+    WHERE network ~* 'COOP' or network ~* 'DCP' or network in ('KCCI','KIMT','KELO') 
+    ORDER by network ASC""").dictresult()
 for i in range(len(rs)):
     id = rs[i]['id']
     LOC2STATE[ id ] = rs[i]['state']
@@ -368,6 +369,8 @@ def process_site(tp, sid, ts, data):
     # If COOP in MW, process it
     network = LOC2NETWORK.get(sid)
     if not network:
+        if network in ['KCCI','KIMT','KELO']:
+            return
         if isCOOP:
             print "COOP? %s %s %s" %  (sid, tp.get_product_id(), data.keys())
             network = "%s_COOP" % (state,)
