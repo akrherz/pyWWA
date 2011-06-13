@@ -368,9 +368,9 @@ def process_site(tp, sid, ts, data):
     # Deterime if we want to waste the DB's time
     # If COOP in MW, process it
     network = LOC2NETWORK.get(sid)
+    if network in ['KCCI','KIMT','KELO']:
+        return
     if not network:
-        if network in ['KCCI','KIMT','KELO']:
-            return
         if isCOOP:
             print "COOP? %s %s %s" %  (sid, tp.get_product_id(), data.keys())
             network = "%s_COOP" % (state,)
