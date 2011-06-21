@@ -11,7 +11,7 @@ M_PI = 3.14159265358979323846
 RE_METERS = 6371200.0
 ENTITIES = ['','','','','','','','DMSP','GMS','METEOSAT','GOES7', 'GOES8',
             'GOES9', 'GOES10', 'GOES11', 'GOES12', 'GOES13']
-CHANNELS = ['','VIS','3.9', 'WV', 'IR', '12', 'U6', 'U7', 'U8', 'U9', 'U10']
+CHANNELS = ['','VIS','3.9', 'WV', 'IR', '12', '13.3', 'U7', 'U8', 'U9', 'U10']
 SECTORS = ['NHCOMP', 'EAST', 'WEST', 'AK', 'AKNAT', 'HI', 'HINAT', 'PR', 'PRNAT','SUPER']
 
 def uint24(data):

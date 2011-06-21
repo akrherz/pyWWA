@@ -20,11 +20,14 @@ def workflow():
     c.seek(0)
     g = gini.GINIZFile( c )
     #
+    archivefn = g.archive_filename()
+    logger.info("Processed archive file: "+ archivefn)
+    currentfn = g.current_filename()
     tmpfn = tempfile.mktemp()
     
     png = Image.fromarray( g.data )
     png.save('%s.png' % (tmpfn,))
-    
+    # World File
     o = open('%s.wld' % (tmpfn,), 'w')
     o.write("""%(dx).3f
 0.000000000000%(random).0f
@@ -33,18 +36,31 @@ def workflow():
 %(x0).3f
 %(y1).3f""" % g.metadata)
     o.close()
+    # Metadata
+    o = open("%s.txt" % (tmpfn,), 'w')
+    o.write("""
+    http://www.nws.noaa.gov/noaaport/html/icdtb48e.html
+    Grid Info:  Lambert Comic Comformal lat_0=25n lon_0=95w
+    
+    Archive Filename: %s
+    Valid: %s 
+    
+    Contact Info: Daryl. Herzmann akrherz@iastate.edu 515 294 5978
+    """ % (archivefn, g.metadata['valid']))
+    o.close()
 
-    archivefn = g.archive_filename()
-    logger.info("Processed archive file: "+ archivefn)
-    currentfn = g.current_filename()
-    pqinsert = "/home/ldm/bin/pqinsert -p 'gis ac %s %s GIS/sat/%s png' %s.png" % (g.metadata['valid'].strftime("%Y%m%d%H%M"),
+
+    pqinsert = "/home/ldm/bin/pqinsert -p 'gis ac %s gis/images/awips211/%s GIS/sat/%s png' %s.png" % (g.metadata['valid'].strftime("%Y%m%d%H%M"),
                                                 currentfn, archivefn, tmpfn )
     os.system(pqinsert)
-    pqinsert = "/home/ldm/bin/pqinsert -p 'gis ac %s %s GIS/sat/%s wld' %s.wld" % (g.metadata['valid'].strftime("%Y%m%d%H%M"),
+    pqinsert = "/home/ldm/bin/pqinsert -p 'gis ac %s gis/images/awips211/%s GIS/sat/%s wld' %s.wld" % (g.metadata['valid'].strftime("%Y%m%d%H%M"),
                                                 currentfn.replace("png", "wld"), 
                                                 archivefn.replace("png", "wld"), tmpfn )
     os.system(pqinsert)
-    
+    pqinsert = "/home/ldm/bin/pqinsert -p 'gis c %s gis/images/awips211/%s GIS/sat/%s txt' %s.txt" % (g.metadata['valid'].strftime("%Y%m%d%H%M"),
+                                                currentfn.replace("png", "txt"), 
+                                                archivefn.replace("png", "txt"), tmpfn )
+    os.system(pqinsert)
     os.unlink("%s.png" % (tmpfn,))
     os.unlink("%s.wld" % (tmpfn,))
     logger.info("Done!")
