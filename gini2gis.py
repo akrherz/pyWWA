@@ -20,6 +20,7 @@ def workflow():
     c.seek(0)
     g = gini.GINIZFile( c )
     #
+    print str(g)
     archivefn = g.archive_filename()
     logger.info("Processed archive file: "+ archivefn)
     currentfn = g.current_filename()

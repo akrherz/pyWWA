@@ -34,7 +34,12 @@ class GINIFile(object):
     def __init__(self, fobj):
 
         self.metadata = self.read_header(hdata)
-        
+    
+    def __str__(self):
+        s = "Line Size: %s Num Lines: %s" % (self.metadata['linesize'],
+                                             self.metadata['numlines'])
+        return s
+    
     def current_filename(self):
         """
         Return a filename for this product, we'll use the format
@@ -185,5 +190,5 @@ class GINIZFile(GINIFile):
         pad = self.metadata['linesize'] * self.metadata['numlines'] - np.shape(data)[0]
         if pad > 0:
             data = np.append(data, np.zeros( (pad), np.int8))
-        self.data = np.reshape(data, (self.metadata['linesize'], self.metadata['numlines']))
+        self.data = np.reshape(data, (self.metadata['numlines'], self.metadata['linesize']))
 
