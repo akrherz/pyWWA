@@ -86,6 +86,9 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
     def process_data(self, buf):
         """ Process the product """
         try:
+            # Make sure we have a trailing $$
+            #if buf.find("$$") == -1:
+            #    buf += "\n\n$$\n\n"
             text_product = TextProduct.TextProduct( buf )
             skip_con = False
             if (text_product.afos[:3] == "FLS" and 
@@ -321,13 +324,15 @@ till %(ets)s %(svs_special)s" % jmsg_dict
         # Lets find our county and update it with action
         # Not worry about polygon at the moment.
             for cnty in ugc:
-                sql = "UPDATE %s SET status = '%s', updated = '%s+00' \
-                        WHERE ugc = '%s' and wfo = '%s' and eventid = %s and \
-                      phenomena = '%s' and significance = '%s'" % \
-              (warning_table, vtec.action, text_product.issueTime, cnty, \
-               vtec.office, vtec.ETN,\
+                _expire = 'expire'
+                if vtec.endTS is None:
+                    _expire = 'expire + \'10 days\'::interval'
+                sql = """UPDATE %s SET status = '%s', updated = '%s+00', expire = %s 
+                        WHERE ugc = '%s' and wfo = '%s' and eventid = %s and 
+                      phenomena = '%s' and significance = '%s'""" % (warning_table, 
+                      vtec.action, text_product.issueTime, _expire, cnty, vtec.office, vtec.ETN,
                             vtec.phenomena, vtec.significance)
-                DBPOOL.runOperation( sql ).addErrback( email_error, sql)
+                DBPOOL.runOperation( sql ).addErrback( common.email_error, sql)
 
             if (len(seg.vtec) == 1):
                 sql = "UPDATE %s SET status = '%s',  \
