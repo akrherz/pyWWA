@@ -511,15 +511,18 @@ till %(ets)s %(svs_special)s" % jmsg_dict
                   seg.giswkt, vtec.action, product_text,
                   (seg.windtag or 'Null'), (seg.hailtag or 'Null'))
         else:
+            _expire = vtec.endTS
+            if vtec.endTS is None:
+                _expire = mx.DateTime.now() + mx.DateTime.RelativeDateTime(days=10)
             sql = "INSERT into sbw_%s(wfo, eventid, significance, phenomena,\
                 issue, expire, init_expire, polygon_begin, polygon_end, geom, \
                 status, report, windtag, hailtag) VALUES ('%s',\
                 '%s','%s','%s', %s,'%s+00','%s+00','%s+00','%s+00', \
                 '%s','%s','%s',%s,%s)" % \
                  (text_product.issueTime.year, vtec.office, vtec.ETN, \
-                 vtec.significance, vtec.phenomena, my_sts, vtec.endTS, \
-                 vtec.endTS, (vtec.beginTS or text_product.issueTime), \
-                 vtec.endTS, seg.giswkt, vtec.action, product_text,
+                 vtec.significance, vtec.phenomena, my_sts, _expire, \
+                 _expire, (vtec.beginTS or text_product.issueTime), \
+                 _expire, seg.giswkt, vtec.action, product_text,
                  (seg.windtag or 'Null'), (seg.hailtag or 'Null'))
         DBPOOL.runOperation(sql).addErrback( email_error, sql)
 
