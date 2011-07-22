@@ -64,5 +64,6 @@ def workflow():
     os.system(pqinsert)
     os.unlink("%s.png" % (tmpfn,))
     os.unlink("%s.wld" % (tmpfn,))
+    os.unlink("%s.txt" % (tmpfn,))
     logger.info("Done!")
 workflow()
