@@ -177,7 +177,7 @@ def process_site(metar):
             iem.data['tmpf'] = mtr.temp.value("F")
         if (mtr.dewpt):
             iem.data['dwpf'] = mtr.dewpt.value("F")
-    iem.data['raw'] = cmetar
+    iem.data['raw'] = cmetar[:254]
     if mtr.wind_speed:
         iem.data['sknt'] = mtr.wind_speed.value("KT")
     if mtr.wind_gust:
