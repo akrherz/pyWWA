@@ -82,12 +82,15 @@ MAPPING = {
   "HGIRZ": "rstage",
   "HGIRZZ": "rstage",
   "HGIRG": "rstage",
+  "HGIRRZ": "rstage",
   "HGIRGZ": "rstage",
   "HG": "rstage",
+  "HGIRPZ": "rstage",
 
   "HPIRGZ": "rstage",
   "HPIRPZ": "rstage",
   "HPIRZZ": "rstage",
+  "HPIRRZZ": "rstage",
 
   "PPHRGZ": "phour",
   "PPHRPZ": "phour",
@@ -156,6 +159,7 @@ MAPPING = {
   "UPIRZZ": "max_sknt",
 
   "URIRZZ": "max_drct",
+  
   "URHRGZ": "max_drct",
 }
 
@@ -357,20 +361,22 @@ def process_site(tp, sid, ts, data):
     # TODO, someday support processing these stranger locations
     if state is None and len(sid) == 8 and sid[0] == 'X':
         return
+    if state is None and len(sid) == 5 and mesonet.nwsli2state.has_key(sid[3:]):
+        state = mesonet.nwsli2state.get(sid[3:])
+        LOC2STATE[sid] = state
     if state is None:
         if UNKNOWN.get(sid) is None:
             print 'Unknown station [%s]' % (sid,)
             enter_unknown(sid, tp, "")
-            UNKNOWN[sid] = 1
+            UNKNOWN[sid] = 1       
         return 
     
     #print sid, state, isCOOP
     # Deterime if we want to waste the DB's time
-    # If COOP in MW, process it
     network = LOC2NETWORK.get(sid)
     if network in ['KCCI','KIMT','KELO']:
         return
-    if not network:
+    if network is None:
         if isCOOP:
             print "COOP? %s %s %s" %  (sid, tp.get_product_id(), data.keys())
             network = "%s_COOP" % (state,)
