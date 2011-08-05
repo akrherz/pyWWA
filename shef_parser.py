@@ -44,7 +44,7 @@ ACCESSDB = adbapi.ConnectionPool("psycopg2", database='iem', host=secret.dbhost)
 HADSDB = adbapi.ConnectionPool("psycopg2", database='hads', host=secret.dbhost)
 i = iemdb.iemdb(secret.dbhost)
 IEMACCESS = i['iem']
-MESOSITE = i['iem']
+MESOSITE = i['mesosite']
 
 # Necessary for the shefit program to run A-OK
 os.chdir("/home/ldm/pyWWA/shef_workspace")
