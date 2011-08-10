@@ -191,7 +191,7 @@ def process_SIGC(prod):
 
     """
     POSTGIS.query("BEGIN;")
-    POSTGIS.query("DELETE from sigmets_current")
+    POSTGIS.query("DELETE from sigmets_current where expire < now()")
     for section in prod.raw.split('\n\n'):
         s = CS_RE.search(section)
         if s:
