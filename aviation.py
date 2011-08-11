@@ -109,8 +109,10 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
         """ Process the product """
         try:
             prod = TextProduct.TextProduct(buf)
-            if prod.afos == 'SIGC':
+            if prod.afos in ['SIGC','SIGW','SIGE']:
                 process_SIGC(prod)
+            elif prod.afos[:2] == 'WS':
+                process_WS(prod)
         except Exception, myexp:
             common.email_error(myexp, buf)
 
@@ -245,6 +247,12 @@ def locs2lonslats(locstr, geotype, widthstr, diameterstr):
         lats = lats2
 
     return lons, lats
+
+def process_WS(prod):
+    """
+    Process non-convective sigmet WS[1-6][N-Y]
+    """
+    pass
 
 def process_SIGC(prod):
     """
