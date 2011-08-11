@@ -46,12 +46,12 @@ POSTGIS = pg.connect(secret.dbname, secret.dbhost, user=secret.dbuser,
 DBPOOL = adbapi.ConnectionPool("psycopg2", database=secret.dbname, 
                                host=secret.dbhost, password=secret.dbpass)
 
-
+# (?P<type>AREA|LINE|DMSHG AREA)
 CS_RE = re.compile(r"""CONVECTIVE\sSIGMET\s(?P<label>[0-9A-Z]+)\n
 VALID\sUNTIL\s(?P<hour>[0-2][0-9])(?P<minute>[0-5][0-9])Z\n
 (?P<states>[A-Z ]+)\n
 FROM\s(?P<locs>[0-9A-Z \-]+)\n
-(?P<type>AREA|LINE)(?P<rest>.*)
+(?P<rest>.*)
 """, re.VERBOSE )
 
 FROM_RE = re.compile(r"""
@@ -204,15 +204,17 @@ def process_SIGC(prod):
             if lats[0] != lats[-1] or lons[0] != lons[-1]:
                 wkt += "%s %s," % (lons[0], lats[0])
             print 'From: %s Till: %s %s' % (prod.issueTime, expire, data['label'])
-            print wkt
             for table in ('sigmets_current', 'sigmets_archive'):
                 sql = """INSERT into %s(sigmet_type, label, issue, expire, raw, geom)
                    VALUES ('C','%s','%s+00','%s+00','%s',
                    'SRID=4326;MULTIPOLYGON(((%s)))')""" % (table, data['label'], 
                                             prod.issueTime, expire, section, wkt[:-1])
-                
                 POSTGIS.query(sql)
 
+        elif section.find("CONVECTIVE SIGMET") > -1:
+            print 'ERROR: Could not parse section'
+            common.email_error("Couldn't parse section", section)
+                
         """ Gonna punt the outlook for now, no need? 
         s = OL_RE.search(section)
         if s:
