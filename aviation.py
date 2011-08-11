@@ -50,8 +50,9 @@ DBPOOL = adbapi.ConnectionPool("psycopg2", database=secret.dbname,
 CS_RE = re.compile(r"""CONVECTIVE\sSIGMET\s(?P<label>[0-9A-Z]+)\n
 VALID\sUNTIL\s(?P<hour>[0-2][0-9])(?P<minute>[0-5][0-9])Z\n
 (?P<states>[A-Z ]+)\n
-FROM\s(?P<locs>[0-9A-Z \-]+)\n
-(?P<dmshg>DMSHG|DVLPG)?\s?(?P<geotype>AREA|LINE)\s(?P<cutype>EMBD|SEV|SEV\sEMBD|EMBD\sSEV)?\s?TS\s(?P<width>[0-9]+\sNM\sWIDE)?
+(?P<from>FROM)?\s?(?P<locs>[0-9A-Z \-]+)\n
+(?P<dmshg>DMSHG|DVLPG)?\s?(?P<geotype>AREA|LINE|ISOL)\s
+(?P<cutype>EMBD|SEV|SEV\sEMBD|EMBD\sSEV)?\s?TS\s(?P<width>[0-9]+\sNM\sWIDE)?(?P<diameter>D[0-9]+)?
 """, re.VERBOSE )
 
 FROM_RE = re.compile(r"""
@@ -163,7 +164,7 @@ def makebox(lons, lats):
     rlats.append( lats[0] + runx )
     return rlons, rlats
 
-def locs2lonslats(locstr, geotype, widthstr):
+def locs2lonslats(locstr, geotype, widthstr, diameterstr):
     """
     Convert a locstring into a lon lat arrays
     """
@@ -173,6 +174,7 @@ def locs2lonslats(locstr, geotype, widthstr):
         width = float(widthstr.replace(" NM WIDE", ""))
         # Approximation
         widthdeg = width / 110.
+
     for l in locstr.split('-'):
         s = FROM_RE.search(l)
         if s:
@@ -184,6 +186,27 @@ def locs2lonslats(locstr, geotype, widthstr):
                   (lon1, lat1) = (LOCS[d['loc']]['lon'], LOCS[d['loc']]['lat'])
             lats.append( lat1 )
             lons.append( lon1 )
+    if geotype == 'ISOL':
+        lats2 = []
+        lons2 = []
+        diameter = float(diameterstr.replace("D", ""))
+        # Approximation
+        diameterdeg = diameter / 110.
+        # UR
+        lons2.append( lons[0] - diameterdeg )
+        lats2.append( lats[0] + diameterdeg )
+        # UL
+        lons2.append( lons[0] + diameterdeg )
+        lats2.append( lats[0] + diameterdeg )
+        # LL
+        lons2.append( lons[0] + diameterdeg )
+        lats2.append( lats[0] - diameterdeg )
+        # LR
+        lons2.append( lons[0] - diameterdeg )
+        lats2.append( lats[0] - diameterdeg )
+        lons = lons2
+        lats = lats2
+        
     if geotype == 'LINE':
         lats2 = []
         lons2 = []
@@ -234,7 +257,7 @@ def process_SIGC(prod):
         if s:
             data = s.groupdict()
             expire = figure_expire(prod.issueTime, float(data['hour']), float(data['minute']))
-            lons, lats = locs2lonslats(data['locs'], data['geotype'], data['width'])
+            lons, lats = locs2lonslats(data['locs'], data['geotype'], data['width'], data['diameter'])
             wkt = ""
             for lat,lon in zip(lats,lons):
                 wkt += "%s %s," % (lon, lat)
@@ -243,6 +266,9 @@ def process_SIGC(prod):
             print '%s %s From: %s Till: %s Len(lats): %s' % (data['label'], data['geotype'], 
                                     prod.issueTime, expire, len(lats))
             for table in ('sigmets_current', 'sigmets_archive'):
+                sql = """DELETE from %s where label = '%s' and expire = '%s+00'""" % (
+                                                table, data['label'], expire)
+                POSTGIS.query(sql)
                 sql = """INSERT into %s(sigmet_type, label, issue, expire, raw, geom)
                    VALUES ('C','%s','%s+00','%s+00','%s',
                    'SRID=4326;MULTIPOLYGON(((%s)))')""" % (table, data['label'], 
