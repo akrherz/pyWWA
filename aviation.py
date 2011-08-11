@@ -46,12 +46,12 @@ POSTGIS = pg.connect(secret.dbname, secret.dbhost, user=secret.dbuser,
 DBPOOL = adbapi.ConnectionPool("psycopg2", database=secret.dbname, 
                                host=secret.dbhost, password=secret.dbpass)
 
-# (?P<type>AREA|LINE|DMSHG AREA)
+# 
 CS_RE = re.compile(r"""CONVECTIVE\sSIGMET\s(?P<label>[0-9A-Z]+)\n
 VALID\sUNTIL\s(?P<hour>[0-2][0-9])(?P<minute>[0-5][0-9])Z\n
 (?P<states>[A-Z ]+)\n
 FROM\s(?P<locs>[0-9A-Z \-]+)\n
-(?P<rest>.*)
+(?P<dmshg>DMSHG)?\s?(?P<geotype>AREA|LINE)\s(?P<cutype>EMBD|SEV)?\s?TS\s(?P<width>[0-9]+\sNM\sWIDE)?
 """, re.VERBOSE )
 
 FROM_RE = re.compile(r"""
@@ -163,12 +163,16 @@ def makebox(lons, lats):
     rlats.append( lats[0] + runx )
     return rlons, rlats
 
-def locs2lonslats(locstr):
+def locs2lonslats(locstr, geotype, widthstr):
     """
     Convert a locstring into a lon lat arrays
     """
     lats = []
     lons = []
+    if geotype == 'LINE':
+        width = float(widthstr.replace(" NM WIDE", ""))
+        # Approximation
+        widthdeg = width / 110.
     for l in locstr.split('-'):
         s = FROM_RE.search(l)
         if s:
@@ -180,9 +184,42 @@ def locs2lonslats(locstr):
                   (lon1, lat1) = (LOCS[d['loc']]['lon'], LOCS[d['loc']]['lat'])
             lats.append( lat1 )
             lons.append( lon1 )
+    if geotype == 'LINE':
+        lats2 = []
+        lons2 = []
+        # Figure out left hand points
+        for i in range(0, len(lats)-1):
+            deltax = lons[i+1] - lons[i]
+            deltay = lats[i+1] - lats[i]
+            if deltax == 0:
+                deltax = 0.001
+            angle = math.atan(deltay/deltax)
+            runx = 0.1 * math.cos(angle)
+            runy = 0.1 * math.sin(angle)
+            # UR
+            lons2.append( lons[i] - runy )
+            lats2.append( lats[i] + runx )
+            # UL
+            lons2.append( lons[i+1] - runy )
+            lats2.append( lats[i+1] + runx )
+            
+        for i in range(0, len(lats)-1):
+            deltax = lons[i+1] - lons[i]
+            deltay = lats[i+1] - lats[i]
+            if deltax == 0:
+                deltax = 0.001
+            angle = math.atan(deltay/deltax)
+            runx = 0.1 * math.cos(angle)
+            runy = 0.1 * math.sin(angle)
+            # LL
+            lons2.append( lons[i+1] + runy )
+            lats2.append( lats[i+1] - runx )
+            # LR
+            lons2.append( lons[i] + runy )
+            lats2.append( lats[i] - runx )
 
-    if len(lons) == 2:
-        (lons, lats) = makebox(lons, lats)
+        lons = lons2
+        lats = lats2
 
     return lons, lats
 
@@ -197,13 +234,14 @@ def process_SIGC(prod):
         if s:
             data = s.groupdict()
             expire = figure_expire(prod.issueTime, float(data['hour']), float(data['minute']))
-            lons, lats = locs2lonslats(data['locs'])
+            lons, lats = locs2lonslats(data['locs'], data['geotype'], data['width'])
             wkt = ""
             for lat,lon in zip(lats,lons):
                 wkt += "%s %s," % (lon, lat)
             if lats[0] != lats[-1] or lons[0] != lons[-1]:
                 wkt += "%s %s," % (lons[0], lats[0])
-            print 'From: %s Till: %s %s' % (prod.issueTime, expire, data['label'])
+            print '%s %s From: %s Till: %s Len(lats): %s' % (data['label'], data['geotype'], 
+                                    prod.issueTime, expire, len(lats))
             for table in ('sigmets_current', 'sigmets_archive'):
                 sql = """INSERT into %s(sigmet_type, label, issue, expire, raw, geom)
                    VALUES ('C','%s','%s+00','%s+00','%s',
@@ -212,7 +250,7 @@ def process_SIGC(prod):
                 POSTGIS.query(sql)
 
         elif section.find("CONVECTIVE SIGMET") > -1:
-            print 'ERROR: Could not parse section'
+            
             common.email_error("Couldn't parse section", section)
                 
         """ Gonna punt the outlook for now, no need? 
