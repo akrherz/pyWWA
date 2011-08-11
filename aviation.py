@@ -51,7 +51,7 @@ CS_RE = re.compile(r"""CONVECTIVE\sSIGMET\s(?P<label>[0-9A-Z]+)\n
 VALID\sUNTIL\s(?P<hour>[0-2][0-9])(?P<minute>[0-5][0-9])Z\n
 (?P<states>[A-Z ]+)\n
 FROM\s(?P<locs>[0-9A-Z \-]+)\n
-(?P<dmshg>DMSHG)?\s?(?P<geotype>AREA|LINE)\s(?P<cutype>EMBD|SEV)?\s?TS\s(?P<width>[0-9]+\sNM\sWIDE)?
+(?P<dmshg>DMSHG|DVLPG)?\s?(?P<geotype>AREA|LINE)\s(?P<cutype>EMBD|SEV|SEV\sEMBD|EMBD\sSEV)?\s?TS\s(?P<width>[0-9]+\sNM\sWIDE)?
 """, re.VERBOSE )
 
 FROM_RE = re.compile(r"""
@@ -250,8 +250,8 @@ def process_SIGC(prod):
                 POSTGIS.query(sql)
 
         elif section.find("CONVECTIVE SIGMET") > -1:
-            
-            common.email_error("Couldn't parse section", section)
+            if section.find("CONVECTIVE SIGMET...NONE") == -1:
+                common.email_error("Couldn't parse section", section)
                 
         """ Gonna punt the outlook for now, no need? 
         s = OL_RE.search(section)
