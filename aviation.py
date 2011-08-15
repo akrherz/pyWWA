@@ -47,10 +47,10 @@ DBPOOL = adbapi.ConnectionPool("psycopg2", database=secret.dbname,
                                host=secret.dbhost, password=secret.dbpass)
 
 # 
-CS_RE = re.compile(r"""CONVECTIVE\sSIGMET\s(?P<label>[0-9A-Z]+)\n
-VALID\sUNTIL\s(?P<hour>[0-2][0-9])(?P<minute>[0-5][0-9])Z\n
-(?P<states>[A-Z ]+)\n
-(?P<from>FROM)?\s?(?P<locs>[0-9A-Z \-]+)\n
+CS_RE = re.compile(r"""CONVECTIVE\sSIGMET\s(?P<label>[0-9A-Z]+)\s
+VALID\sUNTIL\s(?P<hour>[0-2][0-9])(?P<minute>[0-5][0-9])Z\s
+(?P<states>[A-Z ]+)\s
+(?P<from>FROM)?\s?(?P<locs>[0-9A-Z \-]+)\s
 (?P<dmshg>DMSHG|DVLPG|INTSF)?\s?(?P<geotype>AREA|LINE|ISOL)\s
 (?P<cutype>EMBD|SEV|SEV\sEMBD|EMBD\sSEV)?\s?TS\s(?P<width>[0-9]+\sNM\sWIDE)?(?P<diameter>D[0-9]+)?
 """, re.VERBOSE )
@@ -261,7 +261,7 @@ def process_SIGC(prod):
     POSTGIS.query("BEGIN;")
     POSTGIS.query("DELETE from sigmets_current where expire < now()")
     for section in prod.raw.split('\n\n'):
-        s = CS_RE.search(section)
+        s = CS_RE.search(section.replace("\n", ' '))
         if s:
             data = s.groupdict()
             expire = figure_expire(prod.issueTime, float(data['hour']), float(data['minute']))
