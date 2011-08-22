@@ -41,10 +41,15 @@ except:
     iemaccess = pg.connect('iem', host=secret.dbhost, passwd=secret.dbpass)
     asos = pg.connect('asos', host=secret.dbhost, passwd=secret.dbpass)
 LOC2NETWORK = {}
-rs = mesosite.query("""SELECT id, network from stations where network ~* 'ASOS' or network = 'AWOS'
-    or network = 'WTM'""").dictresult()
-for i in range(len(rs)):
-    LOC2NETWORK[ rs[i]['id'] ] = rs[i]['network']
+
+def load_stations():
+    rs = mesosite.query("""SELECT id, network from stations where network ~* 'ASOS' or network = 'AWOS'
+        or network = 'WTM'""").dictresult()
+    for i in range(len(rs)):
+        if not LOC2NETWORK.has_key( rs[i]['id'] ):
+            LOC2NETWORK[ rs[i]['id'] ] = rs[i]['network']
+    # Reload every 12 hours
+    reactor.callLater(12*60*60, load_stations)
 
 windAlerts = {}
 
@@ -336,5 +341,5 @@ factory.addBootstrap(xmlstream.STREAM_END_EVENT, jabber._disconnect )
 reactor.connectTCP(secret.connect_chatserver, 5222, factory)
 
 fact = ldmbridge.LDMProductFactory( myProductIngestor() )
-
+reactor.callLater(0, load_stations)
 reactor.run()
