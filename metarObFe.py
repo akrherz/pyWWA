@@ -161,6 +161,8 @@ def process_site(metar):
     network = LOC2NETWORK[iemid]
 
     iem = MyIEMOB(iemid, network)
+    if mtr.time is None:
+        return
     gts = mx.DateTime.DateTime( mtr.time.year, mtr.time.month, 
                   mtr.time.day, mtr.time.hour, mtr.time.minute)
     # Make sure that the ob is not from the future!
