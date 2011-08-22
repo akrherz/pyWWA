@@ -133,7 +133,7 @@ def process_site(metar):
     metar = metar.encode('latin-1').replace('\xa0', " ")
     clean_metar = re.sub("\s+", " ", metar.strip())
     # Only process US obs for now ....
-    if (len(clean_metar) == 0 or clean_metar[0] not in ("K","X","P","T","N")):
+    if len(clean_metar) == 0:
         return
 
     try:
@@ -147,7 +147,7 @@ def process_site(metar):
 
     # Determine the ID, unfortunately I use 3 char ids for now :(
     iemid = mtr.station_id[-3:]
-    if (mtr.station_id[0] in ["X","P","T","N"]): # West Texas Mesonet, Pacific, Puerto Rico
+    if mtr.station_id[0] != "K":
         iemid = mtr.station_id
     if not LOC2NETWORK.has_key(iemid):
         print 'Unknown stationID: %s' % (iemid,)
