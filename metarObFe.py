@@ -35,9 +35,11 @@ dbpool = adbapi.ConnectionPool("psycopg2", database='iem', host=secret.dbhost, p
 try:
     mesosite = pg.connect('mesosite', host=secret.dbhost)
     iemaccess = pg.connect('iem', host=secret.dbhost)
+    asos = pg.connect('iem', host=secret.dbhost)
 except:
     mesosite = pg.connect('mesosite', host=secret.dbhost, passwd=secret.dbpass)
     iemaccess = pg.connect('iem', host=secret.dbhost, passwd=secret.dbpass)
+    asos = pg.connect('asos', host=secret.dbhost, passwd=secret.dbpass)
 LOC2NETWORK = {}
 rs = mesosite.query("""SELECT id, network from stations where network ~* 'ASOS' or network = 'AWOS'
     or network = 'WTM'""").dictresult()
@@ -156,7 +158,7 @@ def process_site(metar):
     if mtr.station_id[0] != "K":
         iemid = mtr.station_id
     if not LOC2NETWORK.has_key(iemid):
-        print 'Unknown stationID: %s' % (iemid,)
+        asos.query("INSERT into unknown(id) values ('%s')" % (iemid,))
         return
     network = LOC2NETWORK[iemid]
 
