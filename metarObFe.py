@@ -143,7 +143,7 @@ def process_site(metar):
         return
 
     # Remove any multiple whitespace, bad chars
-    metar = metar.encode('latin-1').replace('\xa0', " ")
+    metar = metar.encode('latin-1').replace('\xa0', " ").replace("\003", "")
     clean_metar = re.sub("\s+", " ", metar.strip())
     # Only process US obs for now ....
     if len(clean_metar) == 0:
@@ -158,8 +158,11 @@ def process_site(metar):
         log.msg(clean_metar)
         errormsg = str(inst)
         if errormsg.find("Unparsed groups in body: ") == 0:
-            tokens = errormsg.split(":")
-            #process_site( clean_metar.replace( tokens[1] , ""))
+            tokens = errormsg.split(": ")
+            newmetar = clean_metar.replace( tokens[1] , "")
+            if newmetar != clean_metar:
+                print 'NEW is', newmetar
+                reactor.callLater(0, process_site, newmetar)
         return
 
     # Determine the ID, unfortunately I use 3 char ids for now :(
