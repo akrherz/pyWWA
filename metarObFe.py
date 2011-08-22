@@ -166,6 +166,8 @@ def process_site(metar):
         return
 
     # Determine the ID, unfortunately I use 3 char ids for now :(
+    if mtr.station_id is None:
+        return
     iemid = mtr.station_id[-3:]
     if mtr.station_id[0] != "K":
         iemid = mtr.station_id
