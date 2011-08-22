@@ -35,7 +35,7 @@ dbpool = adbapi.ConnectionPool("psycopg2", database='iem', host=secret.dbhost, p
 try:
     mesosite = pg.connect('mesosite', host=secret.dbhost)
     iemaccess = pg.connect('iem', host=secret.dbhost)
-    asos = pg.connect('iem', host=secret.dbhost)
+    asos = pg.connect('asos', host=secret.dbhost)
 except:
     mesosite = pg.connect('mesosite', host=secret.dbhost, passwd=secret.dbpass)
     iemaccess = pg.connect('iem', host=secret.dbhost, passwd=secret.dbpass)
