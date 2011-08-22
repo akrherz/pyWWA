@@ -151,11 +151,15 @@ def process_site(metar):
 
     try:
         mtr = Metar.Metar(clean_metar)
-    except Metar.ParserError:
+    except Metar.ParserError as inst:
         io = StringIO.StringIO()
         traceback.print_exc(file=io)
         log.msg( io.getvalue() )
         log.msg(clean_metar)
+        errormsg = str(inst)
+        if errormsg.find("Unparsed groups in body: ") == 0:
+            tokens = errormsg.split(":")
+            process_site( clean_metar.replace( tokens[1] , ""))
         return
 
     # Determine the ID, unfortunately I use 3 char ids for now :(
