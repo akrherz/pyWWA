@@ -32,8 +32,12 @@ import common
 
 dbpool = adbapi.ConnectionPool("psycopg2", database='iem', host=secret.dbhost, password=secret.dbpass)
 
-mesosite = pg.connect('mesosite', host=secret.dbhost)
-iemaccess = pg.connect('iem', host=secret.dbhost)
+try:
+    mesosite = pg.connect('mesosite', host=secret.dbhost)
+    iemaccess = pg.connect('iem', host=secret.dbhost)
+except:
+    mesosite = pg.connect('mesosite', host=secret.dbhost, passwd=secret.dbpass)
+    iemaccess = pg.connect('iem', host=secret.dbhost, passwd=secret.dbpass)
 LOC2NETWORK = {}
 rs = mesosite.query("""SELECT id, network from stations where network ~* 'ASOS' or network = 'AWOS'
     or network = 'WTM'""").dictresult()
@@ -113,6 +117,8 @@ def real_processor(buf):
             metar = metar[metar.find("METAR")+5:]
         elif metar.find("SPECI") > -1:
             metar = metar[metar.find("SPECI")+5:]
+        elif metar.find(" NIL") > -1:
+            continue
         elif len(metar.strip()) < 5:
             continue
         # We actually have something
