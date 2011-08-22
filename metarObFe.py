@@ -23,18 +23,17 @@ log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
 
 
 import re, traceback, StringIO
-from pyIEM import iemAccessOb, mesonet, ldmbridge, iemdb
+from pyIEM import iemAccessOb, mesonet, ldmbridge
 from twisted.enterprise import adbapi
 from metar import Metar
 from email.MIMEText import MIMEText
 import smtplib, secret, mx.DateTime, pg
 import common
 
-dbpool = adbapi.ConnectionPool("psycopg2", database='iem', host=secret.dbhost)
+dbpool = adbapi.ConnectionPool("psycopg2", database='iem', host=secret.dbhost, password=secret.dbpass)
 
-i = iemdb.iemdb(dhost=secret.dbhost)
-iemaccess = i['iem']
-mesosite = i['mesosite']
+mesosite = pg.connect('mesosite', host=secret.dbhost)
+iemaccess = pg.connect('iem', host=secret.dbhost)
 LOC2NETWORK = {}
 rs = mesosite.query("""SELECT id, network from stations where network ~* 'ASOS' or network = 'AWOS'
     or network = 'WTM'""").dictresult()
@@ -105,20 +104,22 @@ class myProductIngestor(ldmbridge.LDMProductReceiver):
 
 
 def real_processor(buf):
-    tokens = re.split("METAR", buf)
-    if (len(tokens) == 1):
-        tokens = re.split("SPECI", buf)
-        if (len(tokens) == 1):
-            log.msg("Nothing found: %s" % (buf) )
-            return
-    dataSect = tokens[1]
-    dataSect = re.sub("\015\015\012", " ", dataSect)
-    dataSect = re.sub("\015", " ", dataSect)
-    metars = re.split("=", dataSect)
-
-    for metar in metars:
+    """
+    Actually process a raw string of one or more METARs
+    """
+    tokens = buf.split("=")
+    for metar in tokens:
+        if metar.find("METAR") > -1:
+            metar = metar[metar.find("METAR")+5:]
+        elif metar.find("SPECI") > -1:
+            metar = metar[metar.find("SPECI")+5:]
+        elif len(metar.strip()) < 5:
+            continue
+        # We actually have something
+        metar = re.sub("\015\015\012", " ", metar)
+        metar = re.sub("\015", " ", metar)
         process_site(metar)
-    del tokens, metars, dataSect
+
 
 def process_site(metar):
     """
@@ -132,7 +133,7 @@ def process_site(metar):
     metar = metar.encode('latin-1').replace('\xa0', " ")
     clean_metar = re.sub("\s+", " ", metar.strip())
     # Only process US obs for now ....
-    if (len(clean_metar) == 0 or clean_metar[0] not in ("K","X","P")):
+    if (len(clean_metar) == 0 or clean_metar[0] not in ("K","X","P","T","N")):
         return
 
     try:
@@ -146,7 +147,7 @@ def process_site(metar):
 
     # Determine the ID, unfortunately I use 3 char ids for now :(
     iemid = mtr.station_id[-3:]
-    if (mtr.station_id[0] in ["X","P","T"]): # West Texas Mesonet, Pacific, Puerto Rico
+    if (mtr.station_id[0] in ["X","P","T","N"]): # West Texas Mesonet, Pacific, Puerto Rico
         iemid = mtr.station_id
     if not LOC2NETWORK.has_key(iemid):
         print 'Unknown stationID: %s' % (iemid,)
