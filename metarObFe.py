@@ -131,12 +131,14 @@ def real_processor(buf):
         # We actually have something
         metar = re.sub("\015\015\012", " ", metar)
         metar = re.sub("\015", " ", metar)
-        process_site(metar)
+        process_site(metar, metar)
 
 
-def process_site(metar):
+def process_site(orig_metar, metar):
     """
-    Actually process the metar :)
+    Actually process the raw string of a metar
+    @param string original string of the metar to save in database
+    @param string current working version of the string metar
     """
     # Check the length I have
     if (len(metar) < 10):
@@ -162,7 +164,7 @@ def process_site(metar):
             newmetar = clean_metar.replace( tokens[1] , "")
             if newmetar != clean_metar:
                 print 'NEW is', newmetar
-                reactor.callLater(0, process_site, newmetar)
+                reactor.callLater(0, process_site, orig_metar, newmetar)
         return
 
     # Determine the ID, unfortunately I use 3 char ids for now :(
@@ -202,7 +204,7 @@ def process_site(metar):
             iem.data['tmpf'] = mtr.temp.value("F")
         if (mtr.dewpt):
             iem.data['dwpf'] = mtr.dewpt.value("F")
-    iem.data['raw'] = cmetar[:254]
+    iem.data['raw'] = orig_metar.replace("'", "")[:254]
     if mtr.wind_speed:
         iem.data['sknt'] = mtr.wind_speed.value("KT")
     if mtr.wind_gust:
