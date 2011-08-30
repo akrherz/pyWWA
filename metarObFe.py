@@ -122,6 +122,8 @@ def real_processor(buf):
     for metar in tokens:
         if metar.find("METAR") > -1:
             metar = metar[metar.find("METAR")+5:]
+        elif metar.find("LWIS ") > -1:
+            metar = metar[metar.find("LWIS ")+5:]
         elif metar.find("SPECI") > -1:
             metar = metar[metar.find("SPECI")+5:]
         elif metar.find(" NIL") > -1:
@@ -150,7 +152,6 @@ def process_site(orig_metar, metar):
     # Only process US obs for now ....
     if len(clean_metar) == 0:
         return
-
     try:
         mtr = Metar.Metar(clean_metar)
     except Metar.ParserError as inst:
