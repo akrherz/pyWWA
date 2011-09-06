@@ -5,12 +5,13 @@ import numpy as np
 import zlib
 import mx.DateTime
 import random
+import logging
 
 M_PI_2 = 1.57079632679489661923
 M_PI = 3.14159265358979323846
 RE_METERS = 6371200.0
 ENTITIES = ['','','','','','','','DMSP','GMS','METEOSAT','GOES7', 'GOES8',
-            'GOES9', 'GOES10', 'GOES11', 'GOES12', 'GOES13']
+            'GOES9', 'GOES10', 'GOES11', 'GOES12', 'GOES13', 'GOES14', 'GOES15']
 CHANNELS = ['','VIS','3.9', 'WV', 'IR', '12', '13.3', 'U7', 'U8', 'U9', 'U10']
 SECTORS = ['NHCOMP', 'EAST', 'WEST', 'AK', 'AKNAT', 'HI', 'HINAT', 'PR', 'PRNAT','SUPER']
 
@@ -63,7 +64,7 @@ class GINIFile(object):
         """
         self.metadata['proj'] = pyproj.Proj(proj='lcc', lat_0=self.metadata['latin'],
          lat_1=self.metadata['latin'], lat_2=self.metadata['latin'], lon_0=self.metadata['lov'],
-         ellps='WGS84')
+         a=6371200.0,b=6371200.0)
 
         s = 1.0
         if self.metadata['proj_center_flag'] != 0:
@@ -76,12 +77,17 @@ class GINIFile(object):
         x0, y0 = self.metadata['proj'](self.metadata['lon1'], self.metadata['lat1'])
         self.metadata['x0'] = x0
         self.metadata['y0'] = y0
-        #metadata['dx'] *= alpha
-        #metadata['dy'] *= alpha
-        self.metadata['y1'] = y0 + ( self.metadata['dy'] * (self.metadata['ny'] -1) )
-    
+        #self.metadata['dx'] *= alpha
+        #self.metadata['dy'] *= alpha
+        # TODO: Somehow, I am off :(
+        self.metadata['y1'] = y0 + ( self.metadata['dy'] * self.metadata['ny']) - 18000.
+
         self.metadata['lon_ul'], self.metadata['lat_ul'] =  self.metadata['proj'](self.metadata['x0'],
                                                     self.metadata['y1'], inverse=True)
+        logging.info("lat1: %.5f y0: %5.f y1: %.5f lat: %.5f alpha: %.5f dy: %.3f" % (
+                    self.metadata['lat1'], y0, self.metadata['y1'], 
+                    self.metadata['lat_ul'], alpha, self.metadata['dy']))
+
 
 
     def init_projection(self):

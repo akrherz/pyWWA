@@ -7,7 +7,7 @@ import logging
 import os
 import tempfile
 
-FORMAT = "%(asctime)-15s:: %(message)s"
+FORMAT = "%(asctime)-15s:["+ str(os.getpid()) +"]: %(message)s"
 logging.basicConfig(filename='logs/gini2gis.log', filemode='a+', format=FORMAT)
 logger=logging.getLogger()
 logger.addHandler(logging.StreamHandler())
@@ -20,7 +20,7 @@ def workflow():
     c.seek(0)
     g = gini.GINIZFile( c )
     #
-    print str(g)
+    logger.info( str(g) )
     archivefn = g.archive_filename()
     logger.info("Processed archive file: "+ archivefn)
     currentfn = g.current_filename()
