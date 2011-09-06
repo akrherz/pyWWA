@@ -80,7 +80,7 @@ class GINIFile(object):
         #self.metadata['dx'] *= alpha
         #self.metadata['dy'] *= alpha
         # TODO: Somehow, I am off :(
-        self.metadata['y1'] = y0 + ( self.metadata['dy'] * self.metadata['ny']) - 18000.
+        self.metadata['y1'] = y0 + ( self.metadata['dy'] * self.metadata['ny'])
 
         self.metadata['lon_ul'], self.metadata['lat_ul'] =  self.metadata['proj'](self.metadata['x0'],
                                                     self.metadata['y1'], inverse=True)
