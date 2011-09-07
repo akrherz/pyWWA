@@ -29,7 +29,8 @@ o.write("%s" % ( os.getpid(),) )
 o.close()
 
 # Stuff I wrote
-from pyIEM import iemAccessOb, mesonet, iemdb
+from pyIEM import mesonet
+import access
 from support import ldmbridge, TextProduct
 import secret
 
@@ -40,11 +41,14 @@ import mx.DateTime
 
 
 # Setup Database Links
-ACCESSDB = adbapi.ConnectionPool("psycopg2", database='iem', host=secret.dbhost)
-HADSDB = adbapi.ConnectionPool("psycopg2", database='hads', host=secret.dbhost)
-i = iemdb.iemdb(secret.dbhost)
-IEMACCESS = i['iem']
-MESOSITE = i['mesosite']
+ACCESSDB = adbapi.ConnectionPool("psycopg2", database='iem', host=secret.dbhost,
+                                 password=secret.dbpass)
+HADSDB = adbapi.ConnectionPool("psycopg2", database='hads', host=secret.dbhost,
+                               password=secret.dbpass)
+import pg
+IEMACCESS = pg.connect('iem', secret.dbhost, user=secret.dbuser, passwd=secret.dbpass)
+MESOSITE = pg.connect('mesosite', secret.dbhost, user=secret.dbuser, passwd=secret.dbpass)
+
 
 # Necessary for the shefit program to run A-OK
 os.chdir("/home/ldm/pyWWA/shef_workspace")
@@ -165,7 +169,7 @@ MAPPING = {
 
 EMAILS = 10
 
-class MyIEMOB(iemAccessOb.iemAccessOb):
+class MyIEMOB(access.Ob):
     """
     Override the iemAccessOb class with my own query engine, so that we 
     can capture errors for now!
@@ -398,7 +402,7 @@ def process_site(tp, sid, ts, data):
         myval = data[var] * MULTIPLIER[var[:2]]
         iemob.data[ MAPPING[var] ] = myval
     iemob.data['raw'] = tp.get_product_id()
-    iemob.updateDatabaseSummaryTemps(None, ACCESSDB)
+    iemob.update_summary(None, ACCESSDB)
     iemob.updateDatabase(None, ACCESSDB)
 
     del iemob
