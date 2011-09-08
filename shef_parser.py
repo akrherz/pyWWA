@@ -100,6 +100,7 @@ DIRECTMAP = {'HGIZ': 'rstage',
              'SWIZ': 'snoww',
              'USIZ': 'sknt',
              'SFIZ': 'snow',
+             'SFDZ': 'snow',
              'UDIZ': 'drct',
              'UGIZ': 'gust',
              'UPIZ': 'gust',
@@ -360,7 +361,9 @@ def process_site(tp, sid, ts, data):
         iemob.data[ MAPPING[var] ] = myval
     iemob.data['raw'] = tp.get_product_id()
     iemob.update_summary(None, ACCESSDB)
-    iemob.updateDatabaseSummaryTemps(None, ACCESSDB)
+    # Don't go through this pain, unless we need to!
+    if 'max_tmpf' in iemob.data.keys():
+        iemob.updateDatabaseSummaryTemps(None, ACCESSDB)
     iemob.updateDatabase(None, ACCESSDB)
 
     del iemob
