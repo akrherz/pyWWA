@@ -97,6 +97,10 @@ DIRECTMAP = {'HGIZ': 'rstage',
              'SDIZ': 'snowd',
              'XRIZ': 'relh',
              'PAIZ': 'pres',
+             
+             'QRIZ': 'discharge',
+             'QTIZ': 'discharge',
+             
              'SWIZ': 'snoww',
              'USIZ': 'sknt',
              'SFIZ': 'snow',
