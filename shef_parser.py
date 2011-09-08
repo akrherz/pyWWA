@@ -82,90 +82,48 @@ Some notes on the SHEF codes translated to something IEM Access can handle, for 
 First two chars are physical extent code
 
 """
-MAPPING = {
-  "HGIRZ": "rstage",
-  "HGIRZZ": "rstage",
-  "HGIRG": "rstage",
-  "HGIRRZ": "rstage",
-  "HGIRGZ": "rstage",
-  "HG": "rstage",
-  "HGIRPZ": "rstage",
+DIRECTMAP = {'HGIZ': 'rstage',
+             'HPIZ': 'rstage',
+             'PPHZ': 'phour',
+             'TDIZ': 'dwpf',
+             'TAIZ': 'tmpf',
+             'TAIN': 'min_tmpf',
+             'TAIX': 'max_tmpf',
+             'PPDZ': 'pday',
+             'PPPZ': 'pday',
+             'PCIZ': 'pcounter',
+             'RWIZ': 'srad',
+             'SDIZ': 'snowd',
+             'XRIZ': 'relh',
+             'PAIZ': 'pres',
+             'SWIZ': 'snoww',
+             'USIZ': 'sknt',
+             'SFIZ': 'snow',
+             'UDIZ': 'drct',
+             'UGIZ': 'gust',
+             }
+class mydict(dict):
+    
+    def __getitem__(self, key):
+        """
+        Over-ride getitem so that the sql generated is proper
+        """
+        val = self.get(key)
+        if val is not None:
+            return val
+        # Logic to convert this key into something the iem can handle
+        # Our key is always at least 6 chars!
+        PEI = "%s%s" % (key[:3],key[5])
+        if DIRECTMAP.has_key(PEI):
+            self.__setitem__(key, DIRECTMAP[PEI])
+            return DIRECTMAP[PEI]
+        else:
+            print 'Can not map var %s' % (key,)
+            self.__setitem__(key, '')
+            return ''
+    
+MAPPING = mydict()
 
-  "HPIRGZ": "rstage",
-  "HPIRPZ": "rstage",
-  "HPIRZZ": "rstage",
-  "HPIRRZZ": "rstage",
-
-  "PPHRGZ": "phour",
-  "PPHRPZ": "phour",
-  "PPHRG": "phour", 
-  "PPH": "phour",
-  "PPHRZZ": "phour",
-
-  "TD": "dwpf",
-  "TDIRGZ": "dwpf",
-  "TDIRZZ": "dwpf",
- 
-  "TAIRG": "tmpf",
-  "TAIRGZ": "tmpf",
-  "TAIRZZ": "tmpf",
-  "TAIRRZZ": "tmpf", 
-  "TA": "tmpf",
-
-  "TAIRZNZ": "min_tmpf", 
-  "TAIRGN": "min_tmpf", 
-  "TN": "min_tmpf",
-
-  "TAIRZXZ": "max_tmpf",
-  "TAIRGX": "max_tmpf",
-  "TX": "max_tmpf",
-
-  "PPDRZZ": "pday",
-  "PPD": "pday",
-  "PP": "pday",
-
-  "RWIRGZ": "srad",
-
-  "SD": "snowd", 
-  "SDIRZZ": "snowd", 
-  "SDIRGZ": "snowd", 
- 
-  "XR": "relh",
-  "XRIRGZ": "relh",
-
-  "PA": "pres", 
-  "PAIRGZ": "pres", 
-
-  "SW": "snoww",
-  "SWIRZZ": "snoww",
-
-  "USIRG": "sknt",
-  "USIRGZ": "sknt",
-  "US": "sknt",
-  "USIRZZ": "sknt",
- 
-  "SF": "snow",
-  "SFDRZZ": "snow",
-
-  "UD": "drct", 
-  "UDIRG": "drct",
-  "UDIRGZ": "drct",
-  "UDIRZZ": "drct",
-
-  "UG": "gust", 
-  "UGIRZZ": "gust",
-
-  "UPHRGZ": "max_sknt",
-  "UPIRG": "max_sknt",
-  "UPVRG": "max_sknt",
-  "UPVRGZ": "max_sknt",
-  "UPJRGZ": "max_sknt",
-  "UPIRZZ": "max_sknt",
-
-  "URIRZZ": "max_drct",
-  
-  "URHRGZ": "max_drct",
-}
 
 EMAILS = 10
 
@@ -333,8 +291,10 @@ def checkvars( vars ):
         # Definitely DCP
         if v[:2] in ['HG',]:
             return False
-        if v[:2] in ['SF','SD','PP']:
+        if v[:2] in ['SF','SD']:
             return True
+        if v[:3] in ['PPH',]:
+            return False
     return False
 
 def process_site(tp, sid, ts, data):
@@ -347,14 +307,10 @@ def process_site(tp, sid, ts, data):
     if tp.afos[:3] == 'RR3':
         isCOOP = True
     elif tp.afos[:3] in ['RR1', 'RR2'] and checkvars( data.keys() ):
+        print "Guessing COOP? %s %s %s" %  (sid, tp.get_product_id(), data.keys())
         isCOOP = True
 
     for var in data.keys():
-        if not MAPPING.has_key(var):
-            print "Couldn't map var: %s for SID: %s" % (var, sid)
-            MAPPING[var] = ""
-        if not MULTIPLIER.has_key(var[:2]):
-            MULTIPLIER[var[:2]] = 1.0
         HADSDB.runOperation("""INSERT into raw%s 
             (station, valid, key, value) 
             VALUES('%s','%s+00', '%s', '%s')""" % (ts.strftime("%Y_%m"), sid, 
@@ -370,7 +326,6 @@ def process_site(tp, sid, ts, data):
         LOC2STATE[sid] = state
     if state is None:
         if UNKNOWN.get(sid) is None:
-            print 'Unknown station [%s]' % (sid,)
             enter_unknown(sid, tp, "")
             UNKNOWN[sid] = 1       
         return 
@@ -382,7 +337,6 @@ def process_site(tp, sid, ts, data):
         return
     if network is None:
         if isCOOP:
-            print "COOP? %s %s %s" %  (sid, tp.get_product_id(), data.keys())
             network = "%s_COOP" % (state,)
         # We are left with DCP
         else:
@@ -399,7 +353,7 @@ def process_site(tp, sid, ts, data):
         enter_unknown(sid, tp, network)
         
     for var in data.keys():
-        myval = data[var] * MULTIPLIER[var[:2]]
+        myval = data[var] * MULTIPLIER.get(var[:2],1.0)
         iemob.data[ MAPPING[var] ] = myval
     iemob.data['raw'] = tp.get_product_id()
     iemob.update_summary(None, ACCESSDB)
