@@ -84,6 +84,7 @@ First two chars are physical extent code
 """
 DIRECTMAP = {'HGIZ': 'rstage',
              'HPIZ': 'rstage',
+             'HTIZ': 'rstage',
              'PPHZ': 'phour',
              'TDIZ': 'dwpf',
              'TAIZ': 'tmpf',
@@ -101,6 +102,8 @@ DIRECTMAP = {'HGIZ': 'rstage',
              'SFIZ': 'snow',
              'UDIZ': 'drct',
              'UGIZ': 'gust',
+             'UPIZ': 'gust',
+             'UPHZ': 'gust',
              }
 class mydict(dict):
     
@@ -357,6 +360,7 @@ def process_site(tp, sid, ts, data):
         iemob.data[ MAPPING[var] ] = myval
     iemob.data['raw'] = tp.get_product_id()
     iemob.update_summary(None, ACCESSDB)
+    iemob.updateDatabaseSummaryTemps(None, ACCESSDB)
     iemob.updateDatabase(None, ACCESSDB)
 
     del iemob
