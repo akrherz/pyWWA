@@ -39,7 +39,8 @@ log.startLogging(open('logs/afos_dump.log','a'))
 log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
 
 DBPOOL = adbapi.ConnectionPool("psycopg2", database="afos", 
-                               host=secret.dbhost, password=secret.dbpass)
+                               host=secret.dbhost, user=secret.dbuser,
+                               password=secret.dbpass)
 EMAILS = 10
 
 def email_error(message, product_text):
@@ -90,12 +91,14 @@ def real_parser(buf):
       return
     nws = TextProduct.TextProduct( buf, bypass=True)
     nws.findAFOS()
+    nws.findIssueTime()
     #data = re.sub("'", "\\'",nws.raw)
     #data = re.sub("\x01", "", data)
     #data = re.sub("\x00", "", data)
 
-    DBPOOL.runOperation("""INSERT into products(pil,data)
-      VALUES(%s,%s)""",  (nws.afos.strip(), nws.raw) 
+    DBPOOL.runOperation("""INSERT into products(pil,data,entered)
+      VALUES(%s,%s,%s)""",  (nws.afos.strip(), nws.raw, 
+                             nws.issueTime.strftime("%Y-%m-%d %H:%M+00")) 
      ).addErrback( email_error, buf)
 
 
