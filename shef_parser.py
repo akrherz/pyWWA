@@ -268,6 +268,9 @@ def really_process(tp, data):
             mydata[sid] = {}
         dstr = "%s %s" % (tokens[1], tokens[2])
         tstamp = mx.DateTime.strptime(dstr, "%Y-%m-%d %H:%M:%S")
+        # We don't care about data in the future!
+        if tstamp > (mx.DateTime.gmt() + mx.DateTime.RelativeDateTime(hours=1)):
+            continue
         if not mydata[sid].has_key(tstamp):
             mydata[sid][tstamp] = {}
 
