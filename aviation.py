@@ -69,7 +69,7 @@ AREA\s(?P<areanum>[0-9]+)\.\.\.FROM\s(?P<locs>[0-9A-Z \-]+)\n
 
 # Load LOCS table
 LOCS = {}
-mesosite = pg.connect('mesosite', secret.dbhost)
+mesosite = pg.connect('mesosite', secret.dbhost, passwd=secret.dbpass)
 rs = mesosite.query("""SELECT id, name, x(geom) as lon, y(geom) as lat from stations 
            WHERE network ~* 'ASOS' or network ~* 'AWOS'""").dictresult()
 for i in range(len(rs)):
@@ -181,8 +181,8 @@ def locs2lonslats(locstr, geotype, widthstr, diameterstr):
         s = FROM_RE.search(l)
         if s:
             d = s.groupdict()
-            if d['drct'] is not None:
-                 (lon1, lat1) = utils.go2lonlat(LOCS[d['loc']]['lon'], LOCS[d['loc']]['lat'], 
+            if d['offset'] is not None:
+                (lon1, lat1) = utils.go2lonlat(LOCS[d['loc']]['lon'], LOCS[d['loc']]['lat'], 
                                                    d['drct'], float(d['offset']) )
             else:
                   (lon1, lat1) = (LOCS[d['loc']]['lon'], LOCS[d['loc']]['lat'])
