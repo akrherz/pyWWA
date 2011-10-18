@@ -21,9 +21,9 @@ from twisted.python import log
 log.startLogging(open('logs/metarObFe.log', 'a'))
 log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
 
-
+import access
 import re, traceback, StringIO
-from pyIEM import iemAccessOb, mesonet, ldmbridge
+from pyIEM import mesonet, ldmbridge
 from twisted.enterprise import adbapi
 from metar import Metar
 from email.MIMEText import MIMEText
@@ -41,13 +41,16 @@ except:
     iemaccess = pg.connect('iem', host=secret.dbhost, passwd=secret.dbpass)
     asos = pg.connect('asos', host=secret.dbhost, passwd=secret.dbpass)
 LOC2NETWORK = {}
+LOC2TZNAME = {}
 
 def load_stations():
-    rs = mesosite.query("""SELECT id, network from stations where network ~* 'ASOS' or network = 'AWOS'
-        or network = 'WTM'""").dictresult()
+    rs = mesosite.query("""SELECT id, network, tzname from stations 
+    where network ~* 'ASOS' or network = 'AWOS' or network = 'WTM'""").dictresult()
     for i in range(len(rs)):
         if not LOC2NETWORK.has_key( rs[i]['id'] ):
             LOC2NETWORK[ rs[i]['id'] ] = rs[i]['network']
+        if rs[i]['tzname'] != None and rs[i]['tzname'] != '':
+            LOC2TZNAME[ rs[i]['id'] ] = rs[i]['tzname']
     # Reload every 12 hours
     reactor.callLater(12*60*60, load_stations)
 
@@ -57,11 +60,6 @@ TORNADO_RE = re.compile(r" +FC |TORNADO")
 FUNNEL_RE = re.compile(r" FC |FUNNEL")
 HAIL_RE = re.compile(r"GR")
 EMAILS = 10
-
-# Grrrr, hack to keep iemingest in check
-ISIEM = True
-if (secret.chatserver == "nwschat.weather.gov"):
-  ISIEM = False
 
 def email_error(message, product_text):
     """
@@ -84,7 +82,7 @@ def email_error(message, product_text):
     smtp.close()
 
 
-class MyIEMOB(iemAccessOb.iemAccessOb):
+class MyIEMOB( access.Ob ):
     """
     Override the iemAccessOb class with my own query engine, so that we 
     can capture errors for now!
@@ -189,16 +187,17 @@ def process_site(orig_metar, metar):
         log.msg("%s METAR [%s] timestamp in the future!" % (iemid, gts))
         return
 
+    iem.data['tzname'] = LOC2TZNAME.get(iemid, 'America/Chicago')
     iem.setObTimeGMT(gts)
-    if ISIEM:
-        iem.load_and_compare(iemaccess)
+    iem.load_and_compare(iemaccess)
     cmetar = clean_metar.replace("'", "")
+
     """ Need to figure out if we have a duplicate ob, if so, check
         the length of the raw data, if greater, take the temps """
     if iem.data['old_ts'] and (iem.data['ts'] == iem.data['old_ts']) and \
        (len(iem.data['raw']) > len(cmetar)):
-        #print "Duplicate METAR %s OLD: %s NEW: %s" % (iemid, \
-        #       iem.data['raw'], cmetar)
+        print "Duplicate METAR %s OLD: %s NEW: %s" % (iemid, \
+               iem.data['raw'], cmetar)
         pass
     else:
         if (mtr.temp):
@@ -211,7 +210,10 @@ def process_site(orig_metar, metar):
     if mtr.wind_gust:
         iem.data['gust'] = mtr.wind_gust.value("KT")
     if mtr.wind_dir:
-        iem.set_drct(mtr.wind_dir.value())
+        if mtr.wind_dir.value() == 'VRB':
+            iem.data['drct'] = 0
+        else:
+            iem.data['drct'] = float(mtr.wind_dir.value())
     if mtr.vis:
         iem.data['vsby'] = mtr.vis.value("SM")
     if mtr.press:
@@ -226,8 +228,7 @@ def process_site(orig_metar, metar):
         if h is not None:
             iem.data['skyl%s' % (i+1)] = h.value("FT")
 
-    if ISIEM:
-        iem.updateDatabase(None, dbpool)
+    iem.updateDatabase(None, dbpool)
 
     # Search for tornado
     if (len(TORNADO_RE.findall(clean_metar)) > 0):
@@ -267,24 +268,21 @@ def process_site(orig_metar, metar):
             windAlerts[key] = 1
             sendWindAlert(iemid, v, d, t, clean_metar)
 
-        if ISIEM:
-            d0 = {}
-            d0['stationID'] = mtr.station_id[1:]
-            d0['peak_gust'] = v
-            d0['peak_drct'] = d
-            d0['peak_ts'] = t.strftime("%Y-%m-%d %H:%M:%S")+"+00"
-            d0['year'] = t.strftime("%Y")
-            iem.updateDatabasePeakWind(iemaccess, d0, dbpool)
+        d0 = {}
+        d0['tzname'] = LOC2TZNAME.get(iemid, 'America/Chicago')
+        d0['stationID'] = mtr.station_id[1:]
+        d0['peak_gust'] = v
+        d0['peak_drct'] = d
+        d0['peak_ts'] = t.strftime("%Y-%m-%d %H:%M:%S")+"+00"
+        d0['year'] = t.strftime("%Y")
+        iem.updateDatabasePeakWind(iemaccess, d0, dbpool)
 
 
     del mtr, iem
 
 def sendAlert(iemid, what, clean_metar):
     print "ALERTING for [%s]" % (iemid,)
-    if ISIEM:
-        mesosite = pg.connect('mesosite', secret.dbhost)
-    else:
-        mesosite = pg.connect('mesosite')
+    mesosite = pg.connect('mesosite', secret.dbhost)
     rs = mesosite.query("""SELECT wfo, state, name, x(geom) as lon,
            y(geom) as lat from stations 
            WHERE id = '%s' """ % (iemid,) ).dictresult()
@@ -313,10 +311,7 @@ def sendWindAlert(iemid, v, d, t, clean_metar):
     Send a wind alert please
     """
     print "ALERTING for [%s]" % (iemid,)
-    if ISIEM:
-        mesosite = pg.connect('mesosite', secret.dbhost)
-    else:
-        mesosite = pg.connect('mesosite')
+    mesosite = pg.connect('mesosite', secret.dbhost)
     rs = mesosite.query("""SELECT wfo, state, name, x(geom) as lon,
            y(geom) as lat from stations 
            WHERE id = '%s' """ % (iemid,) ).dictresult()
