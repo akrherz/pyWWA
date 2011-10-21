@@ -160,7 +160,7 @@ def process_site(orig_metar, metar):
             tokens = errormsg.split(": ")
             newmetar = clean_metar.replace( tokens[1] , "")
             if newmetar != clean_metar:
-                print 'NEW is', newmetar
+                #print 'NEW is', newmetar
                 reactor.callLater(0, process_site, orig_metar, newmetar)
         return
 
@@ -193,8 +193,8 @@ def process_site(orig_metar, metar):
         the length of the raw data, if greater, take the temps """
     if iem.data['old_ts'] and (iem.data['ts'] == iem.data['old_ts']) and \
        (len(iem.data['raw']) > len(cmetar)):
-        print "Duplicate METAR %s OLD: %s NEW: %s" % (iemid, \
-               iem.data['raw'], cmetar)
+        #print "Duplicate METAR %s OLD: %s NEW: %s" % (iemid, \
+        #       iem.data['raw'], cmetar)
         pass
     else:
         if (mtr.temp):
