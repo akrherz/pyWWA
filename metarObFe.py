@@ -41,16 +41,14 @@ except:
     iemaccess = pg.connect('iem', host=secret.dbhost, passwd=secret.dbpass)
     asos = pg.connect('asos', host=secret.dbhost, passwd=secret.dbpass)
 LOC2NETWORK = {}
-LOC2TZNAME = {}
 
 def load_stations():
-    rs = mesosite.query("""SELECT id, network, tzname from stations 
+    rs = mesosite.query("""SELECT id, network from stations 
     where network ~* 'ASOS' or network = 'AWOS' or network = 'WTM'""").dictresult()
     for i in range(len(rs)):
         if not LOC2NETWORK.has_key( rs[i]['id'] ):
             LOC2NETWORK[ rs[i]['id'] ] = rs[i]['network']
-        if rs[i]['tzname'] != None and rs[i]['tzname'] != '':
-            LOC2TZNAME[ rs[i]['id'] ] = rs[i]['tzname']
+
     # Reload every 12 hours
     reactor.callLater(12*60*60, load_stations)
 
@@ -187,7 +185,6 @@ def process_site(orig_metar, metar):
         log.msg("%s METAR [%s] timestamp in the future!" % (iemid, gts))
         return
 
-    iem.data['tzname'] = LOC2TZNAME.get(iemid, 'America/Chicago')
     iem.setObTimeGMT(gts)
     iem.load_and_compare(iemaccess)
     cmetar = clean_metar.replace("'", "")
@@ -269,7 +266,6 @@ def process_site(orig_metar, metar):
             sendWindAlert(iemid, v, d, t, clean_metar)
 
         d0 = {}
-        d0['tzname'] = LOC2TZNAME.get(iemid, 'America/Chicago')
         d0['stationID'] = mtr.station_id[1:]
         d0['peak_gust'] = v
         d0['peak_drct'] = d
