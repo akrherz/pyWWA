@@ -144,7 +144,7 @@ def process_dsm(data):
     if dict['precip'] == "T":
         updater.append("pday = 0.0001")
 
-    sql = "UPDATE summary_%s SET %s WHERE station = '%s' and day = '%s'" % (
+    sql = "UPDATE summary_%s s SET %s FROM stations t WHERE t.iemid = s.iemid and t.id = '%s' and day = '%s'" % (
          ts.year, " , ".join(updater), dict['id'][1:], ts.strftime("%Y-%m-%d"))
     print "%s %s %s %s %s" % (dict['id'], ts.strftime("%Y-%m-%d"),
           dict['high'], dict['low'], dict['precip'] )
