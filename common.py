@@ -92,7 +92,7 @@ def reallytweet(json, channels, msg, extras):
     tinyurl = ""
     if json:
         j = simplejson.loads( json )
-        if j.has_key('errorMessage'):
+        if j.has_key('errorCode') and j['errorCode'] != 0 and j.has_key('errorMessage'):
             email_error(str(j), "Problem with bitly")
         elif j.has_key('results'):
             tinyurl = j['results'][ j['results'].keys()[0] ]['shortUrl']
