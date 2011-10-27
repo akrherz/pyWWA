@@ -19,6 +19,7 @@ import StringIO
 from email.MIMEText import MIMEText
 import base64
 import pg
+import socket
 from oauth import oauth
 
 mesosite = pg.connect("mesosite", "iemdb", user='nobody')
@@ -42,10 +43,14 @@ def email_error(exp, message):
     cstr.seek(0)
     tbstr = cstr.read()
     log.msg( tbstr )
+    log.msg( exp )
     log.msg( message )
 
     # Now, we may email....
+    if os.environ.get('EMAILS') is None:
+        os.environ['EMAILS'] = "10"
     if int(os.environ['EMAILS']) < 0:
+        log.msg("NO EMAIL DUE TO LIMIT...")
         return
     os.environ['EMAILS'] = str( int(os.environ["EMAILS"]) - 1 )
 
@@ -57,7 +62,8 @@ Exception:
 %s
 
 Message:
-%s""" % (os.environ["EMAILS"], os.environ["HOSTNAME"], tbstr, exp, message))
+%s
+""" % (os.environ["EMAILS"], socket.gethostname(), tbstr, exp, message))
     msg['subject'] = '%s Traceback' % (sys.argv[0],)
     msg['From'] = secret.parser_user
     msg['To'] = secret.error_email
@@ -69,12 +75,13 @@ def tweet(channels, msg, url, extras={}):
     """
     if secret.DISARM:
         channels = ['TEST',]
+        return
 
     if url:
         url = url.replace("&amp;", "&").replace("#","%23")
-        client.getPage(BITLY % (url, ) ).addCallback(reallytweet, 
-           channels, msg, extras ).addErrback(reallytweet,
-           channels, msg, extras )
+        deffer = client.getPage(BITLY % (url, ) )
+        deffer.addCallback(reallytweet, channels, msg, extras )
+        deffer.addErrback(reallytweet, channels, msg, extras )
     else:
         reallytweet(None, channels, msg, extras)
 
@@ -82,11 +89,13 @@ def reallytweet(json, channels, msg, extras):
     """
     Actually, really publish this time!
     """
+    tinyurl = ""
     if json:
         j = simplejson.loads( json )
-        tinyurl = j['results'][ j['results'].keys()[0] ]['shortUrl']
-    else:
-        tinyurl = ""
+        if j.has_key('errorMessage'):
+            email_error(str(j), "Problem with bitly")
+        elif j.has_key('results'):
+            tinyurl = j['results'][ j['results'].keys()[0] ]['shortUrl']
     # We are finally ready to tweet!
     for channel in channels:
         tuser = "iembot_%s" % (channel.lower(),)
@@ -94,10 +103,17 @@ def reallytweet(json, channels, msg, extras):
             print "Unknown Twitter User, %s" % (tuser,)
             continue
         twt = "#%s %s %s" % (channel, msg[:112], tinyurl)
-        twitter.Twitter(consumer=OAUTH_CONSUMER, token=OAUTH_TOKENS[tuser]).update( twt, None, extras).addCallback(tb, channel, twt)
+        deffer = twitter.Twitter(consumer=OAUTH_CONSUMER, token=OAUTH_TOKENS[tuser]).update( twt, None, extras)
+        deffer.addCallback(tb, channel, twt)
+        deffer.addErrback(twitterErrback, channel, twt)
 
 def tb(x, channel, twt):
     print "TWEET [%s] RES: %s" % (twt, x) 
+    
+def twitterErrback(err, channel, twt):
+    print "TWEET [%s] RES: %s" % (twt, err)
+    log.msg( dir(err) ) 
+
 
 class JabberClient:
 

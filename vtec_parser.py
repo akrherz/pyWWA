@@ -35,15 +35,17 @@ import mx.DateTime, pg
 from support import ldmbridge, TextProduct, reference
 import secret
 import common
+import StringIO
+import socket
+import sys
 
-
-log.startLogging(open('logs/vtec_parser.log','a'))
 log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
+log.startLogging(open('logs/vtec_parser.log','a'))
+
 
 POSTGIS = pg.connect(secret.dbname, secret.dbhost, user=secret.dbuser, passwd=secret.dbpass)
 DBPOOL = adbapi.ConnectionPool("psycopg2", database=secret.dbname, host=secret.dbhost, password=secret.dbpass)
-
-EMAILS = 10
+TIMEFORMAT="%Y-%m-%d %H:%M+00"
 
 class NoVTECFoundError(Exception):
     """ Exception place holder """
@@ -52,23 +54,6 @@ class NoVTECFoundError(Exception):
 class ProcessingError(Exception):
     """ Exception place holder """
     pass
-
-def email_error(message, product_text):
-    """
-    Generic something to send email error messages 
-    """
-    global EMAILS
-    log.msg( message )
-    EMAILS -= 1
-    if (EMAILS < 0):
-        return
-
-    msg = MIMEText("Exception:\n%s\n\nRaw Product:\n%s" \
-                 % (message, product_text))
-    msg['subject'] = 'vtec_parser.py Traceback'
-    msg['From'] = secret.parser_user
-    msg['To'] = secret.error_email
-    smtp.sendmail("localhost", msg["From"], msg["To"], msg)
 
 
 # LDM Ingestor
@@ -109,7 +94,7 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
                 common.tweet([wfo,], twt, uri)
 
         except Exception, myexp:
-            email_error(myexp, buf)
+            common.email_error(myexp, buf)
 
 def alert_error(tp, errorText):
     msg = "%s: iembot processing error:\nProduct: %s\nError:%s" % \
@@ -178,7 +163,7 @@ def segment_processor(text_product, i, skip_con):
 
     # New policy, we only insert the relevant stuff!
     if (i == 0):
-        product_text = text_product.sqlraw()
+        product_text = text_product.raw
     else:
         product_text = "%s\n\n%s\n\n&&\n\n%s" % (text_product.product_header, \
                     re.sub("'", "\\'", seg.raw), text_product.fcster)
@@ -254,14 +239,10 @@ def segment_processor(text_product, i, skip_con):
                         stage_text = seg.bullets[qqq]
 
 
-                sql = "INSERT into riverpro(nwsli, stage_text, \
-                  flood_text, forecast_text, severity) VALUES \
-                  ('%s','%s','%s','%s','%s') \
-                  " % (nwsli, stage_text.replace("'","\\'"), \
-                       flood_text.replace("'","\\'"), \
-                       forecast_text.replace("'","\\'"),\
-                       hvtec[0].severity )
-                DBPOOL.runOperation( sql ).addErrback( email_error, sql)
+                deffer = DBPOOL.runOperation("""INSERT into riverpro(nwsli, stage_text, 
+                  flood_text, forecast_text, severity) VALUES 
+                  (%s,%s,%s,%s,%s) """, (nwsli, stage_text, flood_text, forecast_text, hvtec[0].severity) )
+                deffer.addErrback( common.email_error, 'RIVERPRO ERROR')
           
 
         warning_table = "warnings_%s" % (text_product.issueTime.year,)
@@ -283,30 +264,29 @@ def segment_processor(text_product, i, skip_con):
             fcster = re.sub("'", " ", text_product.fcster)
         # Insert Polygon
             if (seg.giswkt != None):
-                sql = "INSERT into %s (issue, expire, report, \
-significance, geom, phenomena, gtype, wfo, eventid, status, updated, \
-fcster, hvtec_nwsli) VALUES ('%s+00','%s+00','%s','%s','%s','%s','%s', \
-'%s',%s,'%s', '%s+00', '%s', '%s')" \
-   % (warning_table, bts, vtec.endTS , text_product.sqlraw(), vtec.significance, \
-      seg.giswkt, vtec.phenomena, 'P', vtec.office, vtec.ETN, vtec.action, \
-      text_product.issueTime, fcster, seg.get_hvtec_nwsli() )
-                DBPOOL.runOperation( sql ).addErrback( email_error, sql)
+                deffer = DBPOOL.runOperation("""INSERT into """+ warning_table +""" (issue, expire, report, 
+                 significance, geom, phenomena, gtype, wfo, eventid, status, updated, 
+                fcster, hvtec_nwsli) VALUES (%s,%s,%s,%s,%s,%s,%s, 
+                %s,%s,%s,%s, %s, %s)""", (bts.strftime(TIMEFORMAT), vtec.endTS.strftime(TIMEFORMAT) , 
+                                text_product.raw, vtec.significance, 
+      seg.giswkt, vtec.phenomena, 'P', vtec.office, vtec.ETN, vtec.action, 
+      text_product.issueTime.strftime(TIMEFORMAT), fcster, seg.get_hvtec_nwsli() ) )
+                deffer.addErrback( common.email_error, "INSERT GISWKT")
 
             # Insert Counties
             for k in range(len(ugc)):
                 cnty = ugc[k]
                 fcster = re.sub("'", " ", text_product.fcster)
   
-                sql = "INSERT into %s (issue,expire,report, geom, \
-phenomena, gtype, wfo, eventid, status,updated, fcster, ugc, significance,\
-hvtec_nwsli) VALUES('%s+00', '%s+00', '%s',\
-(select geom from nws_ugc WHERE ugc = '%s' LIMIT 1), \
-'%s', 'C', '%s',%s,'%s','%s+00', '%s', '%s','%s', '%s')" % \
-(warning_table, bts, vtec.endTS, text_product.sqlraw(), cnty, \
-vtec.phenomena, vtec.office, vtec.ETN, \
-vtec.action, text_product.issueTime, fcster, cnty, vtec.significance, \
-seg.get_hvtec_nwsli() )
-                DBPOOL.runOperation( sql ).addErrback( email_error, sql)
+                deffer = DBPOOL.runOperation("""INSERT into """+ warning_table +""" 
+                (issue,expire,report, geom, phenomena, gtype, wfo, eventid, status,
+                updated, fcster, ugc, significance, hvtec_nwsli) VALUES(%s, %s, %s, 
+                (select geom from nws_ugc WHERE ugc = %s LIMIT 1), %s, 'C', %s,%s,%s,%s, 
+                %s, %s,%s, %s)""",  (bts.strftime(TIMEFORMAT), vtec.endTS.strftime(TIMEFORMAT), 
+                                      text_product.raw, cnty, vtec.phenomena, vtec.office, vtec.ETN, 
+                                      vtec.action, text_product.issueTime.strftime(TIMEFORMAT), 
+                                      fcster, cnty, vtec.significance, seg.get_hvtec_nwsli() ))
+                deffer.addErrback( common.email_error, "INSERT")
             channels = []
             for w in affectedWFOS.keys():
                 channels.append(w)
@@ -327,21 +307,19 @@ till %(ets)s %(svs_special)s" % jmsg_dict
                 _expire = 'expire'
                 if vtec.endTS is None:
                     _expire = 'expire + \'10 days\'::interval'
-                sql = """UPDATE %s SET status = '%s', updated = '%s+00', expire = %s 
-                        WHERE ugc = '%s' and wfo = '%s' and eventid = %s and 
-                      phenomena = '%s' and significance = '%s'""" % (warning_table, 
-                      vtec.action, text_product.issueTime, _expire, cnty, vtec.office, vtec.ETN,
-                            vtec.phenomena, vtec.significance)
-                DBPOOL.runOperation( sql ).addErrback( common.email_error, sql)
+                deffer = DBPOOL.runOperation("""UPDATE """+ warning_table +""" SET status = %s, 
+                    updated = %s, expire = """+ _expire +""" WHERE ugc = %s and wfo = %s and eventid = %s and 
+                    phenomena = %s and significance = %s""", ( vtec.action, 
+                        text_product.issueTime.strftime(TIMEFORMAT), cnty, vtec.office, vtec.ETN,
+                            vtec.phenomena, vtec.significance ))
+                deffer.addErrback( common.email_error, "UPDATE")
 
             if (len(seg.vtec) == 1):
-                sql = "UPDATE %s SET status = '%s',  \
-                     updated = '%s+00' WHERE gtype = 'P' and wfo = '%s' \
-                     and eventid = %s and phenomena = '%s' \
-                     and significance = '%s'" % (warning_table, vtec.action, \
-       text_product.issueTime, vtec.office, \
-       vtec.ETN, vtec.phenomena, vtec.significance)
-                DBPOOL.runOperation( sql ).addErrback( email_error, sql)
+                deffer = DBPOOL.runOperation("""UPDATE """+ warning_table +""" SET status = %s,  
+                     updated = %s WHERE gtype = 'P' and wfo = %s and eventid = %s and phenomena = %s 
+                     and significance = %s""", (vtec.action, text_product.issueTime.strftime(TIMEFORMAT), 
+                                                vtec.office, vtec.ETN, vtec.phenomena, vtec.significance))
+                deffer.addErrback( common.email_error, "UPDATE!")
 
             channels = []
             for w in affectedWFOS.keys():
@@ -370,25 +348,22 @@ till %(ets)s %(svs_special)s" % jmsg_dict
                 issueSpecial = "'%s+00'" % (vtec.beginTS,)
         # Lets cancel county
             for cnty in ugc:
-                sql = "UPDATE %s SET status = '%s', expire = '%s+00',\
-                       updated = '%s+00', issue = %s WHERE ugc = '%s' and \
-                     wfo = '%s' and eventid = %s and phenomena = '%s' \
-                     and significance = '%s'" % \
-             (warning_table, vtec.action, end_ts, text_product.issueTime, issueSpecial, \
-              cnty, vtec.office, vtec.ETN, \
-              vtec.phenomena, vtec.significance)
-                DBPOOL.runOperation( sql ).addErrback( email_error, sql)
+                deffer = DBPOOL.runOperation("""UPDATE """+ warning_table +""" SET status = %s, 
+                expire = %s, updated = %s, issue = """+ issueSpecial +""" WHERE ugc = %s and wfo = %s and 
+                eventid = %s and phenomena = %s and significance = %s""", (vtec.action, 
+                        end_ts.strftime(TIMEFORMAT), text_product.issueTime.strftime(TIMEFORMAT), 
+                        cnty, vtec.office, vtec.ETN, vtec.phenomena, vtec.significance))
+                deffer.addErrback( common.email_error, "UPDATE12")
 
             # If this is the only county, we can cancel the polygon too
             if (len(text_product.segments) == 1):
                 log.msg("Updating Polygon as well")
-                sql = "UPDATE %s SET status = '%s', expire = '%s+00', \
-                     updated = '%s+00' WHERE gtype = 'P' and wfo = '%s' \
-                     and eventid = %s and phenomena = '%s' \
-                     and significance = '%s'" % (warning_table, vtec.action, end_ts, \
-      text_product.issueTime, vtec.office, vtec.ETN, \
-      vtec.phenomena, vtec.significance)
-                DBPOOL.runOperation( sql ).addErrback( email_error, sql)
+                deffer = DBPOOL.runOperation("""UPDATE """+warning_table+""" SET status = %s, 
+                expire = %s, updated = %s WHERE gtype = 'P' and wfo = %s and eventid = %s 
+                and phenomena = %s and significance = %s""" , (vtec.action, end_ts.strftime(TIMEFORMAT), 
+                        text_product.issueTime.strftime(TIMEFORMAT), vtec.office, vtec.ETN, 
+                        vtec.phenomena, vtec.significance) )
+                deffer.addErrback( common.email_error, "UPDATEPOLY")
 
             jmsg_dict['action'] = "cancels"
             fmt = "%(w)s: %(wfo)s  %(product)s for %(county)s %(svs_special)s "
@@ -419,27 +394,25 @@ till %(ets)s %(svs_special)s" % jmsg_dict
             for cnty in ugc:
                 ugc_limiter += "'%s'," % (cnty,)
 
-            sql = "UPDATE %s SET svs = \
-                  (CASE WHEN (svs IS NULL) THEN '__' ELSE svs END) \
-                   || '%s' || '__' WHERE eventid = %s and wfo = '%s' \
-                   and phenomena = '%s' and significance = '%s' \
-                   and ugc IN (%s)" % \
-                   (warning_table, text_product.sqlraw(), vtec.ETN, vtec.office, \
-                    vtec.phenomena, vtec.significance, ugc_limiter[:-1] )
             log.msg("Updating SVS For:"+ ugc_limiter[:-1] )
-            DBPOOL.runOperation( sql ).addErrback( email_error, sql)
+            deffer = DBPOOL.runOperation("""UPDATE """+ warning_table +""" SET svs = 
+                  (CASE WHEN (svs IS NULL) THEN '__' ELSE svs END) 
+                   || %s || '__' WHERE eventid = %s and wfo = %s 
+                   and phenomena = %s and significance = %s 
+                   and ugc IN ("""+ ugc_limiter[:-1] +""")""" , (text_product.raw, vtec.ETN, vtec.office, 
+                    vtec.phenomena, vtec.significance  ))
+            deffer.addErrback( common.email_error, "UPDATE NOTNEW")
 
     # Update polygon if necessary
     if (vtec.action != "NEW" and seg.giswkt is not None):
-        sql = "UPDATE %s SET svs = \
-              (CASE WHEN (svs IS NULL) THEN '__' ELSE svs END) \
-               || '%s' || '__' WHERE eventid = %s and wfo = '%s' \
-               and phenomena = '%s' and significance = '%s' \
-               and gtype = 'P'" %\
-               (warning_table, text_product.sqlraw(), vtec.ETN, vtec.office, \
-                vtec.phenomena, vtec.significance )
         log.msg("Updating SVS For Polygon")
-        DBPOOL.runOperation( sql ).addErrback( email_error, sql)
+        deffer = DBPOOL.runOperation("""UPDATE """+ warning_table +""" SET svs = 
+              (CASE WHEN (svs IS NULL) THEN '__' ELSE svs END) 
+               || %s || '__' WHERE eventid = %s and wfo = %s 
+               and phenomena = %s and significance = %s 
+               and gtype = P""" , (text_product.raw, vtec.ETN, vtec.office, 
+                vtec.phenomena, vtec.significance )  )
+        deffer.addErrback( common.email_error, "BLAH")
 
     # New fancy SBW Stuff!
     if seg.giswkt is not None:
@@ -448,26 +421,24 @@ till %(ets)s %(svs_special)s" % jmsg_dict
         # 1. Update the polygon_end to cancel time for the last polygon
         # 2. Update everybodies expiration time, product changed yo!
         if vtec.action in ["CAN", "UPG"] and len(text_product.segments) == 1:
-             sql = "UPDATE sbw_%s SET \
-                polygon_end = (CASE WHEN polygon_end = expire\
-                               THEN '%s+00' ELSE polygon_end END), \
-                expire = '%s+00' WHERE \
-                eventid = %s and wfo = '%s' \
-                and phenomena = '%s' and significance = '%s'" % \
-                (text_product.issueTime.year, \
-                text_product.issueTime, text_product.issueTime, \
-                vtec.ETN, vtec.office, vtec.phenomena, vtec.significance)
-             DBPOOL.runOperation( sql ).addErrback( email_error, sql)
+             deffer = DBPOOL.runOperation("""UPDATE sbw_"""+ str(text_product.issueTime.year) +""" SET 
+                polygon_end = (CASE WHEN polygon_end = expire
+                               THEN %s ELSE polygon_end END), 
+                expire = %s WHERE 
+                eventid = %s and wfo = %s 
+                and phenomena = %s and significance = %s""", (
+                text_product.issueTime.strftime(TIMEFORMAT), text_product.issueTime.strftime(TIMEFORMAT), 
+                vtec.ETN, vtec.office, vtec.phenomena, vtec.significance) )
+             deffer.addErrback( common.email_error, "UPDATESBW")
 
         # If we are VTEC CON, then we need to find the last polygon
         # and update its expiration time, since we have new info!
         if vtec.action == "CON":
-            sql = "UPDATE sbw_%s SET polygon_end = '%s+00' WHERE \
-                polygon_end = expire and eventid = %s and wfo = '%s' \
-                and phenomena = '%s' and significance = '%s'" % \
-                (text_product.issueTime.year, text_product.issueTime, \
-                vtec.ETN, vtec.office, vtec.phenomena, vtec.significance)
-            DBPOOL.runOperation( sql ).addErrback( email_error, sql)
+            deffer = DBPOOL.runOperation("""UPDATE sbw_"""+ str(text_product.issueTime.year) +""" SET 
+                polygon_end = %s WHERE polygon_end = expire and eventid = %s and wfo = %s 
+                and phenomena = %s and significance = %s""" , ( text_product.issueTime.strftime(TIMEFORMAT), 
+                vtec.ETN, vtec.office, vtec.phenomena, vtec.significance))
+            deffer.addErrback( common.email_error, "UPDATE SBW")
 
 
         my_sts = "'%s+00'" % (vtec.beginTS,)
@@ -484,47 +455,48 @@ till %(ets)s %(svs_special)s" % jmsg_dict
               vtec.phenomena, vtec.significance)
 
         if vtec.action in ['CAN',]:
-            sql = "INSERT into sbw_%s(wfo, eventid, significance, phenomena,\
-                issue, expire, init_expire, polygon_begin, polygon_end, geom, \
-                status, report, windtag, hailtag) VALUES ('%s',\
-                '%s','%s','%s', %s,'%s+00','%s+00','%s+00','%s+00', \
-                '%s','%s','%s',%s,%s)" % \
-                 (text_product.issueTime.year, vtec.office, vtec.ETN, \
-                 vtec.significance, vtec.phenomena, my_sts, \
-                 text_product.issueTime, (vtec.endTS or my_ets), \
-                 text_product.issueTime, text_product.issueTime, \
+            sql = """INSERT into sbw_"""+ str(text_product.issueTime.year) +"""(wfo, eventid, 
+                significance, phenomena, issue, expire, init_expire, polygon_begin, 
+                polygon_end, geom, status, report, windtag, hailtag) VALUES (%s,
+                %s,%s,%s,"""+ my_sts +""",%s,"""+ my_ets +""",%s,%s,%s,%s,%s,%s,%s)"""
+            myargs = (vtec.office, vtec.ETN, 
+                 vtec.significance, vtec.phenomena, 
+                 text_product.issueTime.strftime(TIMEFORMAT), 
+                 text_product.issueTime.strftime(TIMEFORMAT), 
+                 text_product.issueTime.strftime(TIMEFORMAT), 
                   seg.giswkt, vtec.action, product_text,
                  (seg.windtag or 'Null'), (seg.hailtag or 'Null'))
 
         elif vtec.action in ['EXP', 'UPG', 'EXT']:
-            sql = "INSERT into sbw_%s(wfo, eventid, significance, phenomena,\
-                issue, expire, init_expire, polygon_begin, polygon_end, geom, \
-                status, report, windtag, hailtag) VALUES ('%s',\
-                '%s','%s','%s', %s,'%s+00','%s+00','%s+00','%s+00', \
-                '%s','%s','%s',%s,%s)" % \
-                 (text_product.issueTime.year, vtec.office, vtec.ETN, \
-                 vtec.significance, vtec.phenomena, my_sts, \
-                 (vtec.endTS or my_ets), \
-                 (vtec.endTS or my_ets), \
-                 (vtec.endTS or text_product.issueTime), \
-                 (vtec.endTS or text_product.issueTime), \
-                  seg.giswkt, vtec.action, product_text,
-                  (seg.windtag or 'Null'), (seg.hailtag or 'Null'))
+            sql = """INSERT into sbw_"""+ str(text_product.issueTime.year) +"""(wfo, eventid, significance,
+                phenomena, issue, expire, init_expire, polygon_begin, polygon_end, geom, 
+                status, report, windtag, hailtag) VALUES (%s,
+                %s,%s,%s, """+ my_sts +""","""+ my_ets +""","""+ my_ets +""",%s,%s, 
+                %s,%s,%s,%s,%s)"""
+            vvv = text_product.issueTime.strftime(TIMEFORMAT)
+            if vtec.endTS:
+                vvv = vtec.endTS.strftime(TIMEFORMAT)
+            myargs = ( vtec.office, vtec.ETN, 
+                 vtec.significance, vtec.phenomena, vvv, vvv, 
+                  seg.giswkt, vtec.action, product_text, (seg.windtag or 'Null'), (seg.hailtag or 'Null'))
         else:
             _expire = vtec.endTS
             if vtec.endTS is None:
                 _expire = mx.DateTime.now() + mx.DateTime.RelativeDateTime(days=10)
-            sql = "INSERT into sbw_%s(wfo, eventid, significance, phenomena,\
-                issue, expire, init_expire, polygon_begin, polygon_end, geom, \
-                status, report, windtag, hailtag) VALUES ('%s',\
-                '%s','%s','%s', %s,'%s+00','%s+00','%s+00','%s+00', \
-                '%s','%s','%s',%s,%s)" % \
-                 (text_product.issueTime.year, vtec.office, vtec.ETN, \
-                 vtec.significance, vtec.phenomena, my_sts, _expire, \
-                 _expire, (vtec.beginTS or text_product.issueTime), \
-                 _expire, seg.giswkt, vtec.action, product_text,
-                 (seg.windtag or 'Null'), (seg.hailtag or 'Null'))
-        DBPOOL.runOperation(sql).addErrback( email_error, sql)
+            sql = """INSERT into sbw_"""+ str(text_product.issueTime.year) +"""(wfo, eventid, 
+                significance, phenomena, issue, expire, init_expire, polygon_begin, polygon_end, geom, 
+                status, report, windtag, hailtag) VALUES (%s,
+                %s,%s,%s, """+ my_sts +""",%s,%s,%s,%s, %s,%s,%s,%s,%s)""" 
+            vvv = text_product.issueTime.strftime(TIMEFORMAT)
+            if vtec.beginTS:
+                vvv = vtec.beginTS.strftime(TIMEFORMAT)
+            myargs = (vtec.office, vtec.ETN, 
+                 vtec.significance, vtec.phenomena, _expire.strftime(TIMEFORMAT), 
+                 _expire.strftime(TIMEFORMAT), vvv, 
+                 _expire.strftime(TIMEFORMAT), seg.giswkt, vtec.action, product_text,
+                 seg.windtag, seg.hailtag)
+        deffer = DBPOOL.runOperation(sql, myargs)
+        deffer.addErrback( common.email_error, "LASTONE")
 
 
 """ Load me up with NWS dictionaries! """
