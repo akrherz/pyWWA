@@ -73,23 +73,6 @@ AHPS_TEMPLATE = {
 }
 
 
-def email_error(message, product_text):
-    """
-    Generic something to send email error messages 
-    """
-    global EMAILS
-    log.msg( message )
-    EMAILS -= 1
-    if (EMAILS < 0):
-        return
-
-    msg = MIMEText("Exception:\n%s\n\nRaw Product:\n%s" \
-                 % (message, product_text))
-    msg['subject'] = 'generic_product.py Traceback'
-    msg['From'] = secret.parser_user
-    msg['To'] = secret.error_email
-    smtp.sendmail("localhost", msg["From"], msg["To"], msg)
-
 
 class myProductIngestor(ldmbridge.LDMProductReceiver):
 
@@ -97,7 +80,7 @@ class myProductIngestor(ldmbridge.LDMProductReceiver):
         try:
             real_process(buf)
         except Exception, myexp:
-            email_error(myexp, buf)
+            common.email_error(myexp, buf)
 
     def connectionLost(self, reason):
         print 'connectionLost', reason
@@ -218,23 +201,24 @@ def real_process(raw):
     if (pil == "OEP"):
         wfo = prod.afos[3:]
 
-    raw = raw.replace("'", "\\'")
+    #raw = raw.replace("'", "\\'")
     sqlraw = raw.replace("\015\015\012", "\n").replace("\000", "").strip()
 
     # FTM sometimes have 'garbage' characters included, get em out
-    if (pil == "FTM"):
-        sqlraw = re.sub("[^\n\ra-zA-Z0-9:\.,\s\$\*]", "", sqlraw)
+    #if (pil == "FTM"):
+    #    sqlraw = re.sub("[^\n\ra-zA-Z0-9:\.,\s\$\*]", "", sqlraw)
 
     # TODO: If there are no segments, send an alert to room and daryl!
 
     # Always insert the product into the text archive database
     product_id = prod.get_product_id()
-    sql = "INSERT into text_products(product, product_id) \
-      values ('%s','%s')" % (sqlraw, product_id)
+    sql = """INSERT into text_products(product, product_id) values (%s,%s)"""
+    myargs = (sqlraw, product_id)
     if (len(prod.segments) > 0 and prod.segments[0].giswkt):
-        sql = "INSERT into text_products(product, product_id, geom) \
-      values ('%s','%s','%s')" % (sqlraw, product_id, prod.segments[0].giswkt)
-    DBPOOL.runOperation(sql).addErrback( email_error, sql)
+        sql = """INSERT into text_products(product, product_id, geom) values (%s,%s,%s)""" 
+        myargs = (sqlraw, product_id, prod.segments[0].giswkt)
+    deffer = DBPOOL.runOperation(sql, myargs)
+    deffer.addErrback( common.email_error, sql)
     myurl = "%s?pid=%s" % (secret.PROD_URL, product_id)
 
     # Just send with optional headline to rooms...
