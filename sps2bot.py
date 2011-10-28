@@ -66,24 +66,6 @@ def countyText(u):
     return c[:-4]
 
 
-def email_error(message, product_text):
-    """
-    Generic something to send email error messages 
-    """
-    global EMAILS
-    #io = StringIO.StringIO()
-    #traceback.print_exc(file=io)
-    #log.msg( message )
-    EMAILS -= 1
-    if (EMAILS < 0):
-        return
-
-    msg = MIMEText("Exception:\n%s\n\nRaw Product:\n%s" \
-                 % (message, product_text))
-    msg['subject'] = 'sps2bot.py Traceback'
-    msg['From'] = secret.parser_user
-    msg['To'] = secret.error_email
-    smtp.sendmail("localhost", msg["From"], msg["To"], msg)
 
 
 # LDM Ingestor
@@ -93,7 +75,7 @@ class myProductIngestor(ldmbridge.LDMProductReceiver):
         try:
             real_process(buf)
         except Exception, myexp:
-            email_error(myexp, buf)
+            common.email_error(myexp, buf)
 
     def connectionLost(self, reason):
         print 'connectionLost', reason
@@ -104,8 +86,7 @@ class myProductIngestor(ldmbridge.LDMProductReceiver):
 
 
 def real_process(raw):
-    sqlraw = raw.replace("'", "\\'")
-    sqlraw = sqlraw.replace("\015\015\012", "\n")
+    sqlraw = raw.replace("\015\015\012", "\n")
     prod = TextProduct.TextProduct(raw)
 
     product_id = prod.get_product_id()
@@ -123,13 +104,14 @@ iembot processing error:</span><br />Product: %s<br />Error: %s" % \
 
 
     if (prod.segments[0].giswkt):
-        sql = "INSERT into text_products(product, product_id, geom) \
-      values ('%s','%s', '%s')" % (sqlraw, product_id,prod.segments[0].giswkt )
-        DBPOOL.runOperation(sql).addErrback( email_error, sql)
+        sql = """INSERT into text_products(product, product_id, geom) values (%s,%s, %s)"""
+        myargs = (sqlraw, product_id, prod.segments[0].giswkt )
+        
     else:
-        sql = "INSERT into text_products(product, product_id) \
-      values ('%s','%s')" % (sqlraw, product_id)
-        DBPOOL.runOperation(sql).addErrback( email_error, sql)
+        sql = "INSERT into text_products(product, product_id) values (%s,%s)" 
+        myargs = (sqlraw, product_id)
+    deffer = DBPOOL.runOperation(sql, myargs)
+    deffer.addErrback( common.email_error, sqlraw)
 
     for seg in prod.segments:
         headline = "[NO HEADLINE FOUND IN SPS]"
