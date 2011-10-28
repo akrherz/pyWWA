@@ -410,7 +410,7 @@ till %(ets)s %(svs_special)s" % jmsg_dict
               (CASE WHEN (svs IS NULL) THEN '__' ELSE svs END) 
                || %s || '__' WHERE eventid = %s and wfo = %s 
                and phenomena = %s and significance = %s 
-               and gtype = P""" , (text_product.raw, vtec.ETN, vtec.office, 
+               and gtype = 'P'""" , (text_product.raw, vtec.ETN, vtec.office, 
                 vtec.phenomena, vtec.significance )  )
         deffer.addErrback( common.email_error, "BLAH")
 
