@@ -16,9 +16,9 @@
 """ SHEF product ingestor """
 
 # Setup Standard Logging we use
-from twisted.python import log
-log.startLogging(open('logs/shef_parser.log', 'a'))
+from twisted.python import log, logfile
 log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
+log.startLogging(logfile.DailyLogFile('shef_parser.log', 'logs/'))
 
 # System Imports
 import os, smtplib
@@ -33,6 +33,7 @@ from pyIEM import mesonet
 import access
 from support import ldmbridge, TextProduct
 import secret
+import common
 
 # Third Party Stuff
 from twisted.internet import reactor, protocol
@@ -49,6 +50,7 @@ import pg
 IEMACCESS = pg.connect('iem', secret.dbhost, user=secret.dbuser, passwd=secret.dbpass)
 MESOSITE = pg.connect('mesosite', secret.dbhost, user=secret.dbuser, passwd=secret.dbpass)
 
+BASE_TS = mx.DateTime.gmt() - mx.DateTime.RelativeDateTime(months=2)
 
 # Necessary for the shefit program to run A-OK
 os.chdir("/home/ldm/pyWWA/shef_workspace")
@@ -145,7 +147,7 @@ class MyIEMOB(access.Ob):
         """
         Execute queries with an error callback!
         """
-        dbpool.runOperation( sql ).addErrback( email_error, sql)
+        dbpool.runOperation( sql ).addErrback( common.email_error, sql)
 
 class SHEFIT(protocol.ProcessProtocol):
     """
@@ -199,28 +201,7 @@ class SHEFIT(protocol.ProcessProtocol):
         try:
             really_process(self.tp, self.data)
         except Exception,myexp:
-            email_error(myexp, self.tp.raw)
-
-def email_error(message, product_text, tp=None):
-    """
-    Generic something to send email error messages 
-    """
-    global EMAILS
-    log.msg( message )
-    EMAILS -= 1
-    if (EMAILS < 0):
-        return
-    if tp is not None:
-        product_text = tp.raw
-    msg = MIMEText("Exception:\n%s\n\nRaw Product:\n%s\n%s" % ( 
-                 message, tp or "", product_text))
-    msg['subject'] = 'shef_parser.py Traceback'
-    msg['From'] = secret.parser_user
-    msg['To'] = 'akrherz@iastate.edu'
-    smtp = smtplib.SMTP()
-    smtp.connect()
-    smtp.sendmail(msg['From'], msg['To'], msg.as_string())
-    smtp.close()
+            common.email_error(myexp, self.tp.raw)
 
 def clnstr(buf):
     buf = buf.replace("\015\015\012", "\n")
@@ -270,6 +251,9 @@ def really_process(tp, data):
         tstamp = mx.DateTime.strptime(dstr, "%Y-%m-%d %H:%M:%S")
         # We don't care about data in the future!
         if tstamp > (mx.DateTime.gmt() + mx.DateTime.RelativeDateTime(hours=1)):
+            continue
+        if tstamp < BASE_TS:
+            log.msg("Rejecting old data %s %s" % (sid, tstamp))
             continue
         if not mydata[sid].has_key(tstamp):
             mydata[sid][tstamp] = {}
@@ -326,7 +310,7 @@ def process_site(tp, sid, ts, data):
             (station, valid, key, value) 
             VALUES('%s','%s+00', '%s', '%s')""" % (ts.strftime("%Y_%m"), sid, 
             ts.strftime("%Y-%m-%d %H:%M"), var, 
-            data[var])).addErrback(email_error, data, tp)
+            data[var])).addErrback(common.email_error, tp)
 
     state = LOC2STATE.get( sid )
     # TODO, someday support processing these stranger locations
