@@ -465,7 +465,7 @@ till %(ets)s %(svs_special)s" % jmsg_dict
                  text_product.issueTime.strftime(TIMEFORMAT), 
                  text_product.issueTime.strftime(TIMEFORMAT), 
                   seg.giswkt, vtec.action, product_text,
-                 (seg.windtag or 'Null'), (seg.hailtag or 'Null'))
+                 seg.windtag, seg.hailtag)
 
         elif vtec.action in ['EXP', 'UPG', 'EXT']:
             sql = """INSERT into sbw_"""+ str(text_product.issueTime.year) +"""(wfo, eventid, significance,
@@ -478,7 +478,7 @@ till %(ets)s %(svs_special)s" % jmsg_dict
                 vvv = vtec.endTS.strftime(TIMEFORMAT)
             myargs = ( vtec.office, vtec.ETN, 
                  vtec.significance, vtec.phenomena, vvv, vvv, 
-                  seg.giswkt, vtec.action, product_text, (seg.windtag or 'Null'), (seg.hailtag or 'Null'))
+                  seg.giswkt, vtec.action, product_text, seg.windtag, seg.hailtag)
         else:
             _expire = vtec.endTS
             if vtec.endTS is None:
