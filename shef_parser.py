@@ -40,16 +40,25 @@ from twisted.internet import reactor, protocol
 from twisted.enterprise import adbapi
 import mx.DateTime
 
+#from guppy import hpy
+def profiler():
+    h = hpy()
+    #print h.heap()
+    #print h.iso(UNKNOWN).byvia
+    #print h.iso(LOC2STATE).byvia
+    print (h.heap()&str).byvia
+    #print h.heap()[0].byid
+    #print h.heap()[0].byrcs[0].referrers.byrcs
+    #print h.heap().get_rp()
+    #from meliae import scanner
+    #scanner.dump_all_objects('shef_parser.json')
+    reactor.callLater(60, profiler)
 
 # Setup Database Links
-ACCESSDB = adbapi.ConnectionPool("psycopg2", database='iem', host=secret.dbhost,
-                                 password=secret.dbpass)
+ACCESSDB = adbapi.ConnectionPool("twistedpg", database='iem', host=secret.dbhost,
+                                 password=secret.dbpass, cp_reconnect=True)
 HADSDB = adbapi.ConnectionPool("psycopg2", database='hads', host=secret.dbhost,
-                               password=secret.dbpass)
-import pg
-IEMACCESS = pg.connect('iem', secret.dbhost, user=secret.dbuser, passwd=secret.dbpass)
-MESOSITE = pg.connect('mesosite', secret.dbhost, user=secret.dbuser, passwd=secret.dbpass)
-
+                               password=secret.dbpass, cp_reconnect=True)
 BASE_TS = mx.DateTime.gmt() - mx.DateTime.RelativeDateTime(months=2)
 
 # Necessary for the shefit program to run A-OK
@@ -59,17 +68,18 @@ os.chdir("/home/ldm/pyWWA/shef_workspace")
 LOC2STATE = {}
 LOC2NETWORK = {}
 UNKNOWN = {}
-rs = MESOSITE.query("""SELECT id, network, state from stations 
-    WHERE network ~* 'COOP' or network ~* 'DCP' or network in ('KCCI','KIMT','KELO') 
-    ORDER by network ASC""").dictresult()
-for i in range(len(rs)):
-    id = rs[i]['id']
-    LOC2STATE[ id ] = rs[i]['state']
-    if LOC2NETWORK.has_key(id):
-        del LOC2NETWORK[id]
-    else:
-        LOC2NETWORK[id] = rs[i]['network']
-MESOSITE.close()
+def load_stations(txn):
+    txn.execute("""SELECT id, network, state from stations 
+        WHERE network ~* 'COOP' or network ~* 'DCP' or network in ('KCCI','KIMT','KELO') 
+        ORDER by network ASC""")
+    for row in txn:
+        id = row[0]
+        LOC2STATE[ id ] = row[1]
+        if LOC2NETWORK.has_key(id):
+            del LOC2NETWORK[id]
+        else:
+            LOC2NETWORK[id] = row[2]
+    txn.close()
 
 MULTIPLIER = {
   "US" : 0.87,  # Convert MPH to KNT
@@ -137,18 +147,6 @@ MAPPING = mydict()
 
 EMAILS = 10
 
-class MyIEMOB(access.Ob):
-    """
-    Override the iemAccessOb class with my own query engine, so that we 
-    can capture errors for now!
-    """
-
-    def execQuery(self, sql, dbase, dbpool):
-        """
-        Execute queries with an error callback!
-        """
-        dbpool.runOperation( sql ).addErrback( common.email_error, sql)
-
 class SHEFIT(protocol.ProcessProtocol):
     """
     My process protocol for dealing with the SHEFIT program from the NWS
@@ -198,10 +196,8 @@ class SHEFIT(protocol.ProcessProtocol):
             rejects.write( self.tp.raw +"\003")
             rejects.close()
             return
-        try:
-            really_process(self.tp, self.data)
-        except Exception,myexp:
-            common.email_error(myexp, self.tp.raw)
+        reactor.callLater(0, really_process, self.tp, self.data)
+        
 
 def clnstr(buf):
     buf = buf.replace("\015\015\012", "\n")
@@ -224,7 +220,6 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
         tp = TextProduct.TextProduct( clnstr(buf) )
         shef = SHEFIT( tp )
         reactor.spawnProcess(shef, "shefit", ["shefit"], {})
-
 
 
 def really_process(tp, data):
@@ -306,11 +301,12 @@ def process_site(tp, sid, ts, data):
         isCOOP = True
 
     for var in data.keys():
-        HADSDB.runOperation("""INSERT into raw%s 
+        deffer = HADSDB.runOperation("""INSERT into raw%s 
             (station, valid, key, value) 
             VALUES('%s','%s+00', '%s', '%s')""" % (ts.strftime("%Y_%m"), sid, 
             ts.strftime("%Y-%m-%d %H:%M"), var, 
-            data[var])).addErrback(common.email_error, tp)
+            data[var]))
+        deffer.addErrback(common.email_error, tp)
 
     state = LOC2STATE.get( sid )
     # TODO, someday support processing these stranger locations
@@ -337,28 +333,36 @@ def process_site(tp, sid, ts, data):
         else:
             network = "%s_DCP" % (state,)
 
-    
-    # Lets do this, finally.
-    #print "ACTUALLY PROCESSED", sid, network
-    iemob = MyIEMOB(sid, network)
+    iemob = access.Ob(sid, network)
     iemob.setObTimeGMT(ts)
     iemob.data['year'] = ts.year
-    if not iemob.load_and_compare(IEMACCESS) and ts.strftime("%Y%m%d") == mx.DateTime.now().strftime("%Y%m%d"):
-        #print 'Unknown StationID %s %s' %  (sid,  tp.get_product_id() )
+    
+    deffer = ACCESSDB.runInteraction(save_data, tp, iemob, data)
+    deffer.addErrback(common.email_error, tp.raw)
+    deffer.addCallback(got_results, tp, sid, network)
+    
+def got_results(res, tp, sid, network):
+    if not res:
         enter_unknown(sid, tp, network)
+    
+def save_data(txn, tp, iemob, data):
+    iemob.txn = txn
+    if not iemob.load_and_compare():
+        return False
         
     for var in data.keys():
         myval = data[var] * MULTIPLIER.get(var[:2],1.0)
         iemob.data[ MAPPING[var] ] = myval
     iemob.data['raw'] = tp.get_product_id()
-    iemob.update_summary(None, ACCESSDB)
+    iemob.update_summary()
     # Don't go through this pain, unless we need to!
     if 'max_tmpf' in iemob.data.keys():
-        iemob.updateDatabaseSummaryTemps(None, ACCESSDB)
-    iemob.updateDatabase(None, ACCESSDB)
-
-    del iemob
+        iemob.updateDatabaseSummaryTemps()
+    iemob.updateDatabase()
+    return True
 
 #
 fact = ldmbridge.LDMProductFactory( MyProductIngestor() )
+HADSDB.runInteraction(load_stations)
+#reactor.callLater(60, profiler)
 reactor.run()
