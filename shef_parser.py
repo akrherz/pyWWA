@@ -21,12 +21,13 @@ log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
 log.startLogging(logfile.DailyLogFile('shef_parser.log', 'logs/'))
 
 # System Imports
-import os, smtplib
-from email.mime.text import MIMEText
+import os
 
-o = open("shef_parser.pid",'w')
-o.write("%s" % ( os.getpid(),) )
-o.close()
+def write_pid():
+    """ Create a PID file for when we are fired up! """
+    o = open("shef_parser.pid",'w')
+    o.write("%s" % ( os.getpid(),) )
+    o.close()
 
 # Stuff I wrote
 from pyIEM import mesonet
@@ -39,20 +40,6 @@ import common
 from twisted.internet import reactor, protocol
 from twisted.enterprise import adbapi
 import mx.DateTime
-
-#from guppy import hpy
-def profiler():
-    h = hpy()
-    #print h.heap()
-    #print h.iso(UNKNOWN).byvia
-    #print h.iso(LOC2STATE).byvia
-    print (h.heap()&str).byvia
-    #print h.heap()[0].byid
-    #print h.heap()[0].byrcs[0].referrers.byrcs
-    #print h.heap().get_rp()
-    #from meliae import scanner
-    #scanner.dump_all_objects('shef_parser.json')
-    reactor.callLater(60, profiler)
 
 # Setup Database Links
 ACCESSDB = adbapi.ConnectionPool("twistedpg", database='iem', host=secret.dbhost,
@@ -69,17 +56,20 @@ LOC2STATE = {}
 LOC2NETWORK = {}
 UNKNOWN = {}
 def load_stations(txn):
+    """
+    Load up station metadata to help us with writing data to the IEM database
+    @param txn database transaction
+    """
     txn.execute("""SELECT id, network, state from stations 
         WHERE network ~* 'COOP' or network ~* 'DCP' or network in ('KCCI','KIMT','KELO') 
         ORDER by network ASC""")
     for row in txn:
-        id = row['id']
-        LOC2STATE[ id ] = row['state']
-        if LOC2NETWORK.has_key(id):
-            del LOC2NETWORK[id]
+        stid = row['id']
+        LOC2STATE[ stid ] = row['state']
+        if LOC2NETWORK.has_key(stid):
+            del LOC2NETWORK[stid]
         else:
-            LOC2NETWORK[id] = row['network']
-    txn.close()
+            LOC2NETWORK[stid] = row['network']
 
 MULTIPLIER = {
   "US" : 0.87,  # Convert MPH to KNT
@@ -122,7 +112,7 @@ DIRECTMAP = {'HGIZ': 'rstage',
              'UPIZ': 'gust',
              'UPHZ': 'gust',
              }
-class mydict(dict):
+class MyDict(dict):
     
     def __getitem__(self, key):
         """
@@ -142,7 +132,7 @@ class mydict(dict):
             self.__setitem__(key, '')
             return ''
     
-MAPPING = mydict()
+MAPPING = MyDict()
 
 
 EMAILS = 10
@@ -218,8 +208,7 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
         I am called from the ldmbridge when data is ahoy
         """
         tp = TextProduct.TextProduct( clnstr(buf) )
-        shef = SHEFIT( tp )
-        reactor.spawnProcess(shef, "shefit", ["shefit"], {})
+        reactor.spawnProcess(SHEFIT( tp ), "shefit", ["shefit"], {})
 
 
 def really_process(tp, data):
@@ -291,15 +280,7 @@ def process_site(tp, sid, ts, data):
     """ 
     I process a dictionary of data for a particular site
     """
-
-    # Our simple determination if the site is a COOP site
-    isCOOP = False
-    if tp.afos[:3] == 'RR3':
-        isCOOP = True
-    elif tp.afos[:3] in ['RR1', 'RR2'] and checkvars( data.keys() ):
-        print "Guessing COOP? %s %s %s" %  (sid, tp.get_product_id(), data.keys())
-        isCOOP = True
-
+    # Insert data into database regardless
     for var in data.keys():
         deffer = HADSDB.runOperation("""INSERT into raw%s 
             (station, valid, key, value) 
@@ -308,10 +289,19 @@ def process_site(tp, sid, ts, data):
             data[var]))
         deffer.addErrback(common.email_error, tp)
 
+    # Our simple determination if the site is a COOP site
+    is_coop = False
+    if tp.afos[:3] == 'RR3':
+        is_coop = True
+    elif tp.afos[:3] in ['RR1', 'RR2'] and checkvars( data.keys() ):
+        print "Guessing COOP? %s %s %s" %  (sid, tp.get_product_id(), data.keys())
+        is_coop = True
+
+
     state = LOC2STATE.get( sid )
-    # TODO, someday support processing these stranger locations
     if state is None and len(sid) == 8 and sid[0] == 'X':
         return
+    # Base the state on the 2 char station ID!
     if state is None and len(sid) == 5 and mesonet.nwsli2state.has_key(sid[3:]):
         state = mesonet.nwsli2state.get(sid[3:])
         LOC2STATE[sid] = state
@@ -321,13 +311,12 @@ def process_site(tp, sid, ts, data):
             UNKNOWN[sid] = 1       
         return 
     
-    #print sid, state, isCOOP
     # Deterime if we want to waste the DB's time
     network = LOC2NETWORK.get(sid)
     if network in ['KCCI','KIMT','KELO']:
         return
     if network is None:
-        if isCOOP:
+        if is_coop:
             network = "%s_COOP" % (state,)
         # We are left with DCP
         else:
@@ -342,10 +331,20 @@ def process_site(tp, sid, ts, data):
     deffer.addCallback(got_results, tp, sid, network)
     
 def got_results(res, tp, sid, network):
+    """
+    Callback after our iemdb work
+    @param res response
+    @param tp support.TextProduct instance
+    @param sid stationID
+    @param network string network
+    """
     if not res:
         enter_unknown(sid, tp, network)
     
 def save_data(txn, tp, iemob, data):
+    """
+    Called from a transaction 'thread'
+    """
     iemob.txn = txn
     if not iemob.load_and_compare():
         return False
@@ -364,5 +363,5 @@ def save_data(txn, tp, iemob, data):
 #
 fact = ldmbridge.LDMProductFactory( MyProductIngestor() )
 HADSDB.runInteraction(load_stations)
-#reactor.callLater(60, profiler)
+reactor.callLater(0, write_pid)
 reactor.run()
