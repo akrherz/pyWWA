@@ -57,7 +57,7 @@ def profiler():
 # Setup Database Links
 ACCESSDB = adbapi.ConnectionPool("twistedpg", database='iem', host=secret.dbhost,
                                  password=secret.dbpass, cp_reconnect=True)
-HADSDB = adbapi.ConnectionPool("psycopg2", database='hads', host=secret.dbhost,
+HADSDB = adbapi.ConnectionPool("twistedpg", database='hads', host=secret.dbhost,
                                password=secret.dbpass, cp_reconnect=True)
 BASE_TS = mx.DateTime.gmt() - mx.DateTime.RelativeDateTime(months=2)
 
@@ -73,12 +73,12 @@ def load_stations(txn):
         WHERE network ~* 'COOP' or network ~* 'DCP' or network in ('KCCI','KIMT','KELO') 
         ORDER by network ASC""")
     for row in txn:
-        id = row[0]
-        LOC2STATE[ id ] = row[1]
+        id = row['id']
+        LOC2STATE[ id ] = row['state']
         if LOC2NETWORK.has_key(id):
             del LOC2NETWORK[id]
         else:
-            LOC2NETWORK[id] = row[2]
+            LOC2NETWORK[id] = row['network']
     txn.close()
 
 MULTIPLIER = {

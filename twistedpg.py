@@ -15,4 +15,4 @@ class connection(_2connection):
     def cursor(self):
         return _2connection.cursor(self, cursor_factory=RealDictCursor)
 
-register_type(UNICODE)
+#register_type(UNICODE)
