@@ -17,83 +17,49 @@
 
 from twisted.words.protocols.jabber import client, jid, xmlstream
 from twisted.internet import reactor
-from twisted.python import log
-log.startLogging(open('logs/metarObFe.log', 'a'))
+from twisted.python import log, logfile
 log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
+log.startLogging(logfile.DailyLogFile('metarObFe.log', 'logs/'))
+
 
 import access
 import re, traceback, StringIO
 from pyIEM import mesonet, ldmbridge
 from twisted.enterprise import adbapi
 from metar import Metar
-from email.MIMEText import MIMEText
-import smtplib, secret, mx.DateTime, pg
+import secret, mx.DateTime
 import common
 
-dbpool = adbapi.ConnectionPool("psycopg2", database='iem', host=secret.dbhost, password=secret.dbpass)
+IEMDB = adbapi.ConnectionPool("twistedpg", database='iem', host=secret.dbhost, password=secret.dbpass,
+                               cp_reconnect=True)
+ASOSDB = adbapi.ConnectionPool("twistedpg", database='asos', host=secret.dbhost, password=secret.dbpass,
+                               cp_reconnect=True)
 
-try:
-    mesosite = pg.connect('mesosite', host=secret.dbhost)
-    iemaccess = pg.connect('iem', host=secret.dbhost)
-    asos = pg.connect('asos', host=secret.dbhost)
-except:
-    mesosite = pg.connect('mesosite', host=secret.dbhost, passwd=secret.dbpass)
-    iemaccess = pg.connect('iem', host=secret.dbhost, passwd=secret.dbpass)
-    asos = pg.connect('asos', host=secret.dbhost, passwd=secret.dbpass)
+    
 LOC2NETWORK = {}
 
-def load_stations():
-    rs = mesosite.query("""SELECT id, network from stations 
-    where network ~* 'ASOS' or network = 'AWOS' or network = 'WTM'""").dictresult()
-    for i in range(len(rs)):
-        if not LOC2NETWORK.has_key( rs[i]['id'] ):
-            LOC2NETWORK[ rs[i]['id'] ] = rs[i]['network']
-
+def load_stations(txn, ingest):
+    txn.execute("""SELECT id, network from stations 
+    where network ~* 'ASOS' or network = 'AWOS' or network = 'WTM'""")
+    news = 0
+    for row in txn:
+        if not LOC2NETWORK.has_key( row['id'] ):
+            news += 1
+            LOC2NETWORK[ row['id'] ] = row['network']
+    log.msg("Loaded %s new stations" % (news,))
+    ingest.stations_loaded = True
     # Reload every 12 hours
-    reactor.callLater(12*60*60, load_stations)
+    reactor.callLater(12*60*60, IEMDB.runInteraction, load_stations, ingest)
 
 windAlerts = {}
 
 TORNADO_RE = re.compile(r" +FC |TORNADO")
 FUNNEL_RE = re.compile(r" FC |FUNNEL")
 HAIL_RE = re.compile(r"GR")
-EMAILS = 10
-
-def email_error(message, product_text):
-    """
-    Generic something to send email error messages 
-    """
-    global EMAILS
-    log.msg( message )
-    EMAILS -= 1
-    if (EMAILS < 0):
-        return
-
-    msg = MIMEText("Exception:\n%s\n\nRaw Product:\n%s" \
-                 % (message, product_text))
-    msg['subject'] = 'metarObFe.py Traceback'
-    msg['From'] = secret.parser_user
-    msg['To'] = 'akrherz@iastate.edu'
-    smtp = smtplib.SMTP()
-    smtp.connect()
-    smtp.sendmail(msg['From'], msg['To'], msg.as_string())
-    smtp.close()
-
-
-class MyIEMOB( access.Ob ):
-    """
-    Override the iemAccessOb class with my own query engine, so that we 
-    can capture errors for now!
-    """
-
-    def execQuery(self, sql, dbase, dbpool):
-        """
-        Execute queries with an error callback!
-        """
-        dbpool.runOperation( sql ).addErrback( email_error, sql)
 
 
 class myProductIngestor(ldmbridge.LDMProductReceiver):
+    stations_loaded = False
 
     def connectionLost(self, reason):
         print 'connectionLost', reason
@@ -103,12 +69,13 @@ class myProductIngestor(ldmbridge.LDMProductReceiver):
         reactor.callWhenRunning(reactor.stop)
 
     def processData(self, buf):
-        try:
-            buf = unicode(buf, errors='ignore')
-            real_processor( buf.encode('ascii', 'ignore') )
-        except Exception, myexp:
-            email_error(myexp, buf)
 
+        buf = unicode(buf, errors='ignore')
+        if self.stations_loaded:
+            reactor.callLater(0, real_processor, buf.encode('ascii', 'ignore') )
+        else:
+            log.msg("Stations not loaded, delaying!")
+            reactor.callLater(20, real_processor, buf.encode('ascii', 'ignore') )
 
 def real_processor(buf):
     """
@@ -153,8 +120,6 @@ def process_site(orig_metar, metar):
     except Metar.ParserError as inst:
         io = StringIO.StringIO()
         traceback.print_exc(file=io)
-        log.msg( io.getvalue() )
-        log.msg(clean_metar)
         errormsg = str(inst)
         if errormsg.find("Unparsed groups in body: ") == 0:
             tokens = errormsg.split(": ")
@@ -162,21 +127,27 @@ def process_site(orig_metar, metar):
             if newmetar != clean_metar:
                 #print 'NEW is', newmetar
                 reactor.callLater(0, process_site, orig_metar, newmetar)
+        else:
+            log.msg( io.getvalue() )
+            log.msg(clean_metar)
         return
-
     # Determine the ID, unfortunately I use 3 char ids for now :(
     if mtr.station_id is None:
+        log.msg("METAR station_id is None: %s" % (clean_metar,))
         return
     iemid = mtr.station_id[-3:]
     if mtr.station_id[0] != "K":
         iemid = mtr.station_id
     if not LOC2NETWORK.has_key(iemid):
-        asos.query("INSERT into unknown(id) values ('%s')" % (iemid,))
+        log.msg("Unknown ID: %s" % (iemid,))
+        deffer = ASOSDB.runOperation("INSERT into unknown(id) values (%s)", (iemid,))
+        deffer.addErrback(common.email_error, iemid)
         return
     network = LOC2NETWORK[iemid]
 
-    iem = MyIEMOB(iemid, network)
+    iem = access.Ob(iemid, network)
     if mtr.time is None:
+        log.msg("%s METAR has none-time" % (iemid,))
         return
     gts = mx.DateTime.DateTime( mtr.time.year, mtr.time.month, 
                   mtr.time.day, mtr.time.hour, mtr.time.minute)
@@ -184,17 +155,21 @@ def process_site(orig_metar, metar):
     if gts > (mx.DateTime.gmt() + mx.DateTime.RelativeDateTime(hours=1)):
         log.msg("%s METAR [%s] timestamp in the future!" % (iemid, gts))
         return
-
     iem.setObTimeGMT(gts)
-    iem.load_and_compare(iemaccess)
+    deffer = IEMDB.runInteraction(save_data, iemid, iem, mtr, clean_metar, orig_metar)
+    deffer.addErrback(common.email_error, metar)
+    #deffer.addCallback(got_results, tp, sid, network)
+    
+def save_data(txn, iemid, iem, mtr, clean_metar, orig_metar):
+    iem.txn = txn
+    iem.load_and_compare()
+    
     cmetar = clean_metar.replace("'", "")
 
     """ Need to figure out if we have a duplicate ob, if so, check
         the length of the raw data, if greater, take the temps """
     if iem.data['old_ts'] and (iem.data['ts'] == iem.data['old_ts']) and \
        (len(iem.data['raw']) > len(cmetar)):
-        #print "Duplicate METAR %s OLD: %s NEW: %s" % (iemid, \
-        #       iem.data['raw'], cmetar)
         pass
     else:
         if (mtr.temp):
@@ -225,18 +200,18 @@ def process_site(orig_metar, metar):
         if h is not None:
             iem.data['skyl%s' % (i+1)] = h.value("FT")
 
-    iem.updateDatabase(None, dbpool)
+    iem.updateDatabase()
 
     # Search for tornado
     if (len(TORNADO_RE.findall(clean_metar)) > 0):
-        sendAlert(iemid, "Tornado", clean_metar)
+        sendAlert(txn, iemid, "Tornado", clean_metar)
     elif (len(FUNNEL_RE.findall(clean_metar)) > 0):
-        sendAlert(iemid, "Funnel", clean_metar)
+        sendAlert(txn, iemid, "Funnel", clean_metar)
     else:
         for weatheri in mtr.weather:
             for x in weatheri:
                 if x is not None and "GR" in x:
-                    sendAlert(iemid, "Hail", clean_metar)
+                    sendAlert(txn, iemid, "Hail", clean_metar)
            
 
     # Search for Peak wind gust info....
@@ -263,32 +238,32 @@ def process_site(orig_metar, metar):
         #        (mtr.station_id, v, t, clean_metar))
         if (v >= 50 and not windAlerts.has_key(key)):
             windAlerts[key] = 1
-            sendWindAlert(iemid, v, d, t, clean_metar)
+            sendWindAlert(txn, iemid, v, d, t, clean_metar)
 
         d0 = {}
         d0['stationID'] = mtr.station_id[1:]
-        d0['network'] = network
+        d0['network'] = iem.data.get('network')
         d0['peak_gust'] = v
         d0['peak_drct'] = d
         d0['peak_ts'] = t.strftime("%Y-%m-%d %H:%M:%S")+"+00"
         d0['year'] = t.strftime("%Y")
-        iem.updateDatabasePeakWind(iemaccess, d0, dbpool)
+        iem.updateDatabasePeakWind(None, d0)
 
 
     del mtr, iem
 
-def sendAlert(iemid, what, clean_metar):
+def sendAlert(txn, iemid, what, clean_metar):
     print "ALERTING for [%s]" % (iemid,)
-    mesosite = pg.connect('mesosite', secret.dbhost)
-    rs = mesosite.query("""SELECT wfo, state, name, x(geom) as lon,
+    txn.execute("""SELECT wfo, state, name, x(geom) as lon,
            y(geom) as lat from stations 
-           WHERE id = '%s' """ % (iemid,) ).dictresult()
-    if len(rs) == 0:
+           WHERE id = '%s' """ % (iemid,) )
+    if txn.rowcount == 0:
         print "I not find WFO for sid: %s " % (iemid,)
         return
-    wfo = rs[0]['wfo']
-    st = rs[0]['state']
-    nm = rs[0]['name']
+    row = txn.fetchone()
+    wfo = row['wfo']
+    st = row['state']
+    nm = row['name']
 
     extra = ""
     if (clean_metar.find("$") > 0):
@@ -300,24 +275,24 @@ def sendAlert(iemid, what, clean_metar):
 
     twt = "%s,%s (%s) ASOS reports %s" % (nm, st, iemid, what)
     url = "http://mesonet.agron.iastate.edu/ASOS/current.phtml?network=%s_ASOS" % (st.upper(),)
-    common.tweet([wfo], twt, url, {'lat': `rs[0]['lat']`, 'long': `rs[0]['lon']`})
+    common.tweet([wfo], twt, url, {'lat': str(row['lat']), 'long': str(row['lon'])})
 
 
-def sendWindAlert(iemid, v, d, t, clean_metar):
+def sendWindAlert(txn, iemid, v, d, t, clean_metar):
     """
     Send a wind alert please
     """
     print "ALERTING for [%s]" % (iemid,)
-    mesosite = pg.connect('mesosite', secret.dbhost)
-    rs = mesosite.query("""SELECT wfo, state, name, x(geom) as lon,
+    txn.execute("""SELECT wfo, state, name, x(geom) as lon,
            y(geom) as lat from stations 
-           WHERE id = '%s' """ % (iemid,) ).dictresult()
-    if (len(rs) == 0):
+           WHERE id = '%s' """ % (iemid,) )
+    if txn.rowcount == 0:
         print "I not find WFO for sid: %s " % (iemid,)
         return
-    wfo = rs[0]['wfo']
-    st = rs[0]['state']
-    nm = rs[0]['name']
+    row = txn.fetchone()
+    wfo = row['wfo']
+    st = row['state']
+    nm = row['name']
 
     extra = ""
     if (clean_metar.find("$") > 0):
@@ -330,10 +305,9 @@ def sendWindAlert(iemid, v, d, t, clean_metar):
     twt = "%s,%s (%s) ASOS reports gust of %s knots from %s @ %s" % (nm, 
      st, iemid, v, mesonet.drct2dirTxt(d), t.strftime("%H%MZ"))
     url = "http://mesonet.agron.iastate.edu/ASOS/current.phtml?network=%s_ASOS" % (st.upper(),)
-    common.tweet([wfo], twt, url, {'lat': `rs[0]['lat']`, 'long': `rs[0]['lon']`})
+    common.tweet([wfo], twt, url, {'lat': str(row['lat']), 'long': str(row['lon'])})
 
-myJid = jid.JID('%s@%s/metar_%s' % \
-      (secret.iembot_ingest_user, secret.chatserver, \
+myJid = jid.JID('%s@%s/metar_%s' % (secret.iembot_ingest_user, secret.chatserver, 
        mx.DateTime.gmt().strftime("%Y%m%d%H%M%S") ) )
 factory = client.basicClientFactory(myJid, secret.iembot_ingest_password)
 jabber = common.JabberClient(myJid)
@@ -344,6 +318,7 @@ factory.addBootstrap("//event/stream/error", jabber.debug)
 factory.addBootstrap(xmlstream.STREAM_END_EVENT, jabber._disconnect )
 reactor.connectTCP(secret.connect_chatserver, 5222, factory)
 
-fact = ldmbridge.LDMProductFactory( myProductIngestor() )
-reactor.callLater(0, load_stations)
+ingest = myProductIngestor()
+fact = ldmbridge.LDMProductFactory( ingest )
+IEMDB.runInteraction(load_stations, ingest)
 reactor.run()
