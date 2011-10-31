@@ -110,7 +110,7 @@ def process_site(orig_metar, metar):
         return
 
     # Remove any multiple whitespace, bad chars
-    metar = metar.encode('latin-1').replace('\xa0', " ").replace("\003", "")
+    metar = metar.encode('latin-1').replace('\xa0', " ").replace("\003", "").replace("COR ", "")
     clean_metar = re.sub("\s+", " ", metar.strip())
     # Only process US obs for now ....
     if len(clean_metar) == 0:
@@ -133,7 +133,7 @@ def process_site(orig_metar, metar):
         return
     # Determine the ID, unfortunately I use 3 char ids for now :(
     if mtr.station_id is None:
-        log.msg("METAR station_id is None: %s" % (clean_metar,))
+        log.msg("METAR station_id is None: %s" % (orig_metar,))
         return
     iemid = mtr.station_id[-3:]
     if mtr.station_id[0] != "K":
