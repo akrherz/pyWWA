@@ -30,41 +30,29 @@ from email.MIMEText import MIMEText
 from twisted.words.protocols.jabber import client, jid
 from twisted.words.xish import domish
 from twisted.internet import reactor
+from twisted.enterprise import adbapi
 
 from support import TextProduct
-import pg
-POSTGIS = pg.connect(secret.dbname, secret.dbhost, user=secret.dbuser, passwd=secret.dbpass)
+DBPOOL = adbapi.ConnectionPool("psycopg2", database=secret.dbname, host=secret.dbhost, password=secret.dbpass)
 
 raw = sys.stdin.read()
-
-
 
 def process(raw):
     try:
         real_process(raw)
-    except:
-        io = StringIO.StringIO()
-        traceback.print_exc(file=io)
-        msg = MIMEText("%s\n\n>RAW DATA\n\n%s"%(io.getvalue(),raw))
-        msg['subject'] = 'speParse.py Traceback'
-        msg['From'] = secret.parser_user
-        msg['To'] = secret.error_email
-
-        s = smtplib.SMTP()
-        s.connect()
-        s.sendmail(msg["From"], msg["To"], msg.as_string())
-        s.close()
+    except Exception, exp:
+        common.email_error(exp, raw)
 
 
 def real_process(raw):
-    sqlraw = raw.replace("'", "\\'").replace("\015\015\012", "\n")
+    sqlraw = raw.replace("\015\015\012", "\n")
     prod = TextProduct.TextProduct(raw)
 
     product_id = prod.get_product_id()
-    sql = "INSERT into text_products(product, product_id) \
-      values ('%s','%s')" % (sqlraw, product_id)
-    POSTGIS.query(sql)
-
+    sql = """INSERT into text_products(product, product_id) values (%s,%s)"""
+    myargs = (sqlraw, product_id)
+    DBPOOL.runOperation(sql, myargs)
+    
     tokens = re.findall("ATTN (WFOS|RFCS)(.*)", raw)
     channels = []
     for tpair in tokens:
