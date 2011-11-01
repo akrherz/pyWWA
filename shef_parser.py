@@ -30,7 +30,7 @@ def write_pid():
     o.close()
 
 # Stuff I wrote
-from pyIEM import mesonet
+import mesonet
 import access
 from support import ldmbridge, TextProduct
 import secret
