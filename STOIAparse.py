@@ -7,9 +7,11 @@ from email.MIMEText import MIMEText
 from pyIEM import wellknowntext
 import secret
 
-
-import pg
-mydb = pg.connect(secret.dbname, secret.dbhost, user=secret.dbuser)
+import common
+import iemdb
+import psycopg2.extras
+POSTGIS = iemdb.connect('postgis')
+pcursor = POSTGIS.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
 FORMAT = "%(asctime)-15s:: %(message)s"
 logging.basicConfig(filename='logs/ingestRC.log', filemode='a+', format=FORMAT)
@@ -22,24 +24,6 @@ errors = StringIO.StringIO()
 # Changedir to /tmp
 os.chdir("/tmp")
 
-# Called if we want to email any errors that occured....
-def emailErrors(raw):
-  errors.seek(0)
-  errstr = errors.read()
-  if ( len(errstr) == 0):
-    return  # No runs, no hits, no errors
-
-  logger.error( errstr )
-
-  msg = MIMEText("%s\n\n>RAW DATA\n\n%s" % (errstr, raw) )
-  msg['subject'] = 'STOIAparse.py Traceback'
-  msg['From'] = secret.parser_user
-  msg['To'] = "akrherz@iastate.edu"
-
-  s = smtplib.SMTP()
-  s.connect()
-  s.sendmail(msg["From"], msg["To"], msg.as_string())
-  s.close()
 
 def findString(cond, sstr):
   if (cond.find(sstr) > -1):
@@ -54,9 +38,13 @@ def figureCondition(condition, conditions):
     if (findString(condition, typ.upper())):
       if (not conditions.has_key(typ.upper())):
         logger.info("Unknown Condition: %s\n" % (typ,) )
-        rs = mydb.query("SELECT max(code) as m from roads_conditions").dictresult()
-        newID = int( rs[0]["m"] ) + 1
-        mydb.query("INSERT into roads_conditions VALUES (%s, '%s') " % \
+        pcursor.execute("SELECT max(code) as m from roads_conditions")
+        row = pcursor.fetchone()
+        if row['m'] is None:
+            newID = 1
+        else:
+            newID = int( row['m'] ) + 1
+        pcursor.execute("INSERT into roads_conditions VALUES (%s, '%s') " % \
           (newID, typ) )
         conditions[typ.upper()] = newID
 
@@ -69,17 +57,17 @@ def process(raw):
   # Load up dictionary of Possible Road Conditions
   conditions = {}
   condcodes = {}
-  rs = mydb.query("SELECT * from roads_conditions").dictresult()
-  for i in range(len(rs)):
-    conditions[ rs[i]["label"].upper() ] = rs[i]["code"]
-    condcodes[ int(rs[i]["code"]) ] = rs[i]["label"].upper()
+  pcursor.execute("SELECT label, code from roads_conditions")
+  for row in pcursor:
+    conditions[ row['label'].upper() ] = row['code']
+    condcodes[ int(row['code']) ] = row['label'].upper()
 
   # Load up dictionary of roads...
   roads = {}
-  rs = mydb.query("SELECT * from roads_base").dictresult()
-  for i in range(len(rs)):
-    roads["%s%s" % (rs[i]["major"], rs[i]["minor"].upper())] = rs[i]["segid"]
-
+  pcursor.execute("SELECT major, minor, segid from roads_base")
+  for row in pcursor:
+    roads["%s%s" % (row['major'], row['minor'].upper())] = row['segid']
+    
   # Figure out when this report is valid
   tokens = re.findall("([0-9]{1,2})([0-9][0-9]) ([AP]M) C[DS]T [A-Z][A-Z][A-Z] ([A-Z][A-Z][A-Z]) ([0-9]+) (2[0-9][0-9][0-9])\n", raw)
   # tokens is like [('08', '52', 'AM', 'NOV', '23', '2004')]
@@ -105,8 +93,8 @@ def process(raw):
       continue
     if (line[0] != " "):
       major = (line[:6]).strip()
-    minor = (line[7:40]).strip().upper()
-    condition = (line[40:]).strip().upper()
+    minor = (line[7:47]).strip().upper()
+    condition = (line[47:]).strip().upper()
 
     #----------------------------------------
     # Now we are going to do things by type!
@@ -122,15 +110,15 @@ def process(raw):
     segid = roads[rkey]
 
 
-    mydb.query("UPDATE roads_current SET cond_code = %s, valid = '%s', \
+    pcursor.execute("UPDATE roads_current SET cond_code = %s, valid = '%s', \
      towing_prohibited = %s, limited_vis = %s, raw = '%s' \
      WHERE segid = %s " % (roadCondCode, \
      ts.strftime("%Y-%m-%d %H:%M"), towingProhibited, limitedVis, condition, segid) )
 
 
 
-  # Copy the currents table over to the log...
-  mydb.query("INSERT into roads_%s_log SELECT * from roads_current"%(ts.year,))
+  # Copy the currents table over to the log... HARD CODED
+  pcursor.execute("INSERT into roads_2012_log SELECT * from roads_current")
 
   # Now we generate a shapefile....
   dbf = dbflib.create("iaroad_cond")
@@ -151,30 +139,32 @@ def process(raw):
 
   sql = "select b.*, c.*, astext(b.geom) as bgeom from \
          roads_base b, roads_current c WHERE b.segid = c.segid"
-  rs = mydb.query(sql).dictresult()
-  for i in range(len(rs)):
-    s = rs[i]["bgeom"]
+  pcursor.execute(sql)
+  i = 0
+  for row in pcursor:
+    s = row["bgeom"]
     f = wellknowntext.convert_well_known_text(s)
-    valid = mx.DateTime.strptime(rs[i]["valid"][:16], "%Y-%m-%d %H:%M")
+    valid = row["valid"]
     d = {}
-    d["SEGID"] = rs[i]["segid"]
-    d["MAJOR"] = rs[i]["major"]
-    d["MINOR"] = rs[i]["minor"]
-    d["US1"] = rs[i]["us1"]
-    d["ST1"] = rs[i]["st1"]
-    d["INT1"] = rs[i]["int1"]
-    d["TYPE"] = rs[i]["type"]
+    d["SEGID"] = row["segid"]
+    d["MAJOR"] = row["major"]
+    d["MINOR"] = row["minor"]
+    d["US1"] = row["us1"]
+    d["ST1"] = row["st1"]
+    d["INT1"] = row["int1"]
+    d["TYPE"] = row["type"]
     d["VALID"] = valid.strftime("%Y%m%d%H%M")
-    d["COND_CODE"] = rs[i]["cond_code"]
-    d["COND_TXT"] = rs[i]["raw"]
-    d["BAN_TOW"] = rs[i]["towing_prohibited"].upper()
-    d["LIM_VIS"] = rs[i]["limited_vis"].upper()
+    d["COND_CODE"] = row["cond_code"]
+    d["COND_TXT"] = row["raw"]
+    d["BAN_TOW"] = row["towing_prohibited"].upper()
+    d["LIM_VIS"] = row["limited_vis"].upper()
 
     obj = shapelib.SHPObject(shapelib.SHPT_ARC, 1, f )
     shp.write_object(-1, obj)
     dbf.write_record(i, d)
 
     del(obj)
+    i += 1
 
   del(shp)
   del(dbf)
@@ -195,6 +185,11 @@ if (__name__ == "__main__"):
   except:
     traceback.print_exc(file=errors)
 
-  emailErrors(raw)
-
-  sys.exit(0)
+  errors.seek(0)
+  errstr = errors.read()
+  if ( len(errstr) > 0):
+    logger.error( errstr )
+    common.email_error(errstr, raw)
+  pcursor.close()
+  POSTGIS.commit()
+  POSTGIS.close()
