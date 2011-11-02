@@ -156,8 +156,8 @@ def process(raw):
     d["VALID"] = valid.strftime("%Y%m%d%H%M")
     d["COND_CODE"] = row["cond_code"]
     d["COND_TXT"] = row["raw"]
-    d["BAN_TOW"] = row["towing_prohibited"].upper()
-    d["LIM_VIS"] = row["limited_vis"].upper()
+    d["BAN_TOW"] = str(row["towing_prohibited"])[0]
+    d["LIM_VIS"] = str(row["limited_vis"])[0]
 
     obj = shapelib.SHPObject(shapelib.SHPT_ARC, 1, f )
     shp.write_object(-1, obj)
