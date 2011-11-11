@@ -17,8 +17,9 @@
 
 # Get the logger going, asap
 from twisted.python import log
-log.startLogging(open('logs/lsrParse.log', 'a'))
+from twisted.python import logfile
 log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
+log.startLogging(logfile.DailyLogFile('lsrParse.log', 'logs'))
 
 # Standard python imports
 import re, pickle
@@ -36,8 +37,8 @@ import common
 import secret
 from support import TextProduct,  ldmbridge, reference
 
-DBPOOL = adbapi.ConnectionPool("psycopg2", database=secret.dbname, host=secret.dbhost, password=secret.dbpass)
-EMAILS = 10
+DBPOOL = adbapi.ConnectionPool("twistedpg", database=secret.dbname, host=secret.dbhost, 
+                               password=secret.dbpass, cp_reconnect=True)
 
 class ProcessingException(Exception):
     """ Generic Exception for processing errors I can handle"""
@@ -72,24 +73,6 @@ def pickledb():
     """ Dump our database to a flat file """
     pickle.dump(LSRDB, open('lsrdb.p','w'))
 
-def email_error(message, product_text, lsr=None):
-    """
-    Generic something to send email error messages 
-    """
-    global EMAILS
-    log.msg( message )
-    EMAILS -= 1
-    if (EMAILS < 0):
-        return
-
-    msg = MIMEText("Exception:\n%s\n\nRaw Product:\n%s\n%s" \
-                 % (message, product_text, lsr))
-    msg['subject'] = 'lsr_parser.py Traceback'
-    msg['From'] = secret.parser_user
-    msg['To'] = 'akrherz@iastate.edu'
-    smtp.sendmail("mailhub.iastate.edu", msg["From"], msg["To"], msg)
-
-
 class MyProductIngestor(ldmbridge.LDMProductReceiver):
     """ I process products handed off to me from faithful LDM """
 
@@ -106,7 +89,7 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
         except ProcessingException, msg:
             send_iemchat_error(nws, msg)
         except Exception,myexp:
-            email_error(myexp, buf, nws)
+            common.email_error(myexp, buf)
 
     def connectionLost(self, reason):
         print 'connectionLost', reason
@@ -304,16 +287,15 @@ def real_processor(nws):
               lsr.lts.strftime(time_fmt), nws.z)
         common.tweet([wfo,], twt, uri, {'lat': `lsr.lat`, 'long': "-%s" % (lsr.lon,)})
 
-        sql = "INSERT into lsrs_%s (valid, type, magnitude, city, \
-               county, state, source, remark, geom, wfo, typetext) \
-               values ('%s+00', '%s', %s, '%s', '%s', '%s', \
-               '%s', '%s', 'SRID=4326;POINT(-%s %s)', '%s', '%s')" % \
-          (lsr.gts.year, lsr.gts.strftime("%Y-%m-%d %H:%M"), dbtype, lsr.mag, \
-           lsr.city.replace("'","\\'"), re.sub("'", "\\'",lsr.county), \
-           lsr.state, lsr.source, \
-           re.sub("'", "\\'", lsr.remark), lsr.lon, lsr.lat, wfo, lsr.typetext)
+        sql = """INSERT into lsrs_%s (valid, type, magnitude, city, 
+               county, state, source, remark, geom, wfo, typetext) 
+               values (%s, %s, %s, %s, %s, %s, 
+               %s, %s, 'SRID=4326;POINT(-%s %s)', %s, %s)""" 
+        myargs = (lsr.gts.year, lsr.gts.strftime("%Y-%m-%d %H:%M+00"), dbtype, lsr.mag, 
+           lsr.city, lsr.county, lsr.state, lsr.source, 
+           lsr.remark, lsr.lon, lsr.lat, wfo, lsr.typetext)
 
-        DBPOOL.runOperation(sql).addErrback( email_error, sql, lsr)
+        DBPOOL.runOperation(sql, myargs).addErrback( common.email_error, nws.raw)
 
     if (nws.raw.find("...SUMMARY") > 1):
         extra_text = ""
@@ -336,8 +318,7 @@ sent and not repeated here." % (duplicates, duplicates + new_reports)
         twt = "Summary Local Storm Report"
         common.tweet([wfo,], twt, uri)
 
-myJid = jid.JID('%s@%s/lsr_parse_%s' % \
-      (secret.iembot_ingest_user, secret.chatserver, \
+myJid = jid.JID('%s@%s/lsr_parse_%s' % (secret.iembot_ingest_user, secret.chatserver, 
        mx.DateTime.gmt().strftime("%Y%m%d%H%M%S") ) )
 factory = client.basicClientFactory(myJid, secret.iembot_ingest_password)
 
