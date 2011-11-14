@@ -13,7 +13,10 @@
 # You should have received a copy of the GNU General Public License along with
 # this program; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-""" SHEF product ingestor """
+""" 
+ SHEF product ingestor 
+ $Id: $:
+"""
 
 # Setup Standard Logging we use
 from twisted.python import log, logfile
@@ -339,7 +342,9 @@ def got_results(res, tp, sid, network):
     @param network string network
     """
     if not res:
-        enter_unknown(sid, tp, network)
+        if UNKNOWN.get(sid) is None:
+            enter_unknown(sid, tp, network)
+            UNKNOWN[sid] = 1
     
 def save_data(txn, tp, iemob, data):
     """
