@@ -44,7 +44,7 @@ log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
 POSTGIS = pg.connect(secret.dbname, secret.dbhost, user=secret.dbuser, 
                      passwd=secret.dbpass)
 DBPOOL = adbapi.ConnectionPool("psycopg2", database=secret.dbname, 
-                               host=secret.dbhost, password=secret.dbpass)
+                               host=secret.dbhost, password=secret.dbpass, cp_reconnect=True)
 
 # 
 CS_RE = re.compile(r"""CONVECTIVE\sSIGMET\s(?P<label>[0-9A-Z]+)\s

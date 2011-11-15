@@ -7,6 +7,7 @@ from twisted.mail import smtp
 from twisted.web import client
 from twisted.words.xish.xmlstream import STREAM_END_EVENT
 from twisted.internet.task import LoopingCall
+from twisted.enterprise import adbapi
 
 import secret
 from twittytwister import twitter
@@ -22,15 +23,23 @@ import pg
 import socket
 from oauth import oauth
 
-mesosite = pg.connect("mesosite", "iemdb", user='nobody')
 OAUTH_TOKENS = {}
-rs = mesosite.query("SELECT * from oauth_tokens").dictresult()
-for i in range(len(rs)):
-  OAUTH_TOKENS[ rs[i]['username'] ] = oauth.OAuthToken(rs[i]['token'], rs[i]['secret'])
-
 OAUTH_CONSUMER = oauth.OAuthConsumer(secret.consumer_key, secret.consumer_secret)
-
 BITLY = "http://api.bit.ly/shorten?version=2.0.1&longUrl=%s&login=iembot&apiKey="+ secret.bitly_key
+
+def load_tokens(txn):
+    txn.execute("SELECT * from oauth_tokens")
+    for row in txn:
+        OAUTH_TOKENS[ row['username'] ] = oauth.OAuthToken(
+                            row['token'], row['secret'])
+
+_dbpool = adbapi.ConnectionPool("twistedpg", database="mesosite", 
+                               host=secret.dbhost, user=secret.dbuser,
+                               password=secret.dbpass, cp_reconnect=True)
+defer = _dbpool.runInteraction(load_tokens)
+def stop_pool(res):
+    _dbpool.close()
+defer.addCallback(stop_pool)
 
 def email_error(exp, message):
     """

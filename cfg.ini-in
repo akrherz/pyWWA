@@ -1,0 +1,4 @@
+[xmpp]
+connecthost=localhost
+username=iembot_ingest
+password=secret

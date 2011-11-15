@@ -250,6 +250,7 @@ def real_process(raw):
     # Figure out who should get notification of the watch...
     sql = "SELECT distinct wfo from nws_ugc WHERE \
          contains('SRID=4326;MULTIPOLYGON(((%s)))', geom)" % (wkt,)
+    print sql
     rs = POSTGIS.query(sql).dictresult()
     channels = ['SPC']
     for i in range(len(rs)):

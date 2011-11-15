@@ -10,8 +10,8 @@ NATIONAL WEATHER SERVICE FORT WORTH TX
 ..DATE..    ....MAG....      ..COUNTY LOCATION..ST.. ...SOURCE....
             ..REMARKS..
 
-1037 PM     TORNADO          7 NE ANNA               33.42N  96.46W
-05/09/2006                   GRAYSON            TX   TRAINED SPOTTER 
+1037 PM     TORNADO          7 NE ANNA'S             33.42N  96.46W
+05/09/2006                   GRAYSON'S PIER     TX   TRAINED SPOTTER 
 
             PREVIOUS TORNADO DISSIPATED AND A SECOND LARGER ONE 
             FORMED...DEBRIS REPORTED.  
