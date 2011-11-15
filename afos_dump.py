@@ -18,8 +18,12 @@
 __revision__ = '$Id: afos_dump.py 4513 2009-01-06 16:57:49Z akrherz $'
 
 # Twisted Python imports
-from twisted.internet import reactor
 from twisted.python import log
+from twisted.python import logfile
+log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
+log.startLogging(logfile.DailyLogFile('afos_dump.log','logs/'))
+
+from twisted.internet import reactor
 from twisted.enterprise import adbapi
 from twisted.mail import smtp
 
@@ -35,12 +39,10 @@ from support import ldmbridge, TextProduct, reference
 import secret
 import common
 
-log.startLogging(open('logs/afos_dump.log','a'))
-log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
 
 DBPOOL = adbapi.ConnectionPool("psycopg2", database="afos", 
                                host=secret.dbhost, user=secret.dbuser,
-                               password=secret.dbpass)
+                               password=secret.dbpass, cp_reconnect=True)
 EMAILS = 10
 
 def email_error(message, product_text):
