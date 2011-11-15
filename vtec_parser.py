@@ -17,10 +17,15 @@
 
 __revision__ = '$Id$'
 
+from twisted.python import log
+from twisted.python import logfile
+log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
+log.startLogging( logfile.DailyLogFile('vtec_parser.log','logs'))
+
+
 # Twisted Python imports
 from twisted.words.protocols.jabber import client, jid, xmlstream
 from twisted.internet import reactor
-from twisted.python import log
 from twisted.enterprise import adbapi
 from twisted.mail import smtp
 
@@ -39,12 +44,9 @@ import StringIO
 import socket
 import sys
 
-log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
-log.startLogging(open('logs/vtec_parser.log','a'))
-
-
 POSTGIS = pg.connect(secret.dbname, secret.dbhost, user=secret.dbuser, passwd=secret.dbpass)
-DBPOOL = adbapi.ConnectionPool("psycopg2", database=secret.dbname, host=secret.dbhost, password=secret.dbpass)
+DBPOOL = adbapi.ConnectionPool("psycopg2", database=secret.dbname, host=secret.dbhost, 
+                               password=secret.dbpass, cp_reconnect=True)
 TIMEFORMAT="%Y-%m-%d %H:%M+00"
 
 class NoVTECFoundError(Exception):
