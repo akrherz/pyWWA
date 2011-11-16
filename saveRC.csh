@@ -1,4 +1,6 @@
-
+# This is run async after the ingestor fires a product into LDM
+# which triggers this script
+# Run from: pqact_filer.csh
 set ts="$1"
 set hhmm="`echo $1 | cut -c 9-12`"
 

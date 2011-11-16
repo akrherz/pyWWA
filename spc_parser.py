@@ -17,24 +17,24 @@
 
 __revision__ = '$Id: spc_parser.py 4513 2009-01-06 16:57:49Z akrherz $'
 
+from twisted.python import log
+from twisted.python import logfile
+log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
+log.startLogging(logfile.DailyLogFile('spc_parser.log','logs'))
+
 # Twisted Python imports
 from twisted.words.protocols.jabber import client, jid, xmlstream
 from twisted.internet import reactor
-from twisted.python import log
 from twisted.enterprise import adbapi
-from twisted.mail import smtp
-
-# Standard Python modules
-import os, re, traceback, StringIO, smtplib
-from email.MIMEText import MIMEText
 
 # Python 3rd Party Add-Ons
-import mx.DateTime, pg
-
+import mx.DateTime
 
 # pyWWA stuff
-from support import ldmbridge, TextProduct, reference, spcpts
-import secret
+from support import ldmbridge, TextProduct, spcpts
+import ConfigParser
+config = ConfigParser.ConfigParser()
+config.read('cfg.ini')
 import common
 
 def exception_hook(kwargs):
@@ -42,17 +42,11 @@ def exception_hook(kwargs):
     if not kwargs.has_key("failure"):
         return
 
-#log.addObserver(exception_hook)
-log.startLogging(open('logs/spc_parser.log','a'))
-log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
-
-POSTGIS = pg.connect(secret.dbname, secret.dbhost, user=secret.dbuser, 
-                     passwd=secret.dbpass)
-DBPOOL = adbapi.ConnectionPool("psycopg2", database=secret.dbname, 
-                               host=secret.dbhost, password=secret.dbpass)
-os.environ['EMAILS'] = "10"
-
-
+DBPOOL = adbapi.ConnectionPool("twistedpg", database="postgis", 
+                               host=config.get('database','host'), 
+                               user=config.get('database','user'),
+                               password=config.get('database','password'), 
+                               cp_reconnect=True)
 WAITFOR = 20
 
 
@@ -71,15 +65,17 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
     def process_data(self, buf):
         """ Process the product """
         try:
-            real_parser(buf)
-        except Exception, myexp:
-            common.email_error(myexp, buf)
-
+            real_parser( buf )
+        except Exception, exp:
+            common.email_error(exp, buf)
+        
 def consume(spc, outlook):
     """
     Do the geometric stuff we care about, including storage
     """
-    
+    pgconn = DBPOOL.connect()
+    txn = pgconn.cursor()
+
     # Insert geometry into database table please
     sql = """INSERT into spc_outlooks(issue, valid, expire,
         threshold, category, day, outlook_type, geom)
@@ -88,7 +84,7 @@ def consume(spc, outlook):
             spc.issue,  spc.valid, spc.expire,
             outlook.threshold, outlook.category, spc.day, 
             spc.outlook_type, outlook.polygon.wkt)
-    DBPOOL.runOperation( sql ).addErrback(common.email_error, sql)
+    txn.execute( sql )
     
     # Search for WFOs
     sql = """select distinct wfo from nws_ugc 
@@ -96,13 +92,17 @@ def consume(spc, outlook):
        st_contains(geomFromEWKT('SRID=4326;%s'), geom) )and 
        polygon_class = 'C'""" % (outlook.polygon.wkt, outlook.polygon.wkt)
 
-    rs = POSTGIS.query(sql).dictresult()
+    txn.execute( sql )
     affectedWFOS = []
-    for i in range(len(rs)):
-        affectedWFOS.append( rs[i]['wfo'] )
+    for row in txn.fetchall():
+        affectedWFOS.append( row['wfo'] )
 
     print "Category: %s Threshold: %s  #WFOS: %s" % (
         outlook.category, outlook.threshold,  len(affectedWFOS))
+    
+    txn.close()
+    pgconn.commit()
+
     return affectedWFOS
 
 
@@ -114,7 +114,7 @@ def real_parser(buf):
     #spc.draw_outlooks()
 
     # Remove any previous data
-    POSTGIS.query("""DELETE from spc_outlooks where valid = '%s+00' 
+    DBPOOL.runOperation("""DELETE from spc_outlooks where valid = '%s+00' 
     and expire = '%s+00' 
     and outlook_type = '%s' and day = '%s'""" % (
                     spc.valid, spc.expire, spc.outlook_type, spc.day))
@@ -188,28 +188,21 @@ for portions of %s %s" % (channelprefix, wfo, cat, wfo, url)
                 htmlmsgs[wfo] = "The Storm Prediction Center issues \
 <a href=\"%s\">%s %s Risk</a> for portions of %s's area" % (url, \
   product_descript, codes[cat], wfo)
-                twts[wfo] = "SPC issues Day 1 %s risk" % (cat,)
+                twts[wfo] = "SPC issues Day 1 %s risk for %s" % (cat, wfo)
 
     for wfo in msgs.keys():
         jabber.sendMessage( msgs[wfo], htmlmsgs[wfo] )
 
-    # Fancy pants twitter logic
-    rlkp = {}
     for wfo in twts.keys():
-        if not rlkp.has_key(twts[wfo]):
-            rlkp[ twts[wfo] ] = []
-        rlkp[ twts[wfo] ].append( wfo )
-    for twt in rlkp.keys():
-        common.tweet( rlkp[twt], twt, url )
+        common.tweet( [wfo,], twts[wfo], url )
 
     # Generic for SPC
     twt = "The Storm Prediction Center issues %s Outlook" %( product_descript,)
     common.tweet(['SPC',], twt, url)
 
-myJid = jid.JID('%s@%s/spc_parser_%s' % \
-      (secret.iembot_ingest_user, secret.chatserver, \
-       mx.DateTime.gmt().strftime("%Y%m%d%H%M%S") ) )
-factory = client.basicClientFactory(myJid, secret.iembot_ingest_password)
+myJid = jid.JID('%s@%s/spc_parser_%s' % (config.get('xmpp', 'username'), 
+    config.get('xmpp', 'domain'), mx.DateTime.gmt().strftime("%Y%m%d%H%M%S") ) )
+factory = client.basicClientFactory(myJid, config.get('xmpp','password'))
 
 jabber = common.JabberClient(myJid)
 
@@ -219,7 +212,7 @@ factory.addBootstrap("//event/client/basicauth/authfailed", jabber.debug)
 factory.addBootstrap("//event/stream/error", jabber.debug)
 factory.addBootstrap(xmlstream.STREAM_END_EVENT, jabber._disconnect )
 
-reactor.connectTCP(secret.connect_chatserver, 5222, factory)
+reactor.connectTCP(config.get('xmpp', 'connecthost'), 5222, factory)
 
 ldm = ldmbridge.LDMProductFactory( MyProductIngestor() )
 reactor.run()

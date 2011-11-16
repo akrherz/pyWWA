@@ -1,5 +1,7 @@
-#!/mesonet/python/bin/python
-# Parse UVICAC and create a WXC file
+"""
+Parse UVI data into something WXC can use
+$Id: $:
+"""
 
 import sys, re, os, mx.DateTime
 now = mx.DateTime.now()

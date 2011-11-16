@@ -1,4 +1,14 @@
 [xmpp]
 connecthost=localhost
+domain=localhost
 username=iembot_ingest
 password=secret
+
+[database]
+host=localhost
+user=ldm
+password=secret
+
+[twitter]
+consumerkey=key
+consumersecret=secret

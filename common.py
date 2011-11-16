@@ -170,18 +170,6 @@ class JabberClient:
         b.addRawXml( html or body )
         self.xmlstream.send(message)
 
-
-    #def findurl(self, message):
-    #    """Extract URL from message"""
-    #    tokens = message.split(" ")
-    #    if len(tokens) == 0:
-    #        return None
-    #    if tokens[-1][:4] != "http":
-    #        return None
-    #    return tokens[-1]
-
-
-
     def debug(self, elem):
         log.msg( elem.toXml().encode('utf-8') )
 

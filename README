@@ -1,4 +1,9 @@
-Ingestors for IEM
+These are hacky NWS data ingestors written by:
+   daryl herzmann 
+   akrherz@iastate.edu
+   515-294-5978
+
+Feel free to do whatever you wish with these.
 
 Notes on HVTEC:
   http://www.nws.noaa.gov/om/vtec/hydro_vtec.shtml

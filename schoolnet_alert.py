@@ -1,23 +1,20 @@
-#!/mesonet/python/bin/python
-# 14 Mar 2004	Rewrite for new Reports
+"""
+Called when there is a schoolnet alert
+$ID: $:
+"""
 
 import re, sys, smtplib, mx.DateTime
-from pyIEM import stationTable, iemdb
-i = iemdb.iemdb()
 from email.MIMEText import MIMEText
+import network
 
-st = stationTable.stationTable("/mesonet/TABLES/snet.stns")
+nt = network.Table(('KCCI','KELO','KIMT'))
 
 alerts = { 'KCCI': ["akrherz@iastate.edu", "wxdude@gmail.com"],
   'KIMT': ["akrherz@iastate.edu",],
   'KELO': ["akrherz@iastate.edu", "dennis_todey@sdstate.edu",
    "stormcenter@keloland.com"] }
 
-#alerts = { 'KCCI' : ["akrherz@iastate.edu",],
-#		'KELO': ["akrherz@iastate.edu",] }
-
 bulletin = sys.stdin.read()
-#blines = re.split("\n", bulletin)
 
 tokens = re.findall(".. (.....) (....)  . ..(....)/.. (.*)", bulletin)
 
@@ -29,36 +26,39 @@ sped = tokens[0][3]
 
 msg = MIMEText(bulletin)
 
-msg['Subject'] = "[%s] %s Gust %s" % (network, sped, st.sts[sid]["name"])
+msg['Subject'] = "[%s] %s Gust %s" % (network, sped, nt.sts[sid]["name"])
 
 s = smtplib.SMTP()
 s.connect()
 s.sendmail("ldm@mesonet.agron.iastate.edu", alerts[network], msg.as_string() )
 s.close()
 
-if (network == 'KCCI'): # We have a special
-  ts = mx.DateTime.strptime(mmdd + hhmm, "%m%d%H%M")
-  ts += mx.DateTime.RelativeDateTime(year= mx.DateTime.now().year )
-  mydb = i['kcci']
-  emails = []
-  rs = mydb.query("select w.uid, a.email from walerts w, accounts a \
-    WHERE w.sid = '"+ sid +"' and w.uid = a.uid").dictresult()
-  for i in range(len(rs)):
-    emails.append(rs[i]['email'])
+if network != 'KCCI': # We have a special
+    sys.exit()
 
-#  emails = ['akrherz@iastate.edu']
+ts = mx.DateTime.strptime(mmdd + hhmm, "%m%d%H%M")
+ts += mx.DateTime.RelativeDateTime(year= mx.DateTime.now().year )
+import iemdb
+KCCI = iemdb.connect('kcci', bypass=True)
+kcursor = KCCI.cursor()
+emails = []
+kcursor.execute("""select w.uid, a.email from walerts w, accounts a 
+    WHERE w.sid = %s and w.uid = a.uid""", (sid,))
+for row in kcursor:
+    emails.append(row[1])
 
-  form = {}
-  form["sname"] = st.sts[sid]['name']
-  form["gust"] = sped
-  form["obts"] = ts.strftime("%I:%M %P -- %d %B %Y")
-  form["sid"] = sid
-  form["year"] = ts.strftime("%Y")
-  form["month"] = ts.strftime("%m")
-  form["day"] = ts.strftime("%d")
-  form["bulletin"] = bulletin
 
-  mformat = """
+form = {}
+form["sname"] = nt.sts[sid]['name']
+form["gust"] = sped
+form["obts"] = ts.strftime("%I:%M %P -- %d %B %Y")
+form["sid"] = sid
+form["year"] = ts.strftime("%Y")
+form["month"] = ts.strftime("%m")
+form["day"] = ts.strftime("%d")
+form["bulletin"] = bulletin
+
+mformat = """
 ====================================================================
 KCCI SchoolNet8 Wind Gust Alert
 -------------------------------
@@ -89,13 +89,12 @@ Raw Report:%(bulletin)s
 ====================================================================
 """
 
-  mstring = mformat % form
+mstring = mformat % form
 
-  msg = MIMEText(mstring)
+msg = MIMEText(mstring)
+msg['Subject'] = "[%s] %s Gust %s" % (network, sped, st.sts[sid]["name"])
 
-  msg['Subject'] = "[%s] %s Gust %s" % (network, sped, st.sts[sid]["name"])
-
-  s = smtplib.SMTP()
-  s.connect()
-  s.sendmail("ldm@mesonet.agron.iastate.edu", emails, msg.as_string() )
-  s.close()
+s = smtplib.SMTP()
+s.connect()
+s.sendmail("ldm@mesonet.agron.iastate.edu", emails, msg.as_string() )
+s.close()

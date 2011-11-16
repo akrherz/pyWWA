@@ -17,38 +17,50 @@
 
 __revision__ = '$Id: mos_parset.py 3802 2008-07-29 19:55:56Z akrherz $'
 
+from twisted.python import log
+from twisted.python import logfile
+log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
+log.startLogging( logfile.DailyLogFile('mos_parser.log', 'logs') )
+
 # Twisted Python imports
 from twisted.internet import reactor
-from twisted.python import log
 from twisted.enterprise import adbapi
 
 # Standard Python modules
-import os, re, traceback, StringIO, smtplib
-from email.MIMEText import MIMEText
+import re
 
 # Python 3rd Party Add-Ons
-import mx.DateTime, pg, psycopg2
+import mx.DateTime
 
 # pyWWA stuff
-from support import ldmbridge, TextProduct
-import secret
+from support import ldmbridge
 import common
+import ConfigParser
 
-log.startLogging(open('logs/mos_parser.log', 'a'))
-log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
+config = ConfigParser.ConfigParser()
+config.read("cfg.ini")
 
-
-DBPOOL = adbapi.ConnectionPool("psycopg2", database="mos", host=secret.dbhost, password=secret.dbpass)
+DBPOOL = adbapi.ConnectionPool("twistedpg", database="mos", 
+                               host=config.get('database','host'), 
+                               user=config.get('database','user'),
+                               password=config.get('database','password'), 
+                               cp_reconnect=True)
 
 class myProductIngestor(ldmbridge.LDMProductReceiver):
 
     def process_data(self, buf):
-        #try:
-        real_process(buf)
-        #except Exception,myexp:
-        #    email_error(myexp, buf)
+        """
+        Actual ingestor
+        """
+        try:
+            real_process(buf)
+        except Exception, myexp:
+            common.email_error(myexp, buf)
 
     def connectionLost(self, reason):
+        """
+        Called when ldm closes the pipe
+        """
         print 'connectionLost', reason
         reactor.callLater(5, self.shutdown)
     
@@ -63,81 +75,66 @@ def real_process(raw):
     raw = raw.replace("\015\015\012", "___").replace("\x1e", "")
     sections = re.findall("([A-Z0-9]{4}\s+... MOS GUIDANCE .*?)______", raw)
     map(section_parser, sections)
+    if len(sections) == 0:
+        common.email_error("FAILED REGEX", raw)
 
 def section_parser(sect):
-    """ Actually process a section, getting closer :) """
+    """ Actually process a data section, getting closer :) """
     metadata = re.findall("([A-Z0-9]{4})\s+(...) MOS GUIDANCE\s+([01]?[0-9])/([0-3][0-9])/([0-9]{4})\s+([0-2][0-9]00) UTC", sect)
     (station, model, month, day, year, hhmm) = metadata[0]
     initts = mx.DateTime.DateTime(int(year), int(month), int(day), int(hhmm[:2]))
-    #print "PROCESS", station, model, initts
-
+    
     times = [initts,]
     data = {}
     lines = sect.split("___")
     hrs = lines[2].split()
     for h in hrs[1:]:
-      if (h == "00"):
-        ts = times[-1] + mx.DateTime.RelativeDateTime(days=1,hour=0)
-      else:
-        ts = times[-1] + mx.DateTime.RelativeDateTime(hour=int(h))
-      times.append( ts )
-      data[ts] = {}
+        if (h == "00"):
+            ts = times[-1] + mx.DateTime.RelativeDateTime(days=1, hour=0)
+        else:
+            ts = times[-1] + mx.DateTime.RelativeDateTime(hour=int(h))
+        times.append( ts )
+        data[ts] = {}
 
     for line in lines[3:]:
-      if (len(line) < 10):
-        continue
-      vname = line[:3].replace("/","_")
-      if (vname == "X_N"):
-        vname = "N_X"
-      vals = re.findall("(...)", line[4:])
-      for i in range(len(vals)):
-        if vname == "T06" and [0,6,12,18].__contains__(times[i+1].hour):
-          data[ times[i+1] ]["T06_1"] = vals[i-1].replace("/","").strip()
-          data[ times[i+1] ]["T06_2"] = vals[i].replace("/","").strip()
-        elif (vname == "T06"):
-          pass
-        elif vname == "T12" and [0,12].__contains__(times[i+1].hour):
-          data[ times[i+1] ]["T12_1"] = vals[i-1].replace("/","").strip()
-          data[ times[i+1] ]["T12_2"] = vals[i].replace("/","").strip()
-        elif (vname == "T12"):
-          pass
-        elif (vname == "WDR"):
-          data[ times[i+1] ][ vname ] = int(vals[i].strip()) * 10
-        else:
-          data[ times[i+1] ][ vname ] = vals[i].strip()
+        if (len(line) < 10):
+            continue
+        vname = line[:3].replace("/","_")
+        if (vname == "X_N"):
+            vname = "N_X"
+        vals = re.findall("(...)", line[4:])
+        for i in range(len(vals)):
+            if vname == "T06" and times[i+1].hour in [0, 6, 12, 18]:
+                data[ times[i+1] ]["T06_1"] = vals[i-1].replace("/","").strip()
+                data[ times[i+1] ]["T06_2"] = vals[i].replace("/","").strip()
+            elif (vname == "T06"):
+                pass
+            elif vname == "T12" and times[i+1].hour in [0, 12]:
+                data[ times[i+1] ]["T12_1"] = vals[i-1].replace("/","").strip()
+                data[ times[i+1] ]["T12_2"] = vals[i].replace("/","").strip()
+            elif (vname == "T12"):
+                pass
+            elif (vname == "WDR"):
+                data[ times[i+1] ][ vname ] = int(vals[i].strip()) * 10
+            else:
+                data[ times[i+1] ][ vname ] = vals[i].strip()
 
+    inserts = 0
     for ts in data.keys():
-      if (ts == initts):
-        continue
-      fst = "INSERT into t%s (station, model, runtime, ftime," % (initts.year,)
-      sst = "VALUES('%s','%s','%s+00','%s+00'," % (station, model, initts, ts)
-      for vname in data[ts].keys():
-        fst += " %s," % (vname,)
-        sst += " '%s'," % (data[ts][vname],)
-      sql = fst[:-1] +") "+ sst[:-1] +")"
-      DBPOOL.runOperation( sql.replace("''", "Null") ).addErrback( email_error, sql)
-
-EMAILS = 0
-def email_error(message, product_text):
-    """
-    Generic something to send email error messages 
-    """
-    global EMAILS
-    log.msg( message )
-    EMAILS -= 1
-    if (EMAILS < 0):
-        return
-
-    msg = MIMEText("Exception:\n%s\n\nRaw Product:\n%s" \
-                 % (message, product_text))
-    msg['subject'] = 'mos_parser.py Traceback'
-    msg['From'] = secret.parser_user
-    msg['To'] = 'akrherz@iastate.edu'
-    smtp = smtplib.SMTP()
-    smtp.connect()
-    smtp.sendmail(msg['From'], msg['To'], msg.as_string())
-    smtp.close()
-
+        if (ts == initts):
+            continue
+        fst = "INSERT into t%s (station, model, runtime, ftime," % (initts.year,)
+        sst = "VALUES('%s','%s','%s+00','%s+00'," % (station, model, initts, ts)
+        for vname in data[ts].keys():
+            fst += " %s," % (vname,)
+            sst += " '%s'," % (data[ts][vname],)
+        sql = fst[:-1] +") "+ sst[:-1] +")"
+        deffer = DBPOOL.runOperation( sql.replace("''", "Null") )
+        deffer.addErrback( common.email_error, sql)
+        inserts += 1
+    # Simple debugging
+    if inserts == 0:
+        common.email_error("No data found?", sect)
 
 ldm = ldmbridge.LDMProductFactory( myProductIngestor() )
 reactor.run()
