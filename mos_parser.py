@@ -69,14 +69,14 @@ class myProductIngestor(ldmbridge.LDMProductReceiver):
 
 
 
-def real_process(raw):
+def real_process(initial_raw):
     """ The real processor of the raw data, fun! """
-    raw += "\015\012"
+    raw = initial_raw + "\015\012"
     raw = raw.replace("\015\015\012", "___").replace("\x1e", "")
     sections = re.findall("([A-Z0-9]{4}\s+... MOS GUIDANCE .*?)______", raw)
     map(section_parser, sections)
     if len(sections) == 0:
-        common.email_error("FAILED REGEX", raw)
+        common.email_error("FAILED REGEX", initial_raw)
 
 def section_parser(sect):
     """ Actually process a data section, getting closer :) """
