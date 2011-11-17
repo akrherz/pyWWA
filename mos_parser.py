@@ -38,7 +38,7 @@ import common
 import ConfigParser
 
 config = ConfigParser.ConfigParser()
-config.read("cfg.ini")
+config.read("/home/ldm/pyWWA/cfg.ini")
 
 DBPOOL = adbapi.ConnectionPool("twistedpg", database="mos", 
                                host=config.get('database','host'), 

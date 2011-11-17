@@ -34,7 +34,7 @@ import mx.DateTime
 from support import ldmbridge, TextProduct, spcpts
 import ConfigParser
 config = ConfigParser.ConfigParser()
-config.read('cfg.ini')
+config.read('/home/ldm/pyWWA/cfg.ini')
 import common
 
 def exception_hook(kwargs):

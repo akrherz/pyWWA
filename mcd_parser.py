@@ -37,7 +37,7 @@ from twisted.enterprise import adbapi
 
 import ConfigParser
 config = ConfigParser.ConfigParser()
-config.read('cfg.ini')
+config.read('/home/ldm/pyWWA/cfg.ini')
 
 DBPOOL = adbapi.ConnectionPool("twistedpg", database="postgis", 
                                host=config.get('database','host'), 
