@@ -26,7 +26,7 @@ setenv DISPLAY localhost:1
 
 rm -f ${SITE}_${PROD}_out.gif >& /dev/null
 
-gpmap_gf << EOF > DMX_gpmap.log
+gpmap_gf << EOF > /tmp/DMX_gpmap.log
  MAP = 0
  GAREA = DSET
  PROJ  = RAD//nm

@@ -1,6 +1,6 @@
 #!/bin/csh
 # Simple Script that will save RADAR data
-
+# Run from cron
 
 set DIR = `date -u -d "1 day ago" +%Y_%m`
 set YYYYMMDD = `date -u -d "1 day ago" +%Y%m%d`

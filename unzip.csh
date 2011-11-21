@@ -1,4 +1,5 @@
 #!/bin/csh
+# Automatic file unzipper
 
 # Argument is the filename base!
 set fn="$1"

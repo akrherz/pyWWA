@@ -1,4 +1,5 @@
 #!/bin/sh
+# Store MADIS Files
 
 gzip -d > /tmp/$$.$2
 F=`echo $2 | cut -c1-13`

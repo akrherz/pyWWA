@@ -1,3 +1,6 @@
+#!/bin/csh
+# rotate things that should be rotated based on pqact entry
+#
 set BASE="$1"
 set FMT="$2"
 set SSS="/home/ldm/data/${BASE}"

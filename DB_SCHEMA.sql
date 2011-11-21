@@ -136,22 +136,7 @@ CREATE INDEX lsrs_2011_bogus_idx ON lsrs USING btree (oid);
 CREATE INDEX lsrs_2011_valid_idx ON lsrs USING btree (valid);
 CREATE INDEX lsrs_2011_wfo_idx ON lsrs USING btree (wfo);
 
----
---- watches
----
-CREATE TABLE watches (
-    sel character(5),
-    issued timestamp with time zone,
-    expired timestamp with time zone,
-    type character(3),
-    report text,
-    num smallint
-);
-select addgeometrycolumn('','watches','geom',4326,'MULTIPOLYGON',2);
 
-grant select on watches to apache;
-
-CREATE UNIQUE INDEX watches_idx ON watches USING btree (issued, num);
 
 ---
 --- HVTEC Table

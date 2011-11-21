@@ -19,18 +19,14 @@ __revision__ = '$Id: new_watch.py 3160 2008-04-09 23:31:06Z akrherz $'
 
 
 from twisted.python import log
-log.startLogging(open('logs/new_watch.log', 'a'))
+from twisted.python import logfile
 log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
+log.startLogging( logfile.DailyLogFile('new_watch.log', 'logs/'))
 
-
-import sys
 import re
 import math
 import mx.DateTime
-import StringIO
-import traceback
 import common
-from email.MIMEText import MIMEText
 
 # Non standard Stuff
 from pyIEM import stationTable, utils
@@ -38,18 +34,17 @@ from pyIEM import stationTable, utils
 KM_SM = 1.609347
 
 # Database Connections
-import pg, secret
-POSTGIS = pg.connect(secret.dbname, secret.dbhost, user=secret.dbuser, passwd=secret.dbpass)
-POSTGIS.query("SET TIME ZONE 'GMT'")
-
-errors = StringIO.StringIO()
+import secret
+from support import ldmbridge
+from twisted.enterprise import adbapi
+DBPOOL = adbapi.ConnectionPool("twistedpg", database=secret.dbname, host=secret.dbhost, 
+                               password=secret.dbpass, cp_reconnect=True)
 
 from twisted.words.protocols.jabber import client, jid
 from twisted.internet import reactor
-from twisted.mail import smtp
 
 IEM_URL = secret.WATCH_URL
-errors = StringIO.StringIO()
+
 
 
 def cancel_watch(report, ww_num):
@@ -61,29 +56,32 @@ def cancel_watch(report, ww_num):
     gmt = mx.DateTime.gmt()
     ts = mx.DateTime.DateTime(gmt.year, gmt.month, day1, hour1, minute1)
     for tbl in ('watches', 'watches_current'):
-        sql = "UPDATE %s SET expired = '%s' WHERE num = %s and \
-              extract(year from expired) = %s " \
-              % (tbl, ts.strftime("%Y-%m-%d %H:%M"), 
+        sql = """UPDATE %s SET expired = '%s' WHERE num = %s and 
+              extract(year from expired) = %s """ % (tbl, ts.strftime("%Y-%m-%d %H:%M"), 
                ww_num, ts.year)
-        log.msg(sql)
-        POSTGIS.query(sql)
+        deffer = DBPOOL.runOperation(sql)
+        deffer.addErrback(common.email_error, sql)
 
     msg = "SPC: SPC cancels WW %s http://www.spc.noaa.gov/products/watch/ww%04i.html" % ( ww_num, int(ww_num) )
     jabber.sendMessage( msg , msg)
 
-def process(raw):
-    try:
-        #raw = raw.replace("\015\015\012", "\n")
-        real_process(raw)
-    except:
-        io = StringIO.StringIO()
-        traceback.print_exc(file=io)
-        msg = MIMEText("%s\n\n>RAW DATA\n\n%s"%(io.getvalue(),raw))
-        msg['subject'] = 'new_watch.py Traceback'
-        msg['From'] = secret.parser_user
-        msg['To'] = secret.error_email
-        smtp.sendmail("localhost", msg["From"], msg["To"], msg)
+class MyProductIngestor(ldmbridge.LDMProductReceiver):
+    """ I receive products from ldmbridge and process them 1 by 1 :) """
 
+    def connectionLost(self, reason):
+        print 'connectionLost', reason
+        reactor.callLater(7, self.shutdown)
+
+    def shutdown(self):
+        reactor.callWhenRunning(reactor.stop)
+
+
+    def process_data(self, raw):
+        try:
+            #raw = raw.replace("\015\015\012", "\n")
+            real_process(raw)
+        except Exception,exp:
+            common.email_error(exp, raw)
 
 def real_process(raw):
 
@@ -217,22 +215,24 @@ def real_process(raw):
 
     # Delete from currents
     sql = "DELETE from watches_current WHERE sel = 'SEL%s'" % (saw,)
-    POSTGIS.query(sql)
+    deffer = DBPOOL.runOperation(sql)
+    deffer.addErrback(common.email_error, raw)
 
     # Delete from archive, since maybe it is a correction....
-    sql = "DELETE from watches WHERE num = %s and \
-           extract(year from issued) = %s" % (ww_num, sTS.year)
-    POSTGIS.query(sql)
+    sql = """DELETE from watches WHERE num = %s and 
+           extract(year from issued) = %s""" % (ww_num, sTS.year)
+    DBPOOL.runOperation(sql)
 
     # Insert into our watches table
     for tbl in ('watches', 'watches_current'):
-        sql = "INSERT into %s(sel, issued, expired, type, report, geom, num) \
-               VALUES('SEL%s','%s','%s','%s','%s',\
-               'SRID=4326;MULTIPOLYGON(((%s)))', %s)" % \
-               (tbl, saw, sTS.strftime("%Y-%m-%d %H:%M"), \
-                eTS.strftime("%Y-%m-%d %H:%M"), types[ww_type], \
+        sql = """INSERT into %s(sel, issued, expired, type, report, geom, num) 
+               VALUES('SEL%s','%s+00','%s+00','%s','%s',
+               'SRID=4326;MULTIPOLYGON(((%s)))', %s)""" % (
+                tbl, saw, sTS.strftime("%Y-%m-%d %H:%M"), 
+                eTS.strftime("%Y-%m-%d %H:%M"), types[ww_type], 
                 raw.replace("'","\\'"), wkt, ww_num)
-        POSTGIS.query(sql)
+        deffer = DBPOOL.runOperation(sql)
+        deffer.addErrback(common.email_error, raw)
 
     # Figure out WFOs affected...
     jabberTxt = "SPC issues %s watch till %sZ" % \
@@ -248,16 +248,22 @@ def real_process(raw):
     jabberTxtHTML += " (<a href=\"%s?year=%s&amp;num=%s\">Watch Quickview</a>) " % (IEM_URL, sTS.year, ww_num)
 
     # Figure out who should get notification of the watch...
-    sql = "SELECT distinct wfo from nws_ugc WHERE \
-         contains('SRID=4326;MULTIPOLYGON(((%s)))', geom)" % (wkt,)
-    print sql
-    rs = POSTGIS.query(sql).dictresult()
+    sql = """SELECT distinct wfo from nws_ugc WHERE 
+         contains('SRID=4326;MULTIPOLYGON(((%s)))', geom)""" % (wkt,)
+    
+    pgconn = DBPOOL.connect()
+    txn = pgconn.cursor()
+    txn.execute(sql)
+    rs = txn.fetchall()
     channels = ['SPC']
     for i in range(len(rs)):
         wfo = rs[i]['wfo']
         channels.append( wfo )
         mess = "%s: %s" % (wfo, jabberTxt)
         jabber.sendMessage(mess, jabberTxtHTML)
+    
+    txn.close()
+    pgconn.commit()
 
     # Special message for SPC
     lines = raw.split("\n")
@@ -267,14 +273,7 @@ def real_process(raw):
     common.tweet(channels, twt, url)
 
 
-def killer():
-    reactor.stop()
-
-
-raw = sys.stdin.read()
-
-myJid = jid.JID('%s@%s/watch_%s' % \
-      (secret.iembot_ingest_user, secret.chatserver, \
+myJid = jid.JID('%s@%s/watch_%s' % (secret.iembot_ingest_user, secret.chatserver, 
        mx.DateTime.gmt().strftime("%Y%m%d%H%M%S") ) )
 factory = client.basicClientFactory(myJid, secret.iembot_ingest_password)
 
@@ -285,6 +284,6 @@ factory.addBootstrap("//event/client/basicauth/invaliduser", jabber.debug)
 factory.addBootstrap("//event/client/basicauth/authfailed", jabber.debug)
 factory.addBootstrap("//event/stream/error", jabber.debug)
 reactor.connectTCP(secret.connect_chatserver, 5222, factory)
-reactor.callLater(0, process, raw)
-reactor.callLater(30, killer)
+
+ldm = ldmbridge.LDMProductFactory( MyProductIngestor() )
 reactor.run()
