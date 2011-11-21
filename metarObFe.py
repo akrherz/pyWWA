@@ -63,7 +63,7 @@ class myProductIngestor(ldmbridge.LDMProductReceiver):
 
     def connectionLost(self, reason):
         print 'connectionLost', reason
-        reactor.callLater(10, self.shutdown)
+        reactor.callLater(30, self.shutdown)
 
     def shutdown(self):
         reactor.callWhenRunning(reactor.stop)
@@ -162,21 +162,26 @@ def process_site(orig_metar, metar):
     
 def save_data(txn, iemid, iem, mtr, clean_metar, orig_metar):
     iem.txn = txn
-    iem.load_and_compare()
+    if not iem.load_and_compare():
+        log.msg("load and compare failed: %s %s" % (iemid,clean_metar))
+        deffer = ASOSDB.runOperation("INSERT into unknown(id) values (%s)", (iemid,))
+        deffer.addErrback(common.email_error, iemid)
+        return
     
     cmetar = clean_metar.replace("'", "")
 
     """ Need to figure out if we have a duplicate ob, if so, check
         the length of the raw data, if greater, take the temps """
-    if iem.data['old_ts'] and (iem.data['ts'] == iem.data['old_ts']) and \
-       (len(iem.data['raw']) > len(cmetar)):
+    if iem.data['old_ts'] and (iem.data['ts'] == iem.data['old_ts']) and (len(iem.data['raw']) > len(cmetar)):
         pass
     else:
         if (mtr.temp):
             iem.data['tmpf'] = mtr.temp.value("F")
         if (mtr.dewpt):
             iem.data['dwpf'] = mtr.dewpt.value("F")
+    # Database only allows len 254
     iem.data['raw'] = orig_metar.replace("'", "")[:254]
+    
     if mtr.wind_speed:
         iem.data['sknt'] = mtr.wind_speed.value("KT")
     if mtr.wind_gust:
@@ -186,6 +191,16 @@ def save_data(txn, iemid, iem, mtr, clean_metar, orig_metar):
             iem.data['drct'] = 0
         else:
             iem.data['drct'] = float(mtr.wind_dir.value())
+            
+    if not mtr.wind_speed_peak:
+        old_max_wind = max([iem.data.get('max_sknt', 0),
+                    iem.data.get('max_gust', 0)])
+        new_max_wind = max([iem.data.get('sknt', 0),
+                    iem.data.get('gust', 0)])
+        if new_max_wind > old_max_wind:
+            print 'Setting max_drct manually: %s' % (clean_metar,)
+            iem.data['max_drct'] = iem.data.get('drct',0)
+            
     if mtr.vis:
         iem.data['vsby'] = mtr.vis.value("SM")
     if mtr.press:
