@@ -198,7 +198,7 @@ def save_data(txn, iemid, iem, mtr, clean_metar, orig_metar):
         new_max_wind = max([iem.data.get('sknt', 0),
                     iem.data.get('gust', 0)])
         if new_max_wind > old_max_wind:
-            print 'Setting max_drct manually: %s' % (clean_metar,)
+            #print 'Setting max_drct manually: %s' % (clean_metar,)
             iem.data['max_drct'] = iem.data.get('drct',0)
             
     if mtr.vis:
