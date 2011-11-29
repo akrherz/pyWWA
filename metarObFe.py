@@ -280,26 +280,29 @@ def save_data(txn, iemid, iem, mtr, clean_metar, orig_metar):
 def sendAlert(txn, iemid, what, clean_metar):
     print "ALERTING for [%s]" % (iemid,)
     txn.execute("""SELECT wfo, state, name, x(geom) as lon,
-           y(geom) as lat from stations 
+           y(geom) as lat, network from stations 
            WHERE id = '%s' """ % (iemid,) )
     if txn.rowcount == 0:
         print "I not find WFO for sid: %s " % (iemid,)
         return
     row = txn.fetchone()
     wfo = row['wfo']
+    if wfo is None or wfo == '':
+        log.msg("Unknown WFO for id: %s, skipping wind alert" % (iemid,))
+        return
     st = row['state']
     nm = row['name']
+    network = row['network']
 
     extra = ""
     if (clean_metar.find("$") > 0):
         extra = "(Caution: Maintenance Check Indicator)"
-    jtxt = "%s: %s,%s (%s) ASOS %s reports %s\n%s http://mesonet.agron.iastate.edu/ASOS/current.phtml"\
-            % (wfo, nm, st, iemid, extra, what, clean_metar )
+    url = "http://mesonet.agron.iastate.edu/ASOS/current.phtml?network=%s" % (network,)
+    jtxt = "%s: %s,%s (%s) ASOS %s reports %s\n%s %s" % (wfo, nm, st, iemid, extra, what, clean_metar, url )
 
     jabber.sendMessage(jtxt, jtxt)
 
     twt = "%s,%s (%s) ASOS reports %s" % (nm, st, iemid, what)
-    url = "http://mesonet.agron.iastate.edu/ASOS/current.phtml?network=%s_ASOS" % (st.upper(),)
     common.tweet([wfo], twt, url, {'lat': str(row['lat']), 'long': str(row['lon'])})
 
 
