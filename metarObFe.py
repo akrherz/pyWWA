@@ -147,7 +147,7 @@ def process_site(orig_metar, metar):
 
     iem = access.Ob(iemid, network)
     if mtr.time is None:
-        log.msg("%s METAR has none-time" % (iemid,))
+        log.msg("%s METAR has none-time: %s" % (iemid,orig_metar))
         return
     gts = mx.DateTime.DateTime( mtr.time.year, mtr.time.month, 
                   mtr.time.day, mtr.time.hour, mtr.time.minute)
