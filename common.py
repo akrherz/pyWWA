@@ -99,7 +99,7 @@ def reallytweet(json, channels, msg, extras):
     Actually, really publish this time!
     """
     tinyurl = ""
-    if json:
+    if json and type(json) == type(""):
         j = simplejson.loads( json )
         if j.has_key('errorCode') and j['errorCode'] != 0 and j.has_key('errorMessage'):
             if j['errorCode'] != 500:

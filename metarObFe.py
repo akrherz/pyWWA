@@ -77,6 +77,24 @@ class myProductIngestor(ldmbridge.LDMProductReceiver):
             log.msg("Stations not loaded, delaying!")
             reactor.callLater(20, real_processor, buf.encode('ascii', 'ignore') )
 
+def sanitize(metar):
+    """
+    Preprocess our metar into something we can deal with :/
+    @param metar string
+    @return metar string
+    """
+    metar = re.sub("\015\015\012", " ", metar)
+    metar = re.sub("\015", " ", metar)
+    # Remove any multiple whitespace, bad chars
+    metar = metar.encode('latin-1').replace('\xa0', " ").replace("\003", "").replace("COR ", "")
+    metar = re.sub("\s+", " ", metar.strip())
+    # Look to see that our METAR starts with A-Z
+    if re.match("^[0-9]", metar):
+        log.msg("Found METAR starting with number, gleaning: %s" % (metar,))
+        tokens = metar.split()
+        metar = " ".join(tokens[1:])
+    return metar
+
 def real_processor(buf):
     """
     Actually process a raw string of one or more METARs
@@ -94,26 +112,18 @@ def real_processor(buf):
         elif len(metar.strip()) < 5:
             continue
         # We actually have something
-        metar = re.sub("\015\015\012", " ", metar)
-        metar = re.sub("\015", " ", metar)
+        metar = sanitize( metar )
         process_site(metar, metar)
 
 
-def process_site(orig_metar, metar):
+def process_site(orig_metar, clean_metar):
     """
     Actually process the raw string of a metar
     @param string original string of the metar to save in database
     @param string current working version of the string metar
     """
     # Check the length I have
-    if (len(metar) < 10):
-        return
-
-    # Remove any multiple whitespace, bad chars
-    metar = metar.encode('latin-1').replace('\xa0', " ").replace("\003", "").replace("COR ", "")
-    clean_metar = re.sub("\s+", " ", metar.strip())
-    # Only process US obs for now ....
-    if len(clean_metar) == 0:
+    if len(clean_metar) < 10:
         return
     try:
         mtr = Metar.Metar(clean_metar)
@@ -125,12 +135,12 @@ def process_site(orig_metar, metar):
             tokens = errormsg.split(": ")
             newmetar = clean_metar.replace( tokens[1] , "")
             if newmetar != clean_metar:
-                #print 'NEW is', newmetar
                 reactor.callLater(0, process_site, orig_metar, newmetar)
         else:
             log.msg( io.getvalue() )
             log.msg(clean_metar)
         return
+
     # Determine the ID, unfortunately I use 3 char ids for now :(
     if mtr.station_id is None:
         log.msg("METAR station_id is None: %s" % (orig_metar,))
@@ -139,7 +149,7 @@ def process_site(orig_metar, metar):
     if mtr.station_id[0] != "K":
         iemid = mtr.station_id
     if not LOC2NETWORK.has_key(iemid):
-        log.msg("Unknown ID: %s" % (iemid,))
+        log.msg("Unknown ID: %s: %s" % (iemid, orig_metar))
         deffer = ASOSDB.runOperation("INSERT into unknown(id) values (%s)", (iemid,))
         deffer.addErrback(common.email_error, iemid)
         return
@@ -147,7 +157,7 @@ def process_site(orig_metar, metar):
 
     iem = access.Ob(iemid, network)
     if mtr.time is None:
-        log.msg("%s METAR has none-time: %s" % (iemid,orig_metar))
+        log.msg("%s METAR has none-time: %s" % (iemid, orig_metar))
         return
     gts = mx.DateTime.DateTime( mtr.time.year, mtr.time.month, 
                   mtr.time.day, mtr.time.hour, mtr.time.minute)
