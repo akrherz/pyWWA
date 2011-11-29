@@ -167,7 +167,7 @@ def process_site(orig_metar, clean_metar):
         return
     iem.setObTimeGMT(gts)
     deffer = IEMDB.runInteraction(save_data, iemid, iem, mtr, clean_metar, orig_metar)
-    deffer.addErrback(common.email_error, metar)
+    deffer.addErrback(common.email_error, clean_metar)
     #deffer.addCallback(got_results, tp, sid, network)
     
 def save_data(txn, iemid, iem, mtr, clean_metar, orig_metar):
