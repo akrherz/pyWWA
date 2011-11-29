@@ -288,7 +288,7 @@ def sendAlert(txn, iemid, what, clean_metar):
     row = txn.fetchone()
     wfo = row['wfo']
     if wfo is None or wfo == '':
-        log.msg("Unknown WFO for id: %s, skipping wind alert" % (iemid,))
+        log.msg("Unknown WFO for id: %s, skipping alert" % (iemid,))
         return
     st = row['state']
     nm = row['name']
@@ -312,19 +312,24 @@ def sendWindAlert(txn, iemid, v, d, t, clean_metar):
     """
     print "ALERTING for [%s]" % (iemid,)
     txn.execute("""SELECT wfo, state, name, x(geom) as lon,
-           y(geom) as lat from stations 
+           y(geom) as lat, network from stations 
            WHERE id = '%s' """ % (iemid,) )
     if txn.rowcount == 0:
         print "I not find WFO for sid: %s " % (iemid,)
         return
     row = txn.fetchone()
     wfo = row['wfo']
+    if wfo is None or wfo == '':
+        log.msg("Unknown WFO for id: %s, skipping WindAlert" % (iemid,))
+        return
     st = row['state']
     nm = row['name']
+    network = row['network']
 
     extra = ""
     if (clean_metar.find("$") > 0):
         extra = "(Caution: Maintenance Check Indicator)"
+    url = "http://mesonet.agron.iastate.edu/ASOS/current.phtml?network=%s" % (network,)
     jtxt = "%s: %s,%s (%s) ASOS %s reports gust of %s knots from %s @ %s\n%s"\
             % (wfo, nm, st, iemid, extra, v, mesonet.drct2dirTxt(d), \
                t.strftime("%H%MZ"), clean_metar )
@@ -332,7 +337,6 @@ def sendWindAlert(txn, iemid, v, d, t, clean_metar):
 
     twt = "%s,%s (%s) ASOS reports gust of %s knots from %s @ %s" % (nm, 
      st, iemid, v, mesonet.drct2dirTxt(d), t.strftime("%H%MZ"))
-    url = "http://mesonet.agron.iastate.edu/ASOS/current.phtml?network=%s_ASOS" % (st.upper(),)
     common.tweet([wfo], twt, url, {'lat': str(row['lat']), 'long': str(row['lon'])})
 
 myJid = jid.JID('%s@%s/metar_%s' % (secret.iembot_ingest_user, secret.chatserver, 
