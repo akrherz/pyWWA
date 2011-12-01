@@ -259,7 +259,12 @@ def really_process(tp, data):
 def enter_unknown(sid, tp, network):
     """
     Enter some info about a site ID we know nothing of...
+    @param sid string site id
+    @param tp TextProduct instance
+    @param network string of the guessed network
     """
+    if len(sid) < 5:
+        return
     HADSDB.runOperation("""
             INSERT into unknown(nwsli, product, network) 
             values ('%s', '%s', '%s')
