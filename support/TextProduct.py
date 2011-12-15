@@ -73,7 +73,7 @@ class TextProduct:
 
     def findWMO(self,):
         t = re.findall("^([A-Z]{4}[0-9][0-9]) ([A-Z]{4})", self.sections[0], re.M)
-        if (len(t) == 1):
+        if len(t) > 0:
             self.wmo = t[0][0]
             self.source = t[0][1]
 
