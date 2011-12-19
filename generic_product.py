@@ -21,6 +21,7 @@ __revision__ = '$Id: generic_product.py 3802 2008-07-29 19:55:56Z akrherz $'
 from twisted.words.protocols.jabber import client, jid, xmlstream
 from twisted.internet import reactor
 from twisted.python import log
+from twisted.python import logfile
 from twisted.enterprise import adbapi
 from twisted.mail import smtp
 
@@ -36,8 +37,8 @@ from support import ldmbridge, TextProduct, reference
 import secret
 import common
 
-log.startLogging(open('logs/gp.log', 'a'))
 log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
+log.startLogging( logfile.DailyLogFile('generic_product.log', 'logs/') )
 
 POSTGIS = pg.connect(secret.dbname, secret.dbhost, user=secret.dbuser, passwd=secret.dbpass)
 DBPOOL = adbapi.ConnectionPool("psycopg2", database=secret.dbname, host=secret.dbhost, password=secret.dbpass)
@@ -218,7 +219,7 @@ def real_process(raw):
         sql = """INSERT into text_products(product, product_id, geom) values (%s,%s,%s)""" 
         myargs = (sqlraw, product_id, prod.segments[0].giswkt)
     deffer = DBPOOL.runOperation(sql, myargs)
-    deffer.addErrback( common.email_error, sql)
+    deffer.addErrback( common.email_error, sqlraw)
     myurl = "%s?pid=%s" % (secret.PROD_URL, product_id)
 
     # Just send with optional headline to rooms...
