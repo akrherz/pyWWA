@@ -56,7 +56,7 @@ def cancel_watch(report, ww_num):
     gmt = mx.DateTime.gmt()
     ts = mx.DateTime.DateTime(gmt.year, gmt.month, day1, hour1, minute1)
     for tbl in ('watches', 'watches_current'):
-        sql = """UPDATE %s SET expired = '%s' WHERE num = %s and 
+        sql = """UPDATE %s SET expired = '%s+00' WHERE num = %s and 
               extract(year from expired) = %s """ % (tbl, ts.strftime("%Y-%m-%d %H:%M"), 
                ww_num, ts.year)
         deffer = DBPOOL.runOperation(sql)
