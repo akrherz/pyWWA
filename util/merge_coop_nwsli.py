@@ -57,7 +57,7 @@ def ask_nws(nwsli):
     sys.exit()
 
 # Look for sites 
-hcursor.execute("""SELECT nwsli, product, network from unknown""")
+hcursor.execute("""SELECT nwsli, product, network from unknown WHERE network ~* 'COOP'""")
 for row in hcursor:
     nwsli = row[0]
     if not sites.has_key(nwsli):
@@ -102,7 +102,7 @@ for row in hcursor:
     if network != "":
         hcursor2.execute("""DELETE from unknown where nwsli = '%s'""" % (nwsli,))
     
-        cmd = "/usr/bin/env python /var/www/scripts/util/addSiteMesosite.py %s %s" % (network, nwsli)
+        cmd = "/usr/bin/env python /mesonet/www/apps/iemwebsite/scripts/util/addSiteMesosite.py %s %s" % (network, nwsli)
         os.system(cmd)
         print 'Added %s %s [%s]' % (nwsli, network, sites[nwsli]['name'])
 
