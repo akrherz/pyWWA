@@ -59,3 +59,4 @@ python /home/ldm/pyWWA/ncr2postgis.py /tmp/radar.$$ $1 $2 $3 $4 $5 $6
 rm -f $radfile log.$$ rad.$$ radar.$$ $$.gif
 
 exit 0
+
