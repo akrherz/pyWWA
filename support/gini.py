@@ -186,7 +186,7 @@ class GINIZFile(GINIFile):
                         #print 'Chunk', loc, i, np.shape(np.fromstring( zlib.decompress(d.unused_data[loc:]), np.int8 ))
                     except:
                         #print 'ERROR, keep going', i
-                        continue
+                        pass
                 loc = i
         #try:
         sdata += zlib.decompress(d.unused_data[loc:])
