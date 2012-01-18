@@ -37,7 +37,7 @@ def generate_image(message):
     siteID = message.getStringProperty("siteID")
     ticks = message.getLongProperty("validTime")
     productID = message.getStringProperty("productID")
-    vcp = message.getStringProperty("vcp")
+    #vcp = message.getStringProperty("vcp")
     upperLeftLat = float(message.getStringProperty("upperLeftLat"))
     upperLeftLon = float(message.getStringProperty("upperLeftLon"))
     lowerRightLat = float(message.getStringProperty("lowerRightLat"))
@@ -48,7 +48,7 @@ def generate_image(message):
 
     metadata = {}
     metadata['valid'] = gts.strftime("%Y-%m-%dT%H:%M:%SZ")
-    metadata['vcp'] = vcp
+    #metadata['vcp'] = vcp
     metadata = {'metadata': metadata}
     pqstr = "gis ac %s gis/images/4326/ridge/%s/%s_0.png GIS/ridge/%s/%s/%s_%s_%s.png png" % (
      gts.strftime("%Y%m%d%H%M"), siteID, productID, 
