@@ -46,10 +46,10 @@ def generate_image(message):
     lts = mx.DateTime.DateTimeFromTicks( ticks / 1000. )
     gts = lts.gmtime()
 
-    metadata = {}
-    metadata['valid'] = gts.strftime("%Y-%m-%dT%H:%M:%SZ")
-    #metadata['vcp'] = vcp
-    metadata = {'metadata': metadata}
+    metadata = {'meta': {}}
+    metadata['meta']['valid'] = gts.strftime("%Y-%m-%dT%H:%M:%SZ")
+    metadata['meta']['product'] = productID
+    metadata['meta']['site'] = siteID
     pqstr = "gis ac %s gis/images/4326/ridge/%s/%s_0.png GIS/ridge/%s/%s/%s_%s_%s.png png" % (
      gts.strftime("%Y%m%d%H%M"), siteID, productID, 
      siteID, productID, siteID, productID, gts.strftime("%Y%m%d%H%M"))
@@ -79,7 +79,8 @@ def generate_image(message):
     pqstr = "/home/ldm/bin/pqinsert -p '%s' %s" % (pqstr, fp)
     os.system( pqstr )
     os.system( pqstr.replace("png","wld") )
-    os.system( pqstr.replace("wld","json").replace(" ac ", " c ") )
+    metapq = pqstr.replace("png","json").replace(" ac ", " c ") 
+    os.system( metapq )
 
     os.unlink(fp)
     os.unlink(wldfp)
