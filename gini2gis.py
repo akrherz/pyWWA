@@ -14,7 +14,7 @@ logger.addHandler(logging.StreamHandler())
 logger.setLevel(logging.INFO)
 
 def workflow():
-    logger.info("Starting Ingest")
+    logger.info("Starting Ingest for: %s" % (" ".join(sys.argv),))
     c = cStringIO.StringIO()
     c.write( sys.stdin.read() )
     c.seek(0)
@@ -66,4 +66,5 @@ def workflow():
     os.unlink("%s.wld" % (tmpfn,))
     os.unlink("%s.txt" % (tmpfn,))
     logger.info("Done!")
+
 workflow()
