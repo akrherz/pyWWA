@@ -13,12 +13,15 @@
 # You should have received a copy of the GNU General Public License along with
 # this program; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-""" SPS product ingestor """
+""" SPS product ingestor 
+$Id: $:
+"""
 
 from twisted.python import log
 import os
-log.startLogging(open('logs/sps2bot.log','a'))
 log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
+log.startLogging(open('logs/sps_parser.log','a'))
+
 
 import StringIO, traceback, mx.DateTime
 from email.MIMEText import MIMEText
@@ -33,7 +36,9 @@ from twisted.mail import smtp
 from twisted.enterprise import adbapi
 
 POSTGIS = pg.connect(secret.dbname, secret.dbhost, user=secret.dbuser, passwd=secret.dbpass)
-DBPOOL = adbapi.ConnectionPool("psycopg2", database=secret.dbname, host=secret.dbhost, password=secret.dbpass)
+DBPOOL = adbapi.ConnectionPool("psycopg2", database=secret.dbname, 
+                               host=secret.dbhost, password=secret.dbpass,
+                               cp_reconnect=True)
 
 
 errors = StringIO.StringIO()

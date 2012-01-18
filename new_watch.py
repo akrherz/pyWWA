@@ -45,8 +45,6 @@ from twisted.internet import reactor
 
 IEM_URL = secret.WATCH_URL
 
-
-
 def cancel_watch(report, ww_num):
     """ Cancel a watch please """
     tokens = re.findall("KWNS ([0-3][0-9])([0-9][0-9])([0-9][0-9])", report)

@@ -16,11 +16,12 @@
 """ ASOS Daily Summary Message Parser ingestor """
 
 
-__revision__ = '$Id: dsm_parser.py 4513 2009-01-06 16:57:49Z akrherz $'
+__revision__ = '$Id: :$'
 
 # Twisted Python imports
 from twisted.internet import reactor
 from twisted.python import log
+from twisted.python import logfile
 from twisted.enterprise import adbapi
 from twisted.mail import smtp
 
@@ -36,29 +37,11 @@ from support import ldmbridge, TextProduct, reference
 import secret
 import common
 
-log.startLogging(open('logs/dsm.log','a'))
 log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
+log.startLogging( logfile.DailyLogFile('dsm_parser.log','logs') )
 
-DBPOOL = adbapi.ConnectionPool("psycopg2", database="iem", 
+DBPOOL = adbapi.ConnectionPool("psycopg2", database="iem", cp_reconnect=True,
                                host=secret.dbhost, password=secret.dbpass)
-EMAILS = 10
-
-def email_error(message, product_text):
-    """
-    Generic something to send email error messages 
-    """
-    global EMAILS
-    log.msg( message )
-    EMAILS -= 1
-    if (EMAILS < 0):
-        return
-
-    msg = MIMEText("Exception:\n%s\n\nRaw Product:\n%s" \
-                 % (message, product_text))
-    msg['subject'] = 'dsm_parser.py Traceback'
-    msg['From'] = secret.parser_user
-    msg['To'] = secret.error_email
-    smtp.sendmail("localhost", msg["From"], msg["To"], msg)
 
 # LDM Ingestor
 class MyProductIngestor(ldmbridge.LDMProductReceiver):
@@ -123,7 +106,7 @@ def process_dsm(data):
     m = PARSER_RE.match( data )
     if m is None:
         print "FAIL!", data
-        email_error("DSM RE Match Failure", data)
+        common.email_error("DSM RE Match Failure", data)
         return
     dict = m.groupdict()
     if dict['id'][0] != "K":
@@ -144,12 +127,13 @@ def process_dsm(data):
     if dict['precip'] == "T":
         updater.append("pday = 0.0001")
 
-    sql = "UPDATE summary_%s s SET %s FROM stations t WHERE t.iemid = s.iemid and t.id = '%s' and day = '%s'" % (
+    sql = """UPDATE summary_%s s SET %s FROM stations t WHERE t.iemid = s.iemid 
+    and t.id = '%s' and day = '%s'""" % (
          ts.year, " , ".join(updater), dict['id'][1:], ts.strftime("%Y-%m-%d"))
-    print "%s %s %s %s %s" % (dict['id'], ts.strftime("%Y-%m-%d"),
+    print "%s %s H:%s L:%s P:%s" % (dict['id'], ts.strftime("%Y-%m-%d"),
           dict['high'], dict['low'], dict['precip'] )
     if len(updater) > 0:
-        DBPOOL.runOperation( sql ).addErrback( email_error, sql)
+        DBPOOL.runOperation( sql ).addErrback( common.email_error, sql)
 
 ldm = ldmbridge.LDMProductFactory( MyProductIngestor() )
 reactor.run()

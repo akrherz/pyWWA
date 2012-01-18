@@ -98,7 +98,7 @@ def real_parser(buf):
     #data = re.sub("'", "\\'",nws.raw)
     #data = re.sub("\x01", "", data)
     #data = re.sub("\x00", "", data)
-
+    
     DBPOOL.runOperation("""INSERT into products(pil, data, entered,
         source, wmo) VALUES(%s,%s,%s,%s,%s)""",  (nws.afos.strip(), nws.raw, 
                              nws.issueTime.strftime("%Y-%m-%d %H:%M+00"),

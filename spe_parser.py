@@ -15,10 +15,11 @@
 # 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 """ SPENES product ingestor """
 
-from twisted.python import log
+from twisted.python import log, logfile
 import os
-log.startLogging(open('logs/speParse.log', 'a'))
 log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
+log.startLogging( logfile.DailyLogFile('spe_parser.log', 'logs') )
+
 
 import sys, re, pdb, mx.DateTime
 import traceback, StringIO
