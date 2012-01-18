@@ -1,7 +1,7 @@
 """
 $Id: $:
 """
-import os, sleep
+import os, time
 while True:
     os.system("/usr/bin/python ridge_processor.py")
-    sleep(3)
+    time.sleep(3)
