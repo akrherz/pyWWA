@@ -111,7 +111,7 @@ def run():
     conn.close() 
 
 if __name__ == '__main__':
-    o = open("make_lite.pid",'w')
+    o = open("ridge_processor.pid",'w')
     o.write("%s" % ( os.getpid(),) )
     o.close()
     try:
