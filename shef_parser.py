@@ -110,6 +110,7 @@ DIRECTMAP = {'HGIZ': 'rstage',
              'USIZ': 'sknt',
              'SFIZ': 'snow',
              'SFDZ': 'snow',
+             'SFQZ': 'snow', # This is more instantaneous, or 6hr perhaps
              'UDIZ': 'drct',
              'UGIZ': 'gust',
              'UPIZ': 'gust',
@@ -333,7 +334,7 @@ def process_site(tp, sid, ts, data):
     iemob = access.Ob(sid, network)
     iemob.setObTimeGMT(ts)
     iemob.data['year'] = ts.year
-    
+
     deffer = ACCESSDB.runInteraction(save_data, tp, iemob, data)
     deffer.addErrback(common.email_error, tp.raw)
     deffer.addCallback(got_results, tp, sid, network)
@@ -358,7 +359,6 @@ def save_data(txn, tp, iemob, data):
     iemob.txn = txn
     if not iemob.load_and_compare():
         return False
-        
     for var in data.keys():
         myval = data[var] * MULTIPLIER.get(var[:2],1.0)
         iemob.data[ MAPPING[var] ] = myval
