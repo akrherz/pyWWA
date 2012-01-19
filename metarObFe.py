@@ -230,6 +230,8 @@ def save_data(txn, iemid, iem, mtr, clean_metar, orig_metar):
         iem.data['vsby'] = mtr.vis.value("SM")
     if mtr.press:
         iem.data['alti'] = mtr.press.value("IN")
+    if mtr.press_sea_level:
+        iem.data['pres'] = mtr.press_sea_level.value("MB")
     iem.data['phour'] = 0
     if mtr.precip_1hr:
         iem.data['phour'] = mtr.precip_1hr.value("IN")
