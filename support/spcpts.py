@@ -9,7 +9,7 @@ from shapely.geometry.base import geom_factory
 import shapely.geos
 import mx.DateTime
 
-import matplotlib.pyplot as plt
+
 
 def ptchecker(pts):
     """
@@ -148,7 +148,7 @@ class SPCPTS(object):
         self.find_outlooks( tp )
     
     def draw_outlooks(self):
-
+        import matplotlib.pyplot as plt
         i = 0
         for outlook in self.outlooks:
             fig = plt.figure()
