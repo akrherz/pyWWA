@@ -30,10 +30,10 @@ from metar import Metar
 import secret, mx.DateTime
 import common
 
-IEMDB = adbapi.ConnectionPool("twistedpg", database='iem', host=secret.dbhost, password=secret.dbpass,
-                               cp_reconnect=True)
-ASOSDB = adbapi.ConnectionPool("twistedpg", database='asos', host=secret.dbhost, password=secret.dbpass,
-                               cp_reconnect=True)
+IEMDB = adbapi.ConnectionPool("twistedpg", database='iem', host=secret.dbhost, 
+                              password=secret.dbpass, cp_reconnect=True)
+ASOSDB = adbapi.ConnectionPool("twistedpg", database='asos', host=secret.dbhost, 
+                               password=secret.dbpass, cp_reconnect=True)
 
     
 LOC2NETWORK = {}
@@ -210,7 +210,22 @@ def save_data(txn, iemid, iem, mtr, clean_metar, orig_metar):
         if new_max_wind > old_max_wind:
             #print 'Setting max_drct manually: %s' % (clean_metar,)
             iem.data['max_drct'] = iem.data.get('drct',0)
-            
+
+    if mtr.max_temp_6hr:
+        iem.data['max_tmpf_6hr'] = mtr.max_temp_6hr.value("F")
+    if mtr.min_temp_6hr:
+        iem.data['min_tmpf_6hr'] = mtr.min_temp_6hr.value("F")
+    if mtr.max_temp_24hr:
+        iem.data['max_tmpf_24hr'] = mtr.max_temp_24hr.value("F")
+    if mtr.min_temp_24hr: 
+        iem.data['min_tmpf_6hr'] = mtr.min_temp_24hr.value("F")
+    if mtr.precip_3hr:
+        iem.data['p03i'] = mtr.precip_3hr.value("IN")
+    if mtr.precip_6hr:
+        iem.data['p06i'] = mtr.precip_6hr.value("IN")
+    if mtr.precip_24hr:
+        iem.data['p24i'] = mtr.precip_24hr.value("IN")
+
     if mtr.vis:
         iem.data['vsby'] = mtr.vis.value("SM")
     if mtr.press:
