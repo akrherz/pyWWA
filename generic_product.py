@@ -15,7 +15,7 @@
 # 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 """ generic product ingestor """
 
-__revision__ = '$Id: generic_product.py 3802 2008-07-29 19:55:56Z akrherz $'
+__revision__ = '$Id: :$'
 
 # Twisted Python imports
 from twisted.words.protocols.jabber import client, jid, xmlstream
@@ -40,8 +40,11 @@ import common
 log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
 log.startLogging( logfile.DailyLogFile('generic_product.log', 'logs/') )
 
-POSTGIS = pg.connect(secret.dbname, secret.dbhost, user=secret.dbuser, passwd=secret.dbpass)
-DBPOOL = adbapi.ConnectionPool("psycopg2", database=secret.dbname, host=secret.dbhost, password=secret.dbpass)
+POSTGIS = pg.connect(secret.dbname, secret.dbhost, user=secret.dbuser, 
+                     passwd=secret.dbpass)
+DBPOOL = adbapi.ConnectionPool("psycopg2", database=secret.dbname, 
+                               host=secret.dbhost, password=secret.dbpass,
+                               cp_reconnect=True)
 
 # These are the offices which get all hurricane stuff
 gulfwfo = ['KEY', 'SJU', 'TBW', 'TAE', 'JAX', 'MOB', 'HGX', 'CRP', 'BMX',
@@ -191,6 +194,28 @@ def centertext(txt):
     if (txt == "WNH"): return "Hydrometeorological Prediction Center"
     return "%s" % (txt,)
 
+def snowfall_pns(prod):
+    """
+    Process Snowfall PNS, from ARX at the moment
+    """
+    if prod.raw.find("...RECENT REPORTED SNOWFALL TOTALS...") == -1:
+        return
+    DBPOOL.runOperation("DELETE from snowfall_pns where source = '%s'" % (
+                                                                prod.afos,))
+    for line in prod.raw.split("\n"):
+        tokens = line.split()
+        if len(tokens) < 6:
+            continue
+        if tokens[-3] not in ['AM','PM']:
+            continue
+        # we have a good ob?
+        lon = 0 - float(tokens[-1].replace("W", ""))
+        lat = float(tokens[-2].replace("N", ""))
+        snowfall = tokens[-5]
+        DBPOOL.runOperation("""INSERT into snowfall_pns(valid, source, snow, geom)
+        VALUES (now(), '%s', %s, 'SRID=4326;POINT(%s %s)')""" % (prod.afos,
+                                                snowfall, lon, lat)).addErrback(common.email_error)
+        
 
 def real_process(raw):
     """ The real processor of the raw data, fun! """
@@ -252,6 +277,8 @@ def real_process(raw):
         twt = prodtxt
         url = myurl
         common.tweet(channels, twt, url)
+        if prod.afos == "PNSARX":
+            snowfall_pns(prod)
         # We are done for this product
         return
 
