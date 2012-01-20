@@ -247,7 +247,7 @@ def save_data(txn, iemid, iem, mtr, clean_metar, orig_metar):
         pwx = []
         for x in mtr.weather:
             pwx.append( ("").join([a for a in x if a is not None]) )
-        iem.data['presentwx'] = ",".join(pwx)
+        iem.data['presentwx'] = (",".join(pwx))[:24]
 
     iem.updateDatabase()
     
