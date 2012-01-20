@@ -101,14 +101,15 @@ def real_processor(buf):
     """
     tokens = buf.split("=")
     for metar in tokens:
-        if metar.find("METAR") > -1:
+        # Dump METARs that have NIL in them
+        if metar.find(" NIL") > -1:
+            continue
+        elif metar.find("METAR") > -1:
             metar = metar[metar.find("METAR")+5:]
         elif metar.find("LWIS ") > -1:
             metar = metar[metar.find("LWIS ")+5:]
         elif metar.find("SPECI") > -1:
             metar = metar[metar.find("SPECI")+5:]
-        elif metar.find(" NIL") > -1:
-            continue
         elif len(metar.strip()) < 5:
             continue
         # We actually have something
