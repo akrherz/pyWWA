@@ -242,8 +242,16 @@ def save_data(txn, iemid, iem, mtr, clean_metar, orig_metar):
         if h is not None:
             iem.data['skyl%s' % (i+1)] = h.value("FT")
 
-    iem.updateDatabase()
+    # Presentwx
+    if mtr.weather:
+        pwx = []
+        for x in mtr.weather:
+            pwx.append( ("").join([a for a in x if a is not None]) )
+        iem.data['presentwx'] = ",".join(pwx)
 
+    iem.updateDatabase()
+    
+    
     # Search for tornado
     if (len(TORNADO_RE.findall(clean_metar)) > 0):
         sendAlert(txn, iemid, "Tornado", clean_metar)
