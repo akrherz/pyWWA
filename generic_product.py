@@ -198,7 +198,7 @@ def snowfall_pns(prod):
     """
     Process Snowfall PNS, from ARX at the moment
     """
-    if prod.raw.find("...STORM TOTAL SNOWFALL AMOUNTS...") == -1:
+    if prod.raw.find("LOCATION              SNOWFALL") == -1:
         return
     DBPOOL.runOperation("DELETE from snowfall_pns where source = '%s'" % (
                                                                 prod.afos,))
