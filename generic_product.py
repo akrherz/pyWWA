@@ -198,7 +198,7 @@ def snowfall_pns(prod):
     """
     Process Snowfall PNS, from ARX at the moment
     """
-    if prod.raw.find("...RECENT REPORTED SNOWFALL TOTALS...") == -1:
+    if prod.raw.find("...STORM TOTAL SNOWFALL AMOUNTS...") == -1:
         return
     DBPOOL.runOperation("DELETE from snowfall_pns where source = '%s'" % (
                                                                 prod.afos,))
@@ -214,7 +214,7 @@ def snowfall_pns(prod):
         snowfall = tokens[-5]
         DBPOOL.runOperation("""INSERT into snowfall_pns(valid, source, snow, geom)
         VALUES (now(), '%s', %s, 'SRID=4326;POINT(%s %s)')""" % (prod.afos,
-                                                snowfall, lon, lat)).addErrback(common.email_error)
+                            snowfall, lon, lat)).addErrback(common.email_error)
         
 
 def real_process(raw):
