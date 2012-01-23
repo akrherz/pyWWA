@@ -229,6 +229,7 @@ def real_process(raw):
                 tbl, saw, sTS.strftime("%Y-%m-%d %H:%M"), 
                 eTS.strftime("%Y-%m-%d %H:%M"), types[ww_type], 
                 raw.replace("'","\\'"), wkt, ww_num)
+        print sql
         deffer = DBPOOL.runOperation(sql)
         deffer.addErrback(common.email_error, raw)
 
