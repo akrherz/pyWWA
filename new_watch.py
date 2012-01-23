@@ -268,7 +268,7 @@ def real_process(raw):
     lines = raw.split("\n")
     twt = lines[5]
     url = "http://www.spc.noaa.gov/products/watch/ww%04i.html" % (int(ww_num),)
-    tokens.append("SPC")
+    channels.append("SPC")
     common.tweet(channels, twt, url)
 
 
