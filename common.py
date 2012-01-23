@@ -84,7 +84,7 @@ def tweet(channels, msg, url, extras={}):
     """
     if secret.DISARM:
         channels = ['TEST',]
-        return
+        #return
 
     if url:
         url = url.replace("&amp;", "&").replace("#","%23")
@@ -107,22 +107,37 @@ def reallytweet(json, channels, msg, extras):
         elif j.has_key('results'):
             tinyurl = j['results'][ j['results'].keys()[0] ]['shortUrl']
     # We are finally ready to tweet!
+    i = 0
     for channel in channels:
         tuser = "iembot_%s" % (channel.lower(),)
         if not OAUTH_TOKENS.has_key(tuser):
             print "Unknown Twitter User, %s" % (tuser,)
             continue
-        twt = "#%s %s %s" % (channel, msg[:112], tinyurl)
-        deffer = twitter.Twitter(consumer=OAUTH_CONSUMER, token=OAUTH_TOKENS[tuser]).update( twt, None, extras)
-        deffer.addCallback(tb, channel, twt)
-        deffer.addErrback(twitterErrback, channel, twt)
+        reactor.callLater(i, really_really_tweet, 
+                          tuser, channel, tinyurl, msg, extras)
+        i += 1
+        
+def really_really_tweet(tuser, channel, tinyurl, msg, extras):
+    """
+    Throttled twitter calls
+    """
+    twt = "#%s %s %s" % (channel, msg[:112], tinyurl)
+    _twitter = twitter.Twitter(consumer=OAUTH_CONSUMER, 
+                               token=OAUTH_TOKENS[tuser])
+    deffer = _twitter.update( twt, None, extras)
+    deffer.addCallback(tb, tuser, channel, twt)
+    deffer.addErrback(twitterErrback, tuser, channel, twt)
 
-def tb(x, channel, twt):
-    print "TWEET [%s] RES: %s" % (twt, x) 
+def tb(x, tuser, channel, twt):
+    log.msg("TWEET User: %s TWT: [%s] RES: %s" % (tuser, twt, x) )
     
-def twitterErrback(err, channel, twt):
-    print "TWEET [%s] RES: %s" % (twt, err)
-    log.msg( dir(err) ) 
+def twitterErrback(error, tuser, channel, twt):
+    """
+    Errback for twitter calls! 
+    """
+    log.msg("TWEET ERROR User: %s TWT: [%s] RES: %s" % (tuser, twt, error) )
+    log.msg( error.getErrorMessage() )
+    log.msg( error.value.response )
 
 
 class JabberClient:
