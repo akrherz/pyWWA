@@ -15,7 +15,7 @@
 # 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 """ SPC Watch Ingestor """
 
-__revision__ = '$Id: new_watch.py 3160 2008-04-09 23:31:06Z akrherz $'
+__revision__ = '$Id: $:'
 
 
 from twisted.python import log
@@ -222,15 +222,14 @@ def real_process(raw):
     DBPOOL.runOperation(sql)
 
     # Insert into our watches table
+    giswkt = 'SRID=4326;MULTIPOLYGON(((%s)))' % (wkt,)
     for tbl in ('watches', 'watches_current'):
-        sql = """INSERT into %s(sel, issued, expired, type, report, geom, num) 
-               VALUES('SEL%s','%s+00','%s+00','%s','%s',
-               'SRID=4326;MULTIPOLYGON(((%s)))', %s)""" % (
-                tbl, saw, sTS.strftime("%Y-%m-%d %H:%M"), 
-                eTS.strftime("%Y-%m-%d %H:%M"), types[ww_type], 
-                raw.replace("'","\\'"), wkt, ww_num)
-        log.msg(sql)
-        deffer = DBPOOL.runOperation(sql)
+        sql = """INSERT into """+ tbl +"""(sel, issued, expired, type, report, 
+            geom, num) VALUES(%s,%s,%s,%s,%s,%s, %s)""" 
+        args = ('SEL%s' % (saw,), sTS.strftime("%Y-%m-%d %H:%M+00"), 
+                eTS.strftime("%Y-%m-%d %H:%M+00"), types[ww_type], 
+                raw, giswkt, ww_num)
+        deffer = DBPOOL.runOperation(sql, args)
         deffer.addErrback(common.email_error, raw)
 
     # Figure out WFOs affected...
@@ -266,7 +265,7 @@ def real_process(raw):
 
     # Special message for SPC
     lines = raw.split("\n")
-    twt = lines[5]
+    twt = lines[4]
     url = "http://www.spc.noaa.gov/products/watch/ww%04i.html" % (int(ww_num),)
     channels.append("SPC")
     common.tweet(channels, twt, url)
