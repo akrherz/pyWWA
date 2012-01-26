@@ -45,13 +45,16 @@ def generate_image(message):
     # Convert Java ticks into local time
     lts = mx.DateTime.DateTimeFromTicks( ticks / 1000. )
     gts = lts.gmtime()
+    routes = "ac"
+    if (mx.DateTime.gmt() - gts).seconds > 3600:
+        routes = "a"
 
     metadata = {'meta': {}}
     metadata['meta']['valid'] = gts.strftime("%Y-%m-%dT%H:%M:%SZ")
     metadata['meta']['product'] = productID
     metadata['meta']['site'] = siteID
-    pqstr = "gis ac %s gis/images/4326/ridge/%s/%s_0.png GIS/ridge/%s/%s/%s_%s_%s.png png" % (
-     gts.strftime("%Y%m%d%H%M"), siteID, productID, 
+    pqstr = "gis %s %s gis/images/4326/ridge/%s/%s_0.png GIS/ridge/%s/%s/%s_%s_%s.png png" % (
+     routes, gts.strftime("%Y%m%d%H%M"), siteID, productID, 
      siteID, productID, siteID, productID, gts.strftime("%Y%m%d%H%M"))
 
     fp = '/tmp/%s_%s_%s.png' % (siteID, productID, 
