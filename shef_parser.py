@@ -357,11 +357,15 @@ def save_data(txn, tp, iemob, data):
     Called from a transaction 'thread'
     """
     iemob.txn = txn
+    #print data, iemob.data['valid']
     if not iemob.load_and_compare():
         return False
     for var in data.keys():
         myval = data[var] * MULTIPLIER.get(var[:2],1.0)
         iemob.data[ MAPPING[var] ] = myval
+        if MAPPING[var] == 'tmpf' and iemob.data['network'].find("COOP") > 0:
+            iemob.data['coop_tmpf'] = myval
+            iemob.data['coop_valid'] = iemob.data['valid'].strftime("%Y-%m-%d %H:%M")
     iemob.data['raw'] = tp.get_product_id()
     iemob.update_summary()
     # Don't go through this pain, unless we need to!
