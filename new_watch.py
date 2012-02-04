@@ -265,7 +265,7 @@ def real_process(raw):
 
     # Special message for SPC
     lines = raw.split("\n")
-    twt = lines[4]
+    twt = lines[5].replace("\r\r", "")
     url = "http://www.spc.noaa.gov/products/watch/ww%04i.html" % (int(ww_num),)
     channels.append("SPC")
     common.tweet(channels, twt, url)
