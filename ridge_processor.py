@@ -14,34 +14,24 @@ import random
 import mx.DateTime
 import pyactivemq
 import simplejson
-from pyactivemq import ActiveMQConnectionFactory
-from pyactivemq import AcknowledgeMode
-
-
-class MessageListener(pyactivemq.MessageListener): 
-    def __init__(self, queue): 
-        pyactivemq.MessageListener.__init__(self) 
-        self.queue = queue 
-
-    def onMessage(self, message): 
-        self.queue.put(message)
+import pika
 
 def jitter():
     return "0" * random.randint(0,6)
 
-def generate_image(message):
+def generate_image(ch, method, properties, body):
     """
     Generate a Lite Image given the ActiveMQ message 
     @param pyactivemq.BytesMessage
     """
-    siteID = message.getStringProperty("siteID")
-    ticks = message.getLongProperty("validTime")
-    productID = message.getStringProperty("productID")
-    vcp = message.getStringProperty("vcp")
-    upperLeftLat = float(message.getStringProperty("upperLeftLat"))
-    upperLeftLon = float(message.getStringProperty("upperLeftLon"))
-    lowerRightLat = float(message.getStringProperty("lowerRightLat"))
-    lowerRightLon = float(message.getStringProperty("lowerRightLon"))
+    siteID = properties.headers["siteID"]
+    ticks = properties.headers["validTime"]
+    productID = properties.headers["productID"]
+    vcp = properties.headers["vcp"]
+    upperLeftLat = properties.headers["upperLeftLat"]
+    upperLeftLon = properties.headers["upperLeftLon"]
+    lowerRightLat = properties.headers["lowerRightLat"]
+    lowerRightLon = properties.headers["lowerRightLon"]
     # Convert Java ticks into local time
     lts = mx.DateTime.DateTimeFromTicks( ticks / 1000. )
     gts = lts.gmtime()
@@ -91,29 +81,24 @@ def generate_image(message):
     os.unlink(metafp)
 
 def run():
-    f = ActiveMQConnectionFactory('tcp://localhost:61616?wireFormat=openwire')
-    conn = f.createConnection()
-    session = conn.createSession(AcknowledgeMode.AUTO_ACKNOWLEDGE)
-    topic = session.createTopic('ridge.radar')
-    subscriber = session.createConsumer(topic)
+    connection = pika.BlockingConnection(pika.ConnectionParameters(
+        host='localhost'))
 
-    queue = Queue.Queue(0) 
-    listener = MessageListener(queue) 
-    subscriber.messageListener = listener 
+    channel = connection.channel()
 
-    conn.start()
-    processed = 0
-    while queue and processed < 10000: 
-        message = queue.get(block=True)
-        try: 
-            generate_image(message)
-            processed += 1
-        except:
-            io = StringIO.StringIO()
-            traceback.print_exc(file=io)
-            print io.getvalue()
-        del message
-    conn.close() 
+    channel.exchange_declare(exchange='ridgeProductExchange', type='fanout', 
+                             durable=True)
+    result = channel.queue_declare(exclusive=True)
+    queue_name = result.method.queue
+
+    channel.queue_bind(exchange='ridgeProductExchange',
+                   queue=queue_name)
+
+    channel.basic_consume(generate_image,
+                      queue=queue_name,
+                      no_ack=True)
+
+    channel.start_consuming()
 
 if __name__ == '__main__':
     o = open("ridge_processor.pid",'w')
