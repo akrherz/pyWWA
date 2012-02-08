@@ -28,10 +28,10 @@ def generate_image(ch, method, properties, body):
     ticks = properties.headers["validTime"]
     productID = properties.headers["productID"]
     vcp = properties.headers["vcp"]
-    upperLeftLat = properties.headers["upperLeftLat"]
-    upperLeftLon = properties.headers["upperLeftLon"]
-    lowerRightLat = properties.headers["lowerRightLat"]
-    lowerRightLon = properties.headers["lowerRightLon"]
+    upperLeftLat = float(properties.headers["upperLeftLat"])
+    upperLeftLon = float(properties.headers["upperLeftLon"])
+    lowerRightLat = float(properties.headers["lowerRightLat"])
+    lowerRightLon = float(properties.headers["lowerRightLon"])
     # Convert Java ticks into local time
     lts = mx.DateTime.DateTimeFromTicks( ticks / 1000. )
     gts = lts.gmtime()
@@ -51,7 +51,7 @@ def generate_image(ch, method, properties, body):
     fp = '/tmp/%s_%s_%s.png' % (siteID, productID, 
         gts.strftime("%H%M"))
     o = open(fp, 'wb')
-    o.write( message.bodyBytes )
+    o.write( body )
     o.close()
 
     metafp = '/tmp/%s_%s_%s.json' % (siteID, productID, gts.strftime("%H%M"))
