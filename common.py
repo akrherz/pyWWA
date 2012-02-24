@@ -91,6 +91,7 @@ def tweet(channels, msg, url, extras={}):
         deffer = client.getPage(BITLY % (url, ) )
         deffer.addCallback(reallytweet, channels, msg, extras )
         deffer.addErrback(reallytweet, channels, msg, extras )
+        deffer.addErrback(log.err)
     else:
         reallytweet(None, channels, msg, extras)
 
@@ -116,6 +117,7 @@ def reallytweet(json, channels, msg, extras):
         reactor.callLater(i, really_really_tweet, 
                           tuser, channel, tinyurl, msg, extras)
         i += 1
+
         
 def really_really_tweet(tuser, channel, tinyurl, msg, extras):
     """
@@ -127,6 +129,7 @@ def really_really_tweet(tuser, channel, tinyurl, msg, extras):
     deffer = _twitter.update( twt, None, extras)
     deffer.addCallback(tb, tuser, channel, twt)
     deffer.addErrback(twitterErrback, tuser, channel, twt)
+    deffer.addErrback(log.err)
 
 def tb(x, tuser, channel, twt):
     log.msg("TWEET User: %s TWT: [%s] RES: %s" % (tuser, twt, x) )
