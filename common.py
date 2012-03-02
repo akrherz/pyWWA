@@ -5,6 +5,7 @@ from twisted.words.xish import domish
 from twisted.python import log
 from twisted.mail import smtp
 from twisted.web import client
+import twisted.web.error as weberror
 from twisted.words.xish.xmlstream import STREAM_END_EVENT
 from twisted.internet.task import LoopingCall
 from twisted.enterprise import adbapi
@@ -89,11 +90,22 @@ def tweet(channels, msg, url, extras={}):
     if url:
         url = url.replace("&amp;", "&").replace("#","%23")
         deffer = client.getPage(BITLY % (url, ) )
+        # Add errback first
+        deffer.addErrback(bitly_error, channels, msg, extras )
         deffer.addCallback(reallytweet, channels, msg, extras )
-        deffer.addErrback(reallytweet, channels, msg, extras )
         deffer.addErrback(log.err)
     else:
         reallytweet(None, channels, msg, extras)
+
+def bitly_error(err, channels, msg, extras):
+    """
+    Sometimes bad things happen with bitly
+    """
+    log.msg("Encountered BITLY error")
+    err.trap( weberror.Error )
+    log.msg( err.getErrorMessage() )
+    log.msg( err.value.response )
+    tweet_step2(channels, msg, extras)
 
 def reallytweet(json, channels, msg, extras):
     """
@@ -107,12 +119,14 @@ def reallytweet(json, channels, msg, extras):
                 email_error(str(j), "Problem with bitly")
         elif j.has_key('results'):
             tinyurl = j['results'][ j['results'].keys()[0] ]['shortUrl']
-    # We are finally ready to tweet!
+    tweet_step2(channels, msg, extras, tinyurl)
+
+def tweet_step2(channels, msg, extras, tinyurl=""):
     i = 0
     for channel in channels:
         tuser = "iembot_%s" % (channel.lower(),)
         if not OAUTH_TOKENS.has_key(tuser):
-            print "Unknown Twitter User, %s" % (tuser,)
+            log.msg("Unknown Twitter User, %s" % (tuser,))
             continue
         reactor.callLater(i, really_really_tweet, 
                           tuser, channel, tinyurl, msg, extras)
@@ -138,6 +152,7 @@ def twitterErrback(error, tuser, channel, twt):
     """
     Errback for twitter calls! 
     """
+    error.trap( weberror.Error )
     log.msg("TWEET ERROR User: %s TWT: [%s] RES: %s" % (tuser, twt, error) )
     log.msg( error.getErrorMessage() )
     log.msg( error.value.response )
