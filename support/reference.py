@@ -99,13 +99,15 @@ offsets = {
  'ADT': 3,
  'VDT': 3, 'VST': 4,
  'EDT': 4, 'AST': 4,
- 'CDT': 5, 'EST': 5,
+ 'CDT': 5, 'EST': 5, 
  'MDT': 6, 'CST': 6,
  'PDT': 7, 'MST': 7,
  'AKDT': 8, 'PST': 8,
  'HDT': 9, 'AKST': 9,
            'HST':10,
  'SST':11,
+ 'PLT': -5,
+ 'GSST': -4,
 }
 
 wfo_dict =  {
