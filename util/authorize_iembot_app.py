@@ -1,13 +1,17 @@
-import oauth2 as oauth
+"""
+  Need an app to save authorizations for iembot from twitter...
+ $Id$:
+"""
+import sys
+sys.path.insert(0,'../')
+import secret
 from oauthtwitter import OAuthApi
 import pprint
-import pg
-mydb = pg.connect('mesosite')
+import iemdb
+MESOSITE = iemdb.connect('mesosite')
+mcursor = MESOSITE.cursor()
 
-consumer_key = ""
-consumer_secret = ""
-
-twitter = OAuthApi(consumer_key, consumer_secret)
+twitter = OAuthApi(secret.consumer_key, secret.consumer_secret)
 
 # Get the temporary credentials for our next few calls
 temp_credentials = twitter.getRequestToken()
@@ -23,7 +27,11 @@ print("oauth_token: " + access_token['oauth_token'])
 print("oauth_token_secret: " + access_token['oauth_token_secret'])
 
 botuser = raw_input("What is username?")
-mydb.query("INSERT into oauth_tokens values ('%s','%s','%s')" % (botuser, access_token['oauth_token'], access_token['oauth_token_secret']) )
+mcursor.execute("DELETE from oauth_tokens where username = '%s'" % (botuser,))
+mcursor.execute("INSERT into oauth_tokens values ('%s','%s','%s')" % (botuser, access_token['oauth_token'], access_token['oauth_token_secret']) )
+
+mcursor.close()
+MESOSITE.commit()
 
 # Do a test API call using our new credentials
 #twitter = OAuthApi(consumer_key, consumer_secret, access_token['oauth_token'], access_token['oauth_token_secret'])
