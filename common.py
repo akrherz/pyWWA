@@ -156,6 +156,8 @@ def twitterErrback(error, tuser, channel, twt):
     log.msg("TWEET ERROR User: %s TWT: [%s] RES: %s" % (tuser, twt, error) )
     log.msg( error.getErrorMessage() )
     log.msg( error.value.response )
+    if error.value.status == 401:
+        email_error(error, "Unauthorized 401 for %s" % (tuser,))
 
 
 class JabberClient:
