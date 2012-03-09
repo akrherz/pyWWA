@@ -18,9 +18,10 @@ $Id: $:
 """
 
 from twisted.python import log
+from twisted.python import logfile
 import os
 log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
-log.startLogging(open('logs/sps_parser.log','a'))
+log.startLogging( logfile.DailyLogFile('sps_parser.log','logs/'))
 
 
 import StringIO, traceback, mx.DateTime
@@ -50,6 +51,7 @@ rs = POSTGIS.query(sql).dictresult()
 for i in range(len(rs)):
     name = (rs[i]["name"]).replace("\x92"," ")
     ugc_dict[ rs[i]['ugc'] ] = name
+POSTGIS.close()
 
 def countyText(u):
     countyState = {}
@@ -116,7 +118,8 @@ iembot processing error:</span><br />Product: %s<br />Error: %s" % \
         sql = "INSERT into text_products(product, product_id) values (%s,%s)" 
         myargs = (sqlraw, product_id)
     deffer = DBPOOL.runOperation(sql, myargs)
-    deffer.addErrback( common.email_error, sqlraw)
+    deffer.addErrback( common.email_error, sqlraw )
+    deffer.addErrback( log.err )
 
     for seg in prod.segments:
         headline = "[NO HEADLINE FOUND IN SPS]"
@@ -144,8 +147,8 @@ iembot processing error:</span><br />Product: %s<br />Error: %s" % \
         url = "%s?pid=%s" % (secret.PROD_URL, product_id)
         common.tweet([prod.source[1:],], twt, url)
 
-myJid = jid.JID('%s@%s/sps2bot_%s' % \
-      (secret.iembot_ingest_user, secret.chatserver, \
+myJid = jid.JID('%s@%s/sps2bot_%s' % (secret.iembot_ingest_user, 
+                                      secret.chatserver, 
        mx.DateTime.gmt().strftime("%Y%m%d%H%M%S") ) )
 factory = client.basicClientFactory(myJid, secret.iembot_ingest_password)
 
