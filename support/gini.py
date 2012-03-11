@@ -196,8 +196,9 @@ class GINIZFile(GINIFile):
         pad = self.metadata['linesize'] * self.metadata['numlines'] - np.shape(data)[0]
         if pad > 0:
             fewer = pad / self.metadata['linesize']
-            #print 'Fewer lines found: %s' % (fewer,)
             #data = np.append(data, np.zeros( (pad), np.int8))
             self.metadata['numlines'] -= fewer
+            self.metadata['ny'] -= fewer
         self.data = np.reshape(data, (self.metadata['numlines'], self.metadata['linesize']))
-
+        # Erm, this bothers me, but need to redo, if ny changed!
+        self.init_projection()
