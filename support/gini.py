@@ -195,6 +195,9 @@ class GINIZFile(GINIFile):
         data = np.array( np.fromstring( sdata , np.int8) )
         pad = self.metadata['linesize'] * self.metadata['numlines'] - np.shape(data)[0]
         if pad > 0:
-            data = np.append(data, np.zeros( (pad), np.int8))
+            fewer = pad / self.metadata['linesize']
+            #print 'Fewer lines found: %s' % (fewer,)
+            #data = np.append(data, np.zeros( (pad), np.int8))
+            self.metadata['numlines'] -= fewer
         self.data = np.reshape(data, (self.metadata['numlines'], self.metadata['linesize']))
 
