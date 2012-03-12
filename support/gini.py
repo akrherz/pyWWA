@@ -15,6 +15,18 @@ ENTITIES = ['','','','','','','','DMSP','GMS','METEOSAT','GOES7', 'GOES8',
 CHANNELS = ['','VIS','3.9', 'WV', 'IR', '12', '13.3', 'U7', 'U8', 'U9', 'U10']
 SECTORS = ['NHCOMP', 'EAST', 'WEST', 'AK', 'AKNAT', 'HI', 'HINAT', 'PR', 'PRNAT','SUPER']
 
+AWIPS_GRID = {'TIGB': 203,
+              'TIGE': 211,
+              'TIGW': 211,
+              'TIGH': 208,
+              'TIGP': 210,
+              'TIGA': 207,
+              'TIGB': 203,
+              'TIGI': 204,
+              'TIGQ': 205,
+              'TICF': 201,
+              }
+
 def uint24(data):
     u = int(struct.unpack('>B', data[0] )[0]) << 16
     u += int(struct.unpack('>B', data[1] )[0]) << 8
@@ -37,9 +49,16 @@ class GINIFile(object):
         self.metadata = self.read_header(hdata)
     
     def __str__(self):
-        s = "Line Size: %s Num Lines: %s" % (self.metadata['linesize'],
-                                             self.metadata['numlines'])
+        s = "%s Line Size: %s Num Lines: %s" % (self.wmo,
+                                            self.metadata['linesize'],
+                                            self.metadata['numlines'])
         return s
+    
+    def awips_grid(self):
+        """
+        Return the awips grid number based on the WMO header
+        """
+        return AWIPS_GRID.get(self.wmo[:4], None)
     
     def current_filename(self):
         """
@@ -88,7 +107,48 @@ class GINIFile(object):
                     self.metadata['lat1'], y0, self.metadata['y1'], 
                     self.metadata['lat_ul'], alpha, self.metadata['dy']))
 
+    def init_mercator(self):
+        """
+        Compute mercator projection stuff 
+        """
+        self.metadata['proj'] = pyproj.Proj(proj='merc', 
+                        lat_ts=self.metadata['latin'], x_0=0, y_0=0)
+        x0, y0 = self.metadata['proj'](self.metadata['lon1'], self.metadata['lat1'])
+        self.metadata['x0'] = x0
+        self.metadata['y0'] = y0
+ 
+        x1, y1 = self.metadata['proj'](self.metadata['lon2'], self.metadata['lat2'])
+        self.metadata['x1'] = x1
+        self.metadata['y1'] = y1
+ 
+        self.metadata['dx'] = (x1 - x0) / self.metadata['nx']
+        self.metadata['dy'] = (y1 - y0) / self.metadata['ny']
+        
+        logging.info("latin: %.2f lat1: %.2f lat2: %.2f y0: %5.f y1: %.5f dx: %.3f dy: %.3f" % (
+                    self.metadata['latin'], self.metadata['lat1'], self.metadata['lat2'], y0, y1, 
+                    self.metadata['dx'], self.metadata['dy']))
 
+    def init_stereo(self):
+        """
+        Compute Polar Stereographic
+        """
+        self.metadata['proj'] = pyproj.Proj(proj='stere', 
+                        lat_ts=self.metadata['latin'], lat_0=0, 
+                        lon_0=self.metadata['lov'], 
+                        x_0=0, y_0=0)
+        # First point!
+        x0, y0 = self.metadata['proj'](self.metadata['lon1'], self.metadata['lat1'])
+        self.metadata['x0'] = x0
+        self.metadata['y0'] = y0
+
+        self.metadata['y1'] = y0 + (self.metadata['dy'] * self.metadata['ny'])
+        
+        logging.info("lon_ur: %.2f lat_ur: %.2f lon1: %.2f lon2: %.2f lov: %.2f latin: %.2f lat1: %.2f lat2: %.2f y0: %5.f y1: %.5f dx: %.3f dy: %.3f" % (
+                    self.metadata['lon_ur'], self.metadata['lat_ur'],
+                    self.metadata['lon1'], self.metadata['lon2'], 
+                    self.metadata['lov'], self.metadata['latin'], self.metadata['lat1'], 
+                    self.metadata['lat2'], y0, self.metadata['y1'], 
+                    self.metadata['dx'], self.metadata['dy']))
 
     def init_projection(self):
         """
@@ -96,6 +156,13 @@ class GINIFile(object):
         """
         if self.metadata['map_projection'] == 3:
             self.init_llc()
+        elif self.metadata['map_projection'] == 1:
+            self.init_mercator()
+        elif self.metadata['map_projection'] == 5:
+            self.init_stereo()
+        else:
+            print 'Unknown Projection: %s' % (self.metadata['map_projection'],)
+
 
     def read_header(self, hdata):
         meta = {}
@@ -135,6 +202,7 @@ class GINIFile(object):
             meta['lon2'] = int24( hdata[30:33] )
             meta['lat_ur'] = int24( hdata[55:58] )
             meta['lon_ur'] = int24( hdata[58:61] )
+        # lambert == 3, polar == 5
         else:
             meta['lat1'] = int24( hdata[20:23] )
             meta['lon1'] = int24( hdata[23:26] )
@@ -168,7 +236,7 @@ class GINIZFile(GINIFile):
     def __init__(self, fobj):
         fobj.seek(0)
         # WMO HEADER
-        fobj.read(21)
+        self.wmo = (fobj.read(21)).strip()
         d = zlib.decompressobj()
         hdata = d.decompress(fobj.read())
         self.metadata = self.read_header(hdata[21:])
@@ -196,9 +264,11 @@ class GINIZFile(GINIFile):
         pad = self.metadata['linesize'] * self.metadata['numlines'] - np.shape(data)[0]
         if pad > 0:
             fewer = pad / self.metadata['linesize']
+            logging.info("Trimming %s lines" % (fewer,))
             #data = np.append(data, np.zeros( (pad), np.int8))
             self.metadata['numlines'] -= fewer
             self.metadata['ny'] -= fewer
+            # Erm, this bothers me, but need to redo, if ny changed!
+            self.init_projection()
         self.data = np.reshape(data, (self.metadata['numlines'], self.metadata['linesize']))
-        # Erm, this bothers me, but need to redo, if ny changed!
-        self.init_projection()
+

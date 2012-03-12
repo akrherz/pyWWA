@@ -6,12 +6,17 @@ import mx.DateTime
 import logging
 import os
 import tempfile
+import random
 
 FORMAT = "%(asctime)-15s:["+ str(os.getpid()) +"]: %(message)s"
-logging.basicConfig(filename='logs/gini2gis.log', filemode='a+', format=FORMAT)
+LOG_FN = 'logs/gini2gis-%s.log' % (mx.DateTime.gmt().strftime("%Y%m%d"),)
+logging.basicConfig(filename=LOG_FN, filemode='a+', format=FORMAT)
 logger=logging.getLogger()
 logger.addHandler(logging.StreamHandler())
 logger.setLevel(logging.INFO)
+
+def rand_zeros():
+    return "%s" % ("0" * random.randint(0,10),) 
 
 def workflow():
     logger.info("Starting Ingest for: %s" % (" ".join(sys.argv),))
@@ -24,41 +29,48 @@ def workflow():
     archivefn = g.archive_filename()
     logger.info("Processed archive file: "+ archivefn)
     currentfn = g.current_filename()
+    awips_grid = g.awips_grid()
+    if awips_grid is None:
+        logger.info("ERROR: Unknown awips grid!")
+        return
     tmpfn = tempfile.mktemp()
     
     png = Image.fromarray( g.data )
     png.save('%s.png' % (tmpfn,))
     # World File
     o = open('%s.wld' % (tmpfn,), 'w')
-    o.write("""%(dx).3f
-0.000000000000%(random).0f
-0.0
--%(dy).3f
-%(x0).3f
+    o.write("""%(dx).3f"""+ rand_zeros() +"""
+0.0"""+ rand_zeros() +"""
+0.0"""+ rand_zeros() +"""
+-%(dy).3f"""+ rand_zeros() +"""
+%(x0).3f"""+ rand_zeros() +"""
 %(y1).3f""" % g.metadata)
     o.close()
     # Metadata
     o = open("%s.txt" % (tmpfn,), 'w')
     o.write("""
     http://www.nws.noaa.gov/noaaport/html/icdtb48e.html
-    Grid Info:  Lambert Comic Comformal lat_0=25n lon_0=95w
+    AWIPS Grid: %s
     
     Archive Filename: %s
     Valid: %s 
     
     Contact Info: Daryl. Herzmann akrherz@iastate.edu 515 294 5978
-    """ % (archivefn, g.metadata['valid']))
+    """ % (awips_grid, archivefn, g.metadata['valid']))
     o.close()
 
 
-    pqinsert = "/home/ldm/bin/pqinsert -p 'gis ac %s gis/images/awips211/%s GIS/sat/%s png' %s.png" % (g.metadata['valid'].strftime("%Y%m%d%H%M"),
+    pqinsert = "/home/ldm/bin/pqinsert -p 'gis ac %s gis/images/awips%s/%s GIS/sat/%s png' %s.png" % (
+                                                g.metadata['valid'].strftime("%Y%m%d%H%M"), awips_grid,
                                                 currentfn, archivefn, tmpfn )
     os.system(pqinsert)
-    pqinsert = "/home/ldm/bin/pqinsert -p 'gis ac %s gis/images/awips211/%s GIS/sat/%s wld' %s.wld" % (g.metadata['valid'].strftime("%Y%m%d%H%M"),
+    pqinsert = "/home/ldm/bin/pqinsert -p 'gis ac %s gis/images/awips%s/%s GIS/sat/%s wld' %s.wld" % (
+                                                g.metadata['valid'].strftime("%Y%m%d%H%M"), awips_grid,
                                                 currentfn.replace("png", "wld"), 
                                                 archivefn.replace("png", "wld"), tmpfn )
     os.system(pqinsert)
-    pqinsert = "/home/ldm/bin/pqinsert -p 'gis c %s gis/images/awips211/%s GIS/sat/%s txt' %s.txt" % (g.metadata['valid'].strftime("%Y%m%d%H%M"),
+    pqinsert = "/home/ldm/bin/pqinsert -p 'gis c %s gis/images/awips%s/%s GIS/sat/%s txt' %s.txt" % (
+                                                g.metadata['valid'].strftime("%Y%m%d%H%M"), awips_grid,
                                                 currentfn.replace("png", "txt"), 
                                                 archivefn.replace("png", "txt"), tmpfn )
     os.system(pqinsert)
