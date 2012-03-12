@@ -261,17 +261,15 @@ class GINIZFile(GINIFile):
                         #print 'ERROR, keep going', i
                         pass
                 loc = i
-        #try:
         sdata += zlib.decompress(d.unused_data[loc:])
-        #except:
-        #    sdata += d.unused_data[loc:]
-        data = np.array( np.fromstring( sdata , np.int8) )
+        trunc = 0 - self.metadata['linesize']
+        data = np.array( np.fromstring( sdata[:trunc] , np.int8) )
         pad = self.metadata['linesize'] * self.metadata['numlines'] - np.shape(data)[0]
         if pad > 0:
             fewer = pad / self.metadata['linesize']
             logging.info("Missing %s lines" % (fewer,))
-            data = np.append(data, np.zeros( (pad), np.int8))
-            #self.metadata['numlines'] -= fewer
+            #data = np.append(data, np.zeros( (pad), np.int8))
+            self.metadata['numlines'] -= fewer
             self.metadata['dy'] = self.metadata['dy'] / (float(self.metadata['ny'] - fewer) / float(self.metadata['ny']))
             print 'New dy', self.metadata['dy']
             # Erm, this bothers me, but need to redo, if ny changed!
