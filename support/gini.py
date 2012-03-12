@@ -81,9 +81,12 @@ class GINIFile(object):
         """
         Initialize Lambert Conic Comformal
         """
-        self.metadata['proj'] = pyproj.Proj(proj='lcc', lat_0=self.metadata['latin'],
-         lat_1=self.metadata['latin'], lat_2=self.metadata['latin'], lon_0=self.metadata['lov'],
-         a=6371200.0,b=6371200.0)
+        self.metadata['proj'] = pyproj.Proj(proj='lcc', 
+                                            lat_0=self.metadata['latin'],
+                                            lat_1=self.metadata['latin'], 
+                                            lat_2=self.metadata['latin'], 
+                                            lon_0=self.metadata['lov'],
+                                            a=6371200.0, b=6371200.0)
 
         s = 1.0
         if self.metadata['proj_center_flag'] != 0:
@@ -103,9 +106,11 @@ class GINIFile(object):
 
         self.metadata['lon_ul'], self.metadata['lat_ul'] =  self.metadata['proj'](self.metadata['x0'],
                                                     self.metadata['y1'], inverse=True)
-        logging.info("lat1: %.5f y0: %5.f y1: %.5f lat: %.5f alpha: %.5f dy: %.3f" % (
+        logging.info("""lat1: %.5f y0: %5.f y1: %.5f lat: %.5f
+lat_ur: %.3f lon_ur: %.3f alpha: %.5f dy: %.3f""" % (
                     self.metadata['lat1'], y0, self.metadata['y1'], 
-                    self.metadata['lat_ul'], alpha, self.metadata['dy']))
+                    self.metadata['lat_ul'], self.metadata['lat_ur'],
+                    self.metadata['lon_ur'], alpha, self.metadata['dy']))
 
     def init_mercator(self):
         """
@@ -269,6 +274,6 @@ class GINIZFile(GINIFile):
             self.metadata['numlines'] -= fewer
             self.metadata['ny'] -= fewer
             # Erm, this bothers me, but need to redo, if ny changed!
-            self.init_projection()
+            #self.init_projection()
         self.data = np.reshape(data, (self.metadata['numlines'], self.metadata['linesize']))
 
