@@ -106,7 +106,7 @@ class GINIFile(object):
 
         self.metadata['lon_ul'], self.metadata['lat_ul'] =  self.metadata['proj'](self.metadata['x0'],
                                                     self.metadata['y1'], inverse=True)
-        logging.info("""lat1: %.5f y0: %5.f y1: %.5f lat: %.5f
+        logging.info("""lat1: %.5f y0: %5.f y1: %.5f lat_ul: %.3f
 lat_ur: %.3f lon_ur: %.3f alpha: %.5f dy: %.3f""" % (
                     self.metadata['lat1'], y0, self.metadata['y1'], 
                     self.metadata['lat_ul'], self.metadata['lat_ur'],
@@ -270,7 +270,7 @@ class GINIZFile(GINIFile):
         if pad > 0:
             fewer = pad / self.metadata['linesize']
             logging.info("Missing %s lines" % (fewer,))
-            data = np.append(data, np.zeros( (pad), np.int8))
+            data = np.append(np.zeros( (pad), np.int8), data )
             #self.metadata['numlines'] -= fewer
             #self.metadata['ny'] -= fewer
             # Erm, this bothers me, but need to redo, if ny changed!
