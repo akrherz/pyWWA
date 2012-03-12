@@ -39,12 +39,13 @@ def workflow():
     png.save('%s.png' % (tmpfn,))
     # World File
     o = open('%s.wld' % (tmpfn,), 'w')
-    o.write("""%(dx).3f"""+ rand_zeros() +"""
+    fmt = """%(dx).3f"""+ rand_zeros() +"""
 0.0"""+ rand_zeros() +"""
 0.0"""+ rand_zeros() +"""
 -%(dy).3f"""+ rand_zeros() +"""
 %(x0).3f"""+ rand_zeros() +"""
-%(y1).3f""" % g.metadata)
+%(y1).3f"""
+    o.write( fmt % g.metadata)
     o.close()
     # Metadata
     o = open("%s.txt" % (tmpfn,), 'w')
