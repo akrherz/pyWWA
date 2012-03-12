@@ -250,10 +250,9 @@ class GINIZFile(GINIFile):
         logging.info("Set proj")
         self.init_projection()
         marker = 0
-        self.data = np.zeros( (self.metadata['numlines'], self.metadata['linesize']), np.int8)
         row = 0
         totsz = len(d.unused_data)
-        logging.info("reading data...")
+        sdata = ""
         for i in range(0,len(d.unused_data)-1):
             a = struct.unpack("> B", d.unused_data[i] )[0]
             b = struct.unpack("> B", d.unused_data[i+1] )[0]
@@ -262,8 +261,7 @@ class GINIZFile(GINIFile):
                 if (i-marker) > 0:
                     #print "Chunk!", i, marker, (i-marker)
                     try:
-                        sdata = zlib.decompress(d.unused_data[marker:i])
-                        self.data[row,:] = np.fromstring( sdata, np.int8 )
+                        sdata += zlib.decompress(d.unused_data[marker:i])
                         #print 'Row!', row
                         totsz -= (i-marker)
                         marker = i
@@ -284,5 +282,6 @@ class GINIZFile(GINIFile):
 #            print 'New dy', self.metadata['dy']
             # Erm, this bothers me, but need to redo, if ny changed!
             #self.init_projection()
-        #self.data = np.reshape(data, (self.metadata['numlines'], self.metadata['linesize']))
+        self.data = np.reshape(np.fromstring(sdata, np.int8), 
+                        (self.metadata['numlines'], self.metadata['linesize']))
 
