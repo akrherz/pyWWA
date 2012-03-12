@@ -243,36 +243,46 @@ class GINIZFile(GINIFile):
         # WMO HEADER
         self.wmo = (fobj.read(21)).strip()
         d = zlib.decompressobj()
+        logging.info("Start decompress")
         hdata = d.decompress(fobj.read())
+        logging.info("len hdata %s, reading metadata" % (len(hdata),))
         self.metadata = self.read_header(hdata[21:])
+        logging.info("Set proj")
         self.init_projection()
-        loc = 0
-        sdata = ""
+        marker = 0
+        self.data = np.zeros( (self.metadata['numlines'], self.metadata['linesize']), np.int8)
+        row = 0
+        totsz = len(d.unused_data)
+        logging.info("reading data...")
         for i in range(0,len(d.unused_data)-1):
             a = struct.unpack("> B", d.unused_data[i] )[0]
             b = struct.unpack("> B", d.unused_data[i+1] )[0]
             if a == 120 and b == 218:
-                if loc > 0:
-                    #print 'sz', i - loc, i, len(n)
+                # Do the previous chunk
+                if (i-marker) > 0:
+                    #print "Chunk!", i, marker, (i-marker)
                     try:
-                        sdata += zlib.decompress(d.unused_data[loc:i])
-                        #print 'Chunk', loc, i, np.shape(np.fromstring( zlib.decompress(d.unused_data[loc:]), np.int8 ))
+                        sdata = zlib.decompress(d.unused_data[marker:i])
+                        self.data[row,:] = np.fromstring( sdata, np.int8 )
+                        #print 'Row!', row
+                        totsz -= (i-marker)
+                        marker = i
+                        row += 1
                     except:
-                        #print 'ERROR, keep going', i
                         pass
-                loc = i
-        sdata += zlib.decompress(d.unused_data[loc:])
-        trunc = 0 - self.metadata['linesize']
-        data = np.array( np.fromstring( sdata[:trunc] , np.int8) )
-        pad = self.metadata['linesize'] * self.metadata['numlines'] - np.shape(data)[0]
-        if pad > 0:
-            fewer = pad / self.metadata['linesize']
-            logging.info("Missing %s lines" % (fewer,))
+        logging.info("Totalsize left: %s" % (totsz,))
+        # Last row!
+        #data[row,:] = np.fromstring( zlib.decompress(d.unused_data[marker:]), np.int8)
+        #trunc = 0 - self.metadata['linesize']
+#        pad = self.metadata['linesize'] * self.metadata['numlines'] - np.shape(self.data)[0]
+#        if pad > 0:
+#            fewer = pad / self.metadata['linesize']
+#            logging.info("Missing %s lines" % (fewer,))
             #data = np.append(data, np.zeros( (pad), np.int8))
-            self.metadata['numlines'] -= fewer
-            self.metadata['dy'] = self.metadata['dy'] / (float(self.metadata['ny'] - fewer) / float(self.metadata['ny']))
-            print 'New dy', self.metadata['dy']
+#            self.metadata['numlines'] -= fewer
+#            self.metadata['dy'] = self.metadata['dy'] / (float(self.metadata['ny'] - fewer) / float(self.metadata['ny']))
+#            print 'New dy', self.metadata['dy']
             # Erm, this bothers me, but need to redo, if ny changed!
             #self.init_projection()
-        self.data = np.reshape(data, (self.metadata['numlines'], self.metadata['linesize']))
+        #self.data = np.reshape(data, (self.metadata['numlines'], self.metadata['linesize']))
 
