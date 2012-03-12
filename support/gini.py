@@ -252,22 +252,21 @@ class GINIZFile(GINIFile):
         marker = 0
         row = 0
         totsz = len(d.unused_data)
+        # 5120 value chunks, so we need to be careful!
         sdata = ""
-        for i in range(0,len(d.unused_data)-1):
-            a = struct.unpack("> B", d.unused_data[i] )[0]
-            b = struct.unpack("> B", d.unused_data[i+1] )[0]
-            if a == 120 and b == 218:
-                # Do the previous chunk
-                if (i-marker) > 0:
-                    #print "Chunk!", i, marker, (i-marker)
-                    try:
-                        sdata += zlib.decompress(d.unused_data[marker:i])
-                        #print 'Row!', row
-                        totsz -= (i-marker)
-                        marker = i
-                        row += 1
-                    except:
-                        pass
+        chunk = 'x\xda'
+        i = 0
+        for part in d.unused_data.split('x\xda')[1:-1]:
+            chunk += part
+            try:
+                #print i, len(chunk), len(part)
+                sdata += zlib.decompress( chunk )
+                i += 1
+                totsz -= len(chunk)
+                chunk = 'x\xda'
+            except:
+                chunk += 'x\xda'
+                pass
         logging.info("Totalsize left: %s" % (totsz,))
         # Last row!
         #data[row,:] = np.fromstring( zlib.decompress(d.unused_data[marker:]), np.int8)
