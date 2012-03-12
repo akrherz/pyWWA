@@ -270,7 +270,7 @@ class GINIZFile(GINIFile):
         if pad > 0:
             fewer = pad / self.metadata['linesize']
             logging.info("Missing %s lines" % (fewer,))
-            data = np.append(np.zeros( (pad), np.int8), data )
+            data = np.append(data, np.zeros( (pad), np.int8))
             #self.metadata['numlines'] -= fewer
             #self.metadata['ny'] -= fewer
             # Erm, this bothers me, but need to redo, if ny changed!
