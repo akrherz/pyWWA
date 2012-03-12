@@ -272,7 +272,8 @@ class GINIZFile(GINIFile):
             logging.info("Missing %s lines" % (fewer,))
             data = np.append(data, np.zeros( (pad), np.int8))
             #self.metadata['numlines'] -= fewer
-            #self.metadata['ny'] -= fewer
+            self.metadata['dy'] = self.metadata['dy'] / (float(self.metadata['ny'] - fewer) / float(self.metadata['ny']))
+            print 'New dy', self.metadata['dy']
             # Erm, this bothers me, but need to redo, if ny changed!
             #self.init_projection()
         self.data = np.reshape(data, (self.metadata['numlines'], self.metadata['linesize']))
