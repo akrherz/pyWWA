@@ -60,21 +60,26 @@ def workflow():
     """ % (awips_grid, archivefn, g.metadata['valid']))
     o.close()
 
+    routes = "ac"
+    if (mx.DateTime.gmt() - g.metadata['valid']).minutes > 120:
+        routes = "a"
 
-    pqinsert = "/home/ldm/bin/pqinsert -p 'gis ac %s gis/images/awips%s/%s GIS/sat/%s png' %s.png" % (
-                                                g.metadata['valid'].strftime("%Y%m%d%H%M"), awips_grid,
+    pqinsert = "/home/ldm/bin/pqinsert -p 'gis %s %s gis/images/awips%s/%s GIS/sat/%s png' %s.png" % (
+                                                routes, g.metadata['valid'].strftime("%Y%m%d%H%M"), awips_grid,
                                                 currentfn, archivefn, tmpfn )
     os.system(pqinsert)
-    pqinsert = "/home/ldm/bin/pqinsert -p 'gis ac %s gis/images/awips%s/%s GIS/sat/%s wld' %s.wld" % (
-                                                g.metadata['valid'].strftime("%Y%m%d%H%M"), awips_grid,
+    pqinsert = "/home/ldm/bin/pqinsert -p 'gis %s %s gis/images/awips%s/%s GIS/sat/%s wld' %s.wld" % (
+                                                routes, g.metadata['valid'].strftime("%Y%m%d%H%M"), awips_grid,
                                                 currentfn.replace("png", "wld"), 
                                                 archivefn.replace("png", "wld"), tmpfn )
     os.system(pqinsert)
+    
     pqinsert = "/home/ldm/bin/pqinsert -p 'gis c %s gis/images/awips%s/%s GIS/sat/%s txt' %s.txt" % (
                                                 g.metadata['valid'].strftime("%Y%m%d%H%M"), awips_grid,
                                                 currentfn.replace("png", "txt"), 
                                                 archivefn.replace("png", "txt"), tmpfn )
-    os.system(pqinsert)
+    if routes == 'ac':
+        os.system(pqinsert)
     os.unlink("%s.png" % (tmpfn,))
     os.unlink("%s.wld" % (tmpfn,))
     os.unlink("%s.txt" % (tmpfn,))
