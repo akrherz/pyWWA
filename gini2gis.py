@@ -52,6 +52,7 @@ def workflow():
     metadata = {'meta': {}}
     metadata['meta']['valid'] = g.metadata['valid'].strftime("%Y-%m-%dT%H:%M:%SZ")
     metadata['meta']['awips_grid'] = awips_grid
+    metadata['meta']['archive_filename'] = archivefn
 
     metafp = '%s.json' % (tmpfn,)
     o = open(metafp, 'w')
