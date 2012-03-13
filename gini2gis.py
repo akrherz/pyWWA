@@ -31,7 +31,7 @@ def workflow():
     currentfn = g.current_filename()
     awips_grid = g.awips_grid()
     if awips_grid is None:
-        logger.info("ERROR: Unknown awips grid!")
+        logger.info("ERROR: Unknown awips grid! |%s|" % (g.awips_grid(),))
         return
     tmpfn = tempfile.mktemp()
     

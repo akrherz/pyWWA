@@ -138,19 +138,24 @@ lat_ur: %.3f lon_ur: %.3f alpha: %.5f dy: %.3f""" % (
         Compute Polar Stereographic
         """
         self.metadata['proj'] = pyproj.Proj(proj='stere', 
-                        lat_ts=self.metadata['latin'], lat_0=0, 
+                        lat_ts=60, lat_0=90, 
                         lon_0=self.metadata['lov'], 
-                        x_0=0, y_0=0)
+                        x_0=0, y_0=0,a=6371200.0, b=6371200.0)
         # First point!
         x0, y0 = self.metadata['proj'](self.metadata['lon1'], self.metadata['lat1'])
         self.metadata['x0'] = x0
         self.metadata['y0'] = y0
 
         self.metadata['y1'] = y0 + (self.metadata['dy'] * self.metadata['ny'])
+        self.metadata['lon_ul'], self.metadata['lat_ul'] = self.metadata['proj'](
+                                                        x0, self.metadata['y1'],
+                                                        inverse=True)
         
-        logging.info("lon_ur: %.2f lat_ur: %.2f lon1: %.2f lon2: %.2f lov: %.2f latin: %.2f lat1: %.2f lat2: %.2f y0: %5.f y1: %.5f dx: %.3f dy: %.3f" % (
-                    self.metadata['lon_ur'], self.metadata['lat_ur'],
-                    self.metadata['lon1'], self.metadata['lon2'], 
+        logging.info("""lon_ul: %.2f lat_ul: %.2f 
+lon_ll: %.2f lat_ll: %.2f 
+lov: %.2f latin: %.2f lat1: %.2f lat2: %.2f y0: %5.f y1: %.5f dx: %.3f dy: %.3f""" % (
+                    self.metadata['lon_ul'], self.metadata['lat_ul'],
+                    self.metadata['lon1'], self.metadata['lat1'], 
                     self.metadata['lov'], self.metadata['latin'], self.metadata['lat1'], 
                     self.metadata['lat2'], y0, self.metadata['y1'], 
                     self.metadata['dx'], self.metadata['dy']))
