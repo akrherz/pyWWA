@@ -7,6 +7,7 @@ import logging
 import os
 import tempfile
 import random
+import simplejson
 
 FORMAT = "%(asctime)-15s:["+ str(os.getpid()) +"]: %(message)s"
 LOG_FN = 'logs/gini2gis-%s.log' % (mx.DateTime.gmt().strftime("%Y%m%d"),)
@@ -48,16 +49,13 @@ def workflow():
     o.write( fmt % g.metadata)
     o.close()
     # Metadata
-    o = open("%s.txt" % (tmpfn,), 'w')
-    o.write("""
-    http://www.nws.noaa.gov/noaaport/html/icdtb48e.html
-    AWIPS Grid: %s
-    
-    Archive Filename: %s
-    Valid: %s 
-    
-    Contact Info: Daryl. Herzmann akrherz@iastate.edu 515 294 5978
-    """ % (awips_grid, archivefn, g.metadata['valid']))
+    metadata = {'meta': {}}
+    metadata['meta']['valid'] = g.metadata['valid'].strftime("%Y-%m-%dT%H:%M:%SZ")
+    metadata['meta']['awips_grid'] = awips_grid
+
+    metafp = '%s.json' % (tmpfn,)
+    o = open(metafp, 'w')
+    simplejson.dump(metadata, o)
     o.close()
 
     routes = "ac"
@@ -74,15 +72,15 @@ def workflow():
                                                 archivefn.replace("png", "wld"), tmpfn )
     os.system(pqinsert)
     
-    pqinsert = "/home/ldm/bin/pqinsert -p 'gis c %s gis/images/awips%s/%s GIS/sat/%s txt' %s.txt" % (
+    pqinsert = "/home/ldm/bin/pqinsert -p 'gis c %s gis/images/awips%s/%s GIS/sat/%s json' %s.json" % (
                                                 g.metadata['valid'].strftime("%Y%m%d%H%M"), awips_grid,
-                                                currentfn.replace("png", "txt"), 
-                                                archivefn.replace("png", "txt"), tmpfn )
+                                                currentfn.replace("png", "json"), 
+                                                archivefn.replace("png", "json"), tmpfn )
     if routes == 'ac':
         os.system(pqinsert)
     os.unlink("%s.png" % (tmpfn,))
     os.unlink("%s.wld" % (tmpfn,))
-    os.unlink("%s.txt" % (tmpfn,))
+    os.unlink("%s.json" % (tmpfn,))
     logger.info("Done!")
 
 workflow()
