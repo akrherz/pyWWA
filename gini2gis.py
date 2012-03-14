@@ -36,7 +36,7 @@ def workflow():
         return
     tmpfn = tempfile.mktemp()
     
-    png = Image.fromarray( g.data )
+    png = Image.fromarray( g.data[:-1,:] )
     png.save('%s.png' % (tmpfn,))
     # World File
     o = open('%s.wld' % (tmpfn,), 'w')
