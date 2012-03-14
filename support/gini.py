@@ -117,7 +117,8 @@ lat_ur: %.3f lon_ur: %.3f alpha: %.5f dy: %.3f""" % (
         Compute mercator projection stuff 
         """
         self.metadata['proj'] = pyproj.Proj(proj='merc', 
-                        lat_ts=self.metadata['latin'], x_0=0, y_0=0)
+                        lat_ts=self.metadata['latin'], x_0=0, y_0=0,
+                        a=6371200.0, b=6371200.0)
         x0, y0 = self.metadata['proj'](self.metadata['lon1'], self.metadata['lat1'])
         self.metadata['x0'] = x0
         self.metadata['y0'] = y0
@@ -128,9 +129,14 @@ lat_ur: %.3f lon_ur: %.3f alpha: %.5f dy: %.3f""" % (
  
         self.metadata['dx'] = (x1 - x0) / self.metadata['nx']
         self.metadata['dy'] = (y1 - y0) / self.metadata['ny']
+ 
+        self.metadata['lon_ul'], self.metadata['lat_ul'] =  self.metadata['proj'](self.metadata['x0'],
+                                                    self.metadata['y1'], inverse=True)
         
-        logging.info("latin: %.2f lat1: %.2f lat2: %.2f y0: %5.f y1: %.5f dx: %.3f dy: %.3f" % (
-                    self.metadata['latin'], self.metadata['lat1'], self.metadata['lat2'], y0, y1, 
+        logging.info("""latin: %.2f lat_ul: %.3f lon_ul: %.3f 
+y0: %5.f y1: %.5f dx: %.3f dy: %.3f""" % (
+                    self.metadata['latin'], self.metadata['lat_ul'], 
+                    self.metadata['lon_ul'], y0, y1, 
                     self.metadata['dx'], self.metadata['dy']))
 
     def init_stereo(self):
