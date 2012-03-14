@@ -10,10 +10,27 @@ import logging
 M_PI_2 = 1.57079632679489661923
 M_PI = 3.14159265358979323846
 RE_METERS = 6371200.0
-ENTITIES = ['','','','','','','','DMSP','GMS','METEOSAT','GOES7', 'GOES8',
+ENTITIES = ['UNK','UNK','MISC','JERS','ERS','POES','COMP','DMSP','GMS',
+            'METEOSAT','GOES7', 'GOES8',
             'GOES9', 'GOES10', 'GOES11', 'GOES12', 'GOES13', 'GOES14', 'GOES15']
-CHANNELS = ['','VIS','3.9', 'WV', 'IR', '12', '13.3', 'U7', 'U8', 'U9', 'U10']
-SECTORS = ['NHCOMP', 'EAST', 'WEST', 'AK', 'AKNAT', 'HI', 'HINAT', 'PR', 'PRNAT','SUPER']
+CHANNELS = ['','VIS','3.9', 'WV', 'IR', '12', '13.3', '1.3', 'U8', 'U9', 'U10',
+            'U11', 'U12', 'LI', 'PW', 'SKIN', 'CAPE', 'TSURF', 'WINDEX']
+for u in range(22,100):
+    CHANNELS.append("U%s" % (u,))
+SECTORS = ['NHCOMP', 'EAST', 'WEST', 'AK', 'AKNAT', 'HI', 'HINAT', 'PR', 'PRNAT',
+           'SUPER', 'NHCOMP', 'CCONUS', 'EFLOAT', 'WFLOAT', 'CFLOAT', 'PFLOAT']
+
+AWIPS_GRID_GUESS = {
+  'A': 207, 
+  'B': 203, 
+  'E': 211, 
+  'F': 0,
+  'H': 208, 
+  'I': 204, 
+  'N': 0,
+  'P': 210, 
+  'Q': 205,
+  'W': 211}
 
 AWIPS_GRID = {'TIGB': 203,
               'TIGE': 211,
@@ -58,7 +75,10 @@ class GINIFile(object):
         """
         Return the awips grid number based on the WMO header
         """
-        return AWIPS_GRID.get(self.wmo[:4], None)
+        try1 = AWIPS_GRID.get(self.wmo[:4], None)
+        if try1: 
+            return try1
+        return AWIPS_GRID_GUESS.get(self.wmo[3], None)
     
     def current_filename(self):
         """
