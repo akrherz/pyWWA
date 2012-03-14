@@ -267,7 +267,9 @@ class GINIZFile(GINIFile):
         sdata = ""
         chunk = 'x\xda'
         i = 0
-        for part in d.unused_data.split('x\xda')[1:-1]:
+        for part in d.unused_data.split('x\xda'):
+            if part == "":
+                continue
             chunk += part
             try:
                 #print i, len(chunk), len(part)
@@ -293,5 +295,5 @@ class GINIZFile(GINIFile):
             # Erm, this bothers me, but need to redo, if ny changed!
             #self.init_projection()
         self.data = np.reshape(np.fromstring(sdata, np.int8), 
-                        (self.metadata['numlines'], self.metadata['linesize']))
+                        (self.metadata['numlines']+1, self.metadata['linesize']))
 
