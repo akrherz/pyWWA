@@ -70,13 +70,13 @@ def workflow():
     if (mx.DateTime.gmt() - g.metadata['valid']).minutes > 120:
         routes = "a"
 
-    pqinsert = "/home/ldm/bin/pqinsert -p 'gis %s %s gis/images/awips%s/%s GIS/sat/%s png' %s.png" % (
+    pqinsert = "/home/ldm/bin/pqinsert -p 'gis %s %s gis/images/awips%s/%s GIS/sat/awips%s/%s png' %s.png" % (
                                                 routes, g.metadata['valid'].strftime("%Y%m%d%H%M"), awips_grid,
-                                                currentfn, archivefn, tmpfn )
+                                                currentfn, awips_grid, archivefn, tmpfn )
     os.system(pqinsert)
-    pqinsert = "/home/ldm/bin/pqinsert -p 'gis %s %s gis/images/awips%s/%s GIS/sat/%s wld' %s.wld" % (
+    pqinsert = "/home/ldm/bin/pqinsert -p 'gis %s %s gis/images/awips%s/%s GIS/sat/awips%s/%s wld' %s.wld" % (
                                                 routes, g.metadata['valid'].strftime("%Y%m%d%H%M"), awips_grid,
-                                                currentfn.replace("png", "wld"), 
+                                                currentfn.replace("png", "wld"), awips_grid,
                                                 archivefn.replace("png", "wld"), tmpfn )
     os.system(pqinsert)
     
