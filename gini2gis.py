@@ -55,8 +55,13 @@ def workflow():
     metadata['meta']['valid'] = g.metadata['valid'].strftime("%Y-%m-%dT%H:%M:%SZ")
     metadata['meta']['awips_grid'] = awips_grid
     metadata['meta']['archive_filename'] = archivefn
-
     metafp = '%s.json' % (tmpfn,)
+    o = open(metafp, 'w')
+    simplejson.dump(metadata, o)
+    o.close()
+    del(metadata['meta']['awips_grid'])
+    metadata['meta']['epsg'] = 4326
+    metafp = '%s_4326.json' % (tmpfn,)
     o = open(metafp, 'w')
     simplejson.dump(metadata, o)
     o.close()
@@ -92,17 +97,15 @@ def workflow():
     o.write( rand_zeros() )
     o.write( rand_zeros() )
     o.close()
-    for suffix in ['wld', 'png']:
+    for suffix in ['wld', 'png', 'json']:
         pqinsert = "/home/ldm/bin/pqinsert -p 'gis c 000000000000 gis/images/4326/goes/%s bogus %s' %s_4326.%s" % (
                                                 currentfn, suffix, tmpfn, suffix)
         os.system(pqinsert)
+        os.unlink("%s_4326.%s" % (tmpfn, suffix))
     
     os.unlink("%s.png" % (tmpfn,))
     os.unlink("%s.wld" % (tmpfn,))
     os.unlink("%s.json" % (tmpfn,))
-    os.unlink("%s_4326.wld" % (tmpfn,))
-    os.unlink("%s_4326.tif" % (tmpfn,))
-    os.unlink("%s_4326.png" % (tmpfn,))
     logger.info("Done!")
 
 workflow()
