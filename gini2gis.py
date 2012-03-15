@@ -34,8 +34,10 @@ def workflow():
     if awips_grid is None:
         logger.info("ERROR: Unknown awips grid! |%s|" % (g.awips_grid(),))
         return
-    tmpfn = tempfile.mktemp()
     
+
+    
+    tmpfn = tempfile.mktemp()
     png = Image.fromarray( g.data[:-1,:] )
     png.save('%s.png' % (tmpfn,))
     # World File
@@ -79,9 +81,23 @@ def workflow():
                                                 archivefn.replace("png", "json"), tmpfn )
     if routes == 'ac':
         os.system(pqinsert)
+        
+    cmd = "gdalwarp -q -of GTiff -co 'WORLDFILE=ON' -s_srs '%s' -t_srs 'EPSG:4326' %s.png %s_4326.tif" % (
+                                    g.metadata['proj'].srs, tmpfn, tmpfn)
+    os.system(cmd)
+    cmd = "convert %s_4326.tif %s_4326.png" %(tmpfn, tmpfn)
+    os.system( cmd )
+    for suffix in ['wld', 'png']:
+        pqinsert = "/home/ldm/bin/pqinsert -p 'gis c 000000000000 gis/images/4326/goes/%s bogus %s' %s_4326.%s" % (
+                                                currentfn, suffix, tmpfn, suffix)
+        os.system(pqinsert)
+    
     os.unlink("%s.png" % (tmpfn,))
     os.unlink("%s.wld" % (tmpfn,))
     os.unlink("%s.json" % (tmpfn,))
+    os.unlink("%s_4326.wld" % (tmpfn,))
+    os.unlink("%s_4326.tif" % (tmpfn,))
+    os.unlink("%s_4326.png" % (tmpfn,))
     logger.info("Done!")
 
 workflow()
