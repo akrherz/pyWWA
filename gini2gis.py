@@ -87,6 +87,11 @@ def workflow():
     os.system(cmd)
     cmd = "convert %s_4326.tif %s_4326.png" %(tmpfn, tmpfn)
     os.system( cmd )
+    # Need to randomize the .wld :(
+    o = open('%s_4326.wld' % (tmpfn,), 'a')
+    o.write( rand_zeros() )
+    o.write( rand_zeros() )
+    o.close()
     for suffix in ['wld', 'png']:
         pqinsert = "/home/ldm/bin/pqinsert -p 'gis c 000000000000 gis/images/4326/goes/%s bogus %s' %s_4326.%s" % (
                                                 currentfn, suffix, tmpfn, suffix)
