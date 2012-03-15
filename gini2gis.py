@@ -99,7 +99,7 @@ def workflow():
     o.close()
     for suffix in ['wld', 'png', 'json']:
         pqinsert = "/home/ldm/bin/pqinsert -p 'gis c 000000000000 gis/images/4326/goes/%s bogus %s' %s_4326.%s" % (
-                                                currentfn, suffix, tmpfn, suffix)
+                                                currentfn.replace('png', suffix), suffix, tmpfn, suffix)
         os.system(pqinsert)
         os.unlink("%s_4326.%s" % (tmpfn, suffix))
     
