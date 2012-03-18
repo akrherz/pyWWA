@@ -1,7 +1,7 @@
-#!/bin/csh
+#!/bin/sh
 # Something to compress the MADIS data, run from cron
 
-set YYYYMMDD="`date --date '1 day ago' +'%Y%m%d'`"
+YYYYMMDD="`date --date '1 day ago' +'%Y%m%d'`"
 
 cd /mesonet/data/madis/metar
 gzip ${YYYYMMDD}*nc

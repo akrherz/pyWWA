@@ -10,6 +10,8 @@ import access
 from support import ldmbridge, TextProduct
 import secret
 import common
+import shapelib
+import shapely
 
 # Third Party Stuff
 from twittytwister import twitter

@@ -149,7 +149,11 @@ class LSR:
         self.lts = mx.DateTime.strptime(dstr, "%I:%M %p %m/%d/%Y")
 
         self.typetext = (line1[12:29]).strip().upper()
-        self.city = (line1[29:53]).strip().title()
+        def myupper(s):
+            if len(s) > 3:
+                return s.title()
+            return s
+        self.city = " ".join(map(myupper, (line1[29:53]).strip().split()))
 
         lalo = line1[53:]
         tokens = lalo.strip().split()

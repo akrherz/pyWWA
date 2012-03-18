@@ -365,6 +365,7 @@ def save_data(txn, tp, iemob, data):
         iemob.data[ MAPPING[var] ] = myval
         if MAPPING[var] == 'tmpf' and iemob.data['network'].find("COOP") > 0:
             iemob.data['coop_tmpf'] = myval
+            #print "HEY!", iemob.data['valid'].strftime("%Y-%m-%d %H:%M")
             iemob.data['coop_valid'] = iemob.data['valid'].strftime("%Y-%m-%d %H:%M")
     iemob.data['raw'] = tp.get_product_id()
     iemob.update_summary()

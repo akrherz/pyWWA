@@ -1,12 +1,11 @@
 """
  Take the raw output from gpnids and parse it into the IEM PostgreSQL database
  I am called with the following arguments
-     1. Filename
-     2. NEXRAD ID
-     3. Year YYYY
-     4. MM
-     5. DD
-     6. Minute MI
+     1. NEXRAD ID
+     2. Year YYYY
+     3. MM
+     4. DD
+     5. Minute MI
  $Id: $:
 """
 
@@ -15,13 +14,12 @@ from pyIEM import stationTable
 import smtplib, StringIO, traceback
 import common
 import os
-
-import logging
-FORMAT = "%(asctime)-15s:["+ str(os.getpid()) +"]: %(message)s"
-logging.basicConfig(filename='/home/ldm/logs/ncr2postgis.log', filemode='a+', format=FORMAT)
-logger=logging.getLogger()
-logger.addHandler(logging.StreamHandler())
-logger.setLevel(logging.INFO)
+import tempfile
+import glob
+from twisted.python import log
+from twisted.python import logfile
+log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
+log.startLogging( logfile.DailyLogFile('ncr2postgis.log','logs'))
 
 import iemdb
 POSTGIS = iemdb.connect('postgis', bypass=False)
@@ -29,12 +27,60 @@ pcursor = POSTGIS.cursor()
 
 st = stationTable.stationTable('/home/ldm/pyWWA/tables/nexrad.stns')
 
-def main(filename, nexrad, ts):
+def write_data():
+    """
+    Do the GEMPAK workflow!
+    """
+    tmpfn = tempfile.mktemp().lower()
+    o = open("%s.ncr" % (tmpfn,), 'wb')
+    o.write( sys.stdin.read() )
+    o.close()
+    return tmpfn
+
+def do_gempak(tmpfn):
+    """
+    Do the GEMPAK workflow
+    """
+    cmd = """
+/home/ldm/bin/gpnids_vg << EOF
+ RADFIL   = %s.ncr
+ RADTIM   =
+ TITLE    = 1
+ PANEL    = 0
+ DEVICE   = GIF|%s.gif
+ CLEAR    = YES
+ TEXT     = 1
+ COLORS   = 1
+ WIND     = 
+ LINE     = 3
+ CLRBAR   =
+ IMCBAR   =
+ GAREA    = DSET
+ MAP      = 1
+ LATLON   =
+ OUTPUT   = f/%s.out
+ run
+
+ exit
+EOF
+""" % (tmpfn, tmpfn, tmpfn)
+    os.system( cmd )
+    for suffix in ['gif','ncr']:
+        if os.path.isfile('%s.%s' % (tmpfn,suffix)):
+            os.unlink("%s.%s" % (tmpfn,suffix))
+
+def main(nexrad, ts):
     """
     Actually do work!
     """
+    tmpfn = write_data()
+    do_gempak(tmpfn)
+    if not os.path.isfile("%s.out" % (tmpfn,)):
+        log.msg("Nothing came from GEMPAK! %s.out %s %s" % (tmpfn, nexrad, ts))
+        return
+    
     if not st.sts.has_key(nexrad):
-        logger.info('Unknown NEXRAD! %s' % ( nexrad,))
+        log.msg('Unknown NEXRAD! %s' % ( nexrad,))
         return
     
     pcursor.execute("SET TIME ZONE 'GMT'")
@@ -46,7 +92,7 @@ def main(filename, nexrad, ts):
     lonscale = 111137.0 * math.cos( cenlat * math.pi / 180.0 )
 
     #   STM ID  AZ/RAN TVS  MESO POSH/POH/MX SIZE VIL DBZM  HT  TOP  FCST MVMT
-    lines = open(filename, 'r').readlines()
+    lines = open('%s.out' % (tmpfn,), 'r').readlines()
     co = 0
     for line in lines:
         if (line[1] != " "):
@@ -101,22 +147,23 @@ def main(filename, nexrad, ts):
     %(poh)s, %(max_size)s, %(vil)s, %(max_dbz)s,\
     %(max_dbz_height)s,%(top)s, %(drct)s, %(sknt)s, '%(valid)s')" % d
         pcursor.execute( sql )
-    #logger.info("Process [%s] %s entries" % (nexrad, co))
+    #log.info("Process [%s] %s entries" % (nexrad, co))
+    os.unlink('%s.out' % (tmpfn,))
+    log.msg("%s %s Processed %s entries" % (nexrad, ts, co))
 
-filename = sys.argv[1]
+
+nexrad = sys.argv[1]
+yyyy = int(sys.argv[2])
+mm = int(sys.argv[3])
+dd = int(sys.argv[4])
+hh = int(sys.argv[5])
+mi = int(sys.argv[6])
+ts = mx.DateTime.DateTime(yyyy,mm,dd,hh,mi)
 try:
-    nexrad = sys.argv[2]
-    yyyy = int(sys.argv[3])
-    mm = int(sys.argv[4])
-    dd = int(sys.argv[5])
-    hh = int(sys.argv[6])
-    mi = int(sys.argv[7])
-    ts = mx.DateTime.DateTime(yyyy,mm,dd,hh,mi)
-    main(filename, nexrad, ts)
+    main(nexrad, ts)
     pcursor.close()
     POSTGIS.commit()
     POSTGIS.close()
 except Exception, exp:
-    data = open(filename, 'r').read()
-    common.email_error(exp, data)
+    common.email_error(exp, "%s %s" %(nexrad, ts))
 
