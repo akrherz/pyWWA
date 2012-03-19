@@ -1,6 +1,7 @@
 #!/bin/sh
 # Simple Script that will save RADAR data
 # Run from cron
+#set -x
 
 DIR=`date -u -d "1 day ago" +%Y_%m`
 YYYYMMDD=`date -u -d "1 day ago" +%Y%m%d`
@@ -10,7 +11,7 @@ then
 	mkdir -p /mesonet/ARCHIVE/nexrad/${DIR}
 fi
 
-for R in "DMX DVN OAX ARX FSD MPX EAX ABR UDX"; do
+for R in $(echo "DMX DVN OAX ARX FSD MPX EAX ABR UDX"); do
   cd /mesonet/data/nexrad/NIDS/${R}
   tar -cf /tmp/${R}radar.tar ?[A-Z]?/???_${YYYYMMDD}_*
   tar -uf /tmp/${R}radar.tar ?[0-9]?/???_${YYYYMMDD}_*
