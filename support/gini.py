@@ -288,16 +288,15 @@ class GINIZFile(GINIFile):
         chunk = 'x\xda'
         i = 0
         for part in d.unused_data.split('x\xda'):
-            if part == "":
+            if part == "" and i == 0:
                 continue
             chunk += part
             try:
-                #print i, len(chunk), len(part)
                 sdata += zlib.decompress( chunk )
                 i += 1
                 totsz -= len(chunk)
                 chunk = 'x\xda'
-            except:
+            except Exception, exp:
                 chunk += 'x\xda'
                 pass
         logging.info("Totalsize left: %s" % (totsz,))
