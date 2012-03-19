@@ -56,7 +56,7 @@ VALID\sUNTIL\s(?P<hour>[0-2][0-9])(?P<minute>[0-5][0-9])Z\s
 """, re.VERBOSE )
 
 FROM_RE = re.compile(r"""
-(?P<offset>[0-9]+)?(?P<drct>[A-Z]{1,3})?\s?(?P<loc>[A-Z0-9]{3})
+(?P<offset>[0-9]+)?(?P<drct>N|NE|NNE|ENE|E|ESE|SE|SSE|S|SSW|SW|WSW|W|WNW|NW|NNW)?\s?(?P<loc>[A-Z0-9]{3})
 """, re.VERBOSE)
 
 OL_RE = re.compile(r"""
