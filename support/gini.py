@@ -274,11 +274,8 @@ class GINIZFile(GINIFile):
         # WMO HEADER
         self.wmo = (fobj.read(21)).strip()
         d = zlib.decompressobj()
-        logging.info("Start decompress")
         hdata = d.decompress(fobj.read())
-        logging.info("len hdata %s, reading metadata" % (len(hdata),))
         self.metadata = self.read_header(hdata[21:])
-        logging.info("Set proj")
         self.init_projection()
         marker = 0
         row = 0
@@ -299,7 +296,8 @@ class GINIZFile(GINIFile):
             except Exception, exp:
                 chunk += 'x\xda'
                 pass
-        logging.info("Totalsize left: %s" % (totsz,))
+        if totsz != 0:
+            logging.info("Totalsize left: %s" % (totsz,))
         # Last row!
         #data[row,:] = np.fromstring( zlib.decompress(d.unused_data[marker:]), np.int8)
         #trunc = 0 - self.metadata['linesize']
