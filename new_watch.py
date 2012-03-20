@@ -208,31 +208,32 @@ def real_process(raw):
         lon22 = lon2 + x * KM_SM / (111.11 * math.cos(math.radians(lat2)))
 
 
-    wkt = "%s %s,%s %s,%s %s,%s %s,%s %s" % (lon11, lat11,  \
+    wkt = "%s %s,%s %s,%s %s,%s %s,%s %s" % (lon11, lat11,  
        lon21, lat21, lon22, lat22, lon12, lat12, lon11, lat11)
 
-    # Delete from archive, since maybe it is a correction....
-    sql = """DELETE from watches WHERE num = %s and 
+    def runner(txn):
+        # Delete from archive, since maybe it is a correction....
+        sql = """DELETE from watches WHERE num = %s and 
            extract(year from issued) = %s""" % (ww_num, sTS.year)
-    DBPOOL.runOperation(sql)
+        txn.execute(sql)
 
-    # Insert into our watches table
-    giswkt = 'SRID=4326;MULTIPOLYGON(((%s)))' % (wkt,)
-    sql = """INSERT into watches (sel, issued, expired, type, report, 
+        # Insert into our watches table
+        giswkt = 'SRID=4326;MULTIPOLYGON(((%s)))' % (wkt,)
+        sql = """INSERT into watches (sel, issued, expired, type, report, 
             geom, num) VALUES(%s,%s,%s,%s,%s,%s, %s)""" 
-    args = ('SEL%s' % (saw,), sTS.strftime("%Y-%m-%d %H:%M+00"), 
+        args = ('SEL%s' % (saw,), sTS.strftime("%Y-%m-%d %H:%M+00"), 
                 eTS.strftime("%Y-%m-%d %H:%M+00"), types[ww_type], 
                 raw, giswkt, ww_num)
-    deffer = DBPOOL.runOperation(sql, args)
-    deffer.addErrback(common.email_error, raw)
-
-    sql = """UPDATE watches_current SET issued = %s, expired = %s, type = %s,
-    report = %s, geom = %s, num = %s WHERE sel = %s"""
-    args = (sTS.strftime("%Y-%m-%d %H:%M+00"), 
+        txn.execute(sql, args)
+        sql = """UPDATE watches_current SET issued = %s, expired = %s, type = %s,
+            report = %s, geom = %s, num = %s WHERE sel = %s"""
+        args = (sTS.strftime("%Y-%m-%d %H:%M+00"), 
                 eTS.strftime("%Y-%m-%d %H:%M+00"), types[ww_type], 
                 raw, giswkt, ww_num, 'SEL%s' % (saw,))
-    deffer = DBPOOL.runOperation(sql, args)
-    deffer.addErrback(common.email_error, raw)
+        txn.execute(sql, args)
+
+    defer = DBPOOL.runInteraction(runner)
+    defer.addErrback(common.email_error, raw)
     # Figure out WFOs affected...
     jabberTxt = "SPC issues %s watch till %sZ" % \
                  (ww_type, eTS.strftime("%H:%M") )
