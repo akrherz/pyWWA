@@ -40,8 +40,10 @@ import secret
 import common
 
 # Third Party Stuff
-from twisted.internet import reactor, protocol
 from twisted.enterprise import adbapi
+from twisted.internet.defer import DeferredQueue
+from twisted.internet.task import deferLater, cooperate
+from twisted.internet import reactor, protocol
 import mx.DateTime
 
 # Setup Database Links
@@ -182,11 +184,11 @@ class SHEFIT(protocol.ProcessProtocol):
         """
         Once the program is done, we need to do something with the data
         """
-        if self.data == "":
-            rejects = open("empty.shef", 'a')
-            rejects.write( self.tp.raw +"\003")
-            rejects.close()
-            return
+        #if self.data == "":
+        #    rejects = open("empty.shef", 'a')
+        #    rejects.write( self.tp.raw +"\003")
+        #    rejects.close()
+        #    return
         reactor.callLater(0, really_process, self.tp, self.data)
         
 
@@ -197,7 +199,7 @@ def clnstr(buf):
     return buf.replace("\015\015\012", "\n").replace("\003", "").replace("\001", "")
 
 class MyProductIngestor(ldmbridge.LDMProductReceiver):
-
+    
     def connectionLost(self, reason):
         print 'connectionLost', reason
         reactor.callLater(5, self.shutdown)
@@ -210,8 +212,17 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
         I am called from the ldmbridge when data is ahoy
         """
         tp = TextProduct.TextProduct( clnstr(buf) )
-        reactor.spawnProcess(SHEFIT( tp ), "shefit", ["shefit"], {})
+        self.jobs.put( tp )
 
+def async(tp):
+    d = deferLater(reactor, 0, reactor.spawnProcess, SHEFIT(tp), "shefit", 
+                   ["shefit"], {})
+    d.addErrback( log.err )
+    return d
+
+def worker(jobs):
+    while True:
+        yield jobs.get().addCallback(async)
 
 def really_process(tp, data):
     """
@@ -247,7 +258,6 @@ def really_process(tp, data):
         varname = tokens[5]
         value = float(tokens[6])
         mydata[sid][tstamp][varname] = value
-
     # Now we process each station we found in the report! :)
     for sid in mydata.keys():
         times = mydata[sid].keys()
@@ -375,8 +385,27 @@ def save_data(txn, tp, iemob, data):
     iemob.updateDatabase()
     return True
 
-#
-fact = ldmbridge.LDMProductFactory( MyProductIngestor() )
-HADSDB.runInteraction(load_stations)
-reactor.callLater(0, write_pid)
-reactor.run()
+def job_size(jobs):
+    print "deferredQueue waiting: %s pending: %s" % (len(jobs.waiting), 
+                                                     len(jobs.pending) )
+    reactor.callLater(300, job_size, jobs)
+
+def main():
+    """
+    Go main Go!
+    """
+    jobs = DeferredQueue()
+    ingest = MyProductIngestor()
+    ingest.jobs = jobs
+    fact = ldmbridge.LDMProductFactory( ingest )
+    
+    for i in range(3):
+        cooperate(worker(jobs))
+    
+    reactor.callLater(0, write_pid)
+    reactor.callLater(30, job_size, jobs)
+    reactor.run()
+
+if __name__ == '__main__':
+    HADSDB.runInteraction(load_stations)
+    main()
