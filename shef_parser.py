@@ -138,9 +138,6 @@ class MyDict(dict):
     
 MAPPING = MyDict()
 
-
-EMAILS = 10
-
 class SHEFIT(protocol.ProcessProtocol):
     """
     My process protocol for dealing with the SHEFIT program from the NWS
@@ -194,9 +191,10 @@ class SHEFIT(protocol.ProcessProtocol):
         
 
 def clnstr(buf):
-    buf = buf.replace("\015\015\012", "\n")
-    buf = buf.replace("\003", "")
-    return buf.replace("\001", "")
+    """
+    Get rid of cruft we don't wish to work with
+    """
+    return buf.replace("\015\015\012", "\n").replace("\003", "").replace("\001", "")
 
 class MyProductIngestor(ldmbridge.LDMProductReceiver):
 
@@ -297,6 +295,7 @@ def process_site(tp, sid, ts, data):
             ts.strftime("%Y-%m-%d %H:%M"), var, 
             data[var]))
         deffer.addErrback(common.email_error, tp)
+        deffer.addErrback( log.err )
 
     # Our simple determination if the site is a COOP site
     is_coop = False
@@ -338,6 +337,7 @@ def process_site(tp, sid, ts, data):
     deffer = ACCESSDB.runInteraction(save_data, tp, iemob, data)
     deffer.addErrback(common.email_error, tp.raw)
     deffer.addCallback(got_results, tp, sid, network)
+    deffer.addErrback( log.err )
     
 def got_results(res, tp, sid, network):
     """
