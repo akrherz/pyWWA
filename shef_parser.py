@@ -28,9 +28,9 @@ import os
 
 def write_pid():
     """ Create a PID file for when we are fired up! """
-    o = open("shef_parser.pid",'w')
-    o.write("%s" % ( os.getpid(),) )
-    o.close()
+    pid = open("shef_parser.pid",'w')
+    pid.write("%s" % ( os.getpid(),) )
+    pid.close()
 
 # Stuff I wrote
 import mesonet
@@ -47,9 +47,11 @@ from twisted.internet import reactor, protocol
 import mx.DateTime
 
 # Setup Database Links
-ACCESSDB = adbapi.ConnectionPool("twistedpg", database='iem', host=secret.dbhost,
+ACCESSDB = adbapi.ConnectionPool("twistedpg", database='iem', 
+                                 host=secret.dbhost,
                                  password=secret.dbpass, cp_reconnect=True)
-HADSDB = adbapi.ConnectionPool("twistedpg", database='hads', host=secret.dbhost,
+HADSDB = adbapi.ConnectionPool("twistedpg", database='hads', 
+                               host=secret.dbhost,
                                password=secret.dbpass, cp_reconnect=True)
 BASE_TS = mx.DateTime.gmt() - mx.DateTime.RelativeDateTime(months=2)
 
@@ -84,10 +86,8 @@ MULTIPLIER = {
 }
 
 """
-Some notes on the SHEF codes translated to something IEM Access can handle, for now
-
+Some notes on the SHEF codes translated to something IEM Access can handle
 First two chars are physical extent code
-
 """
 DIRECTMAP = {'HGIZ': 'rstage',
              'HPIZ': 'rstage',
@@ -119,6 +119,9 @@ DIRECTMAP = {'HGIZ': 'rstage',
              'UPHZ': 'gust',
              }
 class MyDict(dict):
+    """
+    Customized dictionary class
+    """
     
     def __getitem__(self, key):
         """
@@ -129,12 +132,12 @@ class MyDict(dict):
             return val
         # Logic to convert this key into something the iem can handle
         # Our key is always at least 6 chars!
-        PEI = "%s%s" % (key[:3],key[5])
-        if DIRECTMAP.has_key(PEI):
-            self.__setitem__(key, DIRECTMAP[PEI])
-            return DIRECTMAP[PEI]
+        pei = "%s%s" % (key[:3], key[5])
+        if DIRECTMAP.has_key( pei ):
+            self.__setitem__(key, DIRECTMAP[ pei ])
+            return DIRECTMAP[ pei ]
         else:
-            print 'Can not map var %s' % (key,)
+            log.msg('Can not map var %s' % (key,))
             self.__setitem__(key, '')
             return ''
     
@@ -145,11 +148,11 @@ class SHEFIT(protocol.ProcessProtocol):
     My process protocol for dealing with the SHEFIT program from the NWS
     """
 
-    def __init__(self, tp):
+    def __init__(self, buf):
         """
         Constructor
         """
-        self.tp = tp
+        self.tp = TextProduct.TextProduct( buf )
         self.data = ""
 
     def connectionMade(self):
@@ -172,8 +175,8 @@ class SHEFIT(protocol.ProcessProtocol):
         """
         In case something comes to stderr 
         """
-        print "errReceived! with %d bytes!" % len(data)
-        print data
+        log.msg("errReceived! with %d bytes!" % len(data))
+        log.msg( data )
 
 #    def processEnded(self, status):
 #        print "debug: type(status): %s" % type(status.value)
@@ -201,7 +204,8 @@ def clnstr(buf):
 class MyProductIngestor(ldmbridge.LDMProductReceiver):
     
     def connectionLost(self, reason):
-        print 'connectionLost', reason
+        log.msg('connectionLost')
+        log.msg(reason)
         reactor.callLater(5, self.shutdown)
 
     def shutdown(self):
@@ -211,11 +215,15 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
         """
         I am called from the ldmbridge when data is ahoy
         """
-        tp = TextProduct.TextProduct( clnstr(buf) )
-        self.jobs.put( tp )
+        self.jobs.put( clnstr(buf) )
 
-def async(tp):
-    d = deferLater(reactor, 0, reactor.spawnProcess, SHEFIT(tp), "shefit", 
+def async(buf):
+    """
+    Async caller of reactor processes
+    @param buf string of the raw NOAAPort Product
+    """
+    d = deferLater(reactor, 0, reactor.spawnProcess, 
+                   SHEFIT( buf ), "shefit", 
                    ["shefit"], {})
     d.addErrback( log.err )
     return d
@@ -236,11 +244,11 @@ def really_process(tp, data):
             continue
         tokens = line.split()
         if len(tokens) < 7:
-            print "NO ENOUGH TOKENS", line
+            log.msg("NO ENOUGH TOKENS %s" % (line,))
             continue
         sid = tokens[0]
         if len(sid) > 8:
-            print "SiteID Len Error: [%s] %s" % (sid, tp.get_product_id())
+            log.msg("SiteID Len Error: [%s] %s" % (sid, tp.get_product_id()))
             continue
         if not mydata.has_key(sid):
             mydata[sid] = {}
@@ -279,11 +287,11 @@ def enter_unknown(sid, tp, network):
             values ('%s', '%s', '%s')
         """ % (sid, tp.get_product_id() , network))
 
-def checkvars( vars ):
+def checkvars( myvars ):
     """
     Check variables to see if we have a COOP or DCP site
     """
-    for v in vars:
+    for v in myvars:
         # Definitely DCP
         if v[:2] in ['HG',]:
             return False
@@ -312,7 +320,8 @@ def process_site(tp, sid, ts, data):
     if tp.afos[:3] == 'RR3':
         is_coop = True
     elif tp.afos[:3] in ['RR1', 'RR2'] and checkvars( data.keys() ):
-        print "Guessing COOP? %s %s %s" %  (sid, tp.get_product_id(), data.keys())
+        log.msg("Guessing COOP? %s %s %s" %  (sid, tp.get_product_id(), 
+                                              data.keys()))
         is_coop = True
 
 
@@ -331,7 +340,7 @@ def process_site(tp, sid, ts, data):
     
     # Deterime if we want to waste the DB's time
     network = LOC2NETWORK.get(sid)
-    if network in ['KCCI','KIMT','KELO']:
+    if network in ['KCCI', 'KIMT', 'KELO']:
         return
     if network is None:
         if is_coop:
@@ -371,7 +380,7 @@ def save_data(txn, tp, iemob, data):
     if not iemob.load_and_compare():
         return False
     for var in data.keys():
-        myval = data[var] * MULTIPLIER.get(var[:2],1.0)
+        myval = data[var] * MULTIPLIER.get(var[:2], 1.0)
         iemob.data[ MAPPING[var] ] = myval
         if MAPPING[var] == 'tmpf' and iemob.data['network'].find("COOP") > 0:
             iemob.data['coop_tmpf'] = myval
@@ -386,8 +395,12 @@ def save_data(txn, tp, iemob, data):
     return True
 
 def job_size(jobs):
-    print "deferredQueue waiting: %s pending: %s" % (len(jobs.waiting), 
-                                                     len(jobs.pending) )
+    """
+    Print out some debug information to the log on the current size of the
+    job queue
+    """
+    log.msg("deferredQueue waiting: %s pending: %s" % (len(jobs.waiting), 
+                                                     len(jobs.pending) ))
     reactor.callLater(300, job_size, jobs)
 
 def main():
@@ -397,7 +410,7 @@ def main():
     jobs = DeferredQueue()
     ingest = MyProductIngestor()
     ingest.jobs = jobs
-    fact = ldmbridge.LDMProductFactory( ingest )
+    ldmbridge.LDMProductFactory( ingest )
     
     for i in range(3):
         cooperate(worker(jobs))
