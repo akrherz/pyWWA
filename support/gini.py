@@ -13,6 +13,9 @@ RE_METERS = 6371200.0
 ENTITIES = ['UNK','UNK','MISC','JERS','ERS','POES','COMP','DMSP','GMS',
             'METEOSAT','GOES7', 'GOES8',
             'GOES9', 'GOES10', 'GOES11', 'GOES12', 'GOES13', 'GOES14', 'GOES15']
+LABELS = ['UNK','UNK','MISC','JERS','ERS','POES','COMP','DMSP','GMS',
+            'METEOSAT','GOES', 'GOES',
+            'GOES', 'GOES', 'GOES', 'GOES', 'GOES', 'GOES', 'GOES']
 CHANNELS = ['','VIS','3.9', 'WV', 'IR', '12', '13.3', '1.3', 'U8', 'U9', 'U10',
             'U11', 'U12', 'LI', 'PW', 'SKIN', 'CAPE', 'TSURF', 'WINDEX']
 for u in range(22,100):
@@ -85,15 +88,22 @@ class GINIFile(object):
         Return a filename for this product, we'll use the format
         {SOURCE}_{SECTOR}_{CHANNEL}_{VALID}.png
         """
-        return "%s_%s_%s.png" % (ENTITIES[self.metadata['creating_entity']],
+        return "%s_%s_%s.png" % (LABELS[self.metadata['creating_entity']],
                                     SECTORS[self.metadata['sector']],
                                     CHANNELS[self.metadata['channel']])
+        
+    def get_bird(self):
+        """
+        Return a string label for this satellite
+        """
+        return ENTITIES[self.metadata['creating_entity']]
+        
     def archive_filename(self):
         """
         Return a filename for this product, we'll use the format
         {SOURCE}_{SECTOR}_{CHANNEL}_{VALID}.png
         """
-        return "%s_%s_%s_%s.png" % (ENTITIES[self.metadata['creating_entity']],
+        return "%s_%s_%s_%s.png" % (LABELS[self.metadata['creating_entity']],
                                     SECTORS[self.metadata['sector']],
                                     CHANNELS[self.metadata['channel']],
                                     self.metadata['valid'].strftime("%Y%m%d%H%M"))

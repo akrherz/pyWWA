@@ -84,6 +84,7 @@ def write_metadata(sat, tmpfn):
     metadata = {'meta': {}}
     metadata['meta']['valid'] = sat.metadata['valid'].strftime("%Y-%m-%dT%H:%M:%SZ")
     metadata['meta']['awips_grid'] = sat.awips_grid()
+    metadata['meta']['bird'] = sat.get_bird()
     metadata['meta']['archive_filename'] = sat.archive_filename()
     metafp = '%s.json' % (tmpfn,)
     out = open(metafp, 'w')
@@ -107,6 +108,7 @@ def write_metadata_epsg(sat, tmpfn, epsg):
     metadata = {'meta': {}}
     metadata['meta']['valid'] = sat.metadata['valid'].strftime("%Y-%m-%dT%H:%M:%SZ")
     metadata['meta']['epsg'] = epsg
+    metadata['meta']['bird'] = sat.get_bird()
     metadata['meta']['archive_filename'] = sat.archive_filename()
     metafp = '%s_%s.json' % (tmpfn, epsg)
     out = open(metafp, 'w')
