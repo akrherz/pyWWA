@@ -459,36 +459,38 @@ till %(ets)s %(svs_special)s" % jmsg_dict
         if vtec.action in ['CAN',]:
             sql = """INSERT into sbw_"""+ str(text_product.issueTime.year) +"""(wfo, eventid, 
                 significance, phenomena, issue, expire, init_expire, polygon_begin, 
-                polygon_end, geom, status, report, windtag, hailtag) VALUES (%s,
-                %s,%s,%s,"""+ my_sts +""",%s,"""+ my_ets +""",%s,%s,%s,%s,%s,%s,%s)"""
+                polygon_end, geom, status, report, windtag, hailtag, tornadotag,
+                tornadodamagetag) VALUES (%s,
+                %s,%s,%s,"""+ my_sts +""",%s,"""+ my_ets +""",%s,%s,%s,%s,%s,%s,%s,%s,%s)"""
             myargs = (vtec.office, vtec.ETN, 
                  vtec.significance, vtec.phenomena, 
                  text_product.issueTime.strftime(TIMEFORMAT), 
                  text_product.issueTime.strftime(TIMEFORMAT), 
                  text_product.issueTime.strftime(TIMEFORMAT), 
                   seg.giswkt, vtec.action, product_text,
-                 seg.windtag, seg.hailtag)
+                 seg.windtag, seg.hailtag, seg.tornadotag, seg.tornadodamagetag)
 
         elif vtec.action in ['EXP', 'UPG', 'EXT']:
             sql = """INSERT into sbw_"""+ str(text_product.issueTime.year) +"""(wfo, eventid, significance,
                 phenomena, issue, expire, init_expire, polygon_begin, polygon_end, geom, 
-                status, report, windtag, hailtag) VALUES (%s,
+                status, report, windtag, hailtag, tornadotag, tornadodamagetag) VALUES (%s,
                 %s,%s,%s, """+ my_sts +""","""+ my_ets +""","""+ my_ets +""",%s,%s, 
-                %s,%s,%s,%s,%s)"""
+                %s,%s,%s,%s,%s,%s,%s)"""
             vvv = text_product.issueTime.strftime(TIMEFORMAT)
             if vtec.endTS:
                 vvv = vtec.endTS.strftime(TIMEFORMAT)
             myargs = ( vtec.office, vtec.ETN, 
                  vtec.significance, vtec.phenomena, vvv, vvv, 
-                  seg.giswkt, vtec.action, product_text, seg.windtag, seg.hailtag)
+                  seg.giswkt, vtec.action, product_text, seg.windtag, seg.hailtag,
+                  seg.tornadotag, seg.tornadodamagetag)
         else:
             _expire = vtec.endTS
             if vtec.endTS is None:
                 _expire = mx.DateTime.now() + mx.DateTime.RelativeDateTime(days=10)
             sql = """INSERT into sbw_"""+ str(text_product.issueTime.year) +"""(wfo, eventid, 
                 significance, phenomena, issue, expire, init_expire, polygon_begin, polygon_end, geom, 
-                status, report, windtag, hailtag) VALUES (%s,
-                %s,%s,%s, """+ my_sts +""",%s,%s,%s,%s, %s,%s,%s,%s,%s)""" 
+                status, report, windtag, hailtag, tornadotag, tornadodamagetag) VALUES (%s,
+                %s,%s,%s, """+ my_sts +""",%s,%s,%s,%s, %s,%s,%s,%s,%s,%s,%s)""" 
             vvv = text_product.issueTime.strftime(TIMEFORMAT)
             if vtec.beginTS:
                 vvv = vtec.beginTS.strftime(TIMEFORMAT)
@@ -496,7 +498,7 @@ till %(ets)s %(svs_special)s" % jmsg_dict
                  vtec.significance, vtec.phenomena, _expire.strftime(TIMEFORMAT), 
                  _expire.strftime(TIMEFORMAT), vvv, 
                  _expire.strftime(TIMEFORMAT), seg.giswkt, vtec.action, product_text,
-                 seg.windtag, seg.hailtag)
+                 seg.windtag, seg.hailtag, seg.tornadotag, seg.tornadodamagetag)
         deffer = DBPOOL.runOperation(sql, myargs)
         deffer.addErrback( common.email_error, "LASTONE")
 

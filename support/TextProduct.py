@@ -5,6 +5,10 @@ from support import ugc, vtec, hvtec, reference
 #TORNADO = re.compile(r"(STORM\W+CAPABLE\W+OF\W+PRODUCING|REPORTED|INDICATED?)\W+A\W+TORNADO")
 TORNADO = re.compile(r"^AT |^\* AT")
 WINDHAIL = re.compile(".*WIND\.\.\.HAIL (?P<winddir>[><]?)(?P<wind>[0-9]+)MPH (?P<haildir>[><]?)(?P<hail>[0-9\.]+)IN")
+HAILTAG = re.compile(".*HAIL\.\.\.(?P<haildir>[><]?)(?P<hail>[0-9\.]+)IN")
+TORNADOTAG = re.compile(".*TORNADO\.\.\.(?P<tornado>RADAR INDICATED|OBSERVED)")
+TORNADODAMAGETAG = re.compile(".*TORNADO DAMAGE THREAT\.\.\.(?P<damage>SIGNIFICANT|CATASTROPHIC)")
+
 class TextProduct:
 
     def __init__(self, raw, bypass=False):
@@ -200,6 +204,8 @@ class TextProductSegment:
         self.hailtag = None
         self.haildirtag = None
         self.winddirtag = None
+        self.tornadotag = None
+        self.tornadodamagetag = None
         self.parse()
 
     def bullet_splitter(self):
@@ -272,6 +278,22 @@ class TextProductSegment:
                 self.haildirtag = d['haildir']
                 self.winddirtag = d['winddir']
                 self.hailtag = d['hail']
+            m = HAILTAG.match( rend2[1] )
+            if m:
+                d = m.groupdict()
+                self.haildirtag = d['haildir']
+                self.hailtag = d['hail']
+
+            m = TORNADOTAG.match( rend2[1] )
+            if m:
+                d = m.groupdict()
+                self.tornadotag = d['tornado']
+
+            m = TORNADODAMAGETAG.match( rend2[1] )
+            if m:
+                d = m.groupdict()
+                self.tornadodamagetag = d['damage']
+
 
     def __str__(self,):
         s = """
