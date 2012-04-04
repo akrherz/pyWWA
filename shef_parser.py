@@ -401,6 +401,9 @@ def job_size(jobs):
     """
     log.msg("deferredQueue waiting: %s pending: %s" % (len(jobs.waiting), 
                                                      len(jobs.pending) ))
+    if len(jobs.pending) > 100:
+        log.msg("ABORT")
+        reactor.callWhenRunning(reactor.stop)
     reactor.callLater(300, job_size, jobs)
 
 def main():
