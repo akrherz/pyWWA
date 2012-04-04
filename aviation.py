@@ -15,12 +15,12 @@
 # 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 """ Aviation Product Parser! """
 
-__revision__ = '$Id: spc_parser.py 4513 2009-01-06 16:57:49Z akrherz $'
+__revision__ = '$Id: $:'
 
 # Twisted Python imports
 from twisted.words.protocols.jabber import client, jid, xmlstream
 from twisted.internet import reactor
-from twisted.python import log
+from twisted.python import log, logfile
 from twisted.enterprise import adbapi
 from twisted.mail import smtp
 
@@ -35,23 +35,20 @@ from support import ldmbridge, TextProduct, utils
 import secret
 import common
 
-os.environ["EMAILS"] = "10"
 
-
-log.startLogging(open('logs/aviation.log','a'))
 log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
+log.startLogging(logfile.DailyLogFile('aviation.log','logs'))
 
-POSTGIS = pg.connect(secret.dbname, secret.dbhost, user=secret.dbuser, 
-                     passwd=secret.dbpass)
 DBPOOL = adbapi.ConnectionPool("psycopg2", database=secret.dbname, 
-                               host=secret.dbhost, password=secret.dbpass, cp_reconnect=True)
+                               host=secret.dbhost, password=secret.dbpass, 
+                               cp_reconnect=True)
 
 # 
 CS_RE = re.compile(r"""CONVECTIVE\sSIGMET\s(?P<label>[0-9A-Z]+)\s
 VALID\sUNTIL\s(?P<hour>[0-2][0-9])(?P<minute>[0-5][0-9])Z\s
 (?P<states>[A-Z ]+)\s
-(?P<from>FROM)?\s?(?P<locs>[0-9A-Z \-]+)\s
-(?P<dmshg>DMSHG|DVLPG|INTSF)?\s?(?P<geotype>AREA|LINE|ISOL)\s
+(?P<from>FROM)?\s?(?P<locs>[0-9A-Z \-]+?)\s
+(?P<dmshg>DMSHG|DVLPG|INTSF)?\s?(?P<geotype>AREA|LINE|ISOL)?\s?
 (?P<cutype>EMBD|SEV|SEV\sEMBD|EMBD\sSEV)?\s?TS\s(?P<width>[0-9]+\sNM\sWIDE)?(?P<diameter>D[0-9]+)?
 """, re.VERBOSE )
 
@@ -110,9 +107,11 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
         try:
             prod = TextProduct.TextProduct(buf)
             if prod.afos in ['SIGC','SIGW','SIGE']:
-                process_SIGC(prod)
+                defer = DBPOOL.runInteraction(process_SIGC, prod)
+                defer.addErrback(common.email_error, buf)
             elif prod.afos[:2] == 'WS':
-                process_WS(prod)
+                defer = DBPOOL.runInteraction(process_WS, prod)
+                defer.addErrback(common.email_error, buf)
         except Exception, myexp:
             common.email_error(myexp, buf)
 
@@ -177,6 +176,7 @@ def locs2lonslats(locstr, geotype, widthstr, diameterstr):
         # Approximation
         widthdeg = width / 110.
 
+    #log.msg("locstr is:%s geotype is:%s", (locstr, geotype))
     for l in locstr.split('-'):
         s = FROM_RE.search(l)
         if s:
@@ -188,7 +188,7 @@ def locs2lonslats(locstr, geotype, widthstr, diameterstr):
                   (lon1, lat1) = (LOCS[d['loc']]['lon'], LOCS[d['loc']]['lat'])
             lats.append( lat1 )
             lons.append( lon1 )
-    if geotype == 'ISOL':
+    if geotype == 'ISOL' or diameterstr is not None:
         lats2 = []
         lons2 = []
         diameter = float(diameterstr.replace("D", ""))
@@ -248,18 +248,17 @@ def locs2lonslats(locstr, geotype, widthstr, diameterstr):
 
     return lons, lats
 
-def process_WS(prod):
+def process_WS(txn, prod):
     """
     Process non-convective sigmet WS[1-6][N-Y]
     """
     pass
 
-def process_SIGC(prod):
+def process_SIGC(txn, prod):
     """
 
     """
-    POSTGIS.query("BEGIN;")
-    POSTGIS.query("DELETE from sigmets_current where expire < now()")
+    txn.execute("DELETE from sigmets_current where expire < now()")
     for section in prod.raw.split('\n\n'):
         s = CS_RE.search(section.replace("\n", ' '))
         if s:
@@ -276,12 +275,12 @@ def process_SIGC(prod):
             for table in ('sigmets_current', 'sigmets_archive'):
                 sql = """DELETE from %s where label = '%s' and expire = '%s+00'""" % (
                                                 table, data['label'], expire)
-                POSTGIS.query(sql)
+                txn.execute(sql)
                 sql = """INSERT into %s(sigmet_type, label, issue, expire, raw, geom)
                    VALUES ('C','%s','%s+00','%s+00','%s',
                    'SRID=4326;MULTIPOLYGON(((%s)))')""" % (table, data['label'], 
                                             prod.issueTime, expire, section, wkt[:-1])
-                POSTGIS.query(sql)
+                txn.execute(sql)
 
         elif section.find("CONVECTIVE SIGMET") > -1:
             if section.find("CONVECTIVE SIGMET...NONE") == -1:
@@ -301,7 +300,6 @@ def process_SIGC(prod):
                 wkt += "%s %s," % (lon, lat)
             wkt += "%s %s" % (lons[0], lats[0])
         """
-    POSTGIS.query("COMMIT;")
 
 myJid = jid.JID('%s@%s/aviation_%s' % (secret.iembot_ingest_user, 
             secret.chatserver, mx.DateTime.gmt().strftime("%Y%m%d%H%M%S") ) )
