@@ -65,9 +65,9 @@ def real_process(raw):
             htmlbody = "NESDIS issues <a href='%s?pid=%s'>Satellite Precipitation Estimates</a>" %(secret.PROD_URL, product_id,)
             jabber.sendMessage(body, htmlbody)
 
-    twt = "NESDIS issues Satellite Precipitation Estimates"
-    url = "%s?pid=%s" % (secret.PROD_URL, product_id)
-    common.tweet(channels, twt, url)
+            twt = "#%s NESDIS issues Satellite Precipitation Estimates" % (wfo,)
+            url = "%s?pid=%s" % (secret.PROD_URL, product_id)
+            common.tweet(wfo, twt, url)
 
 
 
