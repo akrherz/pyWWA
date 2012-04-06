@@ -86,16 +86,20 @@ def tweet(channels, msg, url, extras={}):
     if secret.DISARM:
         channels = ['TEST',]
         #return
-
-    if url:
-        url = url.replace("&amp;", "&").replace("#","%23")
-        deffer = client.getPage(BITLY % (url, ) )
-        # Add errback first
-        deffer.addErrback(bitly_error, channels, msg, extras )
-        deffer.addCallback(reallytweet, channels, msg, extras )
-        deffer.addErrback(log.err)
-    else:
-        reallytweet(None, channels, msg, extras)
+    for channel in channels:
+        if url:
+            if url.find("?") > -1:
+                url += "&_%s_" % (channel,)
+            else:
+                url += "?_%s_" % (channel,)
+            url = url.replace("&amp;", "&").replace("#","%23").replace("&","%26")
+            deffer = client.getPage(BITLY % (url, ) )
+            # Add errback first
+            deffer.addErrback(bitly_error, [channel,], msg, extras )
+            deffer.addCallback(reallytweet, [channel,], msg, extras )
+            deffer.addErrback(log.err)
+        else:
+            reallytweet(None, [channel,], msg, extras)
 
 def bitly_error(err, channels, msg, extras):
     """
@@ -141,8 +145,8 @@ def really_really_tweet(tuser, channel, tinyurl, msg, extras):
     _twitter = twitter.Twitter(consumer=OAUTH_CONSUMER, 
                                token=OAUTH_TOKENS[tuser])
     deffer = _twitter.update( twt, None, extras)
-    deffer.addCallback(tb, tuser, channel, twt)
     deffer.addErrback(twitterErrback, tuser, channel, twt)
+    deffer.addCallback(tb, tuser, channel, twt)
     deffer.addErrback(log.err)
 
 def tb(x, tuser, channel, twt):
