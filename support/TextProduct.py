@@ -6,6 +6,7 @@ from support import ugc, vtec, hvtec, reference
 TORNADO = re.compile(r"^AT |^\* AT")
 WINDHAIL = re.compile(".*WIND\.\.\.HAIL (?P<winddir>[><]?)(?P<wind>[0-9]+)MPH (?P<haildir>[><]?)(?P<hail>[0-9\.]+)IN")
 HAILTAG = re.compile(".*HAIL\.\.\.(?P<haildir>[><]?)(?P<hail>[0-9\.]+)IN")
+WINDTAG = re.compile(".*WIND\.\.\.(?P<winddir>[><]?)\s?(?P<wind>[0-9]+)\s?MPH")
 TORNADOTAG = re.compile(".*TORNADO\.\.\.(?P<tornado>RADAR INDICATED|OBSERVED)")
 TORNADODAMAGETAG = re.compile(".*TORNADO DAMAGE THREAT\.\.\.(?P<damage>SIGNIFICANT|CATASTROPHIC)")
 
@@ -278,6 +279,13 @@ class TextProductSegment:
                 self.haildirtag = d['haildir']
                 self.winddirtag = d['winddir']
                 self.hailtag = d['hail']
+                
+            m = WINDTAG.match( rend2[1] )
+            if m:
+                d = m.groupdict()
+                self.winddirtag = d['winddir']
+                self.windtag = d['wind']
+                
             m = HAILTAG.match( rend2[1] )
             if m:
                 d = m.groupdict()
