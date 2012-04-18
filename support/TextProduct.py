@@ -7,7 +7,7 @@ TORNADO = re.compile(r"^AT |^\* AT")
 WINDHAIL = re.compile(".*WIND\.\.\.HAIL (?P<winddir>[><]?)(?P<wind>[0-9]+)MPH (?P<haildir>[><]?)(?P<hail>[0-9\.]+)IN")
 HAILTAG = re.compile(".*HAIL\.\.\.(?P<haildir>[><]?)(?P<hail>[0-9\.]+)IN")
 WINDTAG = re.compile(".*WIND\.\.\.(?P<winddir>[><]?)\s?(?P<wind>[0-9]+)\s?MPH")
-TORNADOTAG = re.compile(".*TORNADO\.\.\.(?P<tornado>RADAR INDICATED|OBSERVED)")
+TORNADOTAG = re.compile(".*TORNADO\.\.\.(?P<tornado>RADAR INDICATED|OBSERVED|POSSIBLE)")
 TORNADODAMAGETAG = re.compile(".*TORNADO DAMAGE THREAT\.\.\.(?P<damage>SIGNIFICANT|CATASTROPHIC)")
 
 class TextProduct:
