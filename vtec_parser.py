@@ -456,41 +456,51 @@ till %(ets)s %(svs_special)s" % jmsg_dict
               LIMIT 1)" % (text_product.issueTime.year, vtec.ETN, vtec.office, \
               vtec.phenomena, vtec.significance)
 
+        tml_valid = None
+        if seg.tml_valid:
+            tml_valid = seg.tml_valid.strftime(TIMEFORMAT)
         if vtec.action in ['CAN',]:
             sql = """INSERT into sbw_"""+ str(text_product.issueTime.year) +"""(wfo, eventid, 
                 significance, phenomena, issue, expire, init_expire, polygon_begin, 
                 polygon_end, geom, status, report, windtag, hailtag, tornadotag,
-                tornadodamagetag) VALUES (%s,
-                %s,%s,%s,"""+ my_sts +""",%s,"""+ my_ets +""",%s,%s,%s,%s,%s,%s,%s,%s,%s)"""
+                tornadodamagetag, tml_valid, tml_direction, tml_sknt,
+                tml_geom) VALUES (%s,
+                %s,%s,%s,"""+ my_sts +""",%s,"""+ my_ets +""",%s,%s,%s,%s,%s,
+                %s,%s,%s,%s, %s, %s, %s, %s)"""
             myargs = (vtec.office, vtec.ETN, 
                  vtec.significance, vtec.phenomena, 
                  text_product.issueTime.strftime(TIMEFORMAT), 
                  text_product.issueTime.strftime(TIMEFORMAT), 
                  text_product.issueTime.strftime(TIMEFORMAT), 
                   seg.giswkt, vtec.action, product_text,
-                 seg.windtag, seg.hailtag, seg.tornadotag, seg.tornadodamagetag)
+                 seg.windtag, seg.hailtag, seg.tornadotag, seg.tornadodamagetag,
+                 tml_valid, seg.tml_dir, seg.tml_sknt, seg.tml_giswkt)
 
         elif vtec.action in ['EXP', 'UPG', 'EXT']:
             sql = """INSERT into sbw_"""+ str(text_product.issueTime.year) +"""(wfo, eventid, significance,
                 phenomena, issue, expire, init_expire, polygon_begin, polygon_end, geom, 
-                status, report, windtag, hailtag, tornadotag, tornadodamagetag) VALUES (%s,
+                status, report, windtag, hailtag, tornadotag, tornadodamagetag, tml_valid, tml_direction, tml_sknt,
+                tml_geom) VALUES (%s,
                 %s,%s,%s, """+ my_sts +""","""+ my_ets +""","""+ my_ets +""",%s,%s, 
-                %s,%s,%s,%s,%s,%s,%s)"""
+                %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"""
             vvv = text_product.issueTime.strftime(TIMEFORMAT)
             if vtec.endTS:
                 vvv = vtec.endTS.strftime(TIMEFORMAT)
             myargs = ( vtec.office, vtec.ETN, 
                  vtec.significance, vtec.phenomena, vvv, vvv, 
                   seg.giswkt, vtec.action, product_text, seg.windtag, seg.hailtag,
-                  seg.tornadotag, seg.tornadodamagetag)
+                  seg.tornadotag, seg.tornadodamagetag,
+                  tml_valid, seg.tml_dir, seg.tml_sknt, seg.tml_giswkt)
         else:
             _expire = vtec.endTS
             if vtec.endTS is None:
                 _expire = mx.DateTime.now() + mx.DateTime.RelativeDateTime(days=10)
             sql = """INSERT into sbw_"""+ str(text_product.issueTime.year) +"""(wfo, eventid, 
                 significance, phenomena, issue, expire, init_expire, polygon_begin, polygon_end, geom, 
-                status, report, windtag, hailtag, tornadotag, tornadodamagetag) VALUES (%s,
-                %s,%s,%s, """+ my_sts +""",%s,%s,%s,%s, %s,%s,%s,%s,%s,%s,%s)""" 
+                status, report, windtag, hailtag, tornadotag, tornadodamagetag, tml_valid, tml_direction, tml_sknt,
+                tml_geom) VALUES (%s,
+                %s,%s,%s, """+ my_sts +""",%s,%s,%s,%s, %s,%s,%s,%s,%s,%s,%s,
+                %s,%s,%s,%s)""" 
             vvv = text_product.issueTime.strftime(TIMEFORMAT)
             if vtec.beginTS:
                 vvv = vtec.beginTS.strftime(TIMEFORMAT)
@@ -498,7 +508,8 @@ till %(ets)s %(svs_special)s" % jmsg_dict
                  vtec.significance, vtec.phenomena, _expire.strftime(TIMEFORMAT), 
                  _expire.strftime(TIMEFORMAT), vvv, 
                  _expire.strftime(TIMEFORMAT), seg.giswkt, vtec.action, product_text,
-                 seg.windtag, seg.hailtag, seg.tornadotag, seg.tornadodamagetag)
+                 seg.windtag, seg.hailtag, seg.tornadotag, seg.tornadodamagetag,
+                 tml_valid, seg.tml_dir, seg.tml_sknt, seg.tml_giswkt)
         deffer = DBPOOL.runOperation(sql, myargs)
         deffer.addErrback( common.email_error, "LASTONE")
 

@@ -9,6 +9,7 @@ HAILTAG = re.compile(".*HAIL\.\.\.(?P<haildir>[><]?)(?P<hail>[0-9\.]+)IN")
 WINDTAG = re.compile(".*WIND\.\.\.(?P<winddir>[><]?)\s?(?P<wind>[0-9]+)\s?MPH")
 TORNADOTAG = re.compile(".*TORNADO\.\.\.(?P<tornado>RADAR INDICATED|OBSERVED|POSSIBLE)")
 TORNADODAMAGETAG = re.compile(".*TORNADO DAMAGE THREAT\.\.\.(?P<damage>SIGNIFICANT|CATASTROPHIC)")
+TIME_MOT_LOC = re.compile(".*TIME\.\.\.MOT\.\.\.LOC (?P<ztime>[0-9]{4})Z (?P<dir>[0-9]{1,3})DEG (?P<sknt>[0-9]{1,3})KT (?P<lat>[0-9]+) (?P<lon>[0-9]+)")
 
 class TextProduct:
 
@@ -207,6 +208,11 @@ class TextProductSegment:
         self.winddirtag = None
         self.tornadotag = None
         self.tornadodamagetag = None
+        # TIME...MOT...LOC Stuff!
+        self.tml_giswkt = None
+        self.tml_valid = None
+        self.tml_sknt = None
+        self.tml_dir = None
         self.parse()
 
     def bullet_splitter(self):
@@ -253,6 +259,10 @@ class TextProductSegment:
           self.hvtec.append( hvtec.hvtec(t[0]) )
 
         s = self.raw.replace("\n", " ")
+        m = TIME_MOT_LOC.match( s )
+        if m:
+            self.process_time_mot_loc(m)
+
         rend = re.split("LAT\.\.\.LON", s)
         if (len(rend) == 1):
             return None
@@ -303,6 +313,29 @@ class TextProductSegment:
                 self.tornadodamagetag = d['damage']
 
 
+            
+    def process_time_mot_loc(self, m):
+        """
+        Process the match results from a find of TIME...MOT...LOC
+        """
+        print 'In TML!'
+        d = m.groupdict()
+        if len(d['ztime']) != 4 or self.ugcExpire is None:
+            return
+        hh = float(d['ztime'][:2])
+        mi = float(d['ztime'][2:])
+        self.tml_valid = self.ugcExpire + mx.DateTime.RelativeDateTime(hour=hh,
+                                                              minute=mi)
+        if hh > self.ugcExpire.hour:
+            self.tml_valid -= mx.DateTime.RelativeDateTime(days=1)
+
+        lat = float(d['lat']) / 100.0
+        lon = 0 - float(d['lon']) / 100.0
+        
+        self.tml_giswkt = 'SRID=4326;POINT(%s %s)' % (lon, lat)
+        self.tml_sknt = float( d['sknt'] )
+        self.tml_dir = float( d['dir'] )
+        
     def __str__(self,):
         s = """
 headlines: %(headlines)s
