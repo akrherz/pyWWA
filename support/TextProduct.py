@@ -318,7 +318,6 @@ class TextProductSegment:
         """
         Process the match results from a find of TIME...MOT...LOC
         """
-        print 'In TML!'
         d = m.groupdict()
         if len(d['ztime']) != 4 or self.ugcExpire is None:
             return
