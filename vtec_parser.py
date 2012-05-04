@@ -457,6 +457,9 @@ till %(ets)s %(svs_special)s" % jmsg_dict
               vtec.phenomena, vtec.significance)
 
         tml_valid = None
+        tml_column = 'tml_geom'
+        if seg.tml_giswkt and seg.tml_giswkt.find("LINE") > 0:
+            tml_column = 'tml_geom_line'
         if seg.tml_valid:
             tml_valid = seg.tml_valid.strftime(TIMEFORMAT)
         if vtec.action in ['CAN',]:
@@ -464,7 +467,7 @@ till %(ets)s %(svs_special)s" % jmsg_dict
                 significance, phenomena, issue, expire, init_expire, polygon_begin, 
                 polygon_end, geom, status, report, windtag, hailtag, tornadotag,
                 tornadodamagetag, tml_valid, tml_direction, tml_sknt,
-                tml_geom) VALUES (%s,
+                """+ tml_column +""") VALUES (%s,
                 %s,%s,%s,"""+ my_sts +""",%s,"""+ my_ets +""",%s,%s,%s,%s,%s,
                 %s,%s,%s,%s, %s, %s, %s, %s)"""
             myargs = (vtec.office, vtec.ETN, 
@@ -480,7 +483,7 @@ till %(ets)s %(svs_special)s" % jmsg_dict
             sql = """INSERT into sbw_"""+ str(text_product.issueTime.year) +"""(wfo, eventid, significance,
                 phenomena, issue, expire, init_expire, polygon_begin, polygon_end, geom, 
                 status, report, windtag, hailtag, tornadotag, tornadodamagetag, tml_valid, tml_direction, tml_sknt,
-                tml_geom) VALUES (%s,
+                """+ tml_column +""") VALUES (%s,
                 %s,%s,%s, """+ my_sts +""","""+ my_ets +""","""+ my_ets +""",%s,%s, 
                 %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"""
             vvv = text_product.issueTime.strftime(TIMEFORMAT)
@@ -498,7 +501,7 @@ till %(ets)s %(svs_special)s" % jmsg_dict
             sql = """INSERT into sbw_"""+ str(text_product.issueTime.year) +"""(wfo, eventid, 
                 significance, phenomena, issue, expire, init_expire, polygon_begin, polygon_end, geom, 
                 status, report, windtag, hailtag, tornadotag, tornadodamagetag, tml_valid, tml_direction, tml_sknt,
-                tml_geom) VALUES (%s,
+                """+ tml_column +""") VALUES (%s,
                 %s,%s,%s, """+ my_sts +""",%s,%s,%s,%s, %s,%s,%s,%s,%s,%s,%s,
                 %s,%s,%s,%s)""" 
             vvv = text_product.issueTime.strftime(TIMEFORMAT)

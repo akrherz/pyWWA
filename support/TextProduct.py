@@ -9,7 +9,7 @@ HAILTAG = re.compile(".*HAIL\.\.\.(?P<haildir>[><]?)(?P<hail>[0-9\.]+)IN")
 WINDTAG = re.compile(".*WIND\.\.\.(?P<winddir>[><]?)\s?(?P<wind>[0-9]+)\s?MPH")
 TORNADOTAG = re.compile(".*TORNADO\.\.\.(?P<tornado>RADAR INDICATED|OBSERVED|POSSIBLE)")
 TORNADODAMAGETAG = re.compile(".*TORNADO DAMAGE THREAT\.\.\.(?P<damage>SIGNIFICANT|CATASTROPHIC)")
-TIME_MOT_LOC = re.compile(".*TIME\.\.\.MOT\.\.\.LOC (?P<ztime>[0-9]{4})Z (?P<dir>[0-9]{1,3})DEG (?P<sknt>[0-9]{1,3})KT (?P<lat>[0-9]+) (?P<lon>[0-9]+)")
+TIME_MOT_LOC = re.compile(".*TIME\.\.\.MOT\.\.\.LOC (?P<ztime>[0-9]{4})Z (?P<dir>[0-9]{1,3})DEG (?P<sknt>[0-9]{1,3})KT (?P<loc>[0-9 ]+)")
 
 class TextProduct:
 
@@ -328,10 +328,20 @@ class TextProductSegment:
         if hh > self.ugcExpire.hour:
             self.tml_valid -= mx.DateTime.RelativeDateTime(days=1)
 
-        lat = float(d['lat']) / 100.0
-        lon = 0 - float(d['lon']) / 100.0
+        tokens = d['loc'].split()
+        lats = []
+        lons = []
+        for i in range(0,len(tokens),2):
+            lats.append( float(tokens[i]) / 100.0 )
+            lons.append( 0 - float(tokens[i+1]) / 100.0 )
         
-        self.tml_giswkt = 'SRID=4326;POINT(%s %s)' % (lon, lat)
+        if len(lats) == 1:
+            self.tml_giswkt = 'SRID=4326;POINT(%s %s)' % (lons[0], lats[0])
+        else:
+            pairs = []
+            for lat,lon in zip(lats,lons):
+                pairs.append( '%s %s' % (lon, lat) )
+            self.tml_giswkt = 'SRID=4326;LINESTRING(%s)' % (','.join(pairs),)
         self.tml_sknt = float( d['sknt'] )
         self.tml_dir = float( d['dir'] )
         
