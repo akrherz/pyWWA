@@ -331,6 +331,8 @@ class TextProductSegment:
         tokens = d['loc'].split()
         lats = []
         lons = []
+        if len(tokens) % 2 != 0:
+            tokens = tokens[:-1]
         for i in range(0,len(tokens),2):
             lats.append( float(tokens[i]) / 100.0 )
             lons.append( 0 - float(tokens[i+1]) / 100.0 )
