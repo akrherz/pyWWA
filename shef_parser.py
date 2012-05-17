@@ -15,7 +15,6 @@
 # 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 """ 
  SHEF product ingestor 
- $Id: $:
 """
 
 # Setup Standard Logging we use
@@ -380,6 +379,8 @@ def save_data(txn, tp, iemob, data):
     if not iemob.load_and_compare():
         return False
     for var in data.keys():
+        if data[var] == -9999:
+            continue
         myval = data[var] * MULTIPLIER.get(var[:2], 1.0)
         iemob.data[ MAPPING[var] ] = myval
         if MAPPING[var] == 'tmpf' and iemob.data['network'].find("COOP") > 0:
