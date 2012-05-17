@@ -333,6 +333,8 @@ class TextProductSegment:
         lons = []
         if len(tokens) % 2 != 0:
             tokens = tokens[:-1]
+        if len(tokens) == 0:
+            return
         for i in range(0,len(tokens),2):
             lats.append( float(tokens[i]) / 100.0 )
             lons.append( 0 - float(tokens[i+1]) / 100.0 )
