@@ -25,7 +25,7 @@ _sigDict = {'W': 'Warning',
 _phenDict = {
 'AF': 'Ashfall',
 'AS': 'Air Stagnation',
-'BH': 'Beach Hazzard',
+'BH': 'Beach Hazard',
 'BS': 'Blowing Snow',
 'BW': 'Brisk Wind',
 'BZ': 'Blizzard',
