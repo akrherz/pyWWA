@@ -1,10 +1,8 @@
 """
 Do the rotation action that some products need
-$Id: $:
 """
 import sys
 import os
-import gzip
 
 if __name__ == '__main__':
     # blah/file_
