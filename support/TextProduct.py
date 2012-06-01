@@ -235,13 +235,14 @@ class TextProductSegment:
         u = ugc.ugc( self.raw )
         self.ugc = u.ugc
         if (u.rawexpire is not None and self.issueTime is not None):
-          day = int(u.rawexpire[:2])
-          hr = int(u.rawexpire[2:4])
-          mi = int(u.rawexpire[4:])
-          offset = 0
-          if (day < self.issueTime.day):
-              offset = mx.DateTime.RelativeDateTime(months=+1)
-          self.ugcExpire = self.issueTime + offset + mx.DateTime.RelativeDateTime(hour=hr, day=day, minute=mi)
+            day = int(u.rawexpire[:2])
+            hr = int(u.rawexpire[2:4])
+            mi = int(u.rawexpire[4:])
+            offset = 0
+            # If the day is less than today, we need to move ahead a month 
+            if day < self.issueTime.day:
+                offset = mx.DateTime.RelativeDateTime(days=+28)
+            self.ugcExpire = self.issueTime + offset + mx.DateTime.RelativeDateTime(hour=hr, day=day, minute=mi)
 
         # Lets look for headlines
         self.headlines = re.findall("^\.\.\.(.*?)\.\.\.[ ]?\n\n", self.raw, re.M | re.S)
