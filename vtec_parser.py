@@ -73,6 +73,7 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
         try:
             # Make sure we have a trailing $$
             if buf.find("$$") == -1:
+                common.email_error("No $$ Found!", buf)
                 buf += "\n\n$$\n\n"
             text_product = TextProduct.TextProduct( buf )
             skip_con = False
