@@ -27,11 +27,11 @@ log.startLogging( logfile.DailyLogFile('vtec_parser.log','logs'))
 from twisted.words.protocols.jabber import client, jid, xmlstream
 from twisted.internet import reactor
 from twisted.enterprise import adbapi
-from twisted.mail import smtp
+
 
 # Standard Python modules
-import os, re, traceback, StringIO, smtplib
-from email.MIMEText import MIMEText
+import re
+
 
 # Python 3rd Party Add-Ons
 import mx.DateTime, pg
@@ -40,9 +40,7 @@ import mx.DateTime, pg
 from support import ldmbridge, TextProduct, reference
 import secret
 import common
-import StringIO
-import socket
-import sys
+
 
 POSTGIS = pg.connect(secret.dbname, secret.dbhost, user=secret.dbuser, passwd=secret.dbpass)
 DBPOOL = adbapi.ConnectionPool("psycopg2", database=secret.dbname, host=secret.dbhost, 
@@ -74,8 +72,8 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
         """ Process the product """
         try:
             # Make sure we have a trailing $$
-            #if buf.find("$$") == -1:
-            #    buf += "\n\n$$\n\n"
+            if buf.find("$$") == -1:
+                buf += "\n\n$$\n\n"
             text_product = TextProduct.TextProduct( buf )
             skip_con = False
             if (text_product.afos[:3] == "FLS" and 
@@ -254,11 +252,10 @@ def segment_processor(text_product, i, skip_con):
         #   1. Insert any polygons
         #   2. Insert any counties
         #   3. Format Jabber message
-        if (vtec.action == "NEW" or vtec.action == "EXB" or \
-            vtec.action == "EXA"):
-            if (vtec.beginTS is None):
-               vtec.beginTS = text_product.issueTime
-            if (vtec.endTS is None):
+        if vtec.action in ["NEW","EXB","EXA"]:
+            if vtec.beginTS is None:
+                vtec.beginTS = text_product.issueTime
+            if vtec.endTS is None:
                 vtec.endTS = vtec.beginTS + mx.DateTime.RelativeDateTime(days=1)
             bts = vtec.beginTS
             if (vtec.action == "EXB" or vtec.action == "EXA"):
@@ -279,7 +276,6 @@ def segment_processor(text_product, i, skip_con):
             for k in range(len(ugc)):
                 cnty = ugc[k]
                 fcster = re.sub("'", " ", text_product.fcster)
-  
                 deffer = DBPOOL.runOperation("""INSERT into """+ warning_table +""" 
                 (issue,expire,report, geom, phenomena, gtype, wfo, eventid, status,
                 updated, fcster, ugc, significance, hvtec_nwsli) VALUES(%s, %s, %s, 
