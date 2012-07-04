@@ -15,8 +15,6 @@
 # 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 """ SPC Geo Products Parser! """
 
-__revision__ = '$Id: spc_parser.py 4513 2009-01-06 16:57:49Z akrherz $'
-
 from twisted.python import log
 from twisted.python import logfile
 log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"

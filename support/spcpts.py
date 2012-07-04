@@ -9,8 +9,6 @@ from shapely.geometry.base import geom_factory
 import shapely.geos
 import mx.DateTime
 
-
-
 def ptchecker(pts):
     """
     Do some work on the line, buffer if necessary
@@ -24,30 +22,30 @@ def ptchecker(pts):
     dx = data[1,0] - data[0,0] + 0.00001
     dy = data[1,1] - data[0,1] + 0.00001
     if abs(dx) > abs(dy):
-        x = data[0,0] - 0.6 * (abs(dx)/dx)
-        y = data[0,1] - 0.6 * (abs(dy)/abs(dx)) * (abs(dy)/dy)
+        x = data[0,0] - 1. * (abs(dx)/dx)
+        y = data[0,1] - 1. * (abs(dy)/abs(dx)) * (abs(dy)/dy)
     elif abs(dy) > abs(dx):
-        y = data[0,1] - 0.6 * (abs(dy)/dy)
-        x = data[0,0] - 0.6 * (abs(dx)/abs(dy)) * (abs(dx)/dx)
+        y = data[0,1] - 1. * (abs(dy)/dy)
+        x = data[0,0] - 1. * (abs(dx)/abs(dy)) * (abs(dx)/dx)
     else:
-        y = data[0,1] - 0.6 * (abs(dy)/dy)
-        x = data[0,0] - 0.6 * (abs(dx)/dx)
-    print 'Point New: %.2f %.2f P0: %s P1: %s' % (x,y, 
+        y = data[0,1] - 1. * (abs(dy)/dy)
+        x = data[0,0] - 1. * (abs(dx)/dx)
+    print 'Extender Start: New: %.2f %.2f P0: %s P1: %s' % (x,y, 
                                                 data[0,:], data[1,:])
     pts.insert(0, [x,y] )
     # Now we do the last point, extend it some
     dx = data[-1,0] - data[-2,0] + 0.00001
     dy = data[-1,1] - data[-2,1] + 0.00001
     if abs(dx) > abs(dy):
-        x = data[-1,0] + 0.6 * (abs(dx)/dx)
-        y = data[-1,1] + 0.6 * (abs(dy)/abs(dx)) * (abs(dy)/dy)
+        x = data[-1,0] + 1. * (abs(dx)/dx)
+        y = data[-1,1] + 1. * (abs(dy)/abs(dx)) * (abs(dy)/dy)
     elif abs(dy) > abs(dx):
-        y = data[-1,1] + 0.6 * (abs(dy)/dy)
-        x = data[-1,0] + 0.6 * (abs(dx)/abs(dy)) * (abs(dx)/dx)
+        y = data[-1,1] + 1. * (abs(dy)/dy)
+        x = data[-1,0] + 1. * (abs(dx)/abs(dy)) * (abs(dx)/dx)
     else:
-        y = data[-1,1] + 0.6 * (abs(dy)/dy)
-        x = data[-1,0] + 0.6 * (abs(dx)/dx)
-    print 'P-2: %s P-1: %s New: %.2f %.2f' % (
+        y = data[-1,1] + 1. * (abs(dy)/dy)
+        x = data[-1,0] + 1. * (abs(dx)/dx)
+    print 'Extender End: P-2: %s P-1: %s New: %.2f %.2f' % (
                                                 data[-2,:], data[-1,:], x, y)
     pts.append( [x,y] )
     
@@ -131,10 +129,11 @@ CONUSPOLY = read_poly()
 
 class SPCOutlook(object):
 
-    def __init__(self, category, threshold, polygon):
+    def __init__(self, category, threshold, polygon, line):
         self.category = category
         self.threshold = threshold
         self.polygon = polygon
+        self.line = numpy.array(line)
 
 class SPCPTS(object):
 
@@ -154,11 +153,17 @@ class SPCPTS(object):
             fig = plt.figure()
             ax = fig.add_subplot(111)
             x, y = CONUSPOLY.exterior.xy
-            ax.plot(x,y, color='b')
+            ax.plot(x,y, color='b', label='Conus')
             x,y = outlook.polygon.exterior.xy
-            ax.plot(x, y, color='r')
+            ax.plot(x, y, color='r', label='Outlook')
+            x = outlook.line[:,0]
+            y = outlook.line[:,1]
+            ax.plot(x, y, color='g', label='SPC Orig')
+            ax.text(x[0], y[0], 'Start')
+            ax.text(x[-1], y[-1], 'End')
             ax.set_title('Category %s Threshold %s' % (outlook.category, 
                                                    outlook.threshold))
+            ax.legend(loc=3)
             fig.savefig('%02d.png' % (i,))
             i+= 1
             del fig
@@ -212,6 +217,7 @@ class SPCPTS(object):
     
     def find_outlooks(self, tp):
         # First we split the product by &&
+        data = ""
         for segment in tp.raw.split("&&")[:-1]:
             # We need to figure out the probabilistic or category
             tokens = re.findall("\.\.\. (.*) \.\.\.", segment)
@@ -239,7 +245,8 @@ class SPCPTS(object):
         # Compute our array of given points, each time we hit 99999999 this is a
         # break, so we'll make the array multidimensional
         segments = str2pts( data  )
-        print 'Found %s line segments' % (len(segments),)
+        print '%s %s Found %s line segment(s)' % (category, threshold, 
+                                                len(segments))
         mypoly = CONUSPOLY
         geomc = None
         polygons = None
@@ -251,12 +258,12 @@ class SPCPTS(object):
             # Check to see if we have a polygon, if so, our work is done!
             if segment[0,0] == segment[-1,0] and segment[0,1] == segment[-1,1]:
                 self.outlooks.append( SPCOutlook(category, threshold,
-                                                 Polygon( segment ) ) ) 
+                                                 Polygon( segment ), segment ) ) 
                 continue
+
             # Darn, we have some work to do
             line = LineString( segment )
-            # We need to find a point to the right of the line, easy huh?
-
+            # Union this line with the conus polygon
             geomc = mypoly.boundary.union( line )
             geom_array_type = c_void_p * 1
             geom_array = geom_array_type()
@@ -279,7 +286,8 @@ class SPCPTS(object):
         if hasmore:
             x,y = mypoly.exterior.xy
             ar = zip(x,y)
-            self.outlooks.append( SPCOutlook(category, threshold, Polygon( ar ) ) )
+            self.outlooks.append( SPCOutlook(category, threshold, 
+                                             Polygon( ar ), segment ) )
         del mypoly
         del geomc
         del polygons
