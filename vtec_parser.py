@@ -15,7 +15,7 @@
 # 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 """ VTEC product ingestor """
 
-__revision__ = '$Id$'
+__revision__ = ''
 
 from twisted.python import log
 from twisted.python import logfile
@@ -211,7 +211,8 @@ def segment_processor(text_product, i, skip_con):
             if (ugc2wfo.has_key(cnty)):
                 for c in ugc2wfo[cnty]:
                     affectedWFOS[ c ] = 1
-
+        if 'PSR' in affectedWFOS.keys():
+            affectedWFOS = {'PSR': 1}
         # Test for affectedWFOS
         if (len(affectedWFOS) == 0):
             affectedWFOS[ vtec.office ] = 1
