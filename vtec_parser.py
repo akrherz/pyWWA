@@ -212,7 +212,7 @@ def segment_processor(text_product, i, skip_con):
                 for c in ugc2wfo[cnty]:
                     affectedWFOS[ c ] = 1
         if 'PSR' in affectedWFOS.keys():
-            affectedWFOS = {'PSR': 1}
+            affectedWFOS = {vtec.office: 1}
         # Test for affectedWFOS
         if (len(affectedWFOS) == 0):
             affectedWFOS[ vtec.office ] = 1
