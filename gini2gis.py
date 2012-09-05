@@ -4,7 +4,6 @@ I convert raw GINI noaaport imagery into geo-referenced PNG files both in the
 function in life.
 
 Questions? daryl herzmann akrherz@iastate.edu
-$Id: $:
 """
 
 from support import gini
@@ -181,12 +180,14 @@ def workflow():
     tmpfn = tempfile.mktemp()
     # Write PNG
     write_gispng(sat, tmpfn)
-    # Write JSON metadata
-    write_metadata(sat, tmpfn)
-    # Write JSON metadata for 4326 file
-    write_metadata_epsg(sat, tmpfn, 4326)
-    # Warp the file into 4326
-    gdalwarp(sat, tmpfn, 4326)    
+    
+    if get_ldm_routes(sat) == 'ac':
+        # Write JSON metadata
+        write_metadata(sat, tmpfn)
+        # Write JSON metadata for 4326 file
+        write_metadata_epsg(sat, tmpfn, 4326)
+        # Warp the file into 4326
+        gdalwarp(sat, tmpfn, 4326)    
     # cleanup after ourself
     cleanup(tmpfn)
 
