@@ -8,23 +8,26 @@ from twisted.internet import reactor
 
 class LDMProductReceiver(basic.LineReceiver):
     delimiter = '\n'
-    productDelimiter = '\003'
+    product_start = '\001'
+    product_end = '\r\r\n\003'
+
 
     def __init__(self):
         self.productBuffer = ""
         self.setRawMode()
+        self.cbFunc = self.process_data
 
     def rawDataReceived(self, data):
-        tokens = re.split(self.productDelimiter, data)
-        if (len(tokens) == 1):
+        tokens = re.split(self.product_end, data)
+        if len(tokens) == 1:
             self.productBuffer += data
         else:
-            reactor.callLater(0,self.process_data,self.productBuffer + tokens[0])
+            reactor.callLater(0, self.cbFunc, self.productBuffer + tokens[0])
             self.productBuffer = tokens[-1]
             for token in tokens[1:-1]:
-                reactor.callLater(0, self.process_data, token)
-        del tokens           
-
+                reactor.callLater(0, self.cbFunc, token)
+        del tokens
+   
     def connectionLost(self, reason):
         raise NotImplementedError
 
