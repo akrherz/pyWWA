@@ -11,12 +11,13 @@
 import sys
 import mx.DateTime
 import os
-#import time
-#time.sleep(600)
 import tempfile
 import subprocess
 
+
 os.putenv("GEMTBL", "/home/ldm/pyWWA/gempak/tables")
+os.putenv("GEMERR", "/home/ldm/pyWWA/gempak/error")
+os.putenv("GEMPDF", "/home/ldm/pyWWA/gempak/pdf")
 
 def write_data():
     """
@@ -45,9 +46,10 @@ def do_gempak(tmpfn):
  CLRBAR   =
  IMCBAR   =
  GAREA    = DSET
- MAP      = 1
+ MAP      = 1/1/2
  LATLON   =
  OUTPUT   = f/%s.out
+ list
  run
 
  exit
@@ -55,9 +57,13 @@ def do_gempak(tmpfn):
     p = subprocess.Popen("/home/ldm/bin/gpnids_vg",
                          stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                          stderr=subprocess.PIPE)
-    (se, so) = p.communicate(cmd)
-    #sys.stdout.write(se)
-    #sys.stdout.write(so)
+    (so, se) = p.communicate(cmd)
+    #p.stdin.write(cmd)
+    #se = p.stderr.read()
+    #so = p.stdout.read()
+    #time.sleep(3)
+    #l.write( se )
+    #l.write(so)
     for suffix in ['gif','ncr']:
         if os.path.isfile('%s.%s' % (tmpfn,suffix)):
             os.unlink("%s.%s" % (tmpfn,suffix))
@@ -69,11 +75,9 @@ def main(nexrad, ts):
     tmpfn = write_data()
     do_gempak(tmpfn)
     fn = "%s.out" % (tmpfn,)
-    if not os.path.isfile(fn):
-        return
-    sys.stdout.write( open(fn).read() )
-    os.unlink(fn)
-    #sys.stdout.write("%s %s %s" % (fn, nexrad, ts))
+    if os.path.isfile(fn):
+        sys.stdout.write( open(fn).read() )
+        os.unlink(fn)
     
 if __name__ == '__main__':
     nexrad = sys.argv[1]
