@@ -36,7 +36,7 @@ import common
 
 # Third Party Stuff
 from twisted.enterprise import adbapi
-from twisted.internet.defer import DeferredQueue
+from twisted.internet.defer import DeferredQueue, Deferred
 from twisted.internet.task import deferLater, cooperate
 from twisted.internet import reactor, protocol
 import mx.DateTime
@@ -97,6 +97,7 @@ class PROC(protocol.ProcessProtocol):
         """
         Fired when the program starts up and wants stdin
         """
+        #log.msg("Connection Made")
         self.transport.write( self.buf +"\r\r\n\003")
         self.transport.closeStdin()
 
@@ -113,16 +114,22 @@ class PROC(protocol.ProcessProtocol):
         """
         log.msg("errReceived! with %d bytes!" % len(data))
         log.msg( data )
+        self.deferred.errback(data)
+
 
 
     def outConnectionLost(self):
         """
         Once the program is done, we need to do something with the data
         """
+        #log.msg("Teardown")
         if self.res.find("NO STORMS DETECTED") > 0:
+            self.deferred.callback(self)
             return
         POSTGISDB.runInteraction(really_process, self.res, self.afos[3:], 
                                  self.ts)
+        #log.msg("done!")
+        self.deferred.callback(self)
         
 
 class MyProductIngestor(ldmbridge.LDMProductReceiver):
@@ -146,16 +153,24 @@ def async(buf):
     Async caller of reactor processes
     @param buf string of the raw NOAAPort Product
     """
+    defer = Deferred()
     proc = PROC(buf)
+    proc.deferred = defer
+    proc.deferred.addErrback( log.err )
+    #proc.deferred.addCallback(printer, proc.afos, proc.ts.strftime("%Y%m%d%H%M"))
+
     log.msg("PROCESS %s %s" % (proc.afos, proc.ts.strftime("%Y%m%d%H%M") ))
-    d = deferLater(reactor, 0, reactor.spawnProcess,  proc, "python", 
+    
+    p = reactor.spawnProcess(proc, "python", 
                    ["python", "ncr2postgis.py", proc.afos[3:],
                     proc.ts.strftime("%Y%m%d%H%M")], {})
-    d.addErrback( log.err )
-    return d
+    return proc.deferred
 
+def printer(res, a, b):
+    log.msg("ENDPROCESS %s %s" % (a,b))
 
 def worker(jobs):
+    log.msg("worker() ")
     while True:
         yield jobs.get().addCallback(async)
 
@@ -241,7 +256,7 @@ def job_size(jobs):
     """
     log.msg("deferredQueue waiting: %s pending: %s" % (len(jobs.waiting), 
                                                      len(jobs.pending) ))
-    if len(jobs.pending) > 100:
+    if len(jobs.pending) > 1000:
         log.msg("ABORT")
         reactor.callWhenRunning(reactor.stop)
     reactor.callLater(300, job_size, jobs)
