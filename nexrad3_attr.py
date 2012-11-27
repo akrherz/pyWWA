@@ -17,27 +17,27 @@
   Take the NCR NEXRAD Level III product and run it through gpnids to get the
   attribute table, which we then dump into the database 
 """
+# System Imports
+import os
+import math
 
 # Setup Standard Logging we use
 from twisted.python import log, logfile
 log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
-log.startLogging(logfile.DailyLogFile('nexrad3_attr.log', '/home/ldm/logs/'))
+log.startLogging(logfile.DailyLogFile('nexrad3_attr.log', 
+                                      os.path.abspath('logs/')))
 
-# System Imports
-import os
+# Need to do this in order to get the subsequent calls to work, TODO
 os.chdir("/home/ldm/pyWWA")
-import math
-
 
 # Stuff I wrote
-from support import ldmbridge, TextProduct, stationTable
+from support import ldmbridge, stationTable
 import secret
-import common
 
 # Third Party Stuff
 from twisted.enterprise import adbapi
 from twisted.internet.defer import DeferredQueue, Deferred
-from twisted.internet.task import deferLater, cooperate
+from twisted.internet.task import cooperate
 from twisted.internet import reactor, protocol
 import mx.DateTime
 
@@ -157,29 +157,36 @@ def async(buf):
     proc = PROC(buf)
     proc.deferred = defer
     proc.deferred.addErrback( log.err )
-    #proc.deferred.addCallback(printer, proc.afos, proc.ts.strftime("%Y%m%d%H%M"))
 
     log.msg("PROCESS %s %s" % (proc.afos, proc.ts.strftime("%Y%m%d%H%M") ))
     
-    p = reactor.spawnProcess(proc, "python", 
+    reactor.spawnProcess(proc, "python", 
                    ["python", "ncr2postgis.py", proc.afos[3:],
                     proc.ts.strftime("%Y%m%d%H%M")], {})
     return proc.deferred
 
-def printer(res, a, b):
-    log.msg("ENDPROCESS %s %s" % (a,b))
-
 def worker(jobs):
-    log.msg("worker() ")
+    """ I am a worker that processes jobs """
     while True:
         yield jobs.get().addCallback(async)
 
 def really_process(txn, res, nexrad, ts):
     """
     This processes the output we get from the GEMPAK!
+    
+      STM ID  AZ/RAN TVS  MDA  POSH/POH/MX SIZE VIL DBZM  HT  TOP  FCST MVMT 
+         F0  108/ 76 NONE NONE    0/ 20/<0.50    16  53  8.3  16.2    NEW    
+         G0  115/ 88 NONE NONE    0/  0/ 0.00     8  47 10.2  19.3    NEW    
+         H0  322/ 98 NONE NONE    0/  0/ 0.00     6  43 12.1  22.2    NEW
+         
+      STM ID  AZ/RAN TVS  MDA  POSH/POH/MX SIZE VIL DBZM  HT  TOP  FCST MVMT 
+         H1  143/ 90 NONE NONE    0/  0/ 0.00     4  43 11.3  14.9  208/ 27  
+         Q5  125/ 66 NONE NONE    0/  0/ 0.00     3  42  9.3   9.3    NEW    
+         I8  154/ 73 NONE NONE    0/  0/ 0.00     1  33 10.9  10.9    NEW    
+
+         U8  154/126 NONE NONE     UNKNOWN       11  47 18.8  23.1  271/ 70  
+    
     """
-    #log.msg("Processing with ||%s||" % (res,))
-    txn.execute("SET TIME ZONE 'GMT'")
     txn.execute("DELETE from nexrad_attributes WHERE nexrad = '%s'" % (nexrad) )
 
     cenlat = float(ST.sts[nexrad]['lat'])
@@ -195,9 +202,15 @@ def really_process(txn, res, nexrad, ts):
             continue
         if line[1] != " ":
             continue
-        line = line.replace(">", " ")
-        tokens = line.replace("/", " ").split()
-        if len(tokens) < 14 or tokens[0] == "STM":
+        tokens = line.replace(">", " ").replace("/", " ").split()
+        if len(tokens) < 1 or tokens[0] == "STM":
+            continue
+        if tokens[5] == 'UNKNOWN':
+            tokens.insert(5, 0)
+            tokens.insert(5, 0)
+            tokens.insert(5, 0)
+        if len(tokens) < 13:
+            log.msg("Incomplete Line ||%s||" % (line,))
             continue
         d = {}
         co += 1
@@ -215,10 +228,11 @@ def really_process(txn, res, nexrad, ts):
         d["max_dbz"] = tokens[9]
         d["max_dbz_height"] = tokens[10]
         d["top"] = tokens[11]
-        if (tokens[12] == "NEW"):
+        if tokens[12] == "NEW":
             d["drct"], d["sknt"] = 0,0
-        d["drct"] = tokens[12]
-        d["sknt"] = tokens[13]
+        else:
+            d["drct"] = tokens[12]
+            d["sknt"] = tokens[13]
         d["nexrad"] = nexrad
 
         cosaz = math.cos( d["azimuth"] * math.pi / 180.0 )
@@ -226,26 +240,19 @@ def really_process(txn, res, nexrad, ts):
         mylat = cenlat + (cosaz * (d["range"] * 1000.0) / latscale)
         mylon = cenlon + (sinaz * (d["range"] * 1000.0) / lonscale)
         d["geom"] = "SRID=4326;POINT(%s %s)" % (mylon, mylat)
-        d["valid"] = ts.strftime("%Y-%m-%d %H:%M")
+        d["valid"] = ts.strftime("%Y-%m-%d %H:%M+00")
 
-        d["table"] = "nexrad_attributes"
-        sql = """INSERT into %(table)s (nexrad, storm_id, geom, azimuth,
+        for table in ['nexrad_attributes', 'nexrad_attributes_log']:
+            sql = """INSERT into """+table+""" (nexrad, storm_id, geom, azimuth,
     range, tvs, meso, posh, poh, max_size, vil, max_dbz, max_dbz_height,
-    top, drct, sknt, valid) values ('%(nexrad)s', '%(storm_id)s', '%(geom)s',
-    %(azimuth)s, %(range)s, '%(tvs)s', '%(meso)s', %(posh)s,
+    top, drct, sknt, valid) values (%(nexrad)s, %(storm_id)s, %(geom)s,
+    %(azimuth)s, %(range)s, %(tvs)s, %(meso)s, %(posh)s,
     %(poh)s, %(max_size)s, %(vil)s, %(max_dbz)s,
-    %(max_dbz_height)s,%(top)s, %(drct)s, %(sknt)s, '%(valid)s')""" % d
-        txn.execute( sql )
+    %(max_dbz_height)s, %(top)s, %(drct)s, %(sknt)s, %(valid)s)"""
+            txn.execute( sql, d )
 
-        d["table"] = "nexrad_attributes_log"
-        sql = """INSERT into %(table)s (nexrad, storm_id, geom, azimuth,
-    range, tvs, meso, posh, poh, max_size, vil, max_dbz, max_dbz_height,
-    top, drct, sknt, valid) values ('%(nexrad)s', '%(storm_id)s', '%(geom)s',
-    %(azimuth)s, %(range)s, '%(tvs)s', '%(meso)s', %(posh)s,
-    %(poh)s, %(max_size)s, %(vil)s, %(max_dbz)s,
-    %(max_dbz_height)s,%(top)s, %(drct)s, %(sknt)s, '%(valid)s')""" % d
-        txn.execute( sql )
-    
+    if co == 0:
+        log.msg("Got zero entries ||%s||" % (res,))
     log.msg("%s %s Processed %s entries" % (nexrad, ts, co))
 
     
