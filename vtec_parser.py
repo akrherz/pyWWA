@@ -15,36 +15,35 @@
 # 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 """ VTEC product ingestor """
 
-__revision__ = ''
-
 from twisted.python import log
 from twisted.python import logfile
 log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
 log.startLogging( logfile.DailyLogFile('vtec_parser.log','logs'))
-
 
 # Twisted Python imports
 from twisted.words.protocols.jabber import client, jid, xmlstream
 from twisted.internet import reactor
 from twisted.enterprise import adbapi
 
-
 # Standard Python modules
 import re
+import os
 
+import ConfigParser
+config = ConfigParser.ConfigParser()
+config.read(os.path.join(os.path.dirname(__file__), 'cfg.ini'))
 
 # Python 3rd Party Add-Ons
-import mx.DateTime, pg
+import mx.DateTime
 
 # pyWWA stuff
 from support import ldmbridge, TextProduct, reference
-import secret
 import common
 
-
-POSTGIS = pg.connect(secret.dbname, secret.dbhost, user=secret.dbuser, passwd=secret.dbpass)
-DBPOOL = adbapi.ConnectionPool("psycopg2", database=secret.dbname, host=secret.dbhost, 
-                               password=secret.dbpass, cp_reconnect=True)
+POSTGIS = adbapi.ConnectionPool("twistedpg", database="postgis", cp_reconnect=True,
+                                host=config.get('database','host'), 
+                                user=config.get('database','user'),
+                                password=config.get('database','password')) 
 TIMEFORMAT="%Y-%m-%d %H:%M+00"
 
 class NoVTECFoundError(Exception):
@@ -87,25 +86,16 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
 
             if skip_con:
                 wfo = text_product.get_iembot_source()
-                jabber_txt = "%s: %s has sent an updated FLS product (continued products were not reported here).  Consult this website for more details. %s?wfo=%s" % (wfo, wfo, secret.RIVER_APP, wfo)
-                jabber_html = "%s has sent an updated FLS product (continued products were not reported here).  Consult <a href=\"%s?wfo=%s\">this website</a> for more details." % (wfo, secret.RIVER_APP, wfo)
+                jabber_txt = "%s: %s has sent an updated FLS product (continued products were not reported here).  Consult this website for more details. %s?wfo=%s" % (wfo, wfo, 
+                                                                                                                                                                        config.get('urls', 'riverapp'), wfo)
+                jabber_html = "%s has sent an updated FLS product (continued products were not reported here).  Consult <a href=\"%s?wfo=%s\">this website</a> for more details." % (wfo, config.get('urls', 'riverapp'), wfo)
                 jabber.sendMessage(jabber_txt, jabber_html)
                 twt = "Updated Flood Statement"
-                uri = "%s?wfo=%s" % (secret.RIVER_APP, wfo)
+                uri = "%s?wfo=%s" % (config.get('urls', 'riverapp'), wfo)
                 common.tweet([wfo,], twt, uri)
 
         except Exception, myexp:
             common.email_error(myexp, buf)
-
-def alert_error(tp, errorText):
-    msg = "%s: iembot processing error:\nProduct: %s\nError:%s" % \
-            (tp.get_iembot_source(), \
-             tp.get_product_id(), errorText )
-
-    htmlmsg = "<span style='color: #FF0000; font-weight: bold;'>\
-iembot processing error:</span><br />Product: %s<br />Error: %s" % \
-            (tp.get_product_id(), errorText )
-    jabber.sendMessage(msg, htmlmsg)
 
 def ugc_to_text(ugclist):
     """
@@ -127,10 +117,10 @@ def ugc_to_text(ugclist):
     txt = []
     for st in states.keys():
         states[st].sort()
-        str = " %s [%s]" % (", ".join(states[st]), st)
-        if len(str) > 350:
-            str = " %s counties/zones in [%s]" % (len(states[st]), st)
-        txt.append(str)
+        s = " %s [%s]" % (", ".join(states[st]), st)
+        if len(s) > 350:
+            s = " %s counties/zones in [%s]" % (len(states[st]), st)
+        txt.append(s)
 
     return " and".join(txt)
 
@@ -158,8 +148,6 @@ def segment_processor(text_product, i, skip_con):
         if text_product.issueTime.year < 2005:
             text_product.generate_fake_vtec()
         else:
-            alert_error(text_product, 
-         "Missing or incomplete VTEC encoding in segment number %s" % (i+1,))
             raise NoVTECFoundError("No VTEC coding found for this segment")
 
     # New policy, we only insert the relevant stuff!
@@ -183,7 +171,8 @@ def segment_processor(text_product, i, skip_con):
              'svs_special': '',
              'year': text_product.issueTime.year, 'phenomena': vtec.phenomena,
              'eventid': vtec.ETN, 'significance': vtec.significance,
-             'url': "%s#%s" % (secret.VTEC_APP, vtec.url(text_product.issueTime.year)) }
+             'url': "%s#%s" % (config.get('urls', 'vtec'), 
+                               vtec.url(text_product.issueTime.year)) }
 
         if (vtec.beginTS != None and \
             vtec.beginTS > (gmtnow + mx.DateTime.RelativeDateTime(hours=+1))):
@@ -241,9 +230,10 @@ def segment_processor(text_product, i, skip_con):
                         stage_text = seg.bullets[qqq]
 
 
-                deffer = DBPOOL.runOperation("""INSERT into riverpro(nwsli, stage_text, 
+                deffer = POSTGIS.runOperation("""INSERT into riverpro(nwsli, stage_text, 
                   flood_text, forecast_text, severity) VALUES 
-                  (%s,%s,%s,%s,%s) """, (nwsli, stage_text, flood_text, forecast_text, hvtec[0].severity) )
+                  (%s,%s,%s,%s,%s) """, (nwsli, stage_text, flood_text, 
+                                         forecast_text, hvtec[0].severity) )
                 deffer.addErrback( common.email_error, 'RIVERPRO ERROR')
           
 
@@ -265,7 +255,7 @@ def segment_processor(text_product, i, skip_con):
             fcster = re.sub("'", " ", text_product.fcster)
         # Insert Polygon
             if (seg.giswkt != None):
-                deffer = DBPOOL.runOperation("""INSERT into """+ warning_table +""" (issue, expire, report, 
+                deffer = POSTGIS.runOperation("""INSERT into """+ warning_table +""" (issue, expire, report, 
                  significance, geom, phenomena, gtype, wfo, eventid, status, updated, 
                 fcster, hvtec_nwsli) VALUES (%s,%s,%s,%s,%s,%s,%s, 
                 %s,%s,%s,%s, %s, %s)""", (bts.strftime(TIMEFORMAT), vtec.endTS.strftime(TIMEFORMAT) , 
@@ -278,7 +268,7 @@ def segment_processor(text_product, i, skip_con):
             for k in range(len(ugc)):
                 cnty = ugc[k]
                 fcster = re.sub("'", " ", text_product.fcster)
-                deffer = DBPOOL.runOperation("""INSERT into """+ warning_table +""" 
+                deffer = POSTGIS.runOperation("""INSERT into """+ warning_table +""" 
                 (issue,expire,report, geom, phenomena, gtype, wfo, eventid, status,
                 updated, fcster, ugc, significance, hvtec_nwsli) VALUES(%s, %s, %s, 
                 (select geom from nws_ugc WHERE ugc = %s LIMIT 1), %s, 'C', %s,%s,%s,%s, 
@@ -307,7 +297,7 @@ till %(ets)s %(svs_special)s" % jmsg_dict
                 _expire = 'expire'
                 if vtec.endTS is None:
                     _expire = 'expire + \'10 days\'::interval'
-                deffer = DBPOOL.runOperation("""UPDATE """+ warning_table +""" SET status = %s, 
+                deffer = POSTGIS.runOperation("""UPDATE """+ warning_table +""" SET status = %s, 
                     updated = %s, expire = """+ _expire +""" WHERE ugc = %s and wfo = %s and eventid = %s and 
                     phenomena = %s and significance = %s""", ( vtec.action, 
                         text_product.issueTime.strftime(TIMEFORMAT), cnty, vtec.office, vtec.ETN,
@@ -315,7 +305,7 @@ till %(ets)s %(svs_special)s" % jmsg_dict
                 deffer.addErrback( common.email_error, "UPDATE")
 
             if (len(seg.vtec) == 1):
-                deffer = DBPOOL.runOperation("""UPDATE """+ warning_table +""" SET status = %s,  
+                deffer = POSTGIS.runOperation("""UPDATE """+ warning_table +""" SET status = %s,  
                      updated = %s WHERE gtype = 'P' and wfo = %s and eventid = %s and phenomena = %s 
                      and significance = %s""", (vtec.action, text_product.issueTime.strftime(TIMEFORMAT), 
                                                 vtec.office, vtec.ETN, vtec.phenomena, vtec.significance))
@@ -348,7 +338,7 @@ till %(ets)s %(svs_special)s" % jmsg_dict
                 issueSpecial = "'%s+00'" % (vtec.beginTS,)
         # Lets cancel county
             for cnty in ugc:
-                deffer = DBPOOL.runOperation("""UPDATE """+ warning_table +""" SET status = %s, 
+                deffer = POSTGIS.runOperation("""UPDATE """+ warning_table +""" SET status = %s, 
                 expire = %s, updated = %s, issue = """+ issueSpecial +""" WHERE ugc = %s and wfo = %s and 
                 eventid = %s and phenomena = %s and significance = %s""", (vtec.action, 
                         end_ts.strftime(TIMEFORMAT), text_product.issueTime.strftime(TIMEFORMAT), 
@@ -358,7 +348,7 @@ till %(ets)s %(svs_special)s" % jmsg_dict
             # If this is the only county, we can cancel the polygon too
             if (len(text_product.segments) == 1):
                 log.msg("Updating Polygon as well")
-                deffer = DBPOOL.runOperation("""UPDATE """+warning_table+""" SET status = %s, 
+                deffer = POSTGIS.runOperation("""UPDATE """+warning_table+""" SET status = %s, 
                 expire = %s, updated = %s WHERE gtype = 'P' and wfo = %s and eventid = %s 
                 and phenomena = %s and significance = %s""" , (vtec.action, end_ts.strftime(TIMEFORMAT), 
                         text_product.issueTime.strftime(TIMEFORMAT), vtec.office, vtec.ETN, 
@@ -395,7 +385,7 @@ till %(ets)s %(svs_special)s" % jmsg_dict
                 ugc_limiter += "'%s'," % (cnty,)
 
             log.msg("Updating SVS For:"+ ugc_limiter[:-1] )
-            deffer = DBPOOL.runOperation("""UPDATE """+ warning_table +""" SET svs = 
+            deffer = POSTGIS.runOperation("""UPDATE """+ warning_table +""" SET svs = 
                   (CASE WHEN (svs IS NULL) THEN '__' ELSE svs END) 
                    || %s || '__' WHERE eventid = %s and wfo = %s 
                    and phenomena = %s and significance = %s 
@@ -406,7 +396,7 @@ till %(ets)s %(svs_special)s" % jmsg_dict
     # Update polygon if necessary
     if (vtec.action != "NEW" and seg.giswkt is not None):
         log.msg("Updating SVS For Polygon")
-        deffer = DBPOOL.runOperation("""UPDATE """+ warning_table +""" SET svs = 
+        deffer = POSTGIS.runOperation("""UPDATE """+ warning_table +""" SET svs = 
               (CASE WHEN (svs IS NULL) THEN '__' ELSE svs END) 
                || %s || '__' WHERE eventid = %s and wfo = %s 
                and phenomena = %s and significance = %s 
@@ -421,7 +411,7 @@ till %(ets)s %(svs_special)s" % jmsg_dict
         # 1. Update the polygon_end to cancel time for the last polygon
         # 2. Update everybodies expiration time, product changed yo!
         if vtec.action in ["CAN", "UPG"] and len(text_product.segments) == 1:
-             deffer = DBPOOL.runOperation("""UPDATE sbw_"""+ str(text_product.issueTime.year) +""" SET 
+            deffer = POSTGIS.runOperation("""UPDATE sbw_"""+ str(text_product.issueTime.year) +""" SET 
                 polygon_end = (CASE WHEN polygon_end = expire
                                THEN %s ELSE polygon_end END), 
                 expire = %s WHERE 
@@ -429,12 +419,12 @@ till %(ets)s %(svs_special)s" % jmsg_dict
                 and phenomena = %s and significance = %s""", (
                 text_product.issueTime.strftime(TIMEFORMAT), text_product.issueTime.strftime(TIMEFORMAT), 
                 vtec.ETN, vtec.office, vtec.phenomena, vtec.significance) )
-             deffer.addErrback( common.email_error, "UPDATESBW")
+            deffer.addErrback( common.email_error, "UPDATESBW")
 
         # If we are VTEC CON, then we need to find the last polygon
         # and update its expiration time, since we have new info!
         if vtec.action == "CON":
-            deffer = DBPOOL.runOperation("""UPDATE sbw_"""+ str(text_product.issueTime.year) +""" SET 
+            deffer = POSTGIS.runOperation("""UPDATE sbw_"""+ str(text_product.issueTime.year) +""" SET 
                 polygon_end = %s WHERE polygon_end = expire and eventid = %s and wfo = %s 
                 and phenomena = %s and significance = %s""" , ( text_product.issueTime.strftime(TIMEFORMAT), 
                 vtec.ETN, vtec.office, vtec.phenomena, vtec.significance))
@@ -443,13 +433,13 @@ till %(ets)s %(svs_special)s" % jmsg_dict
 
         my_sts = "'%s+00'" % (vtec.beginTS,)
         if vtec.beginTS is None:
-             my_sts = "(SELECT issue from sbw_%s WHERE eventid = %s \
+            my_sts = "(SELECT issue from sbw_%s WHERE eventid = %s \
               and wfo = '%s' and phenomena = '%s' and significance = '%s' \
               LIMIT 1)" % (text_product.issueTime.year, vtec.ETN, vtec.office, \
               vtec.phenomena, vtec.significance)
         my_ets = "'%s+00'" % (vtec.endTS,)
         if vtec.endTS is None:
-             my_ets = "(SELECT expire from sbw_%s WHERE eventid = %s \
+            my_ets = "(SELECT expire from sbw_%s WHERE eventid = %s \
               and wfo = '%s' and phenomena = '%s' and significance = '%s' \
               LIMIT 1)" % (text_product.issueTime.year, vtec.ETN, vtec.office, \
               vtec.phenomena, vtec.significance)
@@ -511,32 +501,39 @@ till %(ets)s %(svs_special)s" % jmsg_dict
                  _expire.strftime(TIMEFORMAT), seg.giswkt, vtec.action, product_text,
                  seg.windtag, seg.hailtag, seg.tornadotag, seg.tornadodamagetag,
                  tml_valid, seg.tml_dir, seg.tml_sknt, seg.tml_giswkt)
-        deffer = DBPOOL.runOperation(sql, myargs)
+        deffer = POSTGIS.runOperation(sql, myargs)
         deffer.addErrback( common.email_error, "LASTONE")
 
 
 """ Load me up with NWS dictionaries! """
 ugc_dict = {}
 ugc2wfo = {}
-sql = "SELECT name, ugc, wfo from nws_ugc WHERE name IS NOT Null"
-rs = POSTGIS.query(sql).dictresult()
-for i in range(len(rs)):
-    ugc_dict[ rs[i]['ugc'] ] = (rs[i]["name"]).replace("\x92"," ").replace("\xc2"," ")
-    ugc2wfo[ rs[i]['ugc'] ] = re.findall(r'([A-Z][A-Z][A-Z])',rs[i]['wfo'])
+def load_ugc(txn):
+    """ load ugc"""
+    sql = "SELECT name, ugc, wfo from nws_ugc WHERE name IS NOT Null"
+    txn.execute(sql)
+    for row in txn:
+        ugc_dict[ row['ugc'] ] = (row["name"]).replace("\x92"," ").replace("\xc2"," ")
+        ugc2wfo[ row['ugc'] ] = re.findall(r'([A-Z][A-Z][A-Z])',row['wfo'])
 
 """ Load up H-VTEC NWSLI reference """
 nwsli_dict = {}
-sql = "SELECT nwsli, \
- river_name || ' ' || proximity || ' ' || name || ' ['||state||']' as rname \
- from hvtec_nwsli"
-rs = POSTGIS.query(sql).dictresult()
-for i in range(len(rs)):
-    nwsli_dict[ rs[i]['nwsli'] ] = (rs[i]['rname']).replace("&"," and ")
+def load_nwsli(txn):
+    """ load_nwsli"""
+    sql = """SELECT nwsli, 
+     river_name || ' ' || proximity || ' ' || name || ' ['||state||']' as rname 
+     from hvtec_nwsli"""
+    txn.execute( sql )
+    for row in txn:
+        nwsli_dict[ row['nwsli'] ] = (row['rname']).replace("&"," and ")
 
-myJid = jid.JID('%s@%s/vtecparser_%s' % \
-      (secret.iembot_ingest_user, secret.chatserver, \
+POSTGIS.runInteraction(load_ugc)
+POSTGIS.runInteraction(load_nwsli)
+
+myJid = jid.JID('%s@%s/vtecparser_%s' % (config.get('xmpp','username'), 
+                                    config.get('xmpp','domain'), 
        mx.DateTime.gmt().strftime("%Y%m%d%H%M%S") ) )
-factory = client.basicClientFactory(myJid, secret.iembot_ingest_password)
+factory = client.basicClientFactory(myJid, config.get('xmpp', 'password'))
 
 jabber = common.JabberClient(myJid)
 
@@ -546,7 +543,7 @@ factory.addBootstrap("//event/client/basicauth/authfailed", jabber.debug)
 factory.addBootstrap("//event/stream/error", jabber.debug)
 factory.addBootstrap(xmlstream.STREAM_END_EVENT, jabber._disconnect )
 
-reactor.connectTCP(secret.connect_chatserver, 5222, factory)
+reactor.connectTCP(config.get('xmpp', 'connecthost'), 5222, factory)
 
 ldm = ldmbridge.LDMProductFactory( MyProductIngestor() )
 reactor.run()

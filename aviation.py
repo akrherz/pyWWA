@@ -15,14 +15,11 @@
 # 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 """ Aviation Product Parser! """
 
-__revision__ = '$Id: $:'
-
 # Twisted Python imports
 from twisted.words.protocols.jabber import client, jid, xmlstream
 from twisted.internet import reactor
 from twisted.python import log, logfile
 from twisted.enterprise import adbapi
-from twisted.mail import smtp
 
 # Standard Python modules
 import re, os, math
@@ -32,16 +29,19 @@ import mx.DateTime, pg
 
 # pyWWA stuff
 from support import ldmbridge, TextProduct, utils
-import secret
 import common
 
+import ConfigParser
+config = ConfigParser.ConfigParser()
+config.read(os.path.join(os.path.dirname(__file__), 'cfg.ini'))
 
 log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
 log.startLogging(logfile.DailyLogFile('aviation.log','logs'))
 
-DBPOOL = adbapi.ConnectionPool("psycopg2", database=secret.dbname, 
-                               host=secret.dbhost, password=secret.dbpass, 
-                               cp_reconnect=True)
+DBPOOL = adbapi.ConnectionPool("twistedpg", database="postgis", cp_reconnect=True,
+                                host=config.get('database','host'), 
+                                user=config.get('database','user'),
+                                password=config.get('database','password') )
 
 # 
 CS_RE = re.compile(r"""CONVECTIVE\sSIGMET\s(?P<label>[0-9A-Z]+)\s
@@ -66,7 +66,7 @@ AREA\s(?P<areanum>[0-9]+)\.\.\.FROM\s(?P<locs>[0-9A-Z \-]+)\n
 
 # Load LOCS table
 LOCS = {}
-mesosite = pg.connect('mesosite', secret.dbhost, passwd=secret.dbpass)
+mesosite = pg.connect('mesosite', config.get('database','host'), passwd=config.get('database','password'))
 rs = mesosite.query("""SELECT id, name, x(geom) as lon, y(geom) as lat from stations 
            WHERE network ~* 'ASOS' or network ~* 'AWOS'""").dictresult()
 for i in range(len(rs)):
@@ -76,18 +76,18 @@ mesosite.close()
 for line in open('/home/ldm/pyWWA/tables/vors.tbl'):
     if len(line) < 70 or line[0] == '!':
         continue
-    id = line[:3]
+    sid = line[:3]
     lat = float(line[56:60]) / 100.0
     lon = float(line[61:67]) / 100.0
     name = line[16:47].strip()
-    LOCS[id] = {'lat': lat, 'lon': lon, 'name': name}
+    LOCS[sid] = {'lat': lat, 'lon': lon, 'name': name}
 
 # Finally, GEMPAK!
 for line in open('/home/ldm/pyWWA/tables/pirep_navaids.tbl'):
-    id = line[:3]
+    sid = line[:3]
     lat = float(line[56:60]) / 100.0
     lon = float(line[61:67]) / 100.0
-    LOCS[id] = {'lat': lat, 'lon': lon}
+    LOCS[sid] = {'lat': lat, 'lon': lon}
 
 
 # LDM Ingestor
@@ -185,7 +185,7 @@ def locs2lonslats(locstr, geotype, widthstr, diameterstr):
                 (lon1, lat1) = utils.go2lonlat(LOCS[d['loc']]['lon'], LOCS[d['loc']]['lat'], 
                                                    d['drct'], float(d['offset']) )
             else:
-                  (lon1, lat1) = (LOCS[d['loc']]['lon'], LOCS[d['loc']]['lat'])
+                (lon1, lat1) = (LOCS[d['loc']]['lon'], LOCS[d['loc']]['lat'])
             lats.append( lat1 )
             lons.append( lon1 )
     if geotype == 'ISOL' or diameterstr is not None:
@@ -301,9 +301,10 @@ def process_SIGC(txn, prod):
             wkt += "%s %s" % (lons[0], lats[0])
         """
 
-myJid = jid.JID('%s@%s/aviation_%s' % (secret.iembot_ingest_user, 
-            secret.chatserver, mx.DateTime.gmt().strftime("%Y%m%d%H%M%S") ) )
-factory = client.basicClientFactory(myJid, secret.iembot_ingest_password)
+myJid = jid.JID('%s@%s/aviation_%s' % (config.get('xmpp','username'), 
+                                    config.get('xmpp','domain'), 
+       mx.DateTime.gmt().strftime("%Y%m%d%H%M%S") ) )
+factory = client.basicClientFactory(myJid, config.get('xmpp', 'password'))
 
 jabber = common.JabberClient(myJid)
 
@@ -313,6 +314,6 @@ factory.addBootstrap("//event/client/basicauth/authfailed", jabber.debug)
 factory.addBootstrap("//event/stream/error", jabber.debug)
 factory.addBootstrap(xmlstream.STREAM_END_EVENT, jabber._disconnect )
 
-reactor.connectTCP(secret.connect_chatserver, 5222, factory)
+reactor.connectTCP(config.get('xmpp', 'connecthost'), 5222, factory)
 ldm = ldmbridge.LDMProductFactory( MyProductIngestor() )
 reactor.run()

@@ -14,7 +14,6 @@
 # this program; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 """ SPS product ingestor 
-$Id: $:
 """
 
 from twisted.python import log
@@ -24,34 +23,39 @@ log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
 log.startLogging( logfile.DailyLogFile('sps_parser.log','logs/'))
 
 
-import StringIO, traceback, mx.DateTime
-from email.MIMEText import MIMEText
-
-import secret
-import common, pg
+import StringIO, mx.DateTime
+import common
 from support import TextProduct, ldmbridge, reference
 
 from twisted.words.protocols.jabber import client, jid, xmlstream
 from twisted.internet import reactor
-from twisted.mail import smtp
 from twisted.enterprise import adbapi
 
-POSTGIS = pg.connect(secret.dbname, secret.dbhost, user=secret.dbuser, passwd=secret.dbpass)
-DBPOOL = adbapi.ConnectionPool("psycopg2", database=secret.dbname, 
-                               host=secret.dbhost, password=secret.dbpass,
-                               cp_reconnect=True)
+import ConfigParser
+config = ConfigParser.ConfigParser()
+config.read(os.path.join(os.path.dirname(__file__), 'cfg.ini'))
+
+POSTGIS = adbapi.ConnectionPool("twistedpg", database="postgis", cp_reconnect=True,
+                                host=config.get('database','host'), 
+                                user=config.get('database','user'),
+                                password=config.get('database','password') )
 
 
 errors = StringIO.StringIO()
 EMAILS = 10
 
 ugc_dict = {}
-sql = "SELECT name, ugc from nws_ugc WHERE name IS NOT Null"
-rs = POSTGIS.query(sql).dictresult()
-for i in range(len(rs)):
-    name = (rs[i]["name"]).replace("\x92"," ")
-    ugc_dict[ rs[i]['ugc'] ] = name
-POSTGIS.close()
+def load_ugc(txn):
+    """ load ugc dict """
+    sql = "SELECT name, ugc from nws_ugc WHERE name IS NOT Null"
+    txn.execute( sql )
+    for row in txn:
+        name = (row["name"]).replace("\x92"," ")
+        ugc_dict[ row['ugc'] ] = name
+
+    log.msg("ugc_dict is loaded...")
+
+POSTGIS.runInteraction(load_ugc)
 
 def countyText(u):
     countyState = {}
@@ -117,7 +121,7 @@ iembot processing error:</span><br />Product: %s<br />Error: %s" % \
     else:
         sql = "INSERT into text_products(product, product_id) values (%s,%s)" 
         myargs = (sqlraw, product_id)
-    deffer = DBPOOL.runOperation(sql, myargs)
+    deffer = POSTGIS.runOperation(sql, myargs)
     deffer.addErrback( common.email_error, sqlraw )
     deffer.addErrback( log.err )
 
@@ -135,22 +139,24 @@ iembot processing error:</span><br />Product: %s<br />Error: %s" % \
             expire = "till "+ (seg.ugcExpire - mx.DateTime.RelativeDateTime(hours= reference.offsets[prod.z] )).strftime("%-I:%M %p ")+ prod.z
 
 
-        mess = "%s: %s issues %s for %s %s %s?pid=%s" % (prod.source[1:], \
-           prod.source[1:], headline, counties, expire, secret.PROD_URL, \
-           product_id)
-        htmlmess = "%s issues <a href='%s?pid=%s'>%s</a> for %s %s" % ( prod.source[1:], secret.PROD_URL, product_id, headline, counties, expire)
+        mess = "%s: %s issues %s for %s %s %s?pid=%s" % (prod.source[1:], 
+           prod.source[1:], headline, counties, expire, 
+           config.get('urls', 'product'), product_id)
+        htmlmess = "%s issues <a href='%s?pid=%s'>%s</a> for %s %s" % ( 
+                                prod.source[1:], config.get('urls', 'product'), 
+                                product_id, headline, counties, expire)
         log.msg(mess)
 
         jabber.sendMessage(mess, htmlmess)
 
         twt = "%s for %s %s" % (headline, counties, expire)
-        url = "%s?pid=%s" % (secret.PROD_URL, product_id)
+        url = "%s?pid=%s" % (config.get('urls', 'product'), product_id)
         common.tweet([prod.source[1:],], twt, url)
 
-myJid = jid.JID('%s@%s/sps2bot_%s' % (secret.iembot_ingest_user, 
-                                      secret.chatserver, 
+myJid = jid.JID('%s@%s/sps2bot_%s' % (config.get('xmpp','username'), 
+                                    config.get('xmpp','domain'), 
        mx.DateTime.gmt().strftime("%Y%m%d%H%M%S") ) )
-factory = client.basicClientFactory(myJid, secret.iembot_ingest_password)
+factory = client.basicClientFactory(myJid, config.get('xmpp', 'password'))
 
 jabber = common.JabberClient(myJid)
 
@@ -160,7 +166,7 @@ factory.addBootstrap("//event/client/basicauth/authfailed", jabber.debug)
 factory.addBootstrap("//event/stream/error", jabber.debug)
 factory.addBootstrap(xmlstream.STREAM_END_EVENT, jabber._disconnect )
 
-reactor.connectTCP(secret.connect_chatserver,5222,factory)
+reactor.connectTCP(config.get('xmpp', 'connecthost'),5222,factory)
 
 ldm = ldmbridge.LDMProductFactory( myProductIngestor() )
 reactor.run()

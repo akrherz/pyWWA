@@ -1,6 +1,5 @@
 """
 Split FWC data into bitesized chunks
-$Id: $:
 """
 import pg, sys, re, string
 mydb = pg.connect("afos", "iemdb")

@@ -16,14 +16,16 @@
 """ 
  SHEF product ingestor 
 """
+# System Imports
+import os
 
 # Setup Standard Logging we use
 from twisted.python import log, logfile
 log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
-log.startLogging(logfile.DailyLogFile('shef_parser.log', 'logs/'))
+log.startLogging(logfile.DailyLogFile('shef_parser.log', 
+                                      os.path.abspath('logs/')))
 
-# System Imports
-import os
+
 
 def write_pid():
     """ Create a PID file for when we are fired up! """
@@ -35,23 +37,28 @@ def write_pid():
 import mesonet
 import access
 from support import ldmbridge, TextProduct
-import secret
 import common
 
 # Third Party Stuff
 from twisted.enterprise import adbapi
-from twisted.internet.defer import DeferredQueue
-from twisted.internet.task import deferLater, cooperate
+from twisted.internet.defer import DeferredQueue, Deferred
+from twisted.internet.task import cooperate
 from twisted.internet import reactor, protocol
 import mx.DateTime
 
+import ConfigParser
+config = ConfigParser.ConfigParser()
+config.read(os.path.join(os.path.dirname(__file__), 'cfg.ini'))
+
 # Setup Database Links
-ACCESSDB = adbapi.ConnectionPool("twistedpg", database='iem', 
-                                 host=secret.dbhost,
-                                 password=secret.dbpass, cp_reconnect=True)
-HADSDB = adbapi.ConnectionPool("twistedpg", database='hads', 
-                               host=secret.dbhost,
-                               password=secret.dbpass, cp_reconnect=True)
+ACCESSDB = adbapi.ConnectionPool("twistedpg", database="iem", cp_reconnect=True,
+                                host=config.get('database','host'), 
+                                user=config.get('database','user'),
+                                password=config.get('database','password') )
+HADSDB = adbapi.ConnectionPool("twistedpg", database="hads", cp_reconnect=True,
+                                host=config.get('database','host'), 
+                                user=config.get('database','user'),
+                                password=config.get('database','password') )
 BASE_TS = mx.DateTime.gmt() - mx.DateTime.RelativeDateTime(months=2)
 
 # Necessary for the shefit program to run A-OK
@@ -176,6 +183,7 @@ class SHEFIT(protocol.ProcessProtocol):
         """
         log.msg("errReceived! with %d bytes!" % len(data))
         log.msg( data )
+        self.deferred.errback(data)
 
 #    def processEnded(self, status):
 #        print "debug: type(status): %s" % type(status.value)
@@ -192,6 +200,7 @@ class SHEFIT(protocol.ProcessProtocol):
         #    rejects.close()
         #    return
         reactor.callLater(0, really_process, self.tp, self.data)
+        self.deferred.callback(self)
         
 
 def clnstr(buf):
@@ -204,7 +213,7 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
     
     def connectionLost(self, reason):
         log.msg('connectionLost')
-        log.msg(reason)
+        log.err(reason)
         reactor.callLater(5, self.shutdown)
 
     def shutdown(self):
@@ -221,11 +230,15 @@ def async(buf):
     Async caller of reactor processes
     @param buf string of the raw NOAAPort Product
     """
-    d = deferLater(reactor, 0, reactor.spawnProcess, 
-                   SHEFIT( buf ), "shefit", 
+    defer = Deferred()
+    proc = SHEFIT(buf)
+    proc.deferred = defer
+    proc.deferred.addErrback( log.err )
+
+    reactor.spawnProcess(proc, "shefit", 
                    ["shefit"], {})
-    d.addErrback( log.err )
-    return d
+    return proc.deferred
+
 
 def worker(jobs):
     while True:

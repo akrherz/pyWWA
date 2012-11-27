@@ -10,23 +10,26 @@ from twisted.words.xish.xmlstream import STREAM_END_EVENT
 from twisted.internet.task import LoopingCall
 from twisted.enterprise import adbapi
 
-import secret
 from twittytwister import twitter
-import urllib
 import simplejson
 import traceback
 import sys
 import os
 import StringIO
 from email.MIMEText import MIMEText
-import base64
-import pg
 import socket
 from oauth import oauth
 
+import ConfigParser
+config = ConfigParser.ConfigParser()
+config.read(os.path.join(os.path.dirname(__file__), 'cfg.ini'))
+
+
 OAUTH_TOKENS = {}
-OAUTH_CONSUMER = oauth.OAuthConsumer(secret.consumer_key, secret.consumer_secret)
-BITLY = "http://api.bit.ly/shorten?version=2.0.1&longUrl=%s&login=iembot&apiKey="+ secret.bitly_key
+OAUTH_CONSUMER = oauth.OAuthConsumer(config.get('twitter','consumerkey'), 
+                                     config.get('twitter','consumersecret'))
+BITLY = "http://api.bit.ly/shorten?version=2.0.1&longUrl=%s&login=iembot&apiKey="+ config.get('bitly','apikey')
+
 
 def load_tokens(txn):
     txn.execute("SELECT * from oauth_tokens")
@@ -34,9 +37,10 @@ def load_tokens(txn):
         OAUTH_TOKENS[ row['username'] ] = oauth.OAuthToken(
                             row['token'], row['secret'])
 
-_dbpool = adbapi.ConnectionPool("twistedpg", database="mesosite", 
-                               host=secret.dbhost, user=secret.dbuser,
-                               password=secret.dbpass, cp_reconnect=True)
+_dbpool = adbapi.ConnectionPool("twistedpg", database="mesosite", cp_reconnect=True,
+                                host=config.get('database','host'), 
+                                user=config.get('database','user'),
+                                password=config.get('database','password') )
 defer = _dbpool.runInteraction(load_tokens)
 def stop_pool(res):
     _dbpool.close()
@@ -75,15 +79,16 @@ Message:
 %s
 """ % (os.environ["EMAILS"], socket.gethostname(), tbstr, exp, message))
     msg['subject'] = '%s Traceback' % (sys.argv[0],)
-    msg['From'] = secret.parser_user
-    msg['To'] = secret.error_email
+    msg['From'] = config.get('errors', 'emailfrom')
+    msg['To'] = config.get('errors', 'emailfrom')
     smtp.sendmail("localhost", msg["From"], msg["To"], msg)
 
 def tweet(channels, msg, url, extras={}):
     """
     Method to publish twitter messages
     """
-    if secret.DISARM:
+    # Simple hack to see if we are running in development TODO
+    if config.get('xmpp','domain') == 'laptop.local':
         channels = ['TEST',]
         #return
     
@@ -191,13 +196,13 @@ class JabberClient:
         log.msg("SETTING authenticated to false!")
         self.authenticated = False
 
-    def sendMessage(self, body, html, to_user=secret.iembot_user):
+    def sendMessage(self, body, html, to_user=config.get('xmpp', 'iembot')):
         if (not self.authenticated):
             log.msg("No Connection, Lets wait and try later...")
             reactor.callLater(3, self.sendMessage, body, html, to_user)
             return
         message = domish.Element(('jabber:client','message'))
-        message['to'] = '%s@%s' % (to_user, secret.chatserver)
+        message['to'] = '%s@%s' % (to_user, config.get('xmpp', 'domain'))
         message['type'] = 'chat'
 
         # message.addElement('subject',None,subject)

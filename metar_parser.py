@@ -19,21 +19,30 @@ from twisted.words.protocols.jabber import client, jid, xmlstream
 from twisted.internet import reactor
 from twisted.python import log, logfile
 log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
-log.startLogging(logfile.DailyLogFile('metarObFe.log', 'logs/'))
+log.startLogging(logfile.DailyLogFile('metar_parser.log', 'logs/'))
 
 
 import access
+import os
 import re, traceback, StringIO
 from pyIEM import mesonet, ldmbridge
 from twisted.enterprise import adbapi
 from metar import Metar
-import secret, mx.DateTime
+import mx.DateTime
 import common
 
-IEMDB = adbapi.ConnectionPool("twistedpg", database='iem', host=secret.dbhost, 
-                              password=secret.dbpass, cp_reconnect=True)
-ASOSDB = adbapi.ConnectionPool("twistedpg", database='asos', host=secret.dbhost, 
-                               password=secret.dbpass, cp_reconnect=True)
+import ConfigParser
+config = ConfigParser.ConfigParser()
+config.read(os.path.join(os.path.dirname(__file__), 'cfg.ini'))
+
+IEMDB = adbapi.ConnectionPool("twistedpg", database="iem", cp_reconnect=True,
+                                host=config.get('database','host'), 
+                                user=config.get('database','user'),
+                                password=config.get('database','password') )
+ASOSDB = adbapi.ConnectionPool("twistedpg", database="asos", cp_reconnect=True,
+                                host=config.get('database','host'), 
+                                user=config.get('database','user'),
+                                password=config.get('database','password') )
 
     
 LOC2NETWORK = {}
@@ -62,7 +71,8 @@ class myProductIngestor(ldmbridge.LDMProductReceiver):
     stations_loaded = False
 
     def connectionLost(self, reason):
-        print 'connectionLost', reason
+        log.msg('connectionLost')
+        log.err( reason )
         reactor.callLater(30, self.shutdown)
 
     def shutdown(self):
@@ -365,16 +375,17 @@ def sendWindAlert(txn, iemid, v, d, t, clean_metar):
      st, iemid, v, mesonet.drct2dirTxt(d), t.strftime("%H%MZ"))
     common.tweet([wfo], twt, url, {'lat': str(row['lat']), 'long': str(row['lon'])})
 
-myJid = jid.JID('%s@%s/metar_%s' % (secret.iembot_ingest_user, secret.chatserver, 
-       mx.DateTime.gmt().strftime("%Y%m%d%H%M%S") ) )
-factory = client.basicClientFactory(myJid, secret.iembot_ingest_password)
+myJid = jid.JID('%s@%s/metar_%s' % (config.get('xmpp','username'), 
+                                    config.get('xmpp','domain'), 
+                                    mx.DateTime.gmt().strftime("%Y%m%d%H%M%S") ) )
+factory = client.basicClientFactory(myJid, config.get('xmpp', 'password'))
 jabber = common.JabberClient(myJid)
 factory.addBootstrap('//event/stream/authd',jabber.authd)
 factory.addBootstrap("//event/client/basicauth/invaliduser", jabber.debug)
 factory.addBootstrap("//event/client/basicauth/authfailed", jabber.debug)
 factory.addBootstrap("//event/stream/error", jabber.debug)
 factory.addBootstrap(xmlstream.STREAM_END_EVENT, jabber._disconnect )
-reactor.connectTCP(secret.connect_chatserver, 5222, factory)
+reactor.connectTCP(config.get('xmpp', 'connecthost'), 5222, factory)
 
 ingest = myProductIngestor()
 fact = ldmbridge.LDMProductFactory( ingest )

@@ -14,7 +14,6 @@
 # this program; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 """ MCD product ingestor 
-$Id: $:
 """
 
 from twisted.python import log
@@ -23,21 +22,18 @@ log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
 log.startLogging(logfile.DailyLogFile('mcd_parser.log', 'logs'))
 
 import os
-import sys, re, pdb, mx.DateTime
-import traceback, StringIO
-import smtplib
-import secret
+import  re,  mx.DateTime
 from support import TextProduct, ldmbridge
 import common
 
 from twisted.words.protocols.jabber import client, jid
-from twisted.words.xish import domish, xmlstream
+from twisted.words.xish import  xmlstream
 from twisted.internet import reactor
 from twisted.enterprise import adbapi
 
 import ConfigParser
 config = ConfigParser.ConfigParser()
-config.read('/home/ldm/pyWWA/cfg.ini')
+config.read(os.path.join(os.path.dirname(__file__), 'cfg.ini'))
 
 DBPOOL = adbapi.ConnectionPool("twistedpg", database="postgis", 
                                host=config.get('database','host'), 
@@ -81,7 +77,8 @@ def real_process(raw):
     for wfo in tokens:
         body = "%s: Storm Prediction Center issues Mesoscale Discussion http://www.spc.noaa.gov/products/md/md%s.html" % \
          (wfo, num)
-        htmlbody = "Storm Prediction Center issues <a href='http://www.spc.noaa.gov/products/md/md%s.html'>Mesoscale Discussion #%s</a> (<a href='%s?pid=%s'>View text</a>)" %(num,num, secret.PROD_URL, product_id)
+        htmlbody = "Storm Prediction Center issues <a href='http://www.spc.noaa.gov/products/md/md%s.html'>Mesoscale Discussion #%s</a> (<a href='%s?pid=%s'>View text</a>)" %(
+                    num, num, config.get('urls', 'product'), product_id)
         jabber.sendMessage(body, htmlbody)
 
 
@@ -98,7 +95,8 @@ def real_process(raw):
     tokens.append("SPC")
     common.tweet(tokens, twt, url) 
 
-myJid = jid.JID('%s@%s/mcd_parser_%s' %  (config.get('xmpp', 'username'), config.get('xmpp', 'domain'), 
+myJid = jid.JID('%s@%s/mcd_parser_%s' %  (config.get('xmpp', 'username'), 
+                                          config.get('xmpp', 'domain'), 
        mx.DateTime.gmt().strftime("%Y%m%d%H%M%S") ) )
 factory = client.basicClientFactory(myJid, config.get('xmpp', 'password'))
 

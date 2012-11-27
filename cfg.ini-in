@@ -1,14 +1,30 @@
+# Defaults, rename this file to cfg.ini and adjust accordingly
 [xmpp]
 connecthost=localhost
 domain=localhost
 username=iembot_ingest
 password=secret
+iembot=iembot
+
+[errors]
+emailfrom=akrherz@localhost
+emailto=akrherz@localhost
 
 [database]
 host=localhost
 user=ldm
 password=secret
 
+[bitly]
+apikey=key
+
 [twitter]
 consumerkey=key
 consumersecret=secret
+
+[urls]
+product=http://iem.local/p.php
+lsr=http://iem.local/lsr/
+riverapp=http://iem.local/river/
+vtec=http://iem.local/vtec/
+watch=http://iem.local/GIS/apps/rview/watch.phtml

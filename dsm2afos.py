@@ -1,6 +1,5 @@
 """
 Move DSM messages into the text database with the proper PIL
-$Id: $:
 """
 import iemdb, sys, re
 from support import TextProduct
@@ -8,7 +7,7 @@ AFOS = iemdb.connect('afos')
 acursor = AFOS.cursor()
 
 raw = sys.stdin.read()
-data = raw.replace("\n", "z")
+data = raw.replace("\r\r\n", "z")
 tokens = re.findall("(K[A-Z0-9]{3} [DM]S.*?[=N]z)", data)
 
 nws = TextProduct.TextProduct( raw, bypass=True)

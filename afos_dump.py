@@ -23,14 +23,20 @@ log.startLogging(logfile.DailyLogFile('afos_dump.log','logs/'))
 from twisted.internet import reactor
 from twisted.enterprise import adbapi
 
+import os
+
+import ConfigParser
+config = ConfigParser.ConfigParser()
+config.read(os.path.join(os.path.dirname(__file__), 'cfg.ini'))
+
 # pyWWA stuff
 from support import ldmbridge, TextProduct
-import secret
 import common
 
-DBPOOL = adbapi.ConnectionPool("psycopg2", database="afos", 
-                               host=secret.dbhost, user=secret.dbuser,
-                               password=secret.dbpass, cp_reconnect=True)
+DBPOOL = adbapi.ConnectionPool("twistedpg", database="afos", cp_reconnect=True,
+                                host=config.get('database','host'), 
+                                user=config.get('database','user'),
+                                password=config.get('database','password') )
 
 # LDM Ingestor
 class MyProductIngestor(ldmbridge.LDMProductReceiver):

@@ -15,36 +15,34 @@
 # 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 """ generic product ingestor """
 
-__revision__ = '$Id: :$'
-
 # Twisted Python imports
 from twisted.words.protocols.jabber import client, jid, xmlstream
 from twisted.internet import reactor
 from twisted.python import log
 from twisted.python import logfile
 from twisted.enterprise import adbapi
-from twisted.mail import smtp
 
 # Standard Python modules
-import os, re, traceback, StringIO
-from email.MIMEText import MIMEText
+import os, re
 
 # Python 3rd Party Add-Ons
-import mx.DateTime, pg, psycopg2
-
+import mx.DateTime
 # pyWWA stuff
 from support import ldmbridge, TextProduct, reference
-import secret
 import common
+
+import ConfigParser
+config = ConfigParser.ConfigParser()
+config.read(os.path.join(os.path.dirname(__file__), 'cfg.ini'))
 
 log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
 log.startLogging( logfile.DailyLogFile('generic_product.log', 'logs/') )
 
-POSTGIS = pg.connect(secret.dbname, secret.dbhost, user=secret.dbuser, 
-                     passwd=secret.dbpass)
-DBPOOL = adbapi.ConnectionPool("psycopg2", database=secret.dbname, 
-                               host=secret.dbhost, password=secret.dbpass,
-                               cp_reconnect=True)
+POSTGIS = adbapi.ConnectionPool("twistedpg", database="postgis", cp_reconnect=True,
+                                host=config.get('database','host'), 
+                                user=config.get('database','user'),
+                                password=config.get('database','password') )
+
 
 # These are the offices which get all hurricane stuff
 gulfwfo = ['KEY', 'SJU', 'TBW', 'TAE', 'JAX', 'MOB', 'HGX', 'CRP', 'BMX',
@@ -66,8 +64,6 @@ SIMPLE_PRODUCTS = ["TCE", "DSA", "AQA", "DGT", "FWF", "RTP", "HPA", "CWF",
             "NOW", "PSH", "NOW", "PNS", "RER", "ADM", "TCU", "RVA", "EQR",
             "OEP", "SIG", "VAA", "RVF", "PWO", "TWO"]
 
-EMAILS = 10
-
 AHPS_TEMPLATE = {
   'CR': 'http://www.crh.noaa.gov/ahps2/hydrograph.php?wfo=%s&amp;gage=%s&amp;view=1,1,1,1,1,1,1,1',
   'SR': 'http://ahps.srh.noaa.gov/ahps2/hydrograph.php?wfo=%s&amp;gage=%s&amp;view=1,1,1,1,1,1,1,1',
@@ -75,8 +71,6 @@ AHPS_TEMPLATE = {
   'WR': 'http://ahps2.wrh.noaa.gov/ahps2/hydrograph.php?wfo=%s&amp;gage=%s&amp;view=1,1,1,1,1,1,1,1',
   'PR': 'http://aprfc.arh.noaa.gov/ahps2/hydrograph.php?wfo=%s&amp;gage=%s&amp;view=1,1,1,1,1,1,1,1',
 }
-
-
 
 class myProductIngestor(ldmbridge.LDMProductReceiver):
 
@@ -87,86 +81,27 @@ class myProductIngestor(ldmbridge.LDMProductReceiver):
             common.email_error(myexp, buf)
 
     def connectionLost(self, reason):
-        print 'connectionLost', reason
+        log.msg('connectionLost')
+        log.err( reason )
         reactor.callLater(5, self.shutdown)
 
     def shutdown(self):
         reactor.callWhenRunning(reactor.stop)
 
-
-prodDefinitions = {
-    'TWO': 'Tropical Weather Outlook (TWO)',
-    'PWO': 'Public Severe Weather Outlook (PWO)',
-    'TCM': 'Tropical Storm Forecast (TCM)',
-    'TCU': 'Tropical Cyclone Update (TCU)',
-    'HLS': 'Hurricane Local Statement (HLS)',
-    'NOW': 'Short-term Forecast (NOW)',
-    'HWO': 'Hazardous Weather Outlook (HWO)',
-    'AFD': 'Area Forecast Discussion (AFD)',
-    'AWU': 'Area Weather Update (AWU)',
-    'PNS': 'Public Information Statement (PNS)',
-    'FFW': 'Flash Flood Warning (FFW)',
-    'FLS': 'Flood Advisory (FLS)',
-    'FFS': 'Flash Flood Statement (FFS)',
-    'FLW': 'Flood Warning (FLW)',
-    'ESF': 'Hydrologic Outlook (ESF)',
-    'PSH': 'Post Tropical Event Report (PSH)',
-    'RER': 'Record Event Report (RER)',
-    'FTM': 'Free Text Message (FTM)',
-    'ADM': 'Administrative Message (ADM)',
-    'CAE': 'Child Abduction Emergency (CAE)',
-    'ADR': 'Administrative Message (ADR)',
-    'TOE': 'Telephone Outage Emergency (TOE)',
-    'LAE': 'Local Area Emergency (LAE)',
-    'AVA': 'Avalanche Watch (AVA)',
-    'AVW': 'Avalanche Warning (AVW)',
-    'CDW': 'Civil Danger Warning (CDW)',
-    'CEM': 'Civil Emergency Message (CEM)',
-    'EQW': 'Earthquake Warning (EQW)',
-    'EVI': 'Evacuation Immediate (EVI)',
-    'FRW': 'Fire Warning (FRW)',
-    'HMW': 'Hazardous Materials Warning (HMW)',
-    'LEW': 'Law Enforcement Warning (LEW)',
-    'NMN': 'Network Message Notification (NMN)',
-    'NUW': 'Nuclear Power Plant Warning (NUW)',
-    'RHW': 'Radiological Hazard Warning (RHW)',
-    'SPW': 'Shelter In Place Warning (SPW)',
-    'VOW': 'Volcano Warning (VOW)',
-    'ZFP': 'Zone Forecast Package (ZFP)',
-    'PFM': 'Point Forecast Matrices (PFM)',
-    'SFT': 'State Forecast Tabular Product (SFT)',
-    'SRF': 'Surf Zone Forecast (SRF)',
-    'CWF': 'Coastal Waters Forecast (CWF)',
-    'RVS': 'Hydrologic Statement (RVS)',
-    'HPA': 'High Pollution Advisory (HPA)',
-    'RTP': 'Regional Temperature and Precipitation (RTP)',
-    'FWF': 'Fire Weather Planning Forecast (FWF)',
-    'DGT': 'Drought Information (DGT)',
-    'MWS': 'Marine Weather Statement (MWS)',
-    'AQA': 'Air Quality Alert (AQA)',
-    'DSA': 'Tropical Disturbance Statement (DSA)',
-    'TCE': 'Tropical Cyclone Position Estimate (TCE)',
-    'RVF': 'River Forecast (RVF)',
-    'RVA': 'Hydrologic Summary (RVA)',
-    'EQR': 'Earthquake Report (EQR)',
-    'OEP': 'TAF Collaboration Product (OEP)',
-    'SIG': 'Convective Sigment (SIG)',
-    'VAA': 'Volcanic Ash Advisory (VAA)',
-}
-
 ugc_dict = {}
-sql = "SELECT name, ugc from nws_ugc WHERE name IS NOT Null"
-postgis_dsn = "dbname=%s host=%s password=%s" % (secret.dbname, secret.dbhost, secret.dbpass)
-conn = psycopg2.connect( postgis_dsn )
-curs = conn.cursor()
-curs.execute( sql )
 
-for row in curs.fetchall():
-    name = (row[0]).replace("\x92"," ")
-    ugc_dict[ row[1] ] = name
+def load_ugc(txn):
+    """ Load UGC Codes """
+    sql = "SELECT name, ugc from nws_ugc WHERE name IS NOT Null"
+    txn.execute( sql )
 
-conn.commit()
-del conn
+    for row in txn:
+        name = (row['name']).replace("\x92"," ")
+        ugc_dict[ row['ugc'] ] = name
+
+    log.msg("ugc_dict is loaded...")
+
+POSTGIS.runInteraction( load_ugc )
 
 def countyText(u):
     countyState = {}
@@ -200,8 +135,8 @@ def snowfall_pns(prod):
     """
     if prod.raw.find("LOCATION              SNOWFALL") == -1:
         return
-    DBPOOL.runOperation("DELETE from snowfall_pns where source = '%s'" % (
-                                                                prod.afos,))
+    POSTGIS.runOperation("DELETE from snowfall_pns where source = %s" , 
+                         (prod.afos,))
     for line in prod.raw.split("\n"):
         tokens = line.split()
         if len(tokens) < 6:
@@ -212,9 +147,10 @@ def snowfall_pns(prod):
         lon = 0 - float(tokens[-1].replace("W", ""))
         lat = float(tokens[-2].replace("N", ""))
         snowfall = tokens[-5]
-        DBPOOL.runOperation("""INSERT into snowfall_pns(valid, source, snow, geom)
+        defer = POSTGIS.runOperation("""INSERT into snowfall_pns(valid, source, snow, geom)
         VALUES (now(), '%s', %s, 'SRID=4326;POINT(%s %s)')""" % (prod.afos,
-                            snowfall, lon, lat)).addErrback(common.email_error)
+                            snowfall, lon, lat))
+        defer.addErrback(common.email_error)
         
 
 def real_process(raw):
@@ -234,8 +170,6 @@ def real_process(raw):
     #if (pil == "FTM"):
     #    sqlraw = re.sub("[^\n\ra-zA-Z0-9:\.,\s\$\*]", "", sqlraw)
 
-    # TODO: If there are no segments, send an alert to room and daryl!
-
     # Always insert the product into the text archive database
     product_id = prod.get_product_id()
     sql = """INSERT into text_products(product, product_id) values (%s,%s)"""
@@ -243,18 +177,17 @@ def real_process(raw):
     if (len(prod.segments) > 0 and prod.segments[0].giswkt):
         sql = """INSERT into text_products(product, product_id, geom) values (%s,%s,%s)""" 
         myargs = (sqlraw, product_id, prod.segments[0].giswkt)
-    deffer = DBPOOL.runOperation(sql, myargs)
+    deffer = POSTGIS.runOperation(sql, myargs)
     deffer.addErrback( common.email_error, sqlraw)
-    myurl = "%s?pid=%s" % (secret.PROD_URL, product_id)
+    myurl = "%s?pid=%s" % (config.get('urls', 'product'), product_id)
 
     # Just send with optional headline to rooms...
-    if ( SIMPLE_PRODUCTS.__contains__(pil) ):
+    if  SIMPLE_PRODUCTS.__contains__(pil):
         prodtxt = "(%s)" % (pil,)
-        if (prodDefinitions.has_key(pil)):
-            prodtxt = prodDefinitions[pil]
+        if reference.prodDefinitions.has_key(pil):
+            prodtxt = reference.prodDefinitions[pil]
 
-        mess = "%s: %s issues %s %s" % \
-          (wfo, wfo, prodtxt, myurl)
+        mess = "%s: %s issues %s %s" % (wfo, wfo, prodtxt, myurl)
         htmlmess = "%s issues <a href=\"%s\">%s</a> " % (centertext(wfo), myurl, prodtxt)
         if (not ["HWO","NOW","ZFP"].__contains__(pil) and 
          len(prod.segments) > 0 and 
@@ -291,7 +224,7 @@ def real_process(raw):
                 print 'Whoa, did not find NWSLI?', seg
                 return
             hsas = re.findall("HSA:([A-Z]{3}) ", seg.raw)
-            prodtxt = prodDefinitions[pil]
+            prodtxt = reference.prodDefinitions[pil]
             mess = "%s: %s issues %s" % \
               (wfo, wfo, prodtxt)
             htmlmess = "%s issues <a href=\"%s\">%s</a> for " \
@@ -331,8 +264,8 @@ def real_process(raw):
     if (pil == "TCM" or pil == "TCP" or pil == "TCD"):
         mess = "%s: %s issues %s %s" % (wfo, wfo, pil, myurl)
         prodtxt = "(%s)" % (pil,)
-        if (prodDefinitions.has_key(pil)):
-            prodtxt = prodDefinitions[pil]
+        if reference.prodDefinitions.has_key(pil):
+            prodtxt = reference.prodDefinitions[pil]
         htmlmess = "%s issues <a href=\"%s\">%s</a> " % (wfo, myurl, prodtxt)
         jabber.sendMessage(mess, htmlmess)
         
@@ -386,8 +319,8 @@ def real_process(raw):
             expire = "till "+ (seg.ugcExpire - mx.DateTime.RelativeDateTime(hours= reference.offsets[prod.z] )).strftime("%-I:%M %p ")+ prod.z
 
         prodtxt = "(%s)" % (pil,)
-        if (prodDefinitions.has_key(pil)):
-            prodtxt = prodDefinitions[pil]
+        if reference.prodDefinitions.has_key(pil):
+            prodtxt = reference.prodDefinitions[pil]
         mess = "%s: %s issues %s for %s %s %s" % \
           (wfo, wfo, prodtxt, counties, expire, myurl)
         htmlmess = "%s issues <a href=\"%s\">%s</a> for %s %s" % (wfo, myurl, prodtxt, counties, expire)
@@ -402,8 +335,8 @@ def real_process(raw):
     if (pil == "TCM" or pil == "TCP" or pil == "TCD"):
         mess = "%s: %s issues %s %s" % (wfo, wfo, pil, myurl)
         prodtxt = "(%s)" % (pil,)
-        if (prodDefinitions.has_key(pil)):
-            prodtxt = prodDefinitions[pil]
+        if reference.prodDefinitions.has_key(pil):
+            prodtxt = reference.prodDefinitions[pil]
         htmlmess = "%s issues <a href=\"%s\">%s</a> " % (wfo, myurl, prodtxt)
         jabber.sendMessage(mess, htmlmess)
         common.tweet([wfo,], prodtxt, myurl)
@@ -436,21 +369,26 @@ def real_process(raw):
 
 """ Load up H-VTEC NWSLI reference """
 nwsli_dict = {}
-sql = "SELECT nwsli, river_name as r, \
- proximity || ' ' || name || ' ['||state||']' as rname \
- from hvtec_nwsli"
-rs = POSTGIS.query(sql).dictresult()
-for i in range(len(rs)):
-    nwsli_dict[ rs[i]['nwsli'] ] = {
-      'rname': (rs[i]['rname']).replace("&"," and "), 
-      'river': (rs[i]['r']).replace("&"," and ") }
+def load_nwsli(txn):
+    """ Load up NWSLI Dict """
+    sql = """SELECT nwsli, river_name as r, 
+             proximity || ' ' || name || ' ['||state||']' as rname 
+             from hvtec_nwsli"""
+    txn.execute(sql)
+    for row in txn:
+        nwsli_dict[ row['nwsli'] ] = {
+                                'rname': (row['r']).replace("&"," and "), 
+                                'river': (row['rname']).replace("&"," and ") }
+
+    log.msg("nwsli_dict is loaded...")
+
+POSTGIS.runInteraction(load_nwsli)
 
 
-
-myJid = jid.JID('%s@%s/gp_%s' % \
-      (secret.iembot_ingest_user, secret.chatserver, \
+myJid = jid.JID('%s@%s/gp_%s' % (config.get('xmpp','username'), 
+                                    config.get('xmpp','domain'), 
        mx.DateTime.gmt().strftime("%Y%m%d%H%M%S") ) )
-factory = client.basicClientFactory(myJid, secret.iembot_ingest_password)
+factory = client.basicClientFactory(myJid, config.get('xmpp', 'password'))
 
 jabber = common.JabberClient(myJid)
 
@@ -460,7 +398,7 @@ factory.addBootstrap("//event/client/basicauth/authfailed", jabber.debug)
 factory.addBootstrap("//event/stream/error", jabber.debug)
 factory.addBootstrap(xmlstream.STREAM_END_EVENT, jabber._disconnect )
 
-reactor.connectTCP(secret.connect_chatserver,5222,factory)
+reactor.connectTCP(config.get('xmpp', 'connecthost'), 5222, factory)
 
 ldm = ldmbridge.LDMProductFactory( myProductIngestor() )
 reactor.run()

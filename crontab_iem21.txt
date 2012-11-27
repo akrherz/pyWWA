@@ -1,7 +1,11 @@
-# IEM21's LDM Crontab, only edit on subversion!
+# IEM21's LDM Crontab
 
-6 6 * * * ~/bin/ldmadmin scour
+###
+# Scour away old data we don't need to keep around
+6 6 * * * ~/bin/scour pyWWA/scour_iem21.conf
 
+###
+# archive Iowa level3 data into a web folder
 10 10 * * * sh pyWWA/save_iowa_level3.sh
 
 ###

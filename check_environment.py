@@ -1,6 +1,5 @@
 """
 Check the environment for python includes
-$Id: $:
 """
 
 from twisted.python import log, logfile
@@ -8,7 +7,6 @@ import os
 import mesonet
 import access
 from support import ldmbridge, TextProduct
-import secret
 import common
 import shapelib
 import shapely

@@ -21,21 +21,22 @@ log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
 log.startLogging( logfile.DailyLogFile('spe_parser.log', 'logs') )
 
 
-import sys, re, pdb, mx.DateTime
-import traceback, StringIO
-import smtplib
-import secret
+import sys, re, mx.DateTime
 import common
-from email.MIMEText import MIMEText
 
 from twisted.words.protocols.jabber import client, jid
-from twisted.words.xish import domish
 from twisted.internet import reactor
 from twisted.enterprise import adbapi
 
-from support import TextProduct
-DBPOOL = adbapi.ConnectionPool("psycopg2", database=secret.dbname, host=secret.dbhost, password=secret.dbpass)
+import ConfigParser
+config = ConfigParser.ConfigParser()
+config.read(os.path.join(os.path.dirname(__file__), 'cfg.ini'))
 
+from support import TextProduct
+POSTGIS = adbapi.ConnectionPool("twistedpg", database="postgis", cp_reconnect=True,
+                                host=config.get('database','host'), 
+                                user=config.get('database','user'),
+                                password=config.get('database','password') )
 raw = sys.stdin.read()
 
 def process(raw):
@@ -52,7 +53,7 @@ def real_process(raw):
     product_id = prod.get_product_id()
     sql = """INSERT into text_products(product, product_id) values (%s,%s)"""
     myargs = (sqlraw, product_id)
-    DBPOOL.runOperation(sql, myargs)
+    POSTGIS.runOperation(sql, myargs)
     
     tokens = re.findall("ATTN (WFOS|RFCS)(.*)", raw)
     channels = []
@@ -60,13 +61,14 @@ def real_process(raw):
         wfos = re.findall("([A-Z]+)\.\.\.", tpair[1])
         for wfo in wfos:
             channels.append( wfo )
-            body = "%s: NESDIS issues Satellite Precipitation Estimates %s?pid=%s" % \
-         (wfo, secret.PROD_URL, product_id)
-            htmlbody = "NESDIS issues <a href='%s?pid=%s'>Satellite Precipitation Estimates</a>" %(secret.PROD_URL, product_id,)
+            body = "%s: NESDIS issues Satellite Precipitation Estimates %s?pid=%s" % (
+                wfo, config.get('urls', 'product'), product_id)
+            htmlbody = "NESDIS issues <a href='%s?pid=%s'>Satellite Precipitation Estimates</a>" %(
+                config.get('urls', 'product'), product_id)
             jabber.sendMessage(body, htmlbody)
 
             twt = "#%s NESDIS issues Satellite Precipitation Estimates" % (wfo,)
-            url = "%s?pid=%s" % (secret.PROD_URL, product_id)
+            url = "%s?pid=%s" % (config.get('urls', 'product'), product_id)
             common.tweet(wfo, twt, url)
 
 
@@ -74,10 +76,10 @@ def real_process(raw):
 def killer():
     reactor.stop()
 
-myJid = jid.JID('%s@%s/spe_%s' % \
-      (secret.iembot_ingest_user, secret.chatserver, \
+myJid = jid.JID('%s@%s/spe_%s' % (config.get('xmpp','username'), 
+                                    config.get('xmpp','domain'),
        mx.DateTime.gmt().strftime("%Y%m%d%H%M%S") ) )
-factory = client.basicClientFactory(myJid, secret.iembot_ingest_password)
+factory = client.basicClientFactory(myJid, config.get('xmpp', 'password'))
 
 jabber = common.JabberClient(myJid)
 
@@ -86,7 +88,7 @@ factory.addBootstrap("//event/client/basicauth/invaliduser", jabber.debug)
 factory.addBootstrap("//event/client/basicauth/authfailed", jabber.debug)
 factory.addBootstrap("//event/stream/error", jabber.debug)
 
-reactor.connectTCP(secret.connect_chatserver,5222,factory)
+reactor.connectTCP(config.get('xmpp', 'connecthost'),5222,factory)
 reactor.callLater(0, process, raw)
 reactor.callLater(30, killer)
 reactor.run()

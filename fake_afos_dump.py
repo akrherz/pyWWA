@@ -1,7 +1,5 @@
 """
 Dump some stuff without AFOS PILs
-
-$Id: $:
 """
 
 import iemdb, sys

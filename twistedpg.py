@@ -1,5 +1,7 @@
-#module twistedpg.py
-#Author: Federico Di Gregorio
+"""
+module twistedpg.py
+Author: Federico Di Gregorio
+"""
 
 from psycopg2 import *
 from psycopg2 import _psycopg as _2psycopg

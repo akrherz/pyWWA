@@ -30,9 +30,10 @@ import mx.DateTime
 
 # pyWWA stuff
 from support import ldmbridge, TextProduct, spcpts
+import os
 import ConfigParser
 config = ConfigParser.ConfigParser()
-config.read('/home/ldm/pyWWA/cfg.ini')
+config.read(os.path.join(os.path.dirname(__file__), 'cfg.ini'))
 import common
 
 def exception_hook(kwargs):

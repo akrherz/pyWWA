@@ -32,7 +32,6 @@ os.chdir("/home/ldm/pyWWA")
 
 # Stuff I wrote
 from support import ldmbridge, stationTable
-import secret
 
 # Third Party Stuff
 from twisted.enterprise import adbapi
@@ -41,10 +40,15 @@ from twisted.internet.task import cooperate
 from twisted.internet import reactor, protocol
 import mx.DateTime
 
+import ConfigParser
+config = ConfigParser.ConfigParser()
+config.read(os.path.join(os.path.dirname(__file__), 'cfg.ini'))
+
 # Setup Database Links
-POSTGISDB = adbapi.ConnectionPool("twistedpg", database='postgis', 
-                               host=secret.dbhost,
-                               password=secret.dbpass, cp_reconnect=True)
+POSTGISDB = adbapi.ConnectionPool("twistedpg", database="postgis", cp_reconnect=True,
+                                host=config.get('database','host'), 
+                                user=config.get('database','user'),
+                                password=config.get('database','password') )
 
 ST = stationTable.stationTable('/home/ldm/pyWWA/tables/nexrad.stns')
 

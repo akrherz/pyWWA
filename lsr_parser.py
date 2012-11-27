@@ -19,26 +19,30 @@
 from twisted.python import log
 from twisted.python import logfile
 log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
-log.startLogging(logfile.DailyLogFile('lsrParse.log', 'logs'))
+log.startLogging(logfile.DailyLogFile('lsr_parser.log', 'logs'))
 
 # Standard python imports
 import re, pickle
-from email.MIMEText import MIMEText
+import os
 
 # Third party python stuff
 import mx.DateTime
 from twisted.enterprise import adbapi
-from twisted.mail import smtp
 from twisted.words.protocols.jabber import client, jid
 from twisted.internet import reactor
 
 # IEM python Stuff
 import common
-import secret
 from support import TextProduct,  ldmbridge, reference
 
-DBPOOL = adbapi.ConnectionPool("twistedpg", database=secret.dbname, host=secret.dbhost, 
-                               password=secret.dbpass, cp_reconnect=True)
+import ConfigParser
+config = ConfigParser.ConfigParser()
+config.read(os.path.join(os.path.dirname(__file__), 'cfg.ini'))
+
+DBPOOL = adbapi.ConnectionPool("twistedpg", database="postgis", cp_reconnect=True,
+                                host=config.get('database','host'), 
+                                user=config.get('database','user'),
+                                password=config.get('database','password') )
 
 class ProcessingException(Exception):
     """ Generic Exception for processing errors I can handle"""
@@ -86,8 +90,6 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
         try:
             nws = TextProduct.TextProduct(raw)
             real_processor(nws)
-        except ProcessingException, msg:
-            send_iemchat_error(nws, msg)
         except Exception,myexp:
             common.email_error(myexp, buf)
 
@@ -97,20 +99,6 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
 
     def shutdown(self):
         reactor.callWhenRunning(reactor.stop)
-
-
-
-def send_iemchat_error(nws, msgtxt):
-    """ Send an error message to the chatroom and to daryl """
-
-    msg = "%s: iembot processing error\nProduct: %s\nError: %s" % \
-            (nws.get_iembot_source(), \
-             nws.get_product_id(), msgtxt )
-
-    htmlmsg = """<span style='color: #FF0000; font-weight: bold;'>
-iembot processing error</span><br/>Product: %s<br/>Error: %s""" % \
-            (nws.get_product_id(), msgtxt )
-    jabber.sendMessage(msg, htmlmsg)
 
 class LSR:
     """ Object to hold a LSR and be more 00 with things """
@@ -192,11 +180,7 @@ class LSR:
 
     def url_builder(self, wfo):
         """ URL builder """
-        #uri = secret.MAP_LSR
-        #uri += "?lat0=%s&amp;lon0=-%s&amp;ts=%s&amp;wfo=%s" % \
-        #       (self.lat,self.lon,self.gts.strftime("%Y-%m-%d%%20%H:%M"),\
-        #        wfo)
-        uri =  "%s#%s/%s/%s" % (secret.MAP_LSR, wfo, 
+        uri =  "%s#%s/%s/%s" % (config.get('urls', 'lsr'), wfo, 
                 self.gts.strftime("%Y%m%d%H%M"),
                 self.gts.strftime("%Y%m%d%H%M") )
         return uri
@@ -307,11 +291,7 @@ def real_processor(nws):
             extra_text = ", %s out of %s reports were previously \
 sent and not repeated here." % (duplicates, duplicates + new_reports)
 
-        #uri = secret.MAP_LSR
-        #uri += "?lat0=%s&amp;lon0=-%s&amp;ts=%s&amp;ts2=%s&amp;wfo=%s" % \
-        #     (lsr.lat,lsr.lon,min_time.strftime("%Y-%m-%d%%20%H:%M"),\
-        #      max_time.strftime("%Y-%m-%d%%20%H:%M"), wfo )
-        uri =  "%s#%s/%s/%s" % (secret.MAP_LSR, wfo, 
+        uri =  "%s#%s/%s/%s" % (config.get('urls', 'lsr'), wfo, 
                min_time.strftime("%Y%m%d%H%M"),
                max_time.strftime("%Y%m%d%H%M") )
         jabber_text = "%s: %s issues Summary Local Storm Report %s %s" % \
@@ -322,9 +302,10 @@ sent and not repeated here." % (duplicates, duplicates + new_reports)
         twt = "Summary Local Storm Report"
         common.tweet([wfo,], twt, uri)
 
-myJid = jid.JID('%s@%s/lsr_parse_%s' % (secret.iembot_ingest_user, secret.chatserver, 
+myJid = jid.JID('%s@%s/lsr_parse_%s' % (config.get('xmpp','username'), 
+                                    config.get('xmpp','domain'),
        mx.DateTime.gmt().strftime("%Y%m%d%H%M%S") ) )
-factory = client.basicClientFactory(myJid, secret.iembot_ingest_password)
+factory = client.basicClientFactory(myJid, config.get('xmpp', 'password'))
 
 jabber = common.JabberClient(myJid)
 
@@ -333,7 +314,7 @@ factory.addBootstrap("//event/client/basicauth/invaliduser", jabber.debug)
 factory.addBootstrap("//event/client/basicauth/authfailed", jabber.debug)
 factory.addBootstrap("//event/stream/error", jabber.debug)
 
-reactor.connectTCP(secret.connect_chatserver, 5222, factory)
+reactor.connectTCP(config.get('xmpp', 'connecthost'), 5222, factory)
 
 LDM = ldmbridge.LDMProductFactory( MyProductIngestor() )
 reactor.callLater( 20, cleandb)

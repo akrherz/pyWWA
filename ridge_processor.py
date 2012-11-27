@@ -1,18 +1,10 @@
 """
  I process activemq messages 10,000 at a time!
-$Id: $:
 """
 
-import Queue
-import urllib2
-import StringIO
-import traceback
-import urllib
-import urllib2
 import os
 import random
 import mx.DateTime
-import pyactivemq
 import simplejson
 import pika
 

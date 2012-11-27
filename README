@@ -3,7 +3,8 @@ These are hacky NWS data ingestors written by:
    akrherz@iastate.edu
    515-294-5978
 
-Feel free to do whatever you wish with these.
+Feel free to do whatever you wish with these, including throwing them in the
+trash.  Someday, I'll be a real programmer and write a libary that is usable.
 
 Notes on HVTEC:
   http://www.nws.noaa.gov/om/vtec/hydro_vtec.shtml

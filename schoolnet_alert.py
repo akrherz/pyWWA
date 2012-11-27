@@ -1,6 +1,5 @@
 """
 Called when there is a schoolnet alert
-$ID: $:
 """
 
 import re, sys, smtplib, mx.DateTime
@@ -92,7 +91,7 @@ Raw Report:%(bulletin)s
 mstring = mformat % form
 
 msg = MIMEText(mstring)
-msg['Subject'] = "[%s] %s Gust %s" % (network, sped, st.sts[sid]["name"])
+msg['Subject'] = "[%s] %s Gust %s" % (network, sped, nt.sts[sid]["name"])
 
 s = smtplib.SMTP()
 s.connect()

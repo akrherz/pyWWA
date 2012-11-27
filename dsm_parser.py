@@ -15,40 +15,41 @@
 # 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 """ ASOS Daily Summary Message Parser ingestor """
 
-
-__revision__ = '$Id: :$'
-
 # Twisted Python imports
 from twisted.internet import reactor
 from twisted.python import log
 from twisted.python import logfile
 from twisted.enterprise import adbapi
-from twisted.mail import smtp
 
 # Standard Python modules
-import os, re, traceback, StringIO, smtplib
-from email.MIMEText import MIMEText
+import re
+import os
 
 # Python 3rd Party Add-Ons
-import mx.DateTime, pg
+import mx.DateTime
 
 # pyWWA stuff
-from support import ldmbridge, TextProduct, reference
-import secret
+from support import ldmbridge
 import common
+import ConfigParser
+config = ConfigParser.ConfigParser()
+config.read(os.path.join(os.path.dirname(__file__), 'cfg.ini'))
 
 log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
 log.startLogging( logfile.DailyLogFile('dsm_parser.log','logs') )
 
 DBPOOL = adbapi.ConnectionPool("psycopg2", database="iem", cp_reconnect=True,
-                               host=secret.dbhost, password=secret.dbpass)
+                                host=config.get('database','host'), 
+                                user=config.get('database','user'),
+                                password=config.get('database','password') )
 
 # LDM Ingestor
 class MyProductIngestor(ldmbridge.LDMProductReceiver):
     """ I receive products from ldmbridge and process them 1 by 1 :) """
 
     def connectionLost(self, reason):
-        print 'connectionLost', reason
+        log.msg('connectionLost')
+        log.err( reason )
         reactor.callLater(5, self.shutdown)
 
     def shutdown(self):
@@ -60,7 +61,7 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
         try:
             real_parser(buf)
         except Exception, myexp:
-            email_error(myexp, buf)
+            common.email_error(myexp, buf)
 
 def real_parser(buf):
 # KAMW DS 19/07 761539/ 540532// 76/ 54//0062028/00/00/00/00/00/00/00/
@@ -105,35 +106,38 @@ PARSER_RE = re.compile("""^(?P<id>[A-Z][A-Z0-9]{3})\s+
 def process_dsm(data):
     m = PARSER_RE.match( data )
     if m is None:
-        print "FAIL!", data
+        log.msg("FAIL ||%s||" %( data,))
         common.email_error("DSM RE Match Failure", data)
         return
-    dict = m.groupdict()
-    if dict['id'][0] != "K":
+    d = m.groupdict()
+    # Only parse United States Sites
+    if d['id'][0] != "K":
         return
     # Figure out the timestamp
     now = mx.DateTime.now()
-    ts = now + mx.DateTime.RelativeDateTime(day=int(dict['day']),
-               month=int(dict['month']))
+    ts = now + mx.DateTime.RelativeDateTime(day=int(d['day']),
+               month=int(d['month']))
     if ts.month == 12 and now.month == 1:
         ts -= mx.DateTime.RelativeDateTime(years=1)
     updater = []
-    if dict['high'] is not None and dict['high'] != "M":
-        updater.append("max_tmpf = %s" % (dict['high'],))
-    if dict['low'] is not None and dict['low'] != "M":
-        updater.append("min_tmpf = %s" % (dict['low'],))
-    if dict['precip'] is not None and dict['precip'] not in ["M","T"]:
-        updater.append("pday = %s" % (float(dict['precip']) / 100.0,))
-    if dict['precip'] == "T":
+    if d['high'] is not None and d['high'] != "M":
+        updater.append("max_tmpf = %s" % (d['high'],))
+    if d['low'] is not None and d['low'] != "M":
+        updater.append("min_tmpf = %s" % (d['low'],))
+
+    if d['precip'] is not None and d['precip'] not in ["M","T"]:
+        updater.append("pday = %s" % (float(d['precip']) / 100.0,))
+    elif d['precip'] == "T":
         updater.append("pday = 0.0001")
 
     sql = """UPDATE summary_%s s SET %s FROM stations t WHERE t.iemid = s.iemid 
     and t.id = '%s' and day = '%s'""" % (
-         ts.year, " , ".join(updater), dict['id'][1:], ts.strftime("%Y-%m-%d"))
-    print "%s %s H:%s L:%s P:%s" % (dict['id'], ts.strftime("%Y-%m-%d"),
-          dict['high'], dict['low'], dict['precip'] )
+         ts.year, " , ".join(updater), d['id'][1:], ts.strftime("%Y-%m-%d"))
+    log.msg("%s %s H:%s L:%s P:%s" % (d['id'], ts.strftime("%Y-%m-%d"),
+          d['high'], d['low'], d['precip'] ))
     if len(updater) > 0:
-        DBPOOL.runOperation( sql ).addErrback( common.email_error, sql)
+        defer = DBPOOL.runOperation( sql )
+        defer.addErrback( common.email_error, sql)
 
 ldm = ldmbridge.LDMProductFactory( MyProductIngestor() )
 reactor.run()

@@ -1,6 +1,5 @@
 """
 Split the MAV product into bitesized chunks that the AFOS viewer can see
-$Id: $:
 """
 import pg, sys, re, string
 mydb = pg.connect("afos", "iemdb")

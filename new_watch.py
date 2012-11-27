@@ -15,15 +15,13 @@
 # 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 """ SPC Watch Ingestor """
 
-__revision__ = '$Id: $:'
-
-
 from twisted.python import log
 from twisted.python import logfile
 log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
 log.startLogging( logfile.DailyLogFile('new_watch.log', 'logs/'))
 
 import re
+import os
 import math
 import mx.DateTime
 import common
@@ -33,17 +31,22 @@ from pyIEM import stationTable, utils
 
 KM_SM = 1.609347
 
+import ConfigParser
+config = ConfigParser.ConfigParser()
+config.read(os.path.join(os.path.dirname(__file__), 'cfg.ini'))
+
 # Database Connections
-import secret
 from support import ldmbridge
 from twisted.enterprise import adbapi
-DBPOOL = adbapi.ConnectionPool("twistedpg", database=secret.dbname, host=secret.dbhost, 
-                               password=secret.dbpass, cp_reconnect=True)
+DBPOOL = adbapi.ConnectionPool("twistedpg", database="postgis", cp_reconnect=True,
+                                host=config.get('database','host'), 
+                                user=config.get('database','user'),
+                                password=config.get('database','password') )
 
 from twisted.words.protocols.jabber import client, jid
 from twisted.internet import reactor
 
-IEM_URL = secret.WATCH_URL
+IEM_URL = config.get('urls', 'watch')
 
 def cancel_watch(report, ww_num):
     """ Cancel a watch please """
@@ -67,7 +70,8 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
     """ I receive products from ldmbridge and process them 1 by 1 :) """
 
     def connectionLost(self, reason):
-        print 'connectionLost', reason
+        log.msg('connectionLost')
+        log.err( reason )
         reactor.callLater(7, self.shutdown)
 
     def shutdown(self):
@@ -233,7 +237,7 @@ def real_process(raw):
         txn.execute(sql, args)
 
     defer = DBPOOL.runInteraction(runner)
-    defer.addErrback(common.email_error, raw)
+    defer.addErrback(common.email_error, 'blah')
     # Figure out WFOs affected...
     jabberTxt = "SPC issues %s watch till %sZ" % \
                  (ww_type, eTS.strftime("%H:%M") )
@@ -247,35 +251,36 @@ def real_process(raw):
     jabberTxt += " http://www.spc.noaa.gov/products/watch/ww%04i.html" % (int(ww_num), )
     jabberTxtHTML += " (<a href=\"%s?year=%s&amp;num=%s\">Watch Quickview</a>) " % (IEM_URL, sTS.year, ww_num)
 
-    # Figure out who should get notification of the watch...
-    sql = """SELECT distinct wfo from nws_ugc WHERE 
-         contains('SRID=4326;MULTIPOLYGON(((%s)))', geom)""" % (wkt,)
+    def runner2(txn):
+        # Figure out who should get notification of the watch...
+        sql = """SELECT distinct wfo from nws_ugc WHERE 
+         ST_Contains('SRID=4326;MULTIPOLYGON(((%s)))', geom)""" % (wkt,)
     
-    pgconn = DBPOOL.connect()
-    txn = pgconn.cursor()
-    txn.execute(sql)
-    rs = txn.fetchall()
-    channels = ['SPC']
-    for i in range(len(rs)):
-        wfo = rs[i]['wfo']
-        channels.append( wfo )
-        mess = "%s: %s" % (wfo, jabberTxt)
-        jabber.sendMessage(mess, jabberTxtHTML)
+        txn.execute(sql)
+        rs = txn.fetchall()
+        channels = ['SPC']
+        for i in range(len(rs)):
+            wfo = rs[i]['wfo']
+            channels.append( wfo )
+            mess = "%s: %s" % (wfo, jabberTxt)
+            jabber.sendMessage(mess, jabberTxtHTML)
+
+        # Special message for SPC
+        lines = raw.split("\n")
+        twt = lines[5].replace("\r\r", "")
+        url = "http://www.spc.noaa.gov/products/watch/ww%04i.html" % (int(ww_num),)
+        channels.append("SPC")
+        common.tweet(channels, twt, url)
+
+    df = DBPOOL.runInteraction(runner2)
+    df.addErrback(common.email_error, raw)
     
-    txn.close()
-    pgconn.commit()
-
-    # Special message for SPC
-    lines = raw.split("\n")
-    twt = lines[5].replace("\r\r", "")
-    url = "http://www.spc.noaa.gov/products/watch/ww%04i.html" % (int(ww_num),)
-    channels.append("SPC")
-    common.tweet(channels, twt, url)
 
 
-myJid = jid.JID('%s@%s/watch_%s' % (secret.iembot_ingest_user, secret.chatserver, 
+myJid = jid.JID('%s@%s/watch_%s' % (config.get('xmpp','username'), 
+                                    config.get('xmpp','domain'), 
        mx.DateTime.gmt().strftime("%Y%m%d%H%M%S") ) )
-factory = client.basicClientFactory(myJid, secret.iembot_ingest_password)
+factory = client.basicClientFactory(myJid, config.get('xmpp', 'password'))
 
 jabber = common.JabberClient(myJid)
 
@@ -283,7 +288,7 @@ factory.addBootstrap('//event/stream/authd', jabber.authd)
 factory.addBootstrap("//event/client/basicauth/invaliduser", jabber.debug)
 factory.addBootstrap("//event/client/basicauth/authfailed", jabber.debug)
 factory.addBootstrap("//event/stream/error", jabber.debug)
-reactor.connectTCP(secret.connect_chatserver, 5222, factory)
+reactor.connectTCP(config.get('xmpp', 'connecthost'), 5222, factory)
 
 ldm = ldmbridge.LDMProductFactory( MyProductIngestor() )
-reactor.run()
+reactor.run() #@UndefinedVariable

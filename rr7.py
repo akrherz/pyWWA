@@ -1,12 +1,11 @@
 """
 Move DSM messages into the text database with the proper PIL
-$Id: $:
 """
 import iemdb, sys, re
 AFOS = iemdb.connect('afos')
 acursor = AFOS.cursor()
 
-data = sys.stdin.read().replace("\n", "z")
+data = sys.stdin.read().replace("\r\r\n", "z")
 
 tokens = re.findall("(\.A [A-Z0-9]{3} .*?=)", data)
 

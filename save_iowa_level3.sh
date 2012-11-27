@@ -3,8 +3,8 @@
 # Run from cron
 #set -x
 
-DIR=`date -u -d "1 day ago" +%Y_%m`
-YYYYMMDD=`date -u -d "1 day ago" +%Y%m%d`
+DIR=$(date -u -d "1 day ago" +'%Y_%m')
+YYYYMMDD=$(date -u -d "1 day ago" +'%Y%m%d')
 
 if [ ! -d /mesonet/ARCHIVE/nexrad/${DIR} ] 
 then

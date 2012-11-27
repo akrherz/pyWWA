@@ -1,9 +1,11 @@
 """
 Parse UVI data into something WXC can use
-$Id: $:
 """
 
-import sys, re, os, mx.DateTime
+import sys
+import subprocess
+import os
+import mx.DateTime
 now = mx.DateTime.now()
 
 cdict = {'DES MOINES IA': [41.53, -93.65,'KDSM'],
@@ -22,11 +24,13 @@ out.write("""Weather Central 001d0300 Surface Data
 """ )
 
 def writer(city, st, uv):
-  key = "%s %s" % (city, st)
-  if (not cdict.has_key(key)):
-    return
+    key = "%s %s" % (city, st)
+    if not cdict.has_key(key):
+        return
 
-  out.write("%4s %-30s %6s %7s %2s 99\n" % (cdict[key][2], key, cdict[key][0], cdict[key][1], uv) )
+    out.write("%4s %-30s %6s %7s %2s 99\n" % (cdict[key][2], key, 
+                                              cdict[key][0], cdict[key][1], 
+                                              uv) )
 
 d = sys.stdin.read()
 data = d.replace("\\015\015\012", "\n")
@@ -34,18 +38,21 @@ data = d.replace("\\015\015\012", "\n")
 lines = data.split("\n")
 
 for line in lines[26:]:
-  if (len(line) < 50):
-    continue
-  city = line[:21].strip()
-  st = line[21:24].strip()
-  uv = line[27:30].strip()
-  writer(city, st, uv)
+    if len(line) < 50:
+        continue
+    city = line[:21].strip()
+    st = line[21:24].strip()
+    uv = line[27:30].strip()
+    writer(city, st, uv)
 
-  city = line[37:57].strip()
-  st = line[57:60].strip()
-  uv = line[63:].strip()
-  writer(city, st, uv)
+    city = line[37:57].strip()
+    st = line[57:60].strip()
+    uv = line[63:].strip()
+    writer(city, st, uv)
 
 out.close()
-os.system("/home/ldm/bin/pqinsert -p \"wxc_uvi.txt\" /tmp/wxc_uvi.txt")
+subprocess.call("/home/ldm/bin/pqinsert -p 'wxc_uvi.txt' /tmp/wxc_uvi.txt",
+                shell=True)
+
+os.unlink('/tmp/wxc_uvi.txt')
 
