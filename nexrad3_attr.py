@@ -21,7 +21,7 @@
 # Setup Standard Logging we use
 from twisted.python import log, logfile
 log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
-log.startLogging(logfile.DailyLogFile('nexrad3_attr.log', 'logs/'))
+log.startLogging(logfile.DailyLogFile('nexrad3_attr.log', '/home/ldm/logs/'))
 
 # System Imports
 import os
