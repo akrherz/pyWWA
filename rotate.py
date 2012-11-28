@@ -15,7 +15,7 @@ if __name__ == '__main__':
     if not os.path.isdir(dirname):
         os.makedirs(dirname)
 
-    if format == "tif.Z":
+    if fmt == "tif.Z":
         for i in range(9,-1,-1):
             oldfp = "/home/ldm/data/%s%s.%s" % (fnbase,i,fmt)
             newfp = "/home/ldm/data/%s%s.%s" % (fnbase,i+1,fmt)
