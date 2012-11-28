@@ -27,6 +27,10 @@ log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
 log.startLogging(logfile.DailyLogFile('nexrad3_attr.log', 
                                       os.path.abspath('logs/')))
 
+import ConfigParser
+config = ConfigParser.ConfigParser()
+config.read(os.path.join(os.path.dirname(__file__), 'cfg.ini'))
+
 # Need to do this in order to get the subsequent calls to work, TODO
 os.chdir("/home/ldm/pyWWA")
 
@@ -40,9 +44,7 @@ from twisted.internet.task import cooperate
 from twisted.internet import reactor, protocol
 import mx.DateTime
 
-import ConfigParser
-config = ConfigParser.ConfigParser()
-config.read(os.path.join(os.path.dirname(__file__), 'cfg.ini'))
+
 
 # Setup Database Links
 POSTGISDB = adbapi.ConnectionPool("twistedpg", database="postgis", cp_reconnect=True,
