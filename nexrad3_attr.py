@@ -123,6 +123,8 @@ class PROC(protocol.ProcessProtocol):
         self.deferred.errback(data)
 
 
+    def cancelDB(self, err):
+        self.deferred.callback(self)
 
     def outConnectionLost(self):
         """
@@ -132,10 +134,10 @@ class PROC(protocol.ProcessProtocol):
         if self.res.find("NO STORMS DETECTED") > 0:
             self.deferred.callback(self)
             return
-        POSTGISDB.runInteraction(really_process, self.res, self.afos[3:], 
+        defer = POSTGISDB.runInteraction(really_process, self.res, self.afos[3:], 
                                  self.ts)
-        #log.msg("done!")
-        self.deferred.callback(self)
+        defer.addErrback(self.cancelDB)
+        defer.addCallback(self.cancelDB)
         
 
 class MyProductIngestor(ldmbridge.LDMProductReceiver):
@@ -230,7 +232,12 @@ def really_process(txn, res, nexrad, ts):
         if (tokens[7] == "<0.50"):
             tokens[7] = 0.01
         d["max_size"] = tokens[7]
-        d["vil"] = tokens[8]
+
+        if tokens[8] == 'UNKNOWN':
+            d["vil"] = 0
+        else:
+            d["vil"] = tokens[8]
+        
         d["max_dbz"] = tokens[9]
         d["max_dbz_height"] = tokens[10]
         d["top"] = tokens[11]
