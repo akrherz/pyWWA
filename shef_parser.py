@@ -51,8 +51,12 @@ config = ConfigParser.ConfigParser()
 config.read(os.path.join(os.path.dirname(__file__), 'cfg.ini'))
 
 # Setup Database Links
+ACCESSDB_SINGLE = adbapi.ConnectionPool("twistedpg", database="iem", cp_reconnect=True,
+                                host=config.get('database','host'), cp_max=1,
+                                user=config.get('database','user'),
+                                password=config.get('database','password') )
 ACCESSDB = adbapi.ConnectionPool("twistedpg", database="iem", cp_reconnect=True,
-                                host=config.get('database','host'), 
+                                host=config.get('database','host'), cp_max=5,
                                 user=config.get('database','user'),
                                 password=config.get('database','password') )
 HADSDB = adbapi.ConnectionPool("twistedpg", database="hads", cp_reconnect=True,
@@ -317,19 +321,29 @@ def checkvars( myvars ):
             return False
     return False
 
+def var2dbcols(var):
+    """ Convert a SHEF var into split values """
+    return [ var[:2], var[2], var[3:5], var[5], var[-1] ]
+
 def process_site(tp, sid, ts, data):
     """ 
     I process a dictionary of data for a particular site
     """
     # Insert data into database regardless
     for var in data.keys():
-        deffer = HADSDB.runOperation("""INSERT into raw%s 
+        deffer = HADSDB.runOperation("""INSERT into raw"""+
+                                      ts.strftime("%Y_%m") +""" 
             (station, valid, key, value) 
-            VALUES('%s','%s+00', '%s', '%s')""" % (ts.strftime("%Y_%m"), sid, 
-            ts.strftime("%Y-%m-%d %H:%M"), var, 
-            data[var]))
-        deffer.addErrback(common.email_error, tp)
+            VALUES(%s,%s, %s, %s)""", ( sid, 
+            ts.strftime("%Y-%m-%d %H:%M+00"), var, data[var]))
+        deffer.addErrback(common.email_error, tp.raw)
         deffer.addErrback( log.err )
+
+        (pe, d, s, e, p) = var2dbcols(var)
+        d2 = ACCESSDB_SINGLE.runOperation("""
+        INSERT into current_shef values (%s,%s,%s,%s,%s,%s,%s,%s)
+        """, (sid, ts.strftime("%Y-%m-%d %H:%M+00"), pe, d, s, e, p, data[var]))
+        d2.addErrback( common.email_error, tp.raw )
 
     # Our simple determination if the site is a COOP site
     is_coop = False
@@ -419,7 +433,7 @@ def job_size(jobs):
     """
     log.msg("deferredQueue waiting: %s pending: %s" % (len(jobs.waiting), 
                                                      len(jobs.pending) ))
-    if len(jobs.pending) > 100:
+    if len(jobs.pending) > 1000:
         log.msg("ABORT")
         reactor.callWhenRunning(reactor.stop)
     reactor.callLater(300, job_size, jobs)
