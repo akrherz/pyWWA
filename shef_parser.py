@@ -94,8 +94,12 @@ MULTIPLIER = {
 """
 Some notes on the SHEF codes translated to something IEM Access can handle
 First two chars are physical extent code
+
 """
-DIRECTMAP = {'HGIZ': 'rstage',
+DIRECTMAP = {
+    'URIZ': 'max_drct',
+    'XVIZ': 'vsby',
+    'HGIZ': 'rstage',
              'HPIZ': 'rstage',
              'HTIZ': 'rstage',
              'PPHZ': 'phour',
