@@ -43,7 +43,7 @@ from twisted.internet.defer import DeferredQueue, Deferred
 from twisted.internet.task import cooperate
 from twisted.internet import reactor, protocol
 import mx.DateTime
-
+import common
 
 
 # Setup Database Links
@@ -124,7 +124,13 @@ class PROC(protocol.ProcessProtocol):
 
 
     def cancelDB(self, err):
+        #log.msg("cancelDB()")
         self.deferred.callback(self)
+
+    def log_error(self, err):
+        log.msg( self.res )
+        log.err( err )
+        common.email_error(err, self.res)
 
     def outConnectionLost(self):
         """
@@ -136,8 +142,9 @@ class PROC(protocol.ProcessProtocol):
             return
         defer = POSTGISDB.runInteraction(really_process, self.res, self.afos[3:], 
                                  self.ts)
-        defer.addErrback(self.cancelDB)
+        defer.addErrback( self.log_error )
         defer.addCallback(self.cancelDB)
+        defer.addErrback( log.err )
         
 
 class MyProductIngestor(ldmbridge.LDMProductReceiver):
@@ -193,10 +200,10 @@ def really_process(txn, res, nexrad, ts):
          I8  154/ 73 NONE NONE    0/  0/ 0.00     1  33 10.9  10.9    NEW    
 
          U8  154/126 NONE NONE     UNKNOWN       11  47 18.8  23.1  271/ 70  
-    
+         J0  127/134 NONE NONE     UNKNOWN       24  51 20.2  33.9    NEW   
     """
     txn.execute("DELETE from nexrad_attributes WHERE nexrad = '%s'" % (nexrad) )
-
+    
     cenlat = float(ST.sts[nexrad]['lat'])
     cenlon = float(ST.sts[nexrad]['lon'])
     latscale = 111137.0
@@ -214,7 +221,7 @@ def really_process(txn, res, nexrad, ts):
         if len(tokens) < 1 or tokens[0] == "STM":
             continue
         if tokens[5] == 'UNKNOWN':
-            tokens.insert(5, 0)
+            tokens[5] = 0
             tokens.insert(5, 0)
             tokens.insert(5, 0)
         if len(tokens) < 13:
@@ -244,7 +251,7 @@ def really_process(txn, res, nexrad, ts):
         if tokens[12] == "NEW":
             d["drct"], d["sknt"] = 0,0
         else:
-            d["drct"] = tokens[12]
+            d["drct"] = int(float(tokens[12]))
             d["sknt"] = tokens[13]
         d["nexrad"] = nexrad
 

@@ -1,16 +1,13 @@
 
-# Python imports
-import sys, re
-
-from twisted.internet import stdio, error
+from twisted.internet import stdio
 from twisted.protocols import basic
 from twisted.internet import reactor
+from twisted.python import log
 
 class LDMProductReceiver(basic.LineReceiver):
     delimiter = '\n'
     product_start = '\001'
     product_end = '\r\r\n\003'
-
 
     def __init__(self):
         self.productBuffer = ""
@@ -18,16 +15,29 @@ class LDMProductReceiver(basic.LineReceiver):
         self.cbFunc = self.process_data
 
     def rawDataReceived(self, data):
-        tokens = re.split(self.product_end, data)
+        """ callback for when raw data is received on the stdin buffer, this 
+        could be a partial product or lots of products """
+        # See if we have anything left over from previous iteration
+        if self.productBuffer != "":
+            data = self.productBuffer + data
+        
+        tokens = data.split(self.product_end)
+        # If length tokens is 1, then we did not find the splitter
         if len(tokens) == 1:
-            self.productBuffer += data
-        else:
-            reactor.callLater(0, self.cbFunc, self.productBuffer + tokens[0])
+            #log.msg("Token not found, len data %s" % (len(data),))
+            self.productBuffer = data
+            return
+
+        # Everything up until the last one can always go...        
+        for token in tokens[:-1]:
+            #log.msg("ldmbridge cb product size: %s" % (len(token),))
+            reactor.callLater(0, self.cbFunc, token)
+        # We have some cruft left over!
+        if tokens[-1] != "":
             self.productBuffer = tokens[-1]
-            for token in tokens[1:-1]:
-                reactor.callLater(0, self.cbFunc, token)
-        del tokens
-   
+        else:
+            self.productBuffer = ""
+                    
     def connectionLost(self, reason):
         raise NotImplementedError
 
@@ -46,7 +56,6 @@ class LDMProductFactory( stdio.StandardIO ):
     def childConnectionLost(self, fd, reason):
         if self.disconnected:
             return
-        print 'childConnectionLost', fd
         if fd == 'read':
             self.connectionLost(reason)
         else:
