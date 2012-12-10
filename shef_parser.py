@@ -379,6 +379,10 @@ def process_site(tp, sid, ts, data):
         else:
             network = "%s_DCP" % (state,)
 
+    # Do not send DCP sites to IEMAccess
+    if network.find("_DCP") > 0:
+        return
+
     iemob = access.Ob(sid, network)
     iemob.setObTimeGMT(ts)
     iemob.data['year'] = ts.year
