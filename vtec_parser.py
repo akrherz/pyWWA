@@ -142,8 +142,8 @@ def segment_processor(text_product, i, skip_con):
             return
 
     # If we found no VTEC and it has UGC, we complain about this
-    if (len(seg.vtec) == 0):
-        if text_product.get_iembot_source() == 'JSJ':
+    if len(seg.vtec) == 0:
+        if text_product.get_iembot_source() in ['JSJ','STU']:
             return
         if text_product.issueTime.year < 2005:
             text_product.generate_fake_vtec()
