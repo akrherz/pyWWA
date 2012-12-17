@@ -67,12 +67,19 @@ def real_parser(buf):
     nws.findIssueTime()
     nws.findWMO()
     
-    DBPOOL.runOperation("""INSERT into products(pil, data, entered,
+    if nws.issueTime.month > 6:
+        table = "products_%s_0106" % (nws.issueTime.year,)
+    else:
+        table = "products_%s_0712" % (nws.issueTime.year,)
+        
+    
+    df = DBPOOL.runOperation("""INSERT into """+table+"""(pil, data, entered,
         source, wmo) VALUES(%s,%s,%s,%s,%s)""",  (nws.afos.strip(), nws.raw, 
                              nws.issueTime.strftime("%Y-%m-%d %H:%M+00"),
                              nws.source, nws.wmo) 
-     ).addErrback( common.email_error, buf)
-
+     )
+    df.addErrback( common.email_error, buf)
+    df.addErrback( log.err )
 
 ldm = ldmbridge.LDMProductFactory( MyProductIngestor() )
 reactor.run()
