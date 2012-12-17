@@ -68,9 +68,9 @@ def real_parser(buf):
     nws.findWMO()
     
     if nws.issueTime.month > 6:
-        table = "products_%s_0106" % (nws.issueTime.year,)
-    else:
         table = "products_%s_0712" % (nws.issueTime.year,)
+    else:
+        table = "products_%s_0106" % (nws.issueTime.year,)
         
     
     df = DBPOOL.runOperation("""INSERT into """+table+"""(pil, data, entered,
