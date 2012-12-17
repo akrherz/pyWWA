@@ -25,8 +25,6 @@ log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
 log.startLogging(logfile.DailyLogFile('shef_parser.log', 
                                       os.path.abspath('logs/')))
 
-
-
 def write_pid():
     """ Create a PID file for when we are fired up! """
     pid = open("shef_parser.pid",'w')
@@ -66,7 +64,7 @@ HADSDB = adbapi.ConnectionPool("twistedpg", database="hads", cp_reconnect=True,
 BASE_TS = mx.DateTime.gmt() - mx.DateTime.RelativeDateTime(months=2)
 
 # Necessary for the shefit program to run A-OK
-os.chdir("/home/ldm/pyWWA/shef_workspace")
+os.chdir("%s/shef_workspace" % (os.path.dirname(os.path.abspath(__file__)),))
 
 # Load up our lookup table of stations to networks
 LOC2STATE = {}
@@ -78,7 +76,8 @@ def load_stations(txn):
     @param txn database transaction
     """
     txn.execute("""SELECT id, network, state from stations 
-        WHERE network ~* 'COOP' or network ~* 'DCP' or network in ('KCCI','KIMT','KELO') 
+        WHERE network ~* 'COOP' or network ~* 'DCP' or 
+        network in ('KCCI','KIMT','KELO') 
         ORDER by network ASC""")
     for row in txn:
         stid = row['id']
@@ -222,7 +221,7 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
     def connectionLost(self, reason):
         log.msg('connectionLost')
         log.err(reason)
-        reactor.callLater(5, self.shutdown)
+        reactor.callLater(15, self.shutdown)
 
     def shutdown(self):
         reactor.callWhenRunning(reactor.stop)
@@ -302,6 +301,7 @@ def enter_unknown(sid, tp, network):
     """
     if len(sid) < 5:
         return
+    #log.msg("Found unknown %s %s %s" % (sid, tp.get_product_id(), network))
     HADSDB.runOperation("""
             INSERT into unknown(nwsli, product, network) 
             values ('%s', '%s', '%s')
@@ -442,10 +442,11 @@ def job_size(jobs):
         reactor.callWhenRunning(reactor.stop)
     reactor.callLater(300, job_size, jobs)
 
-def main():
+def main(res):
     """
     Go main Go!
     """
+    log.msg("main() fired!")
     jobs = DeferredQueue()
     ingest = MyProductIngestor()
     ingest.jobs = jobs
@@ -456,8 +457,9 @@ def main():
     
     reactor.callLater(0, write_pid)
     reactor.callLater(30, job_size, jobs)
-    reactor.run()
+    
 
 if __name__ == '__main__':
-    HADSDB.runInteraction(load_stations)
-    main()
+    df = HADSDB.runInteraction(load_stations)
+    df.addCallback( main )
+    reactor.run()
