@@ -214,7 +214,8 @@ class SHEFIT(protocol.ProcessProtocol):
         #    rejects.write( self.tp.raw +"\003")
         #    rejects.close()
         #    return
-        reactor.callLater(0, really_process, self.tp, self.data)
+        t = task.deferLater(reactor, 0, really_process, self.tp, self.data)
+        t.addErrback(common.email_error, self.tp.text)
         self.deferred.callback(self)
         
 def clnstr(buf):
@@ -398,7 +399,8 @@ def process_site(tp, sid, ts, data):
     # Okay, time for a hack, if our observation is at midnight!
     if localts.hour == 0 and localts.minute == 0:
         localts -= datetime.timedelta(minutes=1)
-        log.msg("Shifting %s back one sec: %s" % (sid, localts))
+        log.msg("Shifting %s [%s] back one minute: %s" % (sid, network, 
+                                                          localts))
 
     iemob = Observation(sid, network, localts)
 
