@@ -18,6 +18,7 @@
 """
 # System Imports
 import os
+import datetime
 
 # Setup Standard Logging we use
 from twisted.python import log, logfile
@@ -33,16 +34,19 @@ def write_pid():
 
 # Stuff I wrote
 import mesonet
-import access
-from support import ldmbridge, TextProduct
+from pyiem.observation import Observation
+from pyiem.nws import product
+from pyldm import ldmbridge
 import common
+import iemtz
+import pytz
 
 # Third Party Stuff
+from twisted.internet import task
 from twisted.enterprise import adbapi
 from twisted.internet.defer import DeferredQueue, Deferred
 from twisted.internet.task import cooperate
 from twisted.internet import reactor, protocol
-import mx.DateTime
 
 import ConfigParser
 config = ConfigParser.ConfigParser()
@@ -61,7 +65,6 @@ HADSDB = adbapi.ConnectionPool("twistedpg", database="hads", cp_reconnect=True,
                                 host=config.get('database','host'), 
                                 user=config.get('database','user'),
                                 password=config.get('database','password') )
-BASE_TS = mx.DateTime.gmt() - mx.DateTime.RelativeDateTime(months=2)
 
 # Necessary for the shefit program to run A-OK
 os.chdir("%s/shef_workspace" % (os.path.dirname(os.path.abspath(__file__)),))
@@ -69,23 +72,28 @@ os.chdir("%s/shef_workspace" % (os.path.dirname(os.path.abspath(__file__)),))
 # Load up our lookup table of stations to networks
 LOC2STATE = {}
 LOC2NETWORK = {}
+LOC2TZ = {}
 UNKNOWN = {}
+TIMEZONES = {None: pytz.timezone('UTC')}
 def load_stations(txn):
     """
     Load up station metadata to help us with writing data to the IEM database
     @param txn database transaction
     """
-    txn.execute("""SELECT id, network, state from stations 
+    txn.execute("""SELECT id, network, state, tzname from stations 
         WHERE network ~* 'COOP' or network ~* 'DCP' or 
         network in ('KCCI','KIMT','KELO') 
         ORDER by network ASC""")
     for row in txn:
         stid = row['id']
         LOC2STATE[ stid ] = row['state']
+        LOC2TZ[stid] = row['tzname']
         if LOC2NETWORK.has_key(stid):
             del LOC2NETWORK[stid]
         else:
             LOC2NETWORK[stid] = row['network']
+        if not TIMEZONES.has_key(row['tzname']):
+            TIMEZONES[ row['tzname'] ] = pytz.timezone( row['tzname'] )
 
 MULTIPLIER = {
   "US" : 0.87,  # Convert MPH to KNT
@@ -165,7 +173,7 @@ class SHEFIT(protocol.ProcessProtocol):
         """
         Constructor
         """
-        self.tp = TextProduct.TextProduct( buf )
+        self.tp = product.TextProduct( buf )
         self.data = ""
 
     def connectionMade(self):
@@ -174,7 +182,7 @@ class SHEFIT(protocol.ProcessProtocol):
         """
         #print "sending %d bytes!" % len(self.shefdata)
         #print "SENDING", self.shefdata
-        self.transport.write( self.tp.raw )
+        self.transport.write( self.tp.text )
         self.transport.closeStdin()
 
     def outReceived(self, data):
@@ -209,7 +217,6 @@ class SHEFIT(protocol.ProcessProtocol):
         reactor.callLater(0, really_process, self.tp, self.data)
         self.deferred.callback(self)
         
-
 def clnstr(buf):
     """
     Get rid of cruft we don't wish to work with
@@ -256,6 +263,7 @@ def really_process(tp, data):
     This processes the output we get from the SHEFIT program
     """
     # Now we loop over the data we got :)
+    #log.msg("\n"+data)
     mydata = {}
     for line in data.split("\n"):
         # Skip blank output lines
@@ -272,11 +280,13 @@ def really_process(tp, data):
         if not mydata.has_key(sid):
             mydata[sid] = {}
         dstr = "%s %s" % (tokens[1], tokens[2])
-        tstamp = mx.DateTime.strptime(dstr, "%Y-%m-%d %H:%M:%S")
+        tstamp = datetime.datetime.strptime(dstr, "%Y-%m-%d %H:%M:%S")
+        tstamp = tstamp.replace(tzinfo=iemtz.UTC())
         # We don't care about data in the future!
-        if tstamp > (mx.DateTime.gmt() + mx.DateTime.RelativeDateTime(hours=1)):
+        utcnow = datetime.datetime.utcnow().replace(tzinfo=iemtz.UTC())
+        if tstamp > (utcnow + datetime.timedelta(hours=1)):
             continue
-        if tstamp < BASE_TS:
+        if tstamp < (utcnow - datetime.timedelta(days=60)):
             log.msg("Rejecting old data %s %s" % (sid, tstamp))
             continue
         if not mydata[sid].has_key(tstamp):
@@ -329,6 +339,8 @@ def process_site(tp, sid, ts, data):
     """ 
     I process a dictionary of data for a particular site
     """
+    localts = ts.astimezone( TIMEZONES[LOC2TZ.get(sid) ])
+    #log.msg("%s sid: %s ts: %s %s" % (tp.get_product_id(), sid, ts, localts))
     # Insert data into database regardless
     for var in data.keys():
         deffer = HADSDB.runOperation("""INSERT into raw"""+
@@ -336,14 +348,14 @@ def process_site(tp, sid, ts, data):
             (station, valid, key, value) 
             VALUES(%s,%s, %s, %s)""", ( sid, 
             ts.strftime("%Y-%m-%d %H:%M+00"), var, data[var]))
-        deffer.addErrback(common.email_error, tp.raw)
+        deffer.addErrback(common.email_error, tp.text)
         deffer.addErrback( log.err )
 
         (pe, d, s, e, p) = var2dbcols(var)
         d2 = ACCESSDB_SINGLE.runOperation("""
         INSERT into current_shef values (%s,%s,%s,%s,%s,%s,%s,%s)
         """, (sid, ts.strftime("%Y-%m-%d %H:%M+00"), pe, d, s, e, p, data[var]))
-        d2.addErrback( common.email_error, tp.raw )
+        d2.addErrback( common.email_error, tp.text )
 
     # Our simple determination if the site is a COOP site
     is_coop = False
@@ -383,12 +395,15 @@ def process_site(tp, sid, ts, data):
     if network.find("_DCP") > 0:
         return
 
-    iemob = access.Ob(sid, network)
-    iemob.setObTimeGMT(ts)
-    iemob.data['year'] = ts.year
+    # Okay, time for a hack, if our observation is at midnight!
+    if localts.hour == 0 and localts.minute == 0:
+        localts -= datetime.timedelta(minutes=1)
+        log.msg("Shifting %s back one sec: %s" % (sid, localts))
+
+    iemob = Observation(sid, network, localts)
 
     deffer = ACCESSDB.runInteraction(save_data, tp, iemob, data)
-    deffer.addErrback(common.email_error, tp.raw)
+    deffer.addErrback(common.email_error, tp.text)
     deffer.addCallback(got_results, tp, sid, network)
     deffer.addErrback( log.err )
     
@@ -409,10 +424,7 @@ def save_data(txn, tp, iemob, data):
     """
     Called from a transaction 'thread'
     """
-    iemob.txn = txn
-    #print data, iemob.data['valid']
-    if not iemob.load_and_compare():
-        return False
+
     for var in data.keys():
         if data[var] == -9999:
             continue
@@ -421,14 +433,9 @@ def save_data(txn, tp, iemob, data):
         if MAPPING[var] == 'tmpf' and iemob.data['network'].find("COOP") > 0:
             iemob.data['coop_tmpf'] = myval
             #print "HEY!", iemob.data['valid'].strftime("%Y-%m-%d %H:%M")
-            iemob.data['coop_valid'] = iemob.data['valid'].strftime("%Y-%m-%d %H:%M")
+            iemob.data['coop_valid'] = iemob.data['valid']
     iemob.data['raw'] = tp.get_product_id()
-    iemob.update_summary()
-    # Don't go through this pain, unless we need to!
-    if 'max_tmpf' in iemob.data.keys():
-        iemob.updateDatabaseSummaryTemps()
-    iemob.updateDatabase()
-    return True
+    return iemob.save(txn)
 
 def job_size(jobs):
     """
@@ -456,10 +463,15 @@ def main(res):
         cooperate(worker(jobs))
     
     reactor.callLater(0, write_pid)
-    reactor.callLater(30, job_size, jobs)
-    
+    reactor.callLater(300, job_size, jobs)
+
+def fullstop(err):
+    log.msg("fullstop() called...")
+    log.err( err )
+    reactor.stop()    
 
 if __name__ == '__main__':
     df = HADSDB.runInteraction(load_stations)
     df.addCallback( main )
+    df.addErrback( fullstop )
     reactor.run()
