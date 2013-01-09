@@ -16,7 +16,6 @@
 """ Aviation Product Parser! """
 
 # Twisted Python imports
-from twisted.words.protocols.jabber import client, jid, xmlstream
 from twisted.internet import reactor
 from twisted.python import log, logfile
 from twisted.enterprise import adbapi
@@ -25,7 +24,8 @@ from twisted.enterprise import adbapi
 import re, os, math
 
 # Python 3rd Party Add-Ons
-import mx.DateTime, pg
+import datetime
+import pg
 
 # pyWWA stuff
 from support import ldmbridge, TextProduct, utils
@@ -66,7 +66,8 @@ AREA\s(?P<areanum>[0-9]+)\.\.\.FROM\s(?P<locs>[0-9A-Z \-]+)\n
 
 # Load LOCS table
 LOCS = {}
-mesosite = pg.connect('mesosite', config.get('database','host'), passwd=config.get('database','password'))
+mesosite = pg.connect('mesosite', config.get('database','host'), 
+                      passwd=config.get('database','password'))
 rs = mesosite.query("""SELECT id, name, x(geom) as lon, y(geom) as lat from stations 
            WHERE network ~* 'ASOS' or network ~* 'AWOS'""").dictresult()
 for i in range(len(rs)):
@@ -121,10 +122,9 @@ def figure_expire(ptime, hour, minute):
     """
     expire = ptime
     if hour < ptime.hour:
-        expire += mx.DateTime.RelativeDateTime(days=1)
-    expire += mx.DateTime.RelativeDateTime(hour=hour,minute=minute)
-    return expire
-
+        expire += datetime.timedelta(days=1)
+    return expire.replace(hour=hour,minute=minute)
+    
 def sanitize_angle(val):
     if val < 0:
         return 360 - math.fabs( val )
@@ -171,10 +171,10 @@ def locs2lonslats(locstr, geotype, widthstr, diameterstr):
     """
     lats = []
     lons = []
-    if geotype == 'LINE':
-        width = float(widthstr.replace(" NM WIDE", ""))
+    #if geotype == 'LINE':
+    #    width = float(widthstr.replace(" NM WIDE", ""))
         # Approximation
-        widthdeg = width / 110.
+    #    widthdeg = width / 110.
 
     #log.msg("locstr is:%s geotype is:%s", (locstr, geotype))
     for l in locstr.split('-'):
@@ -273,14 +273,16 @@ def process_SIGC(txn, prod):
             print '%s %s From: %s Till: %s Len(lats): %s' % (data['label'], data['geotype'], 
                                     prod.issueTime, expire, len(lats))
             for table in ('sigmets_current', 'sigmets_archive'):
-                sql = """DELETE from %s where label = '%s' and expire = '%s+00'""" % (
-                                                table, data['label'], expire)
-                txn.execute(sql)
-                sql = """INSERT into %s(sigmet_type, label, issue, expire, raw, geom)
-                   VALUES ('C','%s','%s+00','%s+00','%s',
-                   'SRID=4326;MULTIPOLYGON(((%s)))')""" % (table, data['label'], 
-                                            prod.issueTime, expire, section, wkt[:-1])
-                txn.execute(sql)
+                sql = "DELETE from "+table+" where label = %s and expire = %s"
+                args = (data['label'], expire)
+                txn.execute(sql, args)
+                sqlwkt = "SRID=4326;MULTIPOLYGON(((%s)))" % (wkt[:-1],)
+                sql = """INSERT into """+table+"""(sigmet_type, label, issue, 
+                    expire, raw, geom) VALUES ('C',%s, %s, %s, %s,
+                   %s)""" 
+                args = (data['label'], 
+                                        prod.issueTime, expire, section, sqlwkt)
+                txn.execute(sql, args)
 
         elif section.find("CONVECTIVE SIGMET") > -1:
             if section.find("CONVECTIVE SIGMET...NONE") == -1:
@@ -301,19 +303,6 @@ def process_SIGC(txn, prod):
             wkt += "%s %s" % (lons[0], lats[0])
         """
 
-myJid = jid.JID('%s@%s/aviation_%s' % (config.get('xmpp','username'), 
-                                    config.get('xmpp','domain'), 
-       mx.DateTime.gmt().strftime("%Y%m%d%H%M%S") ) )
-factory = client.basicClientFactory(myJid, config.get('xmpp', 'password'))
-
-jabber = common.JabberClient(myJid)
-
-factory.addBootstrap('//event/stream/authd', jabber.authd)
-factory.addBootstrap("//event/client/basicauth/invaliduser", jabber.debug)
-factory.addBootstrap("//event/client/basicauth/authfailed", jabber.debug)
-factory.addBootstrap("//event/stream/error", jabber.debug)
-factory.addBootstrap(xmlstream.STREAM_END_EVENT, jabber._disconnect )
-
-reactor.connectTCP(config.get('xmpp', 'connecthost'), 5222, factory)
+jabber = common.make_jabber_client("aviation")
 ldm = ldmbridge.LDMProductFactory( MyProductIngestor() )
 reactor.run()
