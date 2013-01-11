@@ -22,12 +22,11 @@ log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
 log.startLogging(logfile.DailyLogFile('mcd_parser.log', 'logs'))
 
 import os
-import  re,  mx.DateTime
-from support import TextProduct, ldmbridge
+import re
+from pyiem.nws import product
+from pyldm import ldmbridge
 import common
 
-from twisted.words.protocols.jabber import client, jid
-from twisted.words.xish import  xmlstream
 from twisted.internet import reactor
 from twisted.enterprise import adbapi
 
@@ -63,7 +62,7 @@ def real_process(raw):
     num = tokens[0]
 
     sqlraw = raw.replace("\015\015\012", "\n")
-    prod = TextProduct.TextProduct(raw)
+    prod = product.TextProduct(raw)
 
     product_id = prod.get_product_id()
     sql = """INSERT into text_products(product, product_id) 
@@ -95,20 +94,7 @@ def real_process(raw):
     tokens.append("SPC")
     common.tweet(tokens, twt, url) 
 
-myJid = jid.JID('%s@%s/mcd_parser_%s' %  (config.get('xmpp', 'username'), 
-                                          config.get('xmpp', 'domain'), 
-       mx.DateTime.gmt().strftime("%Y%m%d%H%M%S") ) )
-factory = client.basicClientFactory(myJid, config.get('xmpp', 'password'))
-
-jabber = common.JabberClient(myJid)
-
-factory.addBootstrap('//event/stream/authd',jabber.authd)
-factory.addBootstrap("//event/client/basicauth/invaliduser", jabber.debug)
-factory.addBootstrap("//event/client/basicauth/authfailed", jabber.debug)
-factory.addBootstrap("//event/stream/error", jabber.debug)
-factory.addBootstrap(xmlstream.STREAM_END_EVENT, jabber._disconnect )
-
-reactor.connectTCP(config.get('xmpp', 'connecthost'), 5222, factory)
+jabber = common.make_jabber_client("mcd_parser")
 
 ldm = ldmbridge.LDMProductFactory( MyProductIngestor() )
 
