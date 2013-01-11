@@ -3,9 +3,20 @@
  I also generate a shapefile of the parsed data
 """
 
-import sys, re, mx.DateTime, dbflib, shapelib, zipfile, os, logging
-import shutil, StringIO, traceback
-from pyIEM import wellknowntext
+import sys
+import re
+import datetime
+import pytz
+import dbflib
+import shapelib
+import zipfile
+import os
+import logging
+import shutil
+import StringIO
+import traceback
+
+from pyiem import wellknowntext
 import subprocess
 
 import common
@@ -80,7 +91,8 @@ def process(raw):
     mo = mod[ tokens[0][3] ]
     dy = int(tokens[0][4])
     year = int(tokens[0][5])
-    ts = mx.DateTime.DateTime(year, mo, dy, hr, mi)
+    ts = datetime.datetime(year, mo, dy, hr, mi).replace(
+                                tzinfo=pytz.timezone("America/Chicago"))
     logger.info("PROCESSING STOIA: %s" % (ts,))
 
     # Lets start our processing
@@ -109,7 +121,7 @@ def process(raw):
 
         pcursor.execute("""UPDATE roads_current SET cond_code = %s, valid = %s, 
          towing_prohibited = %s, limited_vis = %s, raw = %s 
-         WHERE segid = %s """ , (roadCondCode, ts.strftime("%Y-%m-%d %H:%M"), 
+         WHERE segid = %s """ , (roadCondCode, ts, 
                                  towingProhibited, limitedVis, condition, 
                                  segid) )
 
@@ -174,8 +186,11 @@ def generate_shapefile(ts):
     z.write("iaroad_cond.prj")
     z.close()
 
+    utc = ts.astimezone( pytz.timezone("UTC") )
     subprocess.call("/home/ldm/bin/pqinsert -p 'zip ac %s gis/shape/26915/ia/iaroad_cond.zip GIS/iaroad_cond_%s.zip zip' iaroad_cond.zip" % (
-                                            ts.gmtime().strftime("%Y%m%d%H%M"), ts.gmtime().strftime("%Y%m%d%H%M")), shell=True )
+                                            utc.strftime("%Y%m%d%H%M"), 
+                                            utc.strftime("%Y%m%d%H%M")), 
+                    shell=True )
 
     for suffix in ['shp', 'shx', 'dbf', 'prj', 'zip']:
         os.unlink("iaroad_cond.%s" % (suffix,))
