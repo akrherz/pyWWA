@@ -27,6 +27,7 @@ import StringIO
 from pyiem.observation import Observation
 from pyldm import ldmbridge
 from twisted.enterprise import adbapi
+from twisted.internet.task import deferLater
 from metar import Metar
 import datetime
 import pytz
@@ -49,7 +50,7 @@ ASOSDB = adbapi.ConnectionPool("twistedpg", database="asos", cp_reconnect=True,
 LOC2NETWORK = {}
 LOC2TZ = {}
 TIMEZONES = {None: pytz.timezone('UTC')}
-def load_stations(txn, ingest):
+def load_stations(txn):
     txn.execute("""SELECT id, network, tzname from stations 
     where network ~* 'ASOS' or network = 'AWOS' or network = 'WTM'""")
     news = 0
@@ -67,9 +68,8 @@ def load_stations(txn, ingest):
                 TIMEZONES[ row['tzname'] ] = pytz.timezone("UTC")
             
     log.msg("Loaded %s new stations" % (news,))
-    ingest.stations_loaded = True
     # Reload every 12 hours
-    reactor.callLater(12*60*60, IEMDB.runInteraction, load_stations, ingest)
+    reactor.callLater(12*60*60, IEMDB.runInteraction, load_stations)
 
 windAlerts = {}
 
@@ -92,11 +92,8 @@ class myProductIngestor(ldmbridge.LDMProductReceiver):
     def process_data(self, buf):
 
         buf = unicode(buf, errors='ignore')
-        if self.stations_loaded:
-            reactor.callLater(0, real_processor, buf.encode('ascii', 'ignore') )
-        else:
-            log.msg("Stations not loaded, delaying!")
-            reactor.callLater(20, real_processor, buf.encode('ascii', 'ignore') )
+        d = deferLater(reactor, 0, real_processor, buf.encode('ascii', 'ignore') )
+        d.addErrback(common.email_error, buf)
 
 def sanitize(metar):
     """
@@ -190,7 +187,7 @@ def process_site(orig_metar, clean_metar):
     
     iem = Observation(iemid, network, gts.astimezone( 
                                     TIMEZONES[LOC2TZ.get(iemid, None)]))
-    
+    iem.data['tzname'] = LOC2TZ.get(iemid)
     deffer = IEMDB.runInteraction(save_data, iem, mtr, clean_metar, orig_metar)
     deffer.addErrback(common.email_error, clean_metar)
     #deffer.addCallback(got_results, tp, sid, network)
@@ -202,7 +199,7 @@ def save_data(txn, iem, mtr, clean_metar, orig_metar):
         
     """ Need to figure out if we have a duplicate ob, if so, check
         the length of the raw data, if greater, take the temps """
-    if  iem.data['raw'] is not None and len(iem.data['raw']) > len(clean_metar):
+    if  iem.data['raw'] is not None and len(iem.data['raw']) >= len(clean_metar):
         pass
     else:
         if mtr.temp:
@@ -211,7 +208,7 @@ def save_data(txn, iem, mtr, clean_metar, orig_metar):
             iem.data['dwpf'] = mtr.dewpt.value("F")
         # Daabase only allows len 254
         iem.data['raw'] = orig_metar[:254]
-    
+ 
     if mtr.wind_speed:
         iem.data['sknt'] = mtr.wind_speed.value("KT")
     if mtr.wind_gust:
@@ -420,9 +417,13 @@ def sendWindAlert(txn, iemid, v, d, t, clean_metar):
     common.tweet([wfo], twt, url, {'lat': str(row['lat']), 'long': str(row['lon'])})
 
 
+def ready(bogus):
+    
+    ingest = myProductIngestor()
+    ldmbridge.LDMProductFactory( ingest )
+
 jabber = common.make_jabber_client("metar_parser")
 
-ingest = myProductIngestor()
-fact = ldmbridge.LDMProductFactory( ingest )
-IEMDB.runInteraction(load_stations, ingest)
+df = IEMDB.runInteraction(load_stations)
+df.addCallback(ready)
 reactor.run()
