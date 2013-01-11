@@ -23,11 +23,13 @@ log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
 log.startLogging( logfile.DailyLogFile('sps_parser.log','logs/'))
 
 
-import StringIO, mx.DateTime
+import StringIO
+import datetime
 import common
-from support import TextProduct, ldmbridge, reference
+from pyiem.nws import product
+from pyiem import reference
+from pyldm import ldmbridge
 
-from twisted.words.protocols.jabber import client, jid, xmlstream
 from twisted.internet import reactor
 from twisted.enterprise import adbapi
 
@@ -57,18 +59,17 @@ def load_ugc(txn):
 
 POSTGIS.runInteraction(load_ugc)
 
-def countyText(u):
+def countyText(ugcs):
     countyState = {}
     c = ""
-    for k in range(len(u)):
-        cnty = u[k]
-        stateAB = cnty[:2]
-        if (not countyState.has_key(stateAB)):
+    for ugc in ugcs:
+        stateAB = ugc.state
+        if not countyState.has_key(stateAB):
             countyState[stateAB] = []
-        if (not ugc_dict.has_key(cnty)):
-            name = "((%s))" % (cnty,)
+        if not ugc_dict.has_key(str(ugc)):
+            name = "((%s))" % (str(ugc),)
         else:
-            name = ugc_dict[cnty]
+            name = ugc_dict[str(ugc)]
         countyState[stateAB].append(name)
 
     for st in countyState.keys():
@@ -98,7 +99,7 @@ class myProductIngestor(ldmbridge.LDMProductReceiver):
 
 def real_process(raw):
     sqlraw = raw.replace("\015\015\012", "\n")
-    prod = TextProduct.TextProduct(raw)
+    prod = product.TextProduct(raw)
 
     product_id = prod.get_product_id()
     if len(prod.segments) == 0:
@@ -131,12 +132,13 @@ iembot processing error:</span><br />Product: %s<br />Error: %s" % \
             headline = (seg.headlines[0]).replace("\n", " ")
         elif raw.find("SPECIAL WEATHER STATEMENT") > 0:
             headline = "Special Weather Statement"
-        counties = countyText(seg.ugc)
+        counties = countyText(seg.ugcs)
         if (counties.strip() == ""):
             counties = "entire area"
         expire = ""
-        if (seg.ugcExpire is not None):
-            expire = "till "+ (seg.ugcExpire - mx.DateTime.RelativeDateTime(hours= reference.offsets[prod.z] )).strftime("%-I:%M %p ")+ prod.z
+        if (seg.ugcexpire is not None):
+            expire = "till "+ (seg.ugcexpire - datetime.timedelta(
+                    hours= reference.offsets[prod.z] )).strftime("%-I:%M %p ")+ prod.z
 
 
         mess = "%s: %s issues %s for %s %s %s?pid=%s" % (prod.source[1:], 
@@ -153,20 +155,7 @@ iembot processing error:</span><br />Product: %s<br />Error: %s" % \
         url = "%s?pid=%s" % (config.get('urls', 'product'), product_id)
         common.tweet([prod.source[1:],], twt, url)
 
-myJid = jid.JID('%s@%s/sps2bot_%s' % (config.get('xmpp','username'), 
-                                    config.get('xmpp','domain'), 
-       mx.DateTime.gmt().strftime("%Y%m%d%H%M%S") ) )
-factory = client.basicClientFactory(myJid, config.get('xmpp', 'password'))
-
-jabber = common.JabberClient(myJid)
-
-factory.addBootstrap('//event/stream/authd',jabber.authd)
-factory.addBootstrap("//event/client/basicauth/invaliduser", jabber.debug)
-factory.addBootstrap("//event/client/basicauth/authfailed", jabber.debug)
-factory.addBootstrap("//event/stream/error", jabber.debug)
-factory.addBootstrap(xmlstream.STREAM_END_EVENT, jabber._disconnect )
-
-reactor.connectTCP(config.get('xmpp', 'connecthost'),5222,factory)
+jabber = common.make_jabber_client('sps_parser')
 
 ldm = ldmbridge.LDMProductFactory( myProductIngestor() )
 reactor.run()
