@@ -35,14 +35,15 @@ config.read(os.path.join(os.path.dirname(__file__), 'cfg.ini'))
 os.chdir("/home/ldm/pyWWA")
 
 # Stuff I wrote
-from support import ldmbridge, stationTable
+from pyldm import ldmbridge
 
 # Third Party Stuff
 from twisted.enterprise import adbapi
 from twisted.internet.defer import DeferredQueue, Deferred
 from twisted.internet.task import cooperate
 from twisted.internet import reactor, protocol
-import mx.DateTime
+import datetime
+import pytz
 import common
 
 
@@ -52,7 +53,17 @@ POSTGISDB = adbapi.ConnectionPool("twistedpg", database="postgis", cp_reconnect=
                                 user=config.get('database','user'),
                                 password=config.get('database','password') )
 
-ST = stationTable.stationTable('/home/ldm/pyWWA/tables/nexrad.stns')
+ST = {}
+
+def load_station_table(txn):
+    """ Load the station table of NEXRAD sites """
+    log.msg("load_station_table called() ...")
+    txn.execute("""SELECT id, x(geom) as lon, y(geom) as lat from stations 
+    where network = 'NEXRAD'""")
+    for row in txn:
+        ST[row['id']] = {'lat': row['lat'],
+                         'lon': row['lon']}
+    log.msg("Station Table size %s" % (len(ST.keys(),)))
 
 def write_pid():
     """ Create a PID file for when we are fired up! """
@@ -68,14 +79,14 @@ def compute_ts(tstring):
     hour = int(tstring[14:16])
     minute = int(tstring[16:18])
 
-    gmt = mx.DateTime.gmt() + mx.DateTime.RelativeDateTime(hour=hour,
-                                                           minute=minute,
-                                                           second=0)
-    if gmt.day > 25 and day == 1: # Next month!
-        gmt += mx.DateTime.RelativeDateTime(days=15) # careful
-    gmt += mx.DateTime.RelativeDateTime(day=day)    
+    utc = datetime.datetime.utcnow()
+    utc = utc.replace(tzinfo=pytz.timezone("UTC"), second=0, microsecond=0,
+                      hour=hour, minute=minute)
+    if utc.day > 25 and day == 1: # Next month!
+        utc += datetime.timedelta(days=15) # careful
+    utc = utc.replace(day=day)    
         
-    return gmt
+    return utc
 
 class PROC(protocol.ProcessProtocol):
     """
@@ -142,8 +153,8 @@ class PROC(protocol.ProcessProtocol):
             return
         defer = POSTGISDB.runInteraction(really_process, self.res, self.afos[3:], 
                                  self.ts)
-        defer.addErrback( self.log_error )
         defer.addCallback(self.cancelDB)
+        defer.addErrback( self.log_error )
         defer.addErrback( log.err )
         
 
@@ -202,10 +213,10 @@ def really_process(txn, res, nexrad, ts):
          U8  154/126 NONE NONE     UNKNOWN       11  47 18.8  23.1  271/ 70  
          J0  127/134 NONE NONE     UNKNOWN       24  51 20.2  33.9    NEW   
     """
-    txn.execute("DELETE from nexrad_attributes WHERE nexrad = '%s'" % (nexrad) )
+    txn.execute("DELETE from nexrad_attributes WHERE nexrad = %s", (nexrad,))
     
-    cenlat = float(ST.sts[nexrad]['lat'])
-    cenlon = float(ST.sts[nexrad]['lon'])
+    cenlat = float(ST[nexrad]['lat'])
+    cenlon = float(ST[nexrad]['lon'])
     latscale = 111137.0
     lonscale = 111137.0 * math.cos( cenlat * math.pi / 180.0 )
 
@@ -260,7 +271,7 @@ def really_process(txn, res, nexrad, ts):
         mylat = cenlat + (cosaz * (d["range"] * 1000.0) / latscale)
         mylon = cenlon + (sinaz * (d["range"] * 1000.0) / lonscale)
         d["geom"] = "SRID=4326;POINT(%s %s)" % (mylon, mylat)
-        d["valid"] = ts.strftime("%Y-%m-%d %H:%M+00")
+        d["valid"] = ts
 
         for table in ['nexrad_attributes', 'nexrad_attributes_log']:
             sql = """INSERT into """+table+""" (nexrad, storm_id, geom, azimuth,
@@ -288,10 +299,11 @@ def job_size(jobs):
         reactor.callWhenRunning(reactor.stop)
     reactor.callLater(300, job_size, jobs)
 
-def main():
+def main(bogus):
     """
     Go main Go!
     """
+    log.msg("main() has fired...")
     jobs = DeferredQueue()
     ingest = MyProductIngestor()
     ingest.jobs = jobs
@@ -302,7 +314,8 @@ def main():
     
     reactor.callLater(0, write_pid)
     reactor.callLater(30, job_size, jobs)
-    reactor.run()
 
-if __name__ == '__main__':
-    main()
+df = POSTGISDB.runInteraction(load_station_table)
+df.addCallback(main)
+df.addErrback( reactor.stop )
+reactor.run()

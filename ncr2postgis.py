@@ -1,15 +1,8 @@
 """
- Take the raw output from gpnids and parse it into the IEM PostgreSQL database
- I am called with the following arguments
-     1. NEXRAD ID
-     2. Year YYYY
-     3. MM
-     4. DD
-     5. Minute MI
+ Run gpnids and send the result back to stdout
 """
 
 import sys
-import mx.DateTime
 import os
 import tempfile
 import subprocess
@@ -57,7 +50,8 @@ def do_gempak(tmpfn):
     p = subprocess.Popen("/home/ldm/bin/gpnids_vg",
                          stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                          stderr=subprocess.PIPE)
-    (so, se) = p.communicate(cmd)
+    p.communicate(cmd)
+    #(so, se) = p.communicate(cmd)
     #p.stdin.write(cmd)
     #se = p.stderr.read()
     #so = p.stdout.read()
@@ -68,7 +62,7 @@ def do_gempak(tmpfn):
         if os.path.isfile('%s.%s' % (tmpfn,suffix)):
             os.unlink("%s.%s" % (tmpfn,suffix))
 
-def main(nexrad, ts):
+def main():
     """
     Actually do work!
     """
@@ -80,8 +74,6 @@ def main(nexrad, ts):
         os.unlink(fn)
     
 if __name__ == '__main__':
-    nexrad = sys.argv[1]
-    ts = mx.DateTime.strptime(sys.argv[2], '%Y%m%d%H%M')
-    main(nexrad, ts)
+    main()
 
 
