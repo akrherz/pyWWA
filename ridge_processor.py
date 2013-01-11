@@ -1,11 +1,12 @@
 """
  I process activemq messages 10,000 at a time!
 """
-
 import os
+import subprocess
 import random
-import mx.DateTime
-import simplejson
+import datetime
+import json
+import pytz
 import pika
 
 def jitter():
@@ -25,10 +26,11 @@ def generate_image(ch, method, properties, body):
     lowerRightLat = float(properties.headers["lowerRightLat"])
     lowerRightLon = float(properties.headers["lowerRightLon"])
     # Convert Java ticks into local time
-    lts = mx.DateTime.DateTimeFromTicks( ticks / 1000. )
-    gts = lts.gmtime()
+    gts = datetime.datetime(1970, 1, 1) + datetime.timedelta(seconds = ticks/1000)
+    gts = gts.replace(tzinfo=pytz.timezone("UTC"))
+    utcnow = datetime.datetime.utcnow().replace(tzinfo=pytz.timezone("UTC"))
     routes = "ac"
-    if (mx.DateTime.gmt() - gts).seconds > 3600:
+    if (utcnow - gts).seconds > 3600:
         routes = "a"
 
     metadata = {'meta': {}}
@@ -48,7 +50,7 @@ def generate_image(ch, method, properties, body):
 
     metafp = '/tmp/%s_%s_%s.json' % (siteID, productID, gts.strftime("%H%M"))
     o = open(metafp, 'w')
-    simplejson.dump(metadata, o)
+    json.dump(metadata, o)
     o.close()
 
     wldfp = '/tmp/%s_%s_%s.wld' % (siteID, productID, 
@@ -62,11 +64,11 @@ def generate_image(ch, method, properties, body):
     o.write("%.6f%s\n" % (upperLeftLat,jitter())) #UL Lat
     o.close()
 
-    pqstr = "/home/ldm/bin/pqinsert -p '%s' %s" % (pqstr, fp)
-    os.system( pqstr )
-    os.system( pqstr.replace("png","wld") )
+    pqstr = "pqinsert -p '%s' %s" % (pqstr, fp)
+    subprocess.call( pqstr, shell=True )
+    subprocess.call( pqstr.replace("png","wld"), shell=True )
     metapq = pqstr.replace("png","json").replace(" ac ", " c ") 
-    os.system( metapq )
+    subprocess.call( metapq, shell=True )
 
     os.unlink(fp)
     os.unlink(wldfp)

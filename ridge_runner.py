@@ -4,5 +4,5 @@
 import time
 import subprocess
 while True:
-    subprocess.call("/usr/bin/python ridge_processor.py", shell=True)
+    subprocess.call("python ridge_processor.py", shell=True)
     time.sleep(3)
