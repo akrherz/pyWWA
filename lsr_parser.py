@@ -22,18 +22,22 @@ log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
 log.startLogging(logfile.DailyLogFile('lsr_parser.log', 'logs'))
 
 # Standard python imports
-import re, pickle
+import re
+import pickle
 import os
 
 # Third party python stuff
-import mx.DateTime
+import datetime
+import pytz
 from twisted.enterprise import adbapi
 from twisted.words.protocols.jabber import client, jid
 from twisted.internet import reactor
 
 # IEM python Stuff
 import common
-from support import TextProduct,  ldmbridge, reference
+from pyiem import reference
+from pyiem.nws import product
+from pyldm import ldmbridge
 
 import ConfigParser
 config = ConfigParser.ConfigParser()
@@ -59,10 +63,11 @@ def cleandb():
     """ To keep LSRDB from growing too big, we clean it out 
         Lets hold 7 days of data!
     """
-    thres = mx.DateTime.gmt() - mx.DateTime.RelativeDateTime(hours=24*7)
+    utc = datetime.datetime.utcnow().replace(tzinfo=pytz.timezone("UTC"))
+    thres = utc - datetime.timedelta(hours=24*7)
     init_size = len(LSRDB.keys())
     for key in LSRDB.keys():
-        if (LSRDB[key] < thres):
+        if LSRDB[key] < thres:
             del LSRDB[key]
 
     fin_size = len(LSRDB.keys())
@@ -82,19 +87,20 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
 
     def process_data(self, buf):
         """ @buf: String that is a Text Product """
-        if (len(buf) < 50):
+        if len(buf) < 50:
             log.msg("Too short LSR product found:\n%s" % (buf,))
             return
 
         raw = buf.replace("\015\015\012", "\n")
         try:
-            nws = TextProduct.TextProduct(raw)
+            nws = product.TextProduct(raw)
             real_processor(nws)
         except Exception,myexp:
             common.email_error(myexp, buf)
 
     def connectionLost(self, reason):
-        print 'connectionLost', reason
+        log.msg('connectionLost')
+        log.err( reason )
         reactor.callLater(5, self.shutdown)
 
     def shutdown(self):
@@ -134,7 +140,7 @@ class LSR:
         minute = time_parts[0][-2:]
         ampm = time_parts[1]
         dstr = "%s:%s %s %s" % (hour12, minute, ampm, line2[:10])
-        self.lts = mx.DateTime.strptime(dstr, "%I:%M %p %m/%d/%Y")
+        self.lts = datetime.datetime.strptime(dstr, "%I:%M %p %m/%d/%Y")
 
         self.typetext = (line1[12:29]).strip().upper()
         def myupper(s):
@@ -150,9 +156,9 @@ class LSR:
 
         self.magf = (line2[12:29]).strip()
         self.mag = re.sub("(ACRE|INCHES|INCH|MILE|MPH|KTS|U|FT|F|E|M|TRACE)", "", self.magf)
-        if (self.mag == ""):
+        if self.mag == "":
             self.mag = 0
-        print "mag: |%s| magf: |%s|" % (self.mag, self.magf)
+        log.msg("mag: |%s| magf: |%s|" % (self.mag, self.magf))
         self.county = (line2[29:48]).strip().title()
         self.state = line2[48:50]
         self.source = (line2[53:]).strip().lower()
@@ -176,7 +182,7 @@ class LSR:
 
     def set_gts(self, tsoff):
         """ Set GTS via an offset """
-        self.gts = self.lts + tsoff
+        self.gts = (self.lts + tsoff).replace(tzinfo=pytz.timezone("UTC"))
 
     def url_builder(self, wfo):
         """ URL builder """
@@ -188,9 +194,9 @@ class LSR:
 
 def real_processor(nws):
     """ Lets actually process! """
-    wfo = nws.get_iembot_source()
+    wfo = nws.source[1:]
 
-    tsoff = mx.DateTime.RelativeDateTime(hours= reference.offsets[nws.z])
+    tsoff = datetime.timedelta(hours= reference.offsets[nws.z])
 
     goodies = "\n".join( nws.sections[3:] )
     data = re.split("&&", goodies)
@@ -198,23 +204,24 @@ def real_processor(nws):
 
     _state = 0
     i = 0
-    time_floor = mx.DateTime.now() - mx.DateTime.RelativeDateTime(hours=12)
-    min_time = mx.DateTime.DateTime(2040, 1, 1)
-    max_time = mx.DateTime.DateTime(1970, 1, 1)
+    gmt = datetime.datetime.utcnow().replace(tzinfo=pytz.timezone("UTC"))
+    time_floor = gmt - datetime.timedelta(hours=12)
+    min_time = datetime.datetime(2040, 1, 1).replace(tzinfo=pytz.timezone("UTC"))
+    max_time = datetime.datetime(1970, 1, 1).replace(tzinfo=pytz.timezone("UTC"))
     duplicates = 0
     new_reports = 0
-    while (i < len(lines)):
+    while i < len(lines):
         # Line must start with a number?
-        if (len(lines[i]) < 40 or (re.match("[0-9]", lines[i][0]) == None)):
+        if len(lines[i]) < 40 or (re.match("[0-9]", lines[i][0]) == None):
             i += 1
             continue
         # We can safely eat this line
         lsr = LSR()
         lsr.consume_lines( lines[i], lines[i+1])
         lsr.set_gts(tsoff)
-        if (lsr.gts > max_time):
+        if lsr.gts > max_time:
             max_time = lsr.gts
-        if (lsr.gts < min_time):
+        if lsr.gts < min_time:
             min_time = lsr.gts
 
         i += 1
@@ -245,7 +252,7 @@ def real_processor(nws):
 
         dbtype = reference.lsr_events[lsr.typetext]
         time_fmt = "%I:%M %p"
-        if (lsr.lts < time_floor):
+        if lsr.gts < time_floor:
             time_fmt = "%d %b, %I:%M %p"
 
         # We have all we need now
@@ -256,18 +263,17 @@ def real_processor(nws):
             duplicates += 1
             continue
         new_reports += 1
-        LSRDB[ unique_key ] = mx.DateTime.gmt()
+        LSRDB[ unique_key ] = gmt
 
         mag_long = lsr.mag_string()
         uri = lsr.url_builder(wfo)
 
-        jabber_text = "%s: %s [%s Co, %s] %s reports %s %sat %s %s -- %s %s" % \
-             (wfo, lsr.city, lsr.county, lsr.state, lsr.source, \
-              lsr.typetext, mag_long, \
+        jabber_text = "%s: %s [%s Co, %s] %s reports %s %sat %s %s -- %s %s" % (
+            wfo, lsr.city, lsr.county, lsr.state, lsr.source, 
+              lsr.typetext, mag_long, 
               lsr.lts.strftime(time_fmt), nws.z, lsr.remark, uri)
-        jabber_html = \
-          "%s: %s [%s Co, %s] %s <a href='%s'>reports %s %s</a>at %s %s -- %s" % \
-          (wfo,lsr.city, lsr.county, lsr.state, lsr.source, uri, lsr.typetext, \
+        jabber_html = "%s: %s [%s Co, %s] %s <a href='%s'>reports %s %s</a>at %s %s -- %s" % (
+                wfo,lsr.city, lsr.county, lsr.state, lsr.source, uri, lsr.typetext, 
            mag_long, lsr.lts.strftime(time_fmt), nws.z, lsr.remark)
         jabber.sendMessage(jabber_text, jabber_html)
         twt = "%s [%s Co, %s] %s reports %s %sat %s %s" % (lsr.city, lsr.county, lsr.state, lsr.source, 
@@ -279,13 +285,14 @@ def real_processor(nws):
                county, state, source, remark, geom, wfo, typetext) 
                values (%s, %s, %s, %s, %s, %s, 
                %s, %s, 'SRID=4326;POINT(-%s %s)', %s, %s)""" 
-        myargs = (lsr.gts.year, lsr.gts.strftime("%Y-%m-%d %H:%M+00"), dbtype, lsr.mag, 
+        myargs = (lsr.gts.year, lsr.gts, dbtype, lsr.mag, 
            lsr.city, lsr.county, lsr.state, lsr.source, 
            lsr.remark, lsr.lon, lsr.lat, wfo, lsr.typetext)
 
-        DBPOOL.runOperation(sql, myargs).addErrback( common.email_error, nws.raw)
+        df = DBPOOL.runOperation(sql, myargs)
+        df.addErrback( common.email_error, nws.text)
 
-    if (nws.raw.find("...SUMMARY") > 1):
+    if nws.text.find("...SUMMARY") > 1:
         extra_text = ""
         if (duplicates > 0):
             extra_text = ", %s out of %s reports were previously \
@@ -302,19 +309,7 @@ sent and not repeated here." % (duplicates, duplicates + new_reports)
         twt = "Summary Local Storm Report"
         common.tweet([wfo,], twt, uri)
 
-myJid = jid.JID('%s@%s/lsr_parse_%s' % (config.get('xmpp','username'), 
-                                    config.get('xmpp','domain'),
-       mx.DateTime.gmt().strftime("%Y%m%d%H%M%S") ) )
-factory = client.basicClientFactory(myJid, config.get('xmpp', 'password'))
-
-jabber = common.JabberClient(myJid)
-
-factory.addBootstrap('//event/stream/authd', jabber.authd)
-factory.addBootstrap("//event/client/basicauth/invaliduser", jabber.debug)
-factory.addBootstrap("//event/client/basicauth/authfailed", jabber.debug)
-factory.addBootstrap("//event/stream/error", jabber.debug)
-
-reactor.connectTCP(config.get('xmpp', 'connecthost'), 5222, factory)
+jabber = common.make_jabber_client("lsr_parser")
 
 LDM = ldmbridge.LDMProductFactory( MyProductIngestor() )
 reactor.callLater( 20, cleandb)
