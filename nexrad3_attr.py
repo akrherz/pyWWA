@@ -59,7 +59,7 @@ def load_station_table(txn):
     """ Load the station table of NEXRAD sites """
     log.msg("load_station_table called() ...")
     txn.execute("""SELECT id, x(geom) as lon, y(geom) as lat from stations 
-    where network = 'NEXRAD'""")
+    where network in ('NEXRAD','TWDR')""")
     for row in txn:
         ST[row['id']] = {'lat': row['lat'],
                          'lon': row['lon']}
