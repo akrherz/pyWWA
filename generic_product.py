@@ -108,7 +108,7 @@ def countyText(u):
     countyState = {}
     c = ""
     for k in range(len(u)):
-        cnty = u[k]
+        cnty = str(u[k])
         stateAB = cnty[:2]
         if (not countyState.has_key(stateAB)):
             countyState[stateAB] = []
@@ -300,7 +300,7 @@ def real_process(raw):
 
     for seg in prod.segments:
         # The segment needs to have ugc codes
-        if (len(seg.ugc) == 0):
+        if (len(seg.ugcs) == 0):
             continue
         # If the product has VTEC, it is handled by the vtec ingestor
         if (len(seg.vtec) > 0 and ['MWS','HLS'].__contains__(pil)):
@@ -312,12 +312,12 @@ def real_process(raw):
             log.msg("HVTEC FOUND!, skipping")
             continue
 
-        counties = countyText(seg.ugc)
+        counties = countyText(seg.ugcs)
         if (counties.strip() == ""):
             counties = "entire area"
         expire = ""
-        if (seg.ugcExpire is not None):
-            expire = "till "+ (seg.ugcExpire - datetime.timedelta(hours= reference.offsets[prod.z] )).strftime("%-I:%M %p ")+ prod.z
+        if (seg.ugcexpire is not None):
+            expire = "till "+ (seg.ugcexpire - datetime.timedelta(hours= reference.offsets[prod.z] )).strftime("%-I:%M %p ")+ prod.z
 
         prodtxt = "(%s)" % (pil,)
         if reference.prodDefinitions.has_key(pil):

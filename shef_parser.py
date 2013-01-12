@@ -295,6 +295,14 @@ def really_process(tp, data):
 
         varname = tokens[5]
         value = float(tokens[6])
+        if varname[:2] in ['TV','TB']: # Soil Depth fun!
+            depth = int(value)
+            value = abs( (value * 1000) % (depth * 1000) )
+            if depth < 0:
+                value = 0 - value
+                depth = abs(depth)
+            varname = "%s.%02i" % (varname, depth)
+                
         mydata[sid][tstamp][varname] = value
     # Now we process each station we found in the report! :)
     for sid in mydata.keys():
@@ -334,7 +342,14 @@ def checkvars( myvars ):
 
 def var2dbcols(var):
     """ Convert a SHEF var into split values """
-    return [ var[:2], var[2], var[3:5], var[5], var[-1] ]
+    if var.find(".") > -1:
+        parts = var.split(".")
+        var = parts[0]
+        return [ var[:2], var[2], var[3:5], var[5], var[-1], parts[1] ]
+    else:
+        return [ var[:2], var[2], var[3:5], var[5], var[-1], None ]
+
+    
 
 def process_site(tp, sid, ts, data):
     """ 
@@ -343,19 +358,23 @@ def process_site(tp, sid, ts, data):
     localts = ts.astimezone( TIMEZONES[LOC2TZ.get(sid) ])
     #log.msg("%s sid: %s ts: %s %s" % (tp.get_product_id(), sid, ts, localts))
     # Insert data into database regardless
-    for var in data.keys():
+    for varname in data.keys():
+        value = data[varname]
         deffer = HADSDB.runOperation("""INSERT into raw"""+
                                       ts.strftime("%Y_%m") +""" 
             (station, valid, key, value) 
             VALUES(%s,%s, %s, %s)""", ( sid, 
-            ts.strftime("%Y-%m-%d %H:%M+00"), var, data[var]))
+            ts.strftime("%Y-%m-%d %H:%M+00"), varname, value))
         deffer.addErrback(common.email_error, tp.text)
         deffer.addErrback( log.err )
 
-        (pe, d, s, e, p) = var2dbcols(var)
+        (pe, d, s, e, p, depth) = var2dbcols(varname)
         d2 = ACCESSDB_SINGLE.runOperation("""
-        INSERT into current_shef values (%s,%s,%s,%s,%s,%s,%s,%s)
-        """, (sid, ts.strftime("%Y-%m-%d %H:%M+00"), pe, d, s, e, p, data[var]))
+        INSERT into current_shef(station, valid, physical_code, duration,
+        source, extremum, probability, value, depth) 
+        values (%s,%s,%s,%s,%s,%s,%s,%s,%s)
+        """, (sid, ts.strftime("%Y-%m-%d %H:%M+00"), pe, d, s, e, p, value,
+              depth))
         d2.addErrback( common.email_error, tp.text )
 
     # Our simple determination if the site is a COOP site
