@@ -1,8 +1,10 @@
 """
 Move DSM messages into the text database with the proper PIL
 """
-import iemdb, sys, re
-from support import TextProduct
+import iemdb
+import sys
+import re
+from pyiem.nws import product
 AFOS = iemdb.connect('afos')
 acursor = AFOS.cursor()
 
@@ -10,14 +12,19 @@ raw = sys.stdin.read()
 data = raw.replace("\r\r\n", "z")
 tokens = re.findall("(K[A-Z0-9]{3} [DM]S.*?[=N]z)", data)
 
-nws = TextProduct.TextProduct( raw, bypass=True)
-nws.findAFOS()
-nws.findWMO()
+nws = product.TextProduct( raw )
 
+gmt = nws.valid
+table = "products_%s_0106" % (gmt.year,)
+if gmt.month > 6:
+    table = "products_%s_0712" % (gmt.year,)
+    
+sql = """INSERT into """+table+"""(pil, data, source, wmo, entered) 
+    values(%s,%s,%s,%s,%s)"""
+    
 for t in tokens:
-    sql = "INSERT into products(pil, data, source, wmo) values(%s,%s,%s,%s)"""
     sqlargs = ("%s%s" % (sys.argv[1], t[1:4]) , t.replace("z","\n"),
-               nws.source, nws.wmo )
+               nws.source, nws.wmo, gmt.strftime("%Y-%m-%d %H:%M+00") )
     acursor.execute(sql, sqlargs)
     
 acursor.close()

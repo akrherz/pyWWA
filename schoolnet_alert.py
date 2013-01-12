@@ -2,7 +2,10 @@
 Called when there is a schoolnet alert
 """
 
-import re, sys, smtplib, mx.DateTime
+import re
+import sys
+import smtplib
+import datetime
 from email.MIMEText import MIMEText
 import network
 
@@ -35,8 +38,8 @@ s.close()
 if network != 'KCCI': # We have a special
     sys.exit()
 
-ts = mx.DateTime.strptime(mmdd + hhmm, "%m%d%H%M")
-ts += mx.DateTime.RelativeDateTime(year= mx.DateTime.now().year )
+ts = datetime.datetime.strptime("%s%s%s" % (datetime.datetime.now().year,
+                                            mmdd, hhmm), "%m%d%H%M")
 import iemdb
 KCCI = iemdb.connect('kcci', bypass=True)
 kcursor = KCCI.cursor()

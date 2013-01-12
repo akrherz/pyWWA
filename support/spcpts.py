@@ -7,7 +7,7 @@ import numpy
 from shapely.geometry import Polygon, LineString, Point
 from shapely.geometry.base import geom_factory
 import shapely.geos
-import mx.DateTime
+import datetime
 
 def ptchecker(pts):
     """
@@ -141,7 +141,7 @@ class SPCPTS(object):
         self.outlooks = []
         self.valid = None
         self.expire = None
-        self.issue = tp.issueTime
+        self.issue = tp.valid
         self.set_metadata( tp )
         self.find_issue_expire( tp )
         self.find_outlooks( tp )
@@ -206,12 +206,14 @@ class SPCPTS(object):
         day2 = int(tokens[0][1][:2])
         hour2 = int(tokens[0][1][2:4])
         min2 = int(tokens[0][1][4:])
-        valid = tp.issueTime + mx.DateTime.RelativeDateTime(day=day1,hour=hour1,minute=min1)
-        expire = tp.issueTime + mx.DateTime.RelativeDateTime(day=day2,hour=hour2,minute=min2)
-        if day1 < tp.issueTime.day and day1 == 1:
-            valid += mx.DateTime.RelativeDateTime(months=1)
-        if day2 < tp.issueTime.day and day2 == 1:
-            expire += mx.DateTime.RelativeDateTime(months=1)
+        valid = tp.valid.replace(day=day1,hour=hour1,minute=min1)
+        expire = tp.valid.replace(day=day2,hour=hour2,minute=min2)
+        if day1 < tp.valid.day and day1 == 1:
+            valid = valid + datetime.timedelta(days=25)
+            valid = valid.replace(day=day1,hour=hour1,minute=min1)
+        if day2 < tp.valid.day and day2 == 1:
+            expire = expire - datetime.timedelta(days=25)
+            expire = expire.replace(day=day1,hour=hour1,minute=min1)
         self.valid = valid
         self.expire = expire
     

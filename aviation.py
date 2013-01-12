@@ -28,7 +28,8 @@ import datetime
 import pg
 
 # pyWWA stuff
-from support import ldmbridge, TextProduct, utils
+from pyldm import ldmbridge
+from pyiem.nws import product
 import common
 
 import ConfigParser
@@ -106,7 +107,7 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
     def process_data(self, buf):
         """ Process the product """
         try:
-            prod = TextProduct.TextProduct(buf)
+            prod = product.TextProduct(buf)
             if prod.afos in ['SIGC','SIGW','SIGE']:
                 defer = DBPOOL.runInteraction(process_SIGC, prod)
                 defer.addErrback(common.email_error, buf)
@@ -164,6 +165,22 @@ def makebox(lons, lats):
     rlons.append( lons[0] - runy )
     rlats.append( lats[0] + runx )
     return rlons, rlats
+dirs = {'NNE': 22.5, 'ENE': 67.5, 'NE':  45.0, 'E': 90.0, 'ESE': 112.5,
+        'SSE': 157.5, 'SE': 135.0, 'S': 180.0, 'SSW': 202.5,
+        'WSW': 247.5, 'SW': 225.0, 'W': 270.0, 'WNW': 292.5,
+        'NW': 315.0, 'NNW': 337.5, 'N': 0, '': 0}
+
+KM_SM = 1.609347
+
+
+def go2lonlat(lon0, lat0, direction, displacement):
+    x = -math.cos( math.radians( dirs[direction] ) )
+    y = math.sin( math.radians( dirs[direction] ) )
+    lat0 += (y * displacement * KM_SM / 111.11 )
+    lon0 += (x * displacement * KM_SM /(111.11*math.cos( math.radians(lat0))))
+
+    return lon0, lat0
+
 
 def locs2lonslats(locstr, geotype, widthstr, diameterstr):
     """
@@ -182,7 +199,7 @@ def locs2lonslats(locstr, geotype, widthstr, diameterstr):
         if s:
             d = s.groupdict()
             if d['offset'] is not None:
-                (lon1, lat1) = utils.go2lonlat(LOCS[d['loc']]['lon'], LOCS[d['loc']]['lat'], 
+                (lon1, lat1) = go2lonlat(LOCS[d['loc']]['lon'], LOCS[d['loc']]['lat'], 
                                                    d['drct'], float(d['offset']) )
             else:
                 (lon1, lat1) = (LOCS[d['loc']]['lon'], LOCS[d['loc']]['lat'])
@@ -259,11 +276,11 @@ def process_SIGC(txn, prod):
 
     """
     txn.execute("DELETE from sigmets_current where expire < now()")
-    for section in prod.raw.split('\n\n'):
+    for section in prod.text.split('\n\n'):
         s = CS_RE.search(section.replace("\n", ' '))
         if s:
             data = s.groupdict()
-            expire = figure_expire(prod.issueTime, float(data['hour']), float(data['minute']))
+            expire = figure_expire(prod.valid, float(data['hour']), float(data['minute']))
             lons, lats = locs2lonslats(data['locs'], data['geotype'], data['width'], data['diameter'])
             wkt = ""
             for lat,lon in zip(lats,lons):
@@ -271,7 +288,7 @@ def process_SIGC(txn, prod):
             if lats[0] != lats[-1] or lons[0] != lons[-1]:
                 wkt += "%s %s," % (lons[0], lats[0])
             print '%s %s From: %s Till: %s Len(lats): %s' % (data['label'], data['geotype'], 
-                                    prod.issueTime, expire, len(lats))
+                                    prod.valid, expire, len(lats))
             for table in ('sigmets_current', 'sigmets_archive'):
                 sql = "DELETE from "+table+" where label = %s and expire = %s"
                 args = (data['label'], expire)
@@ -281,7 +298,7 @@ def process_SIGC(txn, prod):
                     expire, raw, geom) VALUES ('C',%s, %s, %s, %s,
                    %s)""" 
                 args = (data['label'], 
-                                        prod.issueTime, expire, section, sqlwkt)
+                                        prod.valid, expire, section, sqlwkt)
                 txn.execute(sql, args)
 
         elif section.find("CONVECTIVE SIGMET") > -1:

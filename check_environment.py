@@ -6,7 +6,8 @@ from twisted.python import log, logfile
 import os
 import mesonet
 import access
-from support import ldmbridge, TextProduct
+from pyldm import ldmbridge
+from pyiem.nws import product
 import common
 import shapelib
 import shapely
@@ -16,4 +17,5 @@ from twittytwister import twitter
 import oauth
 from twisted.internet import reactor, protocol
 from twisted.enterprise import adbapi
-import mx.DateTime
+
+import pytz

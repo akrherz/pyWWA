@@ -1,25 +1,26 @@
 """
 I convert raw GINI noaaport imagery into geo-referenced PNG files both in the
-'native' projection and 4326.  I do need the support/gini.py file as well to
-function in life.
+'native' projection and 4326.  
 
 Questions? daryl herzmann akrherz@iastate.edu
 """
 
-from support import gini
+# https://github.com/akrherz/pyIEM
+from pyiem.nws import gini
+import pytz
 import cStringIO
 import sys
 import Image
-import mx.DateTime
+import datetime
 import logging
 import os
 import tempfile
 import random
-import simplejson
+import json
 import subprocess
 
 FORMAT = "%(asctime)-15s:["+ str(os.getpid()) +"]: %(message)s"
-LOG_FN = 'logs/gini2gis-%s.log' % (mx.DateTime.gmt().strftime("%Y%m%d"),)
+LOG_FN = 'logs/gini2gis-%s.log' % (datetime.datetime.utcnow().strftime("%Y%m%d"),)
 logging.basicConfig(filename=LOG_FN, filemode='a+', format=FORMAT)
 logger = logging.getLogger()
 logger.addHandler(logging.StreamHandler())
@@ -87,7 +88,7 @@ def write_metadata(sat, tmpfn):
     metadata['meta']['archive_filename'] = sat.archive_filename()
     metafp = '%s.json' % (tmpfn,)
     out = open(metafp, 'w')
-    simplejson.dump(metadata, out)
+    json.dump(metadata, out)
     out.close()
     
     cmd = "%s -p 'gis c %s gis/images/awips%s/%s GIS/sat/%s json' %s.json" % (
@@ -111,7 +112,7 @@ def write_metadata_epsg(sat, tmpfn, epsg):
     metadata['meta']['archive_filename'] = sat.archive_filename()
     metafp = '%s_%s.json' % (tmpfn, epsg)
     out = open(metafp, 'w')
-    simplejson.dump(metadata, out)
+    json.dump(metadata, out)
     out.close()
     
     cmd = "%s -p 'gis c 000000000000 gis/images/%s/goes/%s bogus json' %s_%s.json" % (
@@ -125,7 +126,9 @@ def get_ldm_routes(sat):
     """
     Figure out if this product should be routed to current or archived folders
     """
-    if (mx.DateTime.gmt() - sat.metadata['valid']).minutes > 120:
+    utcnow = datetime.datetime.utcnow().replace(tzinfo=pytz.timezone("UTC"))
+    minutes = (utcnow - sat.metadata['valid']).seconds / 60.0
+    if minutes > 120:
         return "a"
     return "ac"
 

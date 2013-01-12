@@ -5,8 +5,8 @@ Parse UVI data into something WXC can use
 import sys
 import subprocess
 import os
-import mx.DateTime
-now = mx.DateTime.now()
+import datetime
+now = datetime.datetime.now()
 
 cdict = {'DES MOINES IA': [41.53, -93.65,'KDSM'],
  'CHICAGO IL': [41.98, -87.93,'KORD'],

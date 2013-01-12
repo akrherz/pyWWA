@@ -187,7 +187,6 @@ def process_site(orig_metar, clean_metar):
     
     iem = Observation(iemid, network, gts.astimezone( 
                                     TIMEZONES[LOC2TZ.get(iemid, None)]))
-    iem.data['tzname'] = LOC2TZ.get(iemid)
     deffer = IEMDB.runInteraction(save_data, iem, mtr, clean_metar, orig_metar)
     deffer.addErrback(common.email_error, clean_metar)
     #deffer.addCallback(got_results, tp, sid, network)

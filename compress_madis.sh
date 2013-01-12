@@ -7,3 +7,5 @@ cd /mesonet/data/madis/metar
 gzip ${YYYYMMDD}*nc
 cd /mesonet/data/madis/mesonet
 gzip ${YYYYMMDD}*nc
+
+#END

@@ -20,3 +20,5 @@ for R in $(echo "DMX DVN OAX ARX FSD MPX EAX ABR UDX"); do
   mv ${R}radar.tgz /mesonet/ARCHIVE/nexrad/${DIR}/${R}_${YYYYMMDD}.tgz
   rm ${R}radar.tar
 done
+
+#END

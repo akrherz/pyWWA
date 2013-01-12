@@ -7,12 +7,16 @@ from twisted.mail import smtp
 from twisted.web import client
 import twisted.web.error as weberror
 from twisted.words.xish.xmlstream import STREAM_END_EVENT
+from twisted.words.protocols.jabber import client as jclient
+from twisted.words.protocols.jabber import xmlstream, jid
 from twisted.internet.task import LoopingCall
+from twisted.internet import task
 from twisted.enterprise import adbapi
 
 from twittytwister import twitter
 import simplejson
 import traceback
+import datetime
 import sys
 import os
 import StringIO
@@ -95,9 +99,8 @@ def tweet(channels, msg, url, extras={}):
     if url:
         url = url.replace("&amp;", "&").replace("#","%23").replace("&","%26").replace("?", "%3F")
         deffer = client.getPage(BITLY % (url, ) )
-        # Add errback first
-        deffer.addErrback(bitly_error, channels, msg, extras )
         deffer.addCallback(reallytweet, channels, msg, extras )
+        deffer.addErrback(bitly_error, channels, msg, extras )
         deffer.addErrback(log.err)
     else:
         reallytweet(None, channels, msg, extras)
@@ -133,9 +136,30 @@ def tweet_step2(channels, msg, extras, tinyurl=""):
         if not OAUTH_TOKENS.has_key(tuser):
             log.msg("Unknown Twitter User, %s" % (tuser,))
             continue
-        reactor.callLater(i, really_really_tweet, 
+        df = task.deferLater(reactor, i, really_really_tweet, 
                           tuser, channel, tinyurl, msg, extras)
+        df.addErrback( log.err )
         i += 1
+
+def make_jabber_client(resource_prefix):
+    """ Generate a jabber client, please """
+
+    myJid = jid.JID('%s@%s/%s_%s' % (config.get('xmpp','username'), 
+                                    config.get('xmpp','domain'), resource_prefix,
+       datetime.datetime.utcnow().strftime("%Y%m%d%H%M%S") ) )
+    factory = jclient.basicClientFactory(myJid, config.get('xmpp', 'password'))
+
+    jabber = JabberClient(myJid)
+
+    factory.addBootstrap('//event/stream/authd', jabber.authd)
+    factory.addBootstrap("//event/client/basicauth/invaliduser", jabber.debug)
+    factory.addBootstrap("//event/client/basicauth/authfailed", jabber.debug)
+    factory.addBootstrap("//event/stream/error", jabber.debug)
+    factory.addBootstrap(xmlstream.STREAM_END_EVENT, jabber._disconnect )
+
+    reactor.connectTCP(config.get('xmpp', 'connecthost'), 5222, factory)
+
+    return jabber
 
         
 def really_really_tweet(tuser, channel, tinyurl, msg, extras):
@@ -149,8 +173,8 @@ def really_really_tweet(tuser, channel, tinyurl, msg, extras):
     _twitter = twitter.Twitter(consumer=OAUTH_CONSUMER, 
                                token=OAUTH_TOKENS[tuser])
     deffer = _twitter.update( twt[:140], None, extras)
-    deffer.addErrback(twitterErrback, tuser, channel, twt)
     deffer.addCallback(tb, tuser, channel, twt)
+    deffer.addErrback(twitterErrback, tuser, channel, twt)
     deffer.addErrback(log.err)
 
 def tb(x, tuser, channel, twt):

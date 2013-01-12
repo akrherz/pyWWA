@@ -1,7 +1,16 @@
 
-import re, mx.DateTime
+import re
+import datetime
+import iemtz
+
+from twisted.python import log
 
 _re = "(/([A-Z])\.([A-Z]+)\.([A-Z]+)\.([A-Z]+)\.([A-Z])\.([0-9]+)\.([0-9,T,Z]+)-([0-9,T,Z]+)/)"
+
+_classDict = {'O': 'Operational',
+              'T': 'Test',
+              'E': 'Experimental',
+              'X': 'Experimental VTEC'}
 
 _actionDict = {'NEW': 'issues',
                'CON': 'continues',
@@ -90,8 +99,10 @@ _phenDict = {
 def contime(s):
     if ( len(re.findall("0000*T",s)) > 0 ): return None
     try:
-        return mx.DateTime.strptime(s, '%y%m%dT%H%MZ')
-    except:
+        ts = datetime.datetime.strptime(s, '%y%m%dT%H%MZ')
+        return ts.replace( tzinfo=iemtz.UTC() )
+    except Exception, err:
+        log.err( err )
         return None
 class vtec:
 
@@ -122,7 +133,7 @@ class vtec:
     def productString(self):
         q = "unknown %s" % (self.action,)
         if (_actionDict.has_key(self.action)):
-           q = _actionDict[ self.action ]
+            q = _actionDict[ self.action ]
 
         p = "Unknown %s" % (self.phenomena,)
         if (_phenDict.has_key(self.phenomena)):
@@ -135,3 +146,4 @@ class vtec:
         if (self.significance == 'A' and self.phenomena == 'FW'):
             p = "Fire Weather"
         return "%s %s %s" % (q, p,a)
+

@@ -1,5 +1,8 @@
 
-import re, mx.DateTime, string
+import re
+import iemtz
+import string
+import datetime
 from support import ugc, vtec, hvtec, reference
 
 #TORNADO = re.compile(r"(STORM\W+CAPABLE\W+OF\W+PRODUCING|REPORTED|INDICATED?)\W+A\W+TORNADO")
@@ -10,10 +13,12 @@ WINDTAG = re.compile(".*WIND\.\.\.(?P<winddir>[><]?)\s?(?P<wind>[0-9]+)\s?MPH")
 TORNADOTAG = re.compile(".*TORNADO\.\.\.(?P<tornado>RADAR INDICATED|OBSERVED|POSSIBLE)")
 TORNADODAMAGETAG = re.compile(".*TORNADO DAMAGE THREAT\.\.\.(?P<damage>SIGNIFICANT|CATASTROPHIC)")
 TIME_MOT_LOC = re.compile(".*TIME\.\.\.MOT\.\.\.LOC (?P<ztime>[0-9]{4})Z (?P<dir>[0-9]{1,3})DEG (?P<sknt>[0-9]{1,3})KT (?P<loc>[0-9 ]+)")
+TIME_RE = "^([0-9]+) (AM|PM) ([A-Z][A-Z][A-Z]?T) [A-Z][A-Z][A-Z] ([A-Z][A-Z][A-Z]) ([0-9]+) ([1-2][0-9][0-9][0-9])$"
+WMO_RE = "^[A-Z0-9]{6} [A-Z]{4} ([0-3][0-9])([0-2][0-9])([0-5][0-9])"
 
 class TextProduct:
 
-    def __init__(self, raw, bypass=False):
+    def __init__(self, raw, bypass=False, gmtnow=datetime.datetime.utcnow()):
         self.idd = None
         self.wmo = None
         self.source = None
@@ -26,9 +31,10 @@ class TextProduct:
 
         self.raw = raw.strip().replace("\015\015\012", "\n") # to unix
         self.sections = self.raw.split("\n\n")
+        self.findIssueTime(gmtnow.replace(second=0))
 
         if not bypass:     
-            parseCallbacks = [self.findIssueTime, self.findSegments, 
+            parseCallbacks = [self.findSegments, 
                 self.findIDD, self.findWMO, self.findAFOS, self.figureFcster, 
                 self.find_pheader]
             for cb in parseCallbacks:
@@ -128,11 +134,12 @@ afos: %(afos)s
         if tokens[0][1] == "PM" and h < 12:
             h += 12
         # Figure local issued time
-        issue = self.issueTime - mx.DateTime.RelativeDateTime(hours=reference.offsets[self.z])
-        expire = issue + mx.DateTime.RelativeDateTime(hour=h, minute=m)
-        if (expire < issue):
-            expire += mx.DateTime.RelativeDateTime(days=1)
-        expireZ = expire + mx.DateTime.RelativeDateTime(hours=reference.offsets[self.z])
+        issue = self.issueTime - datetime.timedelta(
+                                        hours=reference.offsets[self.z])
+        expire = issue.replace(hour=h, minute=m)
+        if expire < issue:
+            expire = expire + datetime.timedelta(days=1)
+        expireZ = expire + datetime.timedelta(hours=reference.offsets[self.z])
         print issue, expire, expireZ, self.z
 
         if (self.afos[:3] == "SVR"):
@@ -149,46 +156,67 @@ afos: %(afos)s
         print 'Fake VTEC', fake
         self.segments[0].vtec.append( vtec.vtec(fake) )
 
-    def findIssueTime(self):
-        """ Too much fun, we need to determine when this text product was
-            issued.  We'll first look to see if it is explicitly said."""
-
-        # Search out the WMO header first, this had better always be there
-        # We only care about the first hit in the file, searching from top
-        dRE = "^[A-Z0-9]{6} [A-Z]{4} ([0-3][0-9])([0-2][0-9])([0-5][0-9])"
-        tokens = re.findall(dRE , self.raw, re.M)
-        iDay = int(tokens[0][0])
-        iHour = int(tokens[0][1])
-        iMinute = int(tokens[0][2])
+    def findIssueTime(self, gmtnow):
+        """ Attempt to figure out when this product was issued based on the
+        WMO header and perhaps a MND explicit timestamp
+        @param gmtnow - the base time that we think this product was issued
+        """
 
         # Now lets look for a local timestamp in the product MND or elsewhere
-        time_re = "^([0-9]+) (AM|PM) ([A-Z][A-Z][A-Z]?T) [A-Z][A-Z][A-Z] ([A-Z][A-Z][A-Z]) ([0-9]+) ([1-2][0-9][0-9][0-9])$"
-        tokens = re.findall(time_re, self.raw, re.M)
+        tokens = re.findall(TIME_RE, self.raw, re.M)
         # If we don't find anything, lets default to now, its the best
-        if (len(tokens) == 0):
-            hack_time = mx.DateTime.utc().strftime("%I%M %p GMT %a %b %d %Y")
-            tokens = re.findall(time_re, hack_time.upper(), re.M)
-        # [('1249', 'AM', 'EDT', 'JUL', '1', '2005')]
-        self.z = tokens[0][2]
-        if (len(tokens[0][0]) < 3):
-            h = tokens[0][0]
-            m = 0
-        else:
-            h = tokens[0][0][:-2]
-            m = tokens[0][0][-2:]
-        dstr = "%s:%s %s %s %s %s" % (h, m, tokens[0][1], tokens[0][3], tokens[0][4], tokens[0][5])
-        now = mx.DateTime.strptime(dstr, "%I:%M %p %b %d %Y")
-        if reference.offsets.has_key(self.z):
-            now += mx.DateTime.RelativeDateTime(hours=reference.offsets[self.z])
-        else:
-            print "Unknown TZ: %s " % (self.z,)
+        if len(tokens) > 0:
+            # [('1249', 'AM', 'EDT', 'JUL', '1', '2005')]
+            self.z = tokens[0][2]
+            if len(tokens[0][0]) < 3:
+                h = tokens[0][0]
+                m = 0
+            else:
+                h = tokens[0][0][:-2]
+                m = tokens[0][0][-2:]
+            dstr = "%s:%s %s %s %s %s" % (h, m, tokens[0][1], tokens[0][3], 
+                                      tokens[0][4], tokens[0][5])
+            now = datetime.datetime.strptime(dstr, "%I:%M %p %b %d %Y")
+            offset = reference.offsets.get(self.z)
+            if offset is not None:
+                self.issueTime =  now + datetime.timedelta(
+                                        hours=offset)
+                return
+            else:
+                print "Unknown TZ: %s " % (self.z,)
 
-            # Now we need to see if we are changing months!
-        addOn = 0
-        if (iDay < now.day):
-            addOn = mx.DateTime.RelativeDateTime(months=+1)
-        self.issueTime = now + mx.DateTime.RelativeDateTime(day=iDay,
-                                hour=iHour, minute=iMinute, second=0)
+        # Search out the WMO header, this had better always be there
+        # We only care about the first hit in the file, searching from top
+        
+        tokens = re.findall(WMO_RE, self.raw[:100], re.M)
+        if len(tokens) == 0:
+            print "FATAL: Could not find WMO Header timestamp, bad!"
+            return
+        # Take the first hit, ignore others
+        wmo_day = int(tokens[0][0])
+        wmo_hour = int(tokens[0][1])
+        wmo_minute = int(tokens[0][2])
+
+        self.issueTime = gmtnow.replace(hour=wmo_hour)
+        self.issueTime = gmtnow.replace(minute=wmo_minute)
+        self.issueTime = self.issueTime.replace(tzinfo=iemtz.UTC())
+        if wmo_day == gmtnow.day:
+            return
+        elif wmo_day - gmtnow.day == 1: # Tomorrow
+            self.issueTime = gmtnow.replace(day=wmo_day)
+            return
+        elif wmo_day > 25 and gmtnow.day < 5: # Previous month!
+            self.issueTime = gmtnow + datetime.timedelta(days=-10)
+            self.issueTime = self.issueTime.replace(day=wmo_day)
+            return
+        elif wmo_day < 5 and gmtnow.day > 25: # next month
+            self.issueTime = gmtnow + datetime.timedelta(days=10)
+            self.issueTime = self.issueTime.replace(day=wmo_day)
+            return
+        
+        # IF we made it here, we are in trouble
+        print 'findIssueTime ERROR: gmtnow: %s wmo: D:%s H:%s M:%s' % (
+                        gmtnow, wmo_day, wmo_hour, wmo_minute)
 
 class TextProductSegment:
 
@@ -238,26 +266,26 @@ class TextProductSegment:
             day = int(u.rawexpire[:2])
             hr = int(u.rawexpire[2:4])
             mi = int(u.rawexpire[4:])
-            offset = 0
+            self.ugcExpire = self.issueTime
             # If the day is less than today, we need to move ahead a month 
             if day < self.issueTime.day:
-                offset = mx.DateTime.RelativeDateTime(days=+28)
-            self.ugcExpire = self.issueTime + offset + mx.DateTime.RelativeDateTime(hour=hr, day=day, minute=mi)
+                self.ugcExpire = self.issueTime + datetime.timedelta(days=+28)
+            self.ugcExpire = self.ugcExpire.replace(hour=hr, day=day, minute=mi)
 
         # Lets look for headlines
         self.headlines = re.findall("^\.\.\.(.*?)\.\.\.[ ]?\n\n", self.raw, re.M | re.S)
         for h in range(len(self.headlines)):
-          self.headlines[h] = self.headlines[h].replace("...",", ").replace("\n", " ")
+            self.headlines[h] = self.headlines[h].replace("...",", ").replace("\n", " ")
         
         # Lets look for VTEC!
         tokens = re.findall(vtec._re, self.raw)
         for t in tokens:
-          self.vtec.append( vtec.vtec(t[0]) )
+            self.vtec.append( vtec.vtec(t[0]) )
 
         # Lets look for HVTEC!
         tokens = re.findall(hvtec._re, self.raw)
         for t in tokens:
-          self.hvtec.append( hvtec.hvtec(t[0]) )
+            self.hvtec.append( hvtec.hvtec(t[0]) )
 
         s = self.raw.replace("\n", " ")
         m = TIME_MOT_LOC.match( s )
@@ -324,10 +352,11 @@ class TextProductSegment:
             return
         hh = float(d['ztime'][:2])
         mi = float(d['ztime'][2:])
-        self.tml_valid = self.ugcExpire + mx.DateTime.RelativeDateTime(hour=hh,
-                                                              minute=mi)
+        self.tml_valid = self.ugcExpire.replace(hour=hh, minute=mi)
         if hh > self.ugcExpire.hour:
-            self.tml_valid -= mx.DateTime.RelativeDateTime(days=1)
+            self.tml_valid = self.tml_valid - datetime.timedelta(days=1)
+
+        self.tml_valid = self.tml_valid.replace(tzinfo=iemtz.UTC())
 
         tokens = d['loc'].split()
         lats = []

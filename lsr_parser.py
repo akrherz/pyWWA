@@ -30,7 +30,6 @@ import os
 import datetime
 import pytz
 from twisted.enterprise import adbapi
-from twisted.words.protocols.jabber import client, jid
 from twisted.internet import reactor
 
 # IEM python Stuff

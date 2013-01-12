@@ -16,7 +16,6 @@
 """ generic product ingestor """
 
 # Twisted Python imports
-from twisted.words.protocols.jabber import client, jid, xmlstream
 from twisted.internet import reactor
 from twisted.python import log
 from twisted.python import logfile
@@ -26,9 +25,11 @@ from twisted.enterprise import adbapi
 import os, re
 
 # Python 3rd Party Add-Ons
-import mx.DateTime
+import datetime
 # pyWWA stuff
-from support import ldmbridge, TextProduct, reference
+from pyldm import ldmbridge
+from pyiem import reference
+from pyiem.nws import product
 import common
 
 import ConfigParser
@@ -133,11 +134,11 @@ def snowfall_pns(prod):
     """
     Process Snowfall PNS, from ARX at the moment
     """
-    if prod.raw.find("LOCATION              SNOWFALL") == -1:
+    if prod.text.find("LOCATION              SNOWFALL") == -1:
         return
     POSTGIS.runOperation("DELETE from snowfall_pns where source = %s" , 
                          (prod.afos,))
-    for line in prod.raw.split("\n"):
+    for line in prod.text.split("\n"):
         tokens = line.split()
         if len(tokens) < 6:
             continue
@@ -156,9 +157,9 @@ def snowfall_pns(prod):
 def real_process(raw):
     """ The real processor of the raw data, fun! """
 
-    prod = TextProduct.TextProduct(raw)
+    prod = product.TextProduct(raw)
     pil = prod.afos[:3]
-    wfo = prod.get_iembot_source()
+    wfo = prod.source[1:]
     # sigh, can't use originating center for the route
     if (pil == "OEP"):
         wfo = prod.afos[3:]
@@ -316,7 +317,7 @@ def real_process(raw):
             counties = "entire area"
         expire = ""
         if (seg.ugcExpire is not None):
-            expire = "till "+ (seg.ugcExpire - mx.DateTime.RelativeDateTime(hours= reference.offsets[prod.z] )).strftime("%-I:%M %p ")+ prod.z
+            expire = "till "+ (seg.ugcExpire - datetime.timedelta(hours= reference.offsets[prod.z] )).strftime("%-I:%M %p ")+ prod.z
 
         prodtxt = "(%s)" % (pil,)
         if reference.prodDefinitions.has_key(pil):
@@ -385,20 +386,7 @@ def load_nwsli(txn):
 POSTGIS.runInteraction(load_nwsli)
 
 
-myJid = jid.JID('%s@%s/gp_%s' % (config.get('xmpp','username'), 
-                                    config.get('xmpp','domain'), 
-       mx.DateTime.gmt().strftime("%Y%m%d%H%M%S") ) )
-factory = client.basicClientFactory(myJid, config.get('xmpp', 'password'))
-
-jabber = common.JabberClient(myJid)
-
-factory.addBootstrap('//event/stream/authd',jabber.authd)
-factory.addBootstrap("//event/client/basicauth/invaliduser", jabber.debug)
-factory.addBootstrap("//event/client/basicauth/authfailed", jabber.debug)
-factory.addBootstrap("//event/stream/error", jabber.debug)
-factory.addBootstrap(xmlstream.STREAM_END_EVENT, jabber._disconnect )
-
-reactor.connectTCP(config.get('xmpp', 'connecthost'), 5222, factory)
+jabber = common.make_jabber_client("gp")
 
 ldm = ldmbridge.LDMProductFactory( myProductIngestor() )
 reactor.run()

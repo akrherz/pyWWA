@@ -23,11 +23,13 @@ log.startLogging( logfile.DailyLogFile('new_watch.log', 'logs/'))
 import re
 import os
 import math
-import mx.DateTime
+import datetime
+import pytz
 import common
 
 # Non standard Stuff
-from pyIEM import stationTable, utils
+from support import stationTable
+
 
 KM_SM = 1.609347
 
@@ -36,14 +38,13 @@ config = ConfigParser.ConfigParser()
 config.read(os.path.join(os.path.dirname(__file__), 'cfg.ini'))
 
 # Database Connections
-from support import ldmbridge
+from pyldm import ldmbridge
 from twisted.enterprise import adbapi
 DBPOOL = adbapi.ConnectionPool("twistedpg", database="postgis", cp_reconnect=True,
                                 host=config.get('database','host'), 
                                 user=config.get('database','user'),
                                 password=config.get('database','password') )
 
-from twisted.words.protocols.jabber import client, jid
 from twisted.internet import reactor
 
 IEM_URL = config.get('urls', 'watch')
@@ -54,17 +55,40 @@ def cancel_watch(report, ww_num):
     day1 = int(tokens[0][0])
     hour1 = int(tokens[0][1])
     minute1 = int(tokens[0][2])
-    gmt = mx.DateTime.gmt()
-    ts = mx.DateTime.DateTime(gmt.year, gmt.month, day1, hour1, minute1)
+    gmt = datetime.datetime.utcnow().replace(tzinfo=pytz.timezone("UTC"))
+    ts = datetime.datetime(gmt.year, gmt.month, day1, hour1, minute1)
+    ts = ts.replace(tzinfo=pytz.timezone("UTC"))
     for tbl in ('watches', 'watches_current'):
-        sql = """UPDATE %s SET expired = '%s+00' WHERE num = %s and 
-              extract(year from expired) = %s """ % (tbl, ts.strftime("%Y-%m-%d %H:%M"), 
-               ww_num, ts.year)
-        deffer = DBPOOL.runOperation(sql)
-        deffer.addErrback(common.email_error, sql)
+        sql = """UPDATE """+tbl+""" SET expired = %s WHERE num = %s and 
+              extract(year from expired) = %s """
+        args = (ts, ww_num, ts.year)
+        deffer = DBPOOL.runOperation(sql, args)
+        deffer.addErrback(common.email_error, report)
 
     msg = "SPC: SPC cancels WW %s http://www.spc.noaa.gov/products/watch/ww%04i.html" % ( ww_num, int(ww_num) )
     jabber.sendMessage( msg , msg)
+
+dirs = {'NNE': 22.5, 'ENE': 67.5, 'NE':  45.0, 'E': 90.0, 'ESE': 112.5,
+        'SSE': 157.5, 'SE': 135.0, 'S': 180.0, 'SSW': 202.5,
+        'WSW': 247.5, 'SW': 225.0, 'W': 270.0, 'WNW': 292.5,
+        'NW': 315.0, 'NNW': 337.5, 'N': 0, '': 0}
+
+
+def loc2lonlat(stationTable, site, direction, displacement):
+    """
+Compute the longitude and latitude of a point given by a site ID
+and an offset ex) 2 SM NE of ALO
+    """
+    # Compute Base location
+    lon0 = stationTable.sts[site]['lon']
+    lat0 = stationTable.sts[site]['lat']
+    x = -math.cos( math.radians( dirs[direction] + 90.0) )
+    y = math.sin( math.radians( dirs[direction] + 90.0) )
+    lat0 += (y * displacement * KM_SM / 111.11 )
+    lon0 += (x * displacement * KM_SM /(111.11*math.cos( math.radians(lat0))))
+
+    return lon0, lat0
+
 
 class MyProductIngestor(ldmbridge.LDMProductReceiver):
     """ I receive products from ldmbridge and process them 1 by 1 :) """
@@ -101,7 +125,7 @@ def real_process(raw):
         print 'TEST watch found'
         return
     ww_num = tokens[0][0]
-    ww_type = tokens[0][2]
+    #ww_type = tokens[0][2]
 
     # Need to check for cancels
     tokens = re.findall("CANCELLED", report)
@@ -126,15 +150,17 @@ def real_process(raw):
     hour2 = int(tokens[0][4])
     minute2 = int(tokens[0][5])
 
-    gmt = mx.DateTime.gmt()
-    sTS = mx.DateTime.DateTime(gmt.year, gmt.month, day1, hour1, minute1)
-    eTS = mx.DateTime.DateTime(gmt.year, gmt.month, day2, hour2, minute2)
+    gmt = datetime.datetime.utcnow().replace(tzinfo=pytz.timezone("UTC"))
+    sTS = gmt.replace(day=day1, hour=hour1, minute=minute1)
+    eTS = gmt.replace(day=day2, hour=hour2, minute=minute2)
 
     # If we are near the end of the month and the day1 is 1, add 1 month
-    if (gmt.day > 27  and day1 == 1):
-        sTS += mx.DateTime.RelativeDateTime(months=+1)
-    if (gmt.day > 27  and day2 == 1):
-        eTS += mx.DateTime.RelativeDateTime(months=+1)
+    if gmt.day > 27  and day1 == 1:
+        sTS +=  datetime.timedelta(days=+25)
+        sTS = sTS.replace(day=1)
+    if gmt.day > 27  and day2 == 1:
+        eTS +=  datetime.timedelta(days=+25)
+        eTS = eTS.replace(day=1)
 
     # Brute Force it!
     tokens = re.findall("WW ([0-9]*) (SEVERE TSTM|TORNADO).*AXIS\.\.([0-9]+) STATUTE MILES (.*) OF LINE..([0-9]*)([A-Z]*)\s?(...)/.*/ - ([0-9]*)([A-Z]*)\s?(...)/.*/..AVIATION", report)
@@ -163,8 +189,8 @@ def real_process(raw):
 
 
     # Now, we have offset locations from our base station locs
-    (lon1, lat1) = utils.loc2lonlat(st, loc1, loc1_vector, loc1_displacement)
-    (lon2, lat2) = utils.loc2lonlat(st, loc2, loc2_vector, loc2_displacement)
+    (lon1, lat1) = loc2lonlat(st, loc1, loc1_vector, loc1_displacement)
+    (lon2, lat2) = loc2lonlat(st, loc2, loc2_vector, loc2_displacement)
 
     log.msg("LOC1 OFF %s [%s,%s] lat: %s lon %s" % (loc1, loc1_displacement, loc1_vector, lat1, lon1))
     log.msg("LOC2 OFF %s [%s,%s] lat: %s lon %s" % (loc2, loc2_displacement, loc2_vector, lat2, lon2))
@@ -277,18 +303,7 @@ def real_process(raw):
     
 
 
-myJid = jid.JID('%s@%s/watch_%s' % (config.get('xmpp','username'), 
-                                    config.get('xmpp','domain'), 
-       mx.DateTime.gmt().strftime("%Y%m%d%H%M%S") ) )
-factory = client.basicClientFactory(myJid, config.get('xmpp', 'password'))
-
-jabber = common.JabberClient(myJid)
-
-factory.addBootstrap('//event/stream/authd', jabber.authd)
-factory.addBootstrap("//event/client/basicauth/invaliduser", jabber.debug)
-factory.addBootstrap("//event/client/basicauth/authfailed", jabber.debug)
-factory.addBootstrap("//event/stream/error", jabber.debug)
-reactor.connectTCP(config.get('xmpp', 'connecthost'), 5222, factory)
+jabber = common.make_jabber_client("new_watch")
 
 ldm = ldmbridge.LDMProductFactory( MyProductIngestor() )
 reactor.run() #@UndefinedVariable

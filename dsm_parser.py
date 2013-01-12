@@ -26,10 +26,10 @@ import re
 import os
 
 # Python 3rd Party Add-Ons
-import mx.DateTime
+import datetime
 
 # pyWWA stuff
-from support import ldmbridge
+from pyldm import ldmbridge
 import common
 import ConfigParser
 config = ConfigParser.ConfigParser()
@@ -114,11 +114,11 @@ def process_dsm(data):
     if d['id'][0] != "K":
         return
     # Figure out the timestamp
-    now = mx.DateTime.now()
-    ts = now + mx.DateTime.RelativeDateTime(day=int(d['day']),
-               month=int(d['month']))
+    now = datetime.datetime.now()
+    ts = now.replace(day=int(d['day']), month=int(d['month']))
     if ts.month == 12 and now.month == 1:
-        ts -= mx.DateTime.RelativeDateTime(years=1)
+        ts -= datetime.timedelta(days=360)
+        ts = ts.replace(day=int(d['day']))
     updater = []
     if d['high'] is not None and d['high'] != "M":
         updater.append("max_tmpf = %s" % (d['high'],))

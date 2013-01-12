@@ -21,10 +21,10 @@ log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
 log.startLogging( logfile.DailyLogFile('spe_parser.log', 'logs') )
 
 
-import sys, re, mx.DateTime
+import sys
+import re
 import common
 
-from twisted.words.protocols.jabber import client, jid
 from twisted.internet import reactor
 from twisted.enterprise import adbapi
 
@@ -32,7 +32,7 @@ import ConfigParser
 config = ConfigParser.ConfigParser()
 config.read(os.path.join(os.path.dirname(__file__), 'cfg.ini'))
 
-from support import TextProduct
+from pyiem.nws import product
 POSTGIS = adbapi.ConnectionPool("twistedpg", database="postgis", cp_reconnect=True,
                                 host=config.get('database','host'), 
                                 user=config.get('database','user'),
@@ -48,7 +48,7 @@ def process(raw):
 
 def real_process(raw):
     sqlraw = raw.replace("\015\015\012", "\n")
-    prod = TextProduct.TextProduct(raw)
+    prod = product.TextProduct(raw)
 
     product_id = prod.get_product_id()
     sql = """INSERT into text_products(product, product_id) values (%s,%s)"""
@@ -76,19 +76,7 @@ def real_process(raw):
 def killer():
     reactor.stop()
 
-myJid = jid.JID('%s@%s/spe_%s' % (config.get('xmpp','username'), 
-                                    config.get('xmpp','domain'),
-       mx.DateTime.gmt().strftime("%Y%m%d%H%M%S") ) )
-factory = client.basicClientFactory(myJid, config.get('xmpp', 'password'))
-
-jabber = common.JabberClient(myJid)
-
-factory.addBootstrap('//event/stream/authd',jabber.authd)
-factory.addBootstrap("//event/client/basicauth/invaliduser", jabber.debug)
-factory.addBootstrap("//event/client/basicauth/authfailed", jabber.debug)
-factory.addBootstrap("//event/stream/error", jabber.debug)
-
-reactor.connectTCP(config.get('xmpp', 'connecthost'),5222,factory)
+jabber = common.make_jabber_client("spe_parser")
 reactor.callLater(0, process, raw)
 reactor.callLater(30, killer)
 reactor.run()

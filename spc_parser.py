@@ -21,16 +21,14 @@ log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
 log.startLogging(logfile.DailyLogFile('spc_parser.log','logs'))
 
 # Twisted Python imports
-from twisted.words.protocols.jabber import client, jid, xmlstream
 from twisted.internet import reactor
 from twisted.enterprise import adbapi
 
-# Python 3rd Party Add-Ons
-import mx.DateTime
-
 # pyWWA stuff
-from support import ldmbridge, TextProduct, spcpts
+from pyldm import ldmbridge
+from pyiem.nws import product, spcpts
 import os
+import datetime
 import ConfigParser
 config = ConfigParser.ConfigParser()
 config.read(os.path.join(os.path.dirname(__file__), 'cfg.ini'))
@@ -54,7 +52,8 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
     """ I receive products from ldmbridge and process them 1 by 1 :) """
 
     def connectionLost(self, reason):
-        print 'connectionLost', reason
+        log.msg('connectionLost')
+        log.err( reason )
         reactor.callLater(5, self.shutdown)
 
     def shutdown(self):
@@ -78,12 +77,11 @@ def consume(spc, outlook):
     # Insert geometry into database table please
     sql = """INSERT into spc_outlooks(issue, valid, expire,
         threshold, category, day, outlook_type, geom)
-    VALUES ('%s+00', '%s+00', '%s+00', '%s', '%s', '%s', '%s', 
-    'SRID=4326;%s')""" % (
-            spc.issue,  spc.valid, spc.expire,
+    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)""" 
+    args = (spc.issue,  spc.valid, spc.expire,
             outlook.threshold, outlook.category, spc.day, 
-            spc.outlook_type, outlook.polygon.wkt)
-    txn.execute( sql )
+            spc.outlook_type, "SRID=4326;%s" % (outlook.polygon.wkt,))
+    txn.execute( sql, args )
     
     # Search for WFOs
     sql = """select distinct wfo from nws_ugc 
@@ -96,8 +94,8 @@ def consume(spc, outlook):
     for row in txn.fetchall():
         affectedWFOS.append( row['wfo'] )
 
-    print "Category: %s Threshold: %s  #WFOS: %s" % (
-        outlook.category, outlook.threshold,  len(affectedWFOS))
+    log.msg("Category: %s Threshold: %s  #WFOS: %s" % (
+        outlook.category, outlook.threshold,  len(affectedWFOS)))
     
     txn.close()
     pgconn.commit()
@@ -108,14 +106,14 @@ def consume(spc, outlook):
 
 def real_parser(buf):
     buf = buf.replace("\015\015\012", "\n")
-    tp = TextProduct.TextProduct(buf)
+    tp = product.TextProduct(buf)
     spc = spcpts.SPCPTS( tp )
     #spc.draw_outlooks()
 
     # Remove any previous data
-    DBPOOL.runOperation("""DELETE from spc_outlooks where valid = '%s+00' 
-    and expire = '%s+00' 
-    and outlook_type = '%s' and day = '%s'""" % (
+    DBPOOL.runOperation("""DELETE from spc_outlooks where valid = %s 
+    and expire = %s 
+    and outlook_type = %s and day = %s""", (
                     spc.valid, spc.expire, spc.outlook_type, spc.day))
 
     wfos = {'TSTM': [], 'EXTM': [], 'SLGT': [], 'CRIT': [], 'MDT': [], 
@@ -199,19 +197,7 @@ for portions of %s %s" % (channelprefix, wfo, cat, wfo, url)
     twt = "The Storm Prediction Center issues %s Outlook" %( product_descript,)
     common.tweet(['SPC',], twt, url)
 
-myJid = jid.JID('%s@%s/spc_parser_%s' % (config.get('xmpp', 'username'), 
-    config.get('xmpp', 'domain'), mx.DateTime.gmt().strftime("%Y%m%d%H%M%S") ) )
-factory = client.basicClientFactory(myJid, config.get('xmpp','password'))
-
-jabber = common.JabberClient(myJid)
-
-factory.addBootstrap('//event/stream/authd', jabber.authd)
-factory.addBootstrap("//event/client/basicauth/invaliduser", jabber.debug)
-factory.addBootstrap("//event/client/basicauth/authfailed", jabber.debug)
-factory.addBootstrap("//event/stream/error", jabber.debug)
-factory.addBootstrap(xmlstream.STREAM_END_EVENT, jabber._disconnect )
-
-reactor.connectTCP(config.get('xmpp', 'connecthost'), 5222, factory)
+jabber = common.make_jabber_client('spc_parser')
 
 ldm = ldmbridge.LDMProductFactory( MyProductIngestor() )
 reactor.run()

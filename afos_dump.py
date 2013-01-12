@@ -29,9 +29,11 @@ import ConfigParser
 config = ConfigParser.ConfigParser()
 config.read(os.path.join(os.path.dirname(__file__), 'cfg.ini'))
 
-# pyWWA stuff
-from support import ldmbridge, TextProduct
+from pyldm import ldmbridge
+from pyiem.nws import product
 import common
+import datetime
+import pytz
 
 DBPOOL = adbapi.ConnectionPool("twistedpg", database="afos", cp_reconnect=True,
                                 host=config.get('database','host'), 
@@ -62,20 +64,24 @@ def real_parser(buf):
     """ Actually do something with the buffer, please """
     if buf.strip() == "":
         return
-    nws = TextProduct.TextProduct( buf, bypass=True)
-    nws.findAFOS()
-    nws.findIssueTime()
-    nws.findWMO()
+    utcnow = datetime.datetime.utcnow()
+    utcnow = utcnow.replace(tzinfo=pytz.timezone("UTC"))
     
-    if nws.issueTime.month > 6:
-        table = "products_%s_0712" % (nws.issueTime.year,)
+    nws = product.TextProduct( buf)
+
+    if (utcnow - nws.valid).days > 180 or (utcnow - nws.valid).days < -180:
+        common.email_error("Very Latent Product! %s" % (nws.valid,), nws.text)
+        return
+    
+    if nws.valid.month > 6:
+        table = "products_%s_0712" % (nws.valid.year,)
     else:
-        table = "products_%s_0106" % (nws.issueTime.year,)
+        table = "products_%s_0106" % (nws.valid.year,)
         
     
     df = DBPOOL.runOperation("""INSERT into """+table+"""(pil, data, entered,
-        source, wmo) VALUES(%s,%s,%s,%s,%s)""",  (nws.afos.strip(), nws.raw, 
-                             nws.issueTime.strftime("%Y-%m-%d %H:%M+00"),
+        source, wmo) VALUES(%s,%s,%s,%s,%s)""",  (nws.afos.strip(), nws.text, 
+                             nws.valid,
                              nws.source, nws.wmo) 
      )
     df.addErrback( common.email_error, buf)

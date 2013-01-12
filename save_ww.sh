@@ -1,5 +1,6 @@
 #
 # Save the zip file of current NWS WWA
+# TODO: this should be removed in favour of unzip.py
 #
 
 cd /mesonet/data/gis/shape/4326/us

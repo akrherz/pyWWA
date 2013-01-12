@@ -19,10 +19,17 @@ import traceback
 from pyiem import wellknowntext
 import subprocess
 
+import ConfigParser
+config = ConfigParser.ConfigParser()
+config.read(os.path.join(os.path.dirname(__file__), 'cfg.ini'))
+
 import common
-import iemdb
+import psycopg2
 import psycopg2.extras
-POSTGIS = iemdb.connect('postgis')
+POSTGIS = psycopg2.connect(database="postgis",
+                                host=config.get('database','host'), 
+                                user=config.get('database','user'),
+                                password=config.get('database','password'))
 pcursor = POSTGIS.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
 FORMAT = "%(asctime)-15s:: %(message)s"

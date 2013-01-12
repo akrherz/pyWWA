@@ -15,8 +15,6 @@
 # 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 """ MOS Data Ingestor, why not? """
 
-__revision__ = '$Id: mos_parset.py 3802 2008-07-29 19:55:56Z akrherz $'
-
 from twisted.python import log
 from twisted.python import logfile
 log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
@@ -29,11 +27,11 @@ from twisted.enterprise import adbapi
 # Standard Python modules
 import re
 
-# Python 3rd Party Add-Ons
-import mx.DateTime
+import datetime
+import pytz
 
 # pyWWA stuff
-from support import ldmbridge
+from pyldm import ldmbridge
 import common
 import ConfigParser
 
@@ -78,11 +76,17 @@ def real_process(initial_raw):
     if len(sections) == 0:
         common.email_error("FAILED REGEX", initial_raw)
 
+def make_null(v):
+    if v == "" or v is None:
+        return None
+    return v
+
 def section_parser(sect):
     """ Actually process a data section, getting closer :) """
     metadata = re.findall("([A-Z0-9]{4})\s+(...) MOS GUIDANCE\s+([01]?[0-9])/([0-3][0-9])/([0-9]{4})\s+([0-2][0-9]00) UTC", sect)
     (station, model, month, day, year, hhmm) = metadata[0]
-    initts = mx.DateTime.DateTime(int(year), int(month), int(day), int(hhmm[:2]))
+    initts = datetime.datetime(int(year), int(month), int(day), int(hhmm[:2]))
+    initts = initts.replace(tzinfo=pytz.timezone("UTC"))
     
     times = [initts,]
     data = {}
@@ -90,9 +94,10 @@ def section_parser(sect):
     hrs = lines[2].split()
     for h in hrs[1:]:
         if (h == "00"):
-            ts = times[-1] + mx.DateTime.RelativeDateTime(days=1, hour=0)
+            ts = times[-1] + datetime.timedelta(days=1)
+            ts = ts.replace(hour=0)
         else:
-            ts = times[-1] + mx.DateTime.RelativeDateTime(hour=int(h))
+            ts = times[-1].replace(hour=int(h))
         times.append( ts )
         data[ts] = {}
 
@@ -124,13 +129,15 @@ def section_parser(sect):
         if (ts == initts):
             continue
         fst = "INSERT into t%s (station, model, runtime, ftime," % (initts.year,)
-        sst = "VALUES('%s','%s','%s+00','%s+00'," % (station, model, initts, ts)
+        sst = "VALUES(%s,%s,%s,%s," 
+        args = [station, model, initts, ts]
         for vname in data[ts].keys():
             fst += " %s," % (vname,)
-            sst += " '%s'," % (data[ts][vname],)
+            sst += "%s," 
+            args.append( make_null(data[ts][vname]) )
         sql = fst[:-1] +") "+ sst[:-1] +")"
-        deffer = DBPOOL.runOperation( sql.replace("''", "Null") )
-        deffer.addErrback( common.email_error, sql)
+        deffer = DBPOOL.runOperation( sql, args )
+        deffer.addErrback( common.email_error, sect)
         inserts += 1
     # Simple debugging
     if inserts == 0:

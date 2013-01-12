@@ -1,4 +1,9 @@
-These are hacky NWS data ingestors written by:
+pyWWA
+=====
+
+These are NWS product ingestors and processors.  Not sure how useful this is to
+anybody else, but perhaps!  If you have questions, please let me know:
+
    daryl herzmann 
    akrherz@iastate.edu
    515-294-5978

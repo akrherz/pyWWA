@@ -413,7 +413,7 @@ def got_results(res, tp, sid, network):
     """
     Callback after our iemdb work
     @param res response
-    @param tp support.TextProduct instance
+    @param tp pyiem.nws.product.TextProduct instance
     @param sid stationID
     @param network string network
     """
