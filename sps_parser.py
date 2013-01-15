@@ -138,7 +138,7 @@ iembot processing error:</span><br />Product: %s<br />Error: %s" % \
         expire = ""
         if (seg.ugcexpire is not None):
             expire = "till "+ (seg.ugcexpire - datetime.timedelta(
-                    hours= reference.offsets[prod.z] )).strftime("%-I:%M %p ")+ prod.z
+                    hours= reference.offsets.get(prod.z,0) )).strftime("%-I:%M %p ")+ prod.z
 
 
         mess = "%s: %s issues %s for %s %s %s?pid=%s" % (prod.source[1:], 
