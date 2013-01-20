@@ -22,8 +22,6 @@ import os
 log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
 log.startLogging( logfile.DailyLogFile('sps_parser.log','logs/'))
 
-
-import StringIO
 import datetime
 import common
 from pyiem.nws import product
@@ -37,14 +35,12 @@ import ConfigParser
 config = ConfigParser.ConfigParser()
 config.read(os.path.join(os.path.dirname(__file__), 'cfg.ini'))
 
-POSTGIS = adbapi.ConnectionPool("twistedpg", database="postgis", cp_reconnect=True,
+POSTGIS = adbapi.ConnectionPool("twistedpg", database="postgis", 
+                                cp_reconnect=True, cp_max=1,
                                 host=config.get('database','host'), 
                                 user=config.get('database','user'),
                                 password=config.get('database','password') )
 
-
-errors = StringIO.StringIO()
-EMAILS = 10
 
 ugc_dict = {}
 def load_ugc(txn):
@@ -57,7 +53,6 @@ def load_ugc(txn):
 
     log.msg("ugc_dict is loaded...")
 
-POSTGIS.runInteraction(load_ugc)
 
 def countyText(ugcs):
     countyState = {}
@@ -90,7 +85,8 @@ class myProductIngestor(ldmbridge.LDMProductReceiver):
             common.email_error(myexp, buf)
 
     def connectionLost(self, reason):
-        print 'connectionLost', reason
+        log.msg('connectionLost') 
+        log.err(reason)
         reactor.callLater(5, self.shutdown)
 
     def shutdown(self):
@@ -115,7 +111,7 @@ iembot processing error:</span><br />Product: %s<br />Error: %s" % \
         return
 
 
-    if (prod.segments[0].giswkt):
+    if prod.segments[0].giswkt:
         sql = """INSERT into text_products(product, product_id, geom) values (%s,%s, %s)"""
         myargs = (sqlraw, product_id, prod.segments[0].giswkt )
         
@@ -136,9 +132,11 @@ iembot processing error:</span><br />Product: %s<br />Error: %s" % \
         if (counties.strip() == ""):
             counties = "entire area"
         expire = ""
-        if (seg.ugcexpire is not None):
-            expire = "till "+ (seg.ugcexpire - datetime.timedelta(
-                    hours= reference.offsets.get(prod.z,0) )).strftime("%-I:%M %p ")+ prod.z
+        if seg.ugcexpire is not None:
+            expire = "till %s %s" % (
+                (seg.ugcexpire - datetime.timedelta(
+                hours=reference.offsets.get(prod.z,0) )).strftime("%-I:%M %p"),
+                                      prod.z)
 
 
         mess = "%s: %s issues %s for %s %s %s?pid=%s" % (prod.source[1:], 
@@ -157,5 +155,15 @@ iembot processing error:</span><br />Product: %s<br />Error: %s" % \
 
 jabber = common.make_jabber_client('sps_parser')
 
-ldm = ldmbridge.LDMProductFactory( myProductIngestor() )
+def ready(bogus):
+    ldmbridge.LDMProductFactory( myProductIngestor() )
+
+def killer(err):
+    log.err( err )
+    reactor.stop()
+
+df = POSTGIS.runInteraction(load_ugc)
+df.addCallback(ready)
+df.addErrback( killer )
+
 reactor.run()
