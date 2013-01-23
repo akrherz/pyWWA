@@ -273,7 +273,7 @@ def really_process(txn, res, nexrad, ts):
         d["geom"] = "SRID=4326;POINT(%s %s)" % (mylon, mylat)
         d["valid"] = ts
 
-        for table in ['nexrad_attributes', 'nexrad_attributes_log']:
+        for table in ['nexrad_attributes', 'nexrad_attributes_%s' % (ts.year,)]:
             sql = """INSERT into """+table+""" (nexrad, storm_id, geom, azimuth,
     range, tvs, meso, posh, poh, max_size, vil, max_dbz, max_dbz_height,
     top, drct, sknt, valid) values (%(nexrad)s, %(storm_id)s, %(geom)s,
