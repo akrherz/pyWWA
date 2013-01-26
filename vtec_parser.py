@@ -84,8 +84,11 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
 
             log.msg( str(text_product) )
             for j in range(len(text_product.segments)):
-                segment_processor(text_product, j, skip_con)
-
+                df = POSTGIS.runInteraction(segment_processor, text_product, j, 
+                                      skip_con)
+                df.addErrback(common.email_error, text_product.unixtext)
+                df.addErrback( log.err )
+                
             if skip_con:
                 wfo = text_product.source[1:]
                 jabber_txt = "%s: %s has sent an updated FLS product (continued products were not reported here).  Consult this website for more details. %s?wfo=%s" % (wfo, wfo, 
@@ -126,7 +129,7 @@ def ugc_to_text(ugclist):
 
     return " and".join(txt)
 
-def segment_processor(text_product, i, skip_con):
+def segment_processor(txn, text_product, i, skip_con):
     """ The real data processor here """
     gmtnow = datetime.datetime.utcnow()
     gmtnow = gmtnow.replace(tzinfo=iemtz.UTC())
@@ -228,12 +231,11 @@ def segment_processor(text_product, i, skip_con):
                         stage_text = seg.bullets[qqq]
 
 
-                deffer = POSTGIS.runOperation("""INSERT into riverpro(nwsli, stage_text, 
+                txn.execute("""INSERT into riverpro(nwsli, stage_text, 
                   flood_text, forecast_text, severity) VALUES 
                   (%s,%s,%s,%s,%s) """, (nwsli, stage_text, flood_text, 
                                          forecast_text, hvtec[0].severity) )
-                deffer.addErrback( common.email_error, 'RIVERPRO ERROR')
-          
+                
 
         warning_table = "warnings_%s" % (text_product.valid.year,)
         #  NEW - New Warning
@@ -256,20 +258,19 @@ def segment_processor(text_product, i, skip_con):
             if fcster is not None:
                 fcster = fcster[:24]
             if (seg.giswkt != None):
-                deffer = POSTGIS.runOperation("""INSERT into """+ warning_table +""" (issue, expire, report, 
+                txn.execute("""INSERT into """+ warning_table +""" (issue, expire, report, 
                  significance, geom, phenomena, gtype, wfo, eventid, status, updated, 
                 fcster, hvtec_nwsli) VALUES (%s,%s,%s,%s,%s,%s,%s, 
                 %s,%s,%s,%s, %s, %s)""", (bts, vtec.endts , 
                                 text_product.text, vtec.significance, 
       seg.giswkt, vtec.phenomena, 'P', vtec.office, vtec.ETN, vtec.action, 
       text_product.valid, fcster, seg.get_hvtec_nwsli() ) )
-                deffer.addErrback( common.email_error, "INSERT GISWKT")
-
+                
             # Insert Counties
             for k in range(len(ugc)):
                 cnty = str(ugc[k])
          
-                deffer = POSTGIS.runOperation("""INSERT into """+ warning_table +""" 
+                txn.execute("""INSERT into """+ warning_table +""" 
                 (issue,expire,report, geom, phenomena, gtype, wfo, eventid, status,
                 updated, fcster, ugc, significance, hvtec_nwsli) VALUES(%s, %s, %s, 
                 (select geom from nws_ugc WHERE ugc = %s LIMIT 1), %s, 'C', %s,%s,%s,%s, 
@@ -277,7 +278,6 @@ def segment_processor(text_product, i, skip_con):
                                       text_product.text, cnty, vtec.phenomena, vtec.office, vtec.ETN, 
                                       vtec.action, text_product.valid, 
                                       fcster, cnty, vtec.significance, seg.get_hvtec_nwsli() ))
-                deffer.addErrback( common.email_error, "INSERT")
             channels = []
             for w in affectedWFOS.keys():
                 channels.append(w)
@@ -298,20 +298,18 @@ till %(ets)s %(svs_special)s" % jmsg_dict
                 _expire = 'expire'
                 if vtec.endts is None:
                     _expire = 'expire + \'10 days\'::interval'
-                deffer = POSTGIS.runOperation("""UPDATE """+ warning_table +""" SET status = %s, 
+                txn.execute("""UPDATE """+ warning_table +""" SET status = %s, 
                     updated = %s, expire = """+ _expire +""" WHERE ugc = %s and wfo = %s and eventid = %s and 
                     phenomena = %s and significance = %s""", ( vtec.action, 
                         text_product.valid, str(cnty), vtec.office, vtec.ETN,
                             vtec.phenomena, vtec.significance ))
-                deffer.addErrback( common.email_error, "UPDATE")
-
+             
             if (len(seg.vtec) == 1):
-                deffer = POSTGIS.runOperation("""UPDATE """+ warning_table +""" SET status = %s,  
+                txn.execute("""UPDATE """+ warning_table +""" SET status = %s,  
                      updated = %s WHERE gtype = 'P' and wfo = %s and eventid = %s and phenomena = %s 
                      and significance = %s""", (vtec.action, text_product.valid, 
                                                 vtec.office, vtec.ETN, vtec.phenomena, vtec.significance))
-                deffer.addErrback( common.email_error, "UPDATE!")
-
+               
             channels = []
             for w in affectedWFOS.keys():
                 jmsg_dict['w'] = w
@@ -339,23 +337,21 @@ till %(ets)s %(svs_special)s" % jmsg_dict
                 issueSpecial = "'%s'" % (vtec.begints,)
         # Lets cancel county
             for cnty in ugc:
-                deffer = POSTGIS.runOperation("""UPDATE """+ warning_table +""" SET status = %s, 
+                txn.execute("""UPDATE """+ warning_table +""" SET status = %s, 
                 expire = %s, updated = %s, issue = """+ issueSpecial +""" WHERE ugc = %s and wfo = %s and 
                 eventid = %s and phenomena = %s and significance = %s""", (vtec.action, 
                         end_ts, text_product.valid, 
                         str(cnty), vtec.office, vtec.ETN, vtec.phenomena, vtec.significance))
-                deffer.addErrback( common.email_error, "UPDATE12")
-
+             
             # If this is the only county, we can cancel the polygon too
             if (len(text_product.segments) == 1):
                 log.msg("Updating Polygon as well")
-                deffer = POSTGIS.runOperation("""UPDATE """+warning_table+""" SET status = %s, 
+                txn.execute("""UPDATE """+warning_table+""" SET status = %s, 
                 expire = %s, updated = %s WHERE gtype = 'P' and wfo = %s and eventid = %s 
                 and phenomena = %s and significance = %s""" , (vtec.action, end_ts, 
                         text_product.valid, vtec.office, vtec.ETN, 
                         vtec.phenomena, vtec.significance) )
-                deffer.addErrback( common.email_error, "UPDATEPOLY")
-
+             
             jmsg_dict['action'] = "cancels"
             fmt = "%(w)s: %(wfo)s  %(product)s for %(county)s %(svs_special)s "
             htmlfmt = "%(wfo)s <a href='%(url)s'>%(product)s</a> for %(county)s %(svs_special)s"
@@ -386,25 +382,23 @@ till %(ets)s %(svs_special)s" % jmsg_dict
                 ugc_limiter += "'%s'," % (cnty,)
 
             log.msg("Updating SVS For:"+ ugc_limiter[:-1] )
-            deffer = POSTGIS.runOperation("""UPDATE """+ warning_table +""" SET svs = 
+            txn.execute("""UPDATE """+ warning_table +""" SET svs = 
                   (CASE WHEN (svs IS NULL) THEN '__' ELSE svs END) 
                    || %s || '__' WHERE eventid = %s and wfo = %s 
                    and phenomena = %s and significance = %s 
                    and ugc IN ("""+ ugc_limiter[:-1] +""")""" , (text_product.text, vtec.ETN, vtec.office, 
                     vtec.phenomena, vtec.significance  ))
-            deffer.addErrback( common.email_error, "UPDATE NOTNEW")
-
+            
     # Update polygon if necessary
     if (vtec.action != "NEW" and seg.giswkt is not None):
         log.msg("Updating SVS For Polygon")
-        deffer = POSTGIS.runOperation("""UPDATE """+ warning_table +""" SET svs = 
+        txn.execute("""UPDATE """+ warning_table +""" SET svs = 
               (CASE WHEN (svs IS NULL) THEN '__' ELSE svs END) 
                || %s || '__' WHERE eventid = %s and wfo = %s 
                and phenomena = %s and significance = %s 
                and gtype = 'P'""" , (text_product.text, vtec.ETN, vtec.office, 
                 vtec.phenomena, vtec.significance )  )
-        deffer.addErrback( common.email_error, "BLAH")
-
+     
     # New fancy SBW Stuff!
     if seg.giswkt is not None:
         # If we are dropping the product and there is only 1 segment
@@ -412,7 +406,7 @@ till %(ets)s %(svs_special)s" % jmsg_dict
         # 1. Update the polygon_end to cancel time for the last polygon
         # 2. Update everybodies expiration time, product changed yo!
         if vtec.action in ["CAN", "UPG"] and len(text_product.segments) == 1:
-            deffer = POSTGIS.runOperation("""UPDATE sbw_"""+ str(text_product.valid.year) +""" SET 
+            txn.execute("""UPDATE sbw_"""+ str(text_product.valid.year) +""" SET 
                 polygon_end = (CASE WHEN polygon_end = expire
                                THEN %s ELSE polygon_end END), 
                 expire = %s WHERE 
@@ -420,31 +414,27 @@ till %(ets)s %(svs_special)s" % jmsg_dict
                 and phenomena = %s and significance = %s""", (
                 text_product.valid, text_product.valid, 
                 vtec.ETN, vtec.office, vtec.phenomena, vtec.significance) )
-            deffer.addErrback( common.email_error, 
-                               "UPDATESBW"+ text_product.text)
-
+        
         # If we are VTEC CON, then we need to find the last polygon
         # and update its expiration time, since we have new info!
         if vtec.action == "CON":
-            deffer = POSTGIS.runOperation("""UPDATE sbw_"""+ str(text_product.valid.year) +""" SET 
+            txn.execute("""UPDATE sbw_"""+ str(text_product.valid.year) +""" SET 
                 polygon_end = %s WHERE polygon_end = expire and eventid = %s and wfo = %s 
                 and phenomena = %s and significance = %s""" , ( text_product.valid, 
                 vtec.ETN, vtec.office, vtec.phenomena, vtec.significance))
-            deffer.addErrback( common.email_error, 
-                               "UPDATE SBW"+ text_product.text)
-
+          
 
         my_sts = "'%s'" % (vtec.begints,)
         if vtec.begints is None:
-            my_sts = "(SELECT issue from sbw_%s WHERE eventid = %s \
-              and wfo = '%s' and phenomena = '%s' and significance = '%s' \
-              LIMIT 1)" % (text_product.valid.year, vtec.ETN, vtec.office, \
+            my_sts = """(SELECT issue from sbw_%s WHERE eventid = %s 
+              and wfo = '%s' and phenomena = '%s' and significance = '%s' 
+              LIMIT 1)""" % (text_product.valid.year, vtec.ETN, vtec.office, 
               vtec.phenomena, vtec.significance)
         my_ets = "'%s'" % (vtec.endts,)
         if vtec.endts is None:
-            my_ets = "(SELECT expire from sbw_%s WHERE eventid = %s \
-              and wfo = '%s' and phenomena = '%s' and significance = '%s' \
-              LIMIT 1)" % (text_product.valid.year, vtec.ETN, vtec.office, \
+            my_ets = """(SELECT expire from sbw_%s WHERE eventid = %s 
+              and wfo = '%s' and phenomena = '%s' and significance = '%s' 
+              LIMIT 1)""" % (text_product.valid.year, vtec.ETN, vtec.office, 
               vtec.phenomena, vtec.significance)
 
         tml_valid = None
@@ -505,9 +495,8 @@ till %(ets)s %(svs_special)s" % jmsg_dict
                  _expire, seg.giswkt, vtec.action, product_text,
                  seg.windtag, seg.hailtag, seg.tornadotag, seg.tornadodamagetag,
                  tml_valid, seg.tml_dir, seg.tml_sknt, seg.tml_giswkt)
-        deffer = POSTGIS.runOperation(sql, myargs)
-        deffer.addErrback( common.email_error, "LASTONE"+ text_product.text)
-
+        txn.execute(sql, myargs)
+        
 
 """ Load me up with NWS dictionaries! """
 ugc_dict = {}
