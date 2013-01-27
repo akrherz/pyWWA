@@ -133,7 +133,8 @@ def process(raw):
                                  segid) )
 
     # Copy the currents table over to the log... HARD CODED
-    pcursor.execute("INSERT into roads_2012_log SELECT * from roads_current")
+    pcursor.execute("INSERT into roads_%s_log SELECT * from roads_current" % (
+                                ts.year,))
     return ts
 
 def generate_shapefile(ts):
