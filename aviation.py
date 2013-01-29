@@ -40,7 +40,7 @@ log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
 log.startLogging(logfile.DailyLogFile('aviation.log','logs'))
 
 DBPOOL = adbapi.ConnectionPool("twistedpg", database="postgis", cp_reconnect=True,
-                                host=config.get('database','host'), 
+                                host=config.get('database','host'), cp_max=1,
                                 user=config.get('database','user'),
                                 password=config.get('database','password') )
 
@@ -276,7 +276,8 @@ def process_SIGC(txn, prod):
 
     """
     txn.execute("DELETE from sigmets_current where expire < now()")
-    for section in prod.text.split('\n\n'):
+    for section in prod.unixtext.split('\n\n'):
+        #log.msg("SECTION IS: "+ section.replace("\n", ' '))
         s = CS_RE.search(section.replace("\n", ' '))
         if s:
             data = s.groupdict()
