@@ -131,9 +131,7 @@ DIRECTMAP = {
              
              'SWIZ': 'snoww',
              'USIZ': 'sknt',
-             'SFIZ': 'snow',
              'SFDZ': 'snow',
-             'SFQZ': 'snow', # This is more instantaneous, or 6hr perhaps
              'UDIZ': 'drct',
              'UGIZ': 'gust',
              'UPIZ': 'gust',
