@@ -316,8 +316,9 @@ def real_process(raw):
         if (counties.strip() == ""):
             counties = "entire area"
         expire = ""
-        if (seg.ugcexpire is not None):
-            expire = "till "+ (seg.ugcexpire - datetime.timedelta(hours= reference.offsets[prod.z] )).strftime("%-I:%M %p ")+ prod.z
+        if seg.ugcexpire is not None:
+            if prod.z:
+                expire = "till "+ (seg.ugcexpire - datetime.timedelta(hours= reference.offsets[prod.z] )).strftime("%-I:%M %p ")+ prod.z
 
         prodtxt = "(%s)" % (pil,)
         if reference.prodDefinitions.has_key(pil):
