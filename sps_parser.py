@@ -55,6 +55,7 @@ def load_ugc(txn):
 
 
 def countyText(ugcs):
+    """ Turn an array of UGC objects into string for message relay """
     countyState = {}
     c = ""
     for ugc in ugcs:
@@ -80,7 +81,7 @@ class myProductIngestor(ldmbridge.LDMProductReceiver):
 
     def process_data(self, buf):
         try:
-            real_process(buf)
+            POSTGIS.runInteraction(real_process, buf)
         except Exception, myexp:
             common.email_error(myexp, buf)
 
@@ -93,44 +94,36 @@ class myProductIngestor(ldmbridge.LDMProductReceiver):
         reactor.callWhenRunning(reactor.stop)
 
 
-def real_process(raw):
-    sqlraw = raw.replace("\015\015\012", "\n")
+def real_process(txn, raw):
+    """ Really process! """
+    if raw.find("$$") == -1:
+        log.msg("$$ was missing from this product")
+        raw += "\r\r\n$$\r\r\n"
     prod = product.TextProduct(raw)
-
     product_id = prod.get_product_id()
-    if len(prod.segments) == 0:
-        # Send the office an alert that they probably don't have a trailing
-        # $$
-        print "Missing $$ detected", product_id
-        mess = "%s: iembot failed to process product: %s\nError: %s" % \
-               (prod.get_iembot_source(), product_id, "Missing $$")
-        htmlmess = "<span style='color: #FF0000; font-weight: bold;'>\
-iembot processing error:</span><br />Product: %s<br />Error: %s" % \
-            (product_id, "Missing $$")
-        jabber.sendMessage(mess, htmlmess)
-        return
-
 
     if prod.segments[0].giswkt:
-        sql = """INSERT into text_products(product, product_id, geom) values (%s,%s, %s)"""
-        myargs = (sqlraw, product_id, prod.segments[0].giswkt )
+        sql = """INSERT into text_products(product, product_id, geom) 
+                values (%s,%s, %s)"""
+        myargs = (prod.unixtext, product_id, prod.segments[0].giswkt )
         
     else:
         sql = "INSERT into text_products(product, product_id) values (%s,%s)" 
-        myargs = (sqlraw, product_id)
-    deffer = POSTGIS.runOperation(sql, myargs)
-    deffer.addErrback( common.email_error, sqlraw )
-    deffer.addErrback( log.err )
+        myargs = (prod.unixtext, product_id)
+    txn.execute(sql, myargs)
 
     for seg in prod.segments:
+        if len(seg.ugcs) == 0:
+            continue
         headline = "[NO HEADLINE FOUND IN SPS]"
         if len(seg.headlines) > 0:
             headline = (seg.headlines[0]).replace("\n", " ")
         elif raw.find("SPECIAL WEATHER STATEMENT") > 0:
             headline = "Special Weather Statement"
         counties = countyText(seg.ugcs)
-        if (counties.strip() == ""):
+        if counties.strip() == "":
             counties = "entire area"
+
         expire = ""
         if seg.ugcexpire is not None:
             expire = "till %s %s" % (
@@ -138,15 +131,13 @@ iembot processing error:</span><br />Product: %s<br />Error: %s" % \
                 hours=reference.offsets.get(prod.z,0) )).strftime("%-I:%M %p"),
                                       prod.z)
 
-
         mess = "%s: %s issues %s for %s %s %s?pid=%s" % (prod.source[1:], 
            prod.source[1:], headline, counties, expire, 
            config.get('urls', 'product'), product_id)
         htmlmess = "%s issues <a href='%s?pid=%s'>%s</a> for %s %s" % ( 
                                 prod.source[1:], config.get('urls', 'product'), 
                                 product_id, headline, counties, expire)
-        log.msg(mess)
-
+        
         jabber.sendMessage(mess, htmlmess)
 
         twt = "%s for %s %s" % (headline, counties, expire)
