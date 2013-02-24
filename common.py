@@ -18,6 +18,7 @@ import simplejson
 import traceback
 import datetime
 import sys
+import urllib
 import os
 import StringIO
 from email.MIMEText import MIMEText
@@ -36,10 +37,12 @@ BITLY = "http://api.bit.ly/shorten?version=2.0.1&longUrl=%s&login=iembot&apiKey=
 
 
 def load_tokens(txn):
+    log.msg("Loading oauth_tokens...")
     txn.execute("SELECT * from oauth_tokens")
     for row in txn:
         OAUTH_TOKENS[ row['username'] ] = oauth.OAuthToken(
                             row['token'], row['secret'])
+    log.msg("... loaded %s oauth_tokens." % (len(OAUTH_TOKENS.keys()),))
 
 _dbpool = adbapi.ConnectionPool("twistedpg", database="mesosite", cp_reconnect=True,
                                 host=config.get('database','host'), 
@@ -172,7 +175,7 @@ def really_really_tweet(tuser, channel, tinyurl, msg, extras):
         twt = "#%s %s" % (channel, msg[:118])
     _twitter = twitter.Twitter(consumer=OAUTH_CONSUMER, 
                                token=OAUTH_TOKENS[tuser])
-    deffer = _twitter.update( twt[:140], None, extras)
+    deffer = _twitter.update( urllib.quote_plus(twt[:140]), None, extras)
     deffer.addCallback(tb, tuser, channel, twt)
     deffer.addErrback(twitterErrback, tuser, channel, twt)
     deffer.addErrback(log.err)
