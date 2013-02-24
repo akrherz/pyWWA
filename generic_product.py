@@ -123,12 +123,13 @@ def countyText(u):
         c +=" %s [%s] and" %(", ".join(countyState[st]), st)
     return c[:-4]
 
-def centertext(txt):
-    if (txt == "SPC"): return "Storm Prediction Center"
-    if (txt == "WNS"): return "Storm Prediction Center"
-    if (txt == "NHC"): return "National Hurricane Center"
-    if (txt == "WNH"): return "Hydrometeorological Prediction Center"
-    return "%s" % (txt,)
+centertext = {
+    "SPC": "Storm Prediction Center",
+    "WNS": "Storm Prediction Center",
+    "NHC": "National Hurricane Center",
+    "WNH": "Hydrometeorological Prediction Center",
+    "WNO": "NCEP Central Operations",
+}
 
 def snowfall_pns(prod):
     """
@@ -182,6 +183,10 @@ def real_process(raw):
     deffer.addErrback( common.email_error, sqlraw)
     myurl = "%s?pid=%s" % (config.get('urls', 'product'), product_id)
 
+    xtra = {
+            "product_id": product_id,
+            }
+
     # Just send with optional headline to rooms...
     if  SIMPLE_PRODUCTS.__contains__(pil):
         prodtxt = "(%s)" % (pil,)
@@ -189,14 +194,14 @@ def real_process(raw):
             prodtxt = reference.prodDefinitions[pil]
 
         mess = "%s: %s issues %s %s" % (wfo, wfo, prodtxt, myurl)
-        htmlmess = "%s issues <a href=\"%s\">%s</a> " % (centertext(wfo), myurl, prodtxt)
+        htmlmess = "%s issues <a href=\"%s\">%s</a> " % (centertext.get(wfo,wfo), myurl, prodtxt)
         if (not ["HWO","NOW","ZFP"].__contains__(pil) and 
          len(prod.segments) > 0 and 
          len(prod.segments[0].headlines) > 0 and 
          len(prod.segments[0].headlines[0]) < 200 ):
             htmlmess += "... %s ..." % (prod.segments[0].headlines[0],)
 
-        jabber.sendMessage(mess, htmlmess)
+        jabber.sendMessage(mess, htmlmess, xtra)
 
         channels = [wfo,]
         # Also send message to any 'subscribing WFO chatrooms'
@@ -205,7 +210,7 @@ def real_process(raw):
                 for wfo2 in routes[key]:
                     mess = "%s: %s issues %s %s" % \
                        (wfo2, wfo, prodtxt, myurl)
-                    jabber.sendMessage(mess, htmlmess)
+                    jabber.sendMessage(mess, htmlmess, xtra)
                     channels.append( wfo2 )
 
         twt = prodtxt
@@ -255,7 +260,7 @@ def real_process(raw):
                     rivers[r] += "%s (%s), " % (rname, nwsli)
             for r in rivers.keys():
                 htmlmess += " %s" % (rivers[r][:-2],)
-            jabber.sendMessage(mess[:-1] +" "+ myurl, htmlmess[:-1])
+            jabber.sendMessage(mess[:-1] +" "+ myurl, htmlmess[:-1], xtra)
             continue
 
 # PUBLIC ADVISORY NUMBER 10 FOR REMNANTS OF BARRY
@@ -268,7 +273,7 @@ def real_process(raw):
         if reference.prodDefinitions.has_key(pil):
             prodtxt = reference.prodDefinitions[pil]
         htmlmess = "%s issues <a href=\"%s\">%s</a> " % (wfo, myurl, prodtxt)
-        jabber.sendMessage(mess, htmlmess)
+        jabber.sendMessage(mess, htmlmess, xtra)
         
         common.tweet([wfo], prodtxt, myurl)
 
@@ -289,12 +294,12 @@ def real_process(raw):
                         tokens2 = re.findall("(PUBLIC ADVISORY) NUMBER\s+([0-9]+) FOR (.*)", raw)
                         what = tokens2[0][0]
                         tt = tokens2[0][2]
-                    mess = "%s: %s issues %s #%s for %s %s" % (wfo2, centertext(wfo), what, tnum, tt, myurl)
-                    htmlmess = "%s issues <a href=\"%s\">%s #%s</a> for %s" % ( centertext(wfo), myurl, what, tnum, tt)
+                    mess = "%s: %s issues %s #%s for %s %s" % (wfo2, centertext.get(wfo, wfo), what, tnum, tt, myurl)
+                    htmlmess = "%s issues <a href=\"%s\">%s #%s</a> for %s" % ( centertext.get(wfo, wfo), myurl, what, tnum, tt)
                 #print htmlmess, mess
-                jabber.sendMessage(mess, htmlmess)
+                jabber.sendMessage(mess, htmlmess, xtra)
                 channels.append( wfo2 )
-            twt = "%s issues %s %s for %s" % (centertext(wfo), what, tnum, tt)
+            twt = "%s issues %s %s for %s" % (centertext.get(wfo, wfo), what, tnum, tt)
             common.tweet(channels, twt, myurl)
 
 
@@ -326,7 +331,7 @@ def real_process(raw):
         mess = "%s: %s issues %s for %s %s %s" % \
           (wfo, wfo, prodtxt, counties, expire, myurl)
         htmlmess = "%s issues <a href=\"%s\">%s</a> for %s %s" % (wfo, myurl, prodtxt, counties, expire)
-        jabber.sendMessage(mess, htmlmess)
+        jabber.sendMessage(mess, htmlmess, xtra)
         twt = "%s for %s %s" % (prodtxt, counties, expire)
         common.tweet([wfo,], twt, myurl)
 
@@ -340,7 +345,7 @@ def real_process(raw):
         if reference.prodDefinitions.has_key(pil):
             prodtxt = reference.prodDefinitions[pil]
         htmlmess = "%s issues <a href=\"%s\">%s</a> " % (wfo, myurl, prodtxt)
-        jabber.sendMessage(mess, htmlmess)
+        jabber.sendMessage(mess, htmlmess, xtra)
         common.tweet([wfo,], prodtxt, myurl)
 
 
@@ -361,12 +366,12 @@ def real_process(raw):
                         tokens2 = re.findall("(PUBLIC ADVISORY) NUMBER\s+([0-9]+) FOR (.*)", raw)
                         what = tokens2[0][0]
                         tt = tokens2[0][2]
-                    mess = "%s: %s issues %s #%s for %s %s" % (wfo2, centertext(wfo), what, tnum, tt, myurl)
-                    htmlmess = "%s issues <a href=\"%s\">%s #%s</a> for %s" % ( centertext(wfo), myurl, what, tnum, tt)
+                    mess = "%s: %s issues %s #%s for %s %s" % (wfo2, centertext.get(wfo, wfo), what, tnum, tt, myurl)
+                    htmlmess = "%s issues <a href=\"%s\">%s #%s</a> for %s" % ( centertext.get(wfo, wfo), myurl, what, tnum, tt)
                 #print htmlmess, mess
-                jabber.sendMessage(mess, htmlmess)
+                jabber.sendMessage(mess, htmlmess, xtra)
                 channels.append( wfo2 )
-            twt = "%s issues %s %s for %s" % (centertext(wfo), what, tnum, tt)
+            twt = "%s issues %s %s for %s" % (centertext.get(wfo, wfo), what, tnum, tt)
             common.tweet(channels, twt, myurl)
 
 """ Load up H-VTEC NWSLI reference """
