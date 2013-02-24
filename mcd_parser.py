@@ -63,6 +63,10 @@ def real_process(raw):
 
     sqlraw = raw.replace("\015\015\012", "\n")
     prod = product.TextProduct(raw)
+    
+    xtra = {
+            'product_id': prod.get_product_id(),
+            }
 
     product_id = prod.get_product_id()
     sql = """INSERT into text_products(product, product_id) 
@@ -78,7 +82,7 @@ def real_process(raw):
          (wfo, num)
         htmlbody = "Storm Prediction Center issues <a href='http://www.spc.noaa.gov/products/md/md%s.html'>Mesoscale Discussion #%s</a> (<a href='%s?pid=%s'>View text</a>)" %(
                     num, num, config.get('urls', 'product'), product_id)
-        jabber.sendMessage(body, htmlbody)
+        jabber.sendMessage(body, htmlbody, xtra)
 
 
     # Figure out which areas SPC is interested in, default to WFOs

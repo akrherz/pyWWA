@@ -101,6 +101,9 @@ def real_process(txn, raw):
         raw += "\r\r\n$$\r\r\n"
     prod = product.TextProduct(raw)
     product_id = prod.get_product_id()
+    xtra ={
+           'product_id': product_id,
+           }
 
     if prod.segments[0].giswkt:
         sql = """INSERT into text_products(product, product_id, geom) 
@@ -138,7 +141,7 @@ def real_process(txn, raw):
                                 prod.source[1:], config.get('urls', 'product'), 
                                 product_id, headline, counties, expire)
         
-        jabber.sendMessage(mess, htmlmess)
+        jabber.sendMessage(mess, htmlmess, xtra)
 
         twt = "%s for %s %s" % (headline, counties, expire)
         url = "%s?pid=%s" % (config.get('urls', 'product'), product_id)

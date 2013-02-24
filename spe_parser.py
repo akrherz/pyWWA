@@ -51,6 +51,9 @@ def real_process(raw):
     prod = product.TextProduct(raw)
 
     product_id = prod.get_product_id()
+    xtra ={
+           'product_id': product_id,
+           }
     sql = """INSERT into text_products(product, product_id) values (%s,%s)"""
     myargs = (sqlraw, product_id)
     POSTGIS.runOperation(sql, myargs)
@@ -65,7 +68,7 @@ def real_process(raw):
                 wfo, config.get('urls', 'product'), product_id)
             htmlbody = "NESDIS issues <a href='%s?pid=%s'>Satellite Precipitation Estimates</a>" %(
                 config.get('urls', 'product'), product_id)
-            jabber.sendMessage(body, htmlbody)
+            jabber.sendMessage(body, htmlbody, xtra)
 
             twt = "#%s NESDIS issues Satellite Precipitation Estimates" % (wfo,)
             url = "%s?pid=%s" % (config.get('urls', 'product'), product_id)

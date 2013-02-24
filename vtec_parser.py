@@ -77,6 +77,9 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
                 common.email_error("No $$ Found!", buf)
                 buf += "\n\n$$\n\n"
             text_product = product.TextProduct( buf )
+            xtra = {
+                    'product_id': text_product.get_product_id(),
+                    }
             skip_con = False
             if (text_product.afos[:3] == "FLS" and 
                 len(text_product.segments) > 4):
@@ -94,7 +97,7 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
                 jabber_txt = "%s: %s has sent an updated FLS product (continued products were not reported here).  Consult this website for more details. %s?wfo=%s" % (wfo, wfo, 
                                                                                                                                                                         config.get('urls', 'riverapp'), wfo)
                 jabber_html = "%s has sent an updated FLS product (continued products were not reported here).  Consult <a href=\"%s?wfo=%s\">this website</a> for more details." % (wfo, config.get('urls', 'riverapp'), wfo)
-                jabber.sendMessage(jabber_txt, jabber_html)
+                jabber.sendMessage(jabber_txt, jabber_html, xtra)
                 twt = "Updated Flood Statement"
                 uri = "%s?wfo=%s" % (config.get('urls', 'riverapp'), wfo)
                 common.tweet([wfo,], twt, uri)
@@ -137,6 +140,9 @@ def segment_processor(txn, text_product, i, skip_con):
                                                     text_product.z, 0))
     seg = text_product.segments[i]
 
+    xtra = {
+            'product_id': text_product.get_product_id(),
+            }
 
     # A segment must have UGC
     if len(seg.ugcs) == 0:
@@ -286,7 +292,7 @@ def segment_processor(txn, text_product, i, skip_con):
 %(county)s till %(ets)s %(svs_special)s %(url)s" % jmsg_dict
                 jabberHTML = "%(wfo)s <a href='%(url)s'>%(product)s</a>%(sts)sfor %(county)s \
 till %(ets)s %(svs_special)s" % jmsg_dict
-                jabber.sendMessage(jabberTxt, jabberHTML)
+                jabber.sendMessage(jabberTxt, jabberHTML, xtra)
             twt = "%(product)s%(sts)sfor %(county)s till %(ets)s" % jmsg_dict
             url = jmsg_dict["url"]
             common.tweet(channels, twt, url)
@@ -318,7 +324,7 @@ till %(ets)s %(svs_special)s" % jmsg_dict
                 jabberHTML = "%(wfo)s <a href='%(url)s'>%(product)s</a>%(sts)sfor %(county)s \
 till %(ets)s %(svs_special)s" % jmsg_dict
                 if not skip_con:
-                    jabber.sendMessage(jabberTxt, jabberHTML)
+                    jabber.sendMessage(jabberTxt, jabberHTML, xtra)
                     channels.append(w)
             twt = "%(product)s%(sts)sfor %(county)s till %(ets)s" % jmsg_dict
             url = jmsg_dict["url"]
@@ -370,7 +376,8 @@ till %(ets)s %(svs_special)s" % jmsg_dict
                 channels = []
                 for w in affectedWFOS.keys():
                     jmsg_dict['w'] = w
-                    jabber.sendMessage(fmt % jmsg_dict, htmlfmt % jmsg_dict)
+                    jabber.sendMessage(fmt % jmsg_dict, htmlfmt % jmsg_dict, 
+                                       xtra)
                     channels.append( w )
                 twt = "%(product)s%(sts)sfor %(county)s till %(ets)s" % jmsg_dict
                 url = jmsg_dict["url"]

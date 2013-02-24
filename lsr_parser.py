@@ -194,6 +194,10 @@ class LSR:
 def real_processor(nws):
     """ Lets actually process! """
     wfo = nws.source[1:]
+    
+    xtra = {
+            'product_id': nws.get_product_id(),
+            }
 
     tsoff = datetime.timedelta(hours= reference.offsets[nws.z])
 
@@ -274,7 +278,7 @@ def real_processor(nws):
         jabber_html = "%s: %s [%s Co, %s] %s <a href='%s'>reports %s %s</a>at %s %s -- %s" % (
                 wfo,lsr.city, lsr.county, lsr.state, lsr.source, uri, lsr.typetext, 
            mag_long, lsr.lts.strftime(time_fmt), nws.z, lsr.remark)
-        jabber.sendMessage(jabber_text, jabber_html)
+        jabber.sendMessage(jabber_text, jabber_html, xtra)
         twt = "%s [%s Co, %s] %s reports %s %sat %s %s" % (lsr.city, lsr.county, lsr.state, lsr.source, 
               lsr.typetext, mag_long, 
               lsr.lts.strftime(time_fmt), nws.z)
@@ -304,7 +308,7 @@ sent and not repeated here." % (duplicates, duplicates + new_reports)
            (wfo, wfo, extra_text, uri)
         jabber_html = "%s issues <a href='%s'>Summary Local Storm Report</a>%s"\
             % (wfo, uri, extra_text)
-        jabber.sendMessage(jabber_text, jabber_html)
+        jabber.sendMessage(jabber_text, jabber_html, xtra)
         twt = "Summary Local Storm Report"
         common.tweet([wfo,], twt, uri)
 

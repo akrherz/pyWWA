@@ -107,6 +107,9 @@ def consume(spc, outlook):
 def real_parser(buf):
     buf = buf.replace("\015\015\012", "\n")
     tp = product.TextProduct(buf)
+    xtra ={
+           'product_id': tp.get_product_id(),
+           }
     spc = spcpts.SPCPTS( tp )
     #spc.draw_outlooks()
 
@@ -188,7 +191,7 @@ for portions of %s %s" % (channelprefix, wfo, cat, wfo, url)
                 twts[wfo] = "SPC issues Day 1 %s risk for %s" % (cat, wfo)
 
     for wfo in msgs.keys():
-        jabber.sendMessage( msgs[wfo], htmlmsgs[wfo] )
+        jabber.sendMessage( msgs[wfo], htmlmsgs[wfo], xtra )
 
     for wfo in twts.keys():
         common.tweet( [wfo,], twts[wfo], url )

@@ -40,7 +40,7 @@ log.startLogging( logfile.DailyLogFile('dsm_parser.log','logs') )
 
 DBPOOL = adbapi.ConnectionPool("psycopg2", database="iem", cp_reconnect=True,
                                 host=config.get('database','host'), 
-                                user=config.get('database','user'),
+                                user=config.get('database','user'), cp_max=1,
                                 password=config.get('database','password') )
 
 # LDM Ingestor
