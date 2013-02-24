@@ -18,7 +18,6 @@ import simplejson
 import traceback
 import datetime
 import sys
-import urllib
 import os
 import StringIO
 from email.MIMEText import MIMEText
@@ -175,7 +174,7 @@ def really_really_tweet(tuser, channel, tinyurl, msg, extras):
         twt = "#%s %s" % (channel, msg[:118])
     _twitter = twitter.Twitter(consumer=OAUTH_CONSUMER, 
                                token=OAUTH_TOKENS[tuser])
-    deffer = _twitter.update( urllib.quote_plus(twt[:140]), None, extras)
+    deffer = _twitter.update( twt[:140], None, extras)
     deffer.addCallback(tb, tuser, channel, twt)
     deffer.addErrback(twitterErrback, tuser, channel, twt)
     deffer.addErrback(log.err)
