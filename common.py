@@ -220,13 +220,15 @@ class JabberClient:
         log.msg("SETTING authenticated to false!")
         self.authenticated = False
 
-    def sendMessage(self, body, html, to_user=config.get('xmpp', 'iembot')):
-        if (not self.authenticated):
+    def sendMessage(self, body, html, xtra={}):
+        """ Send a message to the bot for routing! """
+        if not self.authenticated:
             log.msg("No Connection, Lets wait and try later...")
-            reactor.callLater(3, self.sendMessage, body, html, to_user)
+            reactor.callLater(3, self.sendMessage, body, html, xtra)
             return
         message = domish.Element(('jabber:client','message'))
-        message['to'] = '%s@%s' % (to_user, config.get('xmpp', 'domain'))
+        message['to'] = '%s@%s' % (config.get('xmpp', 'iembot'), 
+                                   config.get('xmpp', 'domain'))
         message['type'] = 'chat'
 
         # message.addElement('subject',None,subject)
@@ -234,6 +236,10 @@ class JabberClient:
         h = message.addElement('html','http://jabber.org/protocol/xhtml-im')
         b = h.addElement('body', 'http://www.w3.org/1999/xhtml')
         b.addRawXml( html or body )
+        # channels is of most important
+        x = message.addElement('x', 'nwschat:nwsbot')
+        for key in xtra.keys():
+            x[key] = xtra[key]
         self.xmlstream.send(message)
 
     def debug(self, elem):
