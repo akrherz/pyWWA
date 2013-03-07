@@ -292,7 +292,11 @@ def really_process(tp, data):
             mydata[sid][tstamp] = {}
 
         varname = tokens[5]
-        value = float(tokens[6])
+        if tokens[6].find("****") == 0:
+            log.msg("Bad Data from %s\n%s" % (tp.get_product_id(), data))
+            value= -9999.0
+        else:
+            value = float(tokens[6])
         if varname[:2] in ['TV','TB']: # Soil Depth fun!
             depth = int(value)
             value = abs( (value * 1000) % (depth * 1000) )
