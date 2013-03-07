@@ -339,7 +339,7 @@ till %(ets)s %(svs_special)s" % jmsg_dict
             if (vtec.action == "CAN" or vtec.action == "UPG"):
                 end_ts = text_product.valid
             issueSpecial = "issue"
-            if vtec.action == "EXT" and vtec.begints is not None: 
+            if vtec.action in ["EXT","UPG"] and vtec.begints is not None: 
                 issueSpecial = "'%s'" % (vtec.begints,)
         # Lets cancel county
             for cnty in ugc:
