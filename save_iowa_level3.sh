@@ -12,7 +12,7 @@ then
 fi
 
 for R in $(echo "DMX DVN OAX ARX FSD MPX EAX ABR UDX"); do
-cd /home/ldm/data/nexrad/NIDS/${R}
+cd /mesonet/data/nexrad/NIDS/${R}
   tar -cf /tmp/${R}radar.tar ?[A-Z]?/???_${YYYYMMDD}_*
   tar -uf /tmp/${R}radar.tar ?[0-9]?/???_${YYYYMMDD}_*
   cd /tmp
