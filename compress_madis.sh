@@ -6,12 +6,12 @@ YYYY=$(date --date '1 day ago' +'%Y')
 
 cd /mesonet/data/madis/metar
 gzip ${YYYYMMDD}*nc
-mkdir -p /mnt/longterm2/metar/${YYYY}
-mv ${YYYYMMDD}*nc.gz /mnt/longterm2/metar/${YYYY}
+mkdir -p /mnt/longterm2/madis/metar/${YYYY}
+mv ${YYYYMMDD}*nc.gz /mnt/longterm2/madis/metar/${YYYY}
 
 cd /mesonet/data/madis/mesonet
 gzip ${YYYYMMDD}*nc
-mkdir -p /mnt/longterm2/mesonet/${YYYY}
-mv ${YYYYMMDD}*nc.gz /mnt/longterm2/mesonet/${YYYY}
+mkdir -p /mnt/longterm2/madis/mesonet/${YYYY}
+mv ${YYYYMMDD}*nc.gz /mnt/longterm2/madis/mesonet/${YYYY}
 
 #END
