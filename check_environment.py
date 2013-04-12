@@ -4,7 +4,6 @@ Check the environment for python includes
 
 from twisted.python import log, logfile
 import os
-import mesonet
 import access
 from pyldm import ldmbridge
 from pyiem.nws import product

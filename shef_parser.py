@@ -33,9 +33,9 @@ def write_pid():
     pid.close()
 
 # Stuff I wrote
-import mesonet
 from pyiem.observation import Observation
 from pyiem.nws import product
+from pyiem import reference
 from pyldm import ldmbridge
 import common
 import iemtz
@@ -393,8 +393,8 @@ def process_site(tp, sid, ts, data):
     if state is None and len(sid) == 8 and sid[0] == 'X':
         return
     # Base the state on the 2 char station ID!
-    if state is None and len(sid) == 5 and mesonet.nwsli2state.has_key(sid[3:]):
-        state = mesonet.nwsli2state.get(sid[3:])
+    if state is None and len(sid) == 5 and reference.nwsli2state.has_key(sid[3:]):
+        state = reference.nwsli2state.get(sid[3:])
         LOC2STATE[sid] = state
     if state is None:
         if UNKNOWN.get(sid) is None:
