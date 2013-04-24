@@ -60,6 +60,10 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
         except Exception, myexp:
             common.email_error(myexp, buf)
 
+class ParseError(Exception):
+    """ general exception """
+    pass
+
 def real_parser(buf):
     """ Actually do something with the buffer, please """
     if buf.strip() == "":
@@ -77,7 +81,10 @@ def real_parser(buf):
         table = "products_%s_0712" % (nws.valid.year,)
     else:
         table = "products_%s_0106" % (nws.valid.year,)
-        
+    
+    if nws.afos is None:
+        raise ParseError("TextProduct.afos is null")
+    
     
     df = DBPOOL.runOperation("""INSERT into """+table+"""(pil, data, entered,
         source, wmo) VALUES(%s,%s,%s,%s,%s)""",  (nws.afos.strip(), nws.text, 
