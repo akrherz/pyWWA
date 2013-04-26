@@ -14,7 +14,7 @@ from twisted.internet import task
 from twisted.enterprise import adbapi
 
 from twittytwister import twitter
-import simplejson
+import json
 import traceback
 import datetime
 import sys
@@ -43,7 +43,8 @@ def load_tokens(txn):
                             row['token'], row['secret'])
     log.msg("... loaded %s oauth_tokens." % (len(OAUTH_TOKENS.keys()),))
 
-_dbpool = adbapi.ConnectionPool("twistedpg", database="mesosite", cp_reconnect=True,
+_dbpool = adbapi.ConnectionPool("twistedpg", database="mesosite", 
+                                cp_reconnect=True,
                                 host=config.get('database','host'), 
                                 user=config.get('database','user'),
                                 password=config.get('database','password') )
@@ -89,6 +90,12 @@ Message:
     msg['To'] = config.get('errors', 'emailfrom')
     smtp.sendmail("localhost", msg["From"], msg["To"], msg)
 
+def send_tweet(twt):
+    """
+    Method to pushish a pyiem.nws.parser.Tweet object 
+    """
+    tweet(twt.xtra['channels'], twt.plain, twt.url, twt.extra)
+
 def tweet(channels, msg, url, extras={}):
     """
     Method to publish twitter messages
@@ -96,7 +103,7 @@ def tweet(channels, msg, url, extras={}):
     # Simple hack to see if we are running in development TODO
     if config.get('xmpp','domain') == 'laptop.local':
         channels = ['TEST',]
-        #return
+        return
     
     if url:
         url = url.replace("&amp;", "&").replace("#","%23").replace("&","%26").replace("?", "%3F")
@@ -117,13 +124,13 @@ def bitly_error(err, channels, msg, extras):
     log.msg( err.value.response )
     tweet_step2(channels, msg, extras)
 
-def reallytweet(json, channels, msg, extras):
+def reallytweet(jsondata, channels, msg, extras):
     """
     Actually, really publish this time!
     """
     tinyurl = ""
-    if json and type(json) == type(""):
-        j = simplejson.loads( json )
+    if jsondata and type(jsondata) == type(""):
+        j = json.loads( jsondata )
         if j.has_key('errorCode') and j['errorCode'] != 0 and j.has_key('errorMessage'):
             if j['errorCode'] != 500:
                 email_error(str(j), "Problem with bitly")
@@ -221,6 +228,10 @@ class JabberClient:
     def _disconnect(self, xs):
         log.msg("SETTING authenticated to false!")
         self.authenticated = False
+
+    def send_jmsg(self, jmsg):
+        """ Send a pyiem.nws.parser.JabberMessage """
+        self.sendMessage(jmsg.plain, jmsg.html, jmsg.xtra)
 
     def sendMessage(self, body, html, xtra={}):
         """ Send a message to the bot for routing! """
