@@ -63,7 +63,8 @@ routes = {'TCPAT[0-9]': gulfwfo,
 SIMPLE_PRODUCTS = ["TCE", "DSA", "AQA", "DGT", "FWF", "RTP", "HPA", "CWF", 
             "SRF", "SFT", "PFM", "ZFP", "CAE", "AFD", "FTM", "AWU", "HWO",
             "NOW", "PSH", "NOW", "PNS", "RER", "ADM", "TCU", "RVA", "EQR",
-            "OEP", "SIG", "VAA", "RVF", "PWO", "TWO"]
+            "OEP", "SIG", "VAA", "RVF", "PWO", "TWO", "RFD"]
+NEW_ROUTING = ['RFD',]
 
 AHPS_TEMPLATE = {
   'CR': 'http://www.crh.noaa.gov/ahps2/hydrograph.php?wfo=%s&amp;gage=%s&amp;view=1,1,1,1,1,1,1,1',
@@ -189,6 +190,9 @@ def real_process(raw):
 
     # Just send with optional headline to rooms...
     if  SIMPLE_PRODUCTS.__contains__(pil):
+        xtra['channels'] = wfo
+        if pil in NEW_ROUTING:
+            xtra['channels'] = prod.afos
         prodtxt = "(%s)" % (pil,)
         if reference.prodDefinitions.has_key(pil):
             prodtxt = reference.prodDefinitions[pil]
