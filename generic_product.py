@@ -208,6 +208,11 @@ def real_process(raw):
         jabber.sendMessage(mess, htmlmess, xtra)
 
         channels = [wfo,]
+        if pil in NEW_ROUTING:
+            channels = [prod.afos,]
+            # TODO: remove manual hack
+            if prod.afos == 'RFDBIS':
+                channels = ['BIS',]
         # Also send message to any 'subscribing WFO chatrooms'
         for key in routes.keys():
             if (re.match(key, prod.afos)):
