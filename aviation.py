@@ -288,8 +288,8 @@ def process_SIGC(txn, prod):
                 wkt += "%s %s," % (lon, lat)
             if lats[0] != lats[-1] or lons[0] != lons[-1]:
                 wkt += "%s %s," % (lons[0], lats[0])
-            print '%s %s From: %s Till: %s Len(lats): %s' % (data['label'], data['geotype'], 
-                                    prod.valid, expire, len(lats))
+            log.msg('%s %s From: %s Till: %s Len(lats): %s' % (data['label'], data['geotype'], 
+                                    prod.valid, expire, len(lats)))
             for table in ('sigmets_current', 'sigmets_archive'):
                 sql = "DELETE from "+table+" where label = %s and expire = %s"
                 args = (data['label'], expire)
@@ -304,7 +304,10 @@ def process_SIGC(txn, prod):
 
         elif section.find("CONVECTIVE SIGMET") > -1:
             if section.find("CONVECTIVE SIGMET...NONE") == -1:
-                common.email_error("Couldn't parse section", section)
+                        if section.find(" TS ") == -1:
+                            common.email_error("Did not find required TS ", section)                
+                        else:
+                            common.email_error("Couldn't parse section", section)
                 
         """ Gonna punt the outlook for now, no need? 
         s = OL_RE.search(section)
