@@ -156,10 +156,10 @@ def real_process(raw):
 
     # If we are near the end of the month and the day1 is 1, add 1 month
     if gmt.day > 27  and day1 == 1:
-        sTS +=  datetime.timedelta(days=+25)
+        sTS +=  datetime.timedelta(days=+35)
         sTS = sTS.replace(day=1)
     if gmt.day > 27  and day2 == 1:
-        eTS +=  datetime.timedelta(days=+25)
+        eTS +=  datetime.timedelta(days=+35)
         eTS = eTS.replace(day=1)
 
     # Brute Force it!
