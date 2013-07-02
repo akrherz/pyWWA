@@ -39,7 +39,7 @@ def exception_hook(kwargs):
     if not kwargs.has_key("failure"):
         return
 
-DBPOOL = adbapi.ConnectionPool("twistedpg", database="postgis", 
+DBPOOL = adbapi.ConnectionPool("twistedpg", database="postgis", cp_max=2,
                                host=config.get('database','host'), 
                                user=config.get('database','user'),
                                password=config.get('database','password'), 
@@ -62,17 +62,13 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
 
     def process_data(self, buf):
         """ Process the product """
-        try:
-            real_parser( buf )
-        except Exception, exp:
-            common.email_error(exp, buf)
+        df = DBPOOL.runInteraction(real_parser, buf)
+        df.addErrback(common.email_error, buf)
         
-def consume(spc, outlook):
+def consume(txn, spc, outlook):
     """
     Do the geometric stuff we care about, including storage
     """
-    pgconn = DBPOOL.connect()
-    txn = pgconn.cursor()
 
     # Insert geometry into database table please
     sql = """INSERT into spc_outlooks(issue, valid, expire,
@@ -97,14 +93,11 @@ def consume(spc, outlook):
     log.msg("Category: %s Threshold: %s  #WFOS: %s" % (
         outlook.category, outlook.threshold,  len(affectedWFOS)))
     
-    txn.close()
-    pgconn.commit()
-
     return affectedWFOS
 
 
 
-def real_parser(buf):
+def real_parser(txn, buf):
     buf = buf.replace("\015\015\012", "\n")
     tp = product.TextProduct(buf)
     xtra ={
@@ -114,7 +107,7 @@ def real_parser(buf):
     #spc.draw_outlooks()
 
     # Remove any previous data
-    DBPOOL.runOperation("""DELETE from spc_outlooks where valid = %s 
+    txn.execute("""DELETE from spc_outlooks where valid = %s 
     and expire = %s 
     and outlook_type = %s and day = %s""", (
                     spc.valid, spc.expire, spc.outlook_type, spc.day))
@@ -123,7 +116,7 @@ def real_parser(buf):
             'HIGH': [] }
 
     for outlook in spc.outlooks:
-        arWFO = consume(spc, outlook)
+        arWFO = consume(txn, spc, outlook)
         if wfos.has_key( outlook.threshold ):
             wfos[ outlook.threshold ].append( arWFO )
     
