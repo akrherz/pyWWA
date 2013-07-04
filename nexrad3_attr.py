@@ -284,6 +284,8 @@ def really_process(txn, res, nexrad, ts):
 
     if co == 0:
         log.msg("Got zero entries ||%s||" % (res,))
+        os.unlink("gemglb.nts")
+        os.unlink("last.nts")
     log.msg("%s %s Processed %s entries" % (nexrad, ts, co))
 
     
