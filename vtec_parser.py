@@ -350,14 +350,14 @@ till %(ets)s %(svs_special)s" % jmsg_dict
                         str(cnty), vtec.office, vtec.ETN, vtec.phenomena, vtec.significance))
              
             # If this is the only county, we can cancel the polygon too
-            if (len(text_product.segments) == 1):
+            if len(text_product.segments) > 1 and len(text_product.segments[1].vtec) == 0:
                 log.msg("Updating Polygon as well")
                 txn.execute("""UPDATE """+warning_table+""" SET status = %s, 
                 expire = %s, updated = %s WHERE gtype = 'P' and wfo = %s and eventid = %s 
                 and phenomena = %s and significance = %s""" , (vtec.action, end_ts, 
                         text_product.valid, vtec.office, vtec.ETN, 
                         vtec.phenomena, vtec.significance) )
-             
+            
             jmsg_dict['action'] = "cancels"
             fmt = "%(w)s: %(wfo)s  %(product)s for %(county)s %(svs_special)s "
             htmlfmt = "%(wfo)s <a href='%(url)s'>%(product)s</a> for %(county)s %(svs_special)s"
