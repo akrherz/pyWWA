@@ -202,7 +202,10 @@ def save_data(txn, iem, mtr, clean_metar, orig_metar):
         pass
     else:
         if mtr.temp:
-            iem.data['tmpf'] = mtr.temp.value("F")
+            val = mtr.temp.value("F")
+            # Place reasonable bounds on the temperature before saving it!
+            if val > -90 and val < 150:
+                iem.data['tmpf'] = val
         if mtr.dewpt:
             iem.data['dwpf'] = mtr.dewpt.value("F")
         # Daabase only allows len 254
