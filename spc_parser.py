@@ -186,8 +186,8 @@ for portions of %s %s" % (channelprefix, wfo, cat, wfo, url)
     for wfo in msgs.keys():
         jabber.sendMessage( msgs[wfo], htmlmsgs[wfo], xtra )
 
-    for wfo in twts.keys():
-        common.tweet( [wfo,], twts[wfo], url )
+    #for wfo in twts.keys():
+    #    common.tweet( [wfo,], twts[wfo], url )
 
     # Generic for SPC
     twt = "The Storm Prediction Center issues %s Outlook" %( product_descript,)
