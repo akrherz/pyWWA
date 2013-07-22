@@ -97,7 +97,8 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
     """ I receive products from ldmbridge and process them 1 by 1 :) """
 
     def connectionLost(self, reason):
-        print 'connectionLost', reason
+        log.msg('connectionLost')
+        log.err( reason )
         reactor.callLater(5, self.shutdown)
 
     def shutdown(self):
@@ -281,8 +282,14 @@ def process_SIGC(txn, prod):
         s = CS_RE.search(section.replace("\n", ' '))
         if s:
             data = s.groupdict()
-            expire = figure_expire(prod.valid, float(data['hour']), float(data['minute']))
-            lons, lats = locs2lonslats(data['locs'], data['geotype'], data['width'], data['diameter'])
+            expire = figure_expire(prod.valid, int(data['hour']), 
+                                   int(data['minute']))
+            lons, lats = locs2lonslats(data['locs'], data['geotype'], 
+                                       data['width'], data['diameter'])
+            if len(lons) == 2:
+                common.email_error("ERROR: only two points in geometry! %s" % (
+                                                data['locs'],), prod.unixtext)
+                continue
             wkt = ""
             for lat,lon in zip(lats,lons):
                 wkt += "%s %s," % (lon, lat)
