@@ -76,22 +76,24 @@ def consume(txn, spc, outlook):
     VALUES (%s, %s, %s, %s, %s, %s, %s, %s)""" 
     args = (spc.issue,  spc.valid, spc.expire,
             outlook.threshold, outlook.category, spc.day, 
-            spc.outlook_type, "SRID=4326;%s" % (outlook.polygon.wkt,))
+            spc.outlook_type, "SRID=4326;%s" % (outlook.geometry.wkt,))
     txn.execute( sql, args )
     
     # Search for WFOs
     sql = """select distinct wfo from nws_ugc 
        WHERE ( st_overlaps(geomFromEWKT('SRID=4326;%s'), geom) or 
        st_contains(geomFromEWKT('SRID=4326;%s'), geom) )and 
-       polygon_class = 'C'""" % (outlook.polygon.wkt, outlook.polygon.wkt)
+       polygon_class = 'C'""" % (outlook.geometry.wkt, 
+                                 outlook.geometry.wkt)
 
     txn.execute( sql )
     affectedWFOS = []
     for row in txn.fetchall():
         affectedWFOS.append( row['wfo'] )
-
-    log.msg("Category: %s Threshold: %s  #WFOS: %s" % (
-        outlook.category, outlook.threshold,  len(affectedWFOS)))
+    affectedWFOS.sort()
+    log.msg("Category: %s Threshold: %s  #WFOS: %s %s" % (
+        outlook.category, outlook.threshold,  len(affectedWFOS),
+        ",".join(affectedWFOS)))
     
     return affectedWFOS
 
