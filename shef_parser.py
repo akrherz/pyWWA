@@ -304,7 +304,15 @@ def really_process(tp, data):
                 value = 0 - value
                 depth = abs(depth)
             varname = "%s.%02i" % (varname, depth)
-                
+            if len(varname) > 10:
+                if depth > 999:
+                    log.msg("Ignoring sid: %s varname: %s value: %s" % (sid, varname, 
+                                                           value))
+                    continue
+                common.email_error("sid: %s varname: %s value: %s is too large" % (
+                                                        sid, varname, value), 
+                               "%s\n%s" % (data, tp.unixtext))
+            continue
         mydata[sid][tstamp][varname] = value
     # Now we process each station we found in the report! :)
     for sid in mydata.keys():
