@@ -21,85 +21,62 @@ from twisted.python import logfile
 log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
 log.startLogging(logfile.DailyLogFile('mcd_parser.log', 'logs'))
 
-import os
-import re
-from pyiem.nws import product
 from pyldm import ldmbridge
+from pyiem.nws.products.mcd import parser as mcdparser
 import common
 
 from twisted.internet import reactor
 from twisted.enterprise import adbapi
+from shapely.geometry import MultiPolygon
 
-import ConfigParser
-config = ConfigParser.ConfigParser()
-config.read(os.path.join(os.path.dirname(__file__), 'cfg.ini'))
-
-DBPOOL = adbapi.ConnectionPool("twistedpg", database="postgis", 
-                               host=config.get('database','host'), 
-                               user=config.get('database','user'),
-                               password=config.get('database','password'), 
-                               cp_reconnect=True)
+DBPOOL = adbapi.ConnectionPool("twistedpg", database="postgis", cp_max=1,
+                           host=common.config.get('database','host'), 
+                           user=common.config.get('database','user'),
+                           password=common.config.get('database','password'), 
+                           cp_reconnect=True)
 # LDM Ingestor
 class MyProductIngestor(ldmbridge.LDMProductReceiver):
     """ I receive products from ldmbridge and process them 1 by 1 :) """
 
     def connectionLost(self, reason):
-        print 'connectionLost', reason
-        reactor.callLater(5, self.shutdown)
-
-    def shutdown(self):
-        reactor.callWhenRunning(reactor.stop)
-
+        ''' connection was lost for some reason '''
+        log.msg('connectionLost')
+        log.err( reason )
+        reactor.callLater(5, reactor.callWhenRunning, reactor.stop)
 
     def process_data(self, raw):
-        try:
-            real_process(raw)
-        except Exception, myexp:
-            common.email_error(myexp, raw)
+        ''' process the data, please '''
+        defer = DBPOOL.runInteraction(real_process, raw)
+        defer.addErrback( common.email_error, raw)
 
-def real_process(raw):
-    tokens = re.findall("MESOSCALE DISCUSSION ([0-9]*)", raw)
-    num = tokens[0]
-
-    sqlraw = raw.replace("\015\015\012", "\n")
-    prod = product.TextProduct(raw)
-    
+def real_process(txn, raw):
+    ''' Actually do stuff! '''
+    mcd = mcdparser( raw )
+    product_id = mcd.get_product_id()
     xtra = {
-            'product_id': prod.get_product_id(),
+            'product_id': product_id,
+            'channels': ','.join(mcd.attn_wfo) + ',SPC'
             }
 
-    product_id = prod.get_product_id()
-    sql = """INSERT into text_products(product, product_id) 
-      values (%s,%s)""" 
-    sqlargs = (sqlraw, product_id)
-    DBPOOL.runOperation(sql, sqlargs)
+    # Yuck, the database has a multi-polygon requirement
+    multi = MultiPolygon([mcd.geometry])
+    wkt = "SRID=4326;%s" % (multi.wkt,)
+    sql = """INSERT into text_products(product, product_id, geom) 
+      values (%s,%s, %s)""" 
+    sqlargs = (raw, product_id, wkt)
+    txn.execute(sql, sqlargs)
 
-    # Figure out which WFOs SPC wants to alert...
-    tokens = re.findall("ATTN\.\.\.WFO\.\.\.([\.,A-Z]*)", raw)
-    tokens = re.findall("([A-Z][A-Z][A-Z])", tokens[0])
-    for wfo in tokens:
-        body = "%s: Storm Prediction Center issues Mesoscale Discussion http://www.spc.noaa.gov/products/md/md%s.html" % \
-         (wfo, num)
-        htmlbody = "Storm Prediction Center issues <a href='http://www.spc.noaa.gov/products/md/md%s.html'>Mesoscale Discussion #%s</a> (<a href='%s?pid=%s'>View text</a>)" %(
-                    num, num, config.get('urls', 'product'), product_id)
-        jabber.sendMessage(body, htmlbody, xtra)
-
-
-    # Figure out which areas SPC is interested in, default to WFOs
-    affected = ", ".join(tokens)
-    sections = sqlraw.split("\n\n")
-    for sect in sections:
-        if sect.find("AREAS AFFECTED...") == 0:
-            affected = sect[17:]
+    uri = '%s?pid=%s' % (common.config.get('urls', 'product'), product_id)
+    body, htmlbody = mcd.get_jabbers(uri)
+    JABBER.sendMessage(body, htmlbody, xtra)
 
     # Twitter this
-    twt = "Mesoscale Discussion %s for %s" % (num, affected)
-    url = "http://www.spc.noaa.gov/products/md/md%s.html" % (num, )
-    tokens.append("SPC")
-    common.tweet(tokens, twt, url) 
+    twt = mcd.tweet()
+    url = mcd.get_spc_url()
+    common.tweet(xtra['channels'].split(','), twt, url) 
 
-jabber = common.make_jabber_client("mcd_parser")
+JABBER = common.make_jabber_client("mcd_parser")
 
-ldm = ldmbridge.LDMProductFactory( MyProductIngestor() )
+ldmbridge.LDMProductFactory( MyProductIngestor() )
 
 reactor.run()

@@ -39,6 +39,8 @@ from pyldm import ldmbridge
 from pyiem import iemtz, reference
 from pyiem.nws import product
 
+from shapely.geometry import MultiPolygon
+
 import common
 
 POSTGIS = adbapi.ConnectionPool("twistedpg", database="postgis", cp_reconnect=True,
@@ -218,8 +220,8 @@ def segment_processor(txn, text_product, i, skip_con):
             affectedWFOS["RGN3FWX"] = 1
 
         # Check for Hydro-VTEC stuff
-        if (len(hvtec) > 0 and hvtec[0].nwsli != "00000"):
-            nwsli = hvtec[0].nwsli
+        if len(hvtec) > 0 and hvtec[0].nwsli.id != "00000":
+            nwsli = hvtec[0].nwsli.id
             rname = "((%s))" % (nwsli,)
             if (nwsli_dict.has_key(nwsli)):
                 rname = "the "+ nwsli_dict[nwsli]
@@ -263,14 +265,15 @@ def segment_processor(txn, text_product, i, skip_con):
             fcster = text_product.get_signature()
             if fcster is not None:
                 fcster = fcster[:24]
-            if (seg.giswkt != None):
+            if (seg.sbw != None):
+                giswkt = 'SRID=4326;%s' % (MultiPolygon([ seg.sbw ]).wkt,)
                 txn.execute("""INSERT into """+ warning_table +""" (issue, expire, report, 
                  significance, geom, phenomena, gtype, wfo, eventid, status, updated, 
                 fcster, hvtec_nwsli) VALUES (%s,%s,%s,%s,%s,%s,%s, 
                 %s,%s,%s,%s, %s, %s)""", (bts, vtec.endts , 
                                 text_product.text, vtec.significance, 
-      seg.giswkt, vtec.phenomena, 'P', vtec.office, vtec.ETN, vtec.action, 
-      text_product.valid, fcster, seg.get_hvtec_nwsli() ) )
+      giswkt, vtec.phenomena, 'P', vtec.office, vtec.ETN, vtec.action, 
+      text_product.valid, fcster, seg.get_hvtec_nwsli().id ) )
                 
             # Insert Counties
             for k in range(len(ugc)):
@@ -283,7 +286,7 @@ def segment_processor(txn, text_product, i, skip_con):
                 %s, %s,%s, %s)""",  (bts, vtec.endts, 
                                       text_product.text, cnty, vtec.phenomena, vtec.office, vtec.ETN, 
                                       vtec.action, text_product.valid, 
-                                      fcster, cnty, vtec.significance, seg.get_hvtec_nwsli() ))
+                                      fcster, cnty, vtec.significance, seg.get_hvtec_nwsli().id ))
             channels = []
             for w in affectedWFOS.keys():
                 channels.append(w)
@@ -397,7 +400,7 @@ till %(ets)s %(svs_special)s" % jmsg_dict
                     vtec.phenomena, vtec.significance  ))
             
     # Update polygon if necessary
-    if (vtec.action != "NEW" and seg.giswkt is not None):
+    if (vtec.action != "NEW" and seg.sbw is not None):
         log.msg("Updating SVS For Polygon")
         txn.execute("""UPDATE """+ warning_table +""" SET svs = 
               (CASE WHEN (svs IS NULL) THEN '__' ELSE svs END) 
@@ -407,7 +410,8 @@ till %(ets)s %(svs_special)s" % jmsg_dict
                 vtec.phenomena, vtec.significance )  )
      
     # New fancy SBW Stuff!
-    if seg.giswkt is not None:
+    if seg.sbw is not None:
+        giswkt = 'SRID=4326;%s' % (MultiPolygon([ seg.sbw ]).wkt,)
         # If we are dropping the product and there is only 1 segment
         # We need not wait for more action, we do two things
         # 1. Update the polygon_end to cancel time for the last polygon
@@ -463,7 +467,7 @@ till %(ets)s %(svs_special)s" % jmsg_dict
                  text_product.valid, 
                  text_product.valid, 
                  text_product.valid, 
-                  seg.giswkt, vtec.action, product_text,
+                  giswkt, vtec.action, product_text,
                  seg.windtag, seg.hailtag, seg.tornadotag, seg.tornadodamagetag,
                  tml_valid, seg.tml_dir, seg.tml_sknt, seg.tml_giswkt)
 
@@ -479,7 +483,7 @@ till %(ets)s %(svs_special)s" % jmsg_dict
                 vvv = vtec.endts
             myargs = ( vtec.office, vtec.ETN, 
                  vtec.significance, vtec.phenomena, vvv, vvv, 
-                  seg.giswkt, vtec.action, product_text, seg.windtag, seg.hailtag,
+                  giswkt, vtec.action, product_text, seg.windtag, seg.hailtag,
                   seg.tornadotag, seg.tornadodamagetag,
                   tml_valid, seg.tml_dir, seg.tml_sknt, seg.tml_giswkt)
         else:
@@ -499,7 +503,7 @@ till %(ets)s %(svs_special)s" % jmsg_dict
             myargs = (vtec.office, vtec.ETN, 
                  vtec.significance, vtec.phenomena, _expire, 
                  _expire, vvv, 
-                 _expire, seg.giswkt, vtec.action, product_text,
+                 _expire, giswkt, vtec.action, product_text,
                  seg.windtag, seg.hailtag, seg.tornadotag, seg.tornadodamagetag,
                  tml_valid, seg.tml_dir, seg.tml_sknt, seg.tml_giswkt)
         txn.execute(sql, myargs)

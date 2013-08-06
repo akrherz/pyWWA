@@ -15,48 +15,42 @@
 # 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 """ LSR product ingestor """
 
+#stdlib
+import pickle
+import os
+import datetime
+
 # Get the logger going, asap
 from twisted.python import log
 from twisted.python import logfile
 log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
 log.startLogging(logfile.DailyLogFile('lsr_parser.log', 'logs'))
 
-# Standard python imports
-import re
-import pickle
-import os
-
 # Third party python stuff
-import datetime
 import pytz
 from twisted.enterprise import adbapi
 from twisted.internet import reactor
+from pyiem import reference
+from pyiem.nws.products.lsr import parser as lsrparser
+from pyldm import ldmbridge
 
 # IEM python Stuff
 import common
-from pyiem import reference
-from pyiem.nws import product
-from pyldm import ldmbridge
 
-import ConfigParser
-config = ConfigParser.ConfigParser()
-config.read(os.path.join(os.path.dirname(__file__), 'cfg.ini'))
-
-DBPOOL = adbapi.ConnectionPool("twistedpg", database="postgis", cp_reconnect=True,
-                                host=config.get('database','host'), 
-                                user=config.get('database','user'),
-                                password=config.get('database','password') )
-
-class ProcessingException(Exception):
-    """ Generic Exception for processing errors I can handle"""
-    pass
+DBPOOL = adbapi.ConnectionPool("twistedpg", database="postgis", 
+                           cp_reconnect=True,
+                           host=common.config.get('database','host'), 
+                           user=common.config.get('database','user'),
+                           password=common.config.get('database','password') )
 
 # Cheap datastore for LSRs to avoid Dups!
 LSRDB = {}
-try:
-    LSRDB = pickle.load( open('lsrdb.p') )
-except:
-    log.msg("Error Loading LSRBD")
+def loaddb():
+    ''' load memory '''
+    if os.path.isfile('lsrdb.p'):
+        mydict = pickle.load( open('lsrdb.p') )
+        for key in mydict:
+            LSRDB[key] = mydict[key]
 
 def cleandb():
     """ To keep LSRDB from growing too big, we clean it out 
@@ -64,12 +58,12 @@ def cleandb():
     """
     utc = datetime.datetime.utcnow().replace(tzinfo=pytz.timezone("UTC"))
     thres = utc - datetime.timedelta(hours=24*7)
-    init_size = len(LSRDB.keys())
+    init_size = len(LSRDB)
     for key in LSRDB.keys():
         if LSRDB[key] < thres:
             del LSRDB[key]
 
-    fin_size = len(LSRDB.keys())
+    fin_size = len(LSRDB)
     log.msg("cleandb() init_size: %s final_size: %s" % (init_size, fin_size))
     # Non blocking hackery
     reactor.callInThread(pickledb)
@@ -84,236 +78,59 @@ def pickledb():
 class MyProductIngestor(ldmbridge.LDMProductReceiver):
     """ I process products handed off to me from faithful LDM """
 
-    def process_data(self, buf):
+    def process_data(self, text):
         """ @buf: String that is a Text Product """
-        if len(buf) < 50:
-            log.msg("Too short LSR product found:\n%s" % (buf,))
-            return
-
-        raw = buf.replace("\015\015\012", "\n")
-        try:
-            nws = product.TextProduct(raw)
-            real_processor(nws)
-        except Exception,myexp:
-            common.email_error(myexp, buf)
+        defer = DBPOOL.runInteraction(real_processor, text)
+        defer.addErrback( common.email_error, text )
 
     def connectionLost(self, reason):
+        ''' the connection was lost! '''
         log.msg('connectionLost')
         log.err( reason )
-        reactor.callLater(5, self.shutdown)
+        reactor.callLater(5, reactor.callWhenRunning, reactor.stop)
 
-    def shutdown(self):
-        reactor.callWhenRunning(reactor.stop)
-
-class LSR:
-    """ Object to hold a LSR and be more 00 with things """
-
-    def __init__(self):
-        """ Constructor """
-        self.lts = None
-        self.gts = None
-        self.typetext = None
-        self.lat = 0
-        self.lon = 0
-        self.city = None
-        self.county = None
-        self.source = None
-        self.remark = None
-        self.magf = None
-        self.mag = None
-        self.state = None
-        self.source = None
-        self.raw = None
-
-    def __str__(self):
-        return self.raw
-
-    def consume_lines(self, line1, line2):
-        """ Consume the first line of a LSR statement """
-        #0914 PM     HAIL             SHAW                    33.60N 90.77W
-        #04/29/2005  1.00 INCH        BOLIVAR            MS   EMERGENCY MNGR
-        self.raw = "%s\n%s" % (line1, line2)
-
-        time_parts = re.split(" ", line1)
-        hour12 = time_parts[0][:-2]
-        minute = time_parts[0][-2:]
-        ampm = time_parts[1]
-        dstr = "%s:%s %s %s" % (hour12, minute, ampm, line2[:10])
-        self.lts = datetime.datetime.strptime(dstr, "%I:%M %p %m/%d/%Y")
-
-        self.typetext = (line1[12:29]).strip().upper()
-        def myupper(s):
-            if len(s) > 3:
-                return s.title()
-            return s
-        self.city = " ".join(map(myupper, (line1[29:53]).strip().split()))
-
-        lalo = line1[53:]
-        tokens = lalo.strip().split()
-        self.lat = float(tokens[0][:-1])
-        self.lon = float(tokens[1][:-1])
-
-        self.magf = (line2[12:29]).strip()
-        self.mag = re.sub("(ACRE|INCHES|INCH|MILE|MPH|KTS|U|FT|F|E|M|TRACE)", "", self.magf)
-        if self.mag == "":
-            self.mag = 0
-        log.msg("mag: |%s| magf: |%s|" % (self.mag, self.magf))
-        self.county = (line2[29:48]).strip().title()
-        self.state = line2[48:50]
-        self.source = (line2[53:]).strip().lower()
-
-    def mag_string(self):
-        """ Create a nice string representation of LSR magnitude """
-        mag_long = ""
-        if (self.typetext == "HAIL" and \
-            reference.hailsize.has_key(float(self.mag))):
-            haildesc = reference.hailsize[float(self.mag)]
-            mag_long = "of %s size (%s) " % (haildesc, self.magf)
-        elif (self.mag != 0):
-            mag_long = "of %s " % (self.magf,)
-
-        return mag_long
-
-    def gen_unique_key(self):
-        """ Generate an unique key to store stuff """
-        return "%s_%s_%s_%s_%s_%s" % (self.gts, self.typetext, \
-                self.city, self.lat, self.lon, self.magf)
-
-    def set_gts(self, tsoff):
-        """ Set GTS via an offset """
-        self.gts = (self.lts + tsoff).replace(tzinfo=pytz.timezone("UTC"))
-
-    def url_builder(self, wfo):
-        """ URL builder """
-        uri =  "%s#%s/%s/%s" % (config.get('urls', 'lsr'), wfo, 
-                self.gts.strftime("%Y%m%d%H%M"),
-                self.gts.strftime("%Y%m%d%H%M") )
-        return uri
-
-
-def real_processor(nws):
+def real_processor(txn, text):
     """ Lets actually process! """
-    wfo = nws.source[1:]
+    prod = lsrparser( text )
+    wfo = prod.source[1:]
     
     xtra = {
-            'product_id': nws.get_product_id(),
+            'product_id': prod.get_product_id(),
+            'channels': wfo,
             }
 
-    tsoff = datetime.timedelta(hours= reference.offsets[nws.z])
+    if len(prod.lsrs) == 0:
+        raise Exception("No LSRs parsed!", text)
 
-    goodies = "\n".join( nws.sections[3:] )
-    data = re.split("&&", goodies)
-    lines = re.split("\n", data[0])
-
-    _state = 0
-    i = 0
-    gmt = datetime.datetime.utcnow().replace(tzinfo=pytz.timezone("UTC"))
-    time_floor = gmt - datetime.timedelta(hours=12)
-    min_time = datetime.datetime(2040, 1, 1).replace(tzinfo=pytz.timezone("UTC"))
-    max_time = datetime.datetime(1970, 1, 1).replace(tzinfo=pytz.timezone("UTC"))
-    duplicates = 0
-    new_reports = 0
-    while i < len(lines):
-        # Line must start with a number?
-        if len(lines[i]) < 40 or (re.match("[0-9]", lines[i][0]) == None):
-            i += 1
-            continue
-        # We can safely eat this line
-        lsr = LSR()
-        lsr.consume_lines( lines[i], lines[i+1])
-        lsr.set_gts(tsoff)
-        if lsr.gts > max_time:
-            max_time = lsr.gts
-        if lsr.gts < min_time:
-            min_time = lsr.gts
-
-        i += 1
-
-        # Now we search
-        searching = 1
-        remark = ""
-        while (searching):
-            i += 1
-            if (len(lines) == i):
-                break
-            #print i, lines[i], len(lines[i])
-            if (len(lines[i]) == 0 or [" ", "\n"].__contains__(lines[i][0]) ):
-                remark += lines[i]
-            else:
-                break
-
-        remark = remark.lower().strip()
-        remark = re.sub("[\s]{2,}", " ", remark)
-        remark = remark.replace("&", "&amp;")
-        remark = remark.replace(">", "&gt;").replace("<","&lt;")
-
-        lsr.remark = remark
-
+    for lsr in prod.lsrs:
         if not reference.lsr_events.has_key(lsr.typetext):
             errmsg = "Unknown LSR typecode '%s'" % (lsr.typetext,)
-            raise ProcessingException, errmsg
-
-        dbtype = reference.lsr_events[lsr.typetext]
-        time_fmt = "%I:%M %p"
-        if lsr.gts < time_floor:
-            time_fmt = "%d %b, %I:%M %p"
-
-        # We have all we need now
-        unique_key = lsr.gen_unique_key()
-
-        if (LSRDB.has_key(unique_key)):
-            log.msg("DUP! %s" % (unique_key,))
-            duplicates += 1
+            common.email_error(errmsg, text)
+        uniquekey = hash(lsr.text)
+        if LSRDB.has_key( uniquekey ):
+            prod.duplicates += 1
             continue
-        new_reports += 1
-        LSRDB[ unique_key ] = gmt
+        LSRDB[ uniquekey ] = datetime.datetime.utcnow().replace(
+                                                tzinfo=pytz.timezone("UTC"))
+        uri =  "%s#%s/%s/%s" % (common.config.get('urls', 'lsr'), wfo, 
+                lsr.utcvalid.strftime("%Y%m%d%H%M"),
+                lsr.utcvalid.strftime("%Y%m%d%H%M") )
+        jabber_text, jabber_html = lsr.get_jabbers(uri)
+        JABBER.sendMessage(jabber_text, jabber_html, xtra)
+        common.tweet([wfo,], lsr.tweet(), uri, {'lat': str(lsr.get_lat()), 
+                                            'long': str(lsr.get_lon())})
 
-        mag_long = lsr.mag_string()
-        uri = lsr.url_builder(wfo)
+        lsr.sql(txn)
 
-        jabber_text = "%s: %s [%s Co, %s] %s reports %s %sat %s %s -- %s %s" % (
-            wfo, lsr.city, lsr.county, lsr.state, lsr.source, 
-              lsr.typetext, mag_long, 
-              lsr.lts.strftime(time_fmt), nws.z, lsr.remark, uri)
-        jabber_html = "%s: %s [%s Co, %s] %s <a href='%s'>reports %s %s</a>at %s %s -- %s" % (
-                wfo,lsr.city, lsr.county, lsr.state, lsr.source, uri, lsr.typetext, 
-           mag_long, lsr.lts.strftime(time_fmt), nws.z, lsr.remark)
-        jabber.sendMessage(jabber_text, jabber_html, xtra)
-        twt = "%s [%s Co, %s] %s reports %s %sat %s %s" % (lsr.city, lsr.county, lsr.state, lsr.source, 
-              lsr.typetext, mag_long, 
-              lsr.lts.strftime(time_fmt), nws.z)
-        common.tweet([wfo,], twt, uri, {'lat': `lsr.lat`, 'long': "-%s" % (lsr.lon,)})
+    if prod.is_summary():
+        baseuri = common.config.get('urls', 'lsr')
+        jabber_text, jabber_html = prod.get_jabbers(baseuri) 
+        JABBER.sendMessage(jabber_text, jabber_html, xtra)
+        common.tweet([wfo,], "Summary Local Storm Report", 
+                     prod.get_url(baseuri))
 
-        sql = """INSERT into lsrs_%s (valid, type, magnitude, city, 
-               county, state, source, remark, geom, wfo, typetext) 
-               values (%s, %s, %s, %s, %s, %s, 
-               %s, %s, 'SRID=4326;POINT(-%s %s)', %s, %s)""" 
-        myargs = (lsr.gts.year, lsr.gts, dbtype, lsr.mag, 
-           lsr.city, lsr.county, lsr.state, lsr.source, 
-           lsr.remark, lsr.lon, lsr.lat, wfo, lsr.typetext)
-
-        df = DBPOOL.runOperation(sql, myargs)
-        df.addErrback( common.email_error, nws.text)
-
-    if nws.text.find("...SUMMARY") > 1:
-        extra_text = ""
-        if (duplicates > 0):
-            extra_text = ", %s out of %s reports were previously \
-sent and not repeated here." % (duplicates, duplicates + new_reports)
-
-        uri =  "%s#%s/%s/%s" % (config.get('urls', 'lsr'), wfo, 
-               min_time.strftime("%Y%m%d%H%M"),
-               max_time.strftime("%Y%m%d%H%M") )
-        jabber_text = "%s: %s issues Summary Local Storm Report %s %s" % \
-           (wfo, wfo, extra_text, uri)
-        jabber_html = "%s issues <a href='%s'>Summary Local Storm Report</a>%s"\
-            % (wfo, uri, extra_text)
-        jabber.sendMessage(jabber_text, jabber_html, xtra)
-        twt = "Summary Local Storm Report"
-        common.tweet([wfo,], twt, uri)
-
-jabber = common.make_jabber_client("lsr_parser")
-
+reactor.callLater(0, loaddb)
+JABBER = common.make_jabber_client("lsr_parser")
 LDM = ldmbridge.LDMProductFactory( MyProductIngestor() )
 reactor.callLater( 20, cleandb)
 reactor.run()
