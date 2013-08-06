@@ -28,6 +28,8 @@ from pyiem.nws import product
 from pyiem import reference
 from pyldm import ldmbridge
 
+from shapely.geometry import MultiPolygon
+
 from twisted.internet import reactor
 from twisted.enterprise import adbapi
 
@@ -80,10 +82,8 @@ def countyText(ugcs):
 class myProductIngestor(ldmbridge.LDMProductReceiver):
 
     def process_data(self, buf):
-        try:
-            POSTGIS.runInteraction(real_process, buf)
-        except Exception, myexp:
-            common.email_error(myexp, buf)
+        deffer = POSTGIS.runInteraction(real_process, buf)
+        deffer.addErrback(common.email_error, buf)
 
     def connectionLost(self, reason):
         log.msg('connectionLost') 
@@ -105,10 +105,11 @@ def real_process(txn, raw):
            'product_id': product_id,
            }
 
-    if prod.segments[0].giswkt:
+    if prod.segments[0].sbw:
+        giswkt = 'SRID=4326;%s' % (MultiPolygon([prod.segments[0].sbw]).wkt,)
         sql = """INSERT into text_products(product, product_id, geom) 
                 values (%s,%s, %s)"""
-        myargs = (prod.unixtext, product_id, prod.segments[0].giswkt )
+        myargs = (prod.unixtext, product_id, giswkt )
         
     else:
         sql = "INSERT into text_products(product, product_id) values (%s,%s)" 
