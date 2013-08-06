@@ -1,34 +1,35 @@
-793 
-NWUS54 KJAN 060032
-LSRJAN
-
-PRELIMINARY LOCAL STORM REPORT...SUMMARY
-NATIONAL WEATHER SERVICE JACKSON MS
-730 PM CDT THU MAY 05 2005
-
-..TIME...   ...EVENT...      ...CITY LOCATION...     ...LAT.LON...
-..DATE...   ....MAG....      ..COUNTY LOCATION..ST.. ...SOURCE....
-            ..REMARKS..
-
-0914 PM     HAIL             SHAW                    33.60N 90.77W 
-04/29/2005  1.00 INCH        BOLIVAR            MS   EMERGENCY MNGR  
-
-0915 PM     TORNADO          2 SE SHAW               33.58N 90.75W 
-04/29/2005                   SUNFLOWER          MS   LAW ENFORCEMENT 
-
-            SHAW PD REPORTED TORNADO ON THE GROUND SOUTHEAST OF SHAW.
-            REPORT RELAYED BY BOLIVAR EOC. QUARTER-SIZED HAIL 
-            REPORTED BY SUNFLOWER SO.
-
-0450 AM     FLASH FLOOD      LAUREL                  31.69N 89.14W 
-04/30/2005                   JONES              MS   EMERGENCY MNGR  
-
-            EOC REPORTED STREET FLOODING IN LAUREL.
-
-
-&&
-
-$$
-
-EC/GG
-
+
+793 
+NWUS54 KJAN 060032
+LSRJAN
+
+PRELIMINARY LOCAL STORM REPORT...SUMMARY
+NATIONAL WEATHER SERVICE JACKSON MS
+730 PM CDT THU MAY 05 2005
+
+..TIME...   ...EVENT...      ...CITY LOCATION...     ...LAT.LON...
+..DATE...   ....MAG....      ..COUNTY LOCATION..ST.. ...SOURCE....
+            ..REMARKS..
+
+0914 PM     HAIL             SHAW                    33.60N 90.77W 
+04/29/2005  1.00 INCH        BOLIVAR            MS   EMERGENCY MNGR  
+
+0915 PM     TORNADO          2 SE SHAW               33.58N 90.75W 
+04/29/2005                   SUNFLOWER          MS   LAW ENFORCEMENT 
+
+            SHAW PD REPORTED TORNADO ON THE GROUND SOUTHEAST OF SHAW.
+            REPORT RELAYED BY BOLIVAR EOC. QUARTER-SIZED HAIL 
+            REPORTED BY SUNFLOWER SO.
+
+0450 AM     FLASH FLOOD      LAUREL                  31.69N 89.14W 
+04/30/2005                   JONES              MS   EMERGENCY MNGR  
+
+            EOC REPORTED STREET FLOODING IN LAUREL.
+
+
+&&
+
+$$
+
+EC/GG
+

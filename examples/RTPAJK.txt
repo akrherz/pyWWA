@@ -1,0 +1,71 @@
+
+426 
+ASAK67 PAJK 250042
+RTPAJK
+AKZ017-018-019-020-021-022-023-024-025-026-027-028-029-260200-
+REGIONAL TEMPERATURE AND PRECIPITATION ROUNDUP
+NATIONAL WEATHER SERVICE JUNEAU AK
+4 PM AKDT WED JUL 24 2013
+
+.B JNU 0724 Y DH17/TAIPAXZ/TAIPANZ/PPDPAZZ
+: ALL VALUES ARE FOR 24 HOURS ENDING
+: AT 5 PM ALASKA LOCAL TIME 07/24/2013
+:
+:LOCATION                        /  MAX /  MIN / PCPN
+ANXA2 : Annex Creek           C  :   62 /   46 / 0.24  
+KTAA2 : Ketchikan 12 N        C  :   60 /   55 / 0.97  
+PAAP  : Port Alexander        C  :   66 /   52 / 0.35  
+.END
+
+.B JNU 0724 Y DH08/TAIPAXZ/TAIPANZ/PPDPAZZ
+: ALL VALUES ARE FOR 24 HOURS ENDING
+: AT 8 AM ALASKA LOCAL TIME 07/24/2013
+:
+:LOCATION                        /  MAX /  MIN / PCPN
+CFSA2 : Craig                 C  :   60 /   55 / 0.68  
+ECBA2 : Eaglecrest, Base      C  :   69 /   49 / 0.16  
+HCSA2 : Haines Customs        C  :   79 /   47 / 0.00  
+KLWA2 : Hollis                C  :   59 /   55 / 1.10  
+HOOA2 : Hoonah                C  :   73 /   53 / 0.26  
+JDWA2 : Juneau Douglas, WWTP  C  :    M /    M / 0.21  
+JOPA2 : Juneau Outer Point    C  :   69 /   53 / 0.25  
+PECA2 : Pelican               C  :   66 /   52 / 0.61  
+PTBA2 : Point Baker           C  :   57 /   49 / 0.57  
+SKGA2 : Skagway Power Stn     C  :   76 /   50 / 0.00  
+SPPA2 : Snettisham Power Stn  C  :   70 /   52 / 0.30  
+.END
+
+.B JNU 0724 Y DH08/TVIRZZZ/TWIRZZZ/
+: AT 8 AM ALASKA LOCAL TIME 07/24/2013
+:
+:LOCATION                        / SOIL TEMP / WATER TEMP
+PTBA2 : Point Baker           C  :     M     /     46     
+.END
+
+.B JNU 0724 Y DH00/TAIPAXZ/TAIPANZ/PPDPAZZ
+: ALL VALUES ARE FOR 24 HOURS ENDING
+: AT MIDNIGHT ALASKA LOCAL TIME 07/23/2013
+:
+:LOCATION                        /  MAX /  MIN / PCPN
+PANT  : Annette                  :   58 /   55 / 0.92  
+PAHN  : Haines Airport           :   78 /   54 / 0.00  
+PAJN  : Juneau, Airport          :   69 /   52 / 0.14  
+JLPA2 : Juneau, Lena Point    C  :   68 /   55 / 0.09  
+PAJK  : Juneau, NWS Office       :   70 /   47 / 0.04  
+PAKT  : Ketchikan                :   59 /   55 / 1.05  
+PAKW  : Klawock                  :   61 /   54 / 0.53  
+PAPG  : Petersburg            C  :   61 /   52 / 0.15  
+PASI  : Sitka                    :   68 /   53 / 0.10  
+PAGY  : Skagway                  :   75 /   54 /    T  
+PAYA  : Yakutat                  :   71 /   50 / 0.00  
+.END
+
+
+M INDICATES DATA IS MISSING.                                       
+T INDICATES TRACE OF PRECIPITATION.                                
+C INDICATES DATA PROVIDED BY NATIONAL WEATHER SERVICE COOPERATIVE 
+  OBSERVERS.
+$$
+
+
+

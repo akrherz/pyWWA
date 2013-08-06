@@ -1,0 +1,195 @@
+
+677 
+ASUS63 KDMX 140059
+RTPIA 
+
+MAX/MIN TEMPERATURE AND PRECIPITATION TABLE FOR IOWA
+NATIONAL WEATHER SERVICE DES MOINES IA
+759 PM CDT MON MAY 13 2013
+
+.BR DMX 0513 C DH19/DC1305131958/TAIRZS/TAIRZI/PP
+:
+: VALUES REPRESENT 18-HOUR HIGHS...18-HOUR LOWS...
+: AND 24-HOUR PRECIPITATION ENDING AT  7 PM CENTRAL TIME
+:
+: ASOS...AWOS AND OTHER AUTOMATED OBSERVING LOCATIONS IN IOWA.
+:
+: NOTE...INFORMATION FOR SELECTED LOCATIONS NEAR IOWA
+:   IS AVAILABLE IMMEDIATELY BELOW THE IOWA LIST.
+:
+:                            MAX   MIN
+:      LOCATION             TEMP  TEMP   PCPN
+:
+: ...NORTHWESTERN IOWA...
+CKP  : CHEROKEE AWOS      :  83 /  39 /  0.00
+EST  : ESTHERVILLE ASOS   :  83 /  37 /  0.00
+LRJ  : LE MARS AWOS       :  88 /  45 /  0.00
+ORC  : ORANGE CITY AWOS   :  88 /  46 /  0.00
+SHL  : SHELDON AWOS       :  88 /  45 /  0.00
+SPW  : SPENCER ASOS       :  85 /  37 /  0.00
+SLB  : STORM LAKE AWOS    :  81 /  43 /  0.00
+:
+: ...NORTH CENTRAL IOWA...
+AXA  : ALGONA AWOS        :  81 /  41 /  0.00
+CCY  : CHARLES CITY AWOS  :  72 /  36 /    T 
+CAV  : CLARION AWOS       :  77 /  37 /  0.00
+FXY  : FOREST CITY AWOS   :  79 /  36 /  0.00
+MCW  : MASON CITY ASOS    :  74 /  34 /  0.00
+MSCI4: MASON CITY*        :   M /   M /    T 
+:
+: ...NORTHEASTERN IOWA...
+DEH  : DECORAH AWOS       :  66 /  34 /    T 
+DBQ  : DUBUQUE ASOS       :  66 /  32 /  0.00
+IIB  : INDEPENDENCE AWOS  :  70 /  34 /     M
+OLZ  : OELWEIN AWOS       :   M /   M /     M
+ALO  : WATERLOO ASOS      :  71 /  32 /    T 
+:
+: ...WEST CENTRAL IOWA...
+ADU  : AUDUBON AWOS       :  81 /  37 /     M
+CIN  : CARROLL AWOS       :  81 /  41 /  0.00
+DNS  : DENISON AWOS       :  81 /  41 /  0.00
+HNR  : HARLAN AWOS        :  81 /  39 /  0.00
+SUX  : SIOUX CITY ASOS    :  90 /  40 /  0.00
+:
+: ...CENTRAL IOWA...
+AMW  : AMES ASOS          :  74 /  35 /  0.00
+IKV  : ANKENY AWOS        :  75 /  36 /  0.00
+BNW  : BOONE AWOS         :  77 /  41 /  0.00
+DSM  : DES MOINES ASOS    :  76 /  43 /  0.00
+FOD  : FORT DODGE AWOS    :  79 /  37 /  0.00
+GGI  : GRINNELL AWOS      :  73 /  40 /  0.00
+IFA  : IOWA FALLS AWOS    :  74 /  37 /  0.00
+MIW  : MARSHALLTOWN ASOS  :  74 /  34 /  0.00
+TNU  : NEWTON AWOS        :  75 /  41 /  0.00
+DMX  : NWS JOHNSTON*      :  74 /  42 /  0.00
+PRO  : PERRY AWOS         :  78 /  40 /  0.00
+NSSI4: PRAIRIE CITY       :  74 /  36 /  0.00
+EBS  : WEBSTER CITY AWOS  :  78 /  36 /  0.00
+:
+: ...EAST CENTRAL IOWA...
+CID  : CEDAR RAPIDS ASOS  :  70 /  34 /    T 
+CWI  : CLINTON AWOS       :  70 /  34 /  0.00
+DVN  : DAVENPORT ASOS     :  69 /  35 /  0.00
+IOW  : IOWA CITY ASOS     :  71 /  34 /  0.00
+MXO  : MONTICELLO AWOS    :   M /   M /     M
+MUT  : MUSCATINE AWOS     :  70 /  34 /  0.00
+VTI  : VINTON AWOS        :  70 /  32 /     M
+:
+: ...SOUTHWESTERN IOWA...
+AIO  : ATLANTIC AWOS      :  81 /  39 /  0.00
+ICL  : CLARINDA AWOS      :  79 /  36 /  0.00
+CBF  : COUNCIL BLUFFS AWOS:  82 /  46 /  0.00
+RDK  : RED OAK AWOS       :  82 /  43 /  0.00
+SDA  : SHENANDOAH AWOS    :  82 /  43 /  0.00
+:
+: ...SOUTH CENTRAL IOWA...
+TVK  : CENTERVILLE AWOS   :  72 /  39 /     M
+CNC  : CHARITON AWOS      :  75 /  41 /  0.00
+CSQ  : CRESTON AWOS       :  75 /  43 /  0.00
+OXV  : KNOXVILLE AWOS     :  73 /  41 /  0.00
+LWD  : LAMONI ASOS        :  75 /  45 /  0.00
+SSFI4: LUCAS              :   M /   M /  0.00
+I75  : OSCEOLA AWOS       :  75 /  42 /  0.00
+PEA  : PELLA AWOS         :  76 /  41 /  0.00
+:
+: ...SOUTHEASTERN IOWA...
+BRL  : BURLINGTON ASOS    :  71 /  37 /  0.00
+FFL  : FAIRFIELD AWOS     :  72 /  39 /  0.00
+FSW  : FORT MADISON AWOS  :  72 /  43 /  0.00
+EOK  : KEOKUK AWOS        :  73 /  41 /  0.00
+MPZ  : MOUNT PLEASANT AWOS:   M /  41 /     M
+OOA  : OSKALOOSA AWOS     :  74 /  40 /  0.00
+OTM  : OTTUMWA ASOS       :  73 /  38 /  0.00
+AWG  : WASHINGTON AWOS    :  73 /  37 /  0.00
+:
+:* COOPERATIVE WEATHER OBSERVATION SITE
+:
+.END
+
+
+: SELECTED ASOS...AWOS AND OTHER AUTOMATED OBSERVING
+:   LOCATIONS NEAR IOWA
+:
+:                            MAX   MIN
+:      LOCATION             TEMP  TEMP   PCPN
+:
+: ...MINNESOTA...
+AEL  : ALBERT LEA AWOS    :  77 /  39 /     M
+AUM  : AUSTIN AWOS        :  72 /  36 /    T 
+FRM  : FAIRMONT AWOS      :  82 /  36 /     M
+MJQ  : JACKSON AWOS       :  86 /  41 /  0.00
+LYV  : LUVERNE AWOS       :  88 /  41 /  0.00
+FKA  : PRESTON AWOS       :  69 /  38 /    T 
+RST  : ROCHESTER ASOS     :  68 /  32 /    T 
+OTG  : WORTHINGTON AWOS   :  84 /  45 /  0.00
+:
+: ...WISCONSIN...
+OVS  : BOSCOBEL AWOS      :  70 /  29 /    T 
+LSE  : LA CROSSE ASOS     :  66 /  35 /    T 
+PVB  : PLATTEVILLE AWOS   :  66 /  35 /     M
+PDC  : PRAIRIE DU CHIEN   :  67 /  32 /    T 
+:
+: ...ILLINOIS...
+MQB  : MACOMB AWOS        :  74 /  38 /     M
+MLI  : QUAD CITY ASOS     :  70 /  32 /  0.00
+:
+: ...NEBRASKA...
+AFK  : NEBRASKA CITY AWOS :  81 /  46 /  0.00
+OMA  : OMAHA/EPPLEY ASOS  :  83 /  48 /  0.00
+OFF  : OMAHA/OFFUTT ASOS  :  82 /  40 /  0.00
+PMV  : PLATTSMOUTH AWOS   :  83 /  48 /  0.00
+TQE  : TEKAMAH ASOS       :  88 /  43 /  0.00
+:
+: ...SOUTH DAKOTA...
+FSD  : SIOUX FALLS ASOS   :  89 /  50 /  0.00
+:
+.END
+
+
+.BR DMX 0513 C DH19/DC1305131958/TX/TN/PP
+:
+: VALUES REPRESENT THE 24 HOURS ENDING AT 7 PM CENTRAL TIME
+:
+: COOPERATIVE OBSERVER AND OTHER LOCATIONS
+:
+:                          DATE/TIME   MAX   MIN
+:      LOCATION               DDHHMM  TEMP  TEMP   PCPN
+:
+: ...NORTHWESTERN IOWA...
+SIXI4: SIOUX CENTER       : DD131536/  84 /  44 /  0.00
+:
+: ...NORTH CENTRAL IOWA...
+:
+: ...NORTHEASTERN IOWA...
+DCRI4: DECORAH            : DD131900/  66 /  29 /  0.02
+:
+: ...WEST CENTRAL IOWA...
+RWCI4: ROCKWELL CITY      : DD131900/   M /   M /  0.00
+:
+: ...CENTRAL IOWA...
+OGDI4: OGDEN              : DD131900/   M /   M /  0.00
+STYI4: STORY CITY         : DD131900/   M /   M /  0.00
+:
+: ...EAST CENTRAL IOWA...
+CRPI4: CEDAR RAPIDS       : DD131700/  69 /  32 /  0.00
+CLNI4: CLINTON            : DD131800/  69 /  33 /    T 
+WLBI4: WILLIAMSBURG       : DD131700/  70 /  30 /  0.00
+:
+: ...SOUTHWESTERN IOWA...
+ADAI4: ADAIR              : DD131900/   M /   M /  0.00
+:
+: ...SOUTH CENTRAL IOWA...
+CMBI4: COLUMBIA           : DD131900/   M /   M /  0.00
+:
+: ...SOUTHEASTERN IOWA...
+FRFI4: FAIRFIELD          : DD131600/  72 /  37 /  0.00
+:
+.END
+
+THESE DATA ARE PRELIMINARY AND HAVE NOT UNDERGONE FINAL QUALITY 
+CONTROL /QC/ BY NCDC. THEREFORE...THESE DATA ARE SUBJECT TO 
+REVISION. FINAL AND CERTIFIED CLIMATE DATA CAN BE ACCESSED AT THE 
+NATIONAL CLIMATIC DATA CENTER /NCDC/ - WWW.NCDC.NOAA.GOV .
+
+$$
+

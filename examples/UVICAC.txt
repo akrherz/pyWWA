@@ -1,0 +1,55 @@
+570 
+AEUS41 KWBC 261813
+UVICAC
+
+NOAA/EPA ULTRAVIOLET INDEX /UVI/ FORECAST
+NWS CLIMATE PREDICTION CENTER CAMP SPRINGS MD
+111 PM EST MON NOV 26 2012
+
+VALID NOV 27 2012 AT SOLAR NOON /APPROXIMATELY NOON
+LOCAL STANDARD TIME OR 100 PM LOCAL DAYLIGHT TIME/
+
+THE UV INDEX IS CATEGORIZED BY THE WORLD HEALTH ORGANIZATION
+AS FOLLOWS:
+           UVI             EXPOSURE LEVEL
+           0 1 2              LOW
+           3 4 5              MODERATE
+           6 7                HIGH
+           8 9 10             VERY HIGH
+           11 AND GREATER     EXTREME
+
+FOR HEALTH RELATED ISSUES...CONTACT EPA AT 1-800-296-1996
+FOR TECHNICAL INFORMATION ABOUT THE UV INDEX....
+GO TO THE NATIONAL WEATHER SERVICE UV INDEX WEB PAGE:
+WWW.CPC.NCEP.NOAA.GOV/PRODUCTS/STRATOSPHERE/UV_INDEX
+
+CITY               STATE  UVI       CITY               STATE  UVI
+ALBUQUERQUE          NM     4       LITTLE ROCK          AR     3
+ANCHORAGE            AK     0       LOS ANGELES          CA     4
+ATLANTIC CITY        NJ     1       LOUISVILLE           KY     2
+ATLANTA              GA     1       MEMPHIS              TN     3
+BALTIMORE            MD     1       MIAMI                FL     5
+BILLINGS             MT     1       MILWAUKEE            WI     1
+BISMARCK             ND     1       MINNEAPOLIS          MN     1
+BOISE                ID     2       MOBILE               AL     1
+BOSTON               MA     1       NEW ORLEANS          LA     1
+BUFFALO              NY     1       NEW YORK             NY     1
+BURLINGTON           VT     1       NORFOLK              VA     2
+CHARLESTON           WV     1       OKLAHOMA CITY        OK     3
+CHARLESTON           SC     1       OMAHA                NE     2
+CHEYENNE             WY     2       PHILADELPHIA         PA     1
+CHICAGO              IL     2       PHOENIX              AZ     4
+CLEVELAND            OH     2       PITTSBURGH           PA     2
+CONCORD              NH     1       PORTLAND             ME     1
+DALLAS               TX     3       PORTLAND             OR     1
+DENVER               CO     2       PROVIDENCE           RI     1
+DES MOINES           IA     2       RALEIGH              NC     2
+DETROIT              MI     1       SALT LAKE CITY       UT     2
+DOVER                DE     1       SAN FRANCISCO        CA     2
+HARTFORD             CT     1       SAN JUAN             PU     8
+HONOLULU             HI     6       SEATTLE              WA     1
+HOUSTON              TX     3       SIOUX FALLS          SD     1
+INDIANAPOLIS         IN     2       ST. LOUIS            MO     2
+JACKSON              MS     2       TAMPA                FL     5
+JACKSONVILLE         FL     3       WASHINGTON           DC     1
+LAS VEGAS            NV     3       WICHITA              KS     2

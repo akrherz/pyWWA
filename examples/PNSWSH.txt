@@ -1,0 +1,99 @@
+009 
+NOUS41 KWBC 131338
+PNSWSH
+
+Service Change Notice 13-13
+National Weather Service Headquarters Washington DC
+838 AM EST Wed Feb 13 2013
+
+To:      Subscribers:
+         -Family of Services
+         -NOAA Weather Wire Service
+         -Emergency Managers Weather Information Network
+         -NOAAPORT
+         Other NWS Partners and NWS Employees
+
+From:    Eli Jacks
+         Chief, Fire and Public Weather Services Branch
+
+Subject: Transition of Experimental Cold Advisory for Newborn 
+         Livestock Web Service to Operational for Participating
+         WFOs in CONUS Only, Effective March 19, 2013
+
+Effective Tuesday, March 19, 2013, at 1200 Coordinated Universal 
+Time (UTC), the experimental Cold Advisory for Newborn Livestock 
+(CANL) Web service will become operational for eight 
+participating NWS Weather Forecast Offices (WFOs) in CONUS only.
+
+The CANL service has been experimental since the 2008/2009 winter 
+season. This service, which is a graphical depiction of the 
+potential for weather related impacts to newborn livestock, is 
+provided to help users reduce newborn livestock losses due to 
+hazardous weather.
+
+Feedback during the experimental period indicated that this type 
+of cold advisory is useful to the livestock industry and is a 
+valuable resource. Some comments, however, did question whether 
+this particular service should be provided by partners in the 
+private sector rather than by the NWS.
+
+As a result, from February 24 through June 22, 2012, the NWS 
+solicited feedback from the weather enterprise (including the 
+private sector, academia, and other government agencies) on 
+interest in meeting this need for the livestock industry:
+
+     http://www.nws.noaa.gov/os/notification/pns12canl.txt
+
+Based on the response, there is no known provider of a comparable 
+service and no clear plan for development of such a service. 
+Therefore, the NWS is moving forward with providing the CANL 
+operationally. Partners and users are advised that this 
+supplementary service will not have 24/7 support, but will be 
+provided per our best efforts, as has been done since 2008.
+
+Effective March 19, 2013, the operational CANL service will be 
+available at the following participating WFO Websites:
+
+WFO Aberdeen, SD
+     http://www.crh.noaa.gov/abr/can/forecast.php
+
+WFO Billings, MT
+     http://www.wrh.noaa.gov/byz/canl/forecasts.php?wfo=byz
+
+WFO Bismarck, ND
+     http://www.crh.noaa.gov/bis/?n=canl
+
+WFO Glasgow, MT
+     http://www.wrh.noaa.gov/ggw/canl/canl.html
+
+WFO Great Falls, MT
+     http://www.wrh.noaa.gov/tfx/canl/canl.php?wfo=tfx
+
+WFO Pocatello, ID
+     http://www.wrh.noaa.gov/pih/canl/
+
+WFO Pendleton, OR
+     http://www.wrh.noaa.gov/pdt/canl/canl.php?wfo=pdt
+
+WFO Cheyenne, WY
+     http://www.crh.noaa.gov/cys/?n=canl
+
+Detailed information is online in the Product Description 
+Document (PDD) at:
+
+     http://products.weather.gov
+
+For more information, please contact:
+
+     Jannie Ferrell
+     National Weather Service
+     Silver Spring, Maryland 20910
+     301-713-1867 x135
+     jannie.g.ferrell@noaa.gov
+
+National Service Change Notices are online at:
+
+     http://www.weather.gov/os/notif.htm
+
+$$
+
