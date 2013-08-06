@@ -273,7 +273,7 @@ def segment_processor(txn, text_product, i, skip_con):
                 %s,%s,%s,%s, %s, %s)""", (bts, vtec.endts , 
                                 text_product.text, vtec.significance, 
       giswkt, vtec.phenomena, 'P', vtec.office, vtec.ETN, vtec.action, 
-      text_product.valid, fcster, seg.get_hvtec_nwsli().id ) )
+      text_product.valid, fcster, seg.get_hvtec_nwsli() ) )
                 
             # Insert Counties
             for k in range(len(ugc)):
@@ -286,7 +286,7 @@ def segment_processor(txn, text_product, i, skip_con):
                 %s, %s,%s, %s)""",  (bts, vtec.endts, 
                                       text_product.text, cnty, vtec.phenomena, vtec.office, vtec.ETN, 
                                       vtec.action, text_product.valid, 
-                                      fcster, cnty, vtec.significance, seg.get_hvtec_nwsli().id ))
+                                      fcster, cnty, vtec.significance, seg.get_hvtec_nwsli() ))
             channels = []
             for w in affectedWFOS.keys():
                 channels.append(w)
