@@ -56,28 +56,34 @@ def realparser(txn, text):
         print 'No %s rows found for %s on %s' % (table, station, prod.cli_valid)
         return
     updatesql = []
+    logmsg = []
     if prod.data.get('temperature_maximum'):
         climax = prod.data['temperature_maximum']
         if int(climax) != row['max_tmpf']:
-            updatesql.append(' max_tmpf = %s' % (climax,)) 
+            updatesql.append(' max_tmpf = %s' % (climax,))
+            logmsg.append( 'MaxT O:%s N:%s' % (row['max_tmpf'], climax))
     if prod.data.get('temperature_minimum'):
         climin = prod.data['temperature_minimum']
         if int(climin) != row['min_tmpf']:
             updatesql.append(' min_tmpf = %s' % (climin,)) 
+            logmsg.append( 'MinT O:%s N:%s' % (row['min_tmpf'], climin))
     if prod.data.get('precip_month'):
         val = prod.data['precip_month']
         if val != row['pmonth']:
             updatesql.append(' pmonth = %s' % (val,)) 
+            logmsg.append( 'PMonth O:%s N:%s' % (row['pmonth'], val))
     if prod.data.get('precip_day'):
         val = prod.data['precip_day']
         if val != row['pday']:
             updatesql.append(' pday = %s' % (val,)) 
+            logmsg.append( 'PDay O:%s N:%s' % (row['pday'], val))
     if len(updatesql) > 0:
         txn.execute("""UPDATE """+table+""" d SET """+ ','.join( updatesql ) +"""
          FROM stations t WHERE t.iemid = d.iemid and d.day = %s and t.id = %s
          and t.network ~* 'ASOS' """, (prod.cli_valid, station))
-        print "Updated %s rows for %s on %s %s" % (txn.rowcount, station,
-                                    prod.cli_valid,  ','.join( updatesql ) )
+        print "%s rows for %s (%s) %s" % (txn.rowcount, station,
+                                    prod.cli_valid.strftime("%y%m%d"),  
+                                    ','.join( logmsg ) )
 
 ldmbridge.LDMProductFactory( MyProductIngestor() )
 
