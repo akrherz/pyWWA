@@ -4,3 +4,12 @@
 /pqact-gini.conf.state
 /pqact-shef.conf.state
 /pqact.conf.state
+/.project
+/.pydevproject
+/pqact-new.conf.state
+/nexrad3_attr.pid
+/lsrdb.p
+/gemglb.nts
+/last.nts
+/cfg.ini
+/logs
