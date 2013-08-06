@@ -23,9 +23,11 @@ from twisted.enterprise import adbapi
 
 # Standard Python modules
 import os, re
+import datetime
 
 # Python 3rd Party Add-Ons
-import datetime
+from shapely.geometry import MultiPolygon
+
 # pyWWA stuff
 from pyldm import ldmbridge
 from pyiem import reference
@@ -177,9 +179,10 @@ def real_process(raw):
     product_id = prod.get_product_id()
     sql = """INSERT into text_products(product, product_id) values (%s,%s)"""
     myargs = (sqlraw, product_id)
-    if (len(prod.segments) > 0 and prod.segments[0].giswkt):
+    if (len(prod.segments) > 0 and prod.segments[0].sbw):
+        giswkt = 'SRID=4326;%s' % (MultiPolygon([prod.segments[0].sbw]).wkt,)
         sql = """INSERT into text_products(product, product_id, geom) values (%s,%s,%s)""" 
-        myargs = (sqlraw, product_id, prod.segments[0].giswkt)
+        myargs = (sqlraw, product_id, giswkt)
     deffer = POSTGIS.runOperation(sql, myargs)
     deffer.addErrback( common.email_error, sqlraw)
     myurl = "%s?pid=%s" % (config.get('urls', 'product'), product_id)
