@@ -30,3 +30,4 @@ for t in tokens:
 acursor.close()
 AFOS.commit()
 AFOS.close()
+
