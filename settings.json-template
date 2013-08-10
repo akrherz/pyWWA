@@ -1,0 +1,18 @@
+{
+  "databaserw": {
+	 "openfire": "nwschat-openfire",
+	 "postgis": "nwschat-postgis",
+	 "archive": "nwschat-archive",
+	 "host": "postgreswrite",
+	 "user": "nwschatwrite",
+	 "password": "secret"
+   }, 
+  "databasero": {
+	 "openfire": "nwschat-openfire",
+	 "postgis": "nwschat-postgis",
+	 "archive": "nwschat-archive",
+	 "host": "postgresread",
+	 "user": "nwschatread",
+	 "password": "secret"
+  }
+}
