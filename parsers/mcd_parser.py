@@ -83,7 +83,8 @@ def real_process(txn, raw):
                                                       'pywwa_product_url'))
     JABBER.sendMessage(body, htmlbody, {
                         'channels': ",".join( channels ),
-                        'product_id': product_id} )
+                        'product_id': product_id,
+                        'twitter': prod.tweet()} )
 
 
 ldmbridge.LDMProductFactory( MyProductIngestor() )
