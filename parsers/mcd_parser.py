@@ -30,7 +30,6 @@ from twisted.enterprise import adbapi
 from twisted.internet import reactor
 
 from pyiem.nws.products.mcd import parser as mcdparser
-from shapely.geometry import MultiPolygon
 from pyldm import ldmbridge
 
 import common
@@ -68,11 +67,6 @@ def real_process(txn, raw):
     prod = mcdparser(raw)
         
     product_id = prod.get_product_id()
-    giswkt = "SRID=4326;%s" % (MultiPolygon([prod.geometry]).wkt,)
-    sql = """INSERT into text_products(product, product_id, geom) 
-      values (%s, %s, %s)"""
-    args = (raw, product_id, giswkt)
-    txn.execute(sql, args)
 
     channels = [prod.afos,]
     channels.extend( prod.attn_wfo )
@@ -86,6 +80,7 @@ def real_process(txn, raw):
                         'product_id': product_id,
                         'twitter': prod.tweet()} )
 
+    prod.database_save(txn)
 
 ldmbridge.LDMProductFactory( MyProductIngestor() )
 JABBER = common.make_jabber_client('mcdparse')
