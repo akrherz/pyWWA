@@ -236,8 +236,12 @@ def save_data(txn, iem, mtr, clean_metar, orig_metar):
 
     if mtr.max_temp_6hr:
         iem.data['max_tmpf_6hr'] = mtr.max_temp_6hr.value("F")
+        if iem.data['valid'].hour >= 6:
+            iem.data['max_tmpf'] = mtr.max_temp_6hr.value("F")
     if mtr.min_temp_6hr:
         iem.data['min_tmpf_6hr'] = mtr.min_temp_6hr.value("F")
+        if iem.data['valid'].hour >= 6:
+            iem.data['min_tmpf'] = mtr.min_temp_6hr.value("F")
     if mtr.max_temp_24hr:
         iem.data['max_tmpf_24hr'] = mtr.max_temp_24hr.value("F")
     if mtr.min_temp_24hr: 
