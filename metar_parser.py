@@ -241,7 +241,7 @@ def save_data(txn, iem, mtr, clean_metar, orig_metar):
     if mtr.max_temp_24hr:
         iem.data['max_tmpf_24hr'] = mtr.max_temp_24hr.value("F")
     if mtr.min_temp_24hr: 
-        iem.data['min_tmpf_6hr'] = mtr.min_temp_24hr.value("F")
+        iem.data['min_tmpf_24hr'] = mtr.min_temp_24hr.value("F")
     if mtr.precip_3hr:
         iem.data['p03i'] = mtr.precip_3hr.value("IN")
     if mtr.precip_6hr:
