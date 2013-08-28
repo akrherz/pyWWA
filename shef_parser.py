@@ -434,8 +434,8 @@ def process_site(tp, sid, ts, data):
     iemob = Observation(sid, network, localts)
 
     deffer = ACCESSDB.runInteraction(save_data, tp, iemob, data)
-    deffer.addErrback(common.email_error, tp.text)
     deffer.addCallback(got_results, tp, sid, network)
+    deffer.addErrback(common.email_error, tp.text)
     deffer.addErrback( log.err )
     
 def got_results(res, tp, sid, network):
@@ -461,9 +461,11 @@ def save_data(txn, tp, iemob, data):
             continue
         myval = data[var] * MULTIPLIER.get(var[:2], 1.0)
         iemob.data[ MAPPING[var] ] = myval
-        if MAPPING[var] == 'tmpf' and iemob.data['network'].find("COOP") > 0:
-            iemob.data['coop_tmpf'] = myval
-            #print "HEY!", iemob.data['valid'].strftime("%Y-%m-%d %H:%M")
+        if (MAPPING[var] in ['tmpf', 'max_tmpf', 'min_tmpf'] and 
+            iemob.data['network'].find("COOP") > 0):
+            if MAPPING[var] == 'tmpf':
+                iemob.data['coop_tmpf'] = myval
+            #print "HEY!", iemob.data['station'], iemob.data['valid'].strftime("%Y-%m-%d %H:%M")
             iemob.data['coop_valid'] = iemob.data['valid']
     iemob.data['raw'] = tp.get_product_id()
     return iemob.save(txn)
