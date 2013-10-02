@@ -1,11 +1,12 @@
 """
 Split the MAV product into bitesized chunks that the AFOS viewer can see
 """
-import pg
 import sys
 import re
 import string
-mydb = pg.connect("afos", "iemdb")
+import psycopg2
+AFOS = psycopg2.connect(database='afos', host='iemdb')
+cursor = AFOS.cursor()
 
 d = string.strip(sys.stdin.read())
 
@@ -16,6 +17,11 @@ sections = re.split("\n\n", d[offset:])
 #print len(sections)
 
 for sect in sections:
-        #print sys.argv[1][:3] + sect[1:4]
-    mydb.query("INSERT into products(pil, data) values('%s','%s')" % (
-                        sys.argv[1][:3] + sect[1:4], d[:offset] + sect) )
+    #print sys.argv[1][:3] + sect[1:4]
+    cursor.execute("""INSERT into products(pil, data, source) 
+        values(%s, %s, %s)""", 
+        (sys.argv[1][:3] + sect[1:4], d[:offset] + sect, sect[:4] ))
+
+cursor.close()
+AFOS.commit()
+AFOS.close()
