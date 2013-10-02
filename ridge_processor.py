@@ -10,7 +10,7 @@ import pytz
 import pika
 
 def jitter():
-    return "0" * random.randint(0,6)
+    return "0" * random.randint(0,9)
 
 def generate_image(ch, method, properties, body):
     """
@@ -42,20 +42,18 @@ def generate_image(ch, method, properties, body):
      routes, gts.strftime("%Y%m%d%H%M"), siteID, productID, 
      siteID, productID, siteID, productID, gts.strftime("%Y%m%d%H%M"))
 
-    fp = '/tmp/%s_%s_%s.png' % (siteID, productID, 
-        gts.strftime("%H%M"))
-    o = open(fp, 'wb')
+    pngfn = '/tmp/%s_%s_%s.png' % (siteID, productID, gts.strftime("%H%M"))
+    o = open(pngfn, 'wb')
     o.write( body )
     o.close()
 
-    metafp = '/tmp/%s_%s_%s.json' % (siteID, productID, gts.strftime("%H%M"))
-    o = open(metafp, 'w')
+    metafn = '/tmp/%s_%s_%s.json' % (siteID, productID, gts.strftime("%H%M"))
+    o = open(metafn, 'w')
     json.dump(metadata, o)
     o.close()
 
-    wldfp = '/tmp/%s_%s_%s.wld' % (siteID, productID, 
-        gts.strftime("%H%M"))
-    o = open(wldfp, 'w')
+    wldfn = '/tmp/%s_%s_%s.wld' % (siteID, productID, gts.strftime("%H%M"))
+    o = open(wldfn, 'w')
     o.write("%.6f%s\n" % ((lowerRightLon - upperLeftLon)/1000.0,jitter())) # dx
     o.write("0.0%s\n" % (jitter(),))
     o.write("0.0%s\n" % (jitter(),))
@@ -64,15 +62,17 @@ def generate_image(ch, method, properties, body):
     o.write("%.6f%s\n" % (upperLeftLat,jitter())) #UL Lat
     o.close()
 
-    pqstr = "pqinsert -p '%s' %s" % (pqstr, fp)
+    pqstr = "pqinsert -p '%s' %s" % (pqstr, pngfn)
     subprocess.call( pqstr, shell=True )
     subprocess.call( pqstr.replace("png","wld"), shell=True )
     metapq = pqstr.replace("png","json").replace(" ac ", " c ") 
     subprocess.call( metapq, shell=True )
 
-    os.unlink(fp)
-    os.unlink(wldfp)
-    os.unlink(metafp)
+    for fn in [pngfn, wldfn, metafn]:
+        if os.path.isfile(fn):
+            os.unlink(fn)
+        else:
+            print 'Strange file: %s was missing, but should be deleted' % (fn,)
 
 def run():
     connection = pika.BlockingConnection(pika.ConnectionParameters(
