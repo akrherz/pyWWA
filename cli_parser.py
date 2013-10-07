@@ -47,7 +47,7 @@ def realparser(txn, text):
     
     station = prod.afos[3:]
     table = "summary_%s" % (prod.cli_valid.year,)
-    txn.execute("""SELECT max_tmpf, min_tmpf, pday, pmonth from """+table+""" d 
+    txn.execute("""SELECT max_tmpf, min_tmpf, pday, pmonth, snow from """+table+""" d 
     JOIN stations t
      on (t.iemid = d.iemid) WHERE d.day = %s and t.id = %s and t.network ~* 'ASOS'
         """, (prod.cli_valid, station))
@@ -72,11 +72,19 @@ def realparser(txn, text):
         if val != row['pmonth']:
             updatesql.append(' pmonth = %s' % (val,)) 
             logmsg.append( 'PMonth O:%s N:%s' % (row['pmonth'], val))
-    if prod.data.get('precip_day'):
-        val = prod.data['precip_day']
+    if prod.data.get('precip_today'):
+        val = prod.data['precip_today']
         if val != row['pday']:
             updatesql.append(' pday = %s' % (val,)) 
             logmsg.append( 'PDay O:%s N:%s' % (row['pday'], val))
+
+    if prod.data.get('snow_today'):
+        val = prod.data['snow_today']
+        if val != row['snow']:
+            updatesql.append(' snow = %s' % (val,)) 
+            logmsg.append( 'Snow O:%s N:%s' % (row['pday'], val))
+
+    
     if len(updatesql) > 0:
         txn.execute("""UPDATE """+table+""" d SET """+ ','.join( updatesql ) +"""
          FROM stations t WHERE t.iemid = d.iemid and d.day = %s and t.id = %s
