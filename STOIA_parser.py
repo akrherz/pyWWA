@@ -99,8 +99,10 @@ def process(raw):
     mo = mod[ tokens[0][3] ]
     dy = int(tokens[0][4])
     year = int(tokens[0][5])
-    ts = datetime.datetime(year, mo, dy, hr, mi).replace(
-                                tzinfo=pytz.timezone("America/Chicago"))
+    ts = datetime.datetime.utcnow().replace(tzinfo=pytz.timezone("UTC"))
+    ts = ts.astimezone(pytz.timezone("America/Chicago"))
+    ts = ts.replace(year=year, month=mo, day=dy, hour=hr, minute=mi,
+                    second=0, microsecond=0)
     logger.info("PROCESSING STOIA: %s" % (ts,))
 
     # Lets start our processing
