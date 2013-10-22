@@ -79,9 +79,10 @@ def process(raw):
 
     # Load up dictionary of roads...
     roads = {}
-    pcursor.execute("SELECT major, minor, segid from roads_base")
+    pcursor.execute("SELECT major, minor, longname, segid from roads_base")
     for row in pcursor:
-        roads["%s%s" % (row['major'], row['minor'].upper())] = row['segid']
+        roads[ row['longname'] ] = {'segid': row['segid'], 'major': row['major'],
+                                    'minor': row['minor']}
     
     # Figure out when this report is valid
     tokens = re.findall("([0-9]{1,2})([0-9][0-9]) ([AP]M) C[DS]T [A-Z][A-Z][A-Z] ([A-Z][A-Z][A-Z]) ([0-9]+) (2[0-9][0-9][0-9])\n", raw)
@@ -104,13 +105,23 @@ def process(raw):
 
     # Lets start our processing
     lines = re.split("\n", raw[ raw.find("*"):])
-    for line in lines:
-        if (len(line) < 20 or line[0] == "*" or line[6] != " " or line[7] == " "):
+    for linenum, line in enumerate(lines):
+        if linenum < 9:
             continue
-        if (line[0] != " "):
-            major = (line[:6]).strip()
-        minor = (line[7:47]).strip().upper()
-        condition = (line[47:]).strip().upper()
+        if (len(line) < 40 or line[0] == "*" or line[30:40].strip() == ''):
+            continue
+        data = line[7:]
+        pos = data.rfind(")")
+        meat = data[:pos+1].replace(", ", " ")
+        condition = data[pos:].upper().strip()
+        if meat.strip() == '':
+            continue
+        if not roads.has_key(meat):
+            logger.info("Unknown road: %s\n" % (meat,))
+            continue
+        
+        #major = roads[meat]['major']
+        #minor = roads[meat]['minor']
 
         #----------------------------------------
         # Now we are going to do things by type!
@@ -119,11 +130,7 @@ def process(raw):
         towingProhibited = (condition.find("TOWING PROHIBITED") > -1)
         limitedVis = (condition.find("LIMITED VIS.") > -1)
   
-        rkey = "%s%s" % (major, minor)
-        if not roads.has_key(rkey):
-            logger.info("Unknown Road: %s\n" % (rkey,) )
-            continue
-        segid = roads[rkey]
+        segid = roads[meat]['segid']
 
 
         pcursor.execute("""UPDATE roads_current SET cond_code = %s, valid = %s, 
@@ -143,7 +150,7 @@ def generate_shapefile(ts):
     dbf = dbflib.create("iaroad_cond")
     dbf.add_field("SEGID", dbflib.FTInteger, 4, 0)
     dbf.add_field("MAJOR", dbflib.FTString, 10, 0)
-    dbf.add_field("MINOR", dbflib.FTString, 40, 0)
+    dbf.add_field("MINOR", dbflib.FTString, 128, 0)
     dbf.add_field("US1", dbflib.FTInteger, 4, 0)
     dbf.add_field("ST1", dbflib.FTInteger, 4, 0)
     dbf.add_field("INT1", dbflib.FTInteger, 4, 0)
@@ -156,8 +163,9 @@ def generate_shapefile(ts):
 
     shp = shapelib.create("iaroad_cond", shapelib.SHPT_ARC)
 
-    pcursor.execute("""select b.*, c.*, astext(b.geom) as bgeom from 
-         roads_base b, roads_current c WHERE b.segid = c.segid""")
+    pcursor.execute("""select b.*, c.*, ST_astext(b.geom) as bgeom from 
+         roads_base b, roads_current c WHERE b.segid = c.segid
+         and valid is not null and b.geom is not null""")
     i = 0
     for row in pcursor:
         s = row["bgeom"]
