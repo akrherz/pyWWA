@@ -31,7 +31,7 @@ import ConfigParser
 config = ConfigParser.ConfigParser()
 config.read(os.path.join(os.path.dirname(__file__), 'cfg.ini'))
 
-# Need to do this in order to get the subsequent calls to work, TODO
+# Need to do this in order to get the subsequent calls to work??
 os.chdir("/home/ldm/pyWWA")
 
 # Stuff I wrote
@@ -46,12 +46,12 @@ import datetime
 import pytz
 import common
 
-
 # Setup Database Links
-POSTGISDB = adbapi.ConnectionPool("twistedpg", database="postgis", cp_reconnect=True,
-                                host=config.get('database','host'), 
-                                user=config.get('database','user'),
-                                password=config.get('database','password') )
+POSTGISDB = adbapi.ConnectionPool("twistedpg", database="postgis", 
+                                  cp_reconnect=True,
+                                  host=config.get('database','host'), 
+                                  user=config.get('database','user'),
+                                  password=config.get('database','password') )
 
 ST = {}
 
@@ -135,10 +135,12 @@ class PROC(protocol.ProcessProtocol):
 
 
     def cancelDB(self, err):
+        """ cancel DB session"""
         #log.msg("cancelDB()")
         self.deferred.callback(self)
 
     def log_error(self, err):
+        """ Log an error """
         log.msg( self.res )
         log.err( err )
         common.email_error(err, self.res)
@@ -283,9 +285,15 @@ def really_process(txn, res, nexrad, ts):
             txn.execute( sql, d )
 
     if co == 0:
+        """
+        Had a problem with GEMPAK corrupting its last.nts and/or gemglb.nts,
+        so when the ingestor senses trouble (no output), remove these files
+        and continue happily on
+        """
         log.msg("Got zero entries ||%s||" % (res,))
-        os.unlink("gemglb.nts")
-        os.unlink("last.nts")
+        for fn in ['gemglb.nts', 'last.nts']:
+            if os.path.isfile(fn):
+                os.unlink(fn)
     log.msg("%s %s Processed %s entries" % (nexrad, ts, co))
 
     
