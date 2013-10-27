@@ -326,8 +326,8 @@ def save_data(txn, iem, mtr, clean_metar, orig_metar):
 
 def sendAlert(txn, iemid, what, clean_metar):
     print "ALERTING for [%s]" % (iemid,)
-    txn.execute("""SELECT wfo, state, name, x(geom) as lon,
-           y(geom) as lat, network from stations 
+    txn.execute("""SELECT wfo, state, name, ST_x(geom) as lon,
+           ST_y(geom) as lat, network from stations 
            WHERE id = '%s' """ % (iemid,) )
     if txn.rowcount == 0:
         print "I not find WFO for sid: %s " % (iemid,)
@@ -394,8 +394,8 @@ def sendWindAlert(txn, iemid, v, d, t, clean_metar):
     Send a wind alert please
     """
     print "ALERTING for [%s]" % (iemid,)
-    txn.execute("""SELECT wfo, state, name, x(geom) as lon,
-           y(geom) as lat, network from stations 
+    txn.execute("""SELECT wfo, state, name, ST_x(geom) as lon,
+           ST_y(geom) as lat, network from stations 
            WHERE id = '%s' """ % (iemid,) )
     if txn.rowcount == 0:
         print "I not find WFO for sid: %s " % (iemid,)

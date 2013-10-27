@@ -69,7 +69,7 @@ AREA\s(?P<areanum>[0-9]+)\.\.\.FROM\s(?P<locs>[0-9A-Z \-]+)\n
 LOCS = {}
 mesosite = pg.connect('mesosite', config.get('database','host'), 
                       passwd=config.get('database','password'))
-rs = mesosite.query("""SELECT id, name, x(geom) as lon, y(geom) as lat from stations 
+rs = mesosite.query("""SELECT id, name, ST_x(geom) as lon, ST_y(geom) as lat from stations 
            WHERE network ~* 'ASOS' or network ~* 'AWOS'""").dictresult()
 for i in range(len(rs)):
     LOCS[rs[i]['id']] = rs[i]
