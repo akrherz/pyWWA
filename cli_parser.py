@@ -1,5 +1,7 @@
 """
-  Ingest VTEC information
+  The CLI report has lots of good data that is hard to find in other products,
+  so we take what data we find in this product and overwrite the database
+  storage of what we got from the automated observations
 """
 import os
 
@@ -28,6 +30,8 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
     """ I receive products from ldmbridge and process them 1 by 1 :) """
 
     def connectionLost(self, reason):
+        ''' Connection was lost! '''
+        log.err(reason)
         reactor.callLater(7, self.shutdown)
 
     def shutdown(self):
@@ -89,9 +93,9 @@ def realparser(txn, text):
         txn.execute("""UPDATE """+table+""" d SET """+ ','.join( updatesql ) +"""
          FROM stations t WHERE t.iemid = d.iemid and d.day = %s and t.id = %s
          and t.network ~* 'ASOS' """, (prod.cli_valid, station))
-        print "%s rows for %s (%s) %s" % (txn.rowcount, station,
+        log.msg("%s rows for %s (%s) %s" % (txn.rowcount, station,
                                     prod.cli_valid.strftime("%y%m%d"),  
-                                    ','.join( logmsg ) )
+                                    ','.join( logmsg ) ))
 
 ldmbridge.LDMProductFactory( MyProductIngestor() )
 
