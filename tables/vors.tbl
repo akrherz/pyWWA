@@ -19,6 +19,7 @@
 !STID    STNM   NAME                             ST CO   LAT    LON  ELV PRI
 !(8)     (6)    (32)                            (2)(2)   (5)    (6)   (5)(2)
 !
+MHZ      000000 MAGNOLIA                         MS US  3243  -9010     0  0
 YSJ      000395 ST_JOHN                          NB CN  4532  -6588     0  0
 HUL      000341 HOULTON                          ME US  4604  -6783     0  0
 PQI      000367 PRESQUE_ISLE                     ME US  4677  -6809     0  0
