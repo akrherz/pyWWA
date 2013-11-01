@@ -55,6 +55,14 @@ POSTGISDB = adbapi.ConnectionPool("twistedpg", database="postgis",
 
 ST = {}
 
+# For archive reprocessing, we need to specify the month and year
+_UTCNOW = None
+if os.environ.has_key("YYYY"):
+    _UTCNOW = datetime.datetime(int(os.environ['YYYY']), 
+                                int(os.environ['MM']), 1)
+    _UTCNOW = _UTCNOW.replace(tzinfo=pytz.timezone("UTC"))
+    log.msg("Date is hard coded to %s" % (_UTCNOW,))
+
 def load_station_table(txn):
     """ Load the station table of NEXRAD sites """
     log.msg("load_station_table called() ...")
@@ -79,13 +87,16 @@ def compute_ts(tstring):
     hour = int(tstring[14:16])
     minute = int(tstring[16:18])
 
-    utc = datetime.datetime.utcnow()
-    utc = utc.replace(tzinfo=pytz.timezone("UTC"), second=0, microsecond=0,
-                      hour=hour, minute=minute)
-    if utc.day > 25 and day == 1: # Next month!
-        utc += datetime.timedelta(days=15) # careful
-    utc = utc.replace(day=day)    
-        
+    if _UTCNOW is None:
+        utc = datetime.datetime.utcnow()
+        utc = utc.replace(tzinfo=pytz.timezone("UTC"), second=0, microsecond=0,
+                          hour=hour, minute=minute)
+        if utc.day > 25 and day == 1: # Next month!
+            utc += datetime.timedelta(days=15) # careful
+        utc = utc.replace(day=day)    
+    else:
+        utc = _UTCNOW.replace(day=day,hour=hour,minute=minute)
+
     return utc
 
 class PROC(protocol.ProcessProtocol):
@@ -325,7 +336,12 @@ def main(bogus):
     reactor.callLater(0, write_pid)
     reactor.callLater(30, job_size, jobs)
 
+def errback(res):
+    ''' ERRORBACK '''
+    log.err(res)
+    reactor.stop()
+
 df = POSTGISDB.runInteraction(load_station_table)
 df.addCallback(main)
-df.addErrback( reactor.stop )
+df.addErrback( errback )
 reactor.run()
