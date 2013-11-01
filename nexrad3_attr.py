@@ -109,6 +109,7 @@ class PROC(protocol.ProcessProtocol):
         Constructor
         """
         #log.msg("init() of PROC")
+        self.res = ""
         lines = buf.split("\r\r\n")
         if len(lines) < 4:
             log.msg("INCOMPLETE PRODUCT!")
@@ -117,7 +118,6 @@ class PROC(protocol.ProcessProtocol):
         self.afos = lines[3]
         self.buf = buf
         self.ts = compute_ts( self.wmo )
-        self.res = ""
         #log.msg("end of init() of PROC")
         
 
@@ -161,7 +161,8 @@ class PROC(protocol.ProcessProtocol):
         Once the program is done, we need to do something with the data
         """
         #log.msg("Teardown")
-        if self.res.find("NO STORMS DETECTED") > 0:
+        if self.res == '' or self.res.find("NO STORMS DETECTED") > -1:
+            log.msg("Aborting self.res is nothing")
             self.deferred.callback(self)
             return
         defer = POSTGISDB.runInteraction(really_process, self.res, self.afos[3:], 
