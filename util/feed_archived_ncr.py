@@ -28,7 +28,7 @@ while now < ets:
         now += interval
         continue
     
-    subprocess.call("tar -x -z -C /tmp/l3tmp -f %s" % (afn,), shell=True)
+    subprocess.call("tar -x -z -C /tmp/l3tmp -f %s NCR" % (afn,), shell=True)
     if not os.path.isdir("/tmp/l3tmp/NCR"):
         sys.stderr.write("Missing NCR data for %s\n" % (afn,))
         now += interval
@@ -42,6 +42,7 @@ while now < ets:
         sys.stdout.write('\r\r\n\003')
         time.sleep(0.25)
     
-    subprocess.call("rm -rf /tmp/l3tmp/???", shell=True)
+    if os.path.isdir("/tmp/l3tmp/NCR"):
+        subprocess.call("rm -rf /tmp/l3tmp/NCR", shell=True)
     
     now += interval
