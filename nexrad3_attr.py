@@ -162,7 +162,6 @@ class PROC(protocol.ProcessProtocol):
         """
         #log.msg("Teardown")
         if self.res == '' or self.res.find("NO STORMS DETECTED") > -1:
-            log.msg("Aborting self.res is nothing")
             self.deferred.callback(self)
             return
         defer = POSTGISDB.runInteraction(really_process, self.res, self.afos[3:], 
