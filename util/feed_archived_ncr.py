@@ -44,7 +44,8 @@ while now < ets:
         if data[0] == 'S':
             sys.stdout.write('\001\r\r\n000\r\r\n')
         sys.stdout.write( data )
-        sys.stdout.write('\r\r\n\003')
+        if data[-4:] != '\r\r\n\003':
+            sys.stdout.write('\r\r\n\003')
         time.sleep(0.25)
     
     if os.path.isdir("/tmp/l3tmp/NCR"):
