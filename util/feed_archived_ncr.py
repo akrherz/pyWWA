@@ -37,8 +37,13 @@ while now < ets:
     files = glob.glob("/tmp/l3tmp/NCR/NCR_*")
     for fn in files:
         # Need fake seq id
-        sys.stdout.write('\001\r\r\n000\r\r\n')
-        sys.stdout.write( open(fn, 'rb').read() )
+        data = open(fn, 'rb').read()
+        if len(data) < 20:
+            sys.stderr.write("short read on %s\n" % (fn,))
+            continue
+        if data[0] == 'S':
+            sys.stdout.write('\001\r\r\n000\r\r\n')
+        sys.stdout.write( data )
         sys.stdout.write('\r\r\n\003')
         time.sleep(0.25)
     

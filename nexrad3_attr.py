@@ -110,13 +110,17 @@ class PROC(protocol.ProcessProtocol):
         """
         #log.msg("init() of PROC")
         self.res = ""
+        self.ts = None
+        self.wmo = None
+        self.afos = None
+        self.buf = buf
+
         lines = buf.split("\r\r\n")
         if len(lines) < 4:
             log.msg("INCOMPLETE PRODUCT!")
             return
         self.wmo = lines[2]
         self.afos = lines[3]
-        self.buf = buf
         self.ts = compute_ts( self.wmo )
         #log.msg("end of init() of PROC")
         
@@ -192,22 +196,26 @@ def async(buf):
     Async caller of reactor processes
     @param buf string of the raw NOAAPort Product
     """
+    #log.msg('async() called...')
     defer = Deferred()
     proc = PROC(buf)
     proc.deferred = defer
     proc.deferred.addErrback( log.err )
-
-    log.msg("PROCESS %s %s" % (proc.afos, proc.ts.strftime("%Y%m%d%H%M") ))
+    if proc.afos is not None:
+        log.msg("PROCESS %s %s" % (proc.afos, proc.ts.strftime("%Y%m%d%H%M") ))
     
-    reactor.spawnProcess(proc, "python", 
+        reactor.spawnProcess(proc, "python", 
                    ["python", "ncr2postgis.py", proc.afos[3:],
                     proc.ts.strftime("%Y%m%d%H%M")], {})
+    else:
+        proc.cancelDB('bogus')
     return proc.deferred
 
 def worker(jobs):
     """ I am a worker that processes jobs """
     while True:
-        yield jobs.get().addCallback(async)
+        yield jobs.get().addCallback(async).addErrback( 
+                common.email_error, 'Unhandled Error' ).addErrback( log.err )
 
 def really_process(txn, res, nexrad, ts):
     """
