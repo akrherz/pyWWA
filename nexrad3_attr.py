@@ -263,6 +263,9 @@ def really_process(txn, res, nexrad, ts):
         co += 1
         d["storm_id"] = tokens[0]
         d["azimuth"] = float(tokens[1])
+        if tokens[2] == '***':
+            log.msg("skipping bad line |%s|" % (line,))
+            continue
         d["range"] = float(tokens[2]) * 1.852
         d["tvs"] = tokens[3]
         d["meso"] = tokens[4]
