@@ -75,11 +75,13 @@ LOC2NETWORK = {}
 LOC2TZ = {}
 UNKNOWN = {}
 TIMEZONES = {None: pytz.timezone('UTC')}
+
 def load_stations(txn):
     """
     Load up station metadata to help us with writing data to the IEM database
     @param txn database transaction
     """
+    log.msg("load_stations called...")
     txn.execute("""SELECT id, network, state, tzname from stations 
         WHERE network ~* 'COOP' or network ~* 'DCP' or 
         network in ('KCCI','KIMT','KELO') 
@@ -93,7 +95,13 @@ def load_stations(txn):
         else:
             LOC2NETWORK[stid] = row['network']
         if not TIMEZONES.has_key(row['tzname']):
-            TIMEZONES[ row['tzname'] ] = pytz.timezone( row['tzname'] )
+            try:
+                TIMEZONES[ row['tzname'] ] = pytz.timezone( row['tzname'] )
+            except:
+                log.msg("pytz does not like tzname: %s" % (row['tzname'],))
+                TIMEZONES[ row['tzname'] ] = pytz.timezone("UTC")
+
+    log.msg("loaded %s stations" % (len(LOC2STATE),))
 
 MULTIPLIER = {
   "US" : 0.87,  # Convert MPH to KNT
@@ -255,7 +263,8 @@ def async(buf):
 
 def worker(jobs):
     while True:
-        yield jobs.get().addCallback(async)
+        yield jobs.get().addCallback(async).addErrback( 
+                common.email_error, 'Unhandled Error' ).addErrback( log.err )
 
 def really_process(tp, data):
     """
