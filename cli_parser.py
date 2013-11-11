@@ -5,8 +5,8 @@
 """
 import os
 # http://bugs.python.org/issue7980
-#import datetime
-#from datetime.datetime import strptime
+import datetime
+datetime.datetime.strptime('2013', '%Y')
 
 from pyiem.nws.product import parser
 from pyldm import ldmbridge
