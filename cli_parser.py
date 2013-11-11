@@ -5,7 +5,8 @@
 """
 import os
 # http://bugs.python.org/issue7980
-from datetime.datetime import strptime
+#import datetime
+#from datetime.datetime import strptime
 
 from pyiem.nws.product import parser
 from pyldm import ldmbridge
