@@ -15,6 +15,7 @@ from twisted.enterprise import adbapi
 
 from twittytwister import twitter
 import json
+import time
 import traceback
 import datetime
 import sys
@@ -106,11 +107,12 @@ def tweet(channels, msg, url, extras={}):
         return
     
     if url:
-        url = url.replace("&amp;", "&").replace("#","%23").replace("&","%26").replace("?", "%3F")
-        deffer = client.getPage(BITLY % (url, ) )
-        deffer.addCallback(reallytweet, channels, msg, extras )
-        deffer.addErrback(bitly_error, channels, msg, extras )
-        deffer.addErrback(log.err)
+        tweet_step2(channels, msg, extras, url)
+        #url = url.replace("&amp;", "&").replace("#","%23").replace("&","%26").replace("?", "%3F")
+        #deffer = client.getPage(BITLY % (url, ) )
+        #deffer.addCallback(reallytweet, channels, msg, extras )
+        #deffer.addErrback(bitly_error, channels, msg, extras )
+        #deffer.addErrback(log.err)
     else:
         reallytweet(None, channels, msg, extras)
 
@@ -170,13 +172,25 @@ def make_jabber_client(resource_prefix):
 
     return jabber
 
-        
+def nounce_uri( uri ):
+    '''
+    Randomize the URI with meaningless stuff so that twitter does not see my
+    usage as spam, sucks to do this
+    '''
+    if uri.find("?") > 0:
+        return '%s&z=%s' % (uri, time.time())
+    return '%s?z=%s' % (uri, time.time())
+    
+
 def really_really_tweet(tuser, channel, tinyurl, msg, extras):
     """
     Throttled twitter calls
     """
     if tinyurl != "":
-        twt = "#%s %s %s?%s" % (channel, msg[:108], tinyurl, channel)
+        tinyurl = nounce_uri( tinyurl )
+        # two spaces and one hashtag (3) , and then 23 for t.co wrapping
+        space = 140 - 3 - len(channel) - 23
+        twt = "#%s %s %s" % (channel, msg[:space], tinyurl)
     else:
         twt = "#%s %s" % (channel, msg[:118])
     _twitter = twitter.Twitter(consumer=OAUTH_CONSUMER, 
