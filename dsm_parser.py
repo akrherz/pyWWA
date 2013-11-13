@@ -115,6 +115,9 @@ def process_dsm(data):
         return
     # Figure out the timestamp
     now = datetime.datetime.now()
+    if d['day'] == '00' or d['month'] == '00':
+        common.email_error("ERROR: Invalid Timestamp", data)
+        return
     ts = now.replace(day=int(d['day']), month=int(d['month']))
     if ts.month == 12 and now.month == 1:
         ts -= datetime.timedelta(days=360)
