@@ -195,7 +195,7 @@ def really_really_tweet(tuser, channel, tinyurl, msg, extras):
         twt = "#%s %s" % (channel, msg[:118])
     _twitter = twitter.Twitter(consumer=OAUTH_CONSUMER, 
                                token=OAUTH_TOKENS[tuser])
-    deffer = _twitter.update( twt[:140], None, extras)
+    deffer = _twitter.update( twt, None, extras)
     deffer.addCallback(tb, tuser, channel, twt)
     deffer.addErrback(twitterErrback, tuser, channel, twt)
     deffer.addErrback(log.err)
