@@ -81,9 +81,9 @@ def consume(txn, spc, outlook):
     
     # Search for WFOs
     sql = """select distinct wfo from nws_ugc 
-       WHERE ( st_overlaps(geomFromEWKT('SRID=4326;%s'), geom) or 
-       st_contains(geomFromEWKT('SRID=4326;%s'), geom) )and 
-       polygon_class = 'C'""" % (outlook.geometry.wkt, 
+       WHERE ( st_overlaps(ST_geomFromEWKT('SRID=4326;%s'), geom) or 
+       st_contains(ST_geomFromEWKT('SRID=4326;%s'), geom) )and 
+       polygon_class = 'C' and wfo is not null""" % (outlook.geometry.wkt, 
                                  outlook.geometry.wkt)
 
     txn.execute( sql )
