@@ -328,7 +328,8 @@ def sendAlert(txn, iemid, what, clean_metar):
     print "ALERTING for [%s]" % (iemid,)
     txn.execute("""SELECT wfo, state, name, ST_x(geom) as lon,
            ST_y(geom) as lat, network from stations 
-           WHERE id = '%s' """ % (iemid,) )
+           WHERE id = '%s' and (network ~* 'ASOS' or network = 'AWOS')""" % (
+                                                                    iemid,) )
     if txn.rowcount == 0:
         print "I not find WFO for sid: %s " % (iemid,)
         return
