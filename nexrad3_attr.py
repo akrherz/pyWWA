@@ -166,6 +166,8 @@ class PROC(protocol.ProcessProtocol):
         """
         #log.msg("Teardown")
         if self.res == '' or self.res.find("NO STORMS DETECTED") > -1:
+            defer = POSTGISDB.runInteraction(delete_prev_attrs, self.afos[3:])
+            defer.addErrback( log.err )
             self.deferred.callback(self)
             return
         defer = POSTGISDB.runInteraction(really_process, self.res, self.afos[3:], 
@@ -190,6 +192,10 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
         I am called from the ldmbridge when data is ahoy
         """
         self.jobs.put( buf )
+
+def delete_prev_attrs(txn, nexrad ):
+    ''' Remove any previous attributes for this nexrad '''
+    txn.execute("DELETE from nexrad_attributes WHERE nexrad = %s", (nexrad,))
 
 def async(buf):
     """
@@ -234,7 +240,7 @@ def really_process(txn, res, nexrad, ts):
          U8  154/126 NONE NONE     UNKNOWN       11  47 18.8  23.1  271/ 70  
          J0  127/134 NONE NONE     UNKNOWN       24  51 20.2  33.9    NEW   
     """
-    txn.execute("DELETE from nexrad_attributes WHERE nexrad = %s", (nexrad,))
+    delete_prev_attrs(txn, nexrad)
     
     cenlat = float(ST[nexrad]['lat'])
     cenlon = float(ST[nexrad]['lon'])
