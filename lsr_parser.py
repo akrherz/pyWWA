@@ -18,7 +18,9 @@
 #stdlib
 import pickle
 import os
+# http://bugs.python.org/issue7980
 import datetime
+datetime.datetime.strptime('2013', '%Y')
 
 # Get the logger going, asap
 from twisted.python import log
