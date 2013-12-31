@@ -142,8 +142,12 @@ def gdalwarp(sat, tmpfn, epsg):
     subprocess.call( cmd, shell=True )
 
     # Convert file back to PNG for use and archival (smaller file)
-    cmd = "convert %s_%s.tif %s_4326.png" % (tmpfn, epsg, tmpfn)
-    subprocess.call( cmd, shell=True )
+    cmd = "convert -quiet %s_%s.tif %s_4326.png" % (tmpfn, epsg, tmpfn)
+    proc = subprocess.Popen( cmd, shell=True, stderr=subprocess.PIPE,
+                             stdout=subprocess.PIPE )
+    output = proc.stderr.read()
+    if output != "":
+        logger.error("gdalwarp() convert error message: %s" % (output,))
     os.unlink("%s_%s.tif" % (tmpfn, epsg))
 
     out = open('%s_%s.tfw' % (tmpfn, epsg), 'a')
