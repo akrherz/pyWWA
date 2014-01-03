@@ -21,7 +21,7 @@ if prod.valid.month > 6:
 for sect in sections:
     if sect[1:4].strip() == "":
         continue
-    print prod.afos[:3] + sect[1:4], prod.source, prod.valid, prod.wmo
+    #print prod.afos[:3] + sect[1:4], prod.source, prod.valid, prod.wmo
     cursor.execute("""INSERT into """+table+""" 
         (pil, data, source, entered, wmo) 
         values(%s, %s, %s, %s, %s)""", 
