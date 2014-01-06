@@ -536,8 +536,9 @@ def load_nwsli(txn):
 def ready(res):
     ldmbridge.LDMProductFactory( MyProductIngestor() )
 
-df = POSTGIS.runInteraction(load_ugc)
+
 df = POSTGIS.runInteraction(load_nwsli)
+df = POSTGIS.runInteraction(load_ugc)
 df.addCallback( ready )
 jabber = common.make_jabber_client('vtec_parser')
 
