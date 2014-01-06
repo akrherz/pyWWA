@@ -278,15 +278,15 @@ def segment_processor(txn, text_product, i, skip_con):
             # Insert Counties
             for k in range(len(ugc)):
                 cnty = str(ugc[k])
-         
                 txn.execute("""INSERT into """+ warning_table +""" 
-                (issue,expire,report, geom, phenomena, gtype, wfo, eventid, status,
-                updated, fcster, ugc, significance, hvtec_nwsli) VALUES(%s, %s, %s, 
-                (select geom from nws_ugc WHERE ugc = %s LIMIT 1), %s, 'C', %s,%s,%s,%s, 
-                %s, %s,%s, %s)""",  (bts, vtec.endts, 
-                                      text_product.text, cnty, vtec.phenomena, vtec.office, vtec.ETN, 
-                                      vtec.action, text_product.valid, 
-                                      fcster, cnty, vtec.significance, seg.get_hvtec_nwsli() ))
+        (issue,expire,report, geom, phenomena, gtype, wfo, eventid, status,
+        updated, fcster, ugc, significance, hvtec_nwsli, gid) VALUES(%s, %s, %s, 
+        (select geom from nws_ugc WHERE ugc = %s LIMIT 1), %s, 'C', %s,%s,%s,%s, 
+        %s, %s,%s, %s, get_gid(%s, %s))""",  (bts, vtec.endts, 
+                text_product.text, cnty, vtec.phenomena, vtec.office, vtec.ETN, 
+                vtec.action, text_product.valid, 
+                fcster, cnty, vtec.significance, seg.get_hvtec_nwsli(),
+                cnty, text_product.valid ))
             channels = []
             for w in affectedWFOS.keys():
                 channels.append(w)
