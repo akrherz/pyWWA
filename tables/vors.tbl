@@ -391,19 +391,20 @@ OME           0 NOME                             AK US  6452 -16545     0  0
 OTZ           0 KOTZEBUE                         AK US  6688 -16260     0  0
 WLK           0 SELAWIK                          AK US  6660 -16000     0  0
 HSL           0 HUSLIA                           AK US  6571 -15637     0  0
-BSF	      0 BRADSHAW		         HI US  1976 -15539     0  0
-UPP	      0 UPOLU POINT			 HI US  2020 -15584     0  0
-ITO	      0 HILO 				 HI US  1972 -15501     0  0
-HNL	      0 HONOLULU		         HI US  2133 -15793     0  0
-OGG	      0 MAUI				 HI US  2091 -15642     0  0
-NDB	      0 VALLEY_ISLAND			 HI US  2088 -15644     0  0
-MUE	      0 KAMUELA				 HI US  2000 -15567     0  0
-NGF	      0 KANEOHE_BAY		         HI US  2145 -15776     0  0
-MKK	      0 MOLOKAI				 HI US  2114 -15717     0  0
-NBS	      0 BARKING_SANDS			 HI US  2204 -15979     0  0
-CKH	      0 KOKO_HEAD			 HI US  2127 -15770     0  0
-IAI	      0 KONA				 HI US  1965 -15602     0  0
-LLD	      0 LANAI				 HI US  2077 -15697     0  0
-LNY	      0 LANAI_CITY			 HI US  2076 -15697     0  0
-LIH	      0 LIHUE				 HI US  2197 -15934     0  0
-SOK	      0 SOUTH_KAUAI			 HI US  2190 -15953     0  0
+BSF	          0 BRADSHAW                         HI US  1976 -15539     0  0
+UPP	          0 UPOLU POINT                      HI US  2020 -15584     0  0
+ITO           0 HILO                             HI US  1972 -15501     0  0
+HNL	          0 HONOLULU                         HI US  2133 -15793     0  0
+OGG	          0 MAUI                             HI US  2091 -15642     0  0
+NDB	          0 VALLEY_ISLAND                    HI US  2088 -15644     0  0
+MUE	          0 KAMUELA                          HI US  2000 -15567     0  0
+NGF	          0 KANEOHE_BAY                      HI US  2145 -15776     0  0
+MKK	          0 MOLOKAI                          HI US  2114 -15717     0  0
+NBS	          0 BARKING_SANDS                    HI US  2204 -15979     0  0
+CKH	          0 KOKO_HEAD                        HI US  2127 -15770     0  0
+IAI	          0 KONA                             HI US  1965 -15602     0  0
+LLD	          0 LANAI                            HI US  2077 -15697     0  0
+LNY	          0 LANAI_CITY                       HI US  2076 -15697     0  0
+LIH	          0 LIHUE                            HI US  2197 -15934     0  0
+SOK	          0 SOUTH_KAUAI                      HI US  2190 -15953     0  0
+  
