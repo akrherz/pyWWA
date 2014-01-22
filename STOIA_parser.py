@@ -115,7 +115,7 @@ def process(raw):
         data = line[7:]
         pos = data.rfind(")")
         meat = data[:pos+1].replace(", ", " ")
-        condition = data[pos:].upper().strip()
+        condition = data[(pos+1):].upper().strip()
         if meat.strip() == '':
             continue
         if not roads.has_key(meat):
