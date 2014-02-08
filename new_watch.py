@@ -279,8 +279,9 @@ def real_process(raw):
 
     def runner2(txn):
         # Figure out who should get notification of the watch...
-        sql = """SELECT distinct wfo from nws_ugc WHERE 
-         ST_Contains('SRID=4326;MULTIPOLYGON(((%s)))', geom)""" % (wkt,)
+        sql = """SELECT distinct wfo from ugcs WHERE 
+         ST_Contains('SRID=4326;MULTIPOLYGON(((%s)))', geom)
+         and end_ts is null""" % (wkt,)
     
         txn.execute(sql)
         rs = txn.fetchall()

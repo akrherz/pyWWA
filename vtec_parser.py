@@ -281,7 +281,7 @@ def segment_processor(txn, text_product, i, skip_con):
                 txn.execute("""INSERT into """+ warning_table +""" 
         (issue,expire,report, geom, phenomena, gtype, wfo, eventid, status,
         updated, fcster, ugc, significance, hvtec_nwsli, gid) VALUES(%s, %s, %s, 
-        (select geom from nws_ugc WHERE ugc = %s LIMIT 1), %s, 'C', %s,%s,%s,%s, 
+        (select geom from ugcs WHERE ugc = %s and end_ts is null LIMIT 1), %s, 'C', %s,%s,%s,%s, 
         %s, %s,%s, %s, get_gid(%s, %s))""",  (bts, vtec.endts, 
                 text_product.text, cnty, vtec.phenomena, vtec.office, vtec.ETN, 
                 vtec.action, text_product.valid, 
@@ -514,7 +514,8 @@ ugc_dict = {}
 ugc2wfo = {}
 def load_ugc(txn):
     """ load ugc"""
-    sql = "SELECT name, ugc, wfo from nws_ugc WHERE name IS NOT Null"
+    sql = """SELECT name, ugc, wfo from ugcs WHERE 
+        name IS NOT Null and end_ts is null"""
     txn.execute(sql)
     for row in txn:
         ugc_dict[ row['ugc'] ] = (row["name"]).replace("\x92"," ").replace("\xc2"," ")

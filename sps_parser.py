@@ -47,7 +47,7 @@ POSTGIS = adbapi.ConnectionPool("twistedpg", database="postgis",
 ugc_dict = {}
 def load_ugc(txn):
     """ load ugc dict """
-    sql = "SELECT name, ugc from nws_ugc WHERE name IS NOT Null"
+    sql = "SELECT name, ugc from ugcs WHERE name IS NOT Null and end_ts is null"
     txn.execute( sql )
     for row in txn:
         name = (row["name"]).replace("\x92"," ")
