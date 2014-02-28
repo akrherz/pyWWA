@@ -3,7 +3,7 @@ from pyiem.nws import product
 from pyiem.nws.ugc import UGC
 import sys
 
-POSTGIS = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
+POSTGIS = psycopg2.connect(database='postgis', host='iemdb')
 cursor = POSTGIS.cursor()
 cursor2 = POSTGIS.cursor()
 
