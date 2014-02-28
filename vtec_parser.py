@@ -13,7 +13,18 @@
 # You should have received a copy of the GNU General Public License along with
 # this program; if not, write to the Free Software Foundation, Inc.,
 # 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-""" VTEC product ingestor """
+""" VTEC product ingestor 
+
+The warnings table has the following timestamp based columns, this gets ugly 
+with watches.  Lets try to explain
+
+    issue   <- VTEC timestamp of when this event was valid for
+    expire  <- When does this VTEC product expire
+    updated <- Product Timestamp of when a product gets updated
+    init_expire <- When did this product initially expire
+    product_issue <- When was this product issued by the NWS
+
+"""
 
 from twisted.python import log
 from twisted.python import logfile
@@ -269,24 +280,28 @@ def segment_processor(txn, text_product, i, skip_con):
                 giswkt = 'SRID=4326;%s' % (MultiPolygon([ seg.sbw ]).wkt,)
                 txn.execute("""INSERT into """+ warning_table +""" (issue, expire, report, 
                  significance, geom, phenomena, gtype, wfo, eventid, status, updated, 
-                fcster, hvtec_nwsli) VALUES (%s,%s,%s,%s,%s,%s,%s, 
-                %s,%s,%s,%s, %s, %s)""", (bts, vtec.endts , 
+                fcster, hvtec_nwsli, init_expire, product_issue) 
+                VALUES (%s,%s,%s,%s,%s,%s,%s, 
+                %s,%s,%s,%s, %s, %s, %s, %s)""", (bts, vtec.endts , 
                                 text_product.text, vtec.significance, 
       giswkt, vtec.phenomena, 'P', vtec.office, vtec.ETN, vtec.action, 
-      text_product.valid, fcster, seg.get_hvtec_nwsli() ) )
+      text_product.valid, fcster, seg.get_hvtec_nwsli(),
+      vtec.endts, text_product.valid ) )
                 
             # Insert Counties
             for k in range(len(ugc)):
                 cnty = str(ugc[k])
                 txn.execute("""INSERT into """+ warning_table +""" 
         (issue,expire,report, geom, phenomena, gtype, wfo, eventid, status,
-        updated, fcster, ugc, significance, hvtec_nwsli, gid) VALUES(%s, %s, %s, 
-        (select geom from ugcs WHERE ugc = %s and end_ts is null LIMIT 1), %s, 'C', %s,%s,%s,%s, 
-        %s, %s,%s, %s, get_gid(%s, %s))""",  (bts, vtec.endts, 
+        updated, fcster, ugc, significance, hvtec_nwsli, gid, init_expire,
+        product_issue) VALUES(%s, %s, %s, 
+        (select geom from ugcs WHERE ugc = %s and end_ts is null LIMIT 1), %s, 
+        'C', %s,%s,%s,%s, 
+        %s, %s,%s, %s, get_gid(%s, %s), %s, %s)""",  (bts, vtec.endts, 
                 text_product.text, cnty, vtec.phenomena, vtec.office, vtec.ETN, 
                 vtec.action, text_product.valid, 
                 fcster, cnty, vtec.significance, seg.get_hvtec_nwsli(),
-                cnty, text_product.valid ))
+                cnty, text_product.valid, vtec.endts, text_product.valid ))
             channels = []
             for w in affectedWFOS.keys():
                 channels.append(w)
@@ -308,7 +323,9 @@ till %(ets)s %(svs_special)s" % jmsg_dict
                 if vtec.endts is None:
                     _expire = 'expire + \'10 days\'::interval'
                 txn.execute("""UPDATE """+ warning_table +""" SET status = %s, 
-                    updated = %s, expire = """+ _expire +""" WHERE ugc = %s and wfo = %s and eventid = %s and 
+                    updated = %s, expire = """+ _expire +""",
+                    init_expire = """+ _expire +""" WHERE ugc = %s and 
+                    wfo = %s and eventid = %s and 
                     phenomena = %s and significance = %s""", ( vtec.action, 
                         text_product.valid, str(cnty), vtec.office, vtec.ETN,
                             vtec.phenomena, vtec.significance ))
