@@ -414,12 +414,12 @@ def sendWindAlert(txn, iemid, v, d, t, clean_metar):
     if (clean_metar.find("$") > 0):
         extra = "(Caution: Maintenance Check Indicator)"
     url = "http://mesonet.agron.iastate.edu/ASOS/current.phtml?network=%s" % (network,)
-    jtxt = "%s: %s,%s (%s) ASOS %s reports gust of %s knots from %s @ %s\n%s"\
+    jtxt = "%s: %s,%s (%s) ASOS %s reports gust of %.1f knots from %s @ %s\n%s"\
             % (wfo, nm, st, iemid, extra, v, drct2dirTxt(d), \
                t.strftime("%H%MZ"), clean_metar )
     jabber.sendMessage(jtxt, jtxt)
 
-    twt = "%s,%s (%s) ASOS reports gust of %s knots from %s @ %s" % (nm, 
+    twt = "%s,%s (%s) ASOS reports gust of %.1f knots from %s @ %s" % (nm, 
      st, iemid, v, drct2dirTxt(d), t.strftime("%H%MZ"))
     common.tweet([wfo], twt, url, {'lat': str(row['lat']), 'long': str(row['lon'])})
 
