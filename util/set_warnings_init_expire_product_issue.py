@@ -11,7 +11,7 @@ table = "warnings_%s" % (sys.argv[1],)
 
 cursor.execute("""
  SELECT oid, report, ugc from """+table+""" where phenomena = 'BZ'
- and significance = 'A' and product_issue is null LIMIT 1000
+ and significance = 'A' and product_issue is null LIMIT 100000
 """)
 
 for row in cursor:
@@ -24,12 +24,14 @@ for row in cursor:
     for segment in prod.segments:
         if ugc not in segment.ugcs:
             continue
+        if len(segment.vtec) == 0:
+            continue
         #print ugc, segment.vtec[0].endts, prod.valid
         cursor2.execute("""UPDATE """+table+""" SET product_issue = %s,
     init_expire = %s WHERE oid = %s""", 
     (prod.valid, segment.vtec[0].endts, oid))
 
-print 'Processed %s rows' % (cursor.rowcount,)    
+print '%s Processed %s rows' % (sys.argv[1], cursor.rowcount)    
 
 cursor2.close()
 POSTGIS.commit()
