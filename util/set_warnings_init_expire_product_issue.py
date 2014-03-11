@@ -11,7 +11,8 @@ table = "warnings_%s" % (sys.argv[1],)
 
 cursor.execute("""
  SELECT oid, report, ugc from """+table+""" where 
- product_issue is null and ugc is not null LIMIT 100000
+ product_issue is null and ugc is not null and
+ report is not null LIMIT 100000
 """)
 
 for row in cursor:
