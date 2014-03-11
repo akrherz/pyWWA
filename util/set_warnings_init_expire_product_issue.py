@@ -10,8 +10,8 @@ cursor2 = POSTGIS.cursor()
 table = "warnings_%s" % (sys.argv[1],)
 
 cursor.execute("""
- SELECT oid, report, ugc from """+table+""" where phenomena = 'BZ'
- and significance = 'A' and product_issue is null LIMIT 100000
+ SELECT oid, report, ugc from """+table+""" where 
+ product_issue is null LIMIT 100000
 """)
 
 for row in cursor:
