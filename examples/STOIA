@@ -1,615 +1,1100 @@
-355 
-SXUS43 KDMX 012156
+021 
+SXUS43 KDMX 210801
 STOIA 
 IOWA ROAD CONDITIONS
 IOWA DEPARTMENT OF PUBLIC SAFETY
 RELAYED BY THE NATIONAL WEATHER SERVICE DES MOINES IA
-456 PM CDT TUE NOV 01 2011
+301 AM CDT MON OCT 21 2013
 
 ******************************** Interstates ********************************
 
-I-29   Missouri Line to CR J 64                Normal
-       CR J 64 to IA 2                         Normal
-       IA 2 to CR J 26                         Normal
-       CR J 26 to CR J 24                      Normal
-       CR J 24 to CR J 10                      Normal
-       CR J 10 to US 34 W                      Normal
-       US 34 W to US 34 E                      Normal
-       US 34 E to IA 370                       Normal
-       IA 370 to IA 92                         Normal
-       IA 92 to I-80 E                         Normal
-       I-80 W to I-480                         Normal
-       I-480 to IA 192                         Normal
-       IA 192 to I-680 W                       Normal
-       I-680 W to CR L 19                      Normal
-       CR L 19 to I-680 E                      Normal
-       I-680 E to CR G 14                      Normal
-       CR G 14 to US 30                        Normal
-       US 30 to CR F 50                        Normal
-       CR F 50 to IA 127                       Normal
-       IA 127 to CR F 20                       Normal
-       CR F 20 to CR E 60                      Normal
-       CR E 60 to IA 175                       Normal
-       IA 175 to CR E 24                       Normal
-       CR E 24 to IA 141                       Normal
-       IA 141 to CR K 25                       Normal
-       CR K 25 to CR D 51                      Normal
-       CR D 51 to SGTBLUFF                     Normal
-       SGTBLUFF to IA 376                      Normal
-       IA 376 to US 20                         Normal
-       US 20 to US 77                          Normal
-       US 77 to IA 12                          Normal
-       IA 12 to South Dakota Line              Normal
-I-35   Missouri Line to US 69                  Normal
-       US 69 to IA 2                           Normal
-       IA 2 to CR J 20                         Normal
-       CR J 20 to CR J 14                      Normal
-       CR J 14 to CR H 45                      Normal
-       CR H 45 to US 34                        Normal
-       US 34 to CR H 33                        Normal
-       CR H 33 to IA 152                       Normal
-       IA 152 to CR G 76                       Normal
-       CR G 76 to CR G 64                      Normal
-       CR G 64 to CR G 50                      Normal
-       CR G 50 to IA 92                        Normal
-       IA 92 to CR G 14                        Normal
-       CR G 14 to IA 5                         Normal
-       IA 5 to GRNDAV                          Normal
-       GRNDAV to MLLSCIV                       Normal
-       MILLSCIV to I-235 E                     Normal
-       I-235 W to CORPWD                       Normal
-       CORPWD to IA 160                        Normal
-       IA 160 to 1STANK                        Normal
-       1STANK to CR F 22                       Normal
-       CR F 22 to IA 210                       Normal
-       IA 210 to US 30                         Normal
-       US 30 to 13THAMZ                        Normal
-       13THAMZ to CR E 29                      Normal
-       CR E 29 to CR E 18                      Normal
-       CR E 18 to CR E 15                      Normal
-       CR E 15 to CR D 65                      Normal
-       CR D 65 to IA 175                       Normal
-       IA 175 to CR D 41                       Normal
-       CR D 41 to US 20                        Normal
-       US 20 to CR D 25                        Normal
-       CR D 25 to CR D 20                      Normal
-       CR D 20 to CR R 75                      Normal
-       CR R 75 to CR C 47                      Normal
-       CR C 47 to IA 3                         Normal
-       IA 3 to CR C 25                         Normal
-       CR C 25 to CR C 13                      Normal
-       CR C 13 to CR B 65                      Normal
-       CR B 65 to CR B 60                      Normal
-       CR B 60 to CR B 43                      Normal
-       CR B 43 to US 18 E                      Normal
-       US 18 E to CR B 35                      Normal
-       CR B 35 to IA 122                       Normal
-       IA 122 to CR B 20                       Normal
-       CR B 20 to IA 9                         Normal
-       IA 9 to CR A 38                         Normal
-       CR A 38 to COHWY 105                    Normal
-       COHWY 105 to Minnesota Line             Normal
-I-80   NE Line to I-29 N                       Normal
-       I-29 N to I-29 S                        Normal
-       I-29 S to US 6                          Normal
-       US 6 to CR G 30                         Normal
-       CR G 30 to CR L 55                      Normal
-       CR L 55 to I-680                        Normal
-       I-680 to CR L 66                        Normal
-       CR L 66 to CR M 16                      Normal
-       CR M 16 to US 59                        Normal
-       US 59 to CR M 47                        Normal
-       CR M 47 to CR M 56                      Normal
-       CR M 56 to IA 173                       Normal
-       IA 173 to CR N 16                       Normal
-       CR N 16 to US 71                        Normal
-       US 6 to CR N 28                         Normal
-       CR N 28 to IA 148                       Normal
-       IA 148 to CR G 30                       Normal
-       CR G 30 to CR N 54                      Normal
-       CR N 54 to ANTQE DR                     Normal
-       ANTQE DR to IA 25                       Normal
-       IA 25 to CR P 20                        Normal
-       CR P 20 to CR P 28                      Normal
-       CR P 28 to CR P 48                      Normal
-       CR P 48 to CR P 53                      Normal
-       CR P 53 to CR P 57                      Normal
-       CR P 57 to CR P 58                      Normal
-       CR P 58 to US 169                       Normal
-       US 169 to CR R 16                       Normal
-       CR R 16 to CR R 22                      Normal
-       CR R 22 to CR F 68                      Normal
-       CR F 68 to I-235 W                      Normal
-       I-235 W to US 6                         Normal
-       US 6 to Douglas                         Normal
-       Douglas to IA 141                       Normal
-       IA 141 to NW 86th                       Normal
-       NW 86th to IA 28                        Normal
-       IA 28 to IA 415                         Normal
-       IA 415 to US 69                         Normal
-       US 69 to I-235 E                        Normal
-       I-235 E to US 65 W                      Normal
-       US 65 W to US 65 E                      Normal
-       US 65 E to NE 72nd                      Normal
-       NE 72nd to CR S 27                      Normal
-       CR S 27 to IA 117                       Normal
-       IA 117 to CR F 48                       Normal
-       CR F 48 to IA 14                        Normal
-       IA 14 to SPDWY DR                       Normal
-       SPDWY DR to IA 224                      Normal
-       IA 224 to CR T 38                       Normal
-       CR T 38 to IA 146                       Normal
-       IA 146 to US 63                         Normal
-       US 63 to CR V 18                        Normal
-       CR V 18 to IA 21                        Normal
-       IA 21 to CR V 38                        Normal
-       CR V 38 to CR V 52                      Normal
-       CR V 52 to CR V 66                      Normal
-       CR V 66 to IA 149                       Normal
-       IA 149 to US 151                        Normal
-       US 151 to CR W 38                       Normal
-       CR W 38 to IRLND                        Normal
-       IRLND to I-380                          Normal
-       I-380 to IA 965                         Normal
-       IA 965 to 1st Ave                       Normal
-       1st Ave to DBQ ST                       Normal
-       DBQ ST to IA 1                          Normal
-       IA 1 to CR F 44                         Normal
-       CR F 44 to CR X 30                      Normal
-       CR X 30 to CR X 40                      Normal
-       CR X 40 to CR X 46                      Normal
-       CR X 46 to IA 38 W                      Normal
-       IA 38 W to IA 38 E                      Normal
-       IA 38 E to CR Y 26                      Normal
-       CR Y 26 to CR Y 30                      Normal
-       CR Y 30 to CR Y 40                      Normal
-       CR Y 40 to I-280                        Normal
-       I-280 to IA 130                         Normal
-       IA 130 to US 61                         Normal
-       US 61 to I-74                           Normal
-       I-74 to Exit 301                        Normal
-       Exit 301 to Illinois Line               Normal
-I-235  I-35 to IA 28                           Normal
-       IA 28 to MLK                            Normal
-       MLK to US 69                            Normal
-       US 69 to US 6                           Normal
-       US 6 to I-80                            Normal
-I-280  I-80 to CR F 58                         Normal
-       CR F 58 to US 61                        Normal
-       US 61 to Illinois Line                  Normal
-I-380  I-80 to CR F 28                         Normal
-       CR F 28 to CR F 12                      Normal
-       CR F 12 to CR E 70                      Normal
-       CR E 70 US 30                           Normal
-       US 30 to WLSNAV                         Normal
-       WLSNAV to IA 922                        Normal
-       IA 922 to IA 100                        No Conditions Reported
-       IA 100 to BOYSNRD                       Normal
-       BOYSNRD to CR E 34                      Normal
-       CR E 34 to CR W 36                      Normal
-       CR W 36 to 54th St                      Normal
-       54th St to IA 150                       Normal
-       IA 150 to CR D 48                       Normal
-       CR D 48 to CR V 65                      Normal
-       CR V 65 to CR D 38                      Normal
-       CR D 38 to US 20                        Normal
-       US 20 to US 218                         Normal
-I-680  NE Line to I-29                         Normal
-       I-29 to CR L 34                         Normal
-       CR L 34 to IA 191                       Normal
-       IA 191 to I-80                          Normal
+I-29   I-29, between Exit 15: County Roads J26 and L31 (13 miles north of the Hamburg area) and Exit 24: County Road J10 and L31 (7 miles south of the Pacific Junction area)Normal
+       I-29, between Exit 71: I-680 and Exit 72: County Road G14 (2 miles south of the Missouri Valley area)Normal
+       I-29, between Exit 95: County Road F20 (near Little Sioux) and Exit 105: County Road E60 (near Blencoe)Normal
+       I-29, between Exit 112: IA 175 (near Onawa) and Exit 120: County Road E24 (5 miles south of the Sloan area)Normal
+       I-29, between Exit 24: County Road J10 and L31 (7 miles south of the Pacific Junction area) and Exit 35: US 34; US 275 (near Pacific Junction)Normal
+       I-29, between Exit 42: IA 370; County Road H10 and Exit 47: US 275; IA 92 (near Council Bluffs)Normal
+       I-29, between Exit 72: County Road G14 (2 miles south of the Missouri Valley area) and Exit 75: US 30 (Missouri Valley)Normal
+       I-29, between Exit 105: County Road E60 (near Blencoe) and Exit 112: IA 175 (near Onawa)Normal
+       I-29, between Exit 120: County Road E24 (5 miles south of the Sloan area) and Exit 127: IA 141; County Road K42 (near Sloan)Normal
+       I-29, between The Missouri State Line and Exit 10: IA 2 (7 miles north of the Hamburg area)Normal
+       I-29, between Exit 35: US 34; US 275 (near Pacific Junction) and Exit 42: IA 370; County Road H10 (near Council Bluffs)Normal
+       I-29, between Exit 47: US 275; IA 92 and Exit 4: I-80 (Council Bluffs)Normal
+       I-29, between I-80 and Exit 53B: I-480; US 6; West Broadway Street (Council Bluffs)Normal
+       I-29, between Exit 75: US 30 (Missouri Valley) and Exit 82: County Road F50 (near Modale)Normal
+       I-29, between Exit 127: IA 141; County Road K42 (near Sloan) and Exit 134: County Road K25 (near Salix)Normal
+       I-29, between Exit 141: 1st Street and Sioux Gateway Airport and Exit 143: IA 376; Singing Hills Boulevard (Sergeant Bluff)Normal
+       I-29, between Exit 10: IA 2 and Exit 15: County Roads J26 and L31 (7 to 13 miles north of the Hamburg area)Normal
+       I-29, between Exit 53B: I-480; US 6; West Broadway Street and Exit 56: IA 192; North 16th Street (Council Bluffs)Normal
+       I-29, between Exit 82: County Road F50 (near Modale) and Exit 89: IA 127 (near Mondamin)Normal
+       I-29, between Exit 134: County Road K25 and Exit 135: County Road D51 (near Salix)Normal
+       I-29, between Exit 143: IA 376; Singing Hills Boulevard (Sergeant Bluff) and Exit 144: I-129; US 20; US 75 (Sioux City)Normal
+       I-29, between Exit 56: IA 192; North 16th Street (Council Bluffs) and Exit 61: I-680; County Road G37 (near Crescent)Normal
+       I-29, between Exit 89: IA 127 (near Mondamin) and Exit 95: County Road F20 (near Little Sioux)Normal
+       I-29, between Exit 135: County Road D51 (near Salix) and Exit 141: 1st Street and Sioux Gateway Airport (Sergeant Bluff)Normal
+       I-29, between Exit 144: I-129; US 20; US 75 and Exit 148: US 77; IA 12; Wesley Parkway (Sioux City)Normal
+       I-29, between Exit 61: I-680; County Road G37 and Exit 66: County Road L19 (3 miles north of the Crescent area)Normal
+       I-29, between Exit 148: US 77; IA 12; Wesley Parkway and Exit 151: IA 12; Riverside Boulevard (Sioux City)Normal
+       I-29, between Exit 66: County Road L19 (3 miles north of the Crescent area) and Exit 71: I-680 (2 miles south of the Missouri Valley area)Normal
+       I-29, between Exit 151: IA 12; Riverside Boulevard and the Missouri River bridge (near Sioux City)Normal
+I-35   I-35, between Exit 137: I-235; I-80 and Exit 89: Corporate Woods Drive (near Ankeny)Normal
+       I-35, between Exit 52: County Road G50 (near Saint Charles) and Exit 56: IA 92 (near Bevington)Normal
+       I-35, between Exit 89: Corporate Woods Drive and Exit 90: IA 160; Oralabor Road (Ankeny)Normal
+       I-35, between Exit 56: IA 92 (near Bevington) and Exit 65: County Roads G4R and G14 (near Cumming)Normal
+       I-35, between Exit 90: IA 160; Oralabor Road and Exit 92: 1st Street (Ankeny)Normal
+       I-35, between Exit 159: County Road C47 (1 mile north of the Dows area) and Exit 170: County Road C25 (near Latimer)Normal
+       I-35, between Exit 182: County Road B60 (near Swaledale) and Exit 194: US 18; IA 122 (Clear Lake)Normal
+       I-35, between Exit 22: County Road J14 (near Van Wert) and Exit 29: County Road H45 (1 mile south of the Osceola area)Normal
+       I-35, between Exit 65: County Roads G4R and G14 and Exit 68: IA 5 (near Cumming)Normal
+       I-35, between Exit 68: IA 5 (Cumming) and Exit 69: Grand Avenue (West Des Moines)Normal
+       I-35, between Exit 92: 1st Street and Exit 94: 36th Street (near Ankeny)Normal
+       I-35, between Exit 170: County Road C25 (near Latimer) and Exit 182: County Road B60 (near Swaledale)Normal
+       I-35, between Exit 194: US 18; IA 122 (Clear Lake) and Exit 203: IA 9 (near Hanlontown)Normal
+       I-35, between the Missouri State Line and Exit 4: US 69 (near Lamoni)Normal
+       I-35, between Exit 29: County Road H45 (1 mile south of the Osceola area) and Exit 33: US 34 (Osceola)Normal
+       I-35, between Exit 69: Grand Avenue and Exit 70: Mills Civic Parkway (West Des Moines)Normal
+       I-35, between Exit 94: 36th Street (near Ankeny) and Exit 96: County Road F22 (near Alleman)Normal
+       I-35, between Exit 128: County Road D65 (near Randall) and Exit 133: IA 175 (near Ellsworth)Normal
+       I-35, between Exit 203: IA 9 and IA 27; the Minnesota Border (13 miles north of the Hanlontown area)Normal
+       I-35, between Exit 4: US 69 (near Lamoni) and Exit 12: IA 2 (near Decatur City)Normal
+       I-35, between Exit 33: US 34 and Exit 34: Clay Street and County Road H33 (Osceola)Normal
+       I-35, between Exit 70: Mills Civic Parkway (West Des Moines) and Exit 123: I-235; I-80 (Clive)Normal
+       I-35, between Exit 96: County Road F22 (near Alleman) and Exit 102: IA 210 (near Huxley)Normal
+       I-35, between Exit 133: IA 175 and Exit 139: County Road D41 (4 miles north of the Ellsworth area)Normal
+       I-35, between Exit 12: IA 2 (near Decatur City) and Exit 22: County Road J14 (near Van Wert)Normal
+       I-35, between Exit 34: Clay Street and County Road H33 and Exit 36: IA 152; County Road R35 (near Osceola)Normal
+       I-35, between Exit 102: IA 210 (near Huxley) and Exit 111: US 30 (near Ames)Normal
+       I-35, between Exit 139: County Road D41 (4 miles north of the Ellsworth area) and Exit 142: US 20 (1 mile south of the Williams area)Normal
+       I-35, between Exit 36: IA 152; County Road R35 (near Osceola) and Exit 43: County Road G76 (6 miles south of the Saint Charles area)Normal
+       I-35, between Exit 111: US 30 and Exit 116: County Road E29 (near Ames)Normal
+       I-35, between Exit 142: US 20 (1 mile south of the Williams area) and Exit 144: County Road D25 (near Williams)Normal
+       I-35, between Exit 43: County Road G76 and Exit 47: County Road G64 (2 to 6 miles south of the Saint Charles area)Normal
+       I-35, between Exit 116: County Road E29 (near Ames) and Exit 123: County Road E18 (near Story City)Normal
+       I-35, between Exit 144: County Road D25 and Exit 147: County Road D20 (near Williams)Normal
+       I-35, between Exit 47: County Road G64 (2 miles south of the Saint Charles area) and Exit 52: County Road G50 (near Saint Charles)Normal
+       I-35, between Exit 123: County Road E18 (near Story City) and Exit 128: County Road D65 (near Randall)Normal
+       I-35, between Exit 147: County Road D20 and Exit 151: County Roads C70 and R75 (4 miles north of the Williams area)Normal
+       I-35, between Exit 151: County Roads C70 and R75 (4 miles north of the Williams area) and Exit 159: County Road C47 (1 mile north of the Dows area)Normal
+I-74   I-74, between Exit 298: I-80 and Exit 4: US 67; Grant Street and State Street (Bettendorf)Normal
+       I-74, between Exit 4: US 67; Grant Street and State Street and Exit 1 - River Drive (1 mile east of the Bettendorf area)Normal
+I-80   I-80, between Exit 8: US 6 (Council Bluffs) and Exit 17: County Road G30 (near Underwood)Normal
+       I-80, between Exit 57: County Road N16 (9 miles east of the Walnut area) and Exit 70: IA 148; County Road F58 (4 miles west of the Adair area)Normal
+       I-80, between Exit 17: County Road G30 (near Underwood) and Exit 23: County Road L55 (near Neola)Normal
+       I-80, between Exit 70: IA 148; County Road F58 (4 miles west of the Adair area) and Exit 83: Antique Country Drive (near Casey)Normal
+       I-80, between Exit 23: County Road L55 (near Neola) and Exit 27: I-680 (1 mile west of the Minden area)Normal
+       I-80, between Exit 83: Antique Country Drive (near Casey) and Exit 93: County Road P28 (Stuart)Normal
+       I-80, between Exit 179: County Road T38 (near Oakland Acres) and Exit 182: IA 146 (near Grinnell)Normal
+       I-80, between Exit 205: County Road V38 (8 miles east of the Brooklyn area) and Exit 220: IA 149; County Road V77 (Williamsburg)Normal
+       I-80, between Exit 4: I-29 and Exit 8: US 6 (Council Bluffs)Normal
+       I-80, between Exit 27: I-680 (1 mile west of the Minden area) and Exit 29: County Road L66 (near Minden)Normal
+       I-80, between Exit 142: US 6; US 65; Hubbell Avenue and Exit 143: 1st Avenue North and North East 72nd Street (near Altoona)Normal
+       I-80, between Exit 182: IA 146 (near Grinnell) and Exit 191: US 63 (near Malcom)Normal
+       I-80, between Exit 220: IA 149; County Road V77 (Williamsburg) and Exit 230: County Road W38 (5 miles west of the Tiffin area)Normal
+       I-80, between Exit 93: County Road P28 (Stuart) and Exit 110: US 169; US 6 (De Soto)Normal
+       I-80, between Exit 143: 1st Avenue North and North East 72nd Street (near Altoona) and Exit 149: County Road S27 (near Mitchellville)Normal
+       I-80, between Exit 230: County Road W38 (5 miles west of the Tiffin area) and Exit 237: Ireland Avenue (Coralville)Normal
+       I-80, between Exit 110: US 169; US 6 (De Soto) and Exit 121: Jordan Creek Parkway (Clive)Normal
+       I-80, between Exit 131: IA 28; Merle Hay Road (Urbandale) and Exit 135: IA 415; 2nd Avenue (near Des Moines)Normal
+       I-80, between Exit 149: County Road S27 (near Mitchellville) and Exit 155: IA 117 (Colfax)Normal
+       I-80, between Exit 123: I-235; I-35 (West Des Moines) and Exit 125: US 6; Hickman Road (Clive)Normal
+       I-80, between Exit 135: IA 415; 2nd Avenue and Exit 136: US 69; East 14th Street (near Des Moines)Normal
+       I-80, between Exit 155: IA 117 (Colfax) and Exit 164: US 6; IA 14 (Lambs Grove)Normal
+       I-80, between the Missouri River bridge and Exit 1A: I-29 (Council Bluffs)Normal
+       I-80, between Exit 125: US 6; Hickman Road (Clive) and Exit 126: Douglas Avenue (Urbandale)Normal
+       I-80, between Exit 136: US 69; East 14th Street and Exit 137: I-235; I-35 (near Des Moines)Normal
+       I-80, between Exit 164: US 6; IA 14 (Lambs Grove) and Exit 168: Iowa Speedway Drive (near Newton)Normal
+       I-80, between Exit 237: Ireland Avenue (Coralville) and Exit 246: IA 1; Dodge Street (Iowa City)Normal
+       I-80, between Exit 1A: I-29 and Exit 3: IA 192; South 4th Street and South Expressway Street (Council Bluffs)Normal
+       I-80, between Exit 126: Douglas Avenue and Exit 127: IA 141; North West Urbandale Drive (Urbandale)Normal
+       I-80, between Exit 168: Iowa Speedway Drive (near Newton) and Exit 173: IA 224; County Road T22 (near Kellogg)Normal
+       I-80, between Exit 191: US 63 (near Malcom) and Exit 197: County Road V18 (near Brooklyn)Normal
+       I-80, between Exit 246: IA 1; Dodge Street (Iowa City) and Exit 254: County Road X30 (near West Branch)Normal
+       I-80, between Exit 254: County Road X30 and Exit 259: County  Road X40 (3 miles east of the West Branch area)Normal
+       I-80, between Exit 3: IA 192; South 4th Street and South Expressway Street and Exit 4: I-29 (Council Bluffs)Normal
+       I-80, between Exit 127: IA 141; North West Urbandale Drive and Exit 129: North West 86th Street (Urbandale)Normal
+       I-80, between Exit 173: IA 224; County Road T22 (near Kellogg) and Exit 179: County Road T38 (near Oakland Acres)Normal
+       I-80, between Exit 197: County Road V18 and Exit 201: IA 21 (4 miles east of the Brooklyn area)Normal
+       I-80, between Exit 259: County  Road X40 and Exit 265: County Road X46 (3 to 8 miles east of the West Branch area)Normal
+       I-80, between Exit 129: North West 86th Street and Exit 131: IA 28; Merle Hay Road (Urbandale)Normal
+       I-80, between Exit 201: IA 21 and Exit 205: County Road V38 (4 to 8 miles east of the Brooklyn area)Normal
+       I-80, between Exit 265: County Road X46 (8 miles east of the West Branch area) and Exit 267: IA 38; County Road X54 (9 miles west of the Durant area)Normal
+       I-80, between Exit 284: County Road Y40 (1 mile east of the Walcott area) and Exit 298: I-74 (Bettendorf)Normal
+       I-80, between Exit 29: County Road L66 (near Minden) and Exit 34: County Road M16 (near Shelby)Normal
+       I-80, between Exit 121: Jordan Creek Parkway (Clive) and Exit 123: I-235; I-35 (West Des Moines)Normal
+       I-80, between Exit 267: IA 38; County Road X54 and Exit 271: US 6; IA 38 and County Road X64 (5 to 9 miles west of the Durant area)Normal
+       I-80, between Exit 298: I-74 (Bettendorf) and Exit 306: US 67 (Le Claire)Normal
+       I-80, between Exit 34: County Road M16 (near Shelby) and Exit 40: US 59 (Avoca)Normal
+       I-80, between Exit 137: I-235; I-35 (near Des Moines) and Exit 141: US 65 (near Altoona)Normal
+       I-80, between Exit 271: US 6; IA 38 and County Road X64 (5 miles west of the Durant area) and Exit 277: County Road Y26 (near Durant)Normal
+       I-80, between Exit 306: US 67 and Exit 1 2nd Ave (near Le Claire)Normal
+       I-80, between Exit 40: US 59 (Avoca) and Exit 46: County Road M47 (Walnut)Normal
+       I-80, between Exit 141: US 65 and Exit 142: US 6; US 65; Hubbell Avenue (near Altoona)Normal
+       I-80, between Exit 277: County Road Y26 and Exit 280: County Road Y30 (2 miles east of the Durant area)Normal
+       I-80, between Exit 46: County Road M47 and Exit 51: County Road M56 (3 miles east of the Walnut area)Normal
+       I-80, between Exit 280: County Road Y30 (2 miles east of the Durant area) and Exit 284: County Road Y40 (near Walcott)Normal
+       I-80, between Exit 51: County Road M56 and Exit 54: IA 173 (3 to 6 miles east of the Walnut area)Normal
+       I-80, between Exit 284: County Road Y40 and Exit 290: I-280; US 6 (1 mile east of the Walcott area)Normal
+       I-80, between Exit 54: IA 173 and Exit 57: County Road N16 (6 to 9 miles east of the Walnut area)Normal
+I-129  I-129, between US 20; US 75; the Nebraska State Line and Exit 1A: I-29; US 20 (near Sioux City)Normal
+I-235  I-235, between Exit 8B: 3rd Street and Exit 9: US 69; East 14th Street and East 15th Street (Des Moines)Normal
+       I-235, between Exit 123: I-35; I-80 and Exit 4: IA 28; 63rd Street (Clive)Normal
+       I-235, between Exit 9: US 69; East 14th Street and East 15th Street and Exit 12: US 6; East Euclid Avenue (Des Moines)Normal
+       I-235, between Exit 4: IA 28; 63rd Street (Clive) and Exit 7A: 19th Street and Martin Luther King Junior Parkway (near Des Moines)Normal
+       I-235, between Exit 12: US 6; East Euclid Avenue and Exit 137: I-35; I-80 (Des Moines)Normal
+       I-235, between Exit 7A: 19th Street and Martin Luther King Junior Parkway and Exit 8B: 3rd Street (near Des Moines)Normal
+I-280  I-280, between Exit 290: I-80; US 6 (Davenport) and Exit 8: IA 22; Rockingham Road (Buffalo)Normal
+       I-280, between Exit 8: IA 22; Rockingham Road (Buffalo) and Exit 11 Centennial Expressway (1 mile east of the Davenport area)Normal
+I-380  I-380, between Exit 25: Boyson Road (Cedar Rapids) and Exit 43: IA 150 (near Urbana)Normal
+       I-380, between Exit 16: US 30; US 151 and US 218 and Exit 17: 33rd Avenue (Cedar Rapids)Normal
+       I-380, between Exit 43: IA 150 (near Urbana) and Exit 62: County Road D38 (1 mile south of the Gilbertville area)Normal
+       I-380, between Exit 17: 33rd Avenue and Exit 21: H Avenue and J Avenue (near Cedar Rapids)Normal
+       I-380, between Exit 21: H Avenue and J Avenue and Exit 25: Boyson Road (near Cedar Rapids)Normal
+       I-380, between Exit 239: I-80; US 218; IA 27 (Coralville) and Exit 10: County Road F12 (near Cedar Rapids)Normal
+       I-380, between Exit 10: County Road F12 and Exit 16: US 30; US 151 and US 218 (near Cedar Rapids)Normal
+       I-380, between Exit 62: County Road D38 (1 mile south of the Gilbertville area) and Exit 73: US 218; I-380 Ends (Evansdale)Normal
+I-480  I-480, between US 6; the Missouri River bridge and Exit 53B: I-29; US 6 (Council Bluffs)Normal
+I-680  I-680, between Exit 71: I-29 and Exit 21: County Road L34 (10 to 18 miles east of the Crescent exit)Normal
+       I-680, between Exit 21: County Road L34 and Exit 28: IA 191 (18 to 25 miles east of the Crescent exit)Normal
+       I-680, between Exit 28: IA 191 and Exit 27: I-80 (25 to 26 miles east of the Crescent exit)Normal
+       I-680, between Mormon Bridge (3 miles west of the Crescent area) and Exit 61: I-29; Old Mormon Bridge Road (near Crescent)Normal
 
 ********************************** US Routes **********************************
 
-US 6   I-29 to CR L 55                         Normal
-       CR L 55 to CR L 66                      Normal
-       CR L 66 to US 59 S                      Normal
-       US 59 S to CR M 47 S                    Normal
-       CR M 47 S to IA 48                      Normal
-       IA 48 to CR M 56 S                      Normal
-       CR M 56 S to US 71                      Normal
-       US 71 to I-80                           Normal
-       I-80 to US 169                          Normal
-       US 169 to I-35/80                       Normal
-       I-35/80 to I-235                        Normal
-       I-235 to I-80                           Normal
-       IA 14 to IA 224                         Normal
-       IA 224 to IA 146                        Normal
-       IA 146 to US 63 South                   Normal
-       IA 146 to IA 21 North                   Normal
-       IA 21 N to IA 212                       Normal
-       IA 212 to I-380                         Normal
-       I-380 to CR X 14                        Normal
-       CR X 14 to IA 70                        Normal
-       IA 70 to I-80                           Normal
-US 18  South Dakota to US 75                   Normal
-       US 75 to US 59                          Normal
-       US 59 to US 71                          Normal
-       US 71 to Palo Alto/Kossuth              Normal
-       Palo Alto/Kossuth to US 169             Normal
-       US 169 to US 69                         Normal
-       US 69 to I-35                           Normal
-       I-35 to US 65                           Normal
-       US 65 to US-218                         Normal
-       US-218 to US 63                         Normal
-       US 63 to US 52                          Normal
-       US 52 to Wisconsin                      Normal
-US 20  I-29 to US 75                           Normal
-       US 75 to IA 140                         Normal
-       IA 140 to IA 31                         Normal
-       IA 31 to US 59 N                        Normal
-       US 59 N to IA 110                       Normal
-       IA 110 to US 71 S                       Normal
-       US 71 S to IA 196                       Normal
-       IA 196 to SacCalhoun                    Normal
-       SacCalhoun to IA 4                      Normal
-       IA 4 to CR P 21                         Normal
-       CR P 21 to US 169                       Normal
-       US 169 to CR P 73                       Normal
-       CR P 73 to IA 17 N                      Normal
-       IA 17 N to IA 17 S                      Normal
-       IA 17 S to US 69                        Normal
-       US 69 to I-35                           Normal
-       I-35 to CR S 27                         Normal
-       CR S 27 to US 65                        Normal
-       US 65 to CR S 56                        Normal
-       CR S 56 to IA 14                        Normal
-       IA 14 to CR T 55                        Normal
-       CR T 55 to IA 58                        Normal
-       IA 58 to US 218                         Normal
-       I-380 S to CR V 65                      Normal
-       CR V 65 to IA 150                       Normal
-       IA 150 to IA 187                        Normal
-       IA 187 to IA 13                         Normal
-       IA 13 to IA 38                          Normal
-       IA 38 to IA 136                         Normal
-       IA 136 to CR Y 17                       Normal
-       CR Y 17 to IA 32                        Normal
-       IA 32 to US 52                          Normal
-US 30  Nebraska to I-29                        Normal
-       I-29 to Harrison/Crawford               Normal
-       Harrison/Crawford to US 59              Normal
-       US 59 to US 71                          Normal
-       US 71 to Carroll/Greene                 Normal
-       Carroll/Greene to Greene/Boone          Normal
-       Greene/Boone to US 169                  Normal
-       US 169 to I-35                          Normal
-       I-35 to US 65                           Normal
-       US 65 to IA 14                          Normal
-       IA 14 to Marshall/Tama                  Normal
-       Marshall/Tama to US 63                  Normal
-       US 63 to US-218                         Normal
-       US-218 to I-380                         Normal
-       I-380 to Hwy 38                         Normal
-       Hwy 38 to US 61                         Normal
-       US 61 to US 67                          Normal
-US 34  I-29 to US 275                          Normal
-       US 275 to US 59                         Normal
-       US 59 to US 71                          Normal
-       US 71 to Adams/Union                    Normal
-       Adams/Union to US 169                   Normal
-       US 169 to I-35                          Normal
-       I-35 to US 69                           Normal
-       US 69 to US 65                          Normal
-       US 65 to Lucas/Monroe                   Normal
-       Lucas/Monroe to US 63                   Normal
-       US 63 to US-218                         Normal
-       US-218 to US 61                         Normal
-       US 61 to Illinois                       Normal
-US 52  Illinois to Jackson/Dubuque             Normal
-       Jackson/Dubuque to US 20                Normal
-       US 20 to US 18                          Normal
-       US 18 to Minnesota                      Normal
-US 59  Missouri State Line to IA 2             Normal
-       IA 2 to CR J 18                         Normal
-       CR J 18 to US 34                        Normal
-       US 34 to IA 92                          Normal
-       IA 92 to US 6 West                      Normal
-       US 6 East to CR G 30                    Normal
-       CR G 30 to I-80                         Normal
-       I-80 to IA 44                           Normal
-       IA 44 to IA 37                          Normal
-       IA 37 to IA 141 East                    Normal
-       IA 141 East to US 30 West               Normal
-       US 30 East to IA 141 West               Normal
-       IA 141 West to CR E 16                  Normal
-       CR E 16 to IA 175                       Normal
-       IA 175 to US 20 East                    Normal
-       US 20 West to IA 31                     Normal
-       IA 31 to IA 3                           Normal
-       IA 3 to IA 10                           Normal
-       IA 10 to US 18 East                     Normal
-       US 18 West to Minnesota State Line      Normal
-US 61  Missouri to US 218                      Normal
-       US 218 to US 34                         Normal
-       US 34 to Louisa/Muscatine               Normal
-       Louisa/Muscatine to I-80                Normal
-       I-80 to US 30                           Normal
-       US 30 to Jackson/Dubuque                Normal
-       Jackson/Dubuque to US 52                Normal
-US 63  Missouri State Line to IA 2             Normal
-       IA 2 to CR J 15                         Normal
-       CR J 15 to US 34 West                   Normal
-       US 34 East to CR T 67                   Normal
-       CR T 67 to IA 137                       Normal
-       IA 137 to IA 163                        Normal
-       IA 163 to IA 92                         Normal
-       IA 92 to IA 146                         Normal
-       IA 146 to CR G 17                       Normal
-       CR G 17 to IA 85                        Normal
-       IA 85 to I-80                           Normal
-       I-80 to US 6 East                       Normal
-       US 6 West to CR E 69                    Normal
-       CR E 69 to US 30                        Normal
-       US 30 to IA 96                          Normal
-       IA 96 to CR D 65                        Normal
-       CR D 65 to IA 175                       Normal
-       IA 175 to US 20                         Normal
-       US 20 to US 218                         Normal
-       US 218 to CR C 57                       Normal
-       CR C 57 to IA 3                         Normal
-       IA 3 to IA 93                           Normal
-       IA 93 to CR V 5C                        Normal
-       CR V 5C to US 18 East                   Normal
-       US 18 West to CR B 22                   Normal
-       CR B 22 to IA 9                         Normal
-       IA 9 to Minnesota State Line            Normal
-US 65  Missouri to US 34                       Normal
-       US 34 to US 69 S                        Normal
-       US 69 S to I-80                         Normal
-       I-80 to US 30                           Normal
-       US 30 to Story/Hardin                   Normal
-       Story/Hardin to US 20                   Normal
-       US 20 to US 18                          Normal
-       US 18 to Minnesota                      Normal
-US 67  I-80 to US 30 W                         Normal
-       US 30 to US 52                          Normal
-US 69  Missouri to I-35                        Normal
-       I-35 to US 34                           Normal
-       US 34 to US 65                          Normal
-       US 65 to I-235                          Normal
-       I-235 to I-35                           Normal
-       I-35 to US 30                           Normal
-       US 30 to Story/Hamilton                 Normal
-       Story/Hamilton to US 20                 Normal
-       US 20 to US 18                          Normal
-       US 18 to Minnesota                      Normal
-US 71  Missouri Line to IA 2                   Normal
-       IA 2 to US 34                           Normal
-       US 34 to IA 92                          Normal
-       IA 92 to US 6                           Normal
-       I-80 to IA 44                           Normal
-       IA 44 to IA 141                         Normal
-       IA 141 to US 30                         Normal
-       US 30 to IA 175 E                       Normal
-       IA 175 E to IA 175 W                    Normal
-       IA 175 W to US 20 W                     Normal
-       US 20 W to IA 3                         Normal
-       IA 3 to IA 10 W                         Normal
-       IA 10 W to US 18 E                      Normal
-       US 18 E to IA 86                        Normal
-       IA 86 to Minnesota Line                 Normal
-US 75  Nebraska to IA 60                       Normal
-       IA 60 to US 18                          Normal
-       US 18 to Minnesota                      Normal
-US 151 I-80 to US 6                            Normal
-       US 6 to CR E 66                         Normal
-       CR E 66 to US 30 West                   Normal
-       US 30 East to IA 100                    Normal
-       IA 100 to IA 1                          Normal
-       IA 1 to IA 38                           Normal
-       IA 38 to IA 136                         Normal
-       IA 136 to CR Y31                        Normal
-       CR Y 31 to US 61                        Normal
-US 169 Missouri to US 34                       Normal
-       US 34 to I-80                           Normal
-       I-80 to US 30                           Normal
-       US 30 to Boone/Webster                  Normal
-       Boone/Webster to US 20                  Normal
-       US 20 to US 18                          Normal
-       US 18 to Minnesota                      Normal
-US 218 US 61 to US 34                          Normal
-       US 34 to Washington/Johnson             Normal
-       Washington/Johnson to I-80              Normal
-       US 30 to Benton/Black Hawk              Normal
-       Benton/Black Hawk to US 20              Normal
-       US 20 to US 18                          Normal
-       US 18 to Minnesota                      Normal
-US 275 Missouri to US 34                       Normal
-       Nebraska State Line to I-29             Normal
+US 6   US 6, between I-29; I-480 and IA 192 (Council Bluffs)Normal
+       US 6, between IA 192 and I-80 (near Council Bluffs)Normal
+       US 6, between I-80 and County Road L52 (4 miles east of the Council Bluffs area)Normal
+       US 6, between I-80; US 169 (De Soto) and US 169 (Adel)Normal
+       US 6, between I-80 and IA 28 (Clive)    Normal
+       US 6, between Exit 83: US 65 and I-80; US 65 (near Altoona)Normal
+       US 6, between IA 14 (near Newton) and IA 224 (near Kellogg)Normal
+       US 6, between IA 224 (near Kellogg) and IA 146 (Grinnell)Normal
+       US 6, between US 63 (4 miles west of the Brooklyn area) and IA 21 (2 miles west of the Victor area)Normal
+       US 6, between County Road V36 (near Victor) and US 151 (3 miles west of the Oxford area)Normal
+       US 6, between County Road X34 (near West Liberty) and County Road X46 (Atalissa)Normal
+       US 6, between I-280 and US 61 (near Davenport)Normal
+       US 6, between IA 192 and IA 192 (near Council Bluffs)Normal
+       US 6, between County Road L52 (4 miles east of the Council Bluffs area) and County Road L66 (5 miles west of the Oakland area)Normal
+       US 6, between US 169 (Adel) and I-80 (near Clive)Normal
+       US 6, between IA 146 (Grinnell) and US 63 (4 miles west of the Brooklyn area)Normal
+       US 6, between IA 21 (2 miles west of the Victor area) and County Road V36 (near Victor)Normal
+       US 6, between County Road X46 (Atalissa) and IA 38 (near Wilton)Normal
+       US 6, between I-280 and US 61 (near Davenport)Normal
+       US 6, between County Road L66 (5 miles west of the Oakland area) and US 59 (near Oakland)Normal
+       US 6, between County Road R16 and I-80 (near Clive)Normal
+       US 6, between IA 38 and I-80; County Road X64 (1 mile east of the Wilton area)Normal
+       US 6, between US 61 (Davenport) and I-74 (Bettendorf)Normal
+       US 6, between US 59 and US 59 (near Oakland)Normal
+       US 6, between US 59 (Oakland) and County Road M47 (6 miles west of the Lewis area)Normal
+       US 6, between US 151 (3 miles west of the Oxford area) and IA 965 (Coralville)Normal
+       US 6, between County Road M47 and IA 48 (1 to 6 miles west of the Lewis area)Normal
+       US 6, between IA 965 (Coralville) and County Road X14 (near Iowa City)Normal
+       US 6, between IA 48 (1 mile west of the Lewis area) and I-80; US 71 (6 miles east of the Atlantic area)Normal
+       US 6, between IA 1 (near Iowa City) and IA 70 (near West Liberty)Normal
+US 18  US 18, between the South Dakota State Line (3 miles west of the Inwood area) and County Road K42 (near Rock Valley)Normal
+       US 18, between County Road R70 and I-35; IA 122 (near Clear Lake)Normal
+       US 18, between County Road V14 (near Ionia) and US 63; IA 24 (near New Hampton)Normal
+       US 18, between County Road K24 (near Rock Valley) and US 75 (1 mile west of the Hull area)Normal
+       US 18, between IA 15 (near Whittemore) and US 169 (Algona)Normal
+       US 18, between IA 17 (near Wesley) and County Road R70 (near Garner)Normal
+       US 18, between County Road T26 (Rudd) and US 218; County Road T44 (near Floyd)Normal
+       US 18, between US 63; IA 24 and US 63; IA 346 (3 miles east of the New Hampton area)Normal
+       US 18, between County Road V68 (3 miles west of the Hawkeye area) and IA 150 (West Union)Normal
+       US 18, between US 75 (1 mile west of the Hull area) and County Road K52 (Hull)Normal
+       US 18, between County Road K52 (Hull) and IA 60 (Sheldon)Normal
+       US 18, between County Road M12 (Hartley) and US 71; County Road B19 (near Spencer)Normal
+       US 18, between US 169 (Algona) and IA 17 (near Wesley)Normal
+       US 18, between US 69 (near Garner) and I-35; IA 122 (near Clear Lake)Normal
+       US 18, between I-35 (near Clear Lake) and US 65 (near Mason City)Normal
+       US 18, between US 218; County Road T44 (near Floyd) and US 218; County Road T64 (Charles City)Normal
+       US 18, between US 63; IA 346 (3 miles east of the New Hampton area) and County Road V68 (3 miles west of the Hawkeye area)Normal
+       US 18, between IA 150 (West Union) and IA 51 (Postville)Normal
+       US 18, between IA 60 (Sheldon) and US 59 (Sanborn)Normal
+       US 18, between US 71; County Road B19 (near Spencer) and County Road N28 (2 miles east of the Ruthven area)Normal
+       US 18, between US 65 (near Mason City) and County Road S70 (near Nora Springs)Normal
+       US 18, between County Road T66 (near Charles City) and County Road V14 (near Ionia)Normal
+       US 18, between IA 51 (Postville) and US 52 (3 miles east of the Monona area)Normal
+       US 18, between US 59 (Sanborn) and County Road M12 (Hartley)Normal
+       US 18, between County Road S70 (near Nora Springs) and County Road T26 (Rudd)Normal
+       US 18, between US 52 (3 miles east of the Monona area) and the Mississippi River bridge (near Mcgregor)Normal
+       US 18, between County Road N28 (2 miles east of the Ruthven area) and IA 4 (1 mile west of the Emmetsburg area)Normal
+       US 18, between IA 4 (1 mile west of the Emmetsburg area) and County Road N60 (near Cylinder)Normal
+       US 18, between County Road N60 (near Cylinder) and IA 15 (near Whittemore)Normal
+US 20  US 20, between IA 140; County Road K64 (near Moville) and IA 31 (Correctionville)Normal
+       US 20, between County Road M25 (near Galva) and IA 110 (near Schaller)Normal
+       US 20, between Exit 136: IA 17; County Road R21 (1 mile west of the Webster City area) and Exit 140: IA 17 (Webster City)Normal
+       US 20, between Exit 142: I-35 and Exit 155: County Road R77 (3 to 5 miles east of the Blairsburg area)Normal
+       US 20, between Exit 215: County Road T55 (Dike) and Exit 224: IA 58; Hudson Road (Cedar Falls)Normal
+       US 20, between Exit 308: County Road Y21 (near Centralia) and IA 32 (Asbury)Normal
+       US 20, between Exit 1B: I-129; I-29; US 75 and Exit 1: South Lakeport Street (Sioux City)Normal
+       US 20, between IA 31 (Correctionville) and County Road L51 (near Cushing)Normal
+       US 20, between IA 110 (near Schaller) and Exit 71: US 71 (near Early)Normal
+       US 20, between Exit 140: IA 17 and Exit 145: R38 (2 miles east of the Webster City area)Normal
+       US 20, between Exit 155: County Road R77 (5 miles east of the Blairsburg area) and Exit 162: County Roads S27 and D38 (near Buckeye)Normal
+       US 20, between Exit 224: IA 58; Hudson Road (Cedar Falls) and Exit 71A: I-380; US 218; US 218 (Evansdale)Normal
+       US 20, between Exit 245: County Road V65 (near Jesup) and Exit 252: 20th Avenue Southwest also known as Iowa Avenue (near Independence)Normal
+       US 20, between County Road X47 (near Dyersville) and Exit 300: County Road Y13 (Farley)Normal
+       US 20, between IA 32 (Asbury) and the Mississippi River bridge (near Dubuque)Normal
+       US 20, between Exit 1: South Lakeport Street and Exit 2: Sunnybrook Drive (Sioux City)Normal
+       US 20, between County Road L43 (near Cushing) and US 59 (Holstein)Normal
+       US 20, between Exit 71: US 71 (near Early) and Exit 82: IA 196; County Road N14 (4 miles west of the Lytton area)Normal
+       US 20, between Exit 145: R38 (2 miles east of the Webster City area) and Exit 149: US 69 (near Blairsburg)Normal
+       US 20, between Exit 162: County Roads S27 and D38 (near Buckeye) and Exit 168: US 65 (1 mile west of the Owasa area)Normal
+       US 20, between Exit 65: I-380; IA 27 (near Raymond) and Exit 245: County Road V65 (near Jesup)Normal
+       US 20, between Exit 252: 20th Avenue Southwest also known as Iowa Avenue and Exit 254: IA 150; 3rd Avenue Southeast (near Independence)Normal
+       US 20, between Exit 300: County Road Y13 (Farley) and Exit 308: County Road Y21 (near Centralia)Normal
+       US 20, between Exit 2: Sunnybrook Drive and Exit 3: Morningside Avenue (Sioux City)Normal
+       US 20, between US 59 (Holstein) and County Road M25 (near Galva)Normal
+       US 20, between Exit 149: US 69 and Exit 142: I-35 (3 miles east of the Blairsburg area)Normal
+       US 20, between Exit 168: US 65 (1 mile west of the Owasa area) and Exit 175: County Road D35 (2 miles east of the Owasa area)Normal
+       US 20, between Exit 181: County Road S56 (1 mile east of the Steamboat Rock area) and Exit 208: IA 14 (5 miles west of the Dike area)Normal
+       US 20, between Exit 254: IA 150; 3rd Avenue Southeast (Independence) and Exit 261: County Road W40 (near Winthrop)Normal
+       US 20, between Exit 3: Morningside Avenue and Exit 4: US 75; IA 12; Gordon Drive (near Sioux City)Normal
+       US 20, between Exit 82: IA 196; County Road N14 (4 miles west of the Lytton area) and Exit 96: IA 4 (8 miles east of the Lytton area)Normal
+       US 20, between Exit 116: County Road D20 (near Moorland) and Exit 121: US 169 (near Fort Dodge)Normal
+       US 20, between Exit 175: County Road D35 (2 miles east of the Owasa area) and Exit 181: County Road S56 (1 mile east of the Steamboat Rock area)Normal
+       US 20, between Exit 208: IA 14 (5 miles west of the Dike area) and Exit 215: County Road T55 (Dike)Normal
+       US 20, between Exit 261: County Road W40 (near Winthrop) and Exit 266: IA 187 (1 mile west of the Masonville area)Normal
+       US 20, between Exit 4: US 75; IA 12; Gordon Drive (near Sioux City) and IA 140; County Road K64 (near Moville)Normal
+       US 20, between Exit 96: IA 4 (8 miles east of the Lytton area) and County Road P29 (2 miles east of the Knierim area)Normal
+       US 20, between Exit 121: US 169 (near Fort Dodge) and Exit 124: County Road P59 (near Otho)Normal
+       US 20, between Exit 266: IA 187 (1 mile west of the Masonville area) and Exit 275: IA 13 (near Manchester)Normal
+       US 20, between County Road P29 (2 miles east of the Knierim area) and Exit 116: County Road D20 (near Moorland)Normal
+       US 20, between Exit 124: County Road P59 (near Otho) and Exit 136: IA 17; County Road R21 (1 mile west of the Webster City area)Normal
+       US 20, between Exit 275: IA 13 and Exit 277: County Road D5X also known as Jefferson Road (near Manchester)Normal
+       US 20, between Exit 277: County Road D5X also known as Jefferson Road (near Manchester) and Exit 282: IA 38 (near Delaware)Normal
+       US 20, between Exit 282: IA 38 (near Delaware) and Exit 285: County Road X35 (near Earlville)Normal
+       US 20, between Exit 285: County Road X35 (near Earlville) and Exit 294: IA 136 (near Dyersville)Normal
+US 30  US 30, between IA 37 (Dunlap) and County Road E52 (Arion)Normal
+       US 30, between County Road M64 (Westside) and US 71 (Carroll)Normal
+       US 30, between IA 930 and US 69 (near Ames)Normal
+       US 30, between IA 21 (4 miles east of the Vining area) and US 218 (3 miles west of the Newhall area)Normal
+       US 30, between County Road W42 and I-380 (near Cedar Rapids)Normal
+       US 30, between IA 1 (Mount Vernon) and County Road X40 (near Mechanicsville)Normal
+       US 30, between County Road Y4E (near Wheatland) and US 61 (De Witt)Normal
+       US 30, between IA 37 (Arion) and US 59 (Denison)Normal
+       US 30, between US 71 (Carroll) and County Road N41 (Glidden)Normal
+       US 30, between R38 and I-35 (near Ames) Normal
+       US 30, between US 218 (3 miles west of the Newhall area) and County Road W42 (near Cedar Rapids)Normal
+       US 30, between I-380 (Cedar Rapids) and US 151; IA 13 (near Bertram)Normal
+       US 30, between County Road X40 (near Mechanicsville) and IA 38 (Stanwood)Normal
+       US 30, between US 61 and US 61 (De Witt)Normal
+       US 30, between US 59 (Denison) and County Road M64 (near Vail)Normal
+       US 30, between I-35 (near Ames) and County Road S14 (Nevada)Normal
+       US 30, between County Road S52 (near State Center) and Exit 179: IA 330 (2 miles west of the Marshalltown area)Normal
+       US 30, between US 151; IA 13 (near Bertram) and IA 1 (Mount Vernon)Normal
+       US 30, between IA 38 (Stanwood) and County Road Y14 (near Clarence)Normal
+       US 30, between US 61 (De Witt) and County Road Z36 (near Clinton)Normal
+       US 30, between US 59 (near Vail) and County Road M64 (Westside)Normal
+       US 30, between County Road S14 (Nevada) and US 65 (Colo)Normal
+       US 30, between Exit 179: IA 330 (2 miles west of the Marshalltown area) and Exit 182: Highland Acres Road; Oaks Avenue (near Marshalltown)Normal
+       US 30, between IA 38 (near Clarence) and County Road Y14 (near Lowden)Normal
+       US 30, between County Road Z36 (near Clinton) and US 67 (Camanche)Normal
+       US 30, between US 169 (near Beaver) and US 169 (Ogden)Normal
+       US 30, between US 65 (Colo) and County Road S62 (near State Center)Normal
+       US 30, between Exit 182: Highland Acres Road; Oaks Avenue and County Road T31 (near Marshalltown)Normal
+       US 30, between Exit 192: IA 146; County Road T37 (near Le Grand) and Exit 202: US 63 (near Tama)Normal
+       US 30, between County Road Y14 (near Lowden) and County Road Y4E (near Wheatland)Normal
+       US 30, between US 67 (Camanche) and the Mississippi River bridge (near Clinton)Normal
+       US 30, between the Missouri River bridge (7 miles west of the Missouri Valley area) and I-29 (Missouri Valley)Normal
+       US 30, between County Road N41 (Glidden) and IA 25; County Road N65 (near Scranton)Normal
+       US 30, between US 169 (Ogden) and IA 17 (near Boone)Normal
+       US 30, between Exit 186: South 18th Avenue (near Marshalltown) and County Road T47 (near Le Grand)Normal
+       US 30, between Exit 202: US 63 and Exit 204: Business US 30; L Avenue (near Tama)Normal
+       US 30, between I-29 (Missouri Valley) and IA 127 (Logan)Normal
+       US 30, between IA 25; County Road N65 (near Scranton) and IA 4 (Jefferson)Normal
+       US 30, between IA 17 (near Boone) and IA 930 (near Ames)Normal
+       US 30, between Exit 204: Business US 30; L Avenue (near Tama) and IA 21 (4 miles east of the Vining area)Normal
+       US 30, between IA 127 (Logan) and IA 44 (2 miles west of the Woodbine area)Normal
+       US 30, between IA 4 (Jefferson) and IA 144 (Grand Junction)Normal
+       US 30, between IA 44 (2 miles west of the Woodbine area) and IA 37 (Dunlap)Normal
+       US 30, between IA 144 (Grand Junction) and US 169 (near Beaver)Normal
+US 34  US 34, between US 59 (near Emerson) and IA 48 (near Red Oak)Normal
+       US 34, between US 71 (4 miles east of the Stanton area) and Exit 62: IA 148 (near Corning)Normal
+       US 34, between County Road P64 (near Thayer) and I-35 (Osceola)Normal
+       US 34, between County Road T61 and US 63 (near Ottumwa)Normal
+       US 34, between IA 16; County Road V43 (2 miles east of the Agency area) and County Road V63 (near Batavia)Normal
+       US 34, between Exit 244: County Road X23 (near New London) and Exit 255 (near Middletown)Normal
+       US 34, between IA 48 (near Red Oak) and US 71 (4 miles east of the Stanton area)Normal
+       US 34, between Exit 62: IA 148 and County Road N64 (7 miles east of the Corning area)Normal
+       US 34, between I-35 and US 69 (Osceola) Normal
+       US 34, between US 63 and Exit 191: US 63 (Ottumwa)Normal
+       US 34, between IA 16; County Road V43 (near Batavia) and Exit 212: IA 1 (9 miles west of the Lockridge area)Normal
+       US 34, between Exit 255 (near Middletown) and Exit 258: County Road X40 (near West Burlington)Normal
+       US 34, between County Road N61 (7 miles east of the Corning area) and IA 25 (5 miles west of the Creston area)Normal
+       US 34, between US 69 (Osceola) and US 65 (near Lucas)Normal
+       US 34, between US 65 (near Lucas) and IA 14 (Chariton)Normal
+       US 34, between US 63 (Ottumwa) and County Road V37 (near Agency)Normal
+       US 34, between Exit 212: IA 1 (9 miles west of the Lockridge area) and County Road W40 (near Lockridge)Normal
+       US 34, between County Road W40 (near Lockridge) and Exit 46: US 218; IA 27 (near Mount Pleasant)Normal
+       US 34, between Exit 258: County Road X40 (near West Burlington) and Exit 259: Mount Pleasant Street (Burlington)Normal
+       US 34, between Plattsmouth Bridge (2 miles west of the Pacific Junction area) and I-29 (near Pacific Junction)Normal
+       US 34, between IA 25 (5 miles west of the Creston area) and IA 25 (Creston)Normal
+       US 34, between IA 14 (Chariton) and County Road S70 (near Melrose)Normal
+       US 34, between County Road S70 (near Melrose) and IA 5 (Albia)Normal
+       US 34, between County Road V37 and IA 16; County Road V43 (2 miles east of the Agency area)Normal
+       US 34, between Exit 46: US 218; IA 27 (near Mount Pleasant) and County Road X31 (near New London)Normal
+       US 34, between Exit 259: Mount Pleasant Street (Burlington) and Exit 261: US 61 (West Burlington)Normal
+       US 34, between I-29 (near Pacific Junction) and US 275 (1 mile east of the Glenwood area)Normal
+       US 34, between IA 25 (Creston) and US 169 (Afton)Normal
+       US 34, between IA 5 and County Road T61 (6 miles east of the Albia area)Normal
+       US 34, between Exit 261: US 61 (West Burlington) and Exit 262B: Central Avenue (Burlington)Normal
+       US 34, between US 275 (1 mile east of the Glenwood area) and US 59 (near Emerson)Normal
+       US 34, between US 169 (Afton) and County Road P64 (near Thayer)Normal
+       US 34, between County Road T61 (6 miles east of the Albia area) and US 63 (near Ottumwa)Normal
+       US 34, between Exit 262B: Central Avenue and the Mississippi River bridge (Burlington)Normal
+US 52  US 52, between IA 64; the Mississippi River bridge and US 67 (near Sabula)Normal
+       US 52, between US 67 (near Sabula) and IA 62 (Bellevue)Normal
+       US 52, between IA 62 (Bellevue) and US 61 (near Dubuque)Normal
+       US 52, between County Road Y21 (near Rickardsville) and IA 136; IA 3 (Luxemburg)Normal
+       US 52, between US 61 and IA 3 (near Dubuque)Normal
+       US 52, between IA 136; IA 3 (Luxemburg) and County Road X47 (near Guttenberg)Normal
+       US 52, between IA 32; County Road Y35 (near Dubuque) and County Road Y17 (near Rickardsville)Normal
+       US 52, between County Road C43 (near Guttenberg) and IA 128 (near Garnavillo)Normal
+       US 52, between IA 128 and US 18 (8 miles north of the Garnavillo area)Normal
+       US 52, between US 18 (near Postville) and IA 150; IA 24 (Calmar)Normal
+       US 52, between IA 150; IA 24 (Calmar) and IA 9 (near Decorah)Normal
+       US 52, between County Road B16 and County Road W34 (near Decorah)Normal
+       US 52, between IA 9 and the Minnesota Border (11 miles north of the Decorah area)Normal
+US 59  US 59, between IA 141 (near Denison) and County Road D54 (2 miles north of the Schleswig area)Normal
+       US 59, between County Road D54 (2 miles north of the Schleswig area) and IA 175 (near Ida Grove)Normal
+       US 59, between IA 175 (near Ida Grove) and US 20 (near Holstein)Normal
+       US 59, between IA 10 (3 miles north of the Calumet area) and County Road B24 (near Primghar)Normal
+       US 59, between US 20 (Holstein) and IA 31; County Road C63 (4 miles south of the Cherokee area)Normal
+       US 59, between IA 48 and County Road J18 (5 miles north of the Shenandoah area)Normal
+       US 59, between IA 31; County Road C63 (4 miles south of the Cherokee area) and IA 3 (near Cherokee)Normal
+       US 59, between County Road B48 (near Primghar) and US 18 (near Sanborn)Normal
+       US 59, between County Road J18 (5 miles north of the Shenandoah area) and US 34 (near Emerson)Normal
+       US 59, between County Road H12 (near Henderson) and IA 92 (near Carson)Normal
+       US 59, between US 6 (Oakland) and County Road G30 (near Hancock)Normal
+       US 59, between IA 44 (near Harlan) and IA 37; County Road F24 (1 mile south of the Defiance area)Normal
+       US 59, between IA 3 (near Cherokee) and IA 10 (near Calumet)Normal
+       US 59, between US 18 (Sanborn) and County Road A34 (3 miles north of the Melvin area)Normal
+       US 59, between the Missouri State Line (9 miles south of the Shenandoah area) and IA 2 (near Shenandoah)Normal
+       US 59, between US 34 (near Emerson) and County Road H12 (near Henderson)Normal
+       US 59, between IA 92 (near Carson) and US 6 (near Oakland)Normal
+       US 59, between County Road G30 (near Hancock) and IA 83 (Avoca)Normal
+       US 59, between IA 37; County Road F24 (1 mile south of the Defiance area) and IA 141 (3 miles north of the Defiance area)Normal
+       US 59, between IA 10 and IA 10 (3 miles north of the Calumet area)Normal
+       US 59, between County Road A34 and the Minnesota Border; County Road A10 (3 to 15 miles north of the Melvin area)Normal
+       US 59, between IA 2 and IA 48 (near Shenandoah)Normal
+       US 59, between IA 83 and I-80 (Avoca)   Normal
+       US 59, between IA 141 (3 miles north of the Defiance area) and US 30 (Denison)Normal
+       US 59, between I-80 (Avoca) and IA 44 (Harlan)Normal
+       US 59, between US 30 and IA 39 (Denison)Normal
+       US 59, between IA 44 and County Road F32 (near Harlan)Normal
+       US 59, between IA 39 and IA 141 (near Denison)Normal
+US 61  US 61, between County Road H40 (near Mediapolis) and IA 78; County Road H22 (3 miles north of the Mediapolis area)Normal
+       US 61, between IA 136 and IA 64 (Maquoketa)Normal
+       US 61, between IA 78; County Road H22 (3 miles north of the Mediapolis area) and IA 92; County Road G48 (near Grandview)Normal
+       US 61, between IA 64 and County Road E17 (4 miles north of the Maquoketa area)Normal
+       US 61, between County Road E17 (4 miles north of the Maquoketa area) and County Road D57 (near Zwingle)Normal
+       US 61, between County Road Y36 (near Blue Grass) and I-280 (Buffalo)Normal
+       US 61, between I-280 (Buffalo) and US 67 (near Davenport)Normal
+       US 61, between County Road F55 (Davenport) and US 30 (De Witt)Normal
+       US 61, between Exit 24: County Road X32 and Exit 27: Business 61; County Road J50 (near Fort Madison)Normal
+       US 61, between US 6 and County Road F55 (Davenport)Normal
+       US 61, between US 30 (De Witt) and IA 136 (near Maquoketa)Normal
+       US 61, between County Road D57 (near Zwingle) and US 52 (near Dubuque)Normal
+       US 61, between Exit 27: Business 61; County Road J50 and IA 16 (4 miles north of the Fort Madison area)Normal
+       US 61, between IA 136 and IA 64 (near Maquoketa)Normal
+       US 61, between US 52 and US 151; the Mississippi River bridge (near Dubuque)Normal
+       US 61, between IA 16 (4 miles north of the Fort Madison area) and US 34 (Burlington)Normal
+       US 61, between US 34 (Burlington) and County Road H40 (near Mediapolis)Normal
+       US 61, between IA 92; County Road G48 (near Grandview) and IA 92 (Muscatine)Normal
+       US 61, between US 136; the Missouri State Line and US 218 (near Keokuk)Normal
+       US 61, between County Road H40 and IA 78; County Road H22 (near Mediapolis)Normal
+       US 61, between IA 92 and IA 22 (near Muscatine)Normal
+       US 61, between US 218 (Keokuk) and US 218 (near Montrose)Normal
+       US 61, between IA 22 and IA 22; IA 38 (near Muscatine)Normal
+       US 61, between US 218 (near Montrose) and Exit 18: IA 2 (near Fort Madison)Normal
+       US 61, between IA 22; IA 38 (Muscatine) and County Road Y26 (5 miles south of the Blue Grass area)Normal
+       US 61, between Exit 18: IA 2 and Exit 22: County Road J40 (near Fort Madison)Normal
+       US 61, between County Road Y26 (5 miles south of the Blue Grass area) and County Road Y36 (near Blue Grass)Normal
+       US 61, between Exit 22: County Road J40 and Exit 24: County Road X32 (near Fort Madison)Normal
+US 63  US 63, between IA 137 (near Eddyville) and IA 163 (near Oskaloosa)Normal
+       US 63, between IA 163 and IA 92 (near Oskaloosa)Normal
+       US 63, between County Road C66 (near Waterloo) and IA 3 (near Denver)Normal
+       US 63, between IA 92 (Oskaloosa) and IA 146 (New Sharon)Normal
+       US 63, between IA 3 (near Denver) and IA 93 (4 miles south of the Frederika area)Normal
+       US 63, between County Road J37 (1 mile north of the Bloomfield area) and US 34 (Ottumwa)Normal
+       US 63, between IA 93 and IA 188 (1 to 4 miles south of the Frederika area)Normal
+       US 63, between IA 188 (1 mile south of the Frederika area) and US 18; IA 346 (4 miles north of the Frederika area)Normal
+       US 63, between the Missouri State Line and IA 2 (2 to 13 miles south of the Bloomfield area)Normal
+       US 63, between Exit 191 and Exit 36: County  Road H25 and East Alta Vista Avenue (near Ottumwa)Normal
+       US 63, between IA 146 (New Sharon) and County Road F46 (near Montezuma)Normal
+       US 63, between IA 8 (Traer) and IA 175 (3 miles south of the Hudson area)Normal
+       US 63, between US 18; IA 24 (near New Hampton) and IA 9 (3 miles south of the Lime Springs area)Normal
+       US 63, between IA 2 (2 miles south of the Bloomfield area) and IA 2 (Bloomfield)Normal
+       US 63, between Exit 36: County  Road H25 and East Alta Vista Avenue and IA 149 (near Ottumwa)Normal
+       US 63, between County Road V13 (near Montezuma) and I-80 (near Malcom)Normal
+       US 63, between IA 175 (3 miles south of the Hudson area) and IA 58 (near Hudson)Normal
+       US 63, between IA 9 (3 miles south of the Lime Springs area) and the Minnesota Border (near Chester)Normal
+       US 63, between IA 2 and County Road J15 (1 mile north of the Bloomfield area)Normal
+       US 63, between IA 149 (near Ottumwa) and IA 137 (near Eddyville)Normal
+       US 63, between I-80 and US 6 (near Malcom)Normal
+       US 63, between US 6; County Road F29 (2 miles north of the Malcom area) and County Road E69 (3 miles south of the Tama area)Normal
+       US 63, between County Road E69 (3 miles south of the Tama area) and US 30 (Tama)Normal
+       US 63, between US 30 (Tama) and IA 96 (4 miles south of the Traer area)Normal
+       US 63, between IA 58 (near Hudson) and US 20 (Cedar Falls)Normal
+       US 63, between IA 96 (4 miles south of the Traer area) and IA 8 (Traer)Normal
+       US 63, between US 20 (Cedar Falls) and County Road C66 (near Waterloo)Normal
+       US 63, between US 218 and County Road C66 (near Waterloo)Normal
+US 65  US 65, between Exit 79: IA 163; East University Avenue and I-80 (near Altoona)Normal
+       US 65, between I-80; US 6 (Altoona) and IA 117; IA 330 (4 miles south of the Collins area)Normal
+       US 65, between County Road J22 (near Humeston) and US 34 (Lucas)Normal
+       US 65, between County Road G76 (8 miles north of the Lucas area) and US 69; County Road G58 (1 mile south of the Indianola area)Normal
+       US 65, between IA 57; County Road S45 (1 mile north of the Iowa Falls area) and IA 3 (Hampton)Normal
+       US 65, between US 34 and County Road G76 (8 miles north of the Lucas area)Normal
+       US 65, between US 69; County Road G58 (1 mile south of the Indianola area) and IA 92 (Indianola)Normal
+       US 65, between IA 92 (near Indianola) and US 69; IA 5 (near Des Moines)Normal
+       US 65, between IA 3 (Hampton) and County Road B65 (near Sheffield)Normal
+       US 65, between County Road C23 (near Sheffield) and IA 122 (Mason City)Normal
+       US 65, between IA 9 (near Manly) and the Minnesota Border (1 mile north of the Northwood area)Normal
+       US 65, between IA 92 and County Road G24 (near Indianola)Normal
+       US 65, between US 69; IA 5 (near Des Moines) and Exit 72: IA 5 (near Carlisle)Normal
+       US 65, between IA 175 and IA 175 (3 miles north of the Hubbard area)Normal
+       US 65, between IA 122 (Mason City) and IA 9 (near Manly)Normal
+       US 65, between the Missouri State Line (near Lineville) and IA 2 (5 miles south of the Humeston area)Normal
+       US 65, between Exit 72: IA 5 (near Carlisle) and Exit 79: IA 163; East University Avenue (Altoona)Normal
+       US 65, between IA 175 (3 miles north of the Hubbard area) and US 20 (2 miles south of the Iowa Falls area)Normal
+       US 65, between IA 2 (5 miles south of the Humeston area) and County Road J22 (near Humeston)Normal
+       US 65, between US 20 (2 miles south of the Iowa Falls area) and IA 57; County Road S45 (1 mile north of the Iowa Falls area)Normal
+       US 65, between IA 117; IA 330 (4 miles south of the Collins area) and IA 210 (near Collins)Normal
+       US 65, between IA 210 (near Collins) and US 30 (Colo)Normal
+       US 65, between US 30 (Colo) and County Road E18 (near Zearing)Normal
+       US 65, between County Road E18 (near Zearing) and IA 175 (Hubbard)Normal
+US 67  US 67, between IA 136 and County Road E50 (3 miles north of the Clinton area)Normal
+       US 67, between County Road E50 (3 miles north of the Clinton area) and US 52 (near Sabula)Normal
+       US 67, between I-74 (Bettendorf) and County Road F33 (near Le Claire)Normal
+       US 67, between I-80 (near Le Claire) and County Road F33 (Princeton)Normal
+       US 67, between I-80 (Princeton) and US 30 (Camanche)Normal
+       US 67, between US 30 and IA 136 (Clinton)Normal
+       US 67, between IA 136 and County Road E50 (near Clinton)Normal
+US 69  US 69, between County Road C20 (near Belmond) and US 18 (Garner)Normal
+       US 69, between US 20 (near Blairsburg) and IA 3 (1 mile north of the Galt area)Normal
+       US 69, between US 18 (near Garner) and IA 9 (Forest City)Normal
+       US 69, between IA 3 (1 mile north of the Galt area) and County Road C20 (near Belmond)Normal
+       US 69, between IA 9 (Forest City) and IA 9 (near Leland)Normal
+       US 69, between IA 9 (near Leland) and the Minnesota Border (3 miles north of the Lake Mills area)Normal
+       US 69, between US 65; IA 5 and I-235 (near Des Moines)Normal
+       US 69, between IA 163 and US 6 (Des Moines)Normal
+       US 69, between the Missouri State Line (1 mile south of the Lamoni area) and IA 2 (Leon)Normal
+       US 69, between I-235 and IA 163 (Des Moines)Normal
+       US 69, between US 6 (Des Moines) and I-80 (near Ankeny)Normal
+       US 69, between IA 2 (Leon) and County Road J12 (near Van Wert)Normal
+       US 69, between US 34 and County Road R59 (7 miles north of the Osceola area)Normal
+       US 69, between IA 160 (Ankeny) and County Road F22 (near Alleman)Normal
+       US 69, between County Road J12 (near Van Wert) and US 34 (Osceola)Normal
+       US 69, between County Road R59 (7 miles north of the Osceola area) and US 65; County Road G58 (15 miles south of the Des Moines area)Normal
+       US 69, between I-80 and IA 160 (near Ankeny)Normal
+       US 69, between IA 175 (Jewell) and US 20 (near Blairsburg)Normal
+       US 69, between US 20 and County Road D20 (near Blairsburg)Normal
+       US 69, between County Road F22 (near Alleman) and IA 210 (near Huxley)Normal
+       US 69, between IA 210 (near Huxley) and County Road E23 (near Ames)Normal
+       US 69, between US 30 (near Ames) and County Road E18 (near Story City)Normal
+       US 69, between County Road E18 (near Story City) and IA 175 (Jewell)Normal
+US 71  US 71, between County Road G13 (near Grant) and US 6 (near Atlantic)Normal
+       US 71, between IA 141; County Road N18 and IA 141 (2 miles north of the Templeton area)Normal
+       US 71, between County Road G35 and US 6 (near Atlantic)Normal
+       US 71, between IA 141 (2 miles north of the Templeton area) and US 30 (Carroll)Normal
+       US 71, between IA 175 and County Road D59 (2 miles north of the Auburn area)Normal
+       US 71, between County Road B14 (near Fostoria) and IA 86 (near Arnolds Park)Normal
+       US 71, between I-80; US 6 (1 mile south of the Brayton area) and IA 44 (1 mile south of the Audubon area)Normal
+       US 71, between US 30 (Carroll) and IA 175 (Auburn)Normal
+       US 71, between County Road D59 (2 miles north of the Auburn area) and IA 196 (1 mile south of the Lake View area)Normal
+       US 71, between US 20 (near Early) and IA 7 (near Lakeside)Normal
+       US 71, between County Road C13 (near Sioux Rapids) and US 18 (Spencer)Normal
+       US 71, between IA 86 (near Arnolds Park) and IA 9 (Okoboji)Normal
+       US 71, between IA 44 (1 mile south of the Audubon area) and IA 141; County Road N18 (near Templeton)Normal
+       US 71, between IA 196 (1 mile south of the Lake View area) and IA 175 (3 miles north of the Wall Lake area)Normal
+       US 71, between IA 7 (near Lakeside) and IA 3 (3 miles south of the Rembrandt area)Normal
+       US 71, between US 18; County Road B19 (near Spencer) and County Road B14 (near Fostoria)Normal
+       US 71, between IA 9 (Okoboji) and IA 9 (3 miles north of the Spirit Lake area)Normal
+       US 71, between IA 175 (3 miles north of the Wall Lake area) and US 20 (near Early)Normal
+       US 71, between IA 3 (3 miles south of the Rembrandt area) and IA 10 (near Sioux Rapids)Normal
+       US 71, between IA 9 and the Minnesota Border (3 to 8 miles north of the Spirit Lake area)Normal
+       US 71, between the Missouri State Line (near Braddyville) and IA 2 (Clarinda)Normal
+       US 71, between IA 2 (Clarinda) and County Road J20 (near Hepburn)Normal
+       US 71, between County Road J20 (near Hepburn) and US 34 (1 mile north of the Villisca area)Normal
+       US 71, between US 34 (1 mile north of the Villisca area) and IA 92; County Road G53 (near Grant)Normal
+US 75  US 75, between County Road B46 (Sioux Center) and US 18 (3 miles north of the Sioux Center area)Normal
+       US 75, between County Road A44 (7 miles south of the Rock Rapids area) and IA 9 (Rock Rapids)Normal
+       US 75, between County Road C70 (near Hinton) and IA 3 (Le Mars)Normal
+       US 75, between US 18 (4 miles north of the Sioux Center area) and County Road A44 (7 miles south of the Rock Rapids area)Normal
+       US 75, between IA 9 and the Minnesota Border (3 miles north of the Rock Rapids area)Normal
+       US 75, between County Road C38 and IA 3 (near Le Mars)Normal
+       US 75, between US 20; IA 12 and IA 376 (near Sioux City)Normal
+       US 75, between IA 3 and IA 404; IA 60 (near Le Mars)Normal
+       US 75, between County Road D18 and IA 376 (near Sioux City)Normal
+       US 75, between IA 404; IA 60 (near Le Mars) and IA 10 (near Maurice)Normal
+       US 75, between County Road D18 and IA 376 (near Sioux City)Normal
+       US 75, between IA 10 (near Maurice) and County Road B30 (Sioux Center)Normal
+       US 75, between IA 376 (Sioux City) and County Road C38 (near Hinton)Normal
+US 77  US 77, between the Nebraska State Line and I-29; IA 12 (near Sioux City)Normal
+US 136 US 136, between US 61 and the Mississippi River bridge (near Keokuk)Normal
+US 151 US 151, between IA 220; County Road F22 (4 miles south of the Walford area) and County Road E66 (near Walford)Normal
+       US 151, between County Road E66 (near Walford) and US 30; IA 922 (near Cedar Rapids)Normal
+       US 151, between IA 13 (Marion) and County Road X20 (near Springville)Normal
+       US 151, between I-80; County Road W21 and US 6 (9 to 15 miles south of the Walford area)Normal
+       US 151, between County Road X20 (near Springville) and Exit 49: IA 1; County Road E34 (2 miles south of the Anamosa area)Normal
+       US 151, between Exit 49: IA 1; County Road E34 (2 miles south of the Anamosa area) and Exit 54: IA 64 (near Anamosa)Normal
+       US 151, between US 6 and IA 220; County Road F22 (4 to 7 miles south of the Walford area)Normal
+       US 151, between US 30; IA 13 (near Bertram) and IA 13 (Marion)Normal
+       US 151, between Exit 54: IA 64 (near Anamosa) and Exit 65: IA 38 (Monticello)Normal
+       US 151, between Exit 65: IA 38 (Monticello) and IA 136 (near Cascade)Normal
+       US 151, between IA 136 and County Road Y21 (4 miles north of the Cascade area)Normal
+       US 151, between County Road Y21 (4 miles north of the Cascade area) and US 61 (near Dubuque)Normal
+US 169 US 169, between the Missouri State Line (near Redding) and IA 2 (near Mount Ayr)Normal
+       US 169, between County Road E18 (near Boxholm) and IA 175; County Road P61 (near Dayton)Normal
+       US 169, between IA 3 (near Dakota City) and County Road C12 (8 miles south of the Algona area)Normal
+       US 169, between IA 2 (near Mount Ayr) and County Road J20 (near Tingley)Normal
+       US 169, between IA 44 (Minburn) and IA 141 (near Bouton)Normal
+       US 169, between IA 175; County Road P61 (near Dayton) and County Road D43 (3 miles south of the Otho area)Normal
+       US 169, between County Road C12 (8 miles south of the Algona area) and US 18 (Algona)Normal
+       US 169, between County Road A42 (near Bancroft) and IA 9 (near Lakota)Normal
+       US 169, between County Road J20 (near Tingley) and US 34 (Afton)Normal
+       US 169, between IA 141 (near Bouton) and US 30 (Ogden)Normal
+       US 169, between US 18 (Algona) and County Road A42 (near Bancroft)Normal
+       US 169, between IA 9 and the Minnesota Border (6 miles north of the Lakota area)Normal
+       US 169, between US 34 (near Thayer) and County Road G61 (near Lorimor)Normal
+       US 169, between US 34 (near Lorimor) and IA 92; County Road P71 (near Winterset)Normal
+       US 169, between IA 92; County Road P71 (near Winterset) and I-80; US 6 (De Soto)Normal
+       US 169, between IA 3 and County Road C29 (near Dakota City)Normal
+       US 169, between US 6 (Adel) and IA 141 (Minburn)Normal
+       US 169, between US 30 (4 miles north of Ogden) and County Road E18 (near Boxholm)Normal
+       US 169, between County Road D43 (3 miles south of the Otho area) and US 20 (near Fort Dodge)Normal
+       US 169, between US 20 and IA 7 (near Fort Dodge)Normal
+       US 169, between IA 7 (near Fort Dodge) and IA 3 (Dakota City)Normal
+US 218 US 218, between IA 16 (7 miles north of the Donnellson area) and US 34 (Mount Pleasant)Normal
+       US 218, between US 34 (near Mount Pleasant) and County Road G62 (near Olds)Normal
+       US 218, between IA 150 (Vinton) and IA 8 (6 miles south of the La Porte City area)Normal
+       US 218, between US 30 (11 miles south of the Vinton area) and IA 150 (Vinton)Normal
+       US 218, between IA 8 (6 miles south of the La Porte City area) and County Road D46 (La Porte City)Normal
+       US 218, between US 18; County Road T44 (near Floyd) and IA 9 (Osage)Normal
+       US 218, between IA 9 (Osage) and County Road A23 (Saint Ansgar)Normal
+       US 218, between IA 188 (near Plainfield) and IA 346 (Nashua)Normal
+       US 218, between County Road T30 and the Minnesota Border (7 miles north of the Saint Ansgar area)Normal
+       US 218, between IA 346 (Nashua) and US 18 (Charles City)Normal
+       US 218, between IA 116 and IA 3 (near Waverly)Normal
+       US 218, between IA 3 (near Waverly) and IA 188 (near Plainfield)Normal
+       US 218, between IA 22 (near Riverside) and Exit 239: I-380; I-80 (Coralville)Normal
+       US 218, between IA 27; IA 57 (near Cedar Falls) and IA 116 (near Waverly)Normal
+       US 218, between IA 92 (near Ainsworth) and IA 22 (near Riverside)Normal
+       US 218, between County Road D65 (La Porte City) and I-380; US 20 (Evansdale)Normal
+       US 218, between County Road H14 (near Olds) and County Road G62 (near Crawfordsville)Normal
+       US 218, between I-380 (Evansdale) and IA 27; IA 57 (Cedar Falls)Normal
+       US 218, between County Road G62 (near Crawfordsville) and IA 92 (near Ainsworth)Normal
+       US 218, between IA 27; IA 57 and County Road C57 (near Cedar Falls)Normal
+       US 218, between US 61 (near Montrose) and Exit 19: IA 27 (near Donnellson)Normal
+       US 218, between Exit 19: IA 27 and IA 2 (near Donnellson)Normal
+       US 218, between IA 2 and IA 16 (7 miles north of the Donnellson area)Normal
+US 275 US 275, between the Missouri State Line (near Hamburg) and IA 2 (near Sidney)Normal
+       US 275, between IA 2 (near Sidney) and County Road H40 (near Tabor)Normal
+       US 275, between County Road J18 (near Tabor) and US 34 (7 miles north of the Tabor area)Normal
+       US 275, between I-29; IA 92 and IA 92; the Missouri River bridge (near Council Bluffs)Normal
 
 ******************************** State Routes ********************************
 
-IA 1   IA 2 to IA 16                           Normal
-       IA 16 to US 34                          Normal
-       US 34 to CR H 17                        Normal
-       CR H 17 to IA 78                        Normal
-       IA 78 to IA 92                          Normal
-       IA 92 to CR G 36                        Normal
-       CR G 36 to IA 22                        Normal
-       IA 22 to US 218                         Normal
-       US 218 to I-80                          Normal
-       I-80 to US 30                           Normal
-       US 30 to US 151                         Normal
-IA 3   South Dakota State Line to CR K 22      Normal
-       CR K 22 to US 75                        Normal
-       US 75 to IA 140                         Normal
-       IA 140 to IA 143                        Normal
-       IA 143 to US 59                         Normal
-       US 59 to CR M 27                        Normal
-       CR M 27 to US 71                        Normal
-       US 71 to CR N 14                        Normal
-       CR N 14 to IA 4                         Normal
-       IA 4 to IA 15                           Normal
-       IA 15 to CR P 19                        Normal
-       CR P 19 to US 169                       Normal
-       US 169 to IA 17 North                   Normal
-       IA 17 North to US 69 South              Normal
-       US 69 North to CR S 13                  Normal
-       CR S 13 to I-35                         Normal
-       I-35 to US 65                           Normal
-       US 65 to CR T 16                        Normal
-       CR T 16 to IA 14                        Normal
-       IA 14 to IA 188                         Normal
-       IA 188 to US 218                        Normal
-       US 218 to US 63                         Normal
-       US 63 to CR V 49                        Normal
-       CR V 49 to V 62                         Normal
-       CR V 62 to IA 150 South                 Normal
-       IA 150 South to IA 187                  Normal
-       IA 187 to IA 13 South                   Normal
-       IA 13 to IA 38                          Normal
-       IA 38 to US 52 North                    Normal
-IA 4   IA 44 to IA 141                         Normal
-       IA 141 to US 30                         Normal
-       US 30 to IA 175                         Normal
-       IA 175 to IA 7                          Normal
-       IA 7 to IA 10                           Normal
-       IA 10 to US 18                          Normal
-       US 18 to IA 9                           Normal
-       IA 9 to Minnesota Line                  Normal
-IA 5   Missouri State Line to IA 2             Normal
-       IA 2 to CR J 18                         Normal
-       CR J 18 to US 34                        Normal
-       US 34 to CR T 23                        Normal
-       CR T 23 to IA 14                        Normal
-       IA 14 to IA 92                          Normal
-       IA 92 to IA 316                         Normal
-       IA 316 to US 65 Bypass                  Normal
-       US 65/69 to IA 28                       Normal
-       IA 28 to I-35                           Normal
-IA 9   Minnesota State Line to IA 182          Normal
-       IA 182 to US 75 North                   Normal
-       US 75 South to CR L14                   Normal
-       CR L14 to CR L26                        Normal
-       CR L26 to IA 60                         Normal
-       IA 60 to US 59                          Normal
-       US 59 to CR M 20                        Normal
-       CR M 20 to CR M 27                      Normal
-       CR M 27 to IA 86                        Normal
-       IA 86 to US 71 South                    Normal
-       US 71 North to IA 4                     Normal
-       IA 4 to CR N 52                         Normal
-       CR N 52 to IA 15                        Normal
-       IA 15 to US 169 South                   Normal
-       US 169 North to CR R 20                 Normal
-       CR R 20 to CR R 34                      Normal
-       CR R 34 to US 69 North                  Normal
-       US 69 South to CR S 14                  Normal
-       CR S 14 to I-35                         Normal
-       I-35 to US 65                           Normal
-       US 65 to CR S 70                        Normal
-       CR S 70 to US 218 North                 Normal
-       US 218 South to CR T 62                 Normal
-       CR T 62 to CR V 18                      Normal
-       CR V 18 to US 63                        Normal
-       US 63 to IA 139                         Normal
-       IA 139 to US 52                         Normal
-       US 52 to CR W4B                         Normal
-       CR W4B to IA 51                         Normal
-       IA 51 to IA 76                          Normal
-       IA 76 to Mississippi River Bridge       Normal
-IA 14  IA 2 to CR J 22                         Normal
-       CR J 22 to CR H 50                      Normal
-       CR H 50 to US 34                        Normal
-       US 34 to CR S 45                        Normal
-       CR S 45 to CR G 76                      Normal
-       CR G 76 to IA 5                         Normal
-       IA 5 to CR G 40                         Normal
-       CR G 40 to CR G28                       Normal
-       CR G 28 to IA 163                       Normal
-       IA 163 to F 62                          Normal
-       CR F 62 to I-80                         Normal
-       US 6 to CR F 17                         Normal
-       CR F 17 to IA 224                       Normal
-       IA 224 to CR E 67                       Normal
-       CR E 67 to US 30                        Normal
-       US 30 to IA 330                         Normal
-       IA 330 to CR D 67                       Normal
-       CR D 67 to IA 175 West                  Normal
-       IA 175 West to IA 175 East              Normal
-       IA 175 East to US 20                    Normal
-       US 20 to CR D 17                        Normal
-       CR D 17 to IA 57                        Normal
-       IA 57 to CR C 51                        Normal
-       CR C 51 to IA 3 East                    Normal
-       IA 3 West to CR C 23                    Normal
-       CR C 23 to CR B 60                      Normal
-       CR B 60 to CR T 47                      Normal
-       CR T 47 to US 18                        Normal
-IA 27  Missouri to US-218                      Normal
-IA 44  IA 4 to CR P 30                         Normal
-       CR P 30 to CR P 58                      Normal
-       CR P 58 to US 169                       Normal
-       US 169 to CR R 22                       Normal
-       CR R 22 to IA 141                       Normal
-IA 60  US 75 to US 18                          Normal
-       US 18 to Minnesota                      Normal
-IA 92  I-29 to CR L55                          Normal
-       CR L 55 to US 59                        Normal
-       US 59 to IA 48                          Normal
-       IA 48 to US 71 South                    Normal
-       US 71 North to IA 148                   Normal
-       IA 148 to CR N 51                       Normal
-       CR N 51 to IA 25                        Normal
-       IA 25 to CR P 28                        Normal
-       CR P 28 to CR P53                       Normal
-       CR P 28 to US 169 South                 Normal
-       US 169 North to I-35                    Normal
-       I-35 to US 65                           Normal
-       US 65 to CR S 31                        Normal
-       CR S 31 to IA 5 North                   Normal
-       IA 5 South to CR T 25                   Normal
-       CR T 25 to IA 163                       Normal
-       IA 163 to IA 23                         Normal
-       IA 23 to CR V 13                        Normal
-       CR V 13 to IA 21                        Normal
-       IA 21 to IA 149                         Normal
-       IA 149 to CR W 15                       Normal
-       CR W 15 to IA 1 North                   Normal
-       IA 1 South to US 218                    Normal
-       US 218 to IA 70                         Normal
-       IA 70 to US 61 South                    Normal
-       US 61 North to Illinois Line            Normal
-IA 141 I-29 to CR K 64                         Normal
-       CR K 64 to IA 31                        Normal
-       IA 31 to IA 175                         Normal
-       IA 175 to IA 183                        Normal
-       IA 183 to CR L 51                       Normal
-       CR L 51 to CR M 14                      Normal
-       CR M 14 to US 59 North                  Normal
-       US 59 South to CR M 56                  Normal
-       CR M 56 to CR M 68                      Normal
-       CR M 68 to US 71 South                  Normal
-       US 71 North to CR N 33                  Normal
-       CR N 33 to CR N 46                      Normal
-       CR N 46 to IA 25                        Normal
-       IA 25 to IA 4                           Normal
-       IA 4 to CR P 46                         Normal
-       CR P 46 to IA 169                       Normal
-       IA 169 to IA 210                        Normal
-       IA 210 to IA 17                         Normal
-       IA 17 to IA 44                          Normal
-       IA 44 to I-80                           Normal
-IA 150 US 218 to I-380                         Normal
-       I-380 to US 20                          Normal
-       US 20 to IA 281                         Normal
-       IA 281 to IA 3 East                     Normal
-       IA 3 West to IA 187                     Normal
-       IA 187 to IA 93                         Normal
-       IA 93 to US 18                          Normal
-       US 18 to US 52                          Normal
-IA 163 US 69 to US 65                          Normal
-       US 65 to CR S 27                        Normal
-       CR S 27 to IA 117                       Normal
-       IA 117 to IA 14                         Normal
-       IA 14 to CR G28                         Normal
-       CR G28 to IA 92                         Normal
-       IA 92 to US 63                          Normal
-IA 330 US 65 to CR S 52                        Normal
-       CR S 52 to US 30                        Normal
-       US 30 to CR E 29                        Normal
-       CR E 29 to IA 14                        Normal
+IA 1   IA 1, between IA 2 (2 miles south of the Keosauqua area) and County Road J40 (near Keosauqua)Normal
+       IA 1, between IA 78 (near Richland) and IA 78 (Brighton)Normal
+       IA 1, between IA 22 (Kalona) and US 6 (Iowa City)Normal
+       IA 1, between US 30 (Mount Vernon) and Exit 49: US 151 (1 mile north of the Martelle area)Normal
+       IA 1, between IA 78 (Brighton) and IA 92 (Washington)Normal
+       IA 1, between US 6 and I-80 (near Iowa City)Normal
+       IA 1, between IA 92 and IA 92; County Road 36 (near Washington)Normal
+       IA 1, between I-80 (Iowa City) and Ivanhoe Road (Solon)Normal
+       IA 1, between County Road J40 (near Keosauqua) and US 34 (near Fairfield)Normal
+       IA 1, between IA 92; County Road 36 (near Washington) and IA 22 (Kalona)Normal
+       IA 1, between County Road F8W (Solon) and US 30 (Mount Vernon)Normal
+       IA 1, between US 34 (near Fairfield) and IA 78 (near Richland)Normal
+IA 2   IA 2, between the Missouri River bridge and US 275; County Road J46 (5 to 15 miles west of the Sidney area)Normal
+       IA 2, between US 59 (near Shenandoah) and County Road M56 (near Yorktown)Normal
+       IA 2, between IA 25 (4 miles west of the Benton area) and US 169 (near Mount Ayr)Normal
+       IA 2, between County Road P68 (near Kellerton) and I-35 (near Decatur City)Normal
+       IA 2, between County Road S26 (near Corydon) and IA 5 (Centerville)Normal
+       IA 2, between IA 1 (5 miles east of the Cantril area) and County Road W40 (near Bonaparte)Normal
+       IA 2, between US 275 (near Sidney) and US 59 (near Shenandoah)Normal
+       IA 2, between County Road M56 (near Yorktown) and US 71 (Clarinda)Normal
+       IA 2, between US 169 (Mount Ayr) and County Road P68 (near Kellerton)Normal
+       IA 2, between I-35 (near Decatur City) and US 69 (Leon)Normal
+       IA 2, between IA 5 and IA 202 (8 miles east of the Centerville area)Normal
+       IA 2, between IA 202 (8 miles east of the Centerville area) and US 63 (5 miles west of Bloomfield)Normal
+       IA 2, between County Road W40 (near Bonaparte) and IA 81 (near Farmington)Normal
+       IA 2, between US 71 (near Clarinda) and County Road N26 (near New Market)Normal
+       IA 2, between US 69 (Leon) and US 65 (8 miles west of the Corydon area)Normal
+       IA 2, between US 63 (Bloomfield) and County Road V64 (Pulaski)Normal
+       IA 2, between IA 81 (near Farmington) and US 218 (Donnellson)Normal
+       IA 2, between County Road N26 (near New Market) and IA 148 (Bedford)Normal
+       IA 2, between US 65 and County Road S26 (8 miles west of the Corydon area)Normal
+       IA 2, between US 63 (Pulaski) and County Road V64 (near Cantril)Normal
+       IA 2, between US 218 (Donnellson) and US 61 (near Fort Madison)Normal
+       IA 2, between IA 148 and County Road N64 (6 miles east of the Bedford area)Normal
+       IA 2, between County Road V64 and IA 1 (5 miles east of the Cantril area)Normal
+       IA 2, between US 61 and the Mississippi River bridge (near Fort Madison)Normal
+       IA 2, between County Road N64 (6 miles east of the Bedford area) and IA 25 (4 miles west of the Benton area)Normal
+IA 3   IA 3, between the South Dakota State Line (near Westfield) and IA 12 (Akron)Normal
+       IA 3, between County Road K22 (5 miles west of the Brunsville area) and US 75 (near Le Mars)Normal
+       IA 3, between IA 143; County Road L36 (near Marcus) and US 59 (near Cherokee)Normal
+       IA 3, between County Road M44 (near Truesdale) and County Road N14 (near Albert City)Normal
+       IA 3, between County Road N14 (near Albert City) and County Road N41 (1 mile west of the Pocahontas area)Normal
+       IA 3, between US 169 (Dakota City) and County Road R45 (near Clarion)Normal
+       IA 3, between US 69 (2 miles west of the Rowan area) and US 65 (Hampton)Normal
+       IA 3, between County Road T16 (near Dumont) and IA 14 (Allison)Normal
+       IA 3, between County Road T55 (near Shell Rock) and US 63 (3 miles east of the Waverly area)Normal
+       IA 3, between County Road V62 (6 miles east of the Readlyn area) and IA 150 (Oelwein)Normal
+       IA 3, between IA 150 and County Road W33 (3 miles east of the Oelwein area)Normal
+       IA 3, between County Road W33 (3 miles east of the Oelwein area) and IA 13 (Strawberry Point)Normal
+       IA 3, between IA 13 (Strawberry Point) and C7X (near Edgewood)Normal
+       IA 3, between IA 38 (1 mile east of the Edgewood area) and US 52; IA 136 (Luxemburg)Normal
+       IA 3, between IA 12 (Akron) and County Road K22 (5 miles west of the Brunsville area)Normal
+       IA 3, between US 75 (near Le Mars) and IA 140; County Road L14 (Remsen)Normal
+       IA 3, between US 59 (near Cherokee) and County Road M27 (3 miles east of the Aurelia area)Normal
+       IA 3, between County Road N41 (1 mile west of the Pocahontas area) and IA 15; County Road N65 (3 miles west of the Gilmore City area)Normal
+       IA 3, between County Road R33 (near Clarion) and US 69 (2 miles west of the Rowan area)Normal
+       IA 3, between US 65 (Hampton) and County Road T16 (near Dumont)Normal
+       IA 3, between IA 14 (Allison) and US 218 (near Shell Rock)Normal
+       IA 3, between US 63 (3 miles east of the Waverly area) and County Road V62 (6 miles east of the Readlyn area)Normal
+       IA 3, between C7X and IA 38 (1 mile east of the Edgewood area)Normal
+       IA 3, between IA 140; County Road L14 (Remsen) and IA 143; County Road L36 (near Marcus)Normal
+       IA 3, between County Road M27 (3 miles east of the Aurelia area) and County Road M44 (near Truesdale)Normal
+       IA 3, between IA 15; County Road N65 (3 miles west of the Gilmore City area) and County Road P29 (1 mile west of the Rutland area)Normal
+       IA 3, between County Road P29 (1 mile west of the Rutland area) and US 169 (Dakota City)Normal
+IA 4   IA 4, between IA 44 (Panora) and IA 141 (3 miles north of the Yale area)Normal
+       IA 4, between IA 141 (3 miles north of the Yale area) and US 30 (Jefferson)Normal
+       IA 4, between IA 175 and County Road N65 (2 miles south of the Lohrville area)Normal
+       IA 4, between IA 175 (near Lohrville) and County Road D46 (1 mile south of the Rockwell City area)Normal
+       IA 4, between IA 10 (near Havelock) and County Road B55 (3 miles north of the Mallard area)Normal
+       IA 4, between IA 9 and the Minnesota Border (5 miles north of the Estherville area)Normal
+       IA 4, between US 30 (Jefferson) and County Road E13 (near Churdan)Normal
+       IA 4, between County Road D46 (1 mile south of the Rockwell City area) and US 20 (1 mile north of the Rockwell City area)Normal
+       IA 4, between County Road B55 (3 miles north of the Mallard area) and US 18 (Emmetsburg)Normal
+       IA 4, between County Road P29 (near Churdan) and IA 175 (2 miles south of the Lohrville area)Normal
+       IA 4, between US 20 (1 mile north of the Rockwell City area) and IA 7; County Road C66 (near Pomeroy)Normal
+       IA 4, between US 18 (5 miles north of Emmetsburg) and County Road B14 (Graettinger)Normal
+       IA 4, between County Road B14 (Graettinger) and IA 9 (Estherville)Normal
+       IA 4, between IA 7; County Road D15 (near Pomeroy) and IA 3 (Pocahontas)Normal
+       IA 4, between IA 3 (Pocahontas) and IA 10 (near Havelock)Normal
+IA 5   IA 5, between County Road J18 (near Moravia) and US 34 (Albia)Normal
+       IA 5, between County Road H33 (near Hamilton) and County Road G71 (near Marysville)Normal
+       IA 5, between IA 92 and IA 316 (2 miles north of the Pleasantville area)Normal
+       IA 5, between US 34 and IA 137 (Albia)  Normal
+       IA 5, between County Road G71 (near Marysville) and IA 92 (near Knoxville)Normal
+       IA 5, between IA 316 (2 miles north of the Pleasantville area) and US 65 (near Carlisle)Normal
+       IA 5, between the Missouri State Line (2 miles south of the Cincinnati area) and IA 2 (Centerville)Normal
+       IA 5, between IA 137 (Albia) and County Road G71 (near Hamilton)Normal
+       IA 5, between IA 92 and IA 14 (near Knoxville)Normal
+       IA 5, between US 65; US 69 and IA 28 (near Des Moines)Normal
+       IA 5, between IA 2 (Centerville) and County Road J18 (near Moravia)Normal
+       IA 5, between IA 14 (Knoxville) and IA 92 (near Pleasantville)Normal
+       IA 5, between IA 28 (Des Moines) and I-35 (Cumming)Normal
+IA 7   IA 7, between County Road N65 (near Manson) and County Road P29 (near Barnum)Normal
+       IA 7, between IA 3 (near Aurelia) and IA 110 (near Storm Lake)Normal
+       IA 7, between County Road P29 (near Barnum) and US 169 (near Fort Dodge)Normal
+       IA 7, between IA 110 (near Storm Lake) and US 71 (near Lakeside)Normal
+       IA 7, between US 71; County Road C65 (near Lakeside) and County Road N28 (2 miles west of the Fonda area)Normal
+       IA 7, between IA 4; County Road D15 (near Pomeroy) and County Road N65 (near Manson)Normal
+       IA 7, between County Road M54 (2 miles west of the Fonda area) and IA 4; County Road C66 (near Pomeroy)Normal
+IA 8   IA 8, between US 63 (Traer) and IA 21 (near Dysart)Normal
+       IA 8, between IA 21 and US 218 (4 miles east of the Dysart area)Normal
+IA 9   IA 9, between the Minnesota Border; County Road A10 (4 miles west of the Larchwood area) and County Road K30 (near Lester)Normal
+       IA 9, between County Road L26 (near Little Rock) and IA 60 (near Sibley)Normal
+       IA 9, between IA 4 (near Estherville) and IA 15 (Armstrong)Normal
+       IA 9, between County Road R34 (near Thompson) and US 69 (near Leland)Normal
+       IA 9, between US 69 (Forest City) and I-35 (near Hanlontown)Normal
+       IA 9, between US 65 (near Manly) and US 218 (Osage)Normal
+       IA 9, between County Road T62 (Riceville) and US 63 (7 miles west of the Cresco area)Normal
+       IA 9, between IA 51 (2 miles west of the Waukon area) and County Road A44 (near Waukon)Normal
+       IA 9, between County Road K30 (near Lester) and US 75 (near Rock Rapids)Normal
+       IA 9, between IA 60 (near Sibley) and County Road M20 (near Harris)Normal
+       IA 9, between County Road M20 (near Harris) and US 71 (Okoboji)Normal
+       IA 9, between IA 15 (Armstrong) and US 169; County Road P20 (3 miles east of the Swea City area)Normal
+       IA 9, between I-35 (near Hanlontown) and US 65 (near Manly)Normal
+       IA 9, between US 218; County Road T46 (4 miles east of Osage) and County Road V10 (Riceville)Normal
+       IA 9, between US 63 (7 miles west of the Cresco area) and IA 139; County Road A34 (near Cresco)Normal
+       IA 9, between IA 76 (near Waukon) and IA 26 (3 miles west of the Lansing area)Normal
+       IA 9, between US 75 (Rock Rapids) and County Road L26 (near Little Rock)Normal
+       IA 9, between US 71 (1 mile west of the Superior area) and IA 4 (Estherville)Normal
+       IA 9, between US 169 (near Lakota) and County Road R50 (near Thompson)Normal
+       IA 9, between IA 139; County Road A34 (near Cresco) and US 52 (near Decorah)Normal
+       IA 9, between County Road X20 (3 miles west of the Lansing area) and the Mississippi River bridge (near Lansing)Normal
+       IA 9, between IA 139; County Road A34 and County Road W42 (near Decorah)Normal
+       IA 9, between County Road W42 (Decorah) and IA 51 (2 miles west of the Waukon area)Normal
+       IA 9, between IA 4 and County Road N32 (near Estherville)Normal
+IA 10  IA 10, between IA 12 (Hawarden) and US 75 (near Maurice)Normal
+       IA 10, between US 59 (near Sutherland) and County Road M36 (near Peterson)Normal
+       IA 10, between US 75 (near Maurice) and County Road L22 (near Granville)Normal
+       IA 10, between County Road M12 (near Peterson) and US 71 (near Sioux Rapids)Normal
+       IA 10, between South Dakota Border and IA 12 (near Hawarden)Normal
+       IA 10, between County Road L22 (near Granville) and US 59 (1 mile east of the Paullina area)Normal
+       IA 10, between US 59 (near Calumet) and County Road M12 (near Sutherland)Normal
+       IA 10, between US 71 (near Rembrandt) and County Road N28 (near Laurens)Normal
+       IA 10, between County Road N28 (near Laurens) and IA 4 (near Havelock)Normal
+IA 12  IA 12, between US 20; US 75 and IA 376 (near Sioux City)Normal
+       IA 12, between IA 376 and I-29; US 77 (Sioux City)Normal
+       IA 12, between I-29 and County Road K18 (Sioux City)Normal
+       IA 12, between I-29 (Sioux City) and County Road K18 (3 miles north of the Sioux City area)Normal
+       IA 12, between County Road K18 (3 miles north of the Sioux City area) and IA 3 (near Westfield)Normal
+       IA 12, between IA 3 and County Road C16 (near Akron)Normal
+       IA 12, between County Road C16 (near Akron) and County Road C12 (near Chatsworth)Normal
+       IA 12, between County Road C12 (near Chatsworth) and IA 10 (Hawarden)Normal
+IA 13  IA 13, between US 151 and County Road E34 (near Marion)Normal
+       IA 13, between County Road E34 (near Marion) and County Road D66 (near Central City)Normal
+       IA 13, between IA 3 (Strawberry Point) and IA 56 (near Elkader)Normal
+       IA 13, between County Road E16 (near Central City) and County Road D47 (near Ryan)Normal
+       IA 13, between IA 56 (near Elkader) and US 52 (2 miles north of the Farmersburg area)Normal
+       IA 13, between County Road D47 (near Ryan) and US 20 (near Manchester)Normal
+       IA 13, between US 20 (near Manchester) and IA 3 (6 miles south of Strawberry Point)Normal
+IA 14  IA 14, between IA 2 (Corydon) and US 34 (Chariton)Normal
+       IA 14, between IA 224 (near Laurel) and US 30 (Marshalltown)Normal
+       IA 14, between IA 96 (1 mile south of the Conrad area) and IA 175 (4 miles south of the Grundy Center area)Normal
+       IA 14, between County Road C23 (near Greene) and US 18 (near Charles City)Normal
+       IA 14, between US 34 (Chariton) and County Road H20 (near Williamson)Normal
+       IA 14, between IA 163 (Monroe) and I-80; US 6 (Lambs Grove)Normal
+       IA 14, between US 30 (Marshalltown) and IA 96 (1 mile south of the Conrad area)Normal
+       IA 14, between IA 175 (4 miles south of the Grundy Center area) and US 20 (3 miles north of the Holland area)Normal
+       IA 14, between US 6 (Lambs Grove) and County Road F17 (5 miles north of the Newton area)Normal
+       IA 14, between US 20 (3 miles north of the Holland area) and IA 57 (Parkersburg)Normal
+       IA 14, between IA 57 (Parkersburg) and IA 3 (Allison)Normal
+       IA 14, between County Road F17 (5 miles north of the Newton area) and IA 224 (2 miles south of the Laurel area)Normal
+       IA 14, between IA 3 (near Allison) and County Road B60 (near Greene)Normal
+       IA 14, between County Road H20 (near Williamson) and County Road G76 (5 miles south of the Knoxville area)Normal
+       IA 14, between IA 224 and County Road E63 (2 miles south of the Laurel area)Normal
+       IA 14, between County Road G76 (5 miles south of the Knoxville area) and County Road G40 (2 miles north of the Knoxville area)Normal
+       IA 14, between County Road G40 (2 miles north of the Knoxville area) and IA 163 (Monroe)Normal
+IA 15  IA 15, between US 18; County Road P16 (near Whittemore) and IA 9 (Armstrong)Normal
+       IA 15, between IA 9 and the Minnesota Border (5 miles north of the Armstrong area)Normal
+       IA 15, between County Road B60 (West Bend) and US 18 (near Whittemore)Normal
+       IA 15, between IA 3; County Road N65 (3 miles south of the Rolfe area) and County Road C15 (3 miles north of the Rolfe area)Normal
+       IA 15, between County Road C15 (3 miles north of the Rolfe area) and County Road B60 (West Bend)Normal
+IA 16  IA 16, between US 34; County Road V43 (3 miles west of the Eldon area) and IA 1 (12 miles west of the Hillsboro area)Normal
+       IA 16, between IA 1 (10 miles west of the Hillsboro area) and County Road W46 (near Hillsboro)Normal
+       IA 16, between County Road W46 (near Hillsboro) and US 218 (near Houghton)Normal
+       IA 16, between US 218 (near Houghton) and County Road X32 (10 miles east of the Saint Paul area)Normal
+       IA 16, between County Road X32 and US 61 (10 to 16 miles east of the Saint Paul area)Normal
+IA 17  IA 17, between IA 210 (Madrid) and US 30 (near Boone)Normal
+       IA 17, between IA 141 (near Granger) and IA 210 (Madrid)Normal
+       IA 17, between US 30 (near Boone) and County Road E18 (6 miles south of the Stanhope area)Normal
+       IA 17, between County Road E18 (6 miles south of the Stanhope area) and IA 175 (near Stanhope)Normal
+       IA 17, between US 20; County Road R21 (5 miles north of Webster City) and County Road D18 (8 miles south of the Eagle Grove area)Normal
+       IA 17, between County Road C56 (near Eagle Grove) and IA 3 (Goldfield)Normal
+       IA 17, between IA 175 (near Stanhope) and US 20 (Webster City)Normal
+       IA 17, between County Road D18 (8 miles south of the Eagle Grove area) and IA 3 (near Eagle Grove)Normal
+       IA 17, between IA 3 (3 miles north of Goldfield) and US 18 (near Wesley)Normal
+IA 21  IA 21, between IA 149 (near Hedrick) and IA 92 (near Delta)Normal
+       IA 21, between IA 92 (near Delta) and IA 22 (near Thornburg)Normal
+       IA 21, between US 6 (near Victor) and County Road E66 (near Belle Plaine)Normal
+       IA 21, between IA 22 (near Thornburg) and IA 85; County Road F52 (near Deep River)Normal
+       IA 21, between IA 212 (near Belle Plaine) and US 30 (1 mile south of the Elberon area)Normal
+       IA 21, between IA 85; County Road F52 (near Deep River) and I-80 (1 mile north of the Guernsey area)Normal
+       IA 21, between US 30 (1 mile south of the Elberon area) and IA 8; County Road V37 (near Dysart)Normal
+       IA 21, between IA 8 (near Dysart) and County Road D38 (near Waterloo)Normal
+       IA 21, between I-80 (1 mile north of the Guernsey area) and US 6 (4 miles south of the Victor area)Normal
+       IA 21, between County Road D38 and US 20 (near Waterloo)Normal
+IA 22  IA 22, between IA 21 (near Thornburg) and IA 149 (Webster)Normal
+       IA 22, between IA 149 (Webster) and County Road W15 (near Kinross)Normal
+       IA 22, between IA 70 and IA 70 (1 mile east of the Nichols area)Normal
+       IA 22, between County Road Y36 (Buffalo) and US 61 (Davenport)Normal
+       IA 22, between County Road V67 (near Kinross) and IA 1 (Wellman)Normal
+       IA 22, between County Road W21 (Wellman) and IA 1 (Kalona)Normal
+       IA 22, between IA 70 (1 mile east of the Nichols area) and US 61 (near Muscatine)Normal
+       IA 22, between IA 1 (Kalona) and US 218 (near Riverside)Normal
+       IA 22, between US 61; IA 38 (Muscatine) and County Road Y36 (near Buffalo)Normal
+       IA 22, between US 218 (near Riverside) and IA 70 (Nichols)Normal
+       IA 22, between County Road Y36 and I-280 (near Buffalo)Normal
+IA 23  IA 23, between IA 149 (near Fremont) and IA 92 (Oskaloosa)Normal
+IA 24  IA 24, between US 18; US 63 (near New Hampton) and County Road W14 (near Jackson Junction)Normal
+       IA 24, between County Road V56 (near Jackson Junction) and US 52; IA 150 (Calmar)Normal
+IA 25  IA 25, between IA 2 (Clearfield) and US 34 (8 miles south of Creston)Normal
+       IA 25, between IA 92 (Greenfield) and I-80 (3 miles south of the Casey area)Normal
+       IA 25, between US 34 (Creston) and County Road G61 (near Orient)Normal
+       IA 25, between I-80 and County Road F51 (3 miles south of the Casey area)Normal
+       IA 25, between IA 2 (4 miles south of the Clearfield area) and County Road J23 (Clearfield)Normal
+       IA 25, between County Road G61 (near Orient) and IA 92 (Greenfield)Normal
+       IA 25, between County Road F65 (near Casey) and IA 44 (Guthrie Center)Normal
+       IA 25, between IA 141 (2 miles south of the Bayard area) and County Road E57 (3 miles south of the Scranton area)Normal
+       IA 25, between County Road F51 (Guthrie Center) and IA 141 (2 miles south of the Bayard area)Normal
+       IA 25, between County Road E57 (3 miles south of the Scranton area) and US 30; County Road N65 (near Scranton)Normal
+IA 26  IA 26, between IA 9 (Lansing) and the Minnesota Border (New Albin)Normal
+IA 27  IA 27, between US 20 and US 218; IA 57 (Cedar Falls)Normal
+       IA 27, between the Missouri State Line (10 miles south of the Donnellson area) and Exit 10: US 218 (near Donnellson)Normal
+IA 28  IA 28, between IA 92 (Martensdale) and IA 5 (near Des Moines)Normal
+       IA 28, between US 6 and I-80 (Des Moines)Normal
+       IA 28, between County Road G24 (near Des Moines) and I-235 (near Clive)Normal
+IA 31  IA 31, between IA 141 (Rodney) and County Road D30 (near Anthon)Normal
+       IA 31, between County Road D30 (near Anthon) and US 20 (Correctionville)Normal
+       IA 31, between US 20 (Correctionville) and US 59; County Road C63 (near Washta)Normal
+       IA 31, between County Road D15 (near Washta) and US 59; County Road C63 (3 miles north of the Quimby area)Normal
+IA 32  IA 32, between US 20 (Asbury) and US 52; County Road Y35 (near Dubuque)Normal
+IA 37  IA 37, between IA 175 (near Turin) and IA 183 (Soldier)Normal
+       IA 37, between US 30 (near Dunlap) and IA 191 (Earling)Normal
+       IA 37, between IA 183 (Soldier) and County Road E54 (4 miles west of the Dunlap area)Normal
+       IA 37, between IA 191 and US 59; County Road F24 (2 miles east of the Earling area)Normal
+       IA 37, between County Road E54 (4 miles west of the Dunlap area) and US 30 (Dunlap)Normal
+       IA 37, between US 30 and IA 191 (near Dunlap)Normal
+IA 38  IA 38, between IA 64 (2 miles north of the Olin area) and US 151 (Monticello)Normal
+       IA 38, between I-80; County Road X54 (6 miles south of the Tipton area) and IA 130 (Tipton)Normal
+       IA 38, between IA 130 (Tipton) and US 30 (near Stanwood)Normal
+       IA 38, between IA 92 and IA 22 (Muscatine)Normal
+       IA 38, between US 30 (Stanwood) and IA 64 (2 miles north of the Olin area)Normal
+       IA 38, between US 61; IA 22 (Muscatine) and US 6; County Road F65 (near Wilton)Normal
+       IA 38, between US 151 (near Monticello) and County Road X47 (1 mile south of the Hopkinton area)Normal
+       IA 38, between County Road X47 (1 mile south of the Hopkinton area) and US 20 (near Delaware)Normal
+       IA 38, between US 20 (near Delaware) and IA 3 (1 mile north of the Greeley area)Normal
+IA 39  IA 39, between US 59 (Denison) and County Road E16 (near Kiron)Normal
+       IA 39, between County Road E16 (near Kiron) and IA 175; County Road M43 (Odebolt)Normal
+IA 44  IA 44, between US 30 (10 miles west of the Portsmouth area) and IA 191 (Portsmouth)Normal
+       IA 44, between IA 191 (Portsmouth) and US 59 (Harlan)Normal
+       IA 44, between IA 4 (Panora) and County Road R22 (near Dallas Center)Normal
+       IA 44, between US 59 (Harlan) and IA 173 (Kimballton)Normal
+       IA 44, between IA 173 and US 71 (8 miles east of the Kimballton area)Normal
+       IA 44, between US 71 (8 miles east of the Kimballton area) and County Road N54 (5 miles west of the Guthrie Center area)Normal
+       IA 44, between County Road N54 (5 miles west of the Guthrie Center area) and IA 4 (Panora)Normal
+       IA 44, between County Road R22 (near Dallas Center) and IA 141 (near Grimes)Normal
+IA 48  IA 48, between County Road J28 (near Essex) and County Road J20 (1 mile north of the Essex area)Normal
+       IA 48, between County Road J20 (1 mile north of the Essex area) and US 34 (near Red Oak)Normal
+       IA 48, between US 34 (near Red Oak) and County Road H14 (near Elliott)Normal
+       IA 48, between US 59 (Shenandoah) and County Road J20 (near Essex)Normal
+       IA 48, between County Road H12 (near Elliott) and US 6 (3 miles north of the Griswold area)Normal
+IA 51  IA 51, between US 18 and IA 9 (8 miles north of the Postville area)Normal
+IA 56  IA 56, between IA 150 and County Road W55 (9 miles east of the West Union area)Normal
+       IA 56, between County Road W55 (9 miles east of the West Union area) and IA 13 (near Elkader)Normal
+IA 57  IA 57, between County Road S55 (near Ackley) and County Road T16 (2 miles west of the Aplington area)Normal
+       IA 57, between US 65; County Road S45 and County Road T13 (6 miles west of the Ackley area)Normal
+       IA 57, between County Road T16 (2 miles west of the Aplington area) and IA 14 (Parkersburg)Normal
+       IA 57, between IA 14 (Parkersburg) and County Road T55 (near New Hartford)Normal
+       IA 57, between County Road T47 (near New Hartford) and US 218; IA 27 (near Cedar Falls)Normal
+       IA 57, between County Road T55 and US 218; IA 27 (near Cedar Falls)Normal
+IA 58  IA 58, between US 63 (near Hudson) and US 20 (Cedar Falls)Normal
+IA 60  IA 60, between US 75; IA 404 and County Road C16 (3 miles north of the Le Mars area)Normal
+       IA 60, between County Road C16 (3 miles north of the Le Mars area) and IA 10 (near Alton)Normal
+       IA 60, between IA 10 (near Alton) and County Road L26 (near Sheldon)Normal
+       IA 60, between County Road L26 and US 18 (near Sheldon)Normal
+       IA 60, between US 18 (Sheldon) and County Road L36 (near Ashton)Normal
+       IA 60, between County Road L36 (near Ashton) and Exit 53: IA 9 (near Sibley)Normal
+       IA 60, between Exit 53: IA 9 and Minnesota Border; County Road A10 (5 miles north of the Sibley area)Normal
+IA 62  IA 62, between IA 64 (Maquoketa) and County Road Y61 (near Andrew)Normal
+       IA 62, between County Road Y61 (near Andrew) and US 52 (Bellevue)Normal
+IA 64  IA 64, between US 151; County Road E28 and IA 38 (5 miles east of the Anamosa area)Normal
+       IA 64, between IA 38 (3 miles west of the Wyoming area) and IA 136 (Wyoming)Normal
+       IA 64, between IA 136 (Wyoming) and County Road Y46 (Monmouth)Normal
+       IA 64, between IA 136 (Monmouth) and US 61 (Maquoketa)Normal
+       IA 64, between US 61 and IA 62 (Maquoketa)Normal
+       IA 64, between IA 62 (Maquoketa) and US 67 (near Preston)Normal
+       IA 64, between County Road Z20 (near Preston) and US 67 (near Sabula)Normal
+IA 70  IA 70, between IA 92 (near Columbus City) and IA 22 (Nichols)Normal
+       IA 70, between IA 22 (3 miles north of Nichols) and US 6 (West Liberty)Normal
+IA 76  IA 76, between US 18 (Mcgregor) and County Road X52 (3 miles north of the Marquette area)Normal
+       IA 76, between County Road X52 (3 miles north of the Marquette area) and IA 9 (near Waukon)Normal
+       IA 76, between IA 9 and the Minnesota Border (16 miles north of the Waukon area)Normal
+       IA 76, between US 18 and US 18 (near Mcgregor)Normal
+IA 78  IA 78, between US 218 (near Olds) and County Road X23 (near Mount Union)Normal
+       IA 78, between County Road X23 (near Mount Union) and US 61; County Road H22 (2 miles east of the Morning Sun area)Normal
+       IA 78, between IA 149 (5 miles west of the Ollie area) and IA 1 (near Richland)Normal
+       IA 78, between County Road V63 and IA 1 (near Richland)Normal
+       IA 78, between IA 1 (Brighton) and County Road V51 (near Wayland)Normal
+       IA 78, between County Road V51 (near Wayland) and US 218 (near Olds)Normal
+IA 81  IA 81, between the Missouri State Line (1 mile south of the Farmington area) and IA 2 (near Farmington)Normal
+IA 83  IA 83, between County Road M47 (near Marne) and US 6 (Atlantic)Normal
+       IA 83, between US 6 (near Atlantic) and IA 148 (Anita)Normal
+       IA 83, between US 59 (Avoca) and County Road M47 (near Walnut)Normal
+       IA 83, between County Road M47 (near Walnut) and IA 173 (near Marne)Normal
+IA 85  IA 85, between the start of IA 85 (Montezuma) and IA 21; County Road F52 (near Deep River)Normal
+IA 86  IA 86, between US 71 (near Arnolds Park) and IA 9 (near Okoboji)Normal
+       IA 86, between IA 9 and the Minnesota Border (5 miles north of the Okoboji area)Normal
+IA 92  IA 92, between County Road N28 (near Cumberland) and IA 148 (near Massena)Normal
+       IA 92, between IA 148 (near Massena) and IA 25 (Greenfield)Normal
+       IA 92, between I-29; US 275 (Council Bluffs) and County Road M16 (near Treynor)Normal
+       IA 92, between IA 25 (Greenfield) and County Road P53 (6 miles west of the Winterset area)Normal
+       IA 92, between County Road T25 (near Harvey) and IA 163 (Beacon)Normal
+       IA 92, between County Road P53 (6 miles west of the Winterset area) and US 169; County Road P71 (near Winterset)Normal
+       IA 92, between IA 163 (Beacon) and US 63 (Oskaloosa)Normal
+       IA 92, between IA 70 (near Columbus City) and US 61; County Road G48 (near Grandview)Normal
+       IA 92, between US 63 and IA 23 (Oskaloosa)Normal
+       IA 92, between County Road V13 (near Rose Hill) and IA 21 (near Delta)Normal
+       IA 92, between US 169 (near Winterset) and I-35 (near Bevington)Normal
+       IA 92, between County Road S23 (near Sandyville) and IA 5 (near Pleasantville)Normal
+       IA 92, between IA 23 (Oskaloosa) and County Road V13 (near Rose Hill)Normal
+       IA 92, between IA 21 (near Delta) and IA 149 (Sigourney)Normal
+       IA 92, between County Road L55 (near Treynor) and US 59 (near Carson)Normal
+       IA 92, between County Road M47 (near Griswold) and US 71; County Road G53 (6 miles east of the Griswold area)Normal
+       IA 92, between I-35 (near Bevington) and IA 28 (Martensdale)Normal
+       IA 92, between IA 5 (near Knoxville) and County Road T25 (near Harvey)Normal
+       IA 92, between IA 149 and IA 149 (near Sigourney)Normal
+       IA 92, between US 59 (near Carson) and IA 48 (near Griswold)Normal
+       IA 92, between US 71 (4 miles west of the Cumberland area) and County Road N28 (near Cumberland)Normal
+       IA 92, between IA 28 (Martensdale) and US 65 (Indianola)Normal
+       IA 92, between IA 149 (near Sigourney) and County Road W15 (near Keota)Normal
+       IA 92, between County Road W15 (near Keota) and IA 1; County Road G36 (near Washington)Normal
+       IA 92, between US 65 (Indianola) and County Road S31 (near Sandyville)Normal
+       IA 92, between IA 1 (Washington) and US 218 (near Ainsworth)Normal
+       IA 92, between US 218 (near Ainsworth) and IA 70 (near Columbus City)Normal
+       IA 92, between US 61 and IA 38 (Muscatine)Normal
+       IA 92, between IA 38 and the Mississippi River bridge (Muscatine)Normal
+IA 93  IA 93, between County Road V48 (1 mile east of the Tripoli area) and County Road V68 (near Sumner)Normal
+       IA 93, between US 63 (2 miles west of the Tripoli area) and County Road V48 (1 mile east of the Tripoli area)Normal
+       IA 93, between County Road V68 (near Sumner) and IA 150 (Fayette)Normal
+IA 96  IA 96, between IA 14 (1 mile west of the Conrad area) and County Road T47 (near Gladbrook)Normal
+       IA 96, between County Road T47 and US 63 (5 miles east of the Gladbrook area)Normal
+IA 98  IA 98, between County Road V64 and IA 16; County Road V64Normal
+IA 100 IA 100, between the start of IA 100 and IA 922 (Cedar Rapids)Normal
+       IA 100, between IA 922 (Cedar Rapids) and US 151 (near Marion)Normal
+IA 110 IA 110, between US 20 (near Schaller) and IA 7 (near Storm Lake)Normal
+IA 116 IA 116, between US 218 and IA 3 (near Waverly)Normal
+IA 117 IA 117, between IA 163 (Prairie City) and I-80 (Colfax)Normal
+       IA 117, between I-80 (Colfax) and US 65; IA 330 (1 mile north of the Mingo area)Normal
+IA 122 IA 122, between I-35; US 18 (Clear Lake) and County Road B30 (Mason City)Normal
+IA 127 IA 127, between I-29 and IA 183 (1 mile east of the Mondamin area)Normal
+       IA 127, between IA 183 (1 mile east of the Mondamin area) and US 30 (Logan)Normal
+IA 128 IA 128, between IA 13 (near Elkader) and US 52 (near Garnavillo)Normal
+IA 130 IA 130, between County Road F31 (near New Liberty) and County Road Y52 (near Maysville)Normal
+       IA 130, between County Road Y40 (near Maysville) and I-80 (Davenport)Normal
+       IA 130, between IA 38 (Tipton) and County Road Y30 (near New Liberty)Normal
+IA 136 IA 136, between IA 64 (near Wyoming) and County Road E17 (3 miles north of the Onslow area)Normal
+       IA 136, between County Road E17 (3 miles north of the Onslow area) and US 151 (near Cascade)Normal
+       IA 136, between US 20 (Dyersville) and US 52; IA 3 (Luxemburg)Normal
+       IA 136, between County Road E17 (near Cascade) and US 20 (Dyersville)Normal
+       IA 136, between US 61 (near Maquoketa) and County Road Y32 (near Lost Nation)Normal
+       IA 136, between County Road Y46 (near Lost Nation) and IA 64 (Wyoming)Normal
+       IA 136, between the Mississippi River bridge and US 67 (near Clinton)Normal
+       IA 136, between US 67 (Clinton) and County Road Z36 (near Goose Lake)Normal
+       IA 136, between County Road Z36 (near Goose Lake) and US 61 (near Maquoketa)Normal
+IA 137 IA 137, between IA 5 (Albia) and US 63 (near Eddyville)Normal
+IA 139 IA 139, between the Minnesota Border (10 miles south of the Cresco area) and IA 9; County Road A34 (near Cresco)Normal
+IA 140 IA 140, between US 20; County Road K64 (near Moville) and County Road C60 (1 mile north of the Kingsley area)Normal
+       IA 140, between County Road C60 (1 mile north of the Kingsley area) and IA 3; County Road L14 (Remsen)Normal
+IA 141 IA 141, between IA 4 (1 mile west of the Jamaica area) and IA 144; County Road P58 (near Perry)Normal
+       IA 141, between IA 144; County Road P58 (near Perry) and IA 17 (near Granger)Normal
+       IA 141, between IA 175 and IA 175 (Mapleton)Normal
+       IA 141, between IA 175 (Mapleton) and IA 183 (Ute)Normal
+       IA 141, between I-29; County Road K42 (near Sloan) and County Road K67 (2 miles east of the Hornick area)Normal
+       IA 141, between IA 183 (Ute) and County Road L61 (near Charter Oak)Normal
+       IA 141, between County Roads M56 and M64 (near Manning) and US 71; County Road N18 (near Templeton)Normal
+       IA 141, between County Road K67 (2 miles east of the Hornick area) and IA 31 (Rodney)Normal
+       IA 141, between US 71 (1 mile west of the Dedham area) and County Road N70 (near Coon Rapids)Normal
+       IA 141, between IA 31 (Rodney) and IA 175 (Mapleton)Normal
+       IA 141, between County Roads N36 and N33 (near Coon Rapids) and IA 25 (near Bayard)Normal
+       IA 141, between IA 25 (2 miles west of the Bagley area) and IA 4 (1 mile east of the Bagley area)Normal
+       IA 141, between IA 183 (near Charter Oak) and US 59 (near Denison)Normal
+       IA 141, between US 59 (4 miles west of the Manilla area) and County Road M68 (near Manning)Normal
+       IA 141, between County Road F31 and IA 415 (near Granger)Normal
+       IA 141, between IA 415 (near Granger) and IA 44 (near Grimes)Normal
+       IA 141, between IA 44 and I-80 (near Grimes)Normal
+IA 143 IA 143, between IA 3; County Road L36 and IA 10 (8 miles north of the Marcus area)Normal
+       IA 143, between IA 3; County Road L36 and County Roads L36 and C16 (near Marcus)Normal
+IA 144 IA 144, between US 30 (Grand Junction) and County Road E18 (near Paton)Normal
+       IA 144, between County Road E18 (near Paton) and IA 175 (near Gowrie)Normal
+       IA 144, between IA 141; County Road P58 (near Perry) and County Road E53 (near Rippey)Normal
+       IA 144, between County Road P54 (near Rippey) and US 30 (Grand Junction)Normal
+IA 146 IA 146, between US 63 (near New Sharon) and County Road F57 (near Searsboro)Normal
+       IA 146, between County Road F57 and County Road F62 (near Searsboro)Normal
+       IA 146, between County Road F62 (near Searsboro) and I-80 (near Grinnell)Normal
+       IA 146, between I-80 and US 6 (near Grinnell)Normal
+       IA 146, between US 6 (Grinnell) and County Road E63 (Gilman)Normal
+       IA 146, between County Road E69 (Gilman) and County Road E49 (near Le Grand)Normal
+       IA 146, between County Road E49 and US 30 (near Le Grand)Normal
+IA 148 IA 148, between County Road J20 (4 miles north of the Gravity area) and US 34 (near Corning)Normal
+       IA 148, between US 34 and County Road H20 (6 miles north of the Corning area)Normal
+       IA 148, between County Road H20 (6 miles north of the Corning area) and IA 92 (near Massena)Normal
+       IA 148, between IA 92 (near Massena) and I-80; County Road F58 (1 mile north of the Anita area)Normal
+       IA 148, between the Missouri State Line (5 miles south of the Bedford area) and IA 2 (Bedford)Normal
+       IA 148, between IA 2 (Bedford) and County Road J20 (4 miles north of the Gravity area)Normal
+IA 149 IA 149, between IA 22 (South English) and I-80 (Williamsburg)Normal
+       IA 149, between the start of IA 149 and US 63 (near Ottumwa)Normal
+       IA 149, between the start of IA 149 (near Ottumwa) and IA 23 (3 miles south of the Hedrick area)Normal
+       IA 149, between IA 23 (3 miles south of the Hedrick area) and IA 21 (near Hedrick)Normal
+       IA 149, between IA 21 (near Hedrick) and IA 78 (near Martinsburg)Normal
+       IA 149, between IA 78 (near Martinsburg) and IA 92 (Sigourney)Normal
+       IA 149, between IA 92 (near Sigourney) and IA 22 (Webster)Normal
+IA 150 IA 150, between US 218 (Vinton) and County Road D62 (near Urbana)Normal
+       IA 150, between County Road D62 (near Urbana) and US 20 (Independence)Normal
+       IA 150, between US 20 (Independence) and IA 281 (near Hazleton)Normal
+       IA 150, between IA 3 (near Oelwein) and IA 187 (2 miles north of the Maynard area)Normal
+       IA 150, between IA 281 (near Hazleton) and IA 3 (Oelwein)Normal
+       IA 150, between IA 187 (2 miles north of the Maynard area) and IA 93 (Fayette)Normal
+       IA 150, between IA 93 (Fayette) and IA 56 (West Union)Normal
+       IA 150, between IA 56 and US 18 (West Union)Normal
+       IA 150, between US 18 and County Road B40 (4 miles north of the West Union area)Normal
+       IA 150, between County Road B40 (4 miles north of the West Union area) and US 52; IA 24 (Calmar)Normal
+IA 152 IA 152, between I-35 and US 69 (near Osceola)Normal
+IA 160 IA 160, between IA 415 and I-35 (Ankeny)Normal
+IA 163 IA 163, between US 65 (Altoona) and IA 117 (3 miles west of the Prairie City area)Normal
+       IA 163, between I-235 (near Des Moines) and US 65 (Altoona)Normal
+       IA 163, between IA 14 (2 miles east of the Monroe area) and IA 92 (near Pella)Normal
+       IA 163, between IA 14 and IA 92 (near Pella)Normal
+       IA 163, between IA 14 (near Pella) and IA 92 (Beacon)Normal
+       IA 163, between IA 92 (Beacon) and US 63 (near Oskaloosa)Normal
+       IA 163, between US 65 (3 miles west of the Prairie City area) and IA 117 (Prairie City)Normal
+       IA 163, between IA 117 (Prairie City) and IA 14 (near Monroe)Normal
+       IA 163, between IA 117 and IA 14 (near Monroe)Normal
+       IA 163, between IA 14 and IA 92 (2 miles east of the Monroe area)Normal
+IA 173 IA 173, between IA 83 (9 miles south of the Elk Horn area) and IA 44 (Kimballton)Normal
+IA 175 IA 175, between Burt County the Missouri River bridge (5 miles west of the Onawa area) and I-29 (near Onawa)Normal
+       IA 175, between I-29 (near Onawa) and IA 37 (near Turin)Normal
+       IA 175, between IA 141 (near Danbury) and County Road L67 (near Battle Creek)Normal
+       IA 175, between IA 37 (near Turin) and IA 141 (Mapleton)Normal
+       IA 175, between County Road L67 (near Battle Creek) and US 59 (near Ida Grove)Normal
+       IA 175, between IA 141 (Mapleton) and County Road L67 (near Danbury)Normal
+       IA 175, between US 59 (near Ida Grove) and IA 39; County Road M43 (Odebolt)Normal
+       IA 175, between IA 4 (2 miles west of the Farnhamville area) and IA 144 (near Gowrie)Normal
+       IA 175, between IA 39; County Road M43 and US 71 (3 miles east of the Odebolt area)Normal
+       IA 175, between IA 144 (near Gowrie) and US 169; County Road P46 (near Harcourt)Normal
+       IA 175, between US 71 (Auburn) and County Road N47 (near Lake City)Normal
+       IA 175, between County Road N28 (near Lake City) and IA 4 (2 miles east of the Lake City area)Normal
+       IA 175, between US 169; County Road P61 (near Dayton) and County Road R27 (near Stratford)Normal
+       IA 175, between County Road S56 (near Eldora) and IA 14 (7 miles west of Grundy Center)Normal
+       IA 175, between County Road D64 (near Stratford) and IA 17 (near Stanhope)Normal
+       IA 175, between IA 14 (Grundy Center) and County Road T55 (near Reinbeck)Normal
+       IA 175, between US 69 (Jewell) and I-35 (near Ellsworth)Normal
+       IA 175, between County Road T55 and US 63 (5 miles east of the Reinbeck area)Normal
+       IA 175, between I-35 (near Ellsworth) and US 65 (Hubbard)Normal
+       IA 175, between US 65 (5 miles west of the Eldora area) and County Road S56 (near Eldora)Normal
+       IA 175, between IA 17 (near Stanhope) and US 69 (near Jewell)Normal
+IA 182 IA 182, between US 18; County Road A42 (near Inwood) and IA 9 (near Larchwood)Normal
+IA 183 IA 183, between IA 127 (near Pisgah) and IA 37 (Soldier)Normal
+       IA 183, between IA 37 (Soldier) and IA 141 (Ute)Normal
+       IA 183, between IA 127 and County Road L16 (7 miles south of the Pisgah area)Normal
+IA 187 IA 187, between US 20 (7 miles south of the Lamont area) and IA 3 (2 miles south of the Arlington area)Normal
+       IA 187, between IA 3 (2 miles south of the Arlington area) and IA 150 (6 miles north of the Arlington area)Normal
+IA 188 IA 188, between IA 3 and County Road T64 (2 miles east of the Clarksville area)Normal
+       IA 188, between County Road T64 (2 miles east of the Clarksville area) and US 218 (near Plainfield)Normal
+       IA 188, between US 218 and US 63 (8 miles east of the Plainfield area)Normal
+IA 191 IA 191, between I-680 (4 miles south of the Persia area) and IA 44 (Portsmouth)Normal
+       IA 191, between IA 44 (Portsmouth) and IA 37 (Earling)Normal
+IA 192 IA 192, between I-80 and US 6 (Council Bluffs)Normal
+       IA 192, between US 6 and Exit 56: I-29 (Council Bluffs)Normal
+IA 196 IA 196, between US 71 (5 miles south of the Sac City area) and US 20; County Road N14 (2 miles north of the Sac City area)Normal
+IA 202 IA 202, between the Missouri State Line (5 miles south of the Moulton area) and IA 2 (near Moulton)Normal
+IA 210 IA 210, between IA 141 (near Woodward) and County Road E62 (near Madrid)Normal
+       IA 210, between County Road E62 and IA 17 (near Madrid)Normal
+       IA 210, between IA 17 (Madrid) and County Road R38 (Sheldahl)Normal
+       IA 210, between County Road R38 (Sheldahl) and I-35 (near Huxley)Normal
+       IA 210, between I-35 (near Huxley) and County Road S27 (near Maxwell)Normal
+       IA 210, between County Road S27 (near Maxwell) and US 65 (near Collins)Normal
+IA 212 IA 212, between IA 21 (near Belle Plaine) and US 6 (Marengo)Normal
+IA 220 IA 220, between US 6; County Road W16 and US 151; County Road F22Normal
+IA 224 IA 224, between I-80; County Road T22 and IA 14 (6 miles north of the Kellogg area)Normal
+IA 281 IA 281, between County Road C54 (Fairbank) and IA 150 (near Hazleton)Normal
+       IA 281, between the start of IA 281 (Elk Run Heights) and County Roads D20 and V51 (2 miles east of the Raymond area)Normal
+       IA 281, between County Roads D20 and V51 (2 miles east of the Raymond area) and County Road W13 (Fairbank)Normal
+IA 316 IA 316, between IA 5 (near Swan) and the end of IA 316 (Runnells)Normal
+IA 330 IA 330, between US 65; IA 117 and County Road S52 (4 to 8 miles south of the Rhodes area)Normal
+       IA 330, between County Road F17 (4 miles south of the Rhodes area) and County Road E63 (near Melbourne)Normal
+       IA 330, between County Road E63 (near Melbourne) and County Roads E41 and S75 (4 miles south of the Albion area)Normal
+       IA 330, between County Roads E41 and S75 (4 miles south of the Albion area) and County Road S75 (near Albion)Normal
+       IA 330, between County Road S75 and IA 14 (3 miles north of the Albion area)Normal
+IA 333 IA 333, between I-29; County Road J64 and US 275 (near Hamburg)Normal
+IA 346 IA 346, between US 218 and US 18; US 63 (9 miles east of the Nashua area)Normal
+IA 370 IA 370, between the Missouri River bridge (2 miles west of the Council Bluffs area) and I-29; County Road H10 (near Council Bluffs)Normal
+IA 376 IA 376, between I-29 (Sergeant Bluff) and IA 12 (Sioux City)Normal
+       IA 376, between IA 12 and US 75 (Sioux City)Normal
+IA 404 IA 404, between IA 3 and US 75; IA 60 (near Le Mars)Normal
+IA 415 IA 415, between US 6 and I-80 (near Des Moines)Normal
+       IA 415, between I-80 (near Des Moines) and IA 160 (Ankeny)Normal
+       IA 415, between IA 160 (Ankeny) and County Road R6F (Polk City)Normal
+       IA 415, between IA 160 (Polk City) and IA 141 (near Granger)Normal
+IA 922 IA 922, between US 151; US 30 and I-380 (near Cedar Rapids)Normal
+IA 930 IA 930, between US 30 and the end of IA 930 (near Ames)Normal
+IA 934 IA 934, between IA 27 (Cedar Falls) and US 63 (Waterloo)Normal
 
 ************************** Surrounding State Numbers **************************
 
