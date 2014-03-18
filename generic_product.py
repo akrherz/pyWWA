@@ -195,7 +195,7 @@ def real_process(raw):
     # Just send with optional headline to rooms...
     if  SIMPLE_PRODUCTS.__contains__(pil):
         if pil in NEW_ROUTING:
-            xtra['channels'] = prod.afos
+            xtra['channels'] = [prod.afos,]
         prodtxt = "(%s)" % (pil,)
         if reference.prodDefinitions.has_key(pil):
             prodtxt = reference.prodDefinitions[pil]
