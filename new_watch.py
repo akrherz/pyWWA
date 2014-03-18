@@ -285,19 +285,18 @@ def real_process(raw):
     
         txn.execute(sql)
         rs = txn.fetchall()
-        channels = ['SPC']
+        xtra = {'channels': ['SPC']}
         for i in range(len(rs)):
             wfo = rs[i]['wfo']
-            channels.append( wfo )
-            mess = "%s: %s" % (wfo, jabberTxt)
-            jabber.sendMessage(mess, jabberTxtHTML)
+            xtra['channels'].append( wfo )
+        jabber.sendMessage(jabberTxt, jabberTxtHTML, xtra)
 
         # Special message for SPC
         lines = raw.split("\n")
         twt = lines[5].replace("\r\r", "")
         url = "http://www.spc.noaa.gov/products/watch/ww%04i.html" % (int(ww_num),)
-        channels.append("SPC")
-        common.tweet(channels, twt, url)
+        xtra['channels'].append("SPC")
+        common.tweet(xtra['channels'], twt, url)
 
     df = DBPOOL.runInteraction(runner2)
     df.addErrback(common.email_error, raw)

@@ -103,6 +103,7 @@ def real_process(txn, raw):
     product_id = prod.get_product_id()
     xtra ={
            'product_id': product_id,
+           'channels': []
            }
 
     if prod.segments[0].sbw:
@@ -134,8 +135,8 @@ def real_process(txn, raw):
                 (seg.ugcexpire - datetime.timedelta(
                 hours=reference.offsets.get(prod.z,0) )).strftime("%-I:%M %p"),
                                       prod.z)
-
-        mess = "%s: %s issues %s for %s %s %s?pid=%s" % (prod.source[1:], 
+        xtra['channels'].append( prod.source[1:] )
+        mess = "%s issues %s for %s %s %s?pid=%s" % ( 
            prod.source[1:], headline, counties, expire, 
            config.get('urls', 'product'), product_id)
         htmlmess = "%s issues <a href='%s?pid=%s'>%s</a> for %s %s" % ( 

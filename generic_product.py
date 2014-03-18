@@ -189,18 +189,18 @@ def real_process(raw):
 
     xtra = {
             "product_id": product_id,
+            'channels': []
             }
 
     # Just send with optional headline to rooms...
     if  SIMPLE_PRODUCTS.__contains__(pil):
-        xtra['channels'] = wfo
         if pil in NEW_ROUTING:
             xtra['channels'] = prod.afos
         prodtxt = "(%s)" % (pil,)
         if reference.prodDefinitions.has_key(pil):
             prodtxt = reference.prodDefinitions[pil]
 
-        mess = "%s: %s issues %s %s" % (wfo, wfo, prodtxt, myurl)
+        mess = "%s issues %s %s" % (wfo, prodtxt, myurl)
         htmlmess = "%s issues <a href=\"%s\">%s</a> " % (centertext.get(wfo,wfo), myurl, prodtxt)
         if (not ["HWO","NOW","ZFP"].__contains__(pil) and 
          len(prod.segments) > 0 and 
@@ -208,26 +208,22 @@ def real_process(raw):
          len(prod.segments[0].headlines[0]) < 200 ):
             htmlmess += "... %s ..." % (prod.segments[0].headlines[0],)
 
-        jabber.sendMessage(mess, htmlmess, xtra)
 
-        channels = [wfo,]
+        xtra['channels'].append(wfo)
         if pil in NEW_ROUTING:
-            channels = [prod.afos,]
-            # TODO: remove manual hack
-            if prod.afos == 'RFDBIS':
-                channels = ['BIS',]
+            xtra['channels'].append(prod.afos)
+
         # Also send message to any 'subscribing WFO chatrooms'
         for key in routes.keys():
             if (re.match(key, prod.afos)):
                 for wfo2 in routes[key]:
-                    mess = "%s: %s issues %s %s" % \
-                       (wfo2, wfo, prodtxt, myurl)
-                    jabber.sendMessage(mess, htmlmess, xtra)
-                    channels.append( wfo2 )
+                    xtra['channels'].append( wfo2 )
+
+        jabber.sendMessage(mess, htmlmess, xtra)
 
         twt = prodtxt
         url = myurl
-        common.tweet(channels, twt, url)
+        common.tweet(xtra['channels'], twt, url)
         if prod.afos == "PNSARX":
             snowfall_pns(prod)
         # We are done for this product
@@ -243,8 +239,8 @@ def real_process(raw):
                 return
             hsas = re.findall("HSA:([A-Z]{3}) ", seg.raw)
             prodtxt = reference.prodDefinitions[pil]
-            mess = "%s: %s issues %s" % \
-              (wfo, wfo, prodtxt)
+            xtra['channels'].append(wfo)
+            mess = "%s issues %s" % (wfo, prodtxt)
             htmlmess = "%s issues <a href=\"%s\">%s</a> for " \
                % (wfo, myurl, prodtxt)
             usednwsli = {}
@@ -280,39 +276,39 @@ def real_process(raw):
 # TROPICAL STORM BARRY INTERMEDIATE ADVISORY NUMBER   2A
 
     if (pil == "TCM" or pil == "TCP" or pil == "TCD"):
-        mess = "%s: %s issues %s %s" % (wfo, wfo, pil, myurl)
+        xtra['channels'].append( wfo )
+        mess = "%s issues %s %s" % (wfo, pil, myurl)
         prodtxt = "(%s)" % (pil,)
         if reference.prodDefinitions.has_key(pil):
             prodtxt = reference.prodDefinitions[pil]
         htmlmess = "%s issues <a href=\"%s\">%s</a> " % (wfo, myurl, prodtxt)
         jabber.sendMessage(mess, htmlmess, xtra)
         
-        common.tweet([wfo], prodtxt, myurl)
+        common.tweet(xtra['channels'], prodtxt, myurl)
 
 
     for key in routes.keys():
         if (re.match(key, prod.afos)):
-            channels = []
             for wfo2 in routes[key]:
-                mess = "%s: %s %s" % \
-                 (wfo2, prod.afos, myurl)
-                htmlmess = "<a href=\"%s\">%s</a>" % (myurl, prodtxt)
-                tokens = re.findall("(.*) (DISCUSSION|INTERMEDIATE ADVISORY|FORECAST/ADVISORY|ADVISORY|MEMEME) NUMBER\s+([0-9]+)", raw.replace("PUBLIC ADVISORY", "ZZZ MEMEME") )
-                if (len(tokens) > 0):
-                    tt = tokens[0][0]
-                    what = tokens[0][1]
-                    tnum = tokens[0][2]
-                    if (tokens[0][1] == "MEMEME"):
-                        tokens2 = re.findall("(PUBLIC ADVISORY) NUMBER\s+([0-9]+) FOR (.*)", raw)
-                        what = tokens2[0][0]
-                        tt = tokens2[0][2]
-                    mess = "%s: %s issues %s #%s for %s %s" % (wfo2, centertext.get(wfo, wfo), what, tnum, tt, myurl)
-                    htmlmess = "%s issues <a href=\"%s\">%s #%s</a> for %s" % ( centertext.get(wfo, wfo), myurl, what, tnum, tt)
+                xtra['channels'].append(wfo2)
+            mess = "%s %s" % \
+                 (prod.afos, myurl)
+            htmlmess = "<a href=\"%s\">%s</a>" % (myurl, prodtxt)
+            tokens = re.findall("(.*) (DISCUSSION|INTERMEDIATE ADVISORY|FORECAST/ADVISORY|ADVISORY|MEMEME) NUMBER\s+([0-9]+)", raw.replace("PUBLIC ADVISORY", "ZZZ MEMEME") )
+            if (len(tokens) > 0):
+                tt = tokens[0][0]
+                what = tokens[0][1]
+                tnum = tokens[0][2]
+                if (tokens[0][1] == "MEMEME"):
+                    tokens2 = re.findall("(PUBLIC ADVISORY) NUMBER\s+([0-9]+) FOR (.*)", raw)
+                    what = tokens2[0][0]
+                    tt = tokens2[0][2]
+                mess = "%s issues %s #%s for %s %s" % (centertext.get(wfo, wfo), what, tnum, tt, myurl)
+                htmlmess = "%s issues <a href=\"%s\">%s #%s</a> for %s" % ( centertext.get(wfo, wfo), myurl, what, tnum, tt)
                 #print htmlmess, mess
-                jabber.sendMessage(mess, htmlmess, xtra)
-                channels.append( wfo2 )
+            jabber.sendMessage(mess, htmlmess, xtra)
             twt = "%s issues %s %s for %s" % (centertext.get(wfo, wfo), what, tnum, tt)
-            common.tweet(channels, twt, myurl)
+            common.tweet(xtra['channels'], twt, myurl)
 
 
     for seg in prod.segments:
@@ -340,8 +336,9 @@ def real_process(raw):
         prodtxt = "(%s)" % (pil,)
         if reference.prodDefinitions.has_key(pil):
             prodtxt = reference.prodDefinitions[pil]
-        mess = "%s: %s issues %s for %s %s %s" % \
-          (wfo, wfo, prodtxt, counties, expire, myurl)
+        xtra['channels'].append(wfo)
+        mess = "%s issues %s for %s %s %s" % \
+          (wfo, prodtxt, counties, expire, myurl)
         htmlmess = "%s issues <a href=\"%s\">%s</a> for %s %s" % (wfo, myurl, prodtxt, counties, expire)
         jabber.sendMessage(mess, htmlmess, xtra)
         twt = "%s for %s %s" % (prodtxt, counties, expire)
@@ -352,7 +349,8 @@ def real_process(raw):
 # TROPICAL STORM BARRY INTERMEDIATE ADVISORY NUMBER   2A
 
     if (pil == "TCM" or pil == "TCP" or pil == "TCD"):
-        mess = "%s: %s issues %s %s" % (wfo, wfo, pil, myurl)
+        xtra['channels'].append(wfo)
+        mess = "%s issues %s %s" % (wfo, pil, myurl)
         prodtxt = "(%s)" % (pil,)
         if reference.prodDefinitions.has_key(pil):
             prodtxt = reference.prodDefinitions[pil]
@@ -364,27 +362,25 @@ def real_process(raw):
 
     for key in routes.keys():
         if (re.match(key, prod.afos)):
-            channels = []
             for wfo2 in routes[key]:
-                mess = "%s: %s %s" % \
-                 (wfo2, prod.afos, myurl)
-                htmlmess = "<a href=\"%s\">%s</a>" % (myurl, prodtxt)
-                tokens = re.findall("(.*) (DISCUSSION|INTERMEDIATE ADVISORY|FORECAST/ADVISORY|ADVISORY|MEMEME) NUMBER\s+([0-9]+)", raw.replace("PUBLIC ADVISORY", "ZZZ MEMEME") )
-                if (len(tokens) > 0):
-                    tt = tokens[0][0]
-                    what = tokens[0][1]
-                    tnum = tokens[0][2]
-                    if (tokens[0][1] == "MEMEME"):
-                        tokens2 = re.findall("(PUBLIC ADVISORY) NUMBER\s+([0-9]+) FOR (.*)", raw)
-                        what = tokens2[0][0]
-                        tt = tokens2[0][2]
-                    mess = "%s: %s issues %s #%s for %s %s" % (wfo2, centertext.get(wfo, wfo), what, tnum, tt, myurl)
-                    htmlmess = "%s issues <a href=\"%s\">%s #%s</a> for %s" % ( centertext.get(wfo, wfo), myurl, what, tnum, tt)
-                #print htmlmess, mess
-                jabber.sendMessage(mess, htmlmess, xtra)
-                channels.append( wfo2 )
+                xtra['channels'].append(wfo2)
+            mess = "%s %s" % (prod.afos, myurl)
+            htmlmess = "<a href=\"%s\">%s</a>" % (myurl, prodtxt)
+            tokens = re.findall("(.*) (DISCUSSION|INTERMEDIATE ADVISORY|FORECAST/ADVISORY|ADVISORY|MEMEME) NUMBER\s+([0-9]+)", raw.replace("PUBLIC ADVISORY", "ZZZ MEMEME") )
+            if (len(tokens) > 0):
+                tt = tokens[0][0]
+                what = tokens[0][1]
+                tnum = tokens[0][2]
+                if (tokens[0][1] == "MEMEME"):
+                    tokens2 = re.findall("(PUBLIC ADVISORY) NUMBER\s+([0-9]+) FOR (.*)", raw)
+                    what = tokens2[0][0]
+                    tt = tokens2[0][2]
+                mess = "%s issues %s #%s for %s %s" % (centertext.get(wfo, wfo), what, tnum, tt, myurl)
+                htmlmess = "%s issues <a href=\"%s\">%s #%s</a> for %s" % ( centertext.get(wfo, wfo), myurl, what, tnum, tt)
+            #print htmlmess, mess
+            jabber.sendMessage(mess, htmlmess, xtra)
             twt = "%s issues %s %s for %s" % (centertext.get(wfo, wfo), what, tnum, tt)
-            common.tweet(channels, twt, myurl)
+            common.tweet(xtra['channels'], twt, myurl)
 
 """ Load up H-VTEC NWSLI reference """
 nwsli_dict = {}

@@ -53,26 +53,28 @@ def real_process(raw):
     product_id = prod.get_product_id()
     xtra ={
            'product_id': product_id,
+           'channels': []
            }
     sql = """INSERT into text_products(product, product_id) values (%s,%s)"""
     myargs = (sqlraw, product_id)
     POSTGIS.runOperation(sql, myargs)
     
     tokens = re.findall("ATTN (WFOS|RFCS)(.*)", raw)
-    channels = []
     for tpair in tokens:
         wfos = re.findall("([A-Z]+)\.\.\.", tpair[1])
+        xtra['channels'] = []
         for wfo in wfos:
-            channels.append( wfo )
-            body = "%s: NESDIS issues Satellite Precipitation Estimates %s?pid=%s" % (
-                wfo, config.get('urls', 'product'), product_id)
-            htmlbody = "NESDIS issues <a href='%s?pid=%s'>Satellite Precipitation Estimates</a>" %(
-                config.get('urls', 'product'), product_id)
-            jabber.sendMessage(body, htmlbody, xtra)
-
+            xtra['channels'].append( wfo )
             twt = "#%s NESDIS issues Satellite Precipitation Estimates" % (wfo,)
             url = "%s?pid=%s" % (config.get('urls', 'product'), product_id)
             common.tweet(wfo, twt, url)
+
+        body = "NESDIS issues Satellite Precipitation Estimates %s?pid=%s" % (
+                config.get('urls', 'product'), product_id)
+        htmlbody = "NESDIS issues <a href='%s?pid=%s'>Satellite Precipitation Estimates</a>" %(
+                config.get('urls', 'product'), product_id)
+        jabber.sendMessage(body, htmlbody, xtra)
+
 
 
 

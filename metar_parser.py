@@ -346,9 +346,9 @@ def sendAlert(txn, iemid, what, clean_metar):
     if (clean_metar.find("$") > 0):
         extra = "(Caution: Maintenance Check Indicator)"
     url = "http://mesonet.agron.iastate.edu/ASOS/current.phtml?network=%s" % (network,)
-    jtxt = "%s: %s,%s (%s) ASOS %s reports %s\n%s %s" % (wfo, nm, st, iemid, extra, what, clean_metar, url )
-
-    jabber.sendMessage(jtxt, jtxt)
+    jtxt = "%s,%s (%s) ASOS %s reports %s\n%s %s" % (nm, st, iemid, extra, what, clean_metar, url )
+    xtra = {'channels': wfo}
+    jabber.sendMessage(jtxt, jtxt, xtra)
 
     twt = "%s,%s (%s) ASOS reports %s" % (nm, st, iemid, what)
     common.tweet([wfo], twt, url, {'lat': str(row['lat']), 'long': str(row['lon'])})
@@ -414,10 +414,11 @@ def sendWindAlert(txn, iemid, v, d, t, clean_metar):
     if (clean_metar.find("$") > 0):
         extra = "(Caution: Maintenance Check Indicator)"
     url = "http://mesonet.agron.iastate.edu/ASOS/current.phtml?network=%s" % (network,)
-    jtxt = "%s: %s,%s (%s) ASOS %s reports gust of %.1f knots from %s @ %s\n%s"\
-            % (wfo, nm, st, iemid, extra, v, drct2dirTxt(d), \
+    jtxt = "%s,%s (%s) ASOS %s reports gust of %.1f knots from %s @ %s\n%s"\
+            % (nm, st, iemid, extra, v, drct2dirTxt(d), \
                t.strftime("%H%MZ"), clean_metar )
-    jabber.sendMessage(jtxt, jtxt)
+    xtra = {'channels': wfo}
+    jabber.sendMessage(jtxt, jtxt, xtra)
 
     twt = "%s,%s (%s) ASOS reports gust of %.1f knots from %s @ %s" % (nm, 
      st, iemid, v, drct2dirTxt(d), t.strftime("%H%MZ"))

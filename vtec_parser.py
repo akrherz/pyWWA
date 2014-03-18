@@ -92,6 +92,7 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
             text_product = product.TextProduct( buf )
             xtra = {
                     'product_id': text_product.get_product_id(),
+                    'channels': []
                     }
             skip_con = False
             if (text_product.afos[:3] == "FLS" and 
@@ -107,7 +108,8 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
                 
             if skip_con:
                 wfo = text_product.source[1:]
-                jabber_txt = "%s: %s has sent an updated FLS product (continued products were not reported here).  Consult this website for more details. %s?wfo=%s" % (wfo, wfo, 
+                xtra['channels'].append(wfo)
+                jabber_txt = "%s has sent an updated FLS product (continued products were not reported here).  Consult this website for more details. %s?wfo=%s" % (wfo, 
                                                                                                                                                                         config.get('urls', 'riverapp'), wfo)
                 jabber_html = "%s has sent an updated FLS product (continued products were not reported here).  Consult <a href=\"%s?wfo=%s\">this website</a> for more details." % (wfo, config.get('urls', 'riverapp'), wfo)
                 jabber.sendMessage(jabber_txt, jabber_html, xtra)
@@ -155,6 +157,7 @@ def segment_processor(txn, text_product, i, skip_con):
 
     xtra = {
             'product_id': text_product.get_product_id(),
+            'channels': []
             }
 
     # A segment must have UGC
@@ -302,18 +305,16 @@ def segment_processor(txn, text_product, i, skip_con):
                 vtec.action, text_product.valid, 
                 fcster, cnty, vtec.significance, seg.get_hvtec_nwsli(),
                 cnty, text_product.valid, vtec.endts, text_product.valid ))
-            channels = []
             for w in affectedWFOS.keys():
-                channels.append(w)
-                jmsg_dict['w'] = w
-                jabberTxt = "%(w)s: %(wfo)s %(product)s%(sts)sfor \
+                xtra['channels'].append(w)
+            jabberTxt = "%(wfo)s %(product)s%(sts)sfor \
 %(county)s till %(ets)s %(svs_special)s %(url)s" % jmsg_dict
-                jabberHTML = "%(wfo)s <a href='%(url)s'>%(product)s</a>%(sts)sfor %(county)s \
+            jabberHTML = "%(wfo)s <a href='%(url)s'>%(product)s</a>%(sts)sfor %(county)s \
 till %(ets)s %(svs_special)s" % jmsg_dict
-                jabber.sendMessage(jabberTxt, jabberHTML, xtra)
+            jabber.sendMessage(jabberTxt, jabberHTML, xtra)
             twt = "%(product)s%(sts)sfor %(county)s till %(ets)s" % jmsg_dict
             url = jmsg_dict["url"]
-            common.tweet(channels, twt, url)
+            common.tweet(xtra['channels'], twt, url)
 
         elif (vtec.action in ["CON", "COR"] ):
         # Lets find our county and update it with action
@@ -336,19 +337,17 @@ till %(ets)s %(svs_special)s" % jmsg_dict
                      and significance = %s""", (vtec.action, text_product.valid, 
                                                 vtec.office, vtec.ETN, vtec.phenomena, vtec.significance))
                
-            channels = []
             for w in affectedWFOS.keys():
-                jmsg_dict['w'] = w
-                jabberTxt = "%(w)s: %(wfo)s %(product)s%(sts)sfor \
+                xtra['channels'].append(w)
+            jabberTxt = "%(wfo)s %(product)s%(sts)sfor \
 %(county)s till %(ets)s %(svs_special)s %(url)s" % jmsg_dict
-                jabberHTML = "%(wfo)s <a href='%(url)s'>%(product)s</a>%(sts)sfor %(county)s \
+            jabberHTML = "%(wfo)s <a href='%(url)s'>%(product)s</a>%(sts)sfor %(county)s \
 till %(ets)s %(svs_special)s" % jmsg_dict
-                if not skip_con:
-                    jabber.sendMessage(jabberTxt, jabberHTML, xtra)
-                    channels.append(w)
+            if not skip_con:
+                jabber.sendMessage(jabberTxt, jabberHTML, xtra)
             twt = "%(product)s%(sts)sfor %(county)s till %(ets)s" % jmsg_dict
             url = jmsg_dict["url"]
-            common.tweet(channels, twt, url)
+            common.tweet(xtra['channels'], twt, url)
 #--
 
         elif (vtec.action in ["CAN", "EXP", "UPG", "EXT"] ):
@@ -384,7 +383,7 @@ till %(ets)s %(svs_special)s" % jmsg_dict
             if (vtec.action == "EXT" and vtec.begints != None):
                 jmsg_dict['sts'] = " valid at %s%s " % ( \
                 (vtec.begints - local_offset).strftime(efmt), text_product.z )
-                fmt = "%(w)s: %(wfo)s  %(product)s for %(county)s %(svs_special)s\
+                fmt = "%(wfo)s  %(product)s for %(county)s %(svs_special)s\
 %(sts)still %(ets)s"
                 htmlfmt = "%(wfo)s <a href='%(url)s'>%(product)s</a>\
  for %(county)s%(sts)still %(ets)s %(svs_special)s"
@@ -393,15 +392,13 @@ till %(ets)s %(svs_special)s" % jmsg_dict
                 htmlfmt += " till %(ets)s"
             fmt += " %(url)s"
             if (vtec.action != 'UPG'):
-                channels = []
                 for w in affectedWFOS.keys():
-                    jmsg_dict['w'] = w
-                    jabber.sendMessage(fmt % jmsg_dict, htmlfmt % jmsg_dict, 
+                    xtra['channels'].append( w )
+                jabber.sendMessage(fmt % jmsg_dict, htmlfmt % jmsg_dict, 
                                        xtra)
-                    channels.append( w )
                 twt = "%(product)s%(sts)sfor %(county)s till %(ets)s" % jmsg_dict
                 url = jmsg_dict["url"]
-                common.tweet(channels, twt, url)
+                common.tweet(xtra['channels'], twt, url)
 
         if (vtec.action != "NEW"):
             ugc_limiter = ""

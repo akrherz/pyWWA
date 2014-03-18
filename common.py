@@ -267,7 +267,10 @@ class JabberClient:
         # channels is of most important
         x = message.addElement('x', 'nwschat:nwsbot')
         for key in xtra.keys():
-            x[key] = xtra[key]
+            if type(xtra[key]) == type([]):
+                x[key] = ",".join(xtra[key])
+            else:
+                x[key] = xtra[key]
         self.xmlstream.send(message)
 
     def debug(self, elem):

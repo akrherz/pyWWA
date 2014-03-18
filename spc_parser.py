@@ -178,14 +178,15 @@ def real_parser(txn, buf):
     for cat in ['SLGT','MDT','HIGH','CRIT','EXTM']:
         for z in wfos[cat]:
             for wfo in z:
-                msgs[wfo] = "%s%s: The Storm Prediction Center issues Day 1 %s risk \
-for portions of %s %s" % (channelprefix, wfo, cat, wfo, url)
+                msgs[wfo] = "The Storm Prediction Center issues Day 1 %s risk \
+for portions of %s %s" % (cat, wfo, url)
                 htmlmsgs[wfo] = "The Storm Prediction Center issues \
 <a href=\"%s\">%s %s Risk</a> for portions of %s's area" % (url, \
   product_descript, codes[cat], wfo)
                 twts[wfo] = "SPC issues Day 1 %s risk for %s" % (cat, wfo)
 
     for wfo in msgs.keys():
+        xtra['channels'] = [wfo,]
         jabber.sendMessage( msgs[wfo], htmlmsgs[wfo], xtra )
 
     #for wfo in twts.keys():
