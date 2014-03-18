@@ -378,7 +378,7 @@ till %(ets)s %(svs_special)s" % jmsg_dict
                         vtec.phenomena, vtec.significance) )
             
             jmsg_dict['action'] = "cancels"
-            fmt = "%(w)s: %(wfo)s  %(product)s for %(county)s %(svs_special)s "
+            fmt = "%(wfo)s  %(product)s for %(county)s %(svs_special)s "
             htmlfmt = "%(wfo)s <a href='%(url)s'>%(product)s</a> for %(county)s %(svs_special)s"
             if (vtec.action == "EXT" and vtec.begints != None):
                 jmsg_dict['sts'] = " valid at %s%s " % ( \
