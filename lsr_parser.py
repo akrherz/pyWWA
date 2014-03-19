@@ -118,6 +118,10 @@ def real_processor(txn, text):
                 lsr.utcvalid.strftime("%Y%m%d%H%M"),
                 lsr.utcvalid.strftime("%Y%m%d%H%M") )
         jabber_text, jabber_html = lsr.get_jabbers(uri)
+        xtra['geometry'] = 'POINT(%s %s)' % (lsr.get_lon(), lsr.get_lat())
+        xtra['ptype'] = lsr.get_dbtype()
+        xtra['valid'] = lsr.utcvalid.strftime("%Y%m%dT%H:%M:00")
+        xtra['category'] = 'LSR'
         JABBER.sendMessage(jabber_text, jabber_html, xtra)
         common.tweet([wfo,], lsr.tweet(), uri, {'lat': str(lsr.get_lat()), 
                                             'long': str(lsr.get_lon())})
