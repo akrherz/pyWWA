@@ -155,10 +155,6 @@ def segment_processor(txn, text_product, i, skip_con):
                                                     text_product.z, 0))
     seg = text_product.segments[i]
 
-    xtra = {
-            'product_id': text_product.get_product_id(),
-            'channels': []
-            }
 
     # A segment must have UGC
     if len(seg.ugcs) == 0:
@@ -184,8 +180,22 @@ def segment_processor(txn, text_product, i, skip_con):
     end_ts = None
     # A segment could have multiple vtec codes :)
     for vtec in seg.vtec:
-        if (vtec.status == "T"):
+        if vtec.status == "T":
             return
+
+        xtra = {
+            'status' : vtec.status,
+            'vtec' : vtec.getID(text_product.valid.year),
+            'ptype': vtec.phenomena,
+            'product_id': text_product.get_product_id(),
+            'channels': []
+            }
+        if seg.giswkt is not None:
+            xtra['category'] = 'SBW'
+            xtra['geometry'] = seg.giswkt.replace("SRID=4326;", "")
+        if vtec.endts is not None:
+            xtra['expire'] = vtec.endts.strftime("%Y%m%dT%H:%M:00")
+
         ugc = seg.ugcs
         hvtec = seg.hvtec
 
@@ -280,14 +290,13 @@ def segment_processor(txn, text_product, i, skip_con):
             if fcster is not None:
                 fcster = fcster[:24]
             if (seg.sbw != None):
-                giswkt = 'SRID=4326;%s' % (MultiPolygon([ seg.sbw ]).wkt,)
                 txn.execute("""INSERT into """+ warning_table +""" (issue, expire, report, 
                  significance, geom, phenomena, gtype, wfo, eventid, status, updated, 
                 fcster, hvtec_nwsli, init_expire, product_issue) 
                 VALUES (%s,%s,%s,%s,%s,%s,%s, 
                 %s,%s,%s,%s, %s, %s, %s, %s)""", (bts, vtec.endts , 
                                 text_product.text, vtec.significance, 
-      giswkt, vtec.phenomena, 'P', vtec.office, vtec.ETN, vtec.action, 
+      seg.giswkt, vtec.phenomena, 'P', vtec.office, vtec.ETN, vtec.action, 
       text_product.valid, fcster, seg.get_hvtec_nwsli(),
       vtec.endts, text_product.valid ) )
                 
@@ -425,7 +434,6 @@ till %(ets)s %(svs_special)s" % jmsg_dict
      
     # New fancy SBW Stuff!
     if seg.sbw is not None:
-        giswkt = 'SRID=4326;%s' % (MultiPolygon([ seg.sbw ]).wkt,)
         # If we are dropping the product and there is only 1 segment
         # We need not wait for more action, we do two things
         # 1. Update the polygon_end to cancel time for the last polygon
@@ -481,7 +489,7 @@ till %(ets)s %(svs_special)s" % jmsg_dict
                  text_product.valid, 
                  text_product.valid, 
                  text_product.valid, 
-                  giswkt, vtec.action, product_text,
+                  seg.giswkt, vtec.action, product_text,
                  seg.windtag, seg.hailtag, seg.tornadotag, seg.tornadodamagetag,
                  tml_valid, seg.tml_dir, seg.tml_sknt, seg.tml_giswkt)
 
@@ -497,7 +505,7 @@ till %(ets)s %(svs_special)s" % jmsg_dict
                 vvv = vtec.endts
             myargs = ( vtec.office, vtec.ETN, 
                  vtec.significance, vtec.phenomena, vvv, vvv, 
-                  giswkt, vtec.action, product_text, seg.windtag, seg.hailtag,
+                  seg.giswkt, vtec.action, product_text, seg.windtag, seg.hailtag,
                   seg.tornadotag, seg.tornadodamagetag,
                   tml_valid, seg.tml_dir, seg.tml_sknt, seg.tml_giswkt)
         else:
@@ -517,7 +525,7 @@ till %(ets)s %(svs_special)s" % jmsg_dict
             myargs = (vtec.office, vtec.ETN, 
                  vtec.significance, vtec.phenomena, _expire, 
                  _expire, vvv, 
-                 _expire, giswkt, vtec.action, product_text,
+                 _expire, seg.giswkt, vtec.action, product_text,
                  seg.windtag, seg.hailtag, seg.tornadotag, seg.tornadodamagetag,
                  tml_valid, seg.tml_dir, seg.tml_sknt, seg.tml_giswkt)
         txn.execute(sql, myargs)
