@@ -93,6 +93,8 @@ def compute_ts(tstring):
                           hour=hour, minute=minute)
         if utc.day > 25 and day == 1: # Next month!
             utc += datetime.timedelta(days=15) # careful
+        if utc.day == 1 and day > 25: # Last month!
+            utc -= datetime.timedelta(days=15)
         utc = utc.replace(day=day)    
     else:
         utc = _UTCNOW.replace(day=day,hour=hour,minute=minute)
