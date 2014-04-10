@@ -19,8 +19,11 @@ for row in cursor:
     oid = row[0]
     report = row[1]
     ugc = UGC(row[2][:2], row[2][2], row[2][3:])
-    
-    prod = product.TextProduct(report)
+    try:
+        prod = product.TextProduct(report)
+    except Exception,exp:
+        print 'ERROR, oid: %s exp: %s' % (oid, exp)
+        continue
     
     for segment in prod.segments:
         if ugc not in segment.ugcs:
