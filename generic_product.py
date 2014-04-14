@@ -66,7 +66,7 @@ SIMPLE_PRODUCTS = ["TCE", "DSA", "AQA", "DGT", "FWF", "RTP", "HPA", "CWF",
             "SRF", "SFT", "PFM", "ZFP", "CAE", "AFD", "FTM", "AWU", "HWO",
             "NOW", "PSH", "NOW", "PNS", "RER", "ADM", "TCU", "RVA", "EQR",
             "OEP", "SIG", "VAA", "RVF", "PWO", "TWO", "RFD"]
-NEW_ROUTING = ['RFD',]
+NEW_ROUTING = ['RFD', 'NOW']
 
 AHPS_TEMPLATE = {
   'CR': 'http://www.crh.noaa.gov/ahps2/hydrograph.php?wfo=%s&amp;gage=%s&amp;view=1,1,1,1,1,1,1,1',
