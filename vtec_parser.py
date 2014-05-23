@@ -50,8 +50,6 @@ from pyldm import ldmbridge
 from pyiem import iemtz, reference
 from pyiem.nws import product
 
-from shapely.geometry import MultiPolygon
-
 import common
 
 POSTGIS = adbapi.ConnectionPool("twistedpg", database="postgis", cp_reconnect=True,
@@ -208,11 +206,12 @@ def segment_processor(txn, text_product, i, skip_con):
              'url': "%s#%s" % (config.get('urls', 'vtec'), 
                                vtec.url(text_product.valid.year)) }
 
-        if (vtec.begints != None and \
+        if (vtec.begints != None and 
             vtec.begints > (gmtnow + datetime.timedelta(hours=+1))):
             efmt = "%b %d, %-I:%M %p "
-            jmsg_dict['sts'] = " valid at %s%s " % \
-                 ((vtec.begints - local_offset).strftime(efmt), text_product.z)
+            jmsg_dict['sts'] = " valid at %s%s " % (
+                                (vtec.begints - local_offset).strftime(efmt), 
+                                text_product.z)
         else:
             efmt = "%-I:%M %p "
 
@@ -285,11 +284,11 @@ def segment_processor(txn, text_product, i, skip_con):
             if (vtec.action == "EXB" or vtec.action == "EXA"):
                 bts = text_product.valid
             
-        # Insert Polygon
+            # Insert Polygon
             fcster = text_product.get_signature()
             if fcster is not None:
                 fcster = fcster[:24]
-            if (seg.sbw != None):
+            if seg.sbw is not None:
                 txn.execute("""INSERT into """+ warning_table +""" (issue, expire, report, 
                  significance, geom, phenomena, gtype, wfo, eventid, status, updated, 
                 fcster, hvtec_nwsli, init_expire, product_issue) 
