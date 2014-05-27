@@ -1,10 +1,10 @@
-# Common stuff for the pyWWA ingestors...
+''' Common stuff for the pyWWA ingestors...'''
 
+#twisted stuff
 from twisted.internet import reactor
 from twisted.words.xish import domish
 from twisted.python import log
 from twisted.mail import smtp
-from twisted.web import client
 import twisted.web.error as weberror
 from twisted.words.xish.xmlstream import STREAM_END_EVENT
 from twisted.words.protocols.jabber import client as jclient
@@ -13,7 +13,7 @@ from twisted.internet.task import LoopingCall
 from twisted.internet import task
 from twisted.enterprise import adbapi
 
-from twittytwister import twitter
+#stdlib
 import json
 import time
 import traceback
@@ -21,11 +21,14 @@ import datetime
 import sys
 import os
 import StringIO
-from email.MIMEText import MIMEText
+from email.mime.text import MIMEText
 import socket
 from oauth import oauth
-
 import ConfigParser
+
+#third party
+from twittytwister import twitter
+
 config = ConfigParser.ConfigParser()
 config.read(os.path.join(os.path.dirname(__file__), 'cfg.ini'))
 
@@ -33,10 +36,17 @@ config.read(os.path.join(os.path.dirname(__file__), 'cfg.ini'))
 OAUTH_TOKENS = {}
 OAUTH_CONSUMER = oauth.OAuthConsumer(config.get('twitter','consumerkey'), 
                                      config.get('twitter','consumersecret'))
-BITLY = "http://api.bit.ly/shorten?version=2.0.1&longUrl=%s&login=iembot&apiKey="+ config.get('bitly','apikey')
 
+def get_database(dbname):
+    ''' Get a database database connection '''
+    return adbapi.ConnectionPool("twistedpg", database=dbname, 
+                                cp_reconnect=True,
+                                host=config.get('database','host'), 
+                                user=config.get('database','user'),
+                                password=config.get('database','password')) 
 
 def load_tokens(txn):
+    ''' Load twitter access tokens '''
     log.msg("Loading oauth_tokens...")
     txn.execute("SELECT * from oauth_tokens")
     for row in txn:
@@ -45,12 +55,13 @@ def load_tokens(txn):
     log.msg("... loaded %s oauth_tokens." % (len(OAUTH_TOKENS.keys()),))
 
 _dbpool = adbapi.ConnectionPool("twistedpg", database="mesosite", 
-                                cp_reconnect=True,
+                                cp_reconnect=True, cp_max=1,
                                 host=config.get('database','host'), 
                                 user=config.get('database','user'),
                                 password=config.get('database','password') )
 defer = _dbpool.runInteraction(load_tokens)
-def stop_pool(res):
+def stop_pool( dummy ):
+    ''' close the temp database pool '''
     _dbpool.close()
 defer.addCallback(stop_pool)
 
@@ -97,34 +108,14 @@ def send_tweet(twt):
     """
     tweet(twt.xtra['channels'], twt.plain, twt.url, twt.extra)
 
-def tweet(channels, msg, url, extras={}):
+def tweet(channels, msg, url, extras=dict()):
     """
     Method to publish twitter messages
-    """
-    # Simple hack to see if we are running in development TODO
-    if config.get('xmpp','domain') == 'laptop.local':
-        channels = ['TEST',]
-        return
-    
+    """    
     if url:
         tweet_step2(channels, msg, extras, url)
-        #url = url.replace("&amp;", "&").replace("#","%23").replace("&","%26").replace("?", "%3F")
-        #deffer = client.getPage(BITLY % (url, ) )
-        #deffer.addCallback(reallytweet, channels, msg, extras )
-        #deffer.addErrback(bitly_error, channels, msg, extras )
-        #deffer.addErrback(log.err)
     else:
         reallytweet(None, channels, msg, extras)
-
-def bitly_error(err, channels, msg, extras):
-    """
-    Sometimes bad things happen with bitly
-    """
-    log.msg("Encountered BITLY error")
-    err.trap( weberror.Error )
-    log.msg( err.getErrorMessage() )
-    log.msg( err.value.response )
-    tweet_step2(channels, msg, extras)
 
 def reallytweet(jsondata, channels, msg, extras):
     """
@@ -133,7 +124,8 @@ def reallytweet(jsondata, channels, msg, extras):
     tinyurl = ""
     if jsondata and type(jsondata) == type(""):
         j = json.loads( jsondata )
-        if j.has_key('errorCode') and j['errorCode'] != 0 and j.has_key('errorMessage'):
+        if (j.has_key('errorCode') and j['errorCode'] != 0 and 
+            j.has_key('errorMessage')):
             if j['errorCode'] != 500:
                 email_error(str(j), "Problem with bitly")
         elif j.has_key('results'):
@@ -141,6 +133,7 @@ def reallytweet(jsondata, channels, msg, extras):
     tweet_step2(channels, msg, extras, tinyurl)
 
 def tweet_step2(channels, msg, extras, tinyurl=""):
+    ''' Step 2 in the twittering '''
     i = 0
     for channel in channels:
         tuser = "iembot_%s" % (channel.lower(),)
@@ -156,17 +149,17 @@ def make_jabber_client(resource_prefix):
     """ Generate a jabber client, please """
 
     myJid = jid.JID('%s@%s/%s_%s' % (config.get('xmpp','username'), 
-                                    config.get('xmpp','domain'), resource_prefix,
-       datetime.datetime.utcnow().strftime("%Y%m%d%H%M%S") ) )
+                    config.get('xmpp','domain'), resource_prefix,
+                    datetime.datetime.utcnow().strftime("%Y%m%d%H%M%S") ) )
     factory = jclient.basicClientFactory(myJid, config.get('xmpp', 'password'))
 
     jabber = JabberClient(myJid)
 
     factory.addBootstrap('//event/stream/authd', jabber.authd)
-    factory.addBootstrap("//event/client/basicauth/invaliduser", jabber.debug)
-    factory.addBootstrap("//event/client/basicauth/authfailed", jabber.debug)
-    factory.addBootstrap("//event/stream/error", jabber.debug)
-    factory.addBootstrap(xmlstream.STREAM_END_EVENT, jabber._disconnect )
+    factory.addBootstrap("//event/client/basicauth/invaliduser", debug)
+    factory.addBootstrap("//event/client/basicauth/authfailed", debug)
+    factory.addBootstrap("//event/stream/error", debug)
+    factory.addBootstrap(xmlstream.STREAM_END_EVENT, jabber.mydisconnect )
 
     reactor.connectTCP(config.get('xmpp', 'connecthost'), 5222, factory)
 
@@ -201,33 +194,50 @@ def really_really_tweet(tuser, channel, tinyurl, msg, extras):
     deffer.addErrback(log.err)
 
 def tb(x, tuser, channel, twt):
-    log.msg("TWEET User: %s TWT: [%s] RES: %s" % (tuser, twt, x) )
+    ''' callback on a good tweet! '''
+    log.msg("TWEET User: %s channel: %s TWT: [%s] RES: %s" % (tuser, channel,
+                                                              twt, x) )
     
 def twitterErrback(error, tuser, channel, twt):
     """
     Errback for twitter calls! 
     """
     error.trap( weberror.Error )
-    log.msg("TWEET ERROR User: %s TWT: [%s] RES: %s" % (tuser, twt, error) )
+    log.msg("TWEET ERROR User: %s Channel: %s TWT: [%s] RES: %s" % (tuser, 
+                                                channel, twt, error) )
     log.msg( error.getErrorMessage() )
     if error.value.status in ["401", "403"]:
         email_error(error.value.response, "Error %s for %s for msg: %s" % (
                                        error.value.status ,tuser, twt))
 
+def debug(data):
+    ''' Debug messages '''
+    log.msg("DEBUG %s" % (data,))
+
+def rawDataInFn(data):
+    ''' Got Data '''
+    log.msg("RECV %s" % (data,))
+
+def rawDataOutFn(data):
+    ''' Sent data '''
+    log.msg("SEND %s" % (data,))
 
 class JabberClient:
+    ''' A jabber client class '''
 
     def __init__(self, myJid):
+        ''' Constructor '''
         self.myJid = myJid
         self.xmlstream = None
         self.authenticated = False
 
-    def authd(self,xs):
+    def authd(self, xs):
+        ''' called back on authentication '''
         log.msg("Logged into Jabber Chat Server!")
 
         self.xmlstream = xs
-        self.xmlstream.rawDataInFn = self.rawDataInFn
-        self.xmlstream.rawDataOutFn = self.rawDataOutFn
+        self.xmlstream.rawDataInFn = rawDataInFn
+        self.xmlstream.rawDataOutFn = rawDataOutFn
         presence = domish.Element(('jabber:client','presence'))
         presence.addElement('status').addContent('Online')
         self.xmlstream.send(presence)
@@ -238,9 +248,11 @@ class JabberClient:
         self.xmlstream.addObserver(STREAM_END_EVENT, lambda _: lc.stop())
 
     def keepalive(self):
+        ''' white space keepalive, for now '''
         self.xmlstream.send(' ')
 
-    def _disconnect(self, xs):
+    def mydisconnect(self, dummy):
+        ''' called back on disconnect ? '''
         log.msg("SETTING authenticated to false!")
         self.authenticated = False
 
@@ -248,7 +260,7 @@ class JabberClient:
         """ Send a pyiem.nws.parser.JabberMessage """
         self.sendMessage(jmsg.plain, jmsg.html, jmsg.xtra)
 
-    def sendMessage(self, body, html, xtra={}):
+    def sendMessage(self, body, html, xtra=dict()):
         """ Send a message to the bot for routing! """
         if not self.authenticated:
             log.msg("No Connection, Lets wait and try later...")
@@ -260,7 +272,7 @@ class JabberClient:
         message['type'] = 'chat'
 
         # message.addElement('subject',None,subject)
-        message.addElement('body',None,body)
+        message.addElement('body', None, body)
         h = message.addElement('html','http://jabber.org/protocol/xhtml-im')
         b = h.addElement('body', 'http://www.w3.org/1999/xhtml')
         b.addRawXml( html or body )
@@ -273,11 +285,5 @@ class JabberClient:
                 x[key] = xtra[key]
         self.xmlstream.send(message)
 
-    def debug(self, elem):
-        log.msg( elem.toXml().encode('utf-8') )
 
-    def rawDataInFn(self, data):
-        print 'RECV', unicode(data,'utf-8','ignore').encode('ascii', 'replace')
-    def rawDataOutFn(self, data):
-        if (data == ' '): return 
-        print 'SEND', unicode(data,'utf-8','ignore').encode('ascii', 'replace')
+
