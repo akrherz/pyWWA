@@ -32,6 +32,7 @@ from shapely.geometry import MultiPolygon
 from pyldm import ldmbridge
 from pyiem import reference
 from pyiem.nws import product
+from pyiem.nws.products.spacewx import parser as spacewxparser
 import common
 
 import ConfigParser
@@ -186,6 +187,14 @@ def real_process(raw):
     deffer = POSTGIS.runOperation(sql, myargs)
     deffer.addErrback( common.email_error, sqlraw)
     myurl = "%s?pid=%s" % (config.get('urls', 'product'), product_id)
+
+    if prod.source == 'KWNP':
+        # this is redundant for now, oh well
+        prod = spacewxparser( raw )
+        j = prod.get_jabbers( 
+                                config.get('urls', 'product') +"?pid=" )
+        jabber.sendMessage(j[0][0], j[0][1], j[0][2])
+        return
 
     xtra = {
             "product_id": product_id,
