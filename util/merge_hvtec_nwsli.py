@@ -26,8 +26,7 @@ if len(sys.argv) < 2:
     sys.exit(0)
 
 dbconn = psycopg2.connect(database='postgis',
-                           host='iemdb',
-                           user='mesonet')
+                           host='iemdb')
 cursor = dbconn.cursor()
 print ' - Connected to database: postgis'
 
