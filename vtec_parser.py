@@ -89,12 +89,17 @@ def really_process_data(buf):
                                nwsli_provider=nwsli_dict)
 
     df = PGCONN.runInteraction(text_product.sql)
-    df.addCallback(do_jabber, text_product)
+    df.addCallback(step2, text_product)
     df.addErrback(common.email_error, text_product.unixtext)
     df.addErrback( log.err )   
 
-def do_jabber(dummy, text_product):
-    ''' Do the Jabber work necessary after the database stuff has completed '''
+def step2(dummy, text_product):
+    ''' After the SQL is done, lets do other things '''
+    if len(text_product.warnings) > 0:
+        common.email_error( "\n\n".join(text_product.warnings), 
+                            text_product.text)
+    
+    #Do the Jabber work necessary after the database stuff has completed
     for (plain, html, xtra) in text_product.get_jabbers( 
                                         common.config.get('urls', 'vtec') ):
         jabber.sendMessage(plain, html, xtra)
