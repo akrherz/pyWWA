@@ -65,9 +65,9 @@ routes = {'TCPAT[0-9]': gulfwfo,
 
 SIMPLE_PRODUCTS = ["TCE", "DSA", "AQA", "DGT", "FWF", "RTP", "HPA", "CWF", 
             "SRF", "SFT", "PFM", "ZFP", "CAE", "AFD", "FTM", "AWU", "HWO",
-            "NOW", "PSH", "NOW", "PNS", "RER", "ADM", "TCU", "RVA", "EQR",
+            "PSH", "PNS", "RER", "ADM", "TCU", "RVA", "EQR",
             "OEP", "SIG", "VAA", "RVF", "PWO", "TWO", "RFD"]
-NEW_ROUTING = ['RFD', 'NOW']
+NEW_ROUTING = ['RFD', ]
 
 AHPS_TEMPLATE = {
   'CR': 'http://www.crh.noaa.gov/ahps2/hydrograph.php?wfo=%s&amp;gage=%s&amp;view=1,1,1,1,1,1,1,1',
@@ -196,6 +196,13 @@ def real_process(raw):
         jabber.sendMessage(j[0][0], j[0][1], j[0][2])
         return
 
+    if pil in ['NOW',]:
+        j = prod.get_jabbers( 
+                                config.get('urls', 'product') +"?pid=" )
+        jabber.sendMessage(j[0][0], j[0][1], j[0][2])
+        return
+        
+
     xtra = {
             "product_id": product_id,
             'channels': []
@@ -211,7 +218,7 @@ def real_process(raw):
 
         mess = "%s issues %s %s" % (wfo, prodtxt, myurl)
         htmlmess = "%s issues <a href=\"%s\">%s</a> " % (centertext.get(wfo,wfo), myurl, prodtxt)
-        if (not ["HWO","NOW","ZFP"].__contains__(pil) and 
+        if (not ["HWO", "ZFP"].__contains__(pil) and 
          len(prod.segments) > 0 and 
          len(prod.segments[0].headlines) > 0 and 
          len(prod.segments[0].headlines[0]) < 200 ):
