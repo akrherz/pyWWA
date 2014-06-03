@@ -94,13 +94,7 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
 def real_processor(txn, text):
     """ Lets actually process! """
     prod = lsrparser( text )
-    wfo = prod.source[1:]
     
-    xtra = {
-            'product_id': prod.get_product_id(),
-            'channels': wfo,
-            }
-
     if len(prod.lsrs) == 0:
         raise Exception("No LSRs parsed!", text)
 
@@ -111,29 +105,15 @@ def real_processor(txn, text):
         uniquekey = hash(lsr.text)
         if LSRDB.has_key( uniquekey ):
             prod.duplicates += 1
+            lsr.duplicate = True
             continue
         LSRDB[ uniquekey ] = datetime.datetime.utcnow().replace(
                                                 tzinfo=pytz.timezone("UTC"))
-        uri =  "%s#%s/%s/%s" % (common.config.get('urls', 'lsr'), wfo, 
-                lsr.utcvalid.strftime("%Y%m%d%H%M"),
-                lsr.utcvalid.strftime("%Y%m%d%H%M") )
-        jabber_text, jabber_html = lsr.get_jabbers(uri)
-        xtra['geometry'] = 'POINT(%s %s)' % (lsr.get_lon(), lsr.get_lat())
-        xtra['ptype'] = lsr.get_dbtype()
-        xtra['valid'] = lsr.utcvalid.strftime("%Y%m%dT%H:%M:00")
-        xtra['category'] = 'LSR'
-        JABBER.sendMessage(jabber_text, jabber_html, xtra)
-        common.tweet([wfo,], lsr.tweet(), uri, {'lat': str(lsr.get_lat()), 
-                                            'long': str(lsr.get_lon())})
-
         lsr.sql(txn)
 
-    if prod.is_summary():
-        baseuri = common.config.get('urls', 'lsr')
-        jabber_text, jabber_html = prod.get_jabbers(baseuri) 
-        JABBER.sendMessage(jabber_text, jabber_html, xtra)
-        common.tweet([wfo,], "Summary Local Storm Report", 
-                     prod.get_url(baseuri))
+    j = prod.get_jabbers(common.config.get('urls', 'lsr')) 
+    for (p, h, x) in j:
+        JABBER.sendMessage(p, h, x)
 
 reactor.callLater(0, loaddb)
 JABBER = common.make_jabber_client("lsr_parser")
