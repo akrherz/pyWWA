@@ -26,6 +26,7 @@ from twisted.internet.task import LoopingCall
 from twisted.internet import reactor
 from twisted.words.xish import domish, xpath
 from twisted.mail import smtp
+from twisted.enterprise import adbapi
 
 _illegal_xml_chars_RE = re.compile(
                     u'[\x00-\x08\x0b\x0c\x0e-\x1F\uD800-\uDFFF\uFFFE\uFFFF]')
@@ -34,6 +35,14 @@ _illegal_xml_chars_RE = re.compile(
 config = json.load(open(os.path.join(os.path.dirname(__file__),
                                      '../settings.json')))
 settings = {}
+
+def get_database(dbname):
+    ''' Get a database database connection '''
+    return adbapi.ConnectionPool("pyiem.twistedpg", database=dbname, 
+                                cp_reconnect=True,
+                                host=config.get('databaserw').get('host'), 
+                                user=config.get('databaserw').get('user'),
+                                password=config.get('databaserw').get('password')) 
 
 def load_settings():
     """ Load settings immediately, so we don't have to worry about the settings 
