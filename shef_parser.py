@@ -28,7 +28,6 @@ import pytz
 
 # Third Party Stuff
 from twisted.internet import task
-from twisted.enterprise import adbapi
 from twisted.internet.defer import DeferredQueue, Deferred
 from twisted.internet.task import cooperate
 from twisted.internet import reactor, protocol
@@ -38,18 +37,9 @@ config = ConfigParser.ConfigParser()
 config.read(os.path.join(os.path.dirname(__file__), 'cfg.ini'))
 
 # Setup Database Links
-ACCESSDB_SINGLE = adbapi.ConnectionPool("twistedpg", database="iem", cp_reconnect=True,
-                                host=config.get('database','host'), cp_max=1,
-                                user=config.get('database','user'),
-                                password=config.get('database','password') )
-ACCESSDB = adbapi.ConnectionPool("twistedpg", database="iem", cp_reconnect=True,
-                                host=config.get('database','host'), cp_max=5,
-                                user=config.get('database','user'),
-                                password=config.get('database','password') )
-HADSDB = adbapi.ConnectionPool("twistedpg", database="hads", cp_reconnect=True,
-                                host=config.get('database','host'), 
-                                user=config.get('database','user'),
-                                password=config.get('database','password') )
+ACCESSDB_SINGLE = common.get_database('iem')
+ACCESSDB = common.get_database('iem')
+HADSDB = common.get_database('hads')
 
 # Necessary for the shefit program to run A-OK
 os.chdir("%s/shef_workspace" % (os.path.dirname(os.path.abspath(__file__)),))

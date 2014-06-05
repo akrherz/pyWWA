@@ -7,7 +7,6 @@ log.startLogging(logfile.DailyLogFile('spc_parser.log','logs'))
 
 # Twisted Python imports
 from twisted.internet import reactor
-from twisted.enterprise import adbapi
 
 # pyWWA stuff
 from pyldm import ldmbridge
@@ -24,11 +23,7 @@ def exception_hook(kwargs):
     if not kwargs.has_key("failure"):
         return
 
-DBPOOL = adbapi.ConnectionPool("twistedpg", database="postgis", cp_max=2,
-                               host=config.get('database','host'), 
-                               user=config.get('database','user'),
-                               password=config.get('database','password'), 
-                               cp_reconnect=True)
+DBPOOL = common.get_database('postgis')
 WAITFOR = 20
 
 

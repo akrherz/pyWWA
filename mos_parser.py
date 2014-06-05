@@ -7,7 +7,6 @@ log.startLogging( logfile.DailyLogFile('mos_parser.log', 'logs') )
 
 # Twisted Python imports
 from twisted.internet import reactor
-from twisted.enterprise import adbapi
 
 # Standard Python modules
 import re
@@ -23,11 +22,7 @@ import ConfigParser
 config = ConfigParser.ConfigParser()
 config.read("/home/ldm/pyWWA/cfg.ini")
 
-DBPOOL = adbapi.ConnectionPool("twistedpg", database="mos", 
-                               host=config.get('database','host'), 
-                               user=config.get('database','user'),
-                               password=config.get('database','password'), 
-                               cp_reconnect=True)
+DBPOOL = common.get_database('mos')
 
 class myProductIngestor(ldmbridge.LDMProductReceiver):
 

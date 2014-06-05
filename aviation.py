@@ -3,7 +3,6 @@
 # Twisted Python imports
 from twisted.internet import reactor
 from twisted.python import log, logfile
-from twisted.enterprise import adbapi
 
 # Standard Python modules
 import re, os, math
@@ -24,10 +23,7 @@ config.read(os.path.join(os.path.dirname(__file__), 'cfg.ini'))
 log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
 log.startLogging(logfile.DailyLogFile('aviation.log','logs'))
 
-DBPOOL = adbapi.ConnectionPool("twistedpg", database="postgis", cp_reconnect=True,
-                                host=config.get('database','host'), cp_max=1,
-                                user=config.get('database','user'),
-                                password=config.get('database','password') )
+DBPOOL = common.get_database('postgis')
 
 # 
 CS_RE = re.compile(r"""CONVECTIVE\sSIGMET\s(?P<label>[0-9A-Z]+)\s

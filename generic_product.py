@@ -4,7 +4,6 @@
 from twisted.internet import reactor
 from twisted.python import log
 from twisted.python import logfile
-from twisted.enterprise import adbapi
 
 # Standard Python modules
 import os, re
@@ -27,10 +26,7 @@ config.read(os.path.join(os.path.dirname(__file__), 'cfg.ini'))
 log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
 log.startLogging( logfile.DailyLogFile('generic_product.log', 'logs/') )
 
-POSTGIS = adbapi.ConnectionPool("twistedpg", database="postgis", cp_reconnect=True,
-                                host=config.get('database','host'), 
-                                user=config.get('database','user'),
-                                password=config.get('database','password') )
+POSTGIS = common.get_database('postgis')
 
 
 # These are the offices which get all hurricane stuff

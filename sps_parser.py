@@ -16,17 +16,12 @@ from pyldm import ldmbridge
 from shapely.geometry import MultiPolygon
 
 from twisted.internet import reactor
-from twisted.enterprise import adbapi
 
 import ConfigParser
 config = ConfigParser.ConfigParser()
 config.read(os.path.join(os.path.dirname(__file__), 'cfg.ini'))
 
-POSTGIS = adbapi.ConnectionPool("twistedpg", database="postgis", 
-                                cp_reconnect=True, cp_max=1,
-                                host=config.get('database','host'), 
-                                user=config.get('database','user'),
-                                password=config.get('database','password') )
+POSTGIS = common.get_database('postgis')
 
 
 ugc_dict = {}

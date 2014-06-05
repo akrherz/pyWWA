@@ -11,17 +11,13 @@ import re
 import common
 
 from twisted.internet import reactor
-from twisted.enterprise import adbapi
 
 import ConfigParser
 config = ConfigParser.ConfigParser()
 config.read(os.path.join(os.path.dirname(__file__), 'cfg.ini'))
 
 from pyiem.nws import product
-POSTGIS = adbapi.ConnectionPool("twistedpg", database="postgis", cp_reconnect=True,
-                                host=config.get('database','host'), 
-                                user=config.get('database','user'),
-                                password=config.get('database','password') )
+POSTGIS = common.get_database('postgis')
 raw = sys.stdin.read()
 
 def process(raw):

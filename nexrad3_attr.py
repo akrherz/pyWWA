@@ -23,7 +23,6 @@ os.chdir("/home/ldm/pyWWA")
 from pyldm import ldmbridge
 
 # Third Party Stuff
-from twisted.enterprise import adbapi
 from twisted.internet.defer import DeferredQueue, Deferred
 from twisted.internet.task import cooperate
 from twisted.internet import reactor, protocol
@@ -32,11 +31,7 @@ import pytz
 import common
 
 # Setup Database Links
-POSTGISDB = adbapi.ConnectionPool("twistedpg", database="postgis", 
-                                  cp_reconnect=True,
-                                  host=config.get('database','host'), 
-                                  user=config.get('database','user'),
-                                  password=config.get('database','password') )
+POSTGISDB = common.get_database('postgis')
 
 ST = {}
 

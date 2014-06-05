@@ -24,11 +24,8 @@ config.read(os.path.join(os.path.dirname(__file__), 'cfg.ini'))
 
 # Database Connections
 from pyldm import ldmbridge
-from twisted.enterprise import adbapi
-DBPOOL = adbapi.ConnectionPool("twistedpg", database="postgis", cp_reconnect=True,
-                                host=config.get('database','host'), 
-                                user=config.get('database','user'),
-                                password=config.get('database','password') )
+
+DBPOOL = common.get_database('postgis')
 
 from twisted.internet import reactor
 

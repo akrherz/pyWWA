@@ -11,7 +11,6 @@ import traceback
 import StringIO
 from pyiem.observation import Observation
 from pyldm import ldmbridge
-from twisted.enterprise import adbapi
 from twisted.internet.task import deferLater
 from metar import Metar
 import datetime
@@ -22,14 +21,8 @@ import ConfigParser
 config = ConfigParser.ConfigParser()
 config.read(os.path.join(os.path.dirname(__file__), 'cfg.ini'))
 
-IEMDB = adbapi.ConnectionPool("twistedpg", database="iem", cp_reconnect=True,
-                                host=config.get('database','host'), 
-                                user=config.get('database','user'),
-                                password=config.get('database','password') )
-ASOSDB = adbapi.ConnectionPool("twistedpg", database="asos", cp_reconnect=True,
-                                host=config.get('database','host'), 
-                                user=config.get('database','user'),
-                                password=config.get('database','password') )
+IEMDB = common.get_database('iem')
+ASOSDB = common.get_database('asos')
 
     
 LOC2NETWORK = {}

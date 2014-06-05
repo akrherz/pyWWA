@@ -6,7 +6,6 @@ log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
 log.startLogging(logfile.DailyLogFile('afos_dump.log','logs/'))
 
 from twisted.internet import reactor
-from twisted.enterprise import adbapi
 
 import os
 
@@ -20,10 +19,7 @@ import common
 import datetime
 import pytz
 
-DBPOOL = adbapi.ConnectionPool("twistedpg", database="afos", cp_reconnect=True,
-                                host=config.get('database','host'), 
-                                user=config.get('database','user'),
-                                password=config.get('database','password') )
+DBPOOL = common.get_database('afos')
 
 # LDM Ingestor
 class MyProductIngestor(ldmbridge.LDMProductReceiver):

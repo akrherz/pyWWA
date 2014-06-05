@@ -39,7 +39,7 @@ OAUTH_CONSUMER = oauth.OAuthConsumer(config.get('twitter','consumerkey'),
 
 def get_database(dbname):
     ''' Get a database database connection '''
-    return adbapi.ConnectionPool("twistedpg", database=dbname, 
+    return adbapi.ConnectionPool("pyiem.twistedpg", database=dbname, 
                                 cp_reconnect=True,
                                 host=config.get('database','host'), 
                                 user=config.get('database','user'),
@@ -54,7 +54,7 @@ def load_tokens(txn):
                             row['token'], row['secret'])
     log.msg("... loaded %s oauth_tokens." % (len(OAUTH_TOKENS.keys()),))
 
-_dbpool = adbapi.ConnectionPool("twistedpg", database="mesosite", 
+_dbpool = adbapi.ConnectionPool("pyiem.twistedpg", database="mesosite", 
                                 cp_reconnect=True, cp_max=1,
                                 host=config.get('database','host'), 
                                 user=config.get('database','user'),
