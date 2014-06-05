@@ -29,6 +29,7 @@ from pyldm import ldmbridge
 # pyIEM https://github.com/akrherz/pyIEM
 from pyiem.nws.products.vtec import parser as vtecparser
 from pyiem.nws import ugc
+from pyiem.nws import nwsli
 
 import common
 
@@ -86,7 +87,8 @@ def step2(dummy, text_product):
     
     #Do the Jabber work necessary after the database stuff has completed
     for (plain, html, xtra) in text_product.get_jabbers( 
-                                        common.config.get('urls', 'vtec') ):
+                    common.settings.get('pywwa_vtec_url', 'pywwa_vtec_url'),
+                    common.settings.get('pywwa_river_url', 'pywwa_river_url') ):
         jabber.sendMessage(plain, html, xtra)
     
 def load_ugc(txn):
@@ -100,13 +102,18 @@ def load_ugc(txn):
                 name=(row["name"]).replace("\x92"," ").replace("\xc2"," "),
                 wfos=re.findall(r'([A-Z][A-Z][A-Z])',row['wfo']))
 
+    log.msg("ugc_dict loaded %s entries" % (len(ugc_dict),))
+
     sql = """SELECT nwsli, 
      river_name || ' ' || proximity || ' ' || name || ' ['||state||']' as rname 
      from hvtec_nwsli"""
     txn.execute( sql )
     for row in txn:
-        nwsli_dict[ row['nwsli'] ] = (row['rname']).replace("&"," and ")
+        nwsli_dict[ row['nwsli'] ] = nwsli.NWSLI(row['nwsli'], 
+                                name=row['rname'].replace("&"," and "))
 
+    log.msg("nwsli_dict loaded %s entries" % (len(nwsli_dict),))
+    
     return None
 
 def ready(dummy):
