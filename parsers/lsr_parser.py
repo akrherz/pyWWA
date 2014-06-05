@@ -15,7 +15,6 @@ log.startLogging(logfile.DailyLogFile('lsr_parser.log', 'logs'))
 
 # Third party python stuff
 import pytz
-from twisted.enterprise import adbapi
 from twisted.internet import reactor
 from pyiem import reference
 from pyiem.nws.products.lsr import parser as lsrparser
@@ -24,11 +23,7 @@ from pyldm import ldmbridge
 # IEM python Stuff
 import common
 
-DBPOOL = adbapi.ConnectionPool("twistedpg", database="postgis", 
-                           cp_reconnect=True,
-                           host=common.config.get('database','host'), 
-                           user=common.config.get('database','user'),
-                           password=common.config.get('database','password') )
+DBPOOL = common.get_database('postgis')
 
 # Cheap datastore for LSRs to avoid Dups!
 LSRDB = {}
