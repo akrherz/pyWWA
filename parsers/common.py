@@ -16,6 +16,7 @@ from email.MIMEText import MIMEText
 
 #3rd party
 import psycopg2
+import pyiem
 
 #twisted
 from twisted.python import log
@@ -35,6 +36,7 @@ _illegal_xml_chars_RE = re.compile(
 config = json.load(open(os.path.join(os.path.dirname(__file__),
                                      '../settings.json')))
 settings = {}
+email_timestamps = []
 
 def get_database(dbname):
     ''' Get a database database connection '''
@@ -61,41 +63,72 @@ def load_settings():
     cursor.close()
     dbconn.close()
 
+def should_email():
+    ''' 
+    Logic to prevent email bombs, we currently want no more than 10 per hour
+    @return boolean if we should email or not
+    '''
+    utcnow = datetime.datetime.utcnow()
+    email_timestamps.insert(0, utcnow )
+    delta = email_timestamps[0] - email_timestamps[-1] 
+    if len(email_timestamps) < 10:
+        return True
+    while len(email_timestamps) > 10:
+        email_timestamps.pop()
+
+    return (delta > datetime.timedelta(hours=1))
+    
+    
+
 def email_error(exp, message):
     """
     Helper function to generate error emails when necessary and hopefully
     not flood!
     @param exp A string or perhaps a traceback object
     @param message A string of more information to pass along in the email
+    @return boolean If an email was sent or not...
     """
     # Always log a message about our fun
     cstr = StringIO.StringIO()
     traceback.print_exc(file=cstr)
     cstr.seek(0)
-    tbstr = cstr.read()
-    log.err( exp )
+    if isinstance(exp, Exception):
+        log.err( exp )
+    else:
+        log.msg( exp )
     log.msg( message )
 
-    # Prevent a parser from sending tons of spam
-    if int(os.environ.get('EMAILS', 10)) < 0:
-        return
-    os.environ['EMAILS'] = str( int(os.environ.get("EMAILS",10)) - 1 )
+    # Logic to prevent email bombs
+    if not should_email():
+        log.msg("Email threshold exceeded, so no email sent!")
+        return False
 
     msg = MIMEText("""
-Emails Left: %s  Host: %s
-
-Exception:
+System          : %s@%s [CWD: %s]
+pyiem.version   : %s
+System UTC date : %s
+process id      : %s
+system load     : %s
+Exception       :
 %s
 %s
 
 Message:
-%s""" % (os.environ["EMAILS"], socket.gethostname(), tbstr, exp, message))
+%s""" % (os.getlogin(), socket.gethostname(), os.getcwd(),
+         pyiem.__version__, 
+         datetime.datetime.utcnow(),
+         os.getpid(), os.getloadavg(), 
+         cstr.read(), exp, message))
+
     # Send the email already!
-    msg['subject'] = '%s Traceback' % (sys.argv[0],)
+    msg['subject'] = '[pyWWA] %s Traceback -- %s' % (
+                    sys.argv[0].split("/")[-1], socket.gethostname())
     msg['From'] = settings.get('pywwa_errors_from', 'ldm@localhost')
     msg['To'] = settings.get('pywwa_errors_to', 'ldm@localhost')
-    smtp.sendmail("smtp", msg["From"], msg["To"], msg)
-
+    df = smtp.sendmail(settings.get('pywwa_smtp', 'smtp'), 
+                  msg["From"], msg["To"], msg)
+    df.addErrback( log.err )
+    return True
 
 def write_pid(myname):
     """ Create and write a PID file for this process """
