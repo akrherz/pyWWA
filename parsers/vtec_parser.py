@@ -89,6 +89,8 @@ def step2(dummy, text_product):
     for (plain, html, xtra) in text_product.get_jabbers( 
                     common.settings.get('pywwa_vtec_url', 'pywwa_vtec_url'),
                     common.settings.get('pywwa_river_url', 'pywwa_river_url') ):
+        if xtra.get('channels', '') == '':
+            common.email_error("xtra[channels] is empty!", text_product.text)
         jabber.sendMessage(plain, html, xtra)
     
 def load_ugc(txn):
