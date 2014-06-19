@@ -58,6 +58,10 @@ def consume(txn, spc, outlook):
             outlook.threshold, outlook.category, spc.day, 
             spc.outlook_type, "SRID=4326;%s" % (outlook.geometry.wkt,))
     txn.execute( sql, args )
+
+    # Don't subject us to bad geos
+    if outlook.category == 'TSTM':
+        return []
     
     # Search for WFOs
     sql = """select distinct wfo from nws_ugc 
