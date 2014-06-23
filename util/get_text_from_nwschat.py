@@ -20,7 +20,7 @@ eventid      = sys.argv[5]
 
 def wrap(data):
     ''' convert data into more noaaportish '''
-    return "\001" + data.replace("\n", "\r\r\n") +"\003"
+    return "\001" + data.replace("&amp;", "&").replace("\n", "\r\r\n") +"\003"
 
 def process(j):
     ''' Process the json data j '''
