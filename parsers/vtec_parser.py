@@ -38,10 +38,6 @@ PGCONN = common.get_database("postgis")
 ugc_dict = {}
 nwsli_dict = {}
 
-JABBER_ON = True
-if len(sys.argv) == 2 and sys.argv[1] == 'nojabber':
-    log.msg("Disabling Jabber as per command line")
-    JABBER_ON = False
 
 def shutdown():
     ''' Stop this app '''
@@ -137,6 +133,11 @@ def dbload():
 if __name__ == '__main__':
     log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
     log.startLogging( logfile.DailyLogFile('vtec_parser.log','logs'))
+
+    JABBER_ON = True
+    if len(sys.argv) == 2 and sys.argv[1] == 'nojabber':
+        log.msg("Disabling Jabber as per command line")
+        JABBER_ON = False
 
     # Fire up!
     dbload()
