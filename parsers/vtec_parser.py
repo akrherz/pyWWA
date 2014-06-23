@@ -20,6 +20,7 @@ from twisted.internet import reactor
 # Standard Python modules
 import re
 import datetime
+import sys
 
 # third party
 import pytz
@@ -36,6 +37,11 @@ import common
 PGCONN = common.get_database("postgis")
 ugc_dict = {}
 nwsli_dict = {}
+
+JABBER_ON = True
+if len(sys.argv) == 2 and sys.argv[1] == 'nojabber':
+    log.msg("Disabling Jabber as per command line")
+    JABBER_ON = False
 
 def shutdown():
     ''' Stop this app '''
@@ -91,7 +97,8 @@ def step2(dummy, text_product):
                     common.settings.get('pywwa_river_url', 'pywwa_river_url') ):
         if xtra.get('channels', '') == '':
             common.email_error("xtra[channels] is empty!", text_product.text)
-        jabber.sendMessage(plain, html, xtra)
+        if JABBER_ON:
+            jabber.sendMessage(plain, html, xtra)
     
 def load_ugc(txn):
     """ load ugc"""
