@@ -10,7 +10,7 @@ from pyiem.nws import gini
 import pytz
 import cStringIO
 import sys
-import Image
+from PIL import Image
 import datetime
 import logging
 import os
@@ -101,6 +101,27 @@ def write_metadata(sat, tmpfn):
     subprocess.call( cmd, shell=True )
     os.unlink("%s.json" % (tmpfn,))
 
+def write_mapserver_metadata(sat, tmpfn, epsg):
+    """ Write out and pqinsert a metadata file that mapserver can use to provide
+    WMS metadata """
+    metafn = "%s.txt" % (tmpfn,)
+    out = open(metafn, 'w')
+    out.write("""
+  METADATA
+    "wms_title" "%s %s %s valid %s UTC"
+    "wms_srs"   "EPSG:4326 EPSG:26915 EPSG:900913 EPSG:3857"
+    "wms_extent" "-126 24 -66 50"
+  END 
+""" % (sat.get_bird(), sat.get_sector(), sat.get_channel(),
+       sat.metadata['valid'].strftime("%Y-%m-%dT%H:%M:%SZ")))
+    out.close()
+    cmd = "%s -p 'gis c 000000000000 gis/images/%s/goes/%s bogus msinc' %s" % (
+                            PQINSERT, epsg,
+                            sat.current_filename().replace("png", "msinc"), 
+                            metafn)
+    subprocess.call( cmd, shell=True )
+    os.unlink(metafn)
+    
 def write_metadata_epsg(sat, tmpfn, epsg):
     """
     Write a JSON formatted metadata file
@@ -193,6 +214,8 @@ def workflow():
         write_metadata(sat, tmpfn)
         # Write JSON metadata for 4326 file
         write_metadata_epsg(sat, tmpfn, 4326)
+        # write mapserver include metadatab
+        write_mapserver_metadata(sat, tmpfn, 4326)
         # Warp the file into 4326
         gdalwarp(sat, tmpfn, 4326)    
     # cleanup after ourself
