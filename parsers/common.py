@@ -122,7 +122,7 @@ Message:
 %s""" % (os.getlogin(), socket.gethostname(), os.getcwd(),
          pyiem.__version__, 
          datetime.datetime.utcnow(),
-         os.getpid(), os.getloadavg(), 
+         os.getpid(), ' '.join(['%.2f' % (_,) for _ in os.getloadavg()]), 
          cstr.read(), exp, message))
 
     # Send the email already!
