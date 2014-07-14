@@ -38,10 +38,15 @@ config = json.load(open(os.path.join(os.path.dirname(__file__),
 settings = {}
 email_timestamps = []
 
-def get_database(dbname):
-    ''' Get a database database connection '''
+def get_database(dbname, cp_max=5):
+    """ Get a twisted database connection 
+    
+    Arguments:
+    dbname -- The string name of the database to connect to
+    cp_max -- The maximum number of connections to make to the database 
+    """
     return adbapi.ConnectionPool("pyiem.twistedpg", database=dbname, 
-                                cp_reconnect=True,
+                                cp_reconnect=True, cp_max=cp_max,
                                 host=config.get('databaserw').get('host'), 
                                 user=config.get('databaserw').get('user'),
                                 password=config.get('databaserw').get('password')) 

@@ -34,7 +34,7 @@ from pyiem.nws import nwsli
 
 import common
 
-PGCONN = common.get_database("postgis")
+
 ugc_dict = {}
 nwsli_dict = {}
 
@@ -93,7 +93,7 @@ def step2(dummy, text_product):
                     common.settings.get('pywwa_river_url', 'pywwa_river_url') ):
         if xtra.get('channels', '') == '':
             common.email_error("xtra[channels] is empty!", text_product.text)
-        if JABBER_ON:
+        if MANUAL:
             jabber.sendMessage(plain, html, xtra)
     
 def load_ugc(txn):
@@ -134,12 +134,13 @@ if __name__ == '__main__':
     log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
     log.startLogging( logfile.DailyLogFile('vtec_parser.log','logs'))
 
-    JABBER_ON = True
-    if len(sys.argv) == 2 and sys.argv[1] == 'nojabber':
-        log.msg("Disabling Jabber as per command line")
-        JABBER_ON = False
+    MANUAL = True
+    if len(sys.argv) == 2 and sys.argv[1] == 'manual':
+        log.msg("Manual runtime (no jabber, 1 database connection) requested")
+        MANUAL = False
 
     # Fire up!
+    PGCONN = common.get_database("postgis", cp_max=(5 if not MANUAL else 1))
     dbload()
     jabber = common.make_jabber_client('vtec_parser')
     
