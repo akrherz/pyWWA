@@ -177,13 +177,6 @@ def real_process(raw):
         jabber.sendMessage(j[0][0], j[0][1], j[0][2])
         return
 
-    if pil in ['NOW',]:
-        j = prod.get_jabbers( 
-                                config.get('urls', 'product') +"?pid=" )
-        jabber.sendMessage(j[0][0], j[0][1], j[0][2])
-        return
-        
-
     xtra = {
             "product_id": product_id,
             'channels': []
