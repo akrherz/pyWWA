@@ -9,6 +9,7 @@ import os
 import re
 import traceback
 import StringIO
+from pyiem import datatypes
 from pyiem.observation import Observation
 from pyldm import ldmbridge
 from twisted.internet.task import deferLater
@@ -372,6 +373,7 @@ def sendWindAlert(txn, iemid, v, d, t, clean_metar):
     """
     Send a wind alert please
     """
+    speed = datatypes.speed(v, 'KT')
     print "ALERTING for [%s]" % (iemid,)
     txn.execute("""SELECT wfo, state, name, ST_x(geom) as lon,
            ST_y(geom) as lat, network from stations 
@@ -389,17 +391,20 @@ def sendWindAlert(txn, iemid, v, d, t, clean_metar):
     network = row['network']
 
     extra = ""
-    if (clean_metar.find("$") > 0):
+    if clean_metar.find("$") > 0:
         extra = "(Caution: Maintenance Check Indicator)"
-    url = "http://mesonet.agron.iastate.edu/ASOS/current.phtml?network=%s" % (network,)
-    jtxt = "%s,%s (%s) ASOS %s reports gust of %.1f knots from %s @ %s\n%s"\
-            % (nm, st, iemid, extra, v, drct2dirTxt(d), \
+        
+    url = "http://mesonet.agron.iastate.edu/ASOS/current.phtml?network=%s" % (
+                                                                    network,)
+    jtxt = "%s,%s (%s) ASOS %s reports gust of %.0f knots (%.1f mph) from %s @ %s\n%s" % (
+            nm, st, iemid, extra, speed.value('KT'), speed.value('MPH'),
+            drct2dirTxt(d), 
                t.strftime("%H%MZ"), clean_metar )
     xtra = {'channels': wfo}
-    jabber.sendMessage(jtxt, jtxt, xtra)
+    jabber.sendMessage(jtxt, "<p>%s</p>" % (jtxt,), xtra)
 
-    twt = "%s,%s (%s) ASOS reports gust of %.1f knots from %s @ %s" % (nm, 
-     st, iemid, v, drct2dirTxt(d), t.strftime("%H%MZ"))
+    twt = "%s,%s (%s) ASOS reports gust of %.1f knots (%.1f mph) from %s @ %s" % (nm, 
+     st, iemid, speed.value('KT'), speed.value('MPH'), drct2dirTxt(d), t.strftime("%H%MZ"))
     common.tweet([wfo], twt, url, {'lat': str(row['lat']), 'long': str(row['lon'])})
 
 
