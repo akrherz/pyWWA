@@ -60,7 +60,7 @@ def load_settings():
                             password=config.get('databasero').get('password'),
                             user=config.get('databasero').get('user'))
     cursor = dbconn.cursor()
-    cursor.execute(""" SELECT propname, propvalue from nwschat_properties """)
+    cursor.execute(""" SELECT propname, propvalue from properties """)
     for row in cursor:
         settings[ row[0] ] = row[1]
     log.msg("common.load_settings loaded %s settings from database" % (

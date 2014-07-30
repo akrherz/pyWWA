@@ -1,6 +1,5 @@
 pyWWA
 =====
-
 These are NWS product ingestors and processors.  Not sure how useful this is to
 anybody else, but perhaps!  If you have questions, please let me know:
 

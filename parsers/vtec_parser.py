@@ -13,9 +13,17 @@ with watches.  Lets try to explain
 '''
 
 # Twisted Python imports
+from syslog import LOG_LOCAL2
+from twisted.python import syslog
+syslog.startLogging(prefix='pyWWA/vtec_parser', facility=LOG_LOCAL2)
 from twisted.python import log
-from twisted.python import logfile
 from twisted.internet import reactor
+
+# http://stackoverflow.com/questions/7016602
+from twisted.web.client import HTTPClientFactory
+HTTPClientFactory.noisy = False
+from twisted.mail.smtp import SMTPSenderFactory
+SMTPSenderFactory.noisy = False
 
 # Standard Python modules
 import re
@@ -29,6 +37,7 @@ import pytz
 from pyldm import ldmbridge
 # pyIEM https://github.com/akrherz/pyIEM
 from pyiem.nws.products.vtec import parser as vtecparser
+from pyiem.nws.product import TextProductException
 from pyiem.nws import ugc
 from pyiem.nws import nwsli
 
@@ -59,6 +68,11 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
         """ Process the product """
         try:
             really_process_data(buf)
+        except TextProductException, (channel, mess):
+            if not MANUAL:
+                jabber.sendMessage(mess, mess, {
+                                'channels': '%s,%s' % (channel, "ERROR")            
+                                })
         except Exception, myexp: #pylint: disable=W0703
             common.email_error(myexp, buf) 
 
@@ -93,7 +107,7 @@ def step2(dummy, text_product):
                     common.settings.get('pywwa_river_url', 'pywwa_river_url') ):
         if xtra.get('channels', '') == '':
             common.email_error("xtra[channels] is empty!", text_product.text)
-        if MANUAL:
+        if not MANUAL:
             jabber.sendMessage(plain, html, xtra)
     
 def load_ugc(txn):
@@ -125,23 +139,20 @@ def ready(dummy):
     ''' cb when our database work is done '''
     ldmbridge.LDMProductFactory( MyProductIngestor() )
 
-def dbload():
-    ''' Load up database stuff '''
-    df = PGCONN.runInteraction(load_ugc)
-    df.addCallback( ready )
 
 if __name__ == '__main__':
-    log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
-    log.startLogging( logfile.DailyLogFile('vtec_parser.log','logs'))
 
-    MANUAL = True
+    common.write_pid("pyWWA_vtec_parser")
+
+    MANUAL = False
     if len(sys.argv) == 2 and sys.argv[1] == 'manual':
         log.msg("Manual runtime (no jabber, 1 database connection) requested")
-        MANUAL = False
+        MANUAL = True
 
     # Fire up!
     PGCONN = common.get_database("postgis", cp_max=(5 if not MANUAL else 1))
-    dbload()
+    df = PGCONN.runInteraction(load_ugc)
+    df.addCallback( ready )
     jabber = common.make_jabber_client('vtec_parser')
     
     reactor.run()
