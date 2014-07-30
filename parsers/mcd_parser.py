@@ -1,8 +1,4 @@
 """ 
-=============================================================================
-  * * * Only edit this upstream https://github.com/akrherz/pyWWA
-=============================================================================
-
  Support SPC's MCD product
  Support WPC's FFG product
 """
@@ -68,6 +64,6 @@ def real_process(txn, raw):
     prod.database_save(txn)
 
 ldmbridge.LDMProductFactory( MyProductIngestor() )
-JABBER = common.make_jabber_client('mcdparse')
+JABBER = common.make_jabber_client('mcd_parser')
 
 reactor.run()

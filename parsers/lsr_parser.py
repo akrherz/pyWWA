@@ -7,23 +7,23 @@ import os
 import datetime
 datetime.datetime.strptime('2013', '%Y')
 
-# Get the logger going, asap
+# Twisted Python imports
+from syslog import LOG_LOCAL2
+from twisted.python import syslog
+syslog.startLogging(prefix='pyWWA/lsr_parser', facility=LOG_LOCAL2)
 from twisted.python import log
-from twisted.python import logfile
-log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
-log.startLogging(logfile.DailyLogFile('lsr_parser.log', 'logs'))
+from twisted.internet import reactor
 
 # Third party python stuff
 import pytz
-from twisted.internet import reactor
 from pyiem import reference
 from pyiem.nws.products.lsr import parser as lsrparser
 from pyldm import ldmbridge
 
 # IEM python Stuff
 import common
-
-DBPOOL = common.get_database('postgis')
+common.write_pid("pyWWA_lsr_parser")
+DBPOOL = common.get_database(common.config['databaserw']['postgis'])
 
 # Cheap datastore for LSRs to avoid Dups!
 LSRDB = {}

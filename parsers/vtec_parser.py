@@ -150,9 +150,11 @@ if __name__ == '__main__':
         MANUAL = True
 
     # Fire up!
-    PGCONN = common.get_database("postgis", cp_max=(5 if not MANUAL else 1))
+    PGCONN = common.get_database(common.config['databaserw']['postgis'], 
+                                 cp_max=(5 if not MANUAL else 1))
     df = PGCONN.runInteraction(load_ugc)
     df.addCallback( ready )
+    df.addErrback(common.email_error, "load_ugc failure!")
     jabber = common.make_jabber_client('vtec_parser')
     
     reactor.run()
