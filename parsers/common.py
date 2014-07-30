@@ -183,7 +183,7 @@ class JabberClient:
         self.xmlstream = None
         self.authenticated = False
         self.routerJid = "%s@%s" % (
-                settings.get('nwsbot_jabber_username', 'nwsbot'),
+                settings.get('bot.username', 'nwsbot'),
                 settings.get('pywwa_jabber_domain', 'nwschat.weather.gov'))
 
     def has_football(self):
