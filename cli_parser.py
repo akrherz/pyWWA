@@ -8,7 +8,7 @@ import os
 import datetime
 datetime.datetime.strptime('2013', '%Y')
 
-from pyiem.nws.product import parser
+from pyiem.nws.products import parser
 from pyldm import ldmbridge
 import common
 
