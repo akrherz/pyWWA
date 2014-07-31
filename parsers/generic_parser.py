@@ -17,7 +17,7 @@ from shapely.geometry import MultiPolygon
 # pyLDM https://github.com/akrherz/pyLDM
 from pyldm import ldmbridge
 # pyIEM https://github.com/akrherz/pyIEM
-from pyiem.nws.product import parser as productparser
+from pyiem.nws.products import parser as productparser
 from pyiem.nws import ugc
 from pyiem.nws import nwsli
 
