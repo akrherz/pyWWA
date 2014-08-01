@@ -48,10 +48,10 @@ def get_database(dbname):
 def load_tokens(txn):
     ''' Load twitter access tokens '''
     log.msg("Loading oauth_tokens...")
-    txn.execute("SELECT * from oauth_tokens")
+    txn.execute("SELECT * from iembot_twitter_oauth")
     for row in txn:
-        OAUTH_TOKENS[ row['username'] ] = oauth.OAuthToken(
-                            row['token'], row['secret'])
+        OAUTH_TOKENS[ row['screen_name'] ] = oauth.OAuthToken(
+                            row['access_token'], row['access_token_secret'])
     log.msg("... loaded %s oauth_tokens." % (len(OAUTH_TOKENS.keys()),))
 
 _dbpool = adbapi.ConnectionPool("pyiem.twistedpg", database="mesosite", 
@@ -59,11 +59,7 @@ _dbpool = adbapi.ConnectionPool("pyiem.twistedpg", database="mesosite",
                                 host=config.get('database','host'), 
                                 user=config.get('database','user'),
                                 password=config.get('database','password') )
-defer = _dbpool.runInteraction(load_tokens)
-def stop_pool( dummy ):
-    ''' close the temp database pool '''
-    _dbpool.close()
-defer.addCallback(stop_pool)
+
 
 def email_error(exp, message):
     """
@@ -286,4 +282,9 @@ class JabberClient:
         self.xmlstream.send(message)
 
 
-
+defer = _dbpool.runInteraction(load_tokens)
+defer.addErrback(email_error)
+def stop_pool( dummy ):
+    ''' close the temp database pool '''
+    _dbpool.close()
+defer.addCallback(stop_pool)
