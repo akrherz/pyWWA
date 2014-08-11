@@ -34,8 +34,8 @@ print("oauth_token: " + access_token['oauth_token'])
 print("oauth_token_secret: " + access_token['oauth_token_secret'])
 
 botuser = raw_input("What is username?")
-mcursor.execute("DELETE from oauth_tokens where username = '%s'" % (botuser,))
-mcursor.execute("INSERT into oauth_tokens values ('%s','%s','%s')" % (botuser, access_token['oauth_token'], access_token['oauth_token_secret']) )
+mcursor.execute("DELETE from iembot_twitter_oauth where screen_name = '%s'" % (botuser,))
+mcursor.execute("INSERT into iembot_twitter_oauth values ('%s','%s','%s')" % (botuser, access_token['oauth_token'], access_token['oauth_token_secret']) )
 
 mcursor.close()
 MESOSITE.commit()
