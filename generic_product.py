@@ -16,7 +16,6 @@ from shapely.geometry import MultiPolygon
 from pyldm import ldmbridge
 from pyiem import reference
 from pyiem.nws import product
-from pyiem.nws.products.spacewx import parser as spacewxparser
 import common
 
 import ConfigParser
