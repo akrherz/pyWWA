@@ -406,8 +406,8 @@ def process_site(tp, sid, ts, data):
             network = "%s_DCP" % (state,)
 
     # Do not send DCP sites to IEMAccess
-    if network.find("_DCP") > 0:
-        return
+    #if network.find("_DCP") > 0:
+    #    return
 
     # Okay, time for a hack, if our observation is at midnight!
     if localts.hour == 0 and localts.minute == 0:
