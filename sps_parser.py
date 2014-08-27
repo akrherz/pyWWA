@@ -7,7 +7,9 @@ import os
 log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
 log.startLogging( logfile.DailyLogFile('sps_parser.log','logs/'))
 
+# http://bugs.python.org/issue7980
 import datetime
+datetime.datetime.strptime('2013', '%Y')
 import common
 from pyiem.nws import product
 from pyiem import reference
