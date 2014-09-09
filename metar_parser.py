@@ -209,6 +209,10 @@ def save_data(txn, iem, mtr, clean_metar, orig_metar):
             #print 'Setting max_drct manually: %s' % (clean_metar,)
             iem.data['max_drct'] = iem.data.get('drct',0)
 
+    if mtr.wind_speed_peak:
+        iem.data['max_gust'] = mtr.wind_speed_peak.value("KT")
+    if mtr.wind_dir_peak:
+        iem.data['max_drct'] = mtr.wind_dir_peak.value()
     if mtr.peak_wind_time:
         iem.data['max_gust_ts'] = mtr.peak_wind_time.replace(
                                                 tzinfo=pytz.timezone("UTC"))
