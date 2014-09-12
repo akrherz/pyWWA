@@ -46,8 +46,10 @@ if os.environ.has_key("YYYY"):
 def load_station_table(txn):
     """ Load the station table of NEXRAD sites """
     log.msg("load_station_table called() ...")
-    txn.execute("""SELECT id, ST_x(geom) as lon, ST_y(geom) as lat from stations 
-    where network in ('NEXRAD','TWDR')""")
+    txn.execute("""
+        SELECT id, ST_x(geom) as lon, ST_y(geom) as lat from stations 
+        where network in ('NEXRAD','TWDR')
+    """)
     for row in txn:
         ST[row['id']] = {'lat': row['lat'],
                          'lon': row['lon']}
@@ -77,7 +79,7 @@ def compute_ts(tstring):
             utc -= datetime.timedelta(days=15)
         utc = utc.replace(day=day)    
     else:
-        utc = _UTCNOW.replace(day=day,hour=hour,minute=minute)
+        utc = _UTCNOW.replace(day=day, hour=hour, minute=minute)
 
     return utc
 
@@ -95,6 +97,7 @@ class PROC(protocol.ProcessProtocol):
         self.ts = None
         self.wmo = None
         self.afos = None
+        self.deferred = None
         self.buf = buf
 
         lines = buf.split("\r\r\n")
@@ -128,10 +131,11 @@ class PROC(protocol.ProcessProtocol):
         """
         log.msg("errReceived! with %d bytes!" % len(data))
         log.msg( data )
-        self.deferred.errback(data)
+        if not isinstance(data, str):
+            self.deferred.errback(data)
 
 
-    def cancelDB(self, err):
+    def cancelDB(self, _):
         """ cancel DB session"""
         #log.msg("cancelDB()")
         self.deferred.callback(self)
@@ -139,7 +143,7 @@ class PROC(protocol.ProcessProtocol):
     def log_error(self, err):
         """ Log an error """
         log.msg( self.res )
-        log.err( err )
+        log.msg( err )
         common.email_error(err, self.res)
 
     def outConnectionLost(self):
@@ -152,22 +156,21 @@ class PROC(protocol.ProcessProtocol):
             defer.addErrback( log.err )
             self.deferred.callback(self)
             return
-        defer = POSTGISDB.runInteraction(really_process, self.res, self.afos[3:], 
-                                 self.ts)
+        defer = POSTGISDB.runInteraction(really_process, self.res, 
+                                         self.afos[3:], self.ts)
         defer.addCallback(self.cancelDB)
         defer.addErrback( self.log_error )
         defer.addErrback( log.err )
         
 
 class MyProductIngestor(ldmbridge.LDMProductReceiver):
+    """ My ingest protocol """
     
     def connectionLost(self, reason):
+        """ Called when stdin is closed """
         log.msg('connectionLost')
-        log.msg(reason)
-        reactor.callLater(15, self.shutdown)
-
-    def shutdown(self):
-        reactor.callWhenRunning(reactor.stop)
+        log.err(reason)
+        reactor.callLater(15, reactor.callWhenRunning, reactor.stop)
 
     def process_data(self, buf):
         """
@@ -258,7 +261,7 @@ def really_process(txn, res, nexrad, ts):
         d["tvs"] = tokens[3]
         d["meso"] = tokens[4]
         d["posh"] = tokens[5]
-        d["poh"] = tokens[6]
+        d["poh"] = tokens[6] if tokens[6] != "***" else None
         if (tokens[7] == "<0.50"):
             tokens[7] = 0.01
         d["max_size"] = tokens[7]
@@ -272,7 +275,8 @@ def really_process(txn, res, nexrad, ts):
         d["max_dbz_height"] = tokens[10]
         d["top"] = tokens[11]
         if tokens[12] == "NEW":
-            d["drct"], d["sknt"] = 0,0
+            d["drct"] = 0
+            d["sknt"] = 0
         else:
             d["drct"] = int(float(tokens[12]))
             d["sknt"] = tokens[13]
@@ -295,11 +299,9 @@ def really_process(txn, res, nexrad, ts):
             txn.execute( sql, d )
 
     if co == 0:
-        """
-        Had a problem with GEMPAK corrupting its last.nts and/or gemglb.nts,
-        so when the ingestor senses trouble (no output), remove these files
-        and continue happily on
-        """
+        # Had a problem with GEMPAK corrupting its last.nts and/or gemglb.nts,
+        # so when the ingestor senses trouble (no output), remove these files
+        # and continue happily on
         log.msg("Got zero entries ||%s||" % (res,))
         for fn in ['gemglb.nts', 'last.nts']:
             if os.path.isfile(fn):
@@ -319,7 +321,7 @@ def job_size(jobs):
         reactor.callWhenRunning(reactor.stop)
     reactor.callLater(300, job_size, jobs)
 
-def main(bogus):
+def main(_):
     """
     Go main Go!
     """
@@ -329,7 +331,7 @@ def main(bogus):
     ingest.jobs = jobs
     ldmbridge.LDMProductFactory( ingest )
     
-    for i in range(3):
+    for _ in range(3):
         cooperate(worker(jobs))
     
     reactor.callLater(0, write_pid)
