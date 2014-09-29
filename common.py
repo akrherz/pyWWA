@@ -37,10 +37,10 @@ OAUTH_TOKENS = {}
 OAUTH_CONSUMER = oauth.OAuthConsumer(config.get('twitter','consumerkey'), 
                                      config.get('twitter','consumersecret'))
 
-def get_database(dbname):
+def get_database(dbname, cp_max=5):
     ''' Get a database database connection '''
     return adbapi.ConnectionPool("pyiem.twistedpg", database=dbname, 
-                                cp_reconnect=True,
+                                cp_reconnect=True, cp_max=cp_max,
                                 host=config.get('database','host'), 
                                 user=config.get('database','user'),
                                 password=config.get('database','password')) 
