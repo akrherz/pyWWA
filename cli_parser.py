@@ -21,7 +21,7 @@ import ConfigParser
 config = ConfigParser.ConfigParser()
 config.read(os.path.join(os.path.dirname(__file__), 'cfg.ini'))
 
-DBPOOL = common.get_database('iem') 
+DBPOOL = common.get_database('iem', cp_max=1) 
 
 # LDM Ingestor
 class MyProductIngestor(ldmbridge.LDMProductReceiver):
@@ -40,7 +40,70 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
         deffer = DBPOOL.runInteraction(realparser, text)
         deffer.addErrback(common.email_error, text)
         
+def save_data(txn, prod):
+    """ Save atomic data to cli_data table """
+    # hopefully this prevents issues with ID conflicts and makes it easier
+    # to match with ASOS sites
+    station = "%s%s" % (prod.source[0], prod.afos[3:])
+    
+    txn.execute("""
+    SELECT product from cli_data where station = %s and valid = %s
+    """, (station, prod.cli_valid))
+    if txn.rowcount == 1:
+        row = txn.fetchone()
+        if prod.get_product_id() < row['product']:
+            print 'Skip save of %s as previous %s row newer?' % (
+                                    prod.get_product_id(), row['product'])
+            return
+        txn.execute("""DELETE from cli_data WHERE station = %s and valid = %s
+        """, (prod.afos[3:], prod.cli_valid))
 
+    txn.execute("""INSERT into cli_data(
+        station, product, valid, high, high_normal, high_record,
+        high_record_years, low, low_normal, low_record, low_record_years,
+        precip, precip_month, precip_jan1, precip_jul1, precip_normal,
+        precip_record,
+        precip_record_years, precip_month_normal, snow, snow_month,
+        snow_jun1, snow_jul1, 
+        snow_dec1, precip_dec1, precip_dec1_normal, precip_jan1_normal,
+        high_time, low_time, snow_record_years, snow_record) 
+        VALUES (
+        %s, %s, %s, %s, %s, %s,
+        %s, %s, %s, %s, %s,
+        %s, %s, %s, %s, %s,
+        %s,
+        %s, %s, %s, %s,
+        %s, %s,
+        %s, %s, %s, %s,
+        %s, %s, %s, %s
+        )
+    """, (station, prod.get_product_id(), prod.cli_valid,
+          prod.data.get('temperature_maximum'), 
+          prod.data.get('temperature_maximum_normal'),
+          prod.data.get('temperature_maximum_record'),
+          prod.data.get('temperature_maximum_record_years', []),
+          prod.data.get('temperature_minimum'), 
+          prod.data.get('temperature_minimum_normal'),
+          prod.data.get('temperature_minimum_record'),
+          prod.data.get('temperature_minimum_record_years', []),
+          prod.data.get('precip_today'),
+          prod.data.get('precip_month'),
+          prod.data.get('precip_jan1'), prod.data.get('precip_jul1'),
+          prod.data.get('precip_today_normal'),
+          prod.data.get('precip_today_record'),
+          prod.data.get('precip_today_record_years', []),
+          prod.data.get('precip_month_normal'),
+          prod.data.get('snow_today'), prod.data.get('snow_month'),
+          prod.data.get('snow_jun1'), prod.data.get('snow_jul1'),
+          prod.data.get('snow_dec1'), prod.data.get('precip_dec1'),
+          prod.data.get('precip_dec1_normal'),
+          prod.data.get('precip_jan1_normal'),
+          prod.data.get('temperature_maximum_time'),
+          prod.data.get('temperature_minimum_time'),
+          prod.data.get('snow_today_record_years', []),
+          prod.data.get('snow_today_record')
+          ))
+    
 def realparser(txn, text):
     ''' Actually do the work '''
     prod = parser( text )
@@ -56,6 +119,7 @@ def realparser(txn, text):
     row = txn.fetchone()
     if row is None:
         print 'No %s rows found for %s on %s' % (table, station, prod.cli_valid)
+        save_data(txn, prod)
         return
     updatesql = []
     logmsg = []
@@ -94,6 +158,8 @@ def realparser(txn, text):
         log.msg("%s rows for %s (%s) %s" % (txn.rowcount, station,
                                     prod.cli_valid.strftime("%y%m%d"),  
                                     ','.join( logmsg ) ))
+
+    save_data(txn, prod)
 
 ldmbridge.LDMProductFactory( MyProductIngestor() )
 
