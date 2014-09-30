@@ -56,7 +56,7 @@ def save_data(txn, prod):
                                     prod.get_product_id(), row['product'])
             return
         txn.execute("""DELETE from cli_data WHERE station = %s and valid = %s
-        """, (prod.afos[3:], prod.cli_valid))
+        """, (station, prod.cli_valid))
 
     txn.execute("""INSERT into cli_data(
         station, product, valid, high, high_normal, high_record,
