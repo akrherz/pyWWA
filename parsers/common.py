@@ -6,6 +6,7 @@
 #stdlib
 import json
 import os
+import pwd
 import datetime
 import re
 import traceback
@@ -119,7 +120,7 @@ Exception       :
 %s
 
 Message:
-%s""" % (os.getlogin(), socket.gethostname(), os.getcwd(),
+%s""" % (pwd.getpwuid(os.getuid())[0], socket.gethostname(), os.getcwd(),
          pyiem.__version__, 
          datetime.datetime.utcnow(),
          os.getpid(), ' '.join(['%.2f' % (_,) for _ in os.getloadavg()]), 
