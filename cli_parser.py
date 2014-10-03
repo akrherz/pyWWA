@@ -10,6 +10,7 @@ datetime.datetime.strptime('2013', '%Y')
 
 from pyiem.nws.products import parser
 from pyldm import ldmbridge
+from pyiem.network import Table as NetworkTable
 import common
 
 from twisted.internet import reactor
@@ -22,6 +23,7 @@ config = ConfigParser.ConfigParser()
 config.read(os.path.join(os.path.dirname(__file__), 'cfg.ini'))
 
 DBPOOL = common.get_database('iem', cp_max=1) 
+NT = NetworkTable("NWSCLI")
 
 # LDM Ingestor
 class MyProductIngestor(ldmbridge.LDMProductReceiver):
@@ -45,6 +47,10 @@ def save_data(txn, prod):
     # hopefully this prevents issues with ID conflicts and makes it easier
     # to match with ASOS sites
     station = "%s%s" % (prod.source[0], prod.afos[3:])
+    
+    if not NT.sts.has_key(station):
+        common.email_error("Unknown CLI Station: %s" % (station,),
+                           prod.unixtext)
     
     txn.execute("""
     SELECT product from cli_data where station = %s and valid = %s
