@@ -108,7 +108,7 @@ def send_tweet(prod):
 
     jres = prod.get_jabbers(    
         common.settings.get('pywwa_product_url', 'pywwa_product_url'))
-    jabber.sendMessage(jres[0], jres[1], jres[2])
+    jabber.sendMessage(jres[0][0], jres[0][1], jres[0][2])
 
 
 
