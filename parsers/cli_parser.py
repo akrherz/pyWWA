@@ -156,9 +156,9 @@ def realparser(txn, text):
 
     if prod.data.get('snow_today'):
         val = prod.data['snow_today']
-        if val != row['snow']:
+        if row['snow'] is None or val != row['snow']:
             updatesql.append(' snow = %s' % (val,))
-            logmsg.append('Snow O:%s N:%s' % (row['pday'], val))
+            logmsg.append('Snow O:%s N:%s' % (row['snow'], val))
 
 
     if len(updatesql) > 0:
