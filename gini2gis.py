@@ -17,6 +17,7 @@ import os
 import tempfile
 import random
 import json
+import numpy as np
 import subprocess
 
 FORMAT = "%(asctime)-15s:["+ str(os.getpid()) +"]: %(message)s"
@@ -50,8 +51,15 @@ def write_gispng(sat, tmpfn):
     """
     Write PNG file with associated .wld file.
     """
-    png = Image.fromarray( sat.data[:-1,:] )
+    
+    if sat.get_channel() == "IR":
+        # Make enhanced version
+        png = Image.fromarray( np.array(sat.data[:-1,:], np.uint8))
+        png.putpalette(tuple(gini.get_ir_ramp().ravel()))
+    else:
+        png = Image.fromarray( sat.data[:-1,:] )
     png.save('%s.png' % (tmpfn,))
+
     # World File
     out = open('%s.wld' % (tmpfn,), 'w')
     fmt = """%(dx).3f"""+ rand_zeros() +"""
