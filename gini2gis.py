@@ -47,12 +47,45 @@ def process_input():
     logger.info(str(sat))
     return sat
 
+def do_legacy_ir(sat, tmpfn):
+    """ since some are unable to process non-grayscale """
+    print("Doing legacy IR junk...")
+    png = Image.fromarray( sat.data[:-1,:] )
+    png.save('%s.png' % (tmpfn,))
+
+    # World File
+    out = open('%s.wld' % (tmpfn,), 'w')
+    fmt = """%(dx).3f"""+ rand_zeros() +"""
+0.0"""+ rand_zeros() +"""
+0.0"""+ rand_zeros() +"""
+-%(dy).3f"""+ rand_zeros() +"""
+%(x0).3f"""+ rand_zeros() +"""
+%(y1).3f"""
+    out.write( fmt % sat.metadata)
+    out.close()
+    
+    cmd = "%s -p 'gis c %s gis/images/awips%s/%s GIS/sat/awips%s/%s png' %s.png" % (
+                        PQINSERT, 
+                        sat.metadata['valid'].strftime("%Y%m%d%H%M"), 
+                        sat.awips_grid(), sat.current_filename().replace(".png", "_gray.png"), 
+                        sat.awips_grid(), sat.archive_filename(), tmpfn )
+    subprocess.call( cmd, shell=True )
+
+    cmd = "%s -p 'gis c %s gis/images/awips%s/%s GIS/sat/awips%s/%s wld' %s.wld" % (
+                        PQINSERT, 
+                        sat.metadata['valid'].strftime("%Y%m%d%H%M"), sat.awips_grid(),
+                        sat.current_filename().replace(".png", "_gray.wld"), sat.awips_grid(),
+                        sat.archive_filename().replace("png", "wld"), tmpfn )
+    subprocess.call( cmd, shell=True )
+
+
 def write_gispng(sat, tmpfn):
     """
     Write PNG file with associated .wld file.
     """
     
     if sat.get_channel() == "IR":
+        do_legacy_ir(sat, tmpfn)
         # Make enhanced version
         png = Image.fromarray( np.array(sat.data[:-1,:], np.uint8))
         png.putpalette(tuple(gini.get_ir_ramp().ravel()))
