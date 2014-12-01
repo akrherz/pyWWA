@@ -187,7 +187,7 @@ def realprocessor(txn, prod, data):
          FROM stations t WHERE t.iemid = d.iemid and d.day = %s and t.id = %s
          and t.network ~* 'ASOS' """, (prod.cli_valid, station))
         log.msg("%s rows for %s (%s) %s" % (txn.rowcount, station,
-                                    prod.cli_valid.strftime("%y%m%d"),
+                                    data['cli_valid'].strftime("%y%m%d"),
                                     ','.join(logmsg)))
 
     save_data(txn, prod, station, data)
