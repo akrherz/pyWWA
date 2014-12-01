@@ -185,7 +185,7 @@ def realprocessor(txn, prod, data):
     if len(updatesql) > 0:
         txn.execute("""UPDATE """+table+""" d SET """+ ','.join(updatesql) +"""
          FROM stations t WHERE t.iemid = d.iemid and d.day = %s and t.id = %s
-         and t.network ~* 'ASOS' """, (prod.cli_valid, station))
+         and t.network ~* 'ASOS' """, (data['cli_valid'], station))
         log.msg("%s rows for %s (%s) %s" % (txn.rowcount, station,
                                     data['cli_valid'].strftime("%y%m%d"),
                                     ','.join(logmsg)))
