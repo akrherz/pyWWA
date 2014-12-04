@@ -65,7 +65,8 @@ def save_data(txn, prod, station, data):
         snow_jun1, snow_jul1, 
         snow_dec1, precip_dec1, precip_dec1_normal, precip_jan1_normal,
         high_time, low_time, snow_record_years, snow_record,
-        snow_jun1_normal, snow_jul1_normal, snow_dec1_normal) 
+        snow_jun1_normal, snow_jul1_normal, snow_dec1_normal,
+        snow_month_normal) 
         VALUES (
         %s, %s, %s, %s, %s, %s,
         %s, %s, %s, %s, %s,
@@ -75,7 +76,7 @@ def save_data(txn, prod, station, data):
         %s, %s,
         %s, %s, %s, %s,
         %s, %s, %s, %s,
-        %s, %s, %s
+        %s, %s, %s, %s
         )
     """, (station, prod.get_product_id(), data['cli_valid'],
           data['data'].get('temperature_maximum'),
@@ -104,7 +105,8 @@ def save_data(txn, prod, station, data):
           data['data'].get('snow_today_record'),
           data['data'].get('snow_jun1_normal'),
           data['data'].get('snow_jul1_normal'),
-          data['data'].get('snow_dec1_normal')
+          data['data'].get('snow_dec1_normal'),
+          data['data'].get('snow_month_normal')
           ))
 
 def send_tweet(prod):
