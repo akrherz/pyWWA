@@ -13,7 +13,8 @@ from pyiem import datatypes
 from pyiem.observation import Observation
 from pyldm import ldmbridge
 from twisted.internet.task import deferLater
-from metar import Metar
+from metar.metar import Metar
+from metar.metar import ParserError as MetarParserError
 import datetime
 import pytz
 import common
@@ -124,14 +125,14 @@ def process_site(orig_metar, clean_metar):
     if len(clean_metar) < 10:
         return
     try:
-        mtr = Metar.Metar(clean_metar)
-    except Metar.ParserError as inst:
+        mtr = Metar(clean_metar)
+    except MetarParserError as inst:
         io = StringIO.StringIO()
         traceback.print_exc(file=io)
         errormsg = str(inst)
-        if errormsg.find("Unparsed groups in body: ") == 0:
+        if errormsg.find("Unparsed groups: ") == 0:
             tokens = errormsg.split(": ")
-            newmetar = clean_metar.replace( tokens[1] , "")
+            newmetar = clean_metar.replace( tokens[1].replace("'", '') , "")
             if newmetar != clean_metar:
                 reactor.callLater(0, process_site, orig_metar, newmetar)
         else:
