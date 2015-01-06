@@ -243,6 +243,16 @@ def save_data(txn, iem, mtr, clean_metar, orig_metar):
         iem.data['alti'] = mtr.press.value("IN")
     if mtr.press_sea_level:
         iem.data['pres'] = mtr.press_sea_level.value("MB")
+    if mtr.press_sea_level and mtr.press:
+        alti = mtr.press.value("MB")
+        mslp = mtr.press_sea_level.value("MB")
+        if abs(alti - mslp) > 25:
+            log.msg("PRESSURE ERROR %s %s ALTI: %s MSLP: %s" % (
+                iem.data['station'], iem.data['valid'], alti, mslp))
+            if alti > mslp:
+                iem.data['pres'] += 100.
+            else:
+                iem.data['pres'] -= 100.
     iem.data['phour'] = 0
     if mtr.precip_1hr:
         iem.data['phour'] = mtr.precip_1hr.value("IN")
