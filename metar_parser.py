@@ -125,7 +125,7 @@ def process_site(orig_metar, clean_metar):
     if len(clean_metar) < 10:
         return
     try:
-        mtr = Metar(clean_metar)
+        mtr = Metar(clean_metar, allexceptions=True)
     except MetarParserError as inst:
         io = StringIO.StringIO()
         traceback.print_exc(file=io)
