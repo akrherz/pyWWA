@@ -21,6 +21,7 @@ import pyiem
 
 #twisted
 from twisted.python import log
+from twisted.python import failure
 from twisted.words.xish.xmlstream import STREAM_END_EVENT
 from twisted.words.protocols.jabber import client as jclient
 from twisted.words.protocols.jabber import xmlstream, jid
@@ -90,18 +91,16 @@ def email_error(exp, message):
     """
     Helper function to generate error emails when necessary and hopefully
     not flood!
-    @param exp A string or perhaps a traceback object
+    @param exp A string or perhaps a twisted python failure object
     @param message A string of more information to pass along in the email
     @return boolean If an email was sent or not...
     """
     # Always log a message about our fun
     cstr = StringIO.StringIO()
-    traceback.print_exc(file=cstr)
+    if isinstance(exp, failure.Failure):
+        traceback.print_exc(file=cstr)
+        log.err(exp)
     cstr.seek(0)
-    if isinstance(exp, Exception):
-        log.err( exp )
-    else:
-        log.msg( exp )
     log.msg( message )
 
     # Logic to prevent email bombs
