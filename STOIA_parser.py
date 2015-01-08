@@ -45,6 +45,8 @@ os.chdir("/tmp")
 
 def figureCondition(condition, conditions):
     """ Find this condition within a dict of conditions """
+    if condition.find("Travel Not Advised") > -1:
+        return 51
     for typ in ["Closed", "Travel Advisory", "CC Ice", "CC Snow", "CC Slush",
            "CC Mixed", "MC Ice", "MC Snow", "MC Slush", "MC Mixed",
            "PC Ice", "PC Snow", "PC Slush", "PC Mixed", "CC Frost",
