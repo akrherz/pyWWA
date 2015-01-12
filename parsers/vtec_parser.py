@@ -140,7 +140,7 @@ def load_ugc(txn):
 
 def ready(dummy):
     ''' cb when our database work is done '''
-    ldmbridge.LDMProductFactory( MyProductIngestor() )
+    ldmbridge.LDMProductFactory( MyProductIngestor(dedup=True) )
 
 
 if __name__ == '__main__':
