@@ -1,18 +1,13 @@
 """ Twisted Way to dump data to the database """
 
 # Twisted Python imports
-from twisted.python import log, logfile
-log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
-log.startLogging(logfile.DailyLogFile('afos_dump.log','logs/'))
-
+from syslog import LOG_LOCAL2
+from twisted.python import syslog
+syslog.startLogging(prefix='pyWWA/afos_dump', facility=LOG_LOCAL2)
+from twisted.python import log
 from twisted.internet import reactor
 
-import os
 import sys
-
-import ConfigParser
-config = ConfigParser.ConfigParser()
-config.read(os.path.join(os.path.dirname(__file__), 'cfg.ini'))
 
 from pyldm import ldmbridge
 from pyiem.nws import product
@@ -37,16 +32,15 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
 
     def process_data(self, buf):
         """ Process the product """
-        try:
-            real_parser(buf)
-        except Exception, myexp:
-            common.email_error(myexp, buf)
+        df = DBPOOL.runInteraction(real_parser, buf)
+        df.addErrback(common.email_error, buf)
+        df.addErrback(log.err)
 
 class ParseError(Exception):
     """ general exception """
     pass
 
-def real_parser(buf):
+def real_parser(txn, buf):
     """ Actually do something with the buffer, please """
     if buf.strip() == "":
         return
@@ -69,11 +63,6 @@ def real_parser(buf):
             return
         raise ParseError("TextProduct.afos is null")
         
-    df = DBPOOL.runInteraction(run_db, table, nws)
-    df.addErrback( common.email_error, buf)
-    df.addErrback( log.err )
-
-def run_db(txn, table, nws):
     """ Run the database transaction """
     if MANUAL:
         txn.execute("""SELECT * from """+table+""" WHERE
