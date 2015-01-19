@@ -13,13 +13,14 @@ trash.  Someday, I'll be a real programmer and write a libary that is usable.
 Notes on HVTEC:
   http://www.nws.noaa.gov/om/vtec/hydro_vtec.shtml
 
-pyIEM/nws/blah.py
-   class Product(TextProduct):
-		def __init__():
-			super.__init__(self)
-		def make_jabber()
-		def make_tweets()
+Constants Used
+==============
 
-   def parser():
-       """ Emits a product class """
-       return Product()
+key | value
+------------- | -------------
+pywwa_lsr_url | URL Base for the LSR App
+pywwa_product_url | URL Base for simple text product viewer
+pywwa_river_url | URL Base for the River App
+pywwa_save_text_products | Boolean that determines if text_products table is used
+pywwa_vtec_url | URL Base for the VTEC App
+pywwa_watch_url | URL Base for the Watch App
