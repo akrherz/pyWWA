@@ -1,11 +1,11 @@
 """
 Move DSM messages into the text database with the proper PIL
 """
-import iemdb
+import psycopg2
 import sys
 import re
 from pyiem.nws import product
-AFOS = iemdb.connect('afos')
+AFOS = psycopg2.connect(database='afos', host='iemdb')
 acursor = AFOS.cursor()
 
 raw = sys.stdin.read()
