@@ -1,9 +1,10 @@
 """ SPC Watch Ingestor """
 
+# Twisted Python imports
+from syslog import LOG_LOCAL2
+from twisted.python import syslog
+syslog.startLogging(prefix='pyWWA/watch_parser', facility=LOG_LOCAL2)
 from twisted.python import log
-from twisted.python import logfile
-log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
-log.startLogging( logfile.DailyLogFile('new_watch.log', 'logs/'))
 
 import re
 import os
@@ -13,14 +14,86 @@ import pytz
 import common
 
 # Non standard Stuff
-from support import stationTable
+import string
 
+class stationTable:
+  def __init__(self, tableName, loadTable = "yes"):
+    self.ids = []
+    self.names = {}
+    self.sts = {}
+    self.tableName = tableName
+    if (loadTable == "yes"):
+      self.load()
+
+  def empty(self):
+    self.ids = []
+    self.names = {}
+    self.sts = {}
+
+  def editRow_mesosite(self, rs):
+    thisID = rs["id"]
+    st = {}
+    st["id"] = thisID
+    self.ids.append(thisID)
+    st["synop"] = rs["synop"]
+    st["name"] = rs["plot_name"]
+    st["state"] = rs["state"]
+    st["country"] = rs["country"]
+    st["lat"] = rs["latitude"]
+    st["lon"] = rs["longitude"]
+    st["gis"] = "POINT("+ str(st["lon"]) +" "+ str(st["lat"]) +")"
+    st["elev"] = rs["elevation"]
+    if (rs["spri"] == None):
+      st["spri"] = " "
+    else:
+      st["spri"] = rs["spri"]
+    self.sts[thisID] = st
+
+  def writeTable(self, o):
+    import string
+    for sid in self.ids:
+       st = self.sts[sid]
+       o.write("%-8s %6s %-32.32s %2s %2s %5.0f %6.0f %4.0f %2s\n" % \
+        (st["id"], st["synop"], st["name"], \
+         st["state"], st["country"], st["lat"] * 100 , st["lon"] * 100, \
+         int(st["elev"]), st["spri"]) )
+
+  def load(self):
+    f = open(self.tableName, 'r').readlines()
+    for line in f:
+      if (line[0] != "#"):
+        thisID = string.strip( line[0:8] )
+        synop  = string.strip( line[9:15] )
+        sname  = string.strip( line[16:48] )
+        state  = string.strip( line[49:51] )
+        country  = string.strip( line[52:54] )
+        lat  = string.strip( line[55:60] )
+        lon  = string.strip( line[61:68] )
+        elev = string.strip( line[68:73] )
+        spri = string.strip( line[74:76] )
+
+        if (len(elev) == 0): elev = "343"
+            
+        # Time to update 
+        self.ids.append(thisID)
+        self.names[thisID] = sname
+        st = {}
+        st["id"] = thisID
+        st["synop"] = synop
+        st["name"] = sname
+        st["state"] = state
+        st["country"] = country
+        st["lat"] = round( int(lat) / 100.00, 2)
+        st["lon"] = round( int(lon) / 100.00, 2)
+        st["gis"] = "POINT("+ str(st["lon"]) +" "+ str(st["lat"]) +")"
+        st["elev"] = elev
+        st["spri"] = spri            
+        self.sts[thisID] = st
+
+#       print thisID, synop, sname, state, country, lat, lon, elev, spri
+#       print self.names
 
 KM_SM = 1.609347
-
-import ConfigParser
-config = ConfigParser.ConfigParser()
-config.read(os.path.join(os.path.dirname(__file__), 'cfg.ini'))
 
 # Database Connections
 from pyldm import ldmbridge
@@ -29,7 +102,7 @@ DBPOOL = common.get_database('postgis')
 
 from twisted.internet import reactor
 
-IEM_URL = config.get('urls', 'watch')
+IEM_URL = common.settings.get('pywwa_watch_url', 'pywwa_watch_url')
 
 def cancel_watch(report, ww_num):
     """ Cancel a watch please """
@@ -56,14 +129,14 @@ dirs = {'NNE': 22.5, 'ENE': 67.5, 'NE':  45.0, 'E': 90.0, 'ESE': 112.5,
         'NW': 315.0, 'NNW': 337.5, 'N': 0, '': 0}
 
 
-def loc2lonlat(stationTable, site, direction, displacement):
+def loc2lonlat(st, site, direction, displacement):
     """
 Compute the longitude and latitude of a point given by a site ID
 and an offset ex) 2 SM NE of ALO
     """
     # Compute Base location
-    lon0 = stationTable.sts[site]['lon']
-    lat0 = stationTable.sts[site]['lat']
+    lon0 = st.sts[site]['lon']
+    lat0 = st.sts[site]['lat']
     x = -math.cos( math.radians( dirs[direction] + 90.0) )
     y = math.sin( math.radians( dirs[direction] + 90.0) )
     lat0 += (y * displacement * KM_SM / 111.11 )
@@ -95,7 +168,7 @@ def real_process(raw):
 
     report = raw.replace("\015\015\012", "").replace("\n", "").replace("'", " ")
     # Set up Station Table!
-    st = stationTable.stationTable("/home/ldm/pyWWA/support/spcwatch.tbl")
+    st = stationTable("/home/ldm/pyWWA/tables/spcwatch.tbl")
 
     # Determine the Saw number
     saw = re.findall("SAW([0-9])", report)[0][0]
@@ -267,18 +340,19 @@ def real_process(raw):
     
         txn.execute(sql)
         rs = txn.fetchall()
-        xtra = {'channels': ['SPC']}
+        channels =  ['SPC',]
         for i in range(len(rs)):
             wfo = rs[i]['wfo']
-            xtra['channels'].append( wfo )
+            channels.append( wfo )
+        xtra = {'channels': ','.join(channels)}
         jabber.sendMessage(jabberTxt, jabberTxtHTML, xtra)
 
         # Special message for SPC
         lines = raw.split("\n")
         twt = lines[5].replace("\r\r", "")
-        url = "http://www.spc.noaa.gov/products/watch/ww%04i.html" % (int(ww_num),)
-        xtra['channels'].append("SPC")
-        common.tweet(xtra['channels'], twt, url)
+        twt += " http://www.spc.noaa.gov/products/watch/ww%04i.html" % (int(ww_num),)
+        xtra['channels'] = 'SPC'
+        jabber.sendMessage(twt, twt, xtra)
 
     df = DBPOOL.runInteraction(runner2)
     df.addErrback(common.email_error, raw)

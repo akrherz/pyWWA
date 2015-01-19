@@ -1,11 +1,13 @@
 """ SPS product ingestor 
 """
 
+# Twisted Python imports
+from syslog import LOG_LOCAL2
+from twisted.python import syslog
+syslog.startLogging(prefix='pyWWA/sps_parser', facility=LOG_LOCAL2)
 from twisted.python import log
-from twisted.python import logfile
-import os
-log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
-log.startLogging( logfile.DailyLogFile('sps_parser.log','logs/'))
+from twisted.internet import reactor
+
 
 # http://bugs.python.org/issue7980
 import datetime
@@ -17,14 +19,9 @@ from pyldm import ldmbridge
 
 from shapely.geometry import MultiPolygon
 
-from twisted.internet import reactor
-
-import ConfigParser
-config = ConfigParser.ConfigParser()
-config.read(os.path.join(os.path.dirname(__file__), 'cfg.ini'))
-
 POSTGIS = common.get_database('postgis')
-
+PYWWA_PRODUCT_URL = common.settings.get('pywwa_product_url',
+                                        'pywwa_product_url')
 
 ugc_dict = {}
 def load_ugc(txn):
@@ -57,9 +54,6 @@ def countyText(ugcs):
         c +=" %s [%s] and" %(", ".join(countyState[st]), st)
     return c[:-4]
 
-
-
-
 # LDM Ingestor
 class myProductIngestor(ldmbridge.LDMProductReceiver):
 
@@ -85,7 +79,7 @@ def real_process(txn, raw):
     product_id = prod.get_product_id()
     xtra ={
            'product_id': product_id,
-           'channels': []
+           'channels': ''
            }
 
     if prod.segments[0].sbw:
@@ -117,19 +111,19 @@ def real_process(txn, raw):
                 (seg.ugcexpire - datetime.timedelta(
                 hours=reference.offsets.get(prod.z,0) )).strftime("%-I:%M %p"),
                                       prod.z)
-        xtra['channels'].append( prod.source[1:] )
+        xtra['channels'] = prod.source[1:]
         mess = "%s issues %s for %s %s %s?pid=%s" % ( 
            prod.source[1:], headline, counties, expire, 
-           config.get('urls', 'product'), product_id)
-        htmlmess = "%s issues <a href='%s?pid=%s'>%s</a> for %s %s" % ( 
-                                prod.source[1:], config.get('urls', 'product'), 
-                                product_id, headline, counties, expire)
-        
+           PYWWA_PRODUCT_URL,
+           product_id)
+        htmlmess = "<p>%s issues <a href='%s?pid=%s'>%s</a> for %s %s</p>" % ( 
+                prod.source[1:],
+                PYWWA_PRODUCT_URL, 
+                product_id, headline, counties, expire)
+        xtra['twitter'] = "%s for %s %s %s?pid=%s" % (headline, counties, 
+                                            expire, PYWWA_PRODUCT_URL,
+                                            product_id)
         jabber.sendMessage(mess, htmlmess, xtra)
-
-        twt = "%s for %s %s" % (headline, counties, expire)
-        url = "%s?pid=%s" % (config.get('urls', 'product'), product_id)
-        common.tweet([prod.source[1:],], twt, url)
 
 jabber = common.make_jabber_client('sps_parser')
 

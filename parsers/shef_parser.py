@@ -5,11 +5,12 @@
 import os
 import datetime
 
-# Setup Standard Logging we use
-from twisted.python import log, logfile
-log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
-log.startLogging(logfile.DailyLogFile('shef_parser.log', 
-                                      os.path.abspath('logs/')))
+# Twisted Python imports
+from syslog import LOG_LOCAL2
+from twisted.python import syslog
+syslog.startLogging(prefix='pyWWA/shef_parser', facility=LOG_LOCAL2)
+from twisted.python import log
+
 
 def write_pid():
     """ Create a PID file for when we are fired up! """
@@ -23,7 +24,6 @@ from pyiem.nws import product
 from pyiem import reference
 from pyldm import ldmbridge
 import common
-import iemtz
 import pytz
 
 # Third Party Stuff
@@ -32,17 +32,17 @@ from twisted.internet.defer import DeferredQueue, Deferred
 from twisted.internet.task import cooperate
 from twisted.internet import reactor, protocol
 
-import ConfigParser
-config = ConfigParser.ConfigParser()
-config.read(os.path.join(os.path.dirname(__file__), 'cfg.ini'))
-
 # Setup Database Links
 ACCESSDB_SINGLE = common.get_database('iem')
 ACCESSDB = common.get_database('iem')
 HADSDB = common.get_database('hads')
 
 # Necessary for the shefit program to run A-OK
-os.chdir("%s/shef_workspace" % (os.path.dirname(os.path.abspath(__file__)),))
+PATH = os.path.normpath(
+                        os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                        "..", "shef_workspace"))
+log.msg("Changing cwd to %s" % (PATH,))
+os.chdir(PATH)
 
 # Load up our lookup table of stations to networks
 LOC2STATE = {}
@@ -264,9 +264,9 @@ def really_process(tp, data):
             mydata[sid] = {}
         dstr = "%s %s" % (tokens[1], tokens[2])
         tstamp = datetime.datetime.strptime(dstr, "%Y-%m-%d %H:%M:%S")
-        tstamp = tstamp.replace(tzinfo=iemtz.UTC())
+        tstamp = tstamp.replace(tzinfo=pytz.timezone("UTC"))
         # We don't care about data in the future!
-        utcnow = datetime.datetime.utcnow().replace(tzinfo=iemtz.UTC())
+        utcnow = datetime.datetime.utcnow().replace(tzinfo=pytz.timezone("UTC"))
         if tstamp > (utcnow + datetime.timedelta(hours=1)):
             continue
         if tstamp < (utcnow - datetime.timedelta(days=60)):
@@ -476,7 +476,7 @@ def main(res):
     ingest.jobs = jobs
     ldmbridge.LDMProductFactory( ingest )
     
-    for i in range(3):
+    for _ in range(3):
         cooperate(worker(jobs))
     
     reactor.callLater(0, write_pid)

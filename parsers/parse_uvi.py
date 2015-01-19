@@ -51,7 +51,7 @@ for line in lines[26:]:
     writer(city, st, uv)
 
 out.close()
-subprocess.call("/home/ldm/bin/pqinsert -p 'wxc_uvi.txt' /tmp/wxc_uvi.txt",
+subprocess.call("/home/ldm/bin/pqinsert -p 'data c 000000000000 wxc/wxc_uvi.txt bogus txt' /tmp/wxc_uvi.txt",
                 shell=True)
 
 os.unlink('/tmp/wxc_uvi.txt')

@@ -1,14 +1,16 @@
 """ ASOS Daily Summary Message Parser ingestor """
 
 # Twisted Python imports
-from twisted.internet import reactor
+from syslog import LOG_LOCAL2
+from twisted.python import syslog
+syslog.startLogging(prefix='pyWWA/dsm_parser', facility=LOG_LOCAL2)
 from twisted.python import log
-from twisted.python import logfile
-from twisted.enterprise import adbapi
+
+# Twisted Python imports
+from twisted.internet import reactor
 
 # Standard Python modules
 import re
-import os
 
 # Python 3rd Party Add-Ons
 import datetime
@@ -16,17 +18,9 @@ import datetime
 # pyWWA stuff
 from pyldm import ldmbridge
 import common
-import ConfigParser
-config = ConfigParser.ConfigParser()
-config.read(os.path.join(os.path.dirname(__file__), 'cfg.ini'))
 
-log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
-log.startLogging( logfile.DailyLogFile('dsm_parser.log','logs') )
 
-DBPOOL = adbapi.ConnectionPool("psycopg2", database="iem", cp_reconnect=True,
-                                host=config.get('database','host'), 
-                                user=config.get('database','user'), cp_max=1,
-                                password=config.get('database','password') )
+DBPOOL = common.get_database("iem", cp_max=1)
 
 # LDM Ingestor
 class MyProductIngestor(ldmbridge.LDMProductReceiver):

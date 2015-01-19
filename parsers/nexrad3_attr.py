@@ -7,17 +7,15 @@ import os
 import math
 
 # Setup Standard Logging we use
-from twisted.python import log, logfile
-log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
-log.startLogging(logfile.DailyLogFile('nexrad3_attr.log', 
-                                      os.path.abspath('logs/')))
+# Twisted Python imports
+from syslog import LOG_LOCAL2
+from twisted.python import syslog
+syslog.startLogging(prefix='pyWWA/nexrad3_attr', facility=LOG_LOCAL2)
+from twisted.python import log
 
-import ConfigParser
-config = ConfigParser.ConfigParser()
-config.read(os.path.join(os.path.dirname(__file__), 'cfg.ini'))
 
 # Need to do this in order to get the subsequent calls to work??
-os.chdir("/home/ldm/pyWWA")
+os.chdir("/home/ldm/pyWWA/parsers")
 
 # Stuff I wrote
 from pyldm import ldmbridge

@@ -1,19 +1,12 @@
 """
 """
-import os
 import sys
 import re
 import pytz
 import datetime
 import psycopg2
-import ConfigParser
-config = ConfigParser.ConfigParser()
-config.read(os.path.join(os.path.dirname(__file__), 'cfg.ini'))
 
-AFOS = psycopg2.connect(database="afos",
-                                host=config.get('database','host'), 
-                                user=config.get('database','user'),
-                                password=config.get('database','password'))
+AFOS = psycopg2.connect(database="afos", host='iemdb')
 
 
 acursor = AFOS.cursor()

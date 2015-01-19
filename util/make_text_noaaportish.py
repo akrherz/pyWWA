@@ -20,5 +20,6 @@ for i in range(len(lines)):
     else:
         out.write(line)
 
+out.write("\003")
 out.close()
 os.rename(fn2, fn)

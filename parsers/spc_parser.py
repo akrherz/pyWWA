@@ -1,11 +1,10 @@
 """ SPC Geo Products Parser! """
 
-from twisted.python import log
-from twisted.python import logfile
-log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
-log.startLogging(logfile.DailyLogFile('spc_parser.log','logs'))
-
 # Twisted Python imports
+from syslog import LOG_LOCAL2
+from twisted.python import syslog
+syslog.startLogging(prefix='pyWWA/spc_parser', facility=LOG_LOCAL2)
+from twisted.python import log
 from twisted.internet import reactor
 
 # pyWWA stuff
@@ -169,15 +168,13 @@ for portions of %s %s" % (cat, wfo, url)
                 twts[wfo] = "SPC issues Day 1 %s risk for %s" % (cat, wfo)
 
     for wfo in msgs.keys():
-        xtra['channels'] = [wfo,]
+        xtra['channels'] = wfo
         jabber.sendMessage( msgs[wfo], htmlmsgs[wfo], xtra )
 
-    #for wfo in twts.keys():
-    #    common.tweet( [wfo,], twts[wfo], url )
-
     # Generic for SPC
-    twt = "The Storm Prediction Center issues %s Outlook" %( product_descript,)
-    common.tweet(['SPC',], twt, url)
+    xtra['twitter'] = "The Storm Prediction Center issues %s Outlook" % (
+                                                            product_descript,)
+    jabber.sendMessage(xtra['twitter'], xtra['twitter'], xtra)
 
 jabber = common.make_jabber_client('spc_parser')
 

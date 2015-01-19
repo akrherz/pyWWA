@@ -1,9 +1,12 @@
 """ METAR product ingestor """
 
+# Twisted Python imports
+from syslog import LOG_LOCAL2
+from twisted.python import syslog
+syslog.startLogging(prefix='pyWWA/metar_parser', facility=LOG_LOCAL2)
+from twisted.python import log
 from twisted.internet import reactor
-from twisted.python import log, logfile
-log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
-log.startLogging(logfile.DailyLogFile('metar_parser.log', 'logs/'))
+
 
 import os
 import re
@@ -18,10 +21,6 @@ from metar.metar import ParserError as MetarParserError
 import datetime
 import pytz
 import common
-
-import ConfigParser
-config = ConfigParser.ConfigParser()
-config.read(os.path.join(os.path.dirname(__file__), 'cfg.ini'))
 
 IEMDB = common.get_database('iem')
 ASOSDB = common.get_database('asos')
@@ -344,11 +343,10 @@ def sendAlert(txn, iemid, what, clean_metar):
         extra = "(Caution: Maintenance Check Indicator)"
     url = "http://mesonet.agron.iastate.edu/ASOS/current.phtml?network=%s" % (network,)
     jtxt = "%s,%s (%s) ASOS %s reports %s\n%s %s" % (nm, st, iemid, extra, what, clean_metar, url )
-    xtra = {'channels': wfo}
+    xtra = {'channels': wfo,
+            'lat':  str(row['lat']), 'long': str(row['lon'])}
+    xtra['twitter'] = "%s,%s (%s) ASOS reports %s" % (nm, st, iemid, what)
     jabber.sendMessage(jtxt, jtxt, xtra)
-
-    twt = "%s,%s (%s) ASOS reports %s" % (nm, st, iemid, what)
-    common.tweet([wfo], twt, url, {'lat': str(row['lat']), 'long': str(row['lon'])})
 
 def drct2dirTxt(idir):
     if idir is None:
@@ -418,12 +416,13 @@ def sendWindAlert(txn, iemid, v, d, t, clean_metar):
             nm, st, iemid, extra, speed.value('KT'), speed.value('MPH'),
             drct2dirTxt(d), 
                t.strftime("%H%MZ"), clean_metar )
-    xtra = {'channels': wfo}
-    jabber.sendMessage(jtxt, "<p>%s</p>" % (jtxt,), xtra)
+    xtra = {'channels': wfo,
+            'lat': str(row['lat']),
+            'long': str(row['lon'])}
 
-    twt = "%s,%s (%s) ASOS reports gust of %.1f knots (%.1f mph) from %s @ %s" % (nm, 
+    xtra['twitter'] = "%s,%s (%s) ASOS reports gust of %.1f knots (%.1f mph) from %s @ %s" % (nm, 
      st, iemid, speed.value('KT'), speed.value('MPH'), drct2dirTxt(d), t.strftime("%H%MZ"))
-    common.tweet([wfo], twt, url, {'lat': str(row['lat']), 'long': str(row['lon'])})
+    jabber.sendMessage(jtxt, "<p>%s</p>" % (jtxt,), xtra)
 
 
 def ready(bogus):

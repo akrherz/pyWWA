@@ -7,9 +7,9 @@ import sys
 import smtplib
 import datetime
 from email.MIMEText import MIMEText
-import network
+from pyiem.network import Table as NetworkTale
 
-nt = network.Table(('KCCI','KELO','KIMT'))
+nt = NetworkTable(('KCCI','KELO','KIMT'))
 
 alerts = { 'KCCI': ["akrherz@iastate.edu", "wxdude@gmail.com"],
   'KIMT': ["akrherz@iastate.edu",],
@@ -40,8 +40,8 @@ if network != 'KCCI': # We have a special
 
 ts = datetime.datetime.strptime("%s%s%s" % (datetime.datetime.now().year,
                                             mmdd, hhmm), "%m%d%H%M")
-import iemdb
-KCCI = iemdb.connect('kcci', bypass=True)
+import psycopg2
+KCCI = psycopg2.connect(database='kcci', host='iemdb')
 kcursor = KCCI.cursor()
 emails = []
 kcursor.execute("""select w.uid, a.email from walerts w, accounts a 

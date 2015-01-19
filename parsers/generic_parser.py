@@ -1,8 +1,10 @@
 """ Generic NWS Product Parser """
 
 # Twisted Python imports
+from syslog import LOG_LOCAL2
+from twisted.python import syslog
+syslog.startLogging(prefix='pyWWA/generic_parser', facility=LOG_LOCAL2)
 from twisted.python import log
-from twisted.python import logfile
 from twisted.internet import reactor
 
 # Standard Python modules
@@ -22,6 +24,7 @@ from pyiem.nws import ugc
 from pyiem.nws import nwsli
 
 import common
+DB_ON = bool(common.settings.get('pywwa_save_text_products', False))
 
 ugc_dict = {}
 nwsli_dict = {}
@@ -45,12 +48,11 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
 
     def process_data(self, buf):
         """ Process the product """
-        try:
-            really_process_data(buf)
-        except Exception, myexp: #pylint: disable=W0703
-            common.email_error(myexp, buf) 
+        defer = PGCONN.runInteraction(really_process_data,buf)
+        defer.addErrback(common.email_error, buf)
+        defer.addErrback(log.err)
 
-def really_process_data(buf):
+def really_process_data(txn, buf):
     ''' Actually do some processing '''
     utcnow = datetime.datetime.utcnow()
     utcnow = utcnow.replace(tzinfo=pytz.timezone("UTC"))
@@ -58,20 +60,7 @@ def really_process_data(buf):
     # Create our TextProduct instance
     prod = productparser( buf, utcnow=utcnow, ugc_provider=ugc_dict,
                                nwsli_provider=nwsli_dict)
-
-    # Insert into database
-    product_id = prod.get_product_id()
-    sqlraw = buf.replace("\015\015\012", "\n").replace("\000", "").strip()
-    sql = """INSERT into text_products(product, product_id) values (%s,%s)"""
-    myargs = (sqlraw, product_id)
-    if (len(prod.segments) > 0 and prod.segments[0].sbw):
-        giswkt = 'SRID=4326;%s' % (MultiPolygon([prod.segments[0].sbw]).wkt,)
-        sql = """INSERT into text_products(product, product_id, geom) 
-                values (%s,%s,%s)"""
-        myargs = (sqlraw, product_id, giswkt)
-    deffer = PGCONN.runOperation(sql, myargs)
-    deffer.addErrback( common.email_error, sqlraw)
-    
+        
     #Do the Jabber work necessary after the database stuff has completed
     for (plain, html, xtra) in prod.get_jabbers( 
             common.settings.get('pywwa_product_url', 'pywwa_product_url') ):
@@ -79,6 +68,20 @@ def really_process_data(buf):
             common.email_error("xtra[channels] is empty!", buf)
         if not MANUAL:
             jabber.sendMessage(plain, html, xtra)
+
+    if DB_ON:
+        # Insert into database
+        product_id = prod.get_product_id()
+        sqlraw = buf.replace("\015\015\012", "\n").replace("\000", "").strip()
+        sql = """INSERT into text_products(product, product_id) values (%s,%s)"""
+        myargs = (sqlraw, product_id)
+        if (len(prod.segments) > 0 and prod.segments[0].sbw):
+            giswkt = 'SRID=4326;%s' % (MultiPolygon([prod.segments[0].sbw]).wkt,)
+            sql = """INSERT into text_products(product, product_id, geom) 
+                    values (%s,%s,%s)"""
+            myargs = (sqlraw, product_id, giswkt)
+        txn.execute(sql, myargs)
+
     
 def load_ugc(txn):
     """ load ugc"""
@@ -115,8 +118,6 @@ def dbload():
     df.addCallback( ready )
 
 if __name__ == '__main__':
-    log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
-    log.startLogging( logfile.DailyLogFile('generic_parser.log','logs'))
 
     MANUAL = False
     if len(sys.argv) == 2 and sys.argv[1] == 'manual':

@@ -2,110 +2,105 @@
  I parse the Iowa Road Condition reports AFOS PIL: STOIA
  I also generate a shapefile of the parsed data
 """
+# Twisted Python imports
+from syslog import LOG_LOCAL2
+from twisted.python import syslog
+syslog.startLogging(prefix='pyWWA/stoia_parser', facility=LOG_LOCAL2)
+from twisted.python import log
+from twisted.internet import reactor
+from pyldm import ldmbridge
+from pyiem.nws.product import TextProduct
+from pyiem import wellknowntext
 
-import sys
 import re
-import datetime
 import pytz
 import dbflib
 import shapelib
 import zipfile
 import os
-import logging
 import shutil
-import StringIO
-import traceback
-
-from pyiem import wellknowntext
 import subprocess
 
-import ConfigParser
-config = ConfigParser.ConfigParser()
-config.read(os.path.join(os.path.dirname(__file__), 'cfg.ini'))
-
 import common
-import psycopg2
-import psycopg2.extras
-POSTGIS = psycopg2.connect(database="postgis",
-                                host=config.get('database','host'), 
-                                user=config.get('database','user'),
-                                password=config.get('database','password'))
-pcursor = POSTGIS.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-FORMAT = "%(asctime)-15s:: %(message)s"
-logging.basicConfig(filename='logs/ingestRC.log', filemode='a+', format=FORMAT)
-logger=logging.getLogger()
-logger.addHandler(logging.StreamHandler())
-logger.setLevel(logging.INFO)
-
-errors = StringIO.StringIO()
+DBPOOL = common.get_database("postgis", cp_max=1)
+CONDITIONS = {}
+ROADS = {}
 
 # Changedir to /tmp
 os.chdir("/tmp")
 
-def figureCondition(condition, conditions):
+def shutdown():
+    """ Down we go! """
+    log.msg("Stopping...")
+    reactor.callWhenRunning(reactor.stop)
+
+# LDM Ingestor
+class MyProductIngestor(ldmbridge.LDMProductReceiver):
+    """ I receive products from ldmbridge and process them 1 by 1 :) """
+
+    def connectionLost(self, reason):
+        """ called when the connection is lost """
+        log.msg('connectionLost')
+        log.err(reason)
+        reactor.callLater(5, shutdown)
+
+    def process_data(self, buf):
+        """ Process the product """
+        defer = DBPOOL.runInteraction(real_parser, buf)
+        defer.addErrback(common.email_error, buf)
+        defer.addErrback(log.err)
+
+
+
+def figureCondition(txn, condition):
     """ Find this condition within a dict of conditions """
-    if condition.find("Travel Not Advised") > -1:
+    if condition.find("Travel Not Advised".upper()) > -1:
         return 51
     for typ in ["Closed", "Travel Advisory", "CC Ice", "CC Snow", "CC Slush",
            "CC Mixed", "MC Ice", "MC Snow", "MC Slush", "MC Mixed",
            "PC Ice", "PC Snow", "PC Slush", "PC Mixed", "CC Frost",
            "MC Frost", "PC Frost", "Wet", "Normal", "No Conditions Reproted"]:
         if condition.find( typ.upper() ) > -1:
-            if (not conditions.has_key(typ.upper())):
-                logger.info("Unknown Condition: %s\n" % (typ,) )
-                pcursor.execute("SELECT max(code) as m from roads_conditions")
-                row = pcursor.fetchone()
+            if (not CONDITIONS.has_key(typ.upper())):
+                log.msg("Unknown Condition: %s\n" % (typ,) )
+                txn.execute("SELECT max(code) as m from roads_conditions")
+                row = txn.fetchone()
                 if row['m'] is None:
                     newID = 1
                 else:
                     newID = int( row['m'] ) + 1
-                pcursor.execute("INSERT into roads_conditions VALUES (%s, %s) ",
+                txn.execute("INSERT into roads_conditions VALUES (%s, %s) ",
                                 (newID, typ) )
-                conditions[typ.upper()] = newID
+                CONDITIONS[typ.upper()] = newID
 
-            return conditions[typ.upper()]
+            return CONDITIONS[typ.upper()]
 
-    return conditions["NORMAL"]
+    return CONDITIONS["NORMAL"]
 
-
-def process(raw):
-    """ Actually do something """
-    # Load up dictionary of Possible Road Conditions
-    conditions = {}
-    condcodes = {}
-    pcursor.execute("SELECT label, code from roads_conditions")
-    for row in pcursor:
-        conditions[ row['label'].upper() ] = row['code']
-        condcodes[ int(row['code']) ] = row['label'].upper()
+def init_dicts(txn):
+    """ Setup what we need to process this file """
+    txn.execute("SELECT label, code from roads_conditions")
+    for row in txn:
+        CONDITIONS[ row['label'].upper() ] = row['code']
+    log.msg("Loaded %s conditions" % (len(CONDITIONS),))
 
     # Load up dictionary of roads...
-    roads = {}
-    pcursor.execute("SELECT major, minor, longname, segid from roads_base")
-    for row in pcursor:
-        roads[ row['longname'] ] = {'segid': row['segid'], 'major': row['major'],
+    txn.execute("SELECT major, minor, longname, segid from roads_base")
+    for row in txn:
+        ROADS[ row['longname'] ] = {'segid': row['segid'], 'major': row['major'],
                                     'minor': row['minor']}
+    log.msg("Loaded %s road segments" % (len(ROADS),))
+
+def real_parser(txn, raw):
+    """ Actually do something """
+    # Load up dictionary of Possible Road Conditions
+    if len(ROADS) == 0:
+        log.msg("Initializing ROADS and CONDITIONS dicts...")
+        init_dicts(txn)
     
-    # Figure out when this report is valid
-    tokens = re.findall("([0-9]{1,2})([0-9][0-9]) ([AP]M) C[DS]T [A-Z][A-Z][A-Z] ([A-Z][A-Z][A-Z]) ([0-9]+) (2[0-9][0-9][0-9])\n", raw)
-    # tokens is like [('08', '52', 'AM', 'NOV', '23', '2004')]
-    hroffset = 0
-    if tokens[0][2] == "PM" and int(tokens[0][0]) < 12:
-        hroffset = 12
-    if tokens[0][2] == "AM" and int(tokens[0][0]) == 12:
-        hroffset = -12
-    hr = int(tokens[0][0]) + hroffset
-    mi = int(tokens[0][1])
-    mod = {"JAN": 1, "FEB": 2, "MAR": 3, "APR": 4, "MAY": 5, "JUN": 6, "JUL": 7,
-      "AUG": 8, "SEP": 9, "OCT":10, "NOV":11, "DEC":12}
-    mo = mod[ tokens[0][3] ]
-    dy = int(tokens[0][4])
-    year = int(tokens[0][5])
-    ts = datetime.datetime.utcnow().replace(tzinfo=pytz.timezone("UTC"))
-    ts = ts.astimezone(pytz.timezone("America/Chicago"))
-    ts = ts.replace(year=year, month=mo, day=dy, hour=hr, minute=mi,
-                    second=0, microsecond=0)
-    logger.info("PROCESSING STOIA: %s" % (ts,))
+    tp = TextProduct(raw)    
+    log.msg("PROCESSING STOIA: %s" % (tp.valid,))
 
     # Lets start our processing
     lines = re.split("\n", raw[ raw.find("*"):])
@@ -120,8 +115,8 @@ def process(raw):
         condition = data[(pos+1):].upper().strip()
         if meat.strip() == '':
             continue
-        if not roads.has_key(meat):
-            logger.info("Unknown road: %s\n" % (meat,))
+        if not ROADS.has_key(meat):
+            log.msg("Unknown road: %s\n" % (meat,))
             continue
         
         #major = roads[meat]['major']
@@ -129,27 +124,23 @@ def process(raw):
 
         #----------------------------------------
         # Now we are going to do things by type!
-        roadCondCode = figureCondition(condition, conditions)
-        #print roadCondCode, condition, condcodes[roadCondCode]
+        roadCondCode = figureCondition(txn, condition)
         towingProhibited = (condition.find("TOWING PROHIBITED") > -1)
         limitedVis = (condition.find("LIMITED VIS.") > -1)
   
-        segid = roads[meat]['segid']
+        segid = ROADS[meat]['segid']
 
 
-        pcursor.execute("""UPDATE roads_current SET cond_code = %s, valid = %s, 
+        txn.execute("""UPDATE roads_current SET cond_code = %s, valid = %s, 
          towing_prohibited = %s, limited_vis = %s, raw = %s 
-         WHERE segid = %s """ , (roadCondCode, ts, 
+         WHERE segid = %s """ , (roadCondCode, tp.valid, 
                                  towingProhibited, limitedVis, condition, 
                                  segid) )
 
     # Copy the currents table over to the log... HARD CODED
-    pcursor.execute("INSERT into roads_%s_log SELECT * from roads_current" % (
-                                ts.year,))
-    return ts
+    txn.execute("INSERT into roads_%s_log SELECT * from roads_current" % (
+                                tp.valid.year,))
 
-def generate_shapefile(ts):
-    """ Generate a shapefile of this data """
     # Now we generate a shapefile....
     dbf = dbflib.create("iaroad_cond")
     dbf.add_field("SEGID", dbflib.FTInteger, 4, 0)
@@ -167,11 +158,11 @@ def generate_shapefile(ts):
 
     shp = shapelib.create("iaroad_cond", shapelib.SHPT_ARC)
 
-    pcursor.execute("""select b.*, c.*, ST_astext(b.geom) as bgeom from 
+    txn.execute("""select b.*, c.*, ST_astext(b.geom) as bgeom from 
          roads_base b, roads_current c WHERE b.segid = c.segid
          and valid is not null and b.geom is not null""")
     i = 0
-    for row in pcursor:
+    for row in txn:
         s = row["bgeom"]
         f = wellknowntext.convert_well_known_text(s)
         valid = row["valid"]
@@ -206,7 +197,7 @@ def generate_shapefile(ts):
     z.write("iaroad_cond.prj")
     z.close()
 
-    utc = ts.astimezone( pytz.timezone("UTC") )
+    utc = tp.valid.astimezone( pytz.timezone("UTC") )
     subprocess.call("/home/ldm/bin/pqinsert -p 'zip ac %s gis/shape/26915/ia/iaroad_cond.zip GIS/iaroad_cond_%s.zip zip' iaroad_cond.zip" % (
                                             utc.strftime("%Y%m%d%H%M"), 
                                             utc.strftime("%Y%m%d%H%M")), 
@@ -215,19 +206,8 @@ def generate_shapefile(ts):
     for suffix in ['shp', 'shx', 'dbf', 'prj', 'zip']:
         os.unlink("iaroad_cond.%s" % (suffix,))
 
-if (__name__ == "__main__"):
-    raw = sys.stdin.read()
-    try:
-        ts = process(raw)
-        generate_shapefile(ts)
-    except:
-        traceback.print_exc(file=errors)
-
-    errors.seek(0)
-    errstr = errors.read()
-    if len(errstr) > 0:
-        logger.error( errstr )
-        common.email_error(errstr, raw)
-    pcursor.close()
-    POSTGIS.commit()
-    POSTGIS.close()
+if __name__ == "__main__":
+    # main
+    ldmbridge.LDMProductFactory(MyProductIngestor())
+    reactor.run()
+    

@@ -1,9 +1,11 @@
 """ MOS Data Ingestor, why not? """
 
+# Twisted Python imports
+from syslog import LOG_LOCAL2
+from twisted.python import syslog
+syslog.startLogging(prefix='pyWWA/mos_parser', facility=LOG_LOCAL2)
 from twisted.python import log
-from twisted.python import logfile
-log.FileLogObserver.timeFormat = "%Y/%m/%d %H:%M:%S %Z"
-log.startLogging( logfile.DailyLogFile('mos_parser.log', 'logs') )
+
 
 # Twisted Python imports
 from twisted.internet import reactor
@@ -17,10 +19,6 @@ import pytz
 # pyWWA stuff
 from pyldm import ldmbridge
 import common
-import ConfigParser
-
-config = ConfigParser.ConfigParser()
-config.read("/home/ldm/pyWWA/cfg.ini")
 
 DBPOOL = common.get_database('mos')
 

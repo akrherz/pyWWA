@@ -101,7 +101,10 @@ def email_error(exp, message):
         traceback.print_exc(file=cstr)
         log.err(exp)
     cstr.seek(0)
-    log.msg( message )
+    if type(message) == type(''):
+        log.msg(message[:100])
+    else:
+        log.msg(message)
 
     # Logic to prevent email bombs
     if not should_email():
