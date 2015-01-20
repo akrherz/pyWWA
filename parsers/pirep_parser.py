@@ -2,7 +2,7 @@
 from syslog import LOG_LOCAL2
 from twisted.python import syslog
 from __builtin__ import True
-syslog.startLogging(prefix='pyWWA/pirep', facility=LOG_LOCAL2)
+syslog.startLogging(prefix='pyWWA/pirep_parser', facility=LOG_LOCAL2)
 
 # Twisted Python imports
 from twisted.internet import reactor
