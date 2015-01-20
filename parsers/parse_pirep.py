@@ -99,7 +99,6 @@ def real_parser(txn, buf):
     j = prod.get_jabbers()
     if len(prod.warnings) > 0:
         common.email_error("\n".join(prod.warnings), buf)
-        return
     for msg in j:
         JABBER.sendMessage(msg[0], msg[1], msg[2])
 
