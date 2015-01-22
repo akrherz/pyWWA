@@ -47,24 +47,37 @@ def load_locs(txn):
     for row in txn:
         LOCS[ row['id'] ] = {'id': row['id'], 'name': row['name'],
                           'lon': row['lon'], 'lat': row['lat']}
-    log.msg("... %s locations loaded" % (txn.rowcount,))
 
+    for line in open(TABLESDIR+'/faa_apt.tbl'):
+        if len(line) < 70 or line[0] == '!':
+            continue
+        sid = line[:4].strip()
+        lat = float(line[56:60]) / 100.0
+        lon = float(line[61:67]) / 100.0
+        name = line[16:47].strip()
+        if not LOCS.has_key(sid):
+            LOCS[sid] = {'lat': lat, 'lon': lon, 'name': name}
 
-for line in open(TABLESDIR+'/vors.tbl'):
-    if len(line) < 70 or line[0] == '!':
-        continue
-    sid = line[:3]
-    lat = float(line[56:60]) / 100.0
-    lon = float(line[61:67]) / 100.0
-    name = line[16:47].strip()
-    LOCS[sid] = {'lat': lat, 'lon': lon, 'name': name}
+    for line in open(TABLESDIR+'/vors.tbl'):
+        if len(line) < 70 or line[0] == '!':
+            continue
+        sid = line[:3]
+        lat = float(line[56:60]) / 100.0
+        lon = float(line[61:67]) / 100.0
+        name = line[16:47].strip()
+        if not LOCS.has_key(sid):
+            LOCS[sid] = {'lat': lat, 'lon': lon, 'name': name}
+    
+    # Finally, GEMPAK!
+    for line in open(TABLESDIR+'/pirep_navaids.tbl'):
+        sid = line[:3]
+        lat = float(line[56:60]) / 100.0
+        lon = float(line[61:67]) / 100.0
+        if not LOCS.has_key(sid):
+            LOCS[sid] = {'lat': lat, 'lon': lon}
 
-# Finally, GEMPAK!
-for line in open(TABLESDIR+'/pirep_navaids.tbl'):
-    sid = line[:3]
-    lat = float(line[56:60]) / 100.0
-    lon = float(line[61:67]) / 100.0
-    LOCS[sid] = {'lat': lat, 'lon': lon}
+    log.msg("... %s locations loaded" % (len(LOCS),))
+
 
 # LDM Ingestor
 class MyProductIngestor(ldmbridge.LDMProductReceiver):
