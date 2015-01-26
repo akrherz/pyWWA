@@ -191,7 +191,7 @@ def async(buf):
     proc.deferred = defer
     proc.deferred.addErrback( log.err )
     if proc.afos is not None:
-        log.msg("PROCESS %s %s" % (proc.afos, proc.ts.strftime("%Y%m%d%H%M") ))
+        #log.msg("PROCESS %s %s" % (proc.afos, proc.ts.strftime("%Y%m%d%H%M") ))
     
         reactor.spawnProcess(proc, "python", 
                    ["python", "ncr2postgis.py", proc.afos[3:],
@@ -290,7 +290,8 @@ def really_process(txn, res, nexrad, ts):
         for table in ['nexrad_attributes', 'nexrad_attributes_%s' % (ts.year,)]:
             sql = """INSERT into """+table+""" (nexrad, storm_id, geom, azimuth,
     range, tvs, meso, posh, poh, max_size, vil, max_dbz, max_dbz_height,
-    top, drct, sknt, valid) values (%(nexrad)s, %(storm_id)s, %(geom)s,
+    top, drct, sknt, valid) values (%(nexrad)s, %(storm_id)s, 
+    ST_GeomFromEWKT(%(geom)s),
     %(azimuth)s, %(range)s, %(tvs)s, %(meso)s, %(posh)s,
     %(poh)s, %(max_size)s, %(vil)s, %(max_dbz)s,
     %(max_dbz_height)s, %(top)s, %(drct)s, %(sknt)s, %(valid)s)"""
