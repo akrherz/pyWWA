@@ -7,7 +7,9 @@
 import json
 import os
 import pwd
+# http://bugs.python.org/issue7980
 import datetime
+datetime.datetime.strptime('2013', '%Y')
 import re
 import traceback
 import StringIO

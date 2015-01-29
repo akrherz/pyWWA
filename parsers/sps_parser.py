@@ -8,10 +8,7 @@ syslog.startLogging(prefix='pyWWA/sps_parser', facility=LOG_LOCAL2)
 from twisted.python import log
 from twisted.internet import reactor
 
-
-# http://bugs.python.org/issue7980
 import datetime
-datetime.datetime.strptime('2013', '%Y')
 import common
 from pyiem.nws import product
 from pyiem import reference

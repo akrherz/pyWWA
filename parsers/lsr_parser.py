@@ -3,9 +3,6 @@
 #stdlib
 import pickle
 import os
-# http://bugs.python.org/issue7980
-import datetime
-datetime.datetime.strptime('2013', '%Y')
 
 # Twisted Python imports
 from syslog import LOG_LOCAL2
@@ -22,6 +19,7 @@ from pyldm import ldmbridge
 
 # IEM python Stuff
 import common
+import datetime
 common.write_pid("pyWWA_lsr_parser")
 DBPOOL = common.get_database(common.config['databaserw']['postgis'])
 

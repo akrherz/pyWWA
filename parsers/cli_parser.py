@@ -3,10 +3,6 @@
   so we take what data we find in this product and overwrite the database
   storage of what we got from the automated observations
 """
-# http://bugs.python.org/issue7980
-import datetime
-datetime.datetime.strptime('2013', '%Y')
-
 from pyiem.nws.products import parser
 from pyldm import ldmbridge
 from pyiem.network import Table as NetworkTable
