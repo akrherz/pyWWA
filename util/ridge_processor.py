@@ -9,9 +9,6 @@ import json
 import pytz
 import pika
 
-def jitter():
-    return "0" * random.randint(0,9)
-
 def generate_image(ch, method, properties, body):
     """
     Generate a Lite Image given the ActiveMQ message 
@@ -54,15 +51,17 @@ def generate_image(ch, method, properties, body):
 
     wldfn = '/tmp/%s_%s_%s.wld' % (siteID, productID, gts.strftime("%H%M"))
     o = open(wldfn, 'w')
-    o.write("%.6f%s\n" % ((lowerRightLon - upperLeftLon)/1000.0,jitter())) # dx
-    o.write("0.0%s\n" % (jitter(),))
-    o.write("0.0%s\n" % (jitter(),))
-    o.write("%.6f%s\n" % (0 - (upperLeftLat - lowerRightLat)/1000.0,jitter())) # dy
-    o.write("%.6f%s\n" % (upperLeftLon,jitter())) #UL Lon
-    o.write("%.6f%s\n" % (upperLeftLat,jitter())) #UL Lat
+    o.write("%.6f\n" % ((lowerRightLon - upperLeftLon)/1000.0,)) # dx
+    o.write("0.0\n")
+    o.write("0.0\n")
+    o.write("%.6f\n" % (0 - (upperLeftLat - lowerRightLat)/1000.0,)) # dy
+    o.write("%.6f\n" % (upperLeftLon,)) #UL Lon
+    o.write("%.6f\n" % (upperLeftLat,)) #UL Lat
     o.close()
 
-    pqstr = "pqinsert -p '%s' %s" % (pqstr, pngfn)
+    # Use -i to allow for duplicate file content as the product id *should*
+    # always be unique
+    pqstr = "pqinsert -i -p '%s' %s" % (pqstr, pngfn)
     subprocess.call( pqstr, shell=True )
     subprocess.call( pqstr.replace("png","wld"), shell=True )
     metapq = pqstr.replace("png","json").replace(" ac ", " c ") 
