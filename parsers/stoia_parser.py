@@ -30,12 +30,13 @@ ROADS = {}
 # Changedir to /tmp
 os.chdir("/tmp")
 
+
 def shutdown():
     """ Down we go! """
     log.msg("Stopping...")
     reactor.callWhenRunning(reactor.stop)
 
-# LDM Ingestor
+
 class MyProductIngestor(ldmbridge.LDMProductReceiver):
     """ I receive products from ldmbridge and process them 1 by 1 :) """
 
@@ -52,31 +53,48 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
         defer.addErrback(log.err)
 
 
-
 def figureCondition(txn, condition):
-    """ Find this condition within a dict of conditions """
-    if condition.find("Travel Not Advised".upper()) > -1:
+    """Conversion of condition text into a code
+
+    Args:
+      txn (cursor): psycopg2 database cursor
+      condition (str): condition string to convert to a code
+
+    Returns:
+      code (int): the converted code
+    """
+    # shortcut
+    if condition in CONDITIONS:
+        return CONDITIONS[condition]
+    # If we find this string, we want this to be 51 (Important)
+    if (condition.find("TRAVEL NOT ADVISED") > -1 or
+            condition.find("TRAVEL ADVISORY") > -1):
+        CONDITIONS[condition] = 51
         return 51
-    for typ in ["Closed", "Travel Advisory", "CC Ice", "CC Snow", "CC Slush",
-           "CC Mixed", "MC Ice", "MC Snow", "MC Slush", "MC Mixed",
-           "PC Ice", "PC Snow", "PC Slush", "PC Mixed", "CC Frost",
-           "MC Frost", "PC Frost", "Wet", "Normal", "No Conditions Reproted"]:
-        if condition.find( typ.upper() ) > -1:
-            if (not CONDITIONS.has_key(typ.upper())):
-                log.msg("Unknown Condition: %s\n" % (typ,) )
-                txn.execute("SELECT max(code) as m from roads_conditions")
-                row = txn.fetchone()
-                if row['m'] is None:
-                    newID = 1
-                else:
-                    newID = int( row['m'] ) + 1
-                txn.execute("INSERT into roads_conditions VALUES (%s, %s) ",
-                                (newID, typ) )
-                CONDITIONS[typ.upper()] = newID
+    # Now we prioritize what we can look for
+    for typ in ["Closed", "CC Ice", "CC Snow", "CC Slush",
+                "CC Mixed", "MC Ice", "MC Snow", "MC Slush", "MC Mixed",
+                "PC Ice", "PC Snow", "PC Slush", "PC Mixed", "CC Frost",
+                "MC Frost", "PC Frost", "Wet", "Normal",
+                "No Conditions Reproted"]:
+        if condition.find(typ.upper()) == -1:
+            continue
+        if typ.upper() not in CONDITIONS:
+            log.msg("Unknown Condition: |%s| |%s|\n" % (typ, condition))
+            txn.execute("SELECT max(code) as m from roads_conditions")
+            row = txn.fetchone()
+            if row['m'] is None:
+                newID = 1
+            else:
+                newID = int(row['m']) + 1
+            txn.execute("INSERT into roads_conditions VALUES (%s, %s) ",
+                        (newID, typ))
+            CONDITIONS[typ.upper()] = newID
 
-            return CONDITIONS[typ.upper()]
+        return CONDITIONS[typ.upper()]
 
-    return CONDITIONS["NORMAL"]
+    return CONDITIONS.get("NORMAL", 0)
+
 
 def init_dicts(txn):
     """ Setup what we need to process this file """
@@ -92,54 +110,56 @@ def init_dicts(txn):
                                     'minor': row['minor']}
     log.msg("Loaded %s road segments" % (len(ROADS),))
 
+
 def real_parser(txn, raw):
-    """ Actually do something """
+    """Actually do the heavy lifting of parsing this product
+
+    Args:
+      txn (cursor): psycopg2 database transaction
+      raw (str): the raw text that needs parsing
+    """
     # Load up dictionary of Possible Road Conditions
     if len(ROADS) == 0:
         log.msg("Initializing ROADS and CONDITIONS dicts...")
         init_dicts(txn)
-    
-    tp = TextProduct(raw)    
+
+    tp = TextProduct(raw)
     log.msg("PROCESSING STOIA: %s" % (tp.valid,))
 
-    # Lets start our processing
-    lines = re.split("\n", raw[ raw.find("*"):])
-    for linenum, line in enumerate(lines):
-        if linenum < 9:
-            continue
-        if (len(line) < 40 or line[0] == "*" or line[30:40].strip() == ''):
+    # Lets start our processing by looking for the first * and then
+    # processing after finding it
+    lines = re.split("\n", raw[raw.find("*"):])
+    for line in lines:
+        if len(line) < 40 or line[0] == "*" or line[30:40].strip() == '':
             continue
         data = line[7:]
+        # Find the right most ) and chomp everything up until it
         pos = data.rfind(")")
         meat = data[:pos+1].replace(", ", " ")
         condition = data[(pos+1):].upper().strip()
         if meat.strip() == '':
             continue
-        if not ROADS.has_key(meat):
-            log.msg("Unknown road: %s\n" % (meat,))
+        if meat not in ROADS:
+            log.msg("Unknown road: %s\n" % (meat, ))
             continue
-        
-        #major = roads[meat]['major']
-        #minor = roads[meat]['minor']
 
-        #----------------------------------------
-        # Now we are going to do things by type!
-        roadCondCode = figureCondition(txn, condition)
+        road_code = figureCondition(txn, condition)
         towingProhibited = (condition.find("TOWING PROHIBITED") > -1)
         limitedVis = (condition.find("LIMITED VIS.") > -1)
-  
         segid = ROADS[meat]['segid']
 
-
-        txn.execute("""UPDATE roads_current SET cond_code = %s, valid = %s, 
-         towing_prohibited = %s, limited_vis = %s, raw = %s 
-         WHERE segid = %s """ , (roadCondCode, tp.valid, 
-                                 towingProhibited, limitedVis, condition, 
-                                 segid) )
+        txn.execute("""
+            UPDATE roads_current SET cond_code = %s, valid = %s,
+            towing_prohibited = %s, limited_vis = %s, raw = %s
+            WHERE segid = %s
+            """, (road_code, tp.valid, towingProhibited, limitedVis,
+                  condition, segid))
 
     # Copy the currents table over to the log... HARD CODED
-    txn.execute("INSERT into roads_%s_log SELECT * from roads_current" % (
-                                tp.valid.year,))
+    txn.execute("""
+        INSERT into roads_%s_log
+        SELECT * from roads_current
+        """ % (tp.valid.year, ))
 
     # Now we generate a shapefile....
     dbf = dbflib.create("iaroad_cond")
@@ -158,7 +178,7 @@ def real_parser(txn, raw):
 
     shp = shapelib.create("iaroad_cond", shapelib.SHPT_ARC)
 
-    txn.execute("""select b.*, c.*, ST_astext(b.geom) as bgeom from 
+    txn.execute("""select b.*, c.*, ST_astext(b.geom) as bgeom from
          roads_base b, roads_current c WHERE b.segid = c.segid
          and valid is not null and b.geom is not null""")
     i = 0
@@ -180,7 +200,7 @@ def real_parser(txn, raw):
         d["BAN_TOW"] = str(row["towing_prohibited"])[0]
         d["LIM_VIS"] = str(row["limited_vis"])[0]
 
-        obj = shapelib.SHPObject(shapelib.SHPT_ARC, 1, f )
+        obj = shapelib.SHPObject(shapelib.SHPT_ARC, 1, f)
         shp.write_object(-1, obj)
         dbf.write_record(i, d)
 
@@ -197,11 +217,12 @@ def real_parser(txn, raw):
     z.write("iaroad_cond.prj")
     z.close()
 
-    utc = tp.valid.astimezone( pytz.timezone("UTC") )
-    subprocess.call("/home/ldm/bin/pqinsert -p 'zip ac %s gis/shape/26915/ia/iaroad_cond.zip GIS/iaroad_cond_%s.zip zip' iaroad_cond.zip" % (
-                                            utc.strftime("%Y%m%d%H%M"), 
-                                            utc.strftime("%Y%m%d%H%M")), 
-                    shell=True )
+    utc = tp.valid.astimezone(pytz.timezone("UTC"))
+    subprocess.call(("/home/ldm/bin/pqinsert -p 'zip ac %s "
+                     "gis/shape/26915/ia/iaroad_cond.zip "
+                     "GIS/iaroad_cond_%s.zip zip' iaroad_cond.zip"
+                     "") % (utc.strftime("%Y%m%d%H%M"),
+                            utc.strftime("%Y%m%d%H%M")), shell=True)
 
     for suffix in ['shp', 'shx', 'dbf', 'prj', 'zip']:
         os.unlink("iaroad_cond.%s" % (suffix,))
@@ -210,4 +231,3 @@ if __name__ == "__main__":
     # main
     ldmbridge.LDMProductFactory(MyProductIngestor())
     reactor.run()
-    
