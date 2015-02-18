@@ -1,5 +1,4 @@
-""" SPS product ingestor 
-"""
+"""SPS product ingestor"""
 
 # Twisted Python imports
 from syslog import LOG_LOCAL2
@@ -21,13 +20,16 @@ PYWWA_PRODUCT_URL = common.settings.get('pywwa_product_url',
                                         'pywwa_product_url')
 
 ugc_dict = {}
+
+
 def load_ugc(txn):
     """ load ugc dict """
-    sql = "SELECT name, ugc from ugcs WHERE name IS NOT Null and end_ts is null"
-    txn.execute( sql )
+    sql = """SELECT name, ugc from ugcs
+        WHERE name IS NOT Null and end_ts is null"""
+    txn.execute(sql)
     for row in txn:
-        name = (row["name"]).replace("\x92"," ")
-        ugc_dict[ row['ugc'] ] = name
+        name = (row["name"]).replace("\x92", " ")
+        ugc_dict[row['ugc']] = name
 
     log.msg("ugc_dict is loaded...")
 
@@ -38,9 +40,9 @@ def countyText(ugcs):
     c = ""
     for ugc in ugcs:
         stateAB = ugc.state
-        if not countyState.has_key(stateAB):
+        if stateAB not in countyState:
             countyState[stateAB] = []
-        if not ugc_dict.has_key(str(ugc)):
+        if str(ugc) not in ugc_dict:
             name = "((%s))" % (str(ugc),)
         else:
             name = ugc_dict[str(ugc)]
@@ -48,10 +50,10 @@ def countyText(ugcs):
 
     for st in countyState.keys():
         countyState[stateAB].sort()
-        c +=" %s [%s] and" %(", ".join(countyState[st]), st)
+        c += " %s [%s] and" % (", ".join(countyState[st]), st)
     return c[:-4]
 
-# LDM Ingestor
+
 class myProductIngestor(ldmbridge.LDMProductReceiver):
 
     def process_data(self, buf):
@@ -59,7 +61,7 @@ class myProductIngestor(ldmbridge.LDMProductReceiver):
         deffer.addErrback(common.email_error, buf)
 
     def connectionLost(self, reason):
-        log.msg('connectionLost') 
+        log.msg('connectionLost')
         log.err(reason)
         reactor.callLater(5, self.shutdown)
 
@@ -74,19 +76,20 @@ def real_process(txn, raw):
         raw += "\r\r\n$$\r\r\n"
     prod = product.TextProduct(raw)
     product_id = prod.get_product_id()
-    xtra ={
-           'product_id': product_id,
-           'channels': ''
-           }
+    xtra = {'product_id': product_id,
+            'channels': ''}
 
     if prod.segments[0].sbw:
+        ets = prod.valid + datetime.timedelta(hours=1)
+        if len(prod.segments) > 0 and prod.segments[0].ugcexpire is not None:
+            ets = prod.segments[0].ugcexpire
         giswkt = 'SRID=4326;%s' % (MultiPolygon([prod.segments[0].sbw]).wkt,)
-        sql = """INSERT into text_products(product, product_id, geom) 
-                values (%s,%s, %s)"""
-        myargs = (prod.unixtext, product_id, giswkt )
-        
+        sql = """INSERT into text_products(product, product_id, geom,
+            issue, expire) values (%s, %s, %s, %s, %s)"""
+        myargs = (prod.unixtext, product_id, giswkt, prod.valid, ets)
+
     else:
-        sql = "INSERT into text_products(product, product_id) values (%s,%s)" 
+        sql = "INSERT into text_products(product, product_id) values (%s,%s)"
         myargs = (prod.unixtext, product_id)
     txn.execute(sql, myargs)
 
