@@ -104,6 +104,7 @@ from twisted.internet import reactor
 
 IEM_URL = common.settings.get('pywwa_watch_url', 'pywwa_watch_url')
 
+
 def cancel_watch(report, ww_num):
     """ Cancel a watch please """
     tokens = re.findall("KWNS ([0-3][0-9])([0-9][0-9])([0-9][0-9])", report)
@@ -114,14 +115,17 @@ def cancel_watch(report, ww_num):
     ts = datetime.datetime(gmt.year, gmt.month, day1, hour1, minute1)
     ts = ts.replace(tzinfo=pytz.timezone("UTC"))
     for tbl in ('watches', 'watches_current'):
-        sql = """UPDATE """+tbl+""" SET expired = %s WHERE num = %s and 
+        sql = """UPDATE """+tbl+""" SET expired = %s WHERE num = %s and
               extract(year from expired) = %s """
         args = (ts, ww_num, ts.year)
         deffer = DBPOOL.runOperation(sql, args)
         deffer.addErrback(common.email_error, report)
 
-    msg = "SPC: SPC cancels WW %s http://www.spc.noaa.gov/products/watch/ww%04i.html" % ( ww_num, int(ww_num) )
-    jabber.sendMessage( msg , msg)
+    msg = ("SPC: SPC cancels WW %s "
+           "http://www.spc.noaa.gov/products/watch/ww%04i.html"
+           "") % (ww_num, int(ww_num))
+    xtra = dict(channels='SPC')
+    jabber.sendMessage(msg, msg, xtra)
 
 dirs = {'NNE': 22.5, 'ENE': 67.5, 'NE':  45.0, 'E': 90.0, 'ESE': 112.5,
         'SSE': 157.5, 'SE': 135.0, 'S': 180.0, 'SSW': 202.5,
