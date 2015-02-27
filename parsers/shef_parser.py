@@ -11,13 +11,6 @@ from twisted.python import syslog
 syslog.startLogging(prefix='pyWWA/shef_parser', facility=LOG_LOCAL2)
 from twisted.python import log
 
-
-def write_pid():
-    """ Create a PID file for when we are fired up! """
-    pid = open("shef_parser.pid",'w')
-    pid.write("%s" % ( os.getpid(),) )
-    pid.close()
-
 # Stuff I wrote
 from pyiem.observation import Observation
 from pyiem.nws import product
@@ -412,16 +405,17 @@ def process_site(tp, sid, ts, data):
     # Okay, time for a hack, if our observation is at midnight!
     if localts.hour == 0 and localts.minute == 0:
         localts -= datetime.timedelta(minutes=1)
-        log.msg("Shifting %s [%s] back one minute: %s" % (sid, network, 
-                                                          localts))
+        # log.msg("Shifting %s [%s] back one minute: %s" % (sid, network,
+        #                                                  localts))
 
     iemob = Observation(sid, network, localts)
 
     deffer = ACCESSDB.runInteraction(save_data, tp, iemob, data)
     deffer.addCallback(got_results, tp, sid, network)
     deffer.addErrback(common.email_error, tp.text)
-    deffer.addErrback( log.err )
-    
+    deffer.addErrback(log.err)
+
+
 def got_results(res, tp, sid, network):
     """
     Callback after our iemdb work
@@ -479,8 +473,8 @@ def main(res):
     for _ in range(3):
         cooperate(worker(jobs))
     
-    reactor.callLater(0, write_pid)
     reactor.callLater(300, job_size, jobs)
+
 
 def fullstop(err):
     log.msg("fullstop() called...")
