@@ -3,13 +3,13 @@ Split the MAV product into bitesized chunks that the AFOS viewer can see
 """
 import re
 import sys
-from pyiem.nws import product 
+from pyiem.nws import product
 import psycopg2
 AFOS = psycopg2.connect(database='afos', host='iemdb')
 cursor = AFOS.cursor()
 
-prod = product.TextProduct( sys.stdin.read() )
-prod.valid = prod.valid.replace(second=0,minute=0,microsecond=0)
+prod = product.TextProduct(sys.stdin.read())
+prod.valid = prod.valid.replace(second=0, minute=0, microsecond=0)
 offset = prod.text.find(prod.afos[:3]) + 7
 
 sections = re.split("\n\n", prod.text[offset:])
@@ -21,12 +21,11 @@ if prod.valid.month > 6:
 for sect in sections:
     if sect[1:4].strip() == "":
         continue
-    #print prod.afos[:3] + sect[1:4], prod.source, prod.valid, prod.wmo
-    cursor.execute("""INSERT into """+table+""" 
-        (pil, data, source, entered, wmo) 
-        values(%s, %s, %s, %s, %s)""", 
-        (prod.afos[:3] + sect[1:4], prod.text[:offset] + sect, 
-         prod.source, prod.valid, prod.wmo ))
+    # print prod.afos[:3] + sect[1:4], prod.source, prod.valid, prod.wmo
+    cursor.execute("""INSERT into """+table+"""
+        (pil, data, source, entered, wmo) values (%s, %s, %s, %s, %s)
+        """, (prod.afos[:3] + sect[1:4], prod.text[:offset] + sect,
+              prod.source, prod.valid, prod.wmo))
 
 cursor.close()
 AFOS.commit()

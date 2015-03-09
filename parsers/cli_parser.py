@@ -17,6 +17,7 @@ from twisted.python import log
 DBPOOL = common.get_database('iem', cp_max=1)
 NT = NetworkTable("NWSCLI")
 
+
 # LDM Ingestor
 class MyProductIngestor(ldmbridge.LDMProductReceiver):
     """ I receive products from ldmbridge and process them 1 by 1 :) """
@@ -31,12 +32,13 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
         deffer = DBPOOL.runInteraction(preprocessor, text)
         deffer.addErrback(common.email_error, text)
 
+
 def save_data(txn, prod, station, data):
     """ Save atomic data to cli_data table """
     # Use four char here
     station = "%s%s" % (prod.source[0], station)
 
-    if not NT.sts.has_key(station):
+    if station not in NT.sts:
         common.email_error("Unknown CLI Station: %s" % (station,),
                            prod.unixtext)
 
@@ -46,8 +48,8 @@ def save_data(txn, prod, station, data):
     if txn.rowcount == 1:
         row = txn.fetchone()
         if prod.get_product_id() < row['product']:
-            print 'Skip save of %s as previous %s row newer?' % (
-                                    prod.get_product_id(), row['product'])
+            print(('Skip save of %s as previous %s row newer?'
+                   ) % (prod.get_product_id(), row['product']))
             return
         txn.execute("""DELETE from cli_data WHERE station = %s and valid = %s
         """, (station, data['cli_valid']))
@@ -58,11 +60,11 @@ def save_data(txn, prod, station, data):
         precip, precip_month, precip_jan1, precip_jul1, precip_normal,
         precip_record,
         precip_record_years, precip_month_normal, snow, snow_month,
-        snow_jun1, snow_jul1, 
+        snow_jun1, snow_jul1,
         snow_dec1, precip_dec1, precip_dec1_normal, precip_jan1_normal,
         high_time, low_time, snow_record_years, snow_record,
         snow_jun1_normal, snow_jul1_normal, snow_dec1_normal,
-        snow_month_normal) 
+        snow_month_normal)
         VALUES (
         %s, %s, %s, %s, %s, %s,
         %s, %s, %s, %s, %s,
@@ -105,13 +107,15 @@ def save_data(txn, prod, station, data):
           data['data'].get('snow_month_normal')
           ))
 
+
 def send_tweet(prod):
     """ Send the tweet for this prod """
 
-    jres = prod.get_jabbers(    
+    jres = prod.get_jabbers(
         common.settings.get('pywwa_product_url', 'pywwa_product_url'))
     for j in jres:
         jabber.sendMessage(j[0], j[1], j[2])
+
 
 def preprocessor(txn, text):
     """ Protect the realprocessor """
@@ -122,6 +126,7 @@ def preprocessor(txn, text):
         realprocessor(txn, prod, data)
     send_tweet(prod)
 
+
 def realprocessor(txn, prod, data):
     """ Actually do the work """
     # Can't always use the AFOS as the station ID :(
@@ -129,12 +134,11 @@ def realprocessor(txn, prod, data):
         station = None
         for stid in NT.sts.keys():
             if NT.sts[stid]['name'].upper() == data['cli_station']:
-                station = stid[1:] # drop first char
+                station = stid[1:]  # drop first char
                 break
         if station is None:
-            common.email_error("Unknown CLI Station Text: |%s|" % (
-                                                data['cli_station'],), 
-                               prod.unixtext)
+            common.email_error(("Unknown CLI Station Text: |%s|"
+                                ) % (data['cli_station'],), prod.unixtext)
             return
     else:
         station = prod.afos[3:]
@@ -146,7 +150,7 @@ def realprocessor(txn, prod, data):
         """, (data['cli_valid'], station))
     row = txn.fetchone()
     if row is None:
-        print 'No %s rows found for %s on %s' % (table, station, 
+        print 'No %s rows found for %s on %s' % (table, station,
                                                  data['cli_valid'])
         save_data(txn, prod, station, data)
         return
@@ -179,14 +183,14 @@ def realprocessor(txn, prod, data):
             updatesql.append(' snow = %s' % (val,))
             logmsg.append('Snow O:%s N:%s' % (row['snow'], val))
 
-
     if len(updatesql) > 0:
-        txn.execute("""UPDATE """+table+""" d SET """+ ','.join(updatesql) +"""
+        txn.execute("""UPDATE """+table+""" d SET
+        """ + ','.join(updatesql) + """
          FROM stations t WHERE t.iemid = d.iemid and d.day = %s and t.id = %s
          and t.network ~* 'ASOS' """, (data['cli_valid'], station))
-        log.msg("%s rows for %s (%s) %s" % (txn.rowcount, station,
-                                    data['cli_valid'].strftime("%y%m%d"),
-                                    ','.join(logmsg)))
+        log.msg(("%s rows for %s (%s) %s"
+                 ) % (txn.rowcount, station,
+                      data['cli_valid'].strftime("%y%m%d"), ','.join(logmsg)))
 
     save_data(txn, prod, station, data)
 

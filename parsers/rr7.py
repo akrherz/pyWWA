@@ -24,8 +24,9 @@ if gmt.month > 6:
     table = "products_%s_0712" % (gmt.year,)
 
 for t in tokens:
-    sql = """INSERT into """+table+"""(pil, data, entered) values(%s,%s,%s)"""
-    sqlargs = ("%s%s" % ('RR7', t[3:6]) , t.replace("z","\n"), gmt )
+    sql = """INSERT into """ + table + """
+    (pil, data, entered) values(%s,%s,%s)"""
+    sqlargs = ("%s%s" % ('RR7', t[3:6]), t.replace("z", "\n"), gmt)
     acursor.execute(sql, sqlargs)
 
 acursor.close()

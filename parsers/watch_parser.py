@@ -7,91 +7,62 @@ syslog.startLogging(prefix='pyWWA/watch_parser', facility=LOG_LOCAL2)
 from twisted.python import log
 
 import re
-import os
 import math
 import datetime
 import pytz
 import common
 
-# Non standard Stuff
-import string
 
 class stationTable:
-  def __init__(self, tableName, loadTable = "yes"):
-    self.ids = []
-    self.names = {}
-    self.sts = {}
-    self.tableName = tableName
-    if (loadTable == "yes"):
-      self.load()
 
-  def empty(self):
-    self.ids = []
-    self.names = {}
-    self.sts = {}
+    def __init__(self, tableName, loadTable="yes"):
+        self.ids = []
+        self.names = {}
+        self.sts = {}
+        self.tableName = tableName
+        if (loadTable == "yes"):
+            self.load()
 
-  def editRow_mesosite(self, rs):
-    thisID = rs["id"]
-    st = {}
-    st["id"] = thisID
-    self.ids.append(thisID)
-    st["synop"] = rs["synop"]
-    st["name"] = rs["plot_name"]
-    st["state"] = rs["state"]
-    st["country"] = rs["country"]
-    st["lat"] = rs["latitude"]
-    st["lon"] = rs["longitude"]
-    st["gis"] = "POINT("+ str(st["lon"]) +" "+ str(st["lat"]) +")"
-    st["elev"] = rs["elevation"]
-    if (rs["spri"] == None):
-      st["spri"] = " "
-    else:
-      st["spri"] = rs["spri"]
-    self.sts[thisID] = st
+    def empty(self):
+        self.ids = []
+        self.names = {}
+        self.sts = {}
 
-  def writeTable(self, o):
-    import string
-    for sid in self.ids:
-       st = self.sts[sid]
-       o.write("%-8s %6s %-32.32s %2s %2s %5.0f %6.0f %4.0f %2s\n" % \
-        (st["id"], st["synop"], st["name"], \
-         st["state"], st["country"], st["lat"] * 100 , st["lon"] * 100, \
-         int(st["elev"]), st["spri"]) )
+    def load(self):
+        f = open(self.tableName, 'r').readlines()
+        for line in f:
+            if (line[0] == "#"):
+                continue
 
-  def load(self):
-    f = open(self.tableName, 'r').readlines()
-    for line in f:
-      if (line[0] != "#"):
-        thisID = string.strip( line[0:8] )
-        synop  = string.strip( line[9:15] )
-        sname  = string.strip( line[16:48] )
-        state  = string.strip( line[49:51] )
-        country  = string.strip( line[52:54] )
-        lat  = string.strip( line[55:60] )
-        lon  = string.strip( line[61:68] )
-        elev = string.strip( line[68:73] )
-        spri = string.strip( line[74:76] )
+            thisID = line[0:8].strip()
+            synop = line[9:15].strip()
+            sname = line[16:48].strip()
+            state = line[49:51].strip()
+            country = line[52:54].strip()
+            lat = line[55:60].strip()
+            lon = line[61:68].strip()
+            elev = line[68:73].strip()
+            spri = line[74:76].strip()
 
-        if (len(elev) == 0): elev = "343"
-            
-        # Time to update 
-        self.ids.append(thisID)
-        self.names[thisID] = sname
-        st = {}
-        st["id"] = thisID
-        st["synop"] = synop
-        st["name"] = sname
-        st["state"] = state
-        st["country"] = country
-        st["lat"] = round( int(lat) / 100.00, 2)
-        st["lon"] = round( int(lon) / 100.00, 2)
-        st["gis"] = "POINT("+ str(st["lon"]) +" "+ str(st["lat"]) +")"
-        st["elev"] = elev
-        st["spri"] = spri            
-        self.sts[thisID] = st
+            if len(elev) == 0:
+                elev = "343"
 
-#       print thisID, synop, sname, state, country, lat, lon, elev, spri
-#       print self.names
+            # Time to update
+            self.ids.append(thisID)
+            self.names[thisID] = sname
+            st = {}
+            st["id"] = thisID
+            st["synop"] = synop
+            st["name"] = sname
+            st["state"] = state
+            st["country"] = country
+            st["lat"] = round(int(lat) / 100.00, 2)
+            st["lon"] = round(int(lon) / 100.00, 2)
+            st["gis"] = "POINT(" + str(st["lon"]) + " " + str(st["lat"]) + ")"
+            st["elev"] = elev
+            st["spri"] = spri
+            self.sts[thisID] = st
+
 
 KM_SM = 1.609347
 
@@ -141,10 +112,10 @@ and an offset ex) 2 SM NE of ALO
     # Compute Base location
     lon0 = st.sts[site]['lon']
     lat0 = st.sts[site]['lat']
-    x = -math.cos( math.radians( dirs[direction] + 90.0) )
-    y = math.sin( math.radians( dirs[direction] + 90.0) )
-    lat0 += (y * displacement * KM_SM / 111.11 )
-    lon0 += (x * displacement * KM_SM /(111.11*math.cos( math.radians(lat0))))
+    x = 0 - math.cos(math.radians(dirs[direction] + 90.0))
+    y = math.sin(math.radians(dirs[direction] + 90.0))
+    lat0 += (y * displacement * KM_SM / 111.11)
+    lon0 += (x * displacement * KM_SM / (111.11*math.cos(math.radians(lat0))))
 
     return lon0, lat0
 
@@ -154,23 +125,23 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
 
     def connectionLost(self, reason):
         log.msg('connectionLost')
-        log.err( reason )
+        log.err(reason)
         reactor.callLater(7, self.shutdown)
 
     def shutdown(self):
         reactor.callWhenRunning(reactor.stop)
 
-
     def process_data(self, raw):
         try:
-            #raw = raw.replace("\015\015\012", "\n")
             real_process(raw)
-        except Exception,exp:
+        except Exception, exp:
             common.email_error(exp, raw)
+
 
 def real_process(raw):
 
-    report = raw.replace("\015\015\012", "").replace("\n", "").replace("'", " ")
+    report = raw.replace("\015\015\012", "").replace("\n",
+                                                     "").replace("'", " ")
     # Set up Station Table!
     st = stationTable("/home/ldm/pyWWA/tables/spcwatch.tbl")
 
@@ -184,13 +155,13 @@ def real_process(raw):
         print 'TEST watch found'
         return
     ww_num = tokens[0][0]
-    #ww_type = tokens[0][2]
+    # ww_type = tokens[0][2]
 
     # Need to check for cancels
     tokens = re.findall("CANCELLED", report)
     if (len(tokens) > 0):
         cancel_watch(report, ww_num)
-        return 
+        return
 
     jabberReplacesTxt = ""
     tokens = re.findall("REPLACES WW ([0-9]*)", report)
@@ -214,11 +185,11 @@ def real_process(raw):
     eTS = gmt.replace(day=day2, hour=hour2, minute=minute2)
 
     # If we are near the end of the month and the day1 is 1, add 1 month
-    if gmt.day > 27  and day1 == 1:
-        sTS +=  datetime.timedelta(days=+35)
+    if gmt.day > 27 and day1 == 1:
+        sTS += datetime.timedelta(days=+35)
         sTS = sTS.replace(day=1)
-    if gmt.day > 27  and day2 == 1:
-        eTS +=  datetime.timedelta(days=+35)
+    if gmt.day > 27 and day2 == 1:
+        eTS += datetime.timedelta(days=+35)
         eTS = eTS.replace(day=1)
 
     # Brute Force it!
@@ -246,18 +217,19 @@ def real_process(raw):
     loc2_vector = tokens[0][8]
     loc2 = tokens[0][9]
 
-
     # Now, we have offset locations from our base station locs
     (lon1, lat1) = loc2lonlat(st, loc1, loc1_vector, loc1_displacement)
     (lon2, lat2) = loc2lonlat(st, loc2, loc2_vector, loc2_displacement)
 
-    log.msg("LOC1 OFF %s [%s,%s] lat: %s lon %s" % (loc1, loc1_displacement, loc1_vector, lat1, lon1))
-    log.msg("LOC2 OFF %s [%s,%s] lat: %s lon %s" % (loc2, loc2_displacement, loc2_vector, lat2, lon2))
+    log.msg("LOC1 OFF %s [%s,%s] lat: %s lon %s" % (loc1, loc1_displacement,
+                                                    loc1_vector, lat1, lon1))
+    log.msg("LOC2 OFF %s [%s,%s] lat: %s lon %s" % (loc2, loc2_displacement,
+                                                    loc2_vector, lat2, lon2))
 
     # Now we compute orientations
-    if lon2 == lon1: #same as EW
+    if lon2 == lon1:  # same as EW
         orientation = "EAST AND WEST"
-    if lat1 == lat2: #same as NS
+    if lat1 == lat2:  # same as NS
         orientation = "NORTH AND SOUTH"
 
     if orientation == "EAST AND WEST":
@@ -282,7 +254,7 @@ def real_process(raw):
 
     elif orientation == "EITHER SIDE":
         slope = (lat2 - lat1)/(lon2 - lon1)
-        angle = (math.pi / 2.0) - math.fabs( math.atan(slope))
+        angle = (math.pi / 2.0) - math.fabs(math.atan(slope))
         x = box_radius * math.cos(angle)
         y = box_radius * math.sin(angle)
         if (slope < 0):
@@ -296,74 +268,78 @@ def real_process(raw):
         lon21 = lon2 - x * KM_SM / (111.11 * math.cos(math.radians(lat2)))
         lon22 = lon2 + x * KM_SM / (111.11 * math.cos(math.radians(lat2)))
 
-
-    wkt = "%s %s,%s %s,%s %s,%s %s,%s %s" % (lon11, lat11,  
-       lon21, lat21, lon22, lat22, lon12, lat12, lon11, lat11)
+    wkt = "%s %s,%s %s,%s %s,%s %s,%s %s" % (lon11, lat11, lon21, lat21,
+                                             lon22, lat22, lon12, lat12,
+                                             lon11, lat11)
 
     def runner(txn):
         # Delete from archive, since maybe it is a correction....
-        sql = """DELETE from watches WHERE num = %s and 
+        sql = """DELETE from watches WHERE num = %s and
            extract(year from issued) = %s""" % (ww_num, sTS.year)
         txn.execute(sql)
 
         # Insert into our watches table
         giswkt = 'SRID=4326;MULTIPOLYGON(((%s)))' % (wkt,)
-        sql = """INSERT into watches (sel, issued, expired, type, report, 
-            geom, num) VALUES(%s,%s,%s,%s,%s,%s, %s)""" 
-        args = ('SEL%s' % (saw,), sTS.strftime("%Y-%m-%d %H:%M+00"), 
-                eTS.strftime("%Y-%m-%d %H:%M+00"), types[ww_type], 
+        sql = """INSERT into watches (sel, issued, expired, type, report,
+            geom, num) VALUES(%s,%s,%s,%s,%s,%s, %s)"""
+        args = ('SEL%s' % (saw,), sTS.strftime("%Y-%m-%d %H:%M+00"),
+                eTS.strftime("%Y-%m-%d %H:%M+00"), types[ww_type],
                 raw, giswkt, ww_num)
         txn.execute(sql, args)
-        sql = """UPDATE watches_current SET issued = %s, expired = %s, type = %s,
-            report = %s, geom = %s, num = %s WHERE sel = %s"""
-        args = (sTS.strftime("%Y-%m-%d %H:%M+00"), 
-                eTS.strftime("%Y-%m-%d %H:%M+00"), types[ww_type], 
+        sql = """UPDATE watches_current SET issued = %s, expired = %s,
+            type = %s, report = %s, geom = %s, num = %s WHERE sel = %s"""
+        args = (sTS.strftime("%Y-%m-%d %H:%M+00"),
+                eTS.strftime("%Y-%m-%d %H:%M+00"), types[ww_type],
                 raw, giswkt, ww_num, 'SEL%s' % (saw,))
         txn.execute(sql, args)
 
     defer = DBPOOL.runInteraction(runner)
     defer.addErrback(common.email_error, 'blah')
     # Figure out WFOs affected...
-    jabberTxt = "SPC issues %s watch till %sZ" % \
-                 (ww_type, eTS.strftime("%H:%M") )
-    jabberTxtHTML = "Storm Prediction Center issues \
-<a href=\"http://www.spc.noaa.gov/products/watch/ww%04i.html\">%s watch</a>\
- till %s UTC " % (int(ww_num), ww_type, eTS.strftime("%H:%M") )
+    jabberTxt = "SPC issues %s watch till %sZ" % (ww_type,
+                                                  eTS.strftime("%H:%M"))
+    jabberTxtHTML = ("<p>Storm Prediction Center issues "
+                     "<a href=\"http://www.spc.noaa.gov/products/watch/"
+                     "ww%04i.html\">%s watch</a>"
+                     "till %s UTC</p>") % (int(ww_num),
+                                           ww_type, eTS.strftime("%H:%M"))
     if (jabberReplacesTxt != ""):
-        jabberTxt += ", new watch replaces "+ jabberReplacesTxt[:-1]
-        jabberTxtHTML += ", new watch replaces "+ jabberReplacesTxt[:-1]
+        jabberTxt += ", new watch replaces " + jabberReplacesTxt[:-1]
+        jabberTxtHTML += ", new watch replaces " + jabberReplacesTxt[:-1]
 
-    jabberTxt += " http://www.spc.noaa.gov/products/watch/ww%04i.html" % (int(ww_num), )
-    jabberTxtHTML += " (<a href=\"%s?year=%s&amp;num=%s\">Watch Quickview</a>) " % (IEM_URL, sTS.year, ww_num)
+    jabberTxt += (" http://www.spc.noaa.gov/products/watch/ww%04i.html"
+                  ) % (int(ww_num), )
+    jabberTxtHTML += (" (<a href=\"%s?year=%s&amp;num=%s\">Watch "
+                      "Quickview</a>)</p>") % (IEM_URL, sTS.year, ww_num)
 
     def runner2(txn):
         # Figure out who should get notification of the watch...
-        sql = """SELECT distinct wfo from ugcs WHERE 
+        sql = """SELECT distinct wfo from ugcs WHERE
          ST_Contains('SRID=4326;MULTIPOLYGON(((%s)))', geom)
          and end_ts is null""" % (wkt,)
-    
+
         txn.execute(sql)
         rs = txn.fetchall()
-        channels =  ['SPC',]
+        channels = ['SPC', ]
         for i in range(len(rs)):
             wfo = rs[i]['wfo']
-            channels.append( wfo )
+            channels.append(wfo)
         xtra = {'channels': ','.join(channels)}
         jabber.sendMessage(jabberTxt, jabberTxtHTML, xtra)
 
         # Special message for SPC
         lines = raw.split("\n")
         twt = lines[5].replace("\r\r", "")
-        twt += " http://www.spc.noaa.gov/products/watch/ww%04i.html" % (int(ww_num),)
+        twt += " http://www.spc.noaa.gov/products/watch/ww%04i.html" % (
+                                                                int(ww_num), )
         xtra['channels'] = 'SPC'
         jabber.sendMessage(twt, twt, xtra)
 
     df = DBPOOL.runInteraction(runner2)
     df.addErrback(common.email_error, raw)
-    
 
+if __name__ == '__main__':
+    jabber = common.make_jabber_client("new_watch")
 
-jabber = common.make_jabber_client("new_watch")
-
-ldm = ldmbridge.LDMProductFactory( MyProductIngestor() )
-reactor.run() #@UndefinedVariable
+    ldm = ldmbridge.LDMProductFactory(MyProductIngestor())
+    reactor.run()

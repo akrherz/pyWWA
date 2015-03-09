@@ -1,4 +1,6 @@
 """ Aviation Product Parser! """
+import common
+import os
 
 # Twisted Python imports
 from twisted.internet import reactor
@@ -10,20 +12,26 @@ from twisted.python import log
 # pyWWA stuff
 from pyldm import ldmbridge
 from pyiem.nws.products.sigmet import parser
-import common
 
 DBPOOL = common.get_database('postgis')
 
 # Load LOCS table
 LOCS = {}
+
+_MYDIR = os.path.dirname(os.path.abspath(__file__))
+TABLE_PATH = os.path.normpath(os.path.join(_MYDIR, "..", "tables"))
+
+
 def load_database(txn):
-    
-    txn.execute("""SELECT id, name, ST_x(geom) as lon, ST_y(geom) as lat from stations 
-           WHERE network ~* 'ASOS' or network ~* 'AWOS'""")
+
+    txn.execute("""
+        SELECT id, name, ST_x(geom) as lon, ST_y(geom) as lat from stations
+        WHERE network ~* 'ASOS' or network ~* 'AWOS'
+        """)
     for row in txn:
         LOCS[row['id']] = row
 
-    for line in open('/home/ldm/pyWWA/tables/vors.tbl'):
+    for line in open(TABLE_PATH + '/vors.tbl'):
         if len(line) < 70 or line[0] == '!':
             continue
         sid = line[:3]
@@ -31,9 +39,9 @@ def load_database(txn):
         lon = float(line[61:67]) / 100.0
         name = line[16:47].strip()
         LOCS[sid] = {'lat': lat, 'lon': lon, 'name': name}
-    
+
     # Finally, GEMPAK!
-    for line in open('/home/ldm/pyWWA/tables/pirep_navaids.tbl'):
+    for line in open(TABLE_PATH + '/pirep_navaids.tbl'):
         sid = line[:3]
         lat = float(line[56:60]) / 100.0
         lon = float(line[61:67]) / 100.0
@@ -46,25 +54,25 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
 
     def connectionLost(self, reason):
         log.msg('connectionLost')
-        log.err( reason )
+        log.err(reason)
         reactor.callLater(5, self.shutdown)
 
     def shutdown(self):
         reactor.callWhenRunning(reactor.stop)
 
-
     def process_data(self, buf):
         """ Process the product """
         try:
             prod = parser(buf, nwsli_provider=LOCS)
-            #prod.draw()
+            # prod.draw()
         except Exception, myexp:
             common.email_error(myexp, buf)
             return
         defer = DBPOOL.runInteraction(prod.sql)
         defer.addCallback(final_step, prod)
         defer.addErrback(common.email_error, buf)
-            
+
+
 def final_step(_, prod):
     """
 
@@ -75,14 +83,15 @@ def final_step(_, prod):
 
 MESOSITE = common.get_database('mesosite')
 
+
 def onready(res):
     log.msg("onready() called...")
-    ldmbridge.LDMProductFactory( MyProductIngestor() )
+    ldmbridge.LDMProductFactory(MyProductIngestor())
     MESOSITE.close()
 
 df = MESOSITE.runInteraction(load_database)
 df.addCallback(onready)
-df.addErrback( log.err )
+df.addErrback(log.err)
 
 jabber = common.make_jabber_client("aviation")
 reactor.run()

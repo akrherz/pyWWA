@@ -8,9 +8,9 @@ import os
 import datetime
 now = datetime.datetime.now()
 
-cdict = {'DES MOINES IA': [41.53, -93.65,'KDSM'],
- 'CHICAGO IL': [41.98, -87.93,'KORD'],
-}
+cdict = {'DES MOINES IA': [41.53, -93.65, 'KDSM'],
+         'CHICAGO IL': [41.98, -87.93, 'KORD'],
+         }
 
 out = open("/tmp/wxc_uvi.txt", 'w')
 out.write("""Weather Central 001d0300 Surface Data
@@ -21,16 +21,17 @@ out.write("""Weather Central 001d0300 Surface Data
    7 Lon
    2 UVI
    2 BOGUS
-""" )
+""")
+
 
 def writer(city, st, uv):
     key = "%s %s" % (city, st)
-    if not cdict.has_key(key):
+    if key not in cdict:
         return
 
-    out.write("%4s %-30s %6s %7s %2s 99\n" % (cdict[key][2], key, 
-                                              cdict[key][0], cdict[key][1], 
-                                              uv) )
+    out.write("%4s %-30s %6s %7s %2s 99\n" % (cdict[key][2], key,
+                                              cdict[key][0], cdict[key][1],
+                                              uv))
 
 d = sys.stdin.read()
 data = d.replace("\\015\015\012", "\n")
@@ -51,8 +52,8 @@ for line in lines[26:]:
     writer(city, st, uv)
 
 out.close()
-subprocess.call("/home/ldm/bin/pqinsert -p 'data c 000000000000 wxc/wxc_uvi.txt bogus txt' /tmp/wxc_uvi.txt",
-                shell=True)
+subprocess.call(("/home/ldm/bin/pqinsert -p 'data c 000000000000 "
+                 "wxc/wxc_uvi.txt bogus txt' /tmp/wxc_uvi.txt"
+                 ), shell=True)
 
 os.unlink('/tmp/wxc_uvi.txt')
-

@@ -20,8 +20,9 @@ TABLESDIR = os.path.join(os.path.dirname(__file__), "../tables")
 
 PIREPS = {}
 
+
 def cleandb():
-    """ To keep LSRDB from growing too big, we clean it out 
+    """ To keep LSRDB from growing too big, we clean it out
         Lets hold 1 days of data!
     """
     thres = datetime.datetime.utcnow() - datetime.timedelta(hours=24*1)
@@ -34,19 +35,21 @@ def cleandb():
     log.msg("cleandb() init_size: %s final_size: %s" % (init_size, fin_size))
 
     # Call Again in 30 minutes
-    reactor.callLater(60*30, cleandb) 
+    reactor.callLater(60*30, cleandb)
 
 DBPOOL = common.get_database("postgis")
 
 # Load LOCS table
 LOCS = {}
+
+
 def load_locs(txn):
     log.msg("load_locs() called...")
-    txn.execute("""SELECT id, name, st_x(geom) as lon, st_y(geom) as lat 
+    txn.execute("""SELECT id, name, st_x(geom) as lon, st_y(geom) as lat
         from stations WHERE network ~* 'ASOS' or network ~* 'AWOS'""")
     for row in txn:
-        LOCS[ row['id'] ] = {'id': row['id'], 'name': row['name'],
-                          'lon': row['lon'], 'lat': row['lat']}
+        LOCS[row['id']] = {'id': row['id'], 'name': row['name'],
+                           'lon': row['lon'], 'lat': row['lat']}
 
     for line in open(TABLESDIR+'/faa_apt.tbl'):
         if len(line) < 70 or line[0] == '!':
@@ -55,7 +58,7 @@ def load_locs(txn):
         lat = float(line[56:60]) / 100.0
         lon = float(line[61:67]) / 100.0
         name = line[16:47].strip()
-        if not LOCS.has_key(sid):
+        if sid not in LOCS:
             LOCS[sid] = {'lat': lat, 'lon': lon, 'name': name}
 
     for line in open(TABLESDIR+'/vors.tbl'):
@@ -65,15 +68,15 @@ def load_locs(txn):
         lat = float(line[56:60]) / 100.0
         lon = float(line[61:67]) / 100.0
         name = line[16:47].strip()
-        if not LOCS.has_key(sid):
+        if sid not in LOCS:
             LOCS[sid] = {'lat': lat, 'lon': lon, 'name': name}
-    
+
     # Finally, GEMPAK!
     for line in open(TABLESDIR+'/pirep_navaids.tbl'):
         sid = line[:3]
         lat = float(line[56:60]) / 100.0
         lon = float(line[61:67]) / 100.0
-        if not LOCS.has_key(sid):
+        if sid not in LOCS:
             LOCS[sid] = {'lat': lat, 'lon': lon}
 
     log.msg("... %s locations loaded" % (len(LOCS),))
@@ -91,12 +94,12 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
     def shutdown(self):
         reactor.callWhenRunning(reactor.stop)
 
-
     def process_data(self, buf):
         """ Process the product """
         defer = DBPOOL.runInteraction(real_parser, buf)
         defer.addErrback(common.email_error, buf)
         defer.addErrback(log.err)
+
 
 def real_parser(txn, buf):
     """
@@ -105,7 +108,7 @@ def real_parser(txn, buf):
     prod = pirepparser(buf, nwsli_provider=LOCS)
     prod.assign_cwsu(txn)
     for report in prod.reports:
-        if PIREPS.has_key(report.text):
+        if report.text in PIREPS:
             report.is_duplicate = True
         PIREPS[report.text] = datetime.datetime.utcnow()
 
@@ -119,16 +122,19 @@ def real_parser(txn, buf):
 
 JABBER = common.make_jabber_client('pirep')
 
+
 def ready(bogus):
-    reactor.callLater( 20, cleandb)
-    ldmbridge.LDMProductFactory( MyProductIngestor() )
+    reactor.callLater(20, cleandb)
+    ldmbridge.LDMProductFactory(MyProductIngestor())
+
 
 def shutdown(err):
     log.msg(err)
     reactor.stop()
 
-df = DBPOOL.runInteraction(load_locs)
-df.addCallback( ready )
-df.addErrback( shutdown )
+if __name__ == '__main__':
+    df = DBPOOL.runInteraction(load_locs)
+    df.addCallback(ready)
+    df.addErrback(shutdown)
 
-reactor.run()
+    reactor.run()

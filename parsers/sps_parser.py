@@ -108,34 +108,36 @@ def real_process(txn, raw):
         expire = ""
         if seg.ugcexpire is not None:
             expire = "till %s %s" % (
-                (seg.ugcexpire - datetime.timedelta(
-                hours=reference.offsets.get(prod.z,0) )).strftime("%-I:%M %p"),
-                                      prod.z)
+                (seg.ugcexpire -
+                 datetime.timedelta(hours=reference.offsets.get(prod.z, 0))
+                 ).strftime("%-I:%M %p"), prod.z)
         xtra['channels'] = prod.source[1:]
-        mess = "%s issues %s for %s %s %s?pid=%s" % ( 
-           prod.source[1:], headline, counties, expire, 
-           PYWWA_PRODUCT_URL,
-           product_id)
-        htmlmess = "<p>%s issues <a href='%s?pid=%s'>%s</a> for %s %s</p>" % ( 
-                prod.source[1:],
-                PYWWA_PRODUCT_URL, 
-                product_id, headline, counties, expire)
-        xtra['twitter'] = "%s for %s %s %s?pid=%s" % (headline, counties, 
-                                            expire, PYWWA_PRODUCT_URL,
-                                            product_id)
+        mess = "%s issues %s for %s %s %s?pid=%s" % (prod.source[1:],
+                                                     headline, counties,
+                                                     expire, PYWWA_PRODUCT_URL,
+                                                     product_id)
+        htmlmess = ("<p>%s issues <a href='%s?pid=%s'>%s</a> for %s %s</p>"
+                    ) % (prod.source[1:], PYWWA_PRODUCT_URL, product_id,
+                         headline, counties, expire)
+        xtra['twitter'] = "%s for %s %s %s?pid=%s" % (headline, counties,
+                                                      expire,
+                                                      PYWWA_PRODUCT_URL,
+                                                      product_id)
         jabber.sendMessage(mess, htmlmess, xtra)
 
 jabber = common.make_jabber_client('sps_parser')
 
+
 def ready(bogus):
-    ldmbridge.LDMProductFactory( myProductIngestor() )
+    ldmbridge.LDMProductFactory(myProductIngestor())
+
 
 def killer(err):
-    log.err( err )
+    log.err(err)
     reactor.stop()
 
 df = POSTGIS.runInteraction(load_ugc)
 df.addCallback(ready)
-df.addErrback( killer )
+df.addErrback(killer)
 
 reactor.run()

@@ -1,8 +1,5 @@
-'''
+"""Support lib for the parser scripts found in this directory"""
 
- Support lib for the parser scripts found in this directory
-
-'''
 # stdlib
 import json
 import os
@@ -108,7 +105,7 @@ def email_error(exp, message):
         traceback.print_exc(file=cstr)
         log.err(exp)
     cstr.seek(0)
-    if isinstance(str, message):
+    if isinstance(message, str):
         log.msg(message[:100])
     else:
         log.msg(message)

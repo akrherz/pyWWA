@@ -100,14 +100,14 @@ def init_dicts(txn):
     """ Setup what we need to process this file """
     txn.execute("SELECT label, code from roads_conditions")
     for row in txn:
-        CONDITIONS[ row['label'].upper() ] = row['code']
+        CONDITIONS[row['label'].upper()] = row['code']
     log.msg("Loaded %s conditions" % (len(CONDITIONS),))
 
     # Load up dictionary of roads...
     txn.execute("SELECT major, minor, longname, segid from roads_base")
     for row in txn:
-        ROADS[ row['longname'] ] = {'segid': row['segid'], 'major': row['major'],
-                                    'minor': row['minor']}
+        ROADS[row['longname']] = {'segid': row['segid'], 'major': row['major'],
+                                  'minor': row['minor']}
     log.msg("Loaded %s road segments" % (len(ROADS),))
 
 

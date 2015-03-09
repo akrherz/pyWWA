@@ -34,7 +34,7 @@ def shutdown():
     ''' Stop this app '''
     log.msg("Shutting down...")
     reactor.callWhenRunning(reactor.stop)
-    
+
 
 # LDM Ingestor
 class MyProductIngestor(ldmbridge.LDMProductReceiver):
@@ -43,27 +43,28 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
     def connectionLost(self, reason):
         ''' callback when the stdin reader connection is closed '''
         log.msg('connectionLost() called...')
-        log.err( reason )
+        log.err(reason)
         reactor.callLater(7, shutdown)
 
     def process_data(self, buf):
         """ Process the product """
-        defer = PGCONN.runInteraction(really_process_data,buf)
+        defer = PGCONN.runInteraction(really_process_data, buf)
         defer.addErrback(common.email_error, buf)
         defer.addErrback(log.err)
+
 
 def really_process_data(txn, buf):
     ''' Actually do some processing '''
     utcnow = datetime.datetime.utcnow()
     utcnow = utcnow.replace(tzinfo=pytz.timezone("UTC"))
-    
+
     # Create our TextProduct instance
-    prod = productparser( buf, utcnow=utcnow, ugc_provider=ugc_dict,
-                               nwsli_provider=nwsli_dict)
-        
-    #Do the Jabber work necessary after the database stuff has completed
-    for (plain, html, xtra) in prod.get_jabbers( 
-            common.settings.get('pywwa_product_url', 'pywwa_product_url') ):
+    prod = productparser(buf, utcnow=utcnow, ugc_provider=ugc_dict,
+                         nwsli_provider=nwsli_dict)
+
+    # Do the Jabber work necessary after the database stuff has completed
+    for (plain, html, xtra) in prod.get_jabbers(
+            common.settings.get('pywwa_product_url', 'pywwa_product_url')):
         if xtra.get('channels', '') == '':
             common.email_error("xtra[channels] is empty!", buf)
         if not MANUAL:
@@ -73,49 +74,58 @@ def really_process_data(txn, buf):
         # Insert into database
         product_id = prod.get_product_id()
         sqlraw = buf.replace("\015\015\012", "\n").replace("\000", "").strip()
-        sql = """INSERT into text_products(product, product_id) values (%s,%s)"""
+        sql = """
+        INSERT into text_products(product, product_id) values (%s,%s)
+        """
         myargs = (sqlraw, product_id)
         if (len(prod.segments) > 0 and prod.segments[0].sbw):
-            giswkt = 'SRID=4326;%s' % (MultiPolygon([prod.segments[0].sbw]).wkt,)
-            sql = """INSERT into text_products(product, product_id, geom) 
-                    values (%s,%s,%s)"""
+            giswkt = ('SRID=4326;%s'
+                      ) % (MultiPolygon([prod.segments[0].sbw]).wkt, )
+            sql = """
+                INSERT into text_products(product, product_id, geom)
+                values (%s,%s,%s)
+            """
             myargs = (sqlraw, product_id, giswkt)
         txn.execute(sql, myargs)
 
-    
+
 def load_ugc(txn):
     """ load ugc"""
-    sql = """SELECT name, ugc, wfo from ugcs WHERE 
+    sql = """SELECT name, ugc, wfo from ugcs WHERE
         name IS NOT Null and end_ts is null"""
     txn.execute(sql)
     for row in txn:
-        ugc_dict[ row['ugc'] ] = ugc.UGC(row['ugc'][:2], row['ugc'][2],
-                        row['ugc'][3:],
-                name=(row["name"]).replace("\x92"," ").replace("\xc2"," "),
-                wfos=re.findall(r'([A-Z][A-Z][A-Z])',row['wfo']))
+        nm = (row["name"]).replace("\x92", " ").replace("\xc2", " ")
+        wfos = re.findall(r'([A-Z][A-Z][A-Z])', row['wfo'])
+        ugc_dict[row['ugc']] = ugc.UGC(row['ugc'][:2], row['ugc'][2],
+                                       row['ugc'][3:],
+                                       name=nm,
+                                       wfos=wfos)
 
     log.msg("ugc_dict loaded %s entries" % (len(ugc_dict),))
 
-    sql = """SELECT nwsli, 
-     river_name || ' ' || proximity || ' ' || name || ' ['||state||']' as rname 
+    sql = """SELECT nwsli,
+     river_name || ' ' || proximity || ' ' || name || ' ['||state||']' as rname
      from hvtec_nwsli"""
-    txn.execute( sql )
+    txn.execute(sql)
     for row in txn:
-        nwsli_dict[ row['nwsli'] ] = nwsli.NWSLI(row['nwsli'], 
-                                name=row['rname'].replace("&"," and "))
+        nm = row['rname'].replace("&", " and ")
+        nwsli_dict[row['nwsli']] = nwsli.NWSLI(row['nwsli'], name=nm)
 
     log.msg("nwsli_dict loaded %s entries" % (len(nwsli_dict),))
-    
+
     return None
+
 
 def ready(dummy):
     ''' cb when our database work is done '''
-    ldmbridge.LDMProductFactory( MyProductIngestor() )
+    ldmbridge.LDMProductFactory(MyProductIngestor())
+
 
 def dbload():
     ''' Load up database stuff '''
     df = PGCONN.runInteraction(load_ugc)
-    df.addCallback( ready )
+    df.addCallback(ready)
 
 if __name__ == '__main__':
 
@@ -128,5 +138,5 @@ if __name__ == '__main__':
     PGCONN = common.get_database("postgis", cp_max=(5 if not MANUAL else 1))
     dbload()
     jabber = common.make_jabber_client('generic_parser')
-    
+
     reactor.run()

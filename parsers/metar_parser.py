@@ -7,8 +7,6 @@ syslog.startLogging(prefix='pyWWA/metar_parser', facility=LOG_LOCAL2)
 from twisted.python import log
 from twisted.internet import reactor
 
-
-import os
 import re
 import traceback
 import StringIO
@@ -25,27 +23,29 @@ import common
 IEMDB = common.get_database('iem')
 ASOSDB = common.get_database('asos')
 
-    
 LOC2NETWORK = {}
 LOC2TZ = {}
 TIMEZONES = {None: pytz.timezone('UTC')}
+
+
 def load_stations(txn):
-    txn.execute("""SELECT id, network, tzname from stations 
-    where network ~* 'ASOS' or network = 'AWOS' or network = 'WTM'""")
+    txn.execute("""SELECT id, network, tzname from stations
+        where network ~* 'ASOS' or network = 'AWOS' or network = 'WTM'
+        """)
     news = 0
     for row in txn:
-        if not LOC2NETWORK.has_key( row['id'] ):
+        if row['id'] not in LOC2NETWORK:
             news += 1
-            LOC2NETWORK[ row['id'] ] = row['network']
-            
+            LOC2NETWORK[row['id']] = row['network']
+
         LOC2TZ[row['id']] = row['tzname']
-        if not TIMEZONES.has_key(row['tzname']):
+        if row['tzname'] not in TIMEZONES:
             try:
-                TIMEZONES[ row['tzname'] ] = pytz.timezone( row['tzname'] )
+                TIMEZONES[row['tzname']] = pytz.timezone(row['tzname'])
             except:
                 log.msg("pytz does not like tzname: %s" % (row['tzname'],))
-                TIMEZONES[ row['tzname'] ] = pytz.timezone("UTC")
-            
+                TIMEZONES[row['tzname']] = pytz.timezone("UTC")
+
     log.msg("Loaded %s new stations" % (news,))
     # Reload every 12 hours
     reactor.callLater(12*60*60, IEMDB.runInteraction, load_stations)
@@ -62,7 +62,7 @@ class myProductIngestor(ldmbridge.LDMProductReceiver):
 
     def connectionLost(self, reason):
         log.msg('connectionLost')
-        log.err( reason )
+        log.err(reason)
         reactor.callLater(30, self.shutdown)
 
     def shutdown(self):
@@ -71,8 +71,10 @@ class myProductIngestor(ldmbridge.LDMProductReceiver):
     def process_data(self, buf):
 
         buf = unicode(buf, errors='ignore')
-        d = deferLater(reactor, 0, real_processor, buf.encode('ascii', 'ignore') )
+        d = deferLater(reactor, 0, real_processor, buf.encode('ascii',
+                                                              'ignore'))
         d.addErrback(common.email_error, buf)
+
 
 def sanitize(metar):
     """
@@ -83,7 +85,10 @@ def sanitize(metar):
     metar = re.sub("\015\015\012", " ", metar)
     metar = re.sub("\015", " ", metar)
     # Remove any multiple whitespace, bad chars
-    metar = metar.encode('latin-1').replace('\xa0', " ").replace("\003", "").replace("COR ", "")
+    metar = metar.encode('latin-1').replace('\xa0',
+                                            " ").replace("\003",
+                                                         "").replace("COR ",
+                                                                     "")
     metar = re.sub("\s+", " ", metar.strip())
     # Look to see that our METAR starts with A-Z
     if re.match("^[0-9]", metar):
@@ -91,6 +96,7 @@ def sanitize(metar):
         tokens = metar.split()
         metar = " ".join(tokens[1:])
     return metar
+
 
 def real_processor(buf):
     """
@@ -110,7 +116,7 @@ def real_processor(buf):
         elif len(metar.strip()) < 5:
             continue
         # We actually have something
-        metar = sanitize( metar )
+        metar = sanitize(metar)
         process_site(metar, metar)
 
 
@@ -131,11 +137,11 @@ def process_site(orig_metar, clean_metar):
         errormsg = str(inst)
         if errormsg.find("Unparsed groups: ") == 0:
             tokens = errormsg.split(": ")
-            newmetar = clean_metar.replace( tokens[1].replace("'", '') , "")
+            newmetar = clean_metar.replace(tokens[1].replace("'", ''), "")
             if newmetar != clean_metar:
                 reactor.callLater(0, process_site, orig_metar, newmetar)
         else:
-            log.msg( io.getvalue() )
+            log.msg(io.getvalue())
             log.msg(clean_metar)
         return
 
@@ -146,9 +152,11 @@ def process_site(orig_metar, clean_metar):
     iemid = mtr.station_id[-3:]
     if mtr.station_id[0] != "K":
         iemid = mtr.station_id
-    if not LOC2NETWORK.has_key(iemid):
+    if iemid not in LOC2NETWORK:
         log.msg("Unknown ID: %s: %s" % (iemid, orig_metar))
-        deffer = ASOSDB.runOperation("INSERT into unknown(id) values (%s)", (iemid,))
+        deffer = ASOSDB.runOperation("""
+            INSERT into unknown(id) values (%s)
+            """, (iemid,))
         deffer.addErrback(common.email_error, iemid)
         return
     network = LOC2NETWORK[iemid]
@@ -163,21 +171,23 @@ def process_site(orig_metar, clean_metar):
     if gts > future:
         log.msg("%s METAR [%s] timestamp in the future!" % (iemid, gts))
         return
-    
-    iem = Observation(iemid, network, gts.astimezone( 
-                                    TIMEZONES[LOC2TZ.get(iemid, None)]))
+
+    iem = Observation(iemid, network,
+                      gts.astimezone(TIMEZONES[LOC2TZ.get(iemid, None)]))
     deffer = IEMDB.runInteraction(save_data, iem, mtr, clean_metar, orig_metar)
     deffer.addErrback(common.email_error, clean_metar)
-    #deffer.addCallback(got_results, tp, sid, network)
-    
+    # deffer.addCallback(got_results, tp, sid, network)
+
+
 def save_data(txn, iem, mtr, clean_metar, orig_metar):
 
     # Load the observation from the database, if the same time exists!
     iem.load(txn)
-        
-    """ Need to figure out if we have a duplicate ob, if so, check
-        the length of the raw data, if greater, take the temps """
-    if  iem.data['raw'] is not None and len(iem.data['raw']) >= len(clean_metar):
+
+    # Need to figure out if we have a duplicate ob, if so, check
+    # the length of the raw data, if greater, take the temps
+    if (iem.data['raw'] is not None and
+            len(iem.data['raw']) >= len(clean_metar)):
         pass
     else:
         if mtr.temp:
@@ -189,7 +199,7 @@ def save_data(txn, iem, mtr, clean_metar, orig_metar):
             iem.data['dwpf'] = mtr.dewpt.value("F")
         # Daabase only allows len 254
         iem.data['raw'] = orig_metar[:254]
- 
+
     if mtr.wind_speed:
         iem.data['sknt'] = mtr.wind_speed.value("KT")
     if mtr.wind_gust:
@@ -199,15 +209,15 @@ def save_data(txn, iem, mtr, clean_metar, orig_metar):
             iem.data['drct'] = 0
         else:
             iem.data['drct'] = float(mtr.wind_dir.value())
-    
+
     if not mtr.wind_speed_peak:
         old_max_wind = max([iem.data.get('max_sknt', 0),
-                    iem.data.get('max_gust', 0)])
+                            iem.data.get('max_gust', 0)])
         new_max_wind = max([iem.data.get('sknt', 0),
-                    iem.data.get('gust', 0)])
+                            iem.data.get('gust', 0)])
         if new_max_wind > old_max_wind:
-            #print 'Setting max_drct manually: %s' % (clean_metar,)
-            iem.data['max_drct'] = iem.data.get('drct',0)
+            # print 'Setting max_drct manually: %s' % (clean_metar,)
+            iem.data['max_drct'] = iem.data.get('drct', 0)
 
     if mtr.wind_speed_peak:
         iem.data['max_gust'] = mtr.wind_speed_peak.value("KT")
@@ -215,7 +225,7 @@ def save_data(txn, iem, mtr, clean_metar, orig_metar):
         iem.data['max_drct'] = mtr.wind_dir_peak.value()
     if mtr.peak_wind_time:
         iem.data['max_gust_ts'] = mtr.peak_wind_time.replace(
-                                                tzinfo=pytz.timezone("UTC"))
+            tzinfo=pytz.timezone("UTC"))
 
     if mtr.max_temp_6hr:
         iem.data['max_tmpf_6hr'] = mtr.max_temp_6hr.value("F")
@@ -227,7 +237,7 @@ def save_data(txn, iem, mtr, clean_metar, orig_metar):
             iem.data['min_tmpf'] = mtr.min_temp_6hr.value("F")
     if mtr.max_temp_24hr:
         iem.data['max_tmpf_24hr'] = mtr.max_temp_24hr.value("F")
-    if mtr.min_temp_24hr: 
+    if mtr.min_temp_24hr:
         iem.data['min_tmpf_24hr'] = mtr.min_temp_24hr.value("F")
     if mtr.precip_3hr:
         iem.data['p03i'] = mtr.precip_3hr.value("IN")
@@ -257,7 +267,7 @@ def save_data(txn, iem, mtr, clean_metar, orig_metar):
         iem.data['phour'] = mtr.precip_1hr.value("IN")
     # Do something with sky coverage
     for i in range(len(mtr.sky)):
-        (c,h,b) = mtr.sky[i]
+        (c, h, _) = mtr.sky[i]
         iem.data['skyc%s' % (i+1)] = c
         if h is not None:
             iem.data['skyl%s' % (i+1)] = h.value("FT")
@@ -266,17 +276,18 @@ def save_data(txn, iem, mtr, clean_metar, orig_metar):
     if mtr.weather:
         pwx = []
         for x in mtr.weather:
-            pwx.append( ("").join([a for a in x if a is not None]) )
+            pwx.append(("").join([a for a in x if a is not None]))
         iem.data['presentwx'] = (",".join(pwx))[:24]
 
     if not iem.save(txn):
         log.msg("Unknown station [%s] METAR [%s]" % (iem.data['station'],
-                                                    clean_metar))
-        deffer = ASOSDB.runOperation("""INSERT into unknown(id, valid) 
-                values (%s, %s)""", (iem.data['station'], iem.data['valid']))
+                                                     clean_metar))
+        deffer = ASOSDB.runOperation("""
+            INSERT into unknown(id, valid)
+            values (%s, %s)
+        """, (iem.data['station'], iem.data['valid']))
         deffer.addErrback(common.email_error, iem.data['station'])
-    
-    
+
     # Search for tornado
     if len(TORNADO_RE.findall(clean_metar)) > 0:
         sendAlert(txn, iem.data['station'], "Tornado", clean_metar)
@@ -287,7 +298,6 @@ def save_data(txn, iem, mtr, clean_metar, orig_metar):
             for x in weatheri:
                 if x is not None and "GR" in x:
                     sendAlert(txn, iem.data['station'], "Hail", clean_metar)
-           
 
     # Search for Peak wind gust info....
     if mtr.wind_gust or mtr.wind_speed_peak:
@@ -309,12 +319,11 @@ def save_data(txn, iem, mtr, clean_metar, orig_metar):
 
         # We store a key for this event
         key = "%s;%s;%s" % (mtr.station_id, v, t)
-        #log.msg("PEAK GUST FOUND: %s %s %s %s" % \
+        # log.msg("PEAK GUST FOUND: %s %s %s %s" % \
         #        (mtr.station_id, v, t, clean_metar))
-        if v >= 50 and not windAlerts.has_key(key):
+        if v >= 50 and key not in windAlerts:
             windAlerts[key] = 1
             sendWindAlert(txn, iem.data['station'], v, d, t, clean_metar)
-
 
 
 def sendAlert(txn, iemid, what, clean_metar):
@@ -323,9 +332,9 @@ def sendAlert(txn, iemid, what, clean_metar):
         return
     print "ALERTING for [%s]" % (iemid,)
     txn.execute("""SELECT wfo, state, name, ST_x(geom) as lon,
-           ST_y(geom) as lat, network from stations 
-           WHERE id = '%s' and (network ~* 'ASOS' or network = 'AWOS')""" % (
-                                                                    iemid,) )
+           ST_y(geom) as lat, network from stations
+           WHERE id = '%s' and (network ~* 'ASOS' or network = 'AWOS')
+           """ % (iemid,))
     if txn.rowcount == 0:
         print "I not find WFO for sid: %s " % (iemid,)
         return
@@ -341,12 +350,15 @@ def sendAlert(txn, iemid, what, clean_metar):
     extra = ""
     if (clean_metar.find("$") > 0):
         extra = "(Caution: Maintenance Check Indicator)"
-    url = "http://mesonet.agron.iastate.edu/ASOS/current.phtml?network=%s" % (network,)
-    jtxt = "%s,%s (%s) ASOS %s reports %s\n%s %s" % (nm, st, iemid, extra, what, clean_metar, url )
+    url = ("http://mesonet.agron.iastate.edu/ASOS/current.phtml?network=%s"
+           ) % (network,)
+    jtxt = ("%s,%s (%s) ASOS %s reports %s\n%s %s"
+            ) % (nm, st, iemid, extra, what, clean_metar, url)
     xtra = {'channels': wfo,
             'lat':  str(row['lat']), 'long': str(row['lon'])}
     xtra['twitter'] = "%s,%s (%s) ASOS reports %s" % (nm, st, iemid, what)
     jabber.sendMessage(jtxt, jtxt, xtra)
+
 
 def drct2dirTxt(idir):
     if idir is None:
@@ -392,8 +404,8 @@ def sendWindAlert(txn, iemid, v, d, t, clean_metar):
     speed = datatypes.speed(v, 'KT')
     print "ALERTING for [%s]" % (iemid,)
     txn.execute("""SELECT wfo, state, name, ST_x(geom) as lon,
-           ST_y(geom) as lat, network from stations 
-           WHERE id = '%s' """ % (iemid,) )
+           ST_y(geom) as lat, network from stations
+           WHERE id = '%s' """ % (iemid, ))
     if txn.rowcount == 0:
         print "I not find WFO for sid: %s " % (iemid,)
         return
@@ -404,31 +416,31 @@ def sendWindAlert(txn, iemid, v, d, t, clean_metar):
         return
     st = row['state']
     nm = row['name']
-    network = row['network']
 
     extra = ""
     if clean_metar.find("$") > 0:
         extra = "(Caution: Maintenance Check Indicator)"
-        
-    url = "http://mesonet.agron.iastate.edu/ASOS/current.phtml?network=%s" % (
-                                                                    network,)
-    jtxt = "%s,%s (%s) ASOS %s reports gust of %.0f knots (%.1f mph) from %s @ %s\n%s" % (
-            nm, st, iemid, extra, speed.value('KT'), speed.value('MPH'),
-            drct2dirTxt(d), 
-               t.strftime("%H%MZ"), clean_metar )
+
+    jtxt = ("%s,%s (%s) ASOS %s reports gust of %.0f knots (%.1f mph) "
+            "from %s @ %s\n%s"
+            ) % (nm, st, iemid, extra, speed.value('KT'), speed.value('MPH'),
+                 drct2dirTxt(d), t.strftime("%H%MZ"), clean_metar)
     xtra = {'channels': wfo,
             'lat': str(row['lat']),
             'long': str(row['lon'])}
 
-    xtra['twitter'] = "%s,%s (%s) ASOS reports gust of %.1f knots (%.1f mph) from %s @ %s" % (nm, 
-     st, iemid, speed.value('KT'), speed.value('MPH'), drct2dirTxt(d), t.strftime("%H%MZ"))
+    xtra['twitter'] = ("%s,%s (%s) ASOS reports gust of %.1f knots "
+                       "(%.1f mph) from %s @ %s"
+                       ) % (nm, st, iemid, speed.value('KT'),
+                            speed.value('MPH'), drct2dirTxt(d),
+                            t.strftime("%H%MZ"))
     jabber.sendMessage(jtxt, "<p>%s</p>" % (jtxt,), xtra)
 
 
 def ready(bogus):
-    
+
     ingest = myProductIngestor()
-    ldmbridge.LDMProductFactory( ingest )
+    ldmbridge.LDMProductFactory(ingest)
 
 jabber = common.make_jabber_client("metar_parser")
 

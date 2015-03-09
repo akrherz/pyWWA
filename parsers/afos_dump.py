@@ -17,10 +17,12 @@ import pytz
 
 DBPOOL = common.get_database('afos')
 
+
 def shutdown():
     """ Down we go! """
     log.msg("Stopping...")
     reactor.callWhenRunning(reactor.stop)
+
 
 # LDM Ingestor
 class MyProductIngestor(ldmbridge.LDMProductReceiver):
@@ -38,9 +40,11 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
         defer.addErrback(common.email_error, buf)
         defer.addErrback(log.err)
 
+
 class ParseError(Exception):
     """ general exception """
     pass
+
 
 def real_parser(txn, buf):
     """ Actually do something with the buffer, please """
