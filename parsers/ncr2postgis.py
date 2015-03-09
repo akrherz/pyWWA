@@ -7,10 +7,13 @@ import os
 import tempfile
 import subprocess
 
+_MYDIR = os.path.dirname(os.path.abspath(__file__))
+PATH = os.path.normpath(os.path.join(_MYDIR,
+                                     "..", "gempak"))
+os.putenv("GEMTBL", PATH + "/tables")
+os.putenv("GEMERR", PATH + "/error")
+os.putenv("GEMPDF", PATH + "/pdf")
 
-os.putenv("GEMTBL", "/home/ldm/pyWWA/gempak/tables")
-os.putenv("GEMERR", "/home/ldm/pyWWA/gempak/error")
-os.putenv("GEMPDF", "/home/ldm/pyWWA/gempak/pdf")
 
 def write_data():
     """
@@ -18,9 +21,10 @@ def write_data():
     """
     tmpfn = tempfile.mktemp().lower()
     o = open("%s.ncr" % (tmpfn,), 'wb')
-    o.write( sys.stdin.read() )
+    o.write(sys.stdin.read())
     o.close()
     return tmpfn
+
 
 def do_gempak(tmpfn):
     """
@@ -34,7 +38,7 @@ def do_gempak(tmpfn):
  CLEAR    = YES
  TEXT     = 1
  COLORS   = 1
- WIND     = 
+ WIND     =
  LINE     = 3
  CLRBAR   =
  IMCBAR   =
@@ -51,16 +55,10 @@ def do_gempak(tmpfn):
                          stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                          stderr=subprocess.PIPE)
     p.communicate(cmd)
-    #(so, se) = p.communicate(cmd)
-    #p.stdin.write(cmd)
-    #se = p.stderr.read()
-    #so = p.stdout.read()
-    #time.sleep(3)
-    #l.write( se )
-    #l.write(so)
-    for suffix in ['gif','ncr']:
-        if os.path.isfile('%s.%s' % (tmpfn,suffix)):
-            os.unlink("%s.%s" % (tmpfn,suffix))
+    for suffix in ['gif', 'ncr']:
+        if os.path.isfile('%s.%s' % (tmpfn, suffix)):
+            os.unlink("%s.%s" % (tmpfn, suffix))
+
 
 def main():
     """
@@ -70,10 +68,8 @@ def main():
     do_gempak(tmpfn)
     fn = "%s.out" % (tmpfn,)
     if os.path.isfile(fn):
-        sys.stdout.write( open(fn).read() )
+        sys.stdout.write(open(fn).read())
         os.unlink(fn)
-    
+
 if __name__ == '__main__':
     main()
-
-
