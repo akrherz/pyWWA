@@ -34,12 +34,30 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
         df.addErrback(common.email_error, raw)
 
 
+def find_cwsus(txn, prod):
+    '''
+    Provided a database transaction, go look for CWSUs that
+    overlap the discussion geometry.
+    ST_Overlaps do the geometries overlap
+    ST_Covers does polygon exist inside CWSU
+    '''
+    wkt = 'SRID=4326;%s' % (prod.geometry.wkt,)
+    sql = """select distinct id from cwsu WHERE
+           st_overlaps('%s', geom) or
+           st_covers(geom, '%s') ORDER by id ASC""" % (wkt, wkt)
+    txn.execute(sql)
+    cwsus = []
+    for row in txn:
+        cwsus.append(row['id'])
+    return cwsus
+
+
 def real_process(txn, raw):
     """"
     Actually process a single MCD
     """
     prod = mcdparser(raw)
-    prod.find_cwsus(txn)
+    prod.cwsus = find_cwsus(txn, prod)
 
     j = prod.get_jabbers(common.settings.get('pywwa_product_url',
                                              'pywwa_product_url'))
