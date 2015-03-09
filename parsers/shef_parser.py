@@ -1,5 +1,5 @@
-""" 
- SHEF product ingestor 
+"""
+ SHEF product ingestor
 """
 # System Imports
 import os
@@ -31,9 +31,9 @@ ACCESSDB = common.get_database('iem')
 HADSDB = common.get_database('hads')
 
 # Necessary for the shefit program to run A-OK
-PATH = os.path.normpath(
-                        os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                        "..", "shef_workspace"))
+_MYDIR = os.path.dirname(os.path.abspath(__file__))
+PATH = os.path.normpath(os.path.join(_MYDIR,
+                                     "..", "shef_workspace"))
 log.msg("Changing cwd to %s" % (PATH,))
 os.chdir(PATH)
 
@@ -44,49 +44,49 @@ LOC2TZ = {}
 UNKNOWN = {}
 TIMEZONES = {None: pytz.timezone('UTC')}
 
+
 def load_stations(txn):
     """
     Load up station metadata to help us with writing data to the IEM database
     @param txn database transaction
     """
     log.msg("load_stations called...")
-    txn.execute("""SELECT id, network, state, tzname from stations 
-        WHERE network ~* 'COOP' or network ~* 'DCP' or 
-        network in ('KCCI','KIMT','KELO') 
+    txn.execute("""SELECT id, network, state, tzname from stations
+        WHERE network ~* 'COOP' or network ~* 'DCP' or
+        network in ('KCCI','KIMT','KELO')
         ORDER by network ASC""")
     for row in txn:
         stid = row['id']
-        LOC2STATE[ stid ] = row['state']
+        LOC2STATE[stid] = row['state']
         LOC2TZ[stid] = row['tzname']
-        if LOC2NETWORK.has_key(stid):
+        if stid in LOC2NETWORK:
             del LOC2NETWORK[stid]
         else:
             LOC2NETWORK[stid] = row['network']
-        if not TIMEZONES.has_key(row['tzname']):
+        if row['tzname'] not in TIMEZONES:
             try:
-                TIMEZONES[ row['tzname'] ] = pytz.timezone( row['tzname'] )
+                TIMEZONES[row['tzname']] = pytz.timezone(row['tzname'])
             except:
                 log.msg("pytz does not like tzname: %s" % (row['tzname'],))
-                TIMEZONES[ row['tzname'] ] = pytz.timezone("UTC")
+                TIMEZONES[row['tzname']] = pytz.timezone("UTC")
 
     log.msg("loaded %s stations" % (len(LOC2STATE),))
 
-MULTIPLIER = {
-  "US" : 0.87,  # Convert MPH to KNT
-  "UG": 0.87,
-  "UP": 0.87,
-  "UR": 10,
-}
+
+MULTIPLIER = {"US": 0.87,  # Convert MPH to KNT
+              "UG": 0.87,
+              "UP": 0.87,
+              "UR": 10,
+              }
 
 """
 Some notes on the SHEF codes translated to something IEM Access can handle
 First two chars are physical extent code
 
 """
-DIRECTMAP = {
-    'URIZ': 'max_drct',
-    'XVIZ': 'vsby',
-    'HGIZ': 'rstage',
+DIRECTMAP = {'URIZ': 'max_drct',
+             'XVIZ': 'vsby',
+             'HGIZ': 'rstage',
              'HPIZ': 'rstage',
              'HTIZ': 'rstage',
              'PPHZ': 'phour',
@@ -101,10 +101,8 @@ DIRECTMAP = {
              'SDIZ': 'snowd',
              'XRIZ': 'relh',
              'PAIZ': 'pres',
-             
              'QRIZ': 'discharge',
              'QTIZ': 'discharge',
-             
              'SWIZ': 'snoww',
              'USIZ': 'sknt',
              'SFDZ': 'snow',
@@ -113,11 +111,13 @@ DIRECTMAP = {
              'UPIZ': 'gust',
              'UPHZ': 'gust',
              }
+
+
 class MyDict(dict):
     """
     Customized dictionary class
     """
-    
+
     def __getitem__(self, key):
         """
         Over-ride getitem so that the sql generated is proper
@@ -128,15 +128,16 @@ class MyDict(dict):
         # Logic to convert this key into something the iem can handle
         # Our key is always at least 6 chars!
         pei = "%s%s" % (key[:3], key[5])
-        if DIRECTMAP.has_key( pei ):
-            self.__setitem__(key, DIRECTMAP[ pei ])
-            return DIRECTMAP[ pei ]
+        if pei in DIRECTMAP:
+            self.__setitem__(key, DIRECTMAP[pei])
+            return DIRECTMAP[pei]
         else:
             log.msg('Can not map var %s' % (key,))
             self.__setitem__(key, '')
             return ''
-    
+
 MAPPING = MyDict()
+
 
 class SHEFIT(protocol.ProcessProtocol):
     """
@@ -147,43 +148,42 @@ class SHEFIT(protocol.ProcessProtocol):
         """
         Constructor
         """
-        self.tp = product.TextProduct( buf )
+        self.tp = product.TextProduct(buf)
         self.data = ""
 
     def connectionMade(self):
         """
         Fired when the program starts up and wants stdin
         """
-        #print "sending %d bytes!" % len(self.shefdata)
-        #print "SENDING", self.shefdata
-        self.transport.write( self.tp.text )
+        # print "sending %d bytes!" % len(self.shefdata)
+        # print "SENDING", self.shefdata
+        self.transport.write(self.tp.text)
         self.transport.closeStdin()
 
     def outReceived(self, data):
         """
         Save the stdout we get from the program for later processing
         """
-        #print "GOT", data
+        # print "GOT", data
         self.data = self.data + data
 
     def errReceived(self, data):
         """
-        In case something comes to stderr 
+        In case something comes to stderr
         """
         log.msg("errReceived! with %d bytes!" % len(data))
-        log.msg( data )
+        log.msg(data)
         self.deferred.errback(data)
 
 #    def processEnded(self, status):
 #        print "debug: type(status): %s" % type(status.value)
 #        print "error: exitCode: %s" % status.value.exitCode
 
-
     def outConnectionLost(self):
         """
         Once the program is done, we need to do something with the data
         """
-        #if self.data == "":
+        # if self.data == "":
         #    rejects = open("empty.shef", 'a')
         #    rejects.write( self.tp.raw +"\003")
         #    rejects.close()
@@ -191,15 +191,18 @@ class SHEFIT(protocol.ProcessProtocol):
         t = task.deferLater(reactor, 0, really_process, self.tp, self.data)
         t.addErrback(common.email_error, self.tp.text)
         self.deferred.callback(self)
-        
+
+
 def clnstr(buf):
     """
     Get rid of cruft we don't wish to work with
     """
-    return buf.replace("\015\015\012", "\n").replace("\003", "").replace("\001", "")
+    return buf.replace("\015\015\012",
+                       "\n").replace("\003", "").replace("\001", "")
+
 
 class MyProductIngestor(ldmbridge.LDMProductReceiver):
-    
+
     def connectionLost(self, reason):
         log.msg('connectionLost')
         log.err(reason)
@@ -212,7 +215,8 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
         """
         I am called from the ldmbridge when data is ahoy
         """
-        self.jobs.put( clnstr(buf) )
+        self.jobs.put(clnstr(buf))
+
 
 def async(buf):
     """
@@ -222,24 +226,25 @@ def async(buf):
     defer = Deferred()
     proc = SHEFIT(buf)
     proc.deferred = defer
-    proc.deferred.addErrback( log.err )
+    proc.deferred.addErrback(log.err)
 
-    reactor.spawnProcess(proc, "shefit", 
-                   ["shefit"], {})
+    reactor.spawnProcess(proc, "shefit", ["shefit"], {})
     return proc.deferred
 
 
 def worker(jobs):
     while True:
-        yield jobs.get().addCallback(async).addErrback( 
-                common.email_error, 'Unhandled Error' ).addErrback( log.err )
+        yield jobs.get().addCallback(async).addErrback(common.email_error,
+                                                       'Unhandled Error'
+                                                       ).addErrback(log.err)
+
 
 def really_process(tp, data):
     """
     This processes the output we get from the SHEFIT program
     """
     # Now we loop over the data we got :)
-    #log.msg("\n"+data)
+    # log.msg("\n"+data)
     mydata = {}
     for line in data.split("\n"):
         # Skip blank output lines
@@ -253,42 +258,43 @@ def really_process(tp, data):
         if len(sid) > 8:
             log.msg("SiteID Len Error: [%s] %s" % (sid, tp.get_product_id()))
             continue
-        if not mydata.has_key(sid):
+        if sid not in mydata:
             mydata[sid] = {}
         dstr = "%s %s" % (tokens[1], tokens[2])
         tstamp = datetime.datetime.strptime(dstr, "%Y-%m-%d %H:%M:%S")
         tstamp = tstamp.replace(tzinfo=pytz.timezone("UTC"))
         # We don't care about data in the future!
-        utcnow = datetime.datetime.utcnow().replace(tzinfo=pytz.timezone("UTC"))
+        utcnow = datetime.datetime.utcnow().replace(tzinfo=pytz.timezone("UTC"
+                                                                         ))
         if tstamp > (utcnow + datetime.timedelta(hours=1)):
             continue
         if tstamp < (utcnow - datetime.timedelta(days=60)):
             log.msg("Rejecting old data %s %s" % (sid, tstamp))
             continue
-        if not mydata[sid].has_key(tstamp):
+        if tstamp not in mydata[sid]:
             mydata[sid][tstamp] = {}
 
         varname = tokens[5]
         if tokens[6].find("****") == 0:
             log.msg("Bad Data from %s\n%s" % (tp.get_product_id(), data))
-            value= -9999.0
+            value = -9999.0
         else:
             value = float(tokens[6])
-        if varname[:2] in ['TV','TB']: # Soil Depth fun!
+        if varname[:2] in ['TV', 'TB']:  # Soil Depth fun!
             depth = int(value)
-            value = abs( (value * 1000) % (depth * 1000) )
+            value = abs((value * 1000) % (depth * 1000))
             if depth < 0:
                 value = 0 - value
                 depth = abs(depth)
             varname = "%s.%02i" % (varname, depth)
             if len(varname) > 10:
                 if depth > 999:
-                    log.msg("Ignoring sid: %s varname: %s value: %s" % (sid, varname, 
-                                                           value))
+                    log.msg(("Ignoring sid: %s varname: %s value: %s"
+                             ) % (sid, varname, value))
                     continue
-                common.email_error("sid: %s varname: %s value: %s is too large" % (
-                                                        sid, varname, value), 
-                               "%s\n%s" % (data, tp.unixtext))
+                common.email_error(("sid: %s varname: %s value: %s "
+                                    "is too large") % (sid, varname, value),
+                                   "%s\n%s" % (data, tp.unixtext))
             continue
         mydata[sid][tstamp][varname] = value
     # Now we process each station we found in the report! :)
@@ -297,6 +303,7 @@ def really_process(tp, data):
         times.sort()
         for tstamp in times:
             process_site(tp, sid, tstamp, mydata[sid][tstamp])
+
 
 def enter_unknown(sid, tp, network):
     """
@@ -307,86 +314,87 @@ def enter_unknown(sid, tp, network):
     """
     if len(sid) < 5:
         return
-    #log.msg("Found unknown %s %s %s" % (sid, tp.get_product_id(), network))
+    # log.msg("Found unknown %s %s %s" % (sid, tp.get_product_id(), network))
     HADSDB.runOperation("""
-            INSERT into unknown(nwsli, product, network) 
+            INSERT into unknown(nwsli, product, network)
             values ('%s', '%s', '%s')
-        """ % (sid, tp.get_product_id() , network))
+        """ % (sid, tp.get_product_id(), network))
 
-def checkvars( myvars ):
+
+def checkvars(myvars):
     """
     Check variables to see if we have a COOP or DCP site
     """
     for v in myvars:
         # Definitely DCP
-        if v[:2] in ['HG',]:
+        if v[:2] in ['HG', ]:
             return False
-        if v[:2] in ['SF','SD']:
+        if v[:2] in ['SF', 'SD']:
             return True
-        if v[:3] in ['PPH',]:
+        if v[:3] in ['PPH', ]:
             return False
     return False
+
 
 def var2dbcols(var):
     """ Convert a SHEF var into split values """
     if var.find(".") > -1:
         parts = var.split(".")
         var = parts[0]
-        return [ var[:2], var[2], var[3:5], var[5], var[-1], parts[1] ]
+        return [var[:2], var[2], var[3:5], var[5], var[-1], parts[1]]
     else:
-        return [ var[:2], var[2], var[3:5], var[5], var[-1], None ]
+        return [var[:2], var[2], var[3:5], var[5], var[-1], None]
 
-    
 
 def process_site(tp, sid, ts, data):
-    """ 
+    """
     I process a dictionary of data for a particular site
     """
-    localts = ts.astimezone( TIMEZONES[LOC2TZ.get(sid) ])
-    #log.msg("%s sid: %s ts: %s %s" % (tp.get_product_id(), sid, ts, localts))
+    localts = ts.astimezone(TIMEZONES[LOC2TZ.get(sid)])
+    # log.msg("%s sid: %s ts: %s %s" % (tp.get_product_id(), sid, ts, localts))
     # Insert data into database regardless
     for varname in data.keys():
         value = data[varname]
-        deffer = HADSDB.runOperation("""INSERT into raw"""+
-                                      ts.strftime("%Y_%m") +""" 
-            (station, valid, key, value) 
-            VALUES(%s,%s, %s, %s)""", ( sid, 
-            ts.strftime("%Y-%m-%d %H:%M+00"), varname, value))
+        deffer = HADSDB.runOperation("""INSERT into raw""" +
+                                     ts.strftime("%Y_%m") +
+                                     """ (station, valid, key, value)
+                                     VALUES(%s,%s, %s, %s)""",
+                                     (sid, ts.strftime("%Y-%m-%d %H:%M+00"),
+                                      varname, value))
         deffer.addErrback(common.email_error, tp.text)
-        deffer.addErrback( log.err )
+        deffer.addErrback(log.err)
 
         (pe, d, s, e, p, depth) = var2dbcols(varname)
         d2 = ACCESSDB_SINGLE.runOperation("""
         INSERT into current_shef(station, valid, physical_code, duration,
-        source, extremum, probability, value, depth) 
+        source, extremum, probability, value, depth)
         values (%s,%s,%s,%s,%s,%s,%s,%s,%s)
         """, (sid, ts.strftime("%Y-%m-%d %H:%M+00"), pe, d, s, e, p, value,
               depth))
-        d2.addErrback( common.email_error, tp.text )
+        d2.addErrback(common.email_error, tp.text)
 
     # Our simple determination if the site is a COOP site
     is_coop = False
     if tp.afos[:3] == 'RR3':
         is_coop = True
-    elif tp.afos[:3] in ['RR1', 'RR2'] and checkvars( data.keys() ):
-        log.msg("Guessing COOP? %s %s %s" %  (sid, tp.get_product_id(), 
-                                              data.keys()))
+    elif tp.afos[:3] in ['RR1', 'RR2'] and checkvars(data.keys()):
+        log.msg("Guessing COOP? %s %s %s" % (sid, tp.get_product_id(),
+                                             data.keys()))
         is_coop = True
 
-
-    state = LOC2STATE.get( sid )
+    state = LOC2STATE.get(sid)
     if state is None and len(sid) == 8 and sid[0] == 'X':
         return
     # Base the state on the 2 char station ID!
-    if state is None and len(sid) == 5 and reference.nwsli2state.has_key(sid[3:]):
+    if state is None and len(sid) == 5 and sid[3:] in reference.nwsli2state:
         state = reference.nwsli2state.get(sid[3:])
         LOC2STATE[sid] = state
     if state is None:
         if UNKNOWN.get(sid) is None:
             enter_unknown(sid, tp, "")
-            UNKNOWN[sid] = 1       
-        return 
-    
+            UNKNOWN[sid] = 1
+        return
+
     # Deterime if we want to waste the DB's time
     network = LOC2NETWORK.get(sid)
     if network in ['KCCI', 'KIMT', 'KELO']:
@@ -399,7 +407,7 @@ def process_site(tp, sid, ts, data):
             network = "%s_DCP" % (state,)
 
     # Do not send DCP sites to IEMAccess
-    #if network.find("_DCP") > 0:
+    # if network.find("_DCP") > 0:
     #    return
 
     # Okay, time for a hack, if our observation is at midnight!
@@ -428,7 +436,8 @@ def got_results(res, tp, sid, network):
         if UNKNOWN.get(sid) is None:
             enter_unknown(sid, tp, network)
             UNKNOWN[sid] = 1
-    
+
+
 def save_data(txn, tp, iemob, data):
     """
     Called from a transaction 'thread'
@@ -438,27 +447,28 @@ def save_data(txn, tp, iemob, data):
         if data[var] == -9999:
             continue
         myval = data[var] * MULTIPLIER.get(var[:2], 1.0)
-        iemob.data[ MAPPING[var] ] = myval
-        if (MAPPING[var] in ['tmpf', 'max_tmpf', 'min_tmpf'] and 
-            iemob.data['network'].find("COOP") > 0):
+        iemob.data[MAPPING[var]] = myval
+        if (MAPPING[var] in ['tmpf', 'max_tmpf', 'min_tmpf'] and
+                iemob.data['network'].find("COOP") > 0):
             if MAPPING[var] == 'tmpf':
                 iemob.data['coop_tmpf'] = myval
-            #print "HEY!", iemob.data['station'], iemob.data['valid'].strftime("%Y-%m-%d %H:%M")
             iemob.data['coop_valid'] = iemob.data['valid']
     iemob.data['raw'] = tp.get_product_id()
     return iemob.save(txn)
+
 
 def job_size(jobs):
     """
     Print out some debug information to the log on the current size of the
     job queue
     """
-    log.msg("deferredQueue waiting: %s pending: %s" % (len(jobs.waiting), 
-                                                     len(jobs.pending) ))
+    log.msg("deferredQueue waiting: %s pending: %s" % (len(jobs.waiting),
+                                                       len(jobs.pending)))
     if len(jobs.pending) > 1000:
         log.msg("ABORT")
         reactor.callWhenRunning(reactor.stop)
     reactor.callLater(300, job_size, jobs)
+
 
 def main(res):
     """
@@ -468,21 +478,21 @@ def main(res):
     jobs = DeferredQueue()
     ingest = MyProductIngestor()
     ingest.jobs = jobs
-    ldmbridge.LDMProductFactory( ingest )
-    
+    ldmbridge.LDMProductFactory(ingest)
+
     for _ in range(3):
         cooperate(worker(jobs))
-    
+
     reactor.callLater(300, job_size, jobs)
 
 
 def fullstop(err):
     log.msg("fullstop() called...")
-    log.err( err )
-    reactor.stop()    
+    log.err(err)
+    reactor.stop()
 
 if __name__ == '__main__':
     df = HADSDB.runInteraction(load_stations)
-    df.addCallback( main )
-    df.addErrback( fullstop )
+    df.addCallback(main)
+    df.addErrback(fullstop)
     reactor.run()

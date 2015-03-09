@@ -3,7 +3,7 @@
  Support lib for the parser scripts found in this directory
 
 '''
-#stdlib
+# stdlib
 import json
 import os
 import pwd
@@ -17,11 +17,11 @@ import socket
 import sys
 from email.MIMEText import MIMEText
 
-#3rd party
+# 3rd party
 import psycopg2
 import pyiem
 
-#twisted
+# twisted
 from twisted.python import log
 from twisted.python import failure
 from twisted.words.xish.xmlstream import STREAM_END_EVENT
@@ -33,8 +33,8 @@ from twisted.words.xish import domish, xpath
 from twisted.mail import smtp
 from twisted.enterprise import adbapi
 
-_illegal_xml_chars_RE = re.compile(
-                    u'[\x00-\x08\x0b\x0c\x0e-\x1F\uD800-\uDFFF\uFFFE\uFFFF]')
+_myregex = u'[\x00-\x08\x0b\x0c\x0e-\x1F\uD800-\uDFFF\uFFFE\uFFFF]'
+_illegal_xml_chars_RE = re.compile(_myregex)
 
 
 config = json.load(open(os.path.join(os.path.dirname(__file__),
@@ -42,52 +42,57 @@ config = json.load(open(os.path.join(os.path.dirname(__file__),
 settings = {}
 email_timestamps = []
 
+
 def get_database(dbname, cp_max=5):
-    """ Get a twisted database connection 
-    
+    """ Get a twisted database connection
+
     Arguments:
     dbname -- The string name of the database to connect to
-    cp_max -- The maximum number of connections to make to the database 
+    cp_max -- The maximum number of connections to make to the database
     """
-    return adbapi.ConnectionPool("pyiem.twistedpg", database=dbname, 
-                                cp_reconnect=True, cp_max=cp_max,
-                                host=config.get('databaserw').get('host'), 
-                                user=config.get('databaserw').get('user'),
-                                password=config.get('databaserw').get('password')) 
+    return adbapi.ConnectionPool("pyiem.twistedpg", database=dbname,
+                                 cp_reconnect=True, cp_max=cp_max,
+                                 host=config.get('databaserw').get('host'),
+                                 user=config.get('databaserw').get('user'),
+                                 password=config.get('databaserw'
+                                                     ).get('password'))
+
 
 def load_settings():
-    """ Load settings immediately, so we don't have to worry about the settings 
+    """ Load settings immediately, so we don't have to worry about the settings
         not being loaded for subsequent usage """
 
-    dbconn = psycopg2.connect(database=config.get('databasero').get('openfire'),
-                            host=config.get('databasero').get('host'),
-                            password=config.get('databasero').get('password'),
-                            user=config.get('databasero').get('user'))
+    dbconn = psycopg2.connect(database=config.get('databasero').get('openfire'
+                                                                    ),
+                              host=config.get('databasero').get('host'),
+                              password=config.get('databasero').get('password'
+                                                                    ),
+                              user=config.get('databasero').get('user'))
     cursor = dbconn.cursor()
-    cursor.execute(""" SELECT propname, propvalue from properties """)
+    cursor.execute("""SELECT propname, propvalue from properties""")
     for row in cursor:
-        settings[ row[0] ] = row[1]
-    log.msg("common.load_settings loaded %s settings from database" % (
-                                                            len(settings),))
+        settings[row[0]] = row[1]
+    log.msg(("common.load_settings loaded %s settings from database"
+             ) % (len(settings), ))
     cursor.close()
     dbconn.close()
 
+
 def should_email():
-    ''' 
+    '''
     Logic to prevent email bombs, we currently want no more than 10 per hour
     @return boolean if we should email or not
     '''
     utcnow = datetime.datetime.utcnow()
-    email_timestamps.insert(0, utcnow )
-    delta = email_timestamps[0] - email_timestamps[-1] 
+    email_timestamps.insert(0, utcnow)
+    delta = email_timestamps[0] - email_timestamps[-1]
     if len(email_timestamps) < 10:
         return True
     while len(email_timestamps) > 10:
         email_timestamps.pop()
 
     return (delta > datetime.timedelta(hours=1))
-    
-    
+
 
 def email_error(exp, message):
     """
@@ -103,7 +108,7 @@ def email_error(exp, message):
         traceback.print_exc(file=cstr)
         log.err(exp)
     cstr.seek(0)
-    if type(message) == type(''):
+    if isinstance(str, message):
         log.msg(message[:100])
     else:
         log.msg(message)
@@ -125,25 +130,26 @@ Exception       :
 
 Message:
 %s""" % (pwd.getpwuid(os.getuid())[0], socket.gethostname(), os.getcwd(),
-         pyiem.__version__, 
+         pyiem.__version__,
          datetime.datetime.utcnow(),
-         os.getpid(), ' '.join(['%.2f' % (_,) for _ in os.getloadavg()]), 
+         os.getpid(), ' '.join(['%.2f' % (_,) for _ in os.getloadavg()]),
          cstr.read(), exp, message))
 
     # Send the email already!
-    msg['subject'] = '[pyWWA] %s Traceback -- %s' % (
-                    sys.argv[0].split("/")[-1], socket.gethostname())
+    msg['subject'] = ("[pyWWA] %s Traceback -- %s"
+                      ) % (sys.argv[0].split("/")[-1], socket.gethostname())
     msg['From'] = settings.get('pywwa_errors_from', 'ldm@localhost')
     msg['To'] = settings.get('pywwa_errors_to', 'ldm@localhost')
-    df = smtp.sendmail(settings.get('pywwa_smtp', 'smtp'), 
-                  msg["From"], msg["To"], msg)
-    df.addErrback( log.err )
+    df = smtp.sendmail(settings.get('pywwa_smtp', 'smtp'),
+                       msg["From"], msg["To"], msg)
+    df.addErrback(log.err)
     return True
+
 
 def write_pid(myname):
     """ Create and write a PID file for this process """
-    o = open("%s.pid" % (myname,),'w')
-    o.write("%s" % ( os.getpid(),) )
+    o = open("%s.pid" % (myname,), 'w')
+    o.write("%s" % (os.getpid(),))
     o.close()
 
 
@@ -154,9 +160,10 @@ def make_jabber_client(resource_prefix):
                     settings.get('pywwa_jabber_username', 'nwsbot_ingest'),
                     settings.get('pywwa_jabber_domain', 'nwschat.weather.gov'),
                     resource_prefix,
-                    datetime.datetime.utcnow().strftime("%Y%m%d%H%M%S") ) )
+                    datetime.datetime.utcnow().strftime("%Y%m%d%H%M%S")))
     factory = jclient.basicClientFactory(myJid,
-                    settings.get('pywwa_jabber_password', 'secret'))
+                                         settings.get('pywwa_jabber_password',
+                                                      'secret'))
 
     jabber = JabberClient(myJid)
 
@@ -164,12 +171,13 @@ def make_jabber_client(resource_prefix):
     factory.addBootstrap("//event/client/basicauth/invaliduser", jabber.debug)
     factory.addBootstrap("//event/client/basicauth/authfailed", jabber.debug)
     factory.addBootstrap("//event/stream/error", jabber.debug)
-    factory.addBootstrap(xmlstream.STREAM_END_EVENT, jabber._disconnect )
+    factory.addBootstrap(xmlstream.STREAM_END_EVENT, jabber._disconnect)
 
     reactor.connectTCP(settings.get('pywwa_jabber_host', 'localhost'), 5222,
                        factory)
 
     return jabber
+
 
 class JabberClient:
     """
@@ -180,16 +188,16 @@ class JabberClient:
 
     def __init__(self, myJid):
         """
-        Constructor 
-        
+        Constructor
+
         @param myJid twisted.words.jid object
         """
         self.myJid = myJid
         self.xmlstream = None
         self.authenticated = False
-        self.routerJid = "%s@%s" % (
-                settings.get('bot.username', 'nwsbot'),
-                settings.get('pywwa_jabber_domain', 'nwschat.weather.gov'))
+        self.routerJid = "%s@%s" % (settings.get('bot.username', 'nwsbot'),
+                                    settings.get('pywwa_jabber_domain',
+                                                 'nwschat.weather.gov'))
 
     def has_football(self):
         """
@@ -205,9 +213,9 @@ class JabberClient:
             return
         if body.lower().strip() == "shutdown":
             log.msg("I got shutdown message, shutting down...")
-            reactor.callWhenRunning( reactor.stop )
+            reactor.callWhenRunning(reactor.stop)
 
-    def authd(self,xs):
+    def authd(self, xs):
         """
         Callbacked once authentication succeeds
         @param xs twisted.words.xish.xmlstream
@@ -223,7 +231,7 @@ class JabberClient:
         self.xmlstream.addObserver('/message/body',  self.message_processor)
 
         # Send initial presence
-        presence = domish.Element(('jabber:client','presence'))
+        presence = domish.Element(('jabber:client', 'presence'))
         presence.addElement('status').addContent('Online')
         self.xmlstream.send(presence)
 
@@ -256,7 +264,7 @@ class JabberClient:
             log.msg("No Connection, Lets wait and try later...")
             reactor.callLater(3, self.sendMessage, body, html, xtra)
             return
-        message = domish.Element(('jabber:client','message'))
+        message = domish.Element(('jabber:client', 'message'))
         message['to'] = self.routerJid
         message['type'] = 'chat'
 
@@ -264,41 +272,41 @@ class JabberClient:
         body = _illegal_xml_chars_RE.sub('', body)
         if html:
             html = _illegal_xml_chars_RE.sub('', html)
-        message.addElement('body',None,body)
-        h = message.addElement('html','http://jabber.org/protocol/xhtml-im')
+        message.addElement('body', None, body)
+        h = message.addElement('html', 'http://jabber.org/protocol/xhtml-im')
         b = h.addElement('body', 'http://www.w3.org/1999/xhtml')
-        b.addRawXml( html or body )
+        b.addRawXml(html or body)
         # channels is of most important
         x = message.addElement('x', 'nwschat:nwsbot')
         for key in xtra.keys():
             x[key] = xtra[key]
         self.xmlstream.send(message)
 
-
     def debug(self, elem):
         """
         Debug method
         @param elem twisted.works.xish
         """
-        log.msg( elem.toXml().encode('utf-8') )
+        log.msg(elem.toXml().encode('utf-8'))
 
     def rawDataInFn(self, data):
         """
-        Debug method 
+        Debug method
         @param data string of what was received from the server
         """
-        log.msg('RECV %s' % (unicode(data,'utf-8','ignore').encode('ascii', 
-                                                                'replace'),))
+        log.msg('RECV %s' % (unicode(data, 'utf-8',
+                                     'ignore').encode('ascii', 'replace'),))
 
     def rawDataOutFn(self, data):
         """
         Debug method
         @param data string of what data was sent
         """
-        if (data == ' '): return
-        log.msg('SEND %s' % (unicode(data,'utf-8','ignore').encode('ascii', 
-                                                                'replace'),))
-        
+        if data == ' ':
+            return
+        log.msg('SEND %s' % (unicode(data, 'utf-8',
+                                     'ignore').encode('ascii', 'replace'),))
+
 # This is blocking, but necessary to make sure settings are loaded before
 # we go on our merry way
 load_settings()
