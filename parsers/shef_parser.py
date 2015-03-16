@@ -53,7 +53,7 @@ def load_stations(txn):
     log.msg("load_stations called...")
     txn.execute("""SELECT id, network, state, tzname from stations
         WHERE network ~* 'COOP' or network ~* 'DCP' or
-        network in ('KCCI','KIMT','KELO')
+        network in ('KCCI','KIMT','KELO', 'ISUSM')
         ORDER by network ASC""")
     for row in txn:
         stid = row['id']
@@ -397,7 +397,7 @@ def process_site(tp, sid, ts, data):
 
     # Deterime if we want to waste the DB's time
     network = LOC2NETWORK.get(sid)
-    if network in ['KCCI', 'KIMT', 'KELO']:
+    if network in ['KCCI', 'KIMT', 'KELO', 'ISUSM']:
         return
     if network is None:
         if is_coop:
