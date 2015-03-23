@@ -404,7 +404,13 @@ def process_site(tp, sid, ts, data):
             network = "%s_COOP" % (state,)
         # We are left with DCP
         else:
-            network = "%s_DCP" % (state,)
+            country = reference.nwsli2country.get(sid[3:])
+            if country in ['CA', 'MX']:
+                network = "%s_%s_DCP" % (country, state)
+            elif country == 'US':
+                network = "%s_DCP" % (state,)
+            else:
+                network = "%s__DCP" % (country,)
 
     # Do not send DCP sites to IEMAccess
     # if network.find("_DCP") > 0:
