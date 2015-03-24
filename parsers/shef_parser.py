@@ -448,17 +448,20 @@ def save_data(txn, tp, iemob, data):
     """
     Called from a transaction 'thread'
     """
-
+    iscoop = (iemob.data['network'].find('COOP') > 0)
     for var in data.keys():
         if data[var] == -9999:
             continue
         myval = data[var] * MULTIPLIER.get(var[:2], 1.0)
         iemob.data[MAPPING[var]] = myval
-        if (MAPPING[var] in ['tmpf', 'max_tmpf', 'min_tmpf'] and
-                iemob.data['network'].find("COOP") > 0):
+        if iscoop:
+            # Save COOP 'at-ob' temperature into summary table
             if MAPPING[var] == 'tmpf':
                 iemob.data['coop_tmpf'] = myval
-            iemob.data['coop_valid'] = iemob.data['valid']
+            # Save observation time into the summary table
+            if MAPPING[var] in ['tmpf', 'max_tmpf', 'min_tmpf', 'pday',
+                                'snow', 'snowd']:
+                iemob.data['coop_valid'] = iemob.data['valid']
     iemob.data['raw'] = tp.get_product_id()
     return iemob.save(txn)
 
