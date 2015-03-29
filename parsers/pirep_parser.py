@@ -73,7 +73,9 @@ def load_locs(txn):
 
     # Finally, GEMPAK!
     for line in open(TABLESDIR+'/pirep_navaids.tbl'):
-        sid = line[:3]
+        if len(line) < 60 or line[0] in ['!', '#']:
+            continue
+        sid = line[:4].strip()
         lat = float(line[56:60]) / 100.0
         lon = float(line[61:67]) / 100.0
         if sid not in LOCS:
