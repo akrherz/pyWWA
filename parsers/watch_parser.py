@@ -171,7 +171,8 @@ def real_process(raw):
             cancel_watch(report, token)
 
     # Figure out when this is valid for
-    tokens = re.findall("([0-3][0-9])([0-2][0-9])([0-6][0-9])Z - ([0-3][0-9])([0-2][0-9])([0-6][0-9])Z", report)
+    tokens = re.findall(("([0-3][0-9])([0-2][0-9])([0-6][0-9])Z - "
+                         "([0-3][0-9])([0-2][0-9])([0-6][0-9])Z"), report)
 
     day1 = int(tokens[0][0])
     hour1 = int(tokens[0][1])
@@ -193,7 +194,10 @@ def real_process(raw):
         eTS = eTS.replace(day=1)
 
     # Brute Force it!
-    tokens = re.findall("WW ([0-9]*) (SEVERE TSTM|TORNADO).*AXIS\.\.([0-9]+) STATUTE MILES (.*) OF LINE..([0-9]*)([A-Z]*)\s?(...)/.*/ - ([0-9]*)([A-Z]*)\s?(...)/.*/..AVIATION", report)
+    tokens = re.findall(("WW ([0-9]*) (SEVERE TSTM|TORNADO).*"
+                         "AXIS\.\.([0-9]+) STATUTE MILES (.*) "
+                         "OF LINE..([0-9]*)([A-Z]*)\s?(...)/.*/ - "
+                         "([0-9]*)([A-Z]*)\s?(...)/.*/..AVIATION"), report)
 
     types = {'SEVERE TSTM': 'SVR', 'TORNADO': 'TOR'}
 
@@ -237,10 +241,14 @@ def real_process(raw):
         lat12 = lat1
         lat21 = lat2
         lat22 = lat2
-        lon11 = lon1 - (box_radius * KM_SM) / (111.11 * math.cos(math.radians(lat1)))
-        lon12 = lon1 + (box_radius * KM_SM) / (111.11 * math.cos(math.radians(lat1)))
-        lon21 = lon2 - (box_radius * KM_SM) / (111.11 * math.cos(math.radians(lat2)))
-        lon22 = lon2 + (box_radius * KM_SM) / (111.11 * math.cos(math.radians(lat2)))
+        lon11 = lon1 - (box_radius * KM_SM) / (111.11 *
+                                               math.cos(math.radians(lat1)))
+        lon12 = lon1 + (box_radius * KM_SM) / (111.11 *
+                                               math.cos(math.radians(lat1)))
+        lon21 = lon2 - (box_radius * KM_SM) / (111.11 *
+                                               math.cos(math.radians(lat2)))
+        lon22 = lon2 + (box_radius * KM_SM) / (111.11 *
+                                               math.cos(math.radians(lat2)))
 
     elif orientation == "NORTH AND SOUTH":
         lon11 = lon1
@@ -301,8 +309,8 @@ def real_process(raw):
     jabberTxtHTML = ("<p>Storm Prediction Center issues "
                      "<a href=\"http://www.spc.noaa.gov/products/watch/"
                      "ww%04i.html\">%s watch</a>"
-                     "till %s UTC</p>") % (int(ww_num),
-                                           ww_type, eTS.strftime("%H:%M"))
+                     "till %s UTC") % (int(ww_num),
+                                       ww_type, eTS.strftime("%H:%M"))
     if (jabberReplacesTxt != ""):
         jabberTxt += ", new watch replaces " + jabberReplacesTxt[:-1]
         jabberTxtHTML += ", new watch replaces " + jabberReplacesTxt[:-1]
@@ -330,8 +338,8 @@ def real_process(raw):
         # Special message for SPC
         lines = raw.split("\n")
         twt = lines[5].replace("\r\r", "")
-        twt += " http://www.spc.noaa.gov/products/watch/ww%04i.html" % (
-                                                                int(ww_num), )
+        twt += (" http://www.spc.noaa.gov/products/watch/ww%04i.html"
+                ) % (int(ww_num), )
         xtra['channels'] = 'SPC'
         jabber.sendMessage(twt, twt, xtra)
 
