@@ -6,23 +6,40 @@ CAQ4            Springhouse                      -- CA  5196 -12214     0  0
 CAT4            Qualicum Beach                   -- CA  4934 -12440     0  0
 CAZ5            Cache Creek                      -- CA  5078 -12132     0  0
 CBE2            Elko                             -- CA  4928 -11515     0  0
+CBQ2            Fort Langley                     -- CA  4917 -12255     0  0
 CEA5            Hardisty                         -- CA  5265 -11138     0  0
 CEC4            Hinton                           -- CA  5332 -11775     0  0
+CED4            Fox Creek                        -- CA  5438 -11677     0  0
 CEL8            Eleonore                         -- CA  5272  -7608     0  0
 CEM5            Swan Hills                       -- CA  5467 -11541     0  0
+CEN4            High River                       -- CA  5053 -11383     0  0
 CEQ3            Camrose                          -- CA  5304 -11282     0  0
+CEZ3            Edmonton                         -- CA  5343 -11312     0  0
+CFX6            Vulcan                           -- CA  5040 -11328     0  0
+CJR3            The Pas                          -- CA  5383 -10121     0  0
 CJS5            Killarney                        -- CA  4915  -9969     0  0
 CMB7            Maxville                         -- CA  4525  -7481     0  0
 CNC4            Guelph                           -- CA  4356  -8020     0  0
 CNF4            Lindsay                          -- CA  4436  -7878     0  0
+CNK4            Parry Sound                      -- CA  4526  -7983     0  0
+CNV9            Neuville                         -- CA  4672  -7158     0  0
+CSE4            Lachute                          -- CA  4564  -7437     0  0
+CSS3            Montreal                         -- CA  4535  -7408     0  0
+CSU3            St Hyacinthe                     -- CA  4561  -7301     0  0
 CTT5            La Romaine                       -- CA  5026  -6068     0  0
 CYAV            Winnipeg St Andrews              -- CA  5006  -9703     0  0
+CYBA            Banff                            -- CA  5121 -11554     0  0
 CYCN            Cochrane                         -- CA  4911  -8101     0  0
 CYCR            Cross Lake                       -- CA  5461  -9776     0  0
 CYCW            Chilliwack                       -- CA  4915 -12194     0  0
 CYEE            MIDLAND                          -- CA  4468  -7993     0  0
 CYFJ            Riviere Rouge                    -- CA  4641  -7478     0  0
+CYGB            Texada                           -- CA  4969 -12452     0  0
 CYGD            Goderich                         -- CA  4377  -8171     0  0
+CYHR            Chevery                          -- CA  5047  -5964     0  0
+CYJM            St James                         -- CA  5440 -12426     0  0
+CYNJ            Langley Tower                    -- CA  4910 -12263     0  0
+CYNR            Fort MacKay                      -- CA  5738 -11170     0  0
 CYPP            Parent                           -- CA  4793  -7461     0  0
 CYQO            Clear Creek                      -- CA  4258  -8057     0  0
 CYRM            Alta                             -- CA  5243 -11490     0  0
@@ -33,6 +50,7 @@ CYVK            Vernon                           -- CA  5025 -11933     0  0
 CZFG            Pukatawagan                      -- CA  5575 -10126     0  0
 CZGR            Little Grand Rapids              -- CA  5205  -9547     0  0
 CZKE            Kaschechewan                     -- CA  5228  -8168     0  0
+CZTA            Bloodvein River                  -- CA  5178  -9669     0  0
 # 
 AAA           0 ABRAHAM                          -- --  4016  -8934     0  0                    
 AAF           0 APALACHICOLA                     -- --  2972  -8503     0  0                    
