@@ -1,5 +1,6 @@
 # Sites found while parsing real data
 CAD5            Merritt                          -- CA  5012 -12074     0  0
+CAJ9            Fort Ware                        -- CA  5743 -12565     0  0
 CAL3            Douglas Lake                     -- CA  5017 -12017     0  0
 CAP3            Sechelt                          -- CA  4946 -12372     0  0
 CAQ4            Springhouse                      -- CA  5196 -12214     0  0
@@ -11,6 +12,8 @@ CEA5            Hardisty                         -- CA  5265 -11138     0  0
 CEB5            Fairview                         -- CA  5608 -11843     0  0
 CEC4            Hinton                           -- CA  5332 -11775     0  0
 CED4            Fox Creek                        -- CA  5438 -11677     0  0
+CEE5            Wabasca                          -- CA  5596 -11382     0  0
+CEH6            Provost                          -- CA  5234 -11028     0  0
 CEL8            Eleonore                         -- CA  5272  -7608     0  0
 CEM5            Swan Hills                       -- CA  5467 -11541     0  0
 CEN4            High River                       -- CA  5053 -11383     0  0
@@ -24,8 +27,10 @@ CNC4            Guelph                           -- CA  4356  -8020     0  0
 CNF4            Lindsay                          -- CA  4436  -7878     0  0
 CNK4            Parry Sound                      -- CA  4526  -7983     0  0
 CNV9            Neuville                         -- CA  4672  -7158     0  0
+CSD4            Mont Laurier                     -- CA  4656  -7557     0  0
 CSE4            Lachute                          -- CA  4564  -7437     0  0
 CSS3            Montreal                         -- CA  4535  -7408     0  0
+CSU2            Chisasibi                        -- CA  5381  -7892     0  0
 CSU3            St Hyacinthe                     -- CA  4561  -7301     0  0
 CTT5            La Romaine                       -- CA  5026  -6068     0  0
 CYAV            Winnipeg St Andrews              -- CA  5006  -9703     0  0
@@ -39,6 +44,7 @@ CYGB            Texada                           -- CA  4969 -12452     0  0
 CYGD            Goderich                         -- CA  4377  -8171     0  0
 CYHR            Chevery                          -- CA  5047  -5964     0  0
 CYJM            St James                         -- CA  5440 -12426     0  0
+CYLQ            La Tuque                         -- CA  4710  -7279     0  0
 CYMW            Maniwaki                         -- CA  4627  -7599     0  0
 CYNJ            Langley Tower                    -- CA  4910 -12263     0  0
 CYNR            Fort MacKay                      -- CA  5738 -11170     0  0
@@ -49,6 +55,7 @@ CYST            St Theresa Point                 -- CA  5385  -9485     0  0
 CYSW            Sparkwood Elk Valley             -- CA  4983 -11488     0  0
 CYVB            Bonaventure                      -- CA  4807  -6546     0  0
 CYVK            Vernon                           -- CA  5025 -11933     0  0
+CZBM            Bromont                          -- CA  4529  -7274     0  0
 CZFG            Pukatawagan                      -- CA  5575 -10126     0  0
 CZGR            Little Grand Rapids              -- CA  5205  -9547     0  0
 CZKE            Kaschechewan                     -- CA  5228  -8168     0  0
