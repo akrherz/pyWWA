@@ -11,6 +11,7 @@ import sys
 
 from pyldm import ldmbridge
 from pyiem.nws import product
+from pyiem.nws.ugc import UGCParseException
 import common
 import datetime
 import pytz
@@ -53,7 +54,11 @@ def real_parser(txn, buf):
     utcnow = datetime.datetime.utcnow()
     utcnow = utcnow.replace(tzinfo=pytz.timezone("UTC"))
 
-    nws = product.TextProduct(buf)
+    try:
+        nws = product.TextProduct(buf)
+    except UGCParseException:
+        log.msg("UGCParseException swallowed for %s" % (buf[11:29],))
+        return
 
     # When we are in realtime processing, do not consider old data, typically
     # when a WFO fails to update the date in their MND
