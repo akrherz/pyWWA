@@ -210,7 +210,9 @@ def gdalwarp(sat, tmpfn, epsg):
     subprocess.call(cmd, shell=True)
 
     # Convert file back to PNG for use and archival (smaller file)
-    cmd = "convert -quiet %s_%s.tif %s_4326.png" % (tmpfn, epsg, tmpfn)
+    cmd = ("convert -quiet -define PNG:preserve-colormap "
+           "%s_%s.tif %s_4326.png"
+           ) % (tmpfn, epsg, tmpfn)
     proc = subprocess.Popen(cmd, shell=True, stderr=subprocess.PIPE,
                             stdout=subprocess.PIPE)
     output = proc.stderr.read()
