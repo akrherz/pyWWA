@@ -42,6 +42,8 @@ def load_database(txn):
 
     # Finally, GEMPAK!
     for line in open(TABLE_PATH + '/pirep_navaids.tbl'):
+        if len(line) < 70 or line[0] in ['!', '#']:
+            continue
         sid = line[:3]
         lat = float(line[56:60]) / 100.0
         lon = float(line[61:67]) / 100.0
@@ -91,6 +93,7 @@ def onready(res):
 
 df = MESOSITE.runInteraction(load_database)
 df.addCallback(onready)
+df.addErrback(common.email_error, 'ERROR on load_database')
 df.addErrback(log.err)
 
 jabber = common.make_jabber_client("aviation")
