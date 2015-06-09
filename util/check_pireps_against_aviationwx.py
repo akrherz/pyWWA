@@ -40,8 +40,8 @@ for feature in avwx['features']:
                 mine[key][1], mine[key][2],
                             lon, lat, location)
         del(mine[key])
-        
-for report in mine:
-    if mine[report][0] < floor:
+
+for key in mine.keys():
+    if mine[key][0] < floor:
         continue
-    print 'AVWX MISS', mine[report][0], mine[report][3]
+    print 'AVWX MISS', mine[key][0], mine[key][3]
