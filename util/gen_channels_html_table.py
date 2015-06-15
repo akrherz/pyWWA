@@ -7,6 +7,7 @@ from pyiem.nws.products.vtec import parser as vtec_parser
 from pyiem.nws.products import parser as productparser
 import psycopg2.extras
 import re
+import sys
 
 ugc_dict = {}
 nwsli_dict = {}
@@ -29,19 +30,20 @@ D = {
      '10-515': 'http://www.nws.noaa.gov/directives/sym/pd01005015curr.pdf',
      '10-517': 'http://www.nws.noaa.gov/directives/sym/pd01005017curr.pdf',
      '10-601': 'http://www.nws.noaa.gov/directives/sym/pd01006001curr.pdf',
-     '10-923': 'http://www.nws.noaa.gov/directives/sym/pd01009023curr.pdf',
+     '10-912': 'http://www.nws.noaa.gov/directives/sym/pd01009012curr.pdf',
+     '10-922': 'http://www.nws.noaa.gov/directives/sym/pd01009022curr.pdf',
      '10-1701': 'http://www.nws.noaa.gov/directives/sym/pd01017001curr.pdf',
     }
-# TODO: TCV TSU ADR CDW DSA EQW HMW HPA LEw NUW RHW VOW
+# TODO: TCV TSU ADR CDW DSA EQW HMW HPA LEw NUW RHW VOW PQS CWA
 # Our dictionary of products!
 VTEC_PRODUCTS = [
     dict(afos='CFW', directive='10-320', channels=[C1, C2, C3, C4, C5, C6]),
     dict(afos='EWW', directive='10-601', channels=[C1, C2, C3, C4, C5, C6]),
-    dict(afos='FFA', directive='10-923', channels=[C1, C2, C3, C4, C5, C6]),
-    dict(afos='FFS', directive='10-923', channels=[C1, C2, C3, C4, C5, C6]),
-    dict(afos='FFW', directive='10-923', channels=[C1, C2, C3, C4, C5, C6]),
-    dict(afos='FLS', directive='10-923', channels=[C1, C2, C3, C4, C5, C6]),
-    dict(afos='FLW', directive='10-923', channels=[C1, C2, C3, C4, C5, C6]),
+    dict(afos='FFA', directive='10-922', channels=[C1, C2, C3, C4, C5, C6]),
+    dict(afos='FFS', directive='10-922', channels=[C1, C2, C3, C4, C5, C6]),
+    dict(afos='FFW', directive='10-922', channels=[C1, C2, C3, C4, C5, C6]),
+    dict(afos='FLS', directive='10-922', channels=[C1, C2, C3, C4, C5, C6]),
+    dict(afos='FLW', directive='10-922', channels=[C1, C2, C3, C4, C5, C6]),
     dict(afos='MWW', directive='10-315', channels=[C2, C3, C4, C5, C6],
          notes=("This product does not get routed to the "
                 "<span class=\"badge\">&lt;wfo&gt;</span> "
@@ -70,7 +72,6 @@ GEN_PRODUCTS = [
     dict(afos='CEM', directive='10-1701', channels=[C3]),
     dict(afos='CGR', directive='10-1701', channels=[C3]),
     dict(afos='CLI', directive='10-1701', channels=[C3]),
-    dict(afos='CWA', directive='10-1701', channels=[C3]),
     dict(afos='CWF', directive='10-1701', channels=[C3]),
     dict(afos='DGT', directive='10-1701', channels=[C3]),
     dict(afos='ESF', directive='10-1701', channels=[C3]),
@@ -101,14 +102,13 @@ GEN_PRODUCTS = [
     dict(afos='PFM', directive='10-1701', channels=[C3]),
     dict(afos='PNS', directive='10-1701', channels=[C3]),
     dict(afos='PSH', directive='10-1701', channels=[C3]),
-    dict(afos='PQS', directive='10-1701', channels=[C3]),
     dict(afos='REC', directive='10-1701', channels=[C3]),
     dict(afos='RER', directive='10-1701', channels=[C3]),
     dict(afos='RRM', directive='10-1701', channels=[C3]),
     dict(afos='RFD', directive='10-1701', channels=[C3]),
     dict(afos='RTP', directive='10-1701', channels=[C3]),
     dict(afos='RVA', directive='10-1701', channels=[C3]),
-    dict(afos='RVD', directive='10-923', channels=[C3]),
+    dict(afos='RVD', directive='10-922', channels=[C3]),
     dict(afos='RVF', directive='10-912', channels=[C3]),
     dict(afos='RWS', directive='10-1701', channels=[C3]),
     dict(afos='RVS', directive='10-1701', channels=[C3]),
@@ -160,7 +160,7 @@ def load_dicts():
 def do_generic():
     print("""
     <h3>NWS Local Office Products</h3>
-    <table class="table table-bordered">
+    <table class="table table-bordered table-condensed">
     <thead>
     <tr><td></td><th>AFOS PIL + Product Name</th><th>Directive</th>
     <th>Channel Templates Used</th></tr>
@@ -170,10 +170,14 @@ def do_generic():
         afos = entry['afos']
         if afos == '':
             continue
-        v = productparser(get_data(afos), ugc_provider=ugc_dict,
-                          nwsli_provider=nwsli_dict)
-        j = v.get_jabbers("http://mesonet.agron.iastate.edu/p.php?",
-                          "http://mesonet.agron.iastate.edu/p.php?")
+        try:
+            v = productparser(get_data(afos), ugc_provider=ugc_dict,
+                              nwsli_provider=nwsli_dict)
+        except Exception, exp:
+            sys.stderr.write(str(exp))
+            sys.stderr.write(afos+"\n")
+            continue
+        j = v.get_jabbers("http://mesonet.agron.iastate.edu/p.php")
         jmsg = ""
         tweet = ""
         channels = []
@@ -184,13 +188,14 @@ def do_generic():
                 if channel not in channels:
                     channels.append(channel)
         channels.sort()
-        print("""<tr><td>
+        print("""<tr><td><a name="channel_%s"/>
         <a id="%s_btn" class="btn btn-small" role="button"
         href="javascript: revdiv('%s');"><i class="glyphicon glyphicon-plus"></i></a>
         </td><td>%s</td><td><a href="%s">%s</a></td><td>%s</td></tr>
         <tr><td colspan="4"><div id="%s" style="display:none;">
         <dl class="dl-horizontal">
         %s
+        <dt>Example Raw Text:</dt><dd><a href="http://mesonet.agron.iastate.edu/p.php?pid=%s">View Text</a></dd>
         <dt>Channels for Product Example:</dt><dd>%s</dd>
         <dt>XMPP Chatroom Example:</dt><dd>%s</dd>
         <dt>Twitter Example:</dt><dd>%s</dd>
@@ -198,11 +203,12 @@ def do_generic():
         </div>
         </td>
         </tr>
-        """ % (afos, afos, prodDefinitions.get(afos, afos),
+        """ % (afos, afos, afos, prodDefinitions.get(afos, afos),
                D[entry['directive']], entry['directive'],
                " ".join(["<span class=\"badge\">%s</span>" % (s,) for s in entry['channels']]),
                afos,
                '<dt>Notes</dt><dd>%s</dd>' % (entry.get('notes'),) if 'notes' in entry else '',
+               v.get_product_id(),
                " ".join(["<span class=\"badge\">%s</span>" % (s,) for s in channels]),
                jmsg, tweet))
 
@@ -212,7 +218,7 @@ def do_generic():
 def do_vtec():
     print("""
     <h3>NWS Products with P-VTEC and/or H-VTEC Included</h3>
-    <table class="table table-bordered">
+    <table class="table table-bordered table-condensed">
     <thead>
     <tr><td></td><th>AFOS PIL + Product Name</th><th>Directive</th>
     <th>Channel Templates Used</th></tr>
@@ -236,13 +242,14 @@ def do_vtec():
                 if channel not in channels:
                     channels.append(channel)
         channels.sort()
-        print("""<tr><td>
+        print("""<tr><td><a name="channel_%s"/>
         <a id="%s_btn" class="btn btn-small" role="button"
         href="javascript: revdiv('%s');"><i class="glyphicon glyphicon-plus"></i></a>
         </td><td>%s</td><td><a href="%s">%s</a></td><td>%s</td></tr>
         <tr><td colspan="4"><div id="%s" style="display:none;">
         <dl class="dl-horizontal">
         %s
+        <dt>Example Raw Text:</dt><dd><a href="http://mesonet.agron.iastate.edu/p.php?pid=%s">View Text</a></dd>
         <dt>Channels for Product Example:</dt><dd>%s</dd>
         <dt>XMPP Chatroom Example:</dt><dd>%s</dd>
         <dt>Twitter Example:</dt><dd>%s</dd>
@@ -250,11 +257,12 @@ def do_vtec():
         </div>
         </td>
         </tr>
-        """ % (afos, afos, prodDefinitions.get(afos, afos),
+        """ % (afos, afos, afos, prodDefinitions.get(afos, afos),
                D[entry['directive']], entry['directive'],
                " ".join(["<span class=\"badge\">%s</span>" % (s,) for s in entry['channels']]),
                afos,
                '<dt>Notes</dt><dd>%s</dd>' % (entry.get('notes'),) if 'notes' in entry else '',
+               v.get_product_id(),
                " ".join(["<span class=\"badge\">%s</span>" % (s,) for s in channels]),
                jmsg, tweet))
 
@@ -287,6 +295,8 @@ def main():
         $a.css('display', 'none');
         $("#"+myid+"_btn").html('<i class="glyphicon glyphicon-plus"></i>');
       } else {
+        window.location.hash = '#channel_'+myid;
+        $("#"+myid+"_btn").parent().parent().addClass('info');
         $a.css('display', 'block');
         $("#"+myid+"_btn").html('<i class="glyphicon glyphicon-minus"></i>');
       }
