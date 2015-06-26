@@ -1,5 +1,6 @@
 # Sites found while parsing real data
 CAD5            Merritt                          -- CA  5012 -12074     0  0
+CAG3            Chilko Lake                      -- CA  5163 -12414     0  0
 CAH4            Valemount                        -- CA  5285 -11933     0  0
 CAJ2            Wiley                            -- CA  6649 -13657     0  0
 CAJ3            Sutcliffe Field                  -- CA  4904 -11650     0  0
@@ -8,13 +9,17 @@ CAL3            Douglas Lake                     -- CA  5017 -12017     0  0
 CAP3            Sechelt                          -- CA  4946 -12372     0  0
 CAQ4            Springhouse                      -- CA  5196 -12214     0  0
 CAT4            Qualicum Beach                   -- CA  4934 -12440     0  0
+CAU3            Oliver                           -- CA  4917 -11955     0  0
 CAU4            Vanderhoof                       -- CA  5405 -12401     0  0
 CAV3            One Hundred Mile House           -- CA  5164 -12131     0  0
+CAV4            McBride                          -- CA  5332 -12017     0  0
 CAZ5            Cache Creek                      -- CA  5078 -12132     0  0
 CBB9            Osoyoos                          -- CA  4904 -11949     0  0
 CBE2            Elko                             -- CA  4928 -11515     0  0
 CBL6            Radium Hot Springs               -- CA  5063 -11610     0  0
 CBQ2            Fort Langley                     -- CA  4917 -12255     0  0
+CBX7            Tumbler Ridge                    -- CA  5503 -12094     0  0
+CCN2            Grand Manan                      -- CA  4471  -6680     0  0
 CEA5            Hardisty                         -- CA  5265 -11138     0  0
 CEB5            Fairview                         -- CA  5608 -11843     0  0
 CEC4            Hinton                           -- CA  5332 -11775     0  0
@@ -28,14 +33,19 @@ CEM5            Swan Hills                       -- CA  5467 -11541     0  0
 CEN4            High River                       -- CA  5053 -11383     0  0
 CEQ3            Camrose                          -- CA  5304 -11282     0  0
 CES4            Westlock                         -- CA  5414 -11374     0  0
+CEV3            Vegreville                       -- CA  5351 -11203     0  0
 CEZ3            Edmonton                         -- CA  5343 -11312     0  0
 CFB6            Joesphburg                       -- CA  5372 -11309     0  0
+CFM7            Boyle                            -- CA  5457 -11282     0  0
 CFS5            Spirit River                     -- CA  5578 -11884     0  0
 CFX6            Vulcan                           -- CA  5040 -11328     0  0
 CJA5            Nestor Falls                     -- CA  4914  -9392     0  0
 CJR3            The Pas                          -- CA  5383 -10121     0  0
 CJS5            Killarney                        -- CA  4915  -9969     0  0
+CJQ6            Tanquary                         -- CA  8141  -7688     0  0
 CKD5            Kipling                          -- CA  5010 -10261     0  0
+CKS8            Cree Lake                        -- CA  5746 -10675     0  0
+CLM2            Leamington                       -- CA  4203  -8253     0  0
 CMB7            Maxville                         -- CA  4525  -7481     0  0
 CNA9            Tomvale                          -- CA  4492  -7694     0  0
 CNC4            Guelph                           -- CA  4356  -8020     0  0
@@ -52,6 +62,8 @@ CSE4            Lachute                          -- CA  4564  -7437     0  0
 CSE5            Montmagny                        -- CA  4700  -7052     0  0
 CSJ4            Louiseville                      -- CA  4625  -7290     0  0
 CSK3            Mascouche                        -- CA  4572  -7360     0  0
+CSM3            Thetford Mines                   -- CA  4605  -7126     0  0
+CSQ2            Shuswap                          -- CA  5088 -11959     0  0
 CSQ3            Valcourt                         -- CA  4548  -7231     0  0
 CSS3            Montreal                         -- CA  4535  -7408     0  0
 CSS4            St Dominique                     -- CA  4563  -7282     0  0
@@ -71,12 +83,14 @@ CYCR            Cross Lake                       -- CA  5461  -9776     0  0
 CYCW            Chilliwack                       -- CA  4915 -12194     0  0
 CYCZ            Fairmont Hot Springs             -- CA  5033 -11587     0  0
 CYEE            MIDLAND                          -- CA  4468  -7993     0  0
+CYEM            Manitowaning                     ON CA  4584  -8186     0  0
 CYFD            Brantford                        -- CA  4313  -8034     0  0
 CYFH            Fort Hope                        ON CA  5156  -8791     0  0
 CYFJ            Riviere Rouge                    -- CA  4641  -7478     0  0
 CYGB            Texada                           -- CA  4969 -12452     0  0
 CYGD            Goderich                         -- CA  4377  -8171     0  0
 CYGO            Gods Lake Narrows                MB CA  5456  -9449     0  0
+CYHC            Vancouver Habour                 -- CA  4939 -12311     0  0
 CYHF            Hearst Rene Fontaine             ON CA  4971  -8369     0  0
 CYHR            Chevery                          -- CA  5047  -5964     0  0
 CYJA            Jasper                           AB CA  5300 -11806     0  0
@@ -93,6 +107,7 @@ CYNJ            Langley Tower                    -- CA  4910 -12263     0  0
 CYNR            Fort MacKay                      -- CA  5738 -11170     0  0
 CYOH            Oxford House                     MB CA  5493  -9528     0  0
 CYPM            Pokangikum                       -- CA  5182  -9397     0  0
+CYPN            Port Menier Man                  -- CA  4984  -6429     0  0
 CYPP            Parent                           -- CA  4793  -7461     0  0
 CYQB            Quebec                           -- CA  4679  -7139     0  0
 CYQO            Clear Creek                      -- CA  4258  -8057     0  0
@@ -105,9 +120,12 @@ CYVB            Bonaventure                      -- CA  4807  -6546     0  0
 CYVK            Vernon                           -- CA  5025 -11933     0  0
 CYWM            Athabasca                        AB CA  5474 -11321     0  0
 CYWP            Webequie                         ON CA  5296  -8738     0  0
+CYWV            Wainwright                       -- CA  5280 -11088     0  0
+CYYM            Cowley                           AB CA  4964 -11409     0  0
 CZAM            Salmon                           BC CA  5068 -11923     0  0
 CZBA            Burlington                       ON CA  4344  -7985     0  0
 CZBM            Bromont                          -- CA  4529  -7274     0  0
+CZEE            Kelsey                           MB CA  5604  -9651     0  0
 CZFG            Pukatawagan                      -- CA  5575 -10126     0  0
 CZGR            Little Grand Rapids              -- CA  5205  -9547     0  0
 CZML            108 Mile                         BC CA  5174 -12133     0  0
