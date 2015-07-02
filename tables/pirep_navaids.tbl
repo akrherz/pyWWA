@@ -20,6 +20,7 @@ CBL6            Radium Hot Springs               -- CA  5063 -11610     0  0
 CBQ2            Fort Langley                     -- CA  4917 -12255     0  0
 CBX7            Tumbler Ridge                    -- CA  5503 -12094     0  0
 CCN2            Grand Manan                      -- CA  4471  -6680     0  0
+# CEA3            
 CEA5            Hardisty                         -- CA  5265 -11138     0  0
 CEB5            Fairview                         -- CA  5608 -11843     0  0
 CEC4            Hinton                           -- CA  5332 -11775     0  0
@@ -40,9 +41,11 @@ CFM7            Boyle                            -- CA  5457 -11282     0  0
 CFS5            Spirit River                     -- CA  5578 -11884     0  0
 CFX6            Vulcan                           -- CA  5040 -11328     0  0
 CJA5            Nestor Falls                     -- CA  4914  -9392     0  0
+CJE3            Weyburn                          -- CA  4970 -10380     0  0
 CJR3            The Pas                          -- CA  5383 -10121     0  0
 CJS5            Killarney                        -- CA  4915  -9969     0  0
 CJQ6            Tanquary                         -- CA  8141  -7688     0  0
+CJY3            Tisdale                          -- CA  5284 -10407     0  0
 CKD5            Kipling                          -- CA  5010 -10261     0  0
 CKS8            Cree Lake                        -- CA  5746 -10675     0  0
 CLM2            Leamington                       -- CA  4203  -8253     0  0
@@ -56,6 +59,7 @@ CNV9            Neuville                         -- CA  4672  -7158     0  0
 CNY3            Collingwood                      -- CA  4445  -8016     0  0
 CPL4            Grand Bend                       -- CA  4329  -8171     0  0
 CPU6            Tyendinaga Mohawk                -- CA  4419  -7711     0  0
+CRL2            Westport                         -- CA  4467  -7640     0  0
 CSC3            Drummondville                    -- CA  4585  -7239     0  0
 CSD4            Mont Laurier                     -- CA  4656  -7557     0  0
 CSE4            Lachute                          -- CA  4564  -7437     0  0
@@ -84,6 +88,7 @@ CYCW            Chilliwack                       -- CA  4915 -12194     0  0
 CYCZ            Fairmont Hot Springs             -- CA  5033 -11587     0  0
 CYEE            MIDLAND                          -- CA  4468  -7993     0  0
 CYEM            Manitowaning                     ON CA  4584  -8186     0  0
+CYFA            Fort Albany                      ON CA  5220  -8170     0  0
 CYFD            Brantford                        -- CA  4313  -8034     0  0
 CYFH            Fort Hope                        ON CA  5156  -8791     0  0
 CYFJ            Riviere Rouge                    -- CA  4641  -7478     0  0
@@ -121,6 +126,7 @@ CYVK            Vernon                           -- CA  5025 -11933     0  0
 CYWM            Athabasca                        AB CA  5474 -11321     0  0
 CYWP            Webequie                         ON CA  5296  -8738     0  0
 CYWV            Wainwright                       -- CA  5280 -11088     0  0
+CYXK            Rimouski                         QC CA  4848  -6850     0  0
 CYYM            Cowley                           AB CA  4964 -11409     0  0
 CZAM            Salmon                           BC CA  5068 -11923     0  0
 CZBA            Burlington                       ON CA  4344  -7985     0  0
