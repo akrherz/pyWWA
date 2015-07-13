@@ -14,15 +14,12 @@ with watches.  Lets try to explain
 # Twisted Python imports
 from syslog import LOG_LOCAL2
 from twisted.python import syslog
-syslog.startLogging(prefix='pyWWA/vtec_parser', facility=LOG_LOCAL2)
 from twisted.python import log
 from twisted.internet import reactor
 
 # http://stackoverflow.com/questions/7016602
 from twisted.web.client import HTTPClientFactory
-HTTPClientFactory.noisy = False
 from twisted.mail.smtp import SMTPSenderFactory
-SMTPSenderFactory.noisy = False
 
 # Standard Python modules
 import re
@@ -34,6 +31,7 @@ import pytz
 
 # pyLDM https://github.com/akrherz/pyLDM
 from pyldm import ldmbridge
+
 # pyIEM https://github.com/akrherz/pyIEM
 from pyiem.nws.products.vtec import parser as vtecparser
 from pyiem.nws.product import TextProductException
@@ -41,10 +39,6 @@ from pyiem.nws import ugc
 from pyiem.nws import nwsli
 
 import common
-
-
-ugc_dict = {}
-nwsli_dict = {}
 
 
 def shutdown():
@@ -150,6 +144,11 @@ def ready(dummy):
     ldmbridge.LDMProductFactory(MyProductIngestor(dedup=True))
 
 if __name__ == '__main__':
+    syslog.startLogging(prefix='pyWWA/vtec_parser', facility=LOG_LOCAL2)
+    HTTPClientFactory.noisy = False
+    SMTPSenderFactory.noisy = False
+    ugc_dict = {}
+    nwsli_dict = {}
 
     MANUAL = False
     if len(sys.argv) == 2 and sys.argv[1] == 'manual':
