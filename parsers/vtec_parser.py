@@ -151,8 +151,6 @@ def ready(dummy):
 
 if __name__ == '__main__':
 
-    common.write_pid("pyWWA_vtec_parser")
-
     MANUAL = False
     if len(sys.argv) == 2 and sys.argv[1] == 'manual':
         log.msg("Manual runtime (no jabber, 1 database connection) requested")

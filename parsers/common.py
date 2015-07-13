@@ -143,13 +143,6 @@ Message:
     return True
 
 
-def write_pid(myname):
-    """ Create and write a PID file for this process """
-    o = open("%s.pid" % (myname,), 'w')
-    o.write("%s" % (os.getpid(),))
-    o.close()
-
-
 def make_jabber_client(resource_prefix):
     """ Generate a jabber client, please """
 

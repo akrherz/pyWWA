@@ -20,7 +20,6 @@ from pyldm import ldmbridge
 # IEM python Stuff
 import common
 import datetime
-common.write_pid("pyWWA_lsr_parser")
 DBPOOL = common.get_database(common.config['databaserw']['postgis'])
 
 # Cheap datastore for LSRs to avoid Dups!
