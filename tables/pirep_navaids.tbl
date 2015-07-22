@@ -1,5 +1,7 @@
+LVR             Big River Lake                   AK US  6081 -15229     0  0
 # Sites found while parsing real data
 CAA8            Invermere                        -- CA  5052 -11600     0  0
+# CAB3            
 CAD5            Merritt                          -- CA  5012 -12074     0  0
 CAF4            Tsuniah                          -- CA  5153 -12417     0  0
 CAG3            Chilko Lake                      -- CA  5163 -12414     0  0
@@ -16,6 +18,7 @@ CAU3            Oliver                           -- CA  4917 -11955     0  0
 CAU4            Vanderhoof                       -- CA  5405 -12401     0  0
 CAV3            One Hundred Mile House           -- CA  5164 -12131     0  0
 CAV4            McBride                          -- CA  5332 -12017     0  0
+# CAX6            
 CAZ5            Cache Creek                      -- CA  5078 -12132     0  0
 CBB9            Osoyoos                          -- CA  4904 -11949     0  0
 CBE2            Elko                             -- CA  4928 -11515     0  0
