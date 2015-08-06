@@ -2,15 +2,18 @@ LVR             Big River Lake                   AK US  6081 -15229     0  0
 # Sites found while parsing real data
 CAA8            Invermere                        -- CA  5052 -11600     0  0
 # CAB3            
+CAD4            Trail                            -- CA  4906 -11761     0  0
 CAD5            Merritt                          -- CA  5012 -12074     0  0
 CAF4            Tsuniah                          -- CA  5153 -12417     0  0
 CAG3            Chilko Lake                      -- CA  5163 -12414     0  0
+# CAH3            
 CAH4            Valemount                        -- CA  5285 -11933     0  0
 CAJ2            Wiley                            -- CA  6649 -13657     0  0
 CAJ3            Sutcliffe Field                  -- CA  4904 -11650     0  0
 CAJ9            Fort Ware                        -- CA  5743 -12565     0  0
 # CAK2            
 CAL3            Douglas Lake                     -- CA  5017 -12017     0  0
+# CAN6            
 CAP3            Sechelt                          -- CA  4946 -12372     0  0
 CAQ4            Springhouse                      -- CA  5196 -12214     0  0
 CAT4            Qualicum Beach                   -- CA  4934 -12440     0  0
@@ -24,12 +27,16 @@ CBB9            Osoyoos                          -- CA  4904 -11949     0  0
 CBE2            Elko                             -- CA  4928 -11515     0  0
 # CBJ9            
 CBL6            Radium Hot Springs               -- CA  5063 -11610     0  0
+CBN9            Tsay Keh                         -- CA  5691 -12497     0  0
 CBQ2            Fort Langley                     -- CA  4917 -12255     0  0
+CBS8            Port Alberni                     -- CA  4932 -12493     0  0
+CBW4            Bob Quinn Ags                    BC CA  5697 -13025     0  0
 CBX7            Tumbler Ridge                    -- CA  5503 -12094     0  0
 # CBY5            
 # CBZ7
 CCM4            Port Au Choix                    -- CA  5069  -5733     0  0
 CCN2            Grand Manan                      -- CA  4471  -6680     0  0
+CCS3            St Stephen                       -- CA  4521  -6725     0  0
 CDA4            Pokemouche                       -- CA  4772  -6488     0  0
 # CEA3            
 CEA5            Hardisty                         -- CA  5265 -11138     0  0
@@ -39,6 +46,7 @@ CED4            Fox Creek                        -- CA  5438 -11677     0  0
 CEE4            Hinton                           -- CA  5338 -11770     0  0
 CEE5            Wabasca                          -- CA  5596 -11382     0  0
 CEE8            Viking                           -- CA  5311 -11186     0  0
+CEH5            Red Earth Creek                  -- CA  5655 -11527     0  0
 CEH6            Provost                          -- CA  5234 -11028     0  0
 CEJ3            Stettler                         -- CA  5231 -11275     0  0
 CEL8            Eleonore                         -- CA  5272  -7608     0  0
@@ -49,10 +57,12 @@ CER3            Drayton Valley                   -- CA  5327 -11496     0  0
 CES4            Westlock                         -- CA  5414 -11374     0  0
 CEV3            Vegreville                       -- CA  5351 -11203     0  0
 CEZ3            Edmonton                         -- CA  5343 -11312     0  0
+CEZ4            Fort Vermillion                  -- CA  5840 -11595     0  0
 CFB6            Joesphburg                       -- CA  5372 -11309     0  0
 CFM7            Boyle                            -- CA  5457 -11282     0  0
 CFS5            Spirit River                     -- CA  5578 -11884     0  0
 CFT8            Pelican                          -- CA  5616 -11347     0  0
+CFX2            Calgary / Okotoks                -- CA  5074 -11393     0  0
 CFX6            Vulcan                           -- CA  5040 -11328     0  0
 CJA5            Nestor Falls                     -- CA  4914  -9392     0  0
 CJE3            Weyburn                          -- CA  4970 -10380     0  0
@@ -64,6 +74,7 @@ CJY3            Tisdale                          -- CA  5284 -10407     0  0
 CKD5            Kipling                          -- CA  5010 -10261     0  0
 CKF4            Goodsoil                         -- CA  5442 -10923     0  0
 CKS8            Cree Lake                        -- CA  5746 -10675     0  0
+# CLA4
 CLM2            Leamington                       -- CA  4203  -8253     0  0
 CMB7            Maxville                         -- CA  4525  -7481     0  0
 CNA9            Tomvale                          -- CA  4492  -7694     0  0
@@ -72,6 +83,8 @@ CND4            Stanhope                         -- CA  4511  -7864     0  0
 CNF4            Lindsay                          -- CA  4436  -7878     0  0
 CNK4            Parry Sound                      -- CA  4526  -7983     0  0
 CNL3            Brockville                       -- CA  4464  -7575     0  0
+# CNQ7            
+CNW3            Bancroft                         -- CA  4507  -7788     0  0
 CNV9            Neuville                         -- CA  4672  -7158     0  0
 CNY3            Collingwood                      -- CA  4445  -8016     0  0
 CPL4            Grand Bend                       -- CA  4329  -8171     0  0
@@ -88,6 +101,7 @@ CSK3            Mascouche                        -- CA  4572  -7360     0  0
 CSM3            Thetford Mines                   -- CA  4605  -7126     0  0
 CSQ2            Shuswap                          -- CA  5088 -11959     0  0
 CSQ3            Valcourt                         -- CA  4548  -7231     0  0
+CSR3            Victoriaville                    -- CA  4611  -7193     0  0
 CSS3            Montreal                         -- CA  4535  -7408     0  0
 CSS4            St Dominique                     -- CA  4563  -7282     0  0
 CSU2            Chisasibi                        -- CA  5381  -7892     0  0
@@ -160,6 +174,8 @@ CZBA            Burlington                       ON CA  4344  -7985     0  0
 CZBM            Bromont                          -- CA  4529  -7274     0  0
 CZEE            Kelsey                           MB CA  5604  -9651     0  0
 CZFG            Pukatawagan                      -- CA  5575 -10126     0  0
+CZGF            Grand Forks                      BC CA  4902 -11842     0  0
+CZGI            Gods River                       MB CA  5484  -9408     0  0
 CZGR            Little Grand Rapids              -- CA  5205  -9547     0  0
 CZHP            High Prairie                     AB CA  5539 -11648     0  0
 CZML            108 Mile                         BC CA  5174 -12133     0  0
