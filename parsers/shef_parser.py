@@ -26,7 +26,9 @@ from twisted.internet.task import cooperate
 from twisted.internet import reactor, protocol
 
 # Setup Database Links
-ACCESSDB_SINGLE = common.get_database('iem')
+# the current_shef table is not very safe when two processes attempt to update
+# it at the same time, use a single process for this connection
+ACCESSDB_SINGLE = common.get_database('iem', cp_max=1)
 ACCESSDB = common.get_database('iem')
 HADSDB = common.get_database('hads')
 
