@@ -7,14 +7,15 @@ import sys
 import smtplib
 import datetime
 from email.MIMEText import MIMEText
-from pyiem.network import Table as NetworkTale
+from pyiem.network import Table as NetworkTable
+import psycopg2
 
-nt = NetworkTable(('KCCI','KELO','KIMT'))
+nt = NetworkTable(('KCCI', 'KELO', 'KIMT'))
 
-alerts = { 'KCCI': ["akrherz@iastate.edu", "wxdude@gmail.com"],
-  'KIMT': ["akrherz@iastate.edu",],
-  'KELO': ["akrherz@iastate.edu", "dennis_todey@sdstate.edu",
-   "stormcenter@keloland.com"] }
+alerts = {'KCCI': ["akrherz@iastate.edu", "wxdude@gmail.com"],
+          'KIMT': ["akrherz@iastate.edu", ],
+          'KELO': ["akrherz@iastate.edu", "dennis_todey@sdstate.edu",
+                   "stormcenter@keloland.com"]}
 
 bulletin = sys.stdin.read()
 
@@ -32,19 +33,18 @@ msg['Subject'] = "[%s] %s Gust %s" % (network, sped, nt.sts[sid]["name"])
 
 s = smtplib.SMTP()
 s.connect()
-s.sendmail("ldm@mesonet.agron.iastate.edu", alerts[network], msg.as_string() )
+s.sendmail("ldm@mesonet.agron.iastate.edu", alerts[network], msg.as_string())
 s.close()
 
-if network != 'KCCI': # We have a special
+if network != 'KCCI':  # We have a special
     sys.exit()
 
 ts = datetime.datetime.strptime("%s%s%s" % (datetime.datetime.now().year,
                                             mmdd, hhmm), "%m%d%H%M")
-import psycopg2
 KCCI = psycopg2.connect(database='kcci', host='iemdb')
 kcursor = KCCI.cursor()
 emails = []
-kcursor.execute("""select w.uid, a.email from walerts w, accounts a 
+kcursor.execute("""select w.uid, a.email from walerts w, accounts a
     WHERE w.sid = %s and w.uid = a.uid""", (sid,))
 for row in kcursor:
     emails.append(row[1])
@@ -85,7 +85,7 @@ Raw Report:%(bulletin)s
  this URL.
    http://kcci.mesonet.agron.iastate.edu/tool/walerts.phtml
 
- * Questions about this service can be sent to 
+ * Questions about this service can be sent to
  Daryl Herzmann akrherz@iastate.edu
 
 ====================================================================
@@ -98,5 +98,5 @@ msg['Subject'] = "[%s] %s Gust %s" % (network, sped, nt.sts[sid]["name"])
 
 s = smtplib.SMTP()
 s.connect()
-s.sendmail("ldm@mesonet.agron.iastate.edu", emails, msg.as_string() )
+s.sendmail("ldm@mesonet.agron.iastate.edu", emails, msg.as_string())
 s.close()

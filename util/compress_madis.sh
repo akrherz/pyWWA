@@ -15,3 +15,4 @@ mkdir -p /mnt/longterm2/madis/mesonet/${YYYY}
 mv ${YYYYMMDD}*nc.gz /mnt/longterm2/madis/mesonet/${YYYY}
 
 #END
+

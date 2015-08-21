@@ -1,5 +1,4 @@
-"""
- Unzip the filename given on stdin
+"""Unzip the filename given on stdin
 
 called from pqact_iemvs.conf
 """

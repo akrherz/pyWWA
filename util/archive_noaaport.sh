@@ -12,3 +12,4 @@ rm -f ${yyyymmdd}??.txt
 mkdir -p /mesonet/ARCHIVE/raw/noaaport/$yyyy
 mv ${yyyymmdd}.tgz /mesonet/ARCHIVE/raw/noaaport/$yyyy/
 # END
+

@@ -165,4 +165,3 @@ draw.text( (235,18), 'C',fill=255, font=font)
 #draw.line( [0,0,255,0,255,29,0,29,0,0], fill=255)
 
 png.save("test.png")
-

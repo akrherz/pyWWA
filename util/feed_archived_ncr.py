@@ -1,8 +1,8 @@
-'''
+"""
  Feed archived NCR data to nexrad3_attr.py , should be run like
- 
+
  python util/feed_archived_ncr.py NEXRAD YYYY MM | YYYY=2009 MM=01 python nexrad3_attr.py
-'''
+"""
 
 import subprocess
 import datetime
@@ -15,7 +15,7 @@ if not os.path.isdir("/tmp/l3tmp"):
 
 nexrad = sys.argv[1]
 
-sts = datetime.datetime( int(sys.argv[2]), int(sys.argv[3]), 1)
+sts = datetime.datetime(int(sys.argv[2]), int(sys.argv[3]), 1)
 ets = sts + datetime.timedelta(days=32)
 ets = ets.replace(day=1)
 interval = datetime.timedelta(days=1)

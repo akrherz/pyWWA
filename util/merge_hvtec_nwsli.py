@@ -9,14 +9,13 @@ Whereby the argument to the script is the filename stored here:
 http://www.nws.noaa.gov/os/vtec/hydro_vtec.shtml
 
 hvtec_nwsli table:
- nwsli      | character(5)           | 
- river_name | character varying(128) | 
- proximity  | character varying(16)  | 
- name       | character varying(128) | 
- state      | character(2)           | 
- geom       | geometry               | 
+ nwsli      | character(5)           |
+ river_name | character varying(128) |
+ proximity  | character varying(16)  |
+ name       | character varying(128) |
+ state      | character(2)           |
+ geom       | geometry               |
 """
-import os
 import sys
 
 import urllib2
@@ -26,7 +25,7 @@ if len(sys.argv) < 2:
     sys.exit(0)
 
 dbconn = psycopg2.connect(database='postgis',
-                           host='iemdb')
+                          host='iemdb')
 cursor = dbconn.cursor()
 print ' - Connected to database: postgis'
 
@@ -39,30 +38,36 @@ response = urllib2.urlopen(req)
 lines = response.readlines()
 updated = 0
 new = 0
-for line in lines:
+bad = 0
+for linenum, line in enumerate(lines):
     if line.strip() == "":
         continue
-    tokens = line.split("\t")
+    tokens = line.strip().split("\t")
     if len(tokens) != 7:
-        print ' + Bad Line found in file: '+ line
+        print((' + Linenum %s had %s tokens, instead of 7\n%s'
+               ) % (linenum+1, len(tokens), line)),
+        bad += 1
         continue
-    (nwsli, river_name, proximity, name, state, lat, lon)  = tokens
+    (nwsli, river_name, proximity, name, state, lat, lon) = tokens
     if len(nwsli) != 5:
-        print ' + Line with bad NWSLI: '+ line
+        print((' + Linenum %s had a NWSLI "%s" not of 5 character length\n%s'
+               ) % (linenum+1, nwsli, line)),
+        bad += 1
         continue
     cursor.execute("DELETE from hvtec_nwsli WHERE nwsli = '%s'" % (nwsli,))
     if cursor.rowcount == 1:
         updated += 1
     else:
         new += 1
-    sql  = """INSERT into hvtec_nwsli (nwsli, river_name, proximity, name, 
-         state, geom) values (%s, %s, %s, %s, %s, 
-         'SRID=4326;POINT(%s %s)')""" 
-    args = (nwsli, river_name, proximity, name, state, float(lon), 
+    sql = """
+        INSERT into hvtec_nwsli (nwsli, river_name, proximity, name,
+         state, geom) values (%s, %s, %s, %s, %s,
+         'SRID=4326;POINT(%s %s)')
+         """
+    args = (nwsli, river_name, proximity, name, state, float(lon),
             float(lat))
     cursor.execute(sql, args)
 
 cursor.close()
 dbconn.commit()
-print ' - DONE! %s updated %s new' % (updated, new)
-
+print ' - DONE! %s updated %s new, %s bad entries' % (updated, new, bad)

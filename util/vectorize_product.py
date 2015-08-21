@@ -21,7 +21,7 @@ for channel in add_channels:
     cursor.execute("""SELECT * from iembot_channels where id = %s""", (channel,
                                                                        ))
     if cursor.rowcount == 0:
-        cursor.execute("""INSERT into iembot_channels(id, name) 
+        cursor.execute("""INSERT into iembot_channels(id, name)
         VALUES (%s,%s)""", (channel, channel))
         channel_adds += 1
 
@@ -51,7 +51,7 @@ for channel in add_channels:
         (screen_name, channel) VALUES (%s,%s)""", (page, channel))
         twitter_adds += 1
 
-print '%s channel_adds %s  room_adds %s twitter_adds %s' % (AWIPSID,
-                                    channel_adds, room_adds, twitter_adds)
+print(('%s channel_adds %s  room_adds %s twitter_adds %s'
+       ) % (AWIPSID, channel_adds, room_adds, twitter_adds))
 cursor.close()
 pgconn.commit()
