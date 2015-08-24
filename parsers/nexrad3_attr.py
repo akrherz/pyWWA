@@ -305,7 +305,8 @@ def really_process(txn, res, nexrad, ts):
         for fn in ['gemglb.nts', 'last.nts']:
             if os.path.isfile(fn):
                 os.unlink(fn)
-    log.msg("%s %s Processed %s entries" % (nexrad, ts, co))
+    log.msg(("%s %s Processed %s entries"
+             ) % (nexrad, ts.strftime("%Y-%m-%d %H:%M UTC"), co))
 
 
 def job_size(jobs):
