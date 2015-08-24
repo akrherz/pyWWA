@@ -43,7 +43,6 @@ os.chdir(PATH)
 LOC2STATE = {}
 LOC2NETWORK = {}
 LOC2TZ = {}
-UNKNOWN = {}
 TIMEZONES = {None: pytz.timezone('UTC')}
 
 
@@ -392,9 +391,7 @@ def process_site(tp, sid, ts, data):
         state = reference.nwsli2state.get(sid[3:])
         LOC2STATE[sid] = state
     if state is None:
-        if UNKNOWN.get(sid) is None:
-            enter_unknown(sid, tp, "")
-            UNKNOWN[sid] = 1
+        enter_unknown(sid, tp, "")
         return
 
     # Deterime if we want to waste the DB's time
@@ -441,9 +438,7 @@ def got_results(res, tp, sid, network):
     @param network string network
     """
     if not res:
-        if UNKNOWN.get(sid) is None:
-            enter_unknown(sid, tp, network)
-            UNKNOWN[sid] = 1
+        enter_unknown(sid, tp, network)
 
 
 def save_data(txn, tp, iemob, data):
