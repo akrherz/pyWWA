@@ -3,6 +3,7 @@ LVR             Big River Lake                   AK US  6081 -15229     0  0
 # CAA2 
 CAA8            Invermere                        -- CA  5052 -11600     0  0
 # CAB3            
+# CAC8            
 CAD4            Trail                            -- CA  4906 -11761     0  0
 CAD5            Merritt                          -- CA  5012 -12074     0  0
 CAF4            Tsuniah                          -- CA  5153 -12417     0  0
@@ -14,6 +15,7 @@ CAJ3            Sutcliffe Field                  -- CA  4904 -11650     0  0
 CAJ9            Fort Ware                        -- CA  5743 -12565     0  0
 # CAK2            
 CAL3            Douglas Lake                     -- CA  5017 -12017     0  0
+CAL4            Fort MacKay                      -- CA  5722 -11142     0  0
 # CAM3
 # CAN6            
 CAP3            Sechelt                          -- CA  4946 -12372     0  0
@@ -44,6 +46,7 @@ CBX7            Tumbler Ridge                    -- CA  5503 -12094     0  0
 CCM4            Port Au Choix                    -- CA  5069  -5733     0  0
 CCN2            Grand Manan                      -- CA  4471  -6680     0  0
 CCS3            St Stephen                       -- CA  4521  -6725     0  0
+CCW3            Waterville                       -- CA  4505  -6465     0  0
 CDA4            Pokemouche                       -- CA  4772  -6488     0  0
 # CEA3            
 CEA5            Hardisty                         -- CA  5265 -11138     0  0
@@ -60,9 +63,13 @@ CEJ3            Stettler                         -- CA  5231 -11275     0  0
 # CEK4
 CEL5            Valleyview                       -- CA  5503 -11730     0  0
 CEL8            Eleonore                         -- CA  5272  -7608     0  0
+CEM3            Whati                            -- CA  6313 -11725     0  0
 CEM5            Swan Hills                       -- CA  5467 -11541     0  0
+CEN3            Three Hills                      -- CA  5170 -11321     0  0
 CEN4            High River                       -- CA  5053 -11383     0  0
+CEP3            Barrhead                         -- CA  5410 -11443     0  0
 CEQ3            Camrose                          -- CA  5304 -11282     0  0
+CEQ5            Grande Cache                     -- CA  5392 -11887     0  0
 CER3            Drayton Valley                   -- CA  5327 -11496     0  0
 CES4            Westlock                         -- CA  5414 -11374     0  0
 CEV3            Vegreville                       -- CA  5351 -11203     0  0
@@ -72,7 +79,9 @@ CFB6            Joesphburg                       -- CA  5372 -11309     0  0
 CFM7            Boyle                            -- CA  5457 -11282     0  0
 CFS5            Spirit River                     -- CA  5578 -11884     0  0
 CFT8            Pelican                          -- CA  5616 -11347     0  0
+CFV2            Beiseker                         -- CA  5139 -11347     0  0
 CFX2            Calgary / Okotoks                -- CA  5074 -11393     0  0
+CFX4            Manning                          -- CA  5695 -11764     0  0
 CFX5            Renard                           -- CA  5273  -7222     0  0
 CFX6            Vulcan                           -- CA  5040 -11328     0  0
 CJA5            Nestor Falls                     -- CA  4914  -9392     0  0
@@ -93,7 +102,9 @@ CMR2            Mary River                       -- CA  7132  -7935     0  0
 CNA9            Tomvale                          -- CA  4492  -7694     0  0
 CNC4            Guelph                           -- CA  4356  -8020     0  0
 CND4            Stanhope                         -- CA  4511  -7864     0  0
+CNE3            Bearskin Lake                    -- CA  5397  -9103     0  0
 CNF4            Lindsay                          -- CA  4436  -7878     0  0
+# CNH3            
 CNK4            Parry Sound                      -- CA  4526  -7983     0  0
 CNL3            Brockville                       -- CA  4464  -7575     0  0
 # CNQ7            
@@ -115,6 +126,7 @@ CSG3            Joliette                         -- CA  4605  -7350     0  0
 CSJ4            Louiseville                      -- CA  4625  -7290     0  0
 CSK3            Mascouche                        -- CA  4572  -7360     0  0
 CSM3            Thetford Mines                   -- CA  4605  -7126     0  0
+CSM5            St Michel Des Saints             -- CA  4668  -7399     0  0
 CSQ2            Shuswap                          -- CA  5088 -11959     0  0
 CSQ3            Valcourt                         -- CA  4548  -7231     0  0
 CSR3            Victoriaville                    -- CA  4611  -7193     0  0
@@ -154,6 +166,7 @@ CYGO            Gods Lake Narrows                MB CA  5456  -9449     0  0
 CYHC            Vancouver Habour                 -- CA  4939 -12311     0  0
 CYHF            Hearst Rene Fontaine             ON CA  4971  -8369     0  0
 CYHR            Chevery                          -- CA  5047  -5964     0  0
+CYHS            Saugeen Mun                      -- CA  4416  -8106     0  0
 CYIF            St Augustin                      QC CA  5121  -5866     0  0
 CYJA            Jasper                           AB CA  5300 -11806     0  0
 CYKM            Kincardine                       -- CA  4420  -8161     0  0
