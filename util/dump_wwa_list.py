@@ -1,9 +1,10 @@
 import urllib2
 import json
+import sys
 from pyiem.network import Table as NetworkTable
 
-ph = "FF"
-sig = "A"
+ph = sys.argv[1]
+sig = sys.argv[2]
 o = open('prods_%s_%s.csv' % (ph, sig), 'w')
 o.write(("WFO,NWSLI,EVENTID,PHENOMENA,SIGNIFICANCE,ISSUE,PRODUCT_ISSUE,"
          "INIT_EXPIRE,EXPIRE,AREA,LOCS\n"))
