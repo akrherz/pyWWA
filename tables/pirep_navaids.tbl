@@ -26,6 +26,7 @@ CAU4            Vanderhoof                       -- CA  5405 -12401     0  0
 # CAU6
 CAV3            One Hundred Mile House           -- CA  5164 -12131     0  0
 CAV4            McBride                          -- CA  5332 -12017     0  0
+# CAW8            
 # CAX6            
 CAZ5            Cache Creek                      -- CA  5078 -12132     0  0
 CBB9            Osoyoos                          -- CA  4904 -11949     0  0
@@ -48,6 +49,7 @@ CCN2            Grand Manan                      -- CA  4471  -6680     0  0
 CCS3            St Stephen                       -- CA  4521  -6725     0  0
 CCW3            Waterville                       -- CA  4505  -6465     0  0
 CDA4            Pokemouche                       -- CA  4772  -6488     0  0
+CDC5            Dougall Campbell                 -- CA  5201 -12121     0  0  
 # CEA3            
 CEA5            Hardisty                         -- CA  5265 -11138     0  0
 CEB5            Fairview                         -- CA  5608 -11843     0  0
@@ -100,6 +102,7 @@ CLM2            Leamington                       -- CA  4203  -8253     0  0
 CMB7            Maxville                         -- CA  4525  -7481     0  0
 CMR2            Mary River                       -- CA  7132  -7935     0  0
 CNA9            Tomvale                          -- CA  4492  -7694     0  0
+CNC3            Brampton                         -- CA  4376  -7988     0  0
 CNC4            Guelph                           -- CA  4356  -8020     0  0
 CND4            Stanhope                         -- CA  4511  -7864     0  0
 CNE3            Bearskin Lake                    -- CA  5397  -9103     0  0
@@ -108,6 +111,7 @@ CNF4            Lindsay                          -- CA  4436  -7878     0  0
 CNK4            Parry Sound                      -- CA  4526  -7983     0  0
 CNL3            Brockville                       -- CA  4464  -7575     0  0
 # CNQ7            
+CNR4            Tobermory                        -- CA  4522  -8163     0  0
 CNT7            Picton                           -- CA  4399  -7714     0  0
 CNW3            Bancroft                         -- CA  4507  -7788     0  0
 CNV9            Neuville                         -- CA  4672  -7158     0  0
@@ -181,6 +185,7 @@ CYMW            Maniwaki                         -- CA  4627  -7599     0  0
 CYNJ            Langley Tower                    -- CA  4910 -12263     0  0
 CYNR            Fort MacKay                      -- CA  5738 -11170     0  0
 CYOH            Oxford House                     MB CA  5493  -9528     0  0
+CYOP            Rainbow Lake                     AB CA  5849 -11941     0  0
 CYPM            Pokangikum                       -- CA  5182  -9397     0  0
 CYPN            Port Menier Man                  -- CA  4984  -6429     0  0
 CYPP            Parent                           -- CA  4793  -7461     0  0
@@ -199,6 +204,7 @@ CYWP            Webequie                         ON CA  5296  -8738     0  0
 CYWV            Wainwright                       -- CA  5280 -11088     0  0
 CYXK            Rimouski                         QC CA  4848  -6850     0  0
 CYYM            Cowley                           AB CA  4964 -11409     0  0
+CYYO            Wynward                          SK CA  5181 -10417     0  0
 CZAM            Salmon                           BC CA  5068 -11923     0  0
 CZBA            Burlington                       ON CA  4344  -7985     0  0
 CZBM            Bromont                          -- CA  4529  -7274     0  0
