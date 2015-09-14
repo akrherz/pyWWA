@@ -28,7 +28,6 @@ from twisted.internet import reactor, protocol
 # Setup Database Links
 # the current_shef table is not very safe when two processes attempt to update
 # it at the same time, use a single process for this connection
-ACCESSDB_SINGLE = common.get_database('iem', cp_max=1)
 ACCESSDB = common.get_database('iem')
 HADSDB = common.get_database('hads')
 
@@ -45,6 +44,7 @@ LOC2NETWORK = {}
 LOC2TZ = {}
 LOC2VALID = {}
 TIMEZONES = {None: pytz.timezone('UTC')}
+CURRENT_QUEUE = {}
 
 
 def load_stations(txn):
@@ -351,6 +351,34 @@ def var2dbcols(var):
         return [var[:2], var[2], var[3:5], var[5], var[-1], None]
 
 
+def save_current():
+    """update the database current_shef table
+
+    It turns out that our database can't handle this fast enough in realtime,
+    so we aggregate some
+    """
+    cnt = 0
+    skipped = 0
+    for k, mydict in CURRENT_QUEUE.items():
+        if not mydict['dirty']:
+            skipped += 1
+            continue
+        cnt += 1
+        (sid, varname) = k.split("|")
+        (pe, d, s, e, p, depth) = var2dbcols(varname)
+        d2 = ACCESSDB.runOperation("""
+        INSERT into current_shef(station, valid, physical_code, duration,
+        source, extremum, probability, value, depth)
+        values (%s,%s,%s,%s,%s,%s,%s,%s,%s)
+        """, (sid, mydict['valid'].strftime("%Y-%m-%d %H:%M+00"), pe, d, s, e,
+              p, mydict['value'], depth))
+        d2.addErrback(common.email_error, '')
+        mydict['dirty'] = False
+
+    log.msg("save_current() processed %s entries, %s skipped" % (cnt, skipped))
+    reactor.callLater(300, save_current)
+
+
 def process_site(tp, sid, ts, data):
     """
     I process a dictionary of data for a particular site
@@ -369,14 +397,11 @@ def process_site(tp, sid, ts, data):
         deffer.addErrback(common.email_error, tp.text)
         deffer.addErrback(log.err)
 
-        (pe, d, s, e, p, depth) = var2dbcols(varname)
-        d2 = ACCESSDB_SINGLE.runOperation("""
-        INSERT into current_shef(station, valid, physical_code, duration,
-        source, extremum, probability, value, depth)
-        values (%s,%s,%s,%s,%s,%s,%s,%s,%s)
-        """, (sid, ts.strftime("%Y-%m-%d %H:%M+00"), pe, d, s, e, p, value,
-              depth))
-        d2.addErrback(common.email_error, tp.text)
+        key = "%s|%s" % (sid, varname)
+        cur = CURRENT_QUEUE.setdefault(key, dict(valid=ts, value=value,
+                                                 dirty=True))
+        if ts > cur['valid']:
+            cur = dict(valid=ts, value=value, dirty=True)
 
     # Our simple determination if the site is a COOP site
     is_coop = False
@@ -506,6 +531,7 @@ def main(res):
 
     reactor.callLater(300, job_size, jobs)
     reactor.callLater(60, dump_memory)
+    reactor.callLater(73, save_current)
 
 
 def fullstop(err):
