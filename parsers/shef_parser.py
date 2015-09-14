@@ -24,6 +24,7 @@ from twisted.internet import task
 from twisted.internet.defer import DeferredQueue, Deferred
 from twisted.internet.task import cooperate
 from twisted.internet import reactor, protocol
+from twisted.internet.task import LoopingCall
 
 # Setup Database Links
 # the current_shef table is not very safe when two processes attempt to update
@@ -376,7 +377,6 @@ def save_current():
         mydict['dirty'] = False
 
     log.msg("save_current() processed %s entries, %s skipped" % (cnt, skipped))
-    reactor.callLater(300, save_current)
 
 
 def process_site(tp, sid, ts, data):
@@ -530,8 +530,9 @@ def main(res):
         cooperate(worker(jobs))
 
     reactor.callLater(300, job_size, jobs)
-    reactor.callLater(60, dump_memory)
-    reactor.callLater(73, save_current)
+    # reactor.callLater(60, dump_memory)
+    lc = LoopingCall(save_current)
+    lc.start(73, now=False)
 
 
 def fullstop(err):
