@@ -532,7 +532,7 @@ def main(res):
     reactor.callLater(300, job_size, jobs)
     # reactor.callLater(60, dump_memory)
     lc = LoopingCall(save_current)
-    lc.start(73, now=False)
+    lc.start(373, now=False)
 
 
 def fullstop(err):
