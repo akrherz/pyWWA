@@ -43,6 +43,7 @@ os.chdir(PATH)
 LOC2STATE = {}
 LOC2NETWORK = {}
 LOC2TZ = {}
+LOC2VALID = {}
 TIMEZONES = {None: pytz.timezone('UTC')}
 
 
@@ -56,8 +57,11 @@ def load_stations(txn):
         WHERE network ~* 'COOP' or network ~* 'DCP' or
         network in ('KCCI','KIMT','KELO', 'ISUSM')
         ORDER by network ASC""")
+    u1980 = datetime.datetime.utcnow()
+    u1980 = u1980.replace(day=1, year=1980, tzinfo=pytz.timezone("UTC"))
     for row in txn:
         stid = row['id']
+        LOC2VALID.setdefault(stid, u1980)
         LOC2STATE[stid] = row['state']
         LOC2TZ[stid] = row['tzname']
         if stid in LOC2NETWORK:
@@ -411,9 +415,10 @@ def process_site(tp, sid, ts, data):
             else:
                 network = "%s__DCP" % (country,)
 
-    # Do not send DCP sites to IEMAccess
-    # if network.find("_DCP") > 0:
-    #    return
+    # Do not send DCP sites with old data to IEMAccess
+    if network.find("_DCP") > 0 and localts < LOC2VALID.get(sid, localts):
+        return
+    LOC2VALID[sid] = localts
 
     # Okay, time for a hack, if our observation is at midnight!
     if localts.hour == 0 and localts.minute == 0:
@@ -463,6 +468,16 @@ def save_data(txn, tp, iemob, data):
     return iemob.save(txn)
 
 
+def dump_memory():
+    """Dump some memory stats"""
+    from pympler import muppy
+    from pympler import summary
+    all_objects = muppy.get_objects()
+    sum1 = summary.summarize(all_objects)
+    summary.print_(sum1)
+    reactor.callLater(300, dump_memory)
+
+
 def job_size(jobs):
     """
     Print out some debug information to the log on the current size of the
@@ -490,6 +505,7 @@ def main(res):
         cooperate(worker(jobs))
 
     reactor.callLater(300, job_size, jobs)
+    reactor.callLater(60, dump_memory)
 
 
 def fullstop(err):
