@@ -401,7 +401,9 @@ def process_site(tp, sid, ts, data):
         cur = CURRENT_QUEUE.setdefault(key, dict(valid=ts, value=value,
                                                  dirty=True))
         if ts > cur['valid']:
-            cur = dict(valid=ts, value=value, dirty=True)
+            cur['valid'] = ts
+            cur['value'] = value
+            cur['dirty'] = True
 
     # Our simple determination if the site is a COOP site
     is_coop = False
