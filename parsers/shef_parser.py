@@ -29,8 +29,8 @@ from twisted.internet.task import LoopingCall
 # Setup Database Links
 # the current_shef table is not very safe when two processes attempt to update
 # it at the same time, use a single process for this connection
-ACCESSDB = common.get_database('iem')
-HADSDB = common.get_database('hads')
+ACCESSDB = common.get_database('iem', module_name='psycopg2')
+HADSDB = common.get_database('hads', module_name='psycopg2')
 
 # Necessary for the shefit program to run A-OK
 _MYDIR = os.path.dirname(os.path.abspath(__file__))
@@ -61,20 +61,20 @@ def load_stations(txn):
     u1980 = datetime.datetime.utcnow()
     u1980 = u1980.replace(day=1, year=1980, tzinfo=pytz.timezone("UTC"))
     for row in txn:
-        stid = row['id']
+        stid = row[0]
         LOC2VALID.setdefault(stid, u1980)
-        LOC2STATE[stid] = row['state']
-        LOC2TZ[stid] = row['tzname']
+        LOC2STATE[stid] = row[2]
+        LOC2TZ[stid] = row[3]
         if stid in LOC2NETWORK:
             del LOC2NETWORK[stid]
         else:
-            LOC2NETWORK[stid] = row['network']
-        if row['tzname'] not in TIMEZONES:
+            LOC2NETWORK[stid] = row[1]
+        if row[3] not in TIMEZONES:
             try:
-                TIMEZONES[row['tzname']] = pytz.timezone(row['tzname'])
+                TIMEZONES[row[3]] = pytz.timezone(row[3])
             except:
-                log.msg("pytz does not like tzname: %s" % (row['tzname'],))
-                TIMEZONES[row['tzname']] = pytz.timezone("UTC")
+                log.msg("pytz does not like tzname: %s" % (row[3],))
+                TIMEZONES[row[3]] = pytz.timezone("UTC")
 
     log.msg("loaded %s stations" % (len(LOC2STATE),))
 
@@ -530,7 +530,7 @@ def main(res):
         cooperate(worker(jobs))
 
     reactor.callLater(300, job_size, jobs)
-    # reactor.callLater(60, dump_memory)
+    reactor.callLater(60, dump_memory)
     lc = LoopingCall(save_current)
     lc.start(373, now=False)
 

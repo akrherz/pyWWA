@@ -40,14 +40,15 @@ settings = {}
 email_timestamps = []
 
 
-def get_database(dbname, cp_max=5):
+def get_database(dbname, cp_max=5, module_name='pyiem.twistedpg'):
     """ Get a twisted database connection
 
-    Arguments:
-    dbname -- The string name of the database to connect to
-    cp_max -- The maximum number of connections to make to the database
+    Args:
+      dbname (str): The string name of the database to connect to
+      cp_max (int): The maximum number of connections to make to the database
+      module_name (str): The python module to use for the ConnectionPool
     """
-    return adbapi.ConnectionPool("pyiem.twistedpg", database=dbname,
+    return adbapi.ConnectionPool(module_name, database=dbname,
                                  cp_reconnect=True, cp_max=cp_max,
                                  host=config.get('databaserw').get('host'),
                                  user=config.get('databaserw').get('user'),
