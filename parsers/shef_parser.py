@@ -311,11 +311,11 @@ def really_process(tp, data):
             process_site(tp, sid, tstamp, mydata[sid][tstamp])
 
 
-def enter_unknown(sid, tp, network):
+def enter_unknown(sid, product_id, network):
     """
     Enter some info about a site ID we know nothing of...
     @param sid string site id
-    @param tp TextProduct instance
+    @param product_id string
     @param network string of the guessed network
     """
     if len(sid) < 5:
@@ -324,7 +324,7 @@ def enter_unknown(sid, tp, network):
     HADSDB.runOperation("""
             INSERT into unknown(nwsli, product, network)
             values ('%s', '%s', '%s')
-        """ % (sid, tp.get_product_id(), network))
+        """ % (sid, product_id, network))
 
 
 def checkvars(myvars):
@@ -420,7 +420,7 @@ def process_site(tp, sid, ts, data):
         state = reference.nwsli2state.get(sid[3:])
         LOC2STATE[sid] = state
     if state is None:
-        enter_unknown(sid, tp, "")
+        enter_unknown(sid, tp.get_product_id(), "")
         return
 
     # Deterime if we want to waste the DB's time
@@ -451,31 +451,31 @@ def process_site(tp, sid, ts, data):
         # log.msg("Shifting %s [%s] back one minute: %s" % (sid, network,
         #                                                  localts))
 
-    iemob = Observation(sid, network, localts)
-
-    deffer = ACCESSDB.runInteraction(save_data, tp, iemob, data)
-    deffer.addCallback(got_results, tp, sid, network)
+    deffer = ACCESSDB.runInteraction(save_data, tp.get_product_id(), sid,
+                                     network, localts, data)
+    deffer.addCallback(got_results, tp.get_product_id(), sid, network)
     deffer.addErrback(common.email_error, tp.text)
     deffer.addErrback(log.err)
 
 
-def got_results(res, tp, sid, network):
+def got_results(res, product_id, sid, network):
     """
     Callback after our iemdb work
     @param res response
-    @param tp pyiem.nws.product.TextProduct instance
+    @param product_id product_id
     @param sid stationID
     @param network string network
     """
     if not res:
-        enter_unknown(sid, tp, network)
+        enter_unknown(sid, product_id, network)
 
 
-def save_data(txn, tp, iemob, data):
+def save_data(txn, product_id, sid, network, localts, data):
     """
     Called from a transaction 'thread'
     """
-    iscoop = (iemob.data['network'].find('COOP') > 0)
+    iemob = Observation(sid, network, localts)
+    iscoop = (network.find('COOP') > 0)
     for var in data.keys():
         if data[var] == -9999:
             continue
@@ -489,7 +489,7 @@ def save_data(txn, tp, iemob, data):
             if MAPPING[var] in ['tmpf', 'max_tmpf', 'min_tmpf', 'pday',
                                 'snow', 'snowd']:
                 iemob.data['coop_valid'] = iemob.data['valid']
-    iemob.data['raw'] = tp.get_product_id()
+    iemob.data['raw'] = product_id
     return iemob.save(txn)
 
 
