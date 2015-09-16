@@ -451,11 +451,35 @@ def process_site(tp, sid, ts, data):
         # log.msg("Shifting %s [%s] back one minute: %s" % (sid, network,
         #                                                  localts))
 
-    deffer = ACCESSDB.runInteraction(save_data, tp.get_product_id(), sid,
-                                     network, localts, data)
-    deffer.addCallback(got_results, tp.get_product_id(), sid, network)
-    deffer.addErrback(common.email_error, tp.text)
-    deffer.addErrback(log.err)
+    iemob = Observation(sid, network, localts)
+    iscoop = (network.find('COOP') > 0)
+    hasdata = False
+    for var in data.keys():
+        if data[var] == -9999:
+            continue
+        iemvar = MAPPING[var]
+        if iemvar == '':
+            continue
+        hasdata = True
+        myval = data[var] * MULTIPLIER.get(var[:2], 1.0)
+        iemob.data[MAPPING[var]] = myval
+        if iscoop:
+            # Save COOP 'at-ob' temperature into summary table
+            if MAPPING[var] == 'tmpf':
+                iemob.data['coop_tmpf'] = myval
+            # Save observation time into the summary table
+            if MAPPING[var] in ['tmpf', 'max_tmpf', 'min_tmpf', 'pday',
+                                'snow', 'snowd']:
+                iemob.data['coop_valid'] = iemob.data['valid']
+    if hasdata:
+        iemob.data['raw'] = tp.get_product_id()
+
+        deffer = ACCESSDB.runInteraction(iemob.save)
+        deffer.addCallback(got_results, tp.get_product_id(), sid, network)
+        deffer.addErrback(common.email_error, tp.text)
+        deffer.addErrback(log.err)
+    # else:
+    #    print 'NODATA?', sid, network, localts, data
 
 
 def got_results(res, product_id, sid, network):
@@ -468,29 +492,6 @@ def got_results(res, product_id, sid, network):
     """
     if not res:
         enter_unknown(sid, product_id, network)
-
-
-def save_data(txn, product_id, sid, network, localts, data):
-    """
-    Called from a transaction 'thread'
-    """
-    iemob = Observation(sid, network, localts)
-    iscoop = (network.find('COOP') > 0)
-    for var in data.keys():
-        if data[var] == -9999:
-            continue
-        myval = data[var] * MULTIPLIER.get(var[:2], 1.0)
-        iemob.data[MAPPING[var]] = myval
-        if iscoop:
-            # Save COOP 'at-ob' temperature into summary table
-            if MAPPING[var] == 'tmpf':
-                iemob.data['coop_tmpf'] = myval
-            # Save observation time into the summary table
-            if MAPPING[var] in ['tmpf', 'max_tmpf', 'min_tmpf', 'pday',
-                                'snow', 'snowd']:
-                iemob.data['coop_valid'] = iemob.data['valid']
-    iemob.data['raw'] = product_id
-    return iemob.save(txn)
 
 
 def dump_memory():
