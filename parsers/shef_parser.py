@@ -388,12 +388,10 @@ def process_site(tp, sid, ts, data):
     # Insert data into database regardless
     for varname in data.keys():
         value = data[varname]
-        deffer = HADSDB.runOperation("""INSERT into raw""" +
-                                     ts.strftime("%Y_%m") +
-                                     """ (station, valid, key, value)
-                                     VALUES(%s,%s, %s, %s)""",
-                                     (sid, ts.strftime("%Y-%m-%d %H:%M+00"),
-                                      varname, value))
+        deffer = HADSDB.runOperation("""INSERT into raw_inbound
+                (station, valid, key, value)
+                VALUES(%s,%s, %s, %s)
+                """, (sid, ts.strftime("%Y-%m-%d %H:%M+00"), varname, value))
         deffer.addErrback(common.email_error, tp.text)
         deffer.addErrback(log.err)
 
