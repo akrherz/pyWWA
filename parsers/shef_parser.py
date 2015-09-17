@@ -286,7 +286,9 @@ def really_process(tp, data):
             value = -9999.0
         else:
             value = float(tokens[6])
-        if varname[:2] in ['TV', 'TB']:  # Soil Depth fun!
+        # Handle 7.4.6 Paired Value ("Vector") Physical Elements
+        if varname[:2] in ['HQ', 'MD', 'MN', 'MS', 'MV', 'NO', 'ST', 'TB',
+                           'TE', 'TV']:
             depth = int(value)
             value = abs((value * 1000) % (depth * 1000))
             if depth < 0:
@@ -463,6 +465,9 @@ def process_site(tp, sid, ts, data):
         hasdata = True
         myval = data[var] * MULTIPLIER.get(var[:2], 1.0)
         iemob.data[MAPPING[var]] = myval
+        # Convert 0.001 to 0.0001 for Trace values
+        if myval == 0.001 and MAPPING[var] in ['pday', 'snow', 'snowd']:
+            iemob.data[MAPPING[var]] = 0.0001
         if iscoop:
             # Save COOP 'at-ob' temperature into summary table
             if MAPPING[var] == 'tmpf':
