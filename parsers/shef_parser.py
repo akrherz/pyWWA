@@ -290,7 +290,10 @@ def really_process(tp, data):
         if varname[:2] in ['HQ', 'MD', 'MN', 'MS', 'MV', 'NO', 'ST', 'TB',
                            'TE', 'TV']:
             depth = int(value)
-            value = abs((value * 1000) % (depth * 1000))
+            if depth == 0:
+                value = abs(value * 1000)
+            else:
+                value = abs((value * 1000) % (depth * 1000))
             if depth < 0:
                 value = 0 - value
                 depth = abs(depth)
