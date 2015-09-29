@@ -408,20 +408,19 @@ def process_site(tp, sid, ts, data):
             cur['value'] = value
             cur['dirty'] = True
 
-    # Our simple determination if the site is a COOP site
-    is_coop = False
-    if tp.afos[:3] == 'RR3':
-        is_coop = True
-    elif tp.afos[:3] in ['RR1', 'RR2'] and checkvars(data.keys()):
-        log.msg("Guessing COOP? %s %s %s" % (sid, tp.get_product_id(),
-                                             data.keys()))
-        is_coop = True
-
     # Deterime if we want to waste the DB's time
     network = LOC2NETWORK.get(sid)
     if network in ['KCCI', 'KIMT', 'KELO', 'ISUSM']:
         return
     if network is None:
+        # Our simple determination if the site is a COOP site
+        is_coop = False
+        if tp.afos[:3] == 'RR3':
+            is_coop = True
+        elif tp.afos[:3] in ['RR1', 'RR2'] and checkvars(data.keys()):
+            log.msg("Guessing COOP? %s %s %s" % (sid, tp.get_product_id(),
+                                                 data.keys()))
+            is_coop = True
         state = LOC2STATE.get(sid)
         if state is None and len(sid) == 8 and sid[0] == 'X':
             return
