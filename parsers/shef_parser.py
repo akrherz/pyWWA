@@ -417,22 +417,22 @@ def process_site(tp, sid, ts, data):
                                              data.keys()))
         is_coop = True
 
-    state = LOC2STATE.get(sid)
-    if state is None and len(sid) == 8 and sid[0] == 'X':
-        return
-    # Base the state on the 2 char station ID!
-    if state is None and len(sid) == 5 and sid[3:] in reference.nwsli2state:
-        state = reference.nwsli2state.get(sid[3:])
-        LOC2STATE[sid] = state
-    if state is None:
-        enter_unknown(sid, tp.get_product_id(), "")
-        return
-
     # Deterime if we want to waste the DB's time
     network = LOC2NETWORK.get(sid)
     if network in ['KCCI', 'KIMT', 'KELO', 'ISUSM']:
         return
     if network is None:
+        state = LOC2STATE.get(sid)
+        if state is None and len(sid) == 8 and sid[0] == 'X':
+            return
+        # Base the state on the 2 char station ID!
+        if (state is None and len(sid) == 5 and
+                sid[3:] in reference.nwsli2state):
+            state = reference.nwsli2state.get(sid[3:])
+            LOC2STATE[sid] = state
+        if state is None:
+            enter_unknown(sid, tp.get_product_id(), "")
+            return
         if is_coop:
             network = "%s_COOP" % (state,)
         # We are left with DCP
