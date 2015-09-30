@@ -46,7 +46,7 @@ def process_input():
 def do_legacy_ir(sat, tmpfn):
     """ since some are unable to process non-grayscale """
     print("Doing legacy IR junk...")
-    png = Image.fromarray(sat.data[:-1, :])
+    png = Image.fromarray(np.array(sat.data[:-1, :], np.uint8))
     png.save('%s.png' % (tmpfn,))
 
     # World File
