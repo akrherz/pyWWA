@@ -90,7 +90,7 @@ def write_gispng(sat, tmpfn):
         png = Image.fromarray(np.array(sat.data[:-1, :], np.uint8))
         png.putpalette(tuple(gini.get_ir_ramp().ravel()))
     else:
-        png = Image.fromarray(sat.data[:-1, :])
+        png = Image.fromarray(np.array(sat.data[:-1, :], np.uint8))
     png.save('%s.png' % (tmpfn,))
 
     # World File
