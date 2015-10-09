@@ -247,7 +247,7 @@ def worker(jobs):
 
 def make_datetime(dpart, tpart):
     """Create a datatime instance from these two strings"""
-    if dpart == "0000-00-00" or tpart == "00:00:00":
+    if dpart == "0000-00-00":
         return None
     dstr = "%s %s" % (dpart, tpart)
     tstamp = datetime.datetime.strptime(dstr, "%Y-%m-%d %H:%M:%S")
