@@ -259,7 +259,7 @@ def really_process(tp, data):
     This processes the output we get from the SHEFIT program
     """
     # Now we loop over the data we got :)
-    log.msg("\n"+data)
+    # log.msg("\n"+data)
     mydata = {}
     for line in data.split("\n"):
         # Skip blank output lines
@@ -288,8 +288,8 @@ def really_process(tp, data):
         if tstamp < (utcnow - datetime.timedelta(days=60)):
             log.msg("Rejecting old data %s %s" % (sid, tstamp))
             continue
-        if tstamp not in mydata[sid]:
-            mydata[sid][tstamp] = {}
+        s_data = mydata.setdefault(sid, dict())
+        st_data = s_data.setdefault(tstamp, dict())
 
         varname = tokens[5]
         if tokens[6].find("****") == 0:
@@ -318,7 +318,7 @@ def really_process(tp, data):
                                     "is too large") % (sid, varname, value),
                                    "%s\n%s" % (data, tp.unixtext))
             continue
-        mydata[sid][tstamp][varname] = value
+        st_data[varname] = value
     # Now we process each station we found in the report! :)
     for sid in mydata.keys():
         times = mydata[sid].keys()
