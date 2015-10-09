@@ -90,33 +90,46 @@ Some notes on the SHEF codes translated to something IEM Access can handle
 First two chars are physical extent code
 
 """
-DIRECTMAP = {'URIZ': 'max_drct',
-             'XVIZ': 'vsby',
-             'HGIZ': 'rstage',
-             'HPIZ': 'rstage',
-             'HTIZ': 'rstage',
-             'PPHZ': 'phour',
-             'TDIZ': 'dwpf',
-             'TAIZ': 'tmpf',
-             'TAIN': 'min_tmpf',
-             'TAIX': 'max_tmpf',
-             'PPDZ': 'pday',
-             'PPPZ': 'pday',
-             'PCIZ': 'pcounter',
-             'RWIZ': 'srad',
-             'SDIZ': 'snowd',
-             'XRIZ': 'relh',
-             'PAIZ': 'pres',
-             'QRIZ': 'discharge',
-             'QTIZ': 'discharge',
-             'SWIZ': 'snoww',
-             'USIZ': 'sknt',
-             'SFDZ': 'snow',
-             'UDIZ': 'drct',
-             'UGIZ': 'gust',
-             'UPIZ': 'gust',
-             'UPHZ': 'gust',
-             }
+DIRECTMAP = {
+    'HGIZ': 'rstage',
+    'HPIZ': 'rstage',
+    'HTIZ': 'rstage',
+
+    'PAIZ': 'pres',
+    'PPHZ': 'phour',
+    'PPDZ': 'pday',
+    'PPPZ': 'pday',
+    'PCIZ': 'pcounter',
+
+    'QRIZ': 'discharge',
+    'QTIZ': 'discharge',
+
+    'RWIZ': 'srad',
+
+    'SDIZ': 'snowd',
+    'SFDZ': 'snow',
+    'SWIZ': 'snoww',
+
+    'TDIZ': 'dwpf',
+    'TAIZ': 'tmpf',
+    'TAIN': 'min_tmpf',
+    'TAIX': 'max_tmpf',
+    'TWIZ': 'water_tmpf',
+
+    'UDIZ': 'drct',
+    'UGIZ': 'gust',
+    'UPIZ': 'gust',
+    'UPHZ': 'gust',
+    'URHZ': 'max_drct',
+    'URIZ': 'max_drct',
+    'USIZ': 'sknt',  # note above that we apply a multipler
+
+    'VBIZ': 'battery',
+
+    'XRIZ': 'relh',
+
+    'XVIZ': 'vsby',
+}
 
 
 class MyDict(dict):
