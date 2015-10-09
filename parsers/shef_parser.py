@@ -245,12 +245,21 @@ def worker(jobs):
                                                        ).addErrback(log.err)
 
 
+def make_datetime(dpart, tpart):
+    """Create a datatime instance from these two strings"""
+    if dpart == "0000-00-00" or tpart == "00:00:00":
+        return None
+    dstr = "%s %s" % (dpart, tpart)
+    tstamp = datetime.datetime.strptime(dstr, "%Y-%m-%d %H:%M:%S")
+    return tstamp.replace(tzinfo=pytz.timezone("UTC"))
+
+
 def really_process(tp, data):
     """
     This processes the output we get from the SHEFIT program
     """
     # Now we loop over the data we got :)
-    # log.msg("\n"+data)
+    log.msg("\n"+data)
     mydata = {}
     for line in data.split("\n"):
         # Skip blank output lines
@@ -266,9 +275,11 @@ def really_process(tp, data):
             continue
         if sid not in mydata:
             mydata[sid] = {}
-        dstr = "%s %s" % (tokens[1], tokens[2])
-        tstamp = datetime.datetime.strptime(dstr, "%Y-%m-%d %H:%M:%S")
-        tstamp = tstamp.replace(tzinfo=pytz.timezone("UTC"))
+        tstamp = make_datetime(tokens[1], tokens[2])
+        modelruntime = make_datetime(tokens[3], tokens[4])
+        if modelruntime is not None:
+            # print("Skipping forecast data for %s" % (sid, ))
+            continue
         # We don't care about data in the future!
         utcnow = datetime.datetime.utcnow().replace(tzinfo=pytz.timezone("UTC"
                                                                          ))
