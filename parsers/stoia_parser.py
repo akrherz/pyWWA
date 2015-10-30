@@ -157,10 +157,15 @@ def real_parser(txn, raw):
                   condition, segid))
 
     # Copy the currents table over to the log... HARD CODED
+    if tp.valid.month < 7:
+        logtable = "roads_%s_%s_log" % (tp.valid.year - 1, tp.valid.year)
+    else:
+        logtable = "roads_%s_%s.log" % (tp.valid.year, tp.valid.year + 1)
     txn.execute("""
-        INSERT into roads_%s_log
-        SELECT * from roads_current
-        """ % (tp.valid.year, ))
+        INSERT into """+logtable+"""
+        SELECT * from roads_current WHERE valid = %s
+        """, (tp.valid, ))
+    log.msg("Copied %s rows into %s table" % (txn.rowcount, logtable))
 
     # Now we generate a shapefile....
     dbf = dbflib.create("iaroad_cond")
