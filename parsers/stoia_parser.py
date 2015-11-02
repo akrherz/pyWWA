@@ -5,7 +5,6 @@
 # Twisted Python imports
 from syslog import LOG_LOCAL2
 from twisted.python import syslog
-syslog.startLogging(prefix='pyWWA/stoia_parser', facility=LOG_LOCAL2)
 from twisted.python import log
 from twisted.internet import reactor
 from pyldm import ldmbridge
@@ -23,6 +22,7 @@ import subprocess
 
 import common
 
+syslog.startLogging(prefix='pyWWA/stoia_parser', facility=LOG_LOCAL2)
 EPSG26915 = """PROJCS["NAD_1983_UTM_Zone_15N",GEOGCS["GCS_North_American_1983",DATUM["D_North_American_1983",SPHEROID["GRS_1980",6378137.0,298.257222101]],PRIMEM["Greenwich",0.0],UNIT["Degree",0.0174532925199433]],PROJECTION["Transverse_Mercator"],PARAMETER["False_Easting",500000.0],PARAMETER["False_Northing",0.0],PARAMETER["Central_Meridian",-93.0],PARAMETER["Scale_Factor",0.9996],PARAMETER["Latitude_Of_Origin",0.0],UNIT["Meter",1.0]]"""
 DBPOOL = common.get_database("postgis", cp_max=1)
 CONDITIONS = {}
@@ -160,7 +160,7 @@ def real_parser(txn, raw):
     if tp.valid.month < 7:
         logtable = "roads_%s_%s_log" % (tp.valid.year - 1, tp.valid.year)
     else:
-        logtable = "roads_%s_%s.log" % (tp.valid.year, tp.valid.year + 1)
+        logtable = "roads_%s_%s_log" % (tp.valid.year, tp.valid.year + 1)
     txn.execute("""
         INSERT into """+logtable+"""
         SELECT * from roads_current WHERE valid = %s
