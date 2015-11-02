@@ -105,10 +105,14 @@ def init_dicts(txn):
     log.msg("Loaded %s conditions" % (len(CONDITIONS),))
 
     # Load up dictionary of roads...
-    txn.execute("SELECT major, minor, longname, segid from roads_base")
+    txn.execute("""
+        SELECT major, minor, longname, segid from roads_base
+        WHERE longname is not null ORDER by segid ASC
+    """)
     for row in txn:
-        ROADS[row['longname']] = {'segid': row['segid'], 'major': row['major'],
-                                  'minor': row['minor']}
+        ROADS[row['longname'].upper()] = {'segid': row['segid'],
+                                          'major': row['major'],
+                                          'minor': row['minor']}
     log.msg("Loaded %s road segments" % (len(ROADS),))
 
 
@@ -136,7 +140,7 @@ def real_parser(txn, raw):
         data = line[7:]
         # Find the right most ) and chomp everything up until it
         pos = data.rfind(")")
-        meat = data[:pos+1].replace(", ", " ")
+        meat = data[:pos+1]
         condition = data[(pos+1):].upper().strip()
         if meat.strip() == '':
             continue
