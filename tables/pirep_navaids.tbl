@@ -8,6 +8,7 @@ CAD4            Trail                            -- CA  4906 -11761     0  0
 CAD5            Merritt                          -- CA  5012 -12074     0  0
 CAF4            Tsuniah                          -- CA  5153 -12417     0  0
 CAG3            Chilko Lake                      -- CA  5163 -12414     0  0
+# CAG8            
 # CAH3            
 CAH4            Valemount                        -- CA  5285 -11933     0  0
 CAJ2            Wiley                            -- CA  6649 -13657     0  0
@@ -48,6 +49,7 @@ CBX5            Tungsten                         -- CA  6196 -12820     0  0
 CBX7            Tumbler Ridge                    -- CA  5503 -12094     0  0
 # CBY5            
 # CBZ7
+CCD3            Woodstock                        -- CA  4615  -6755     0  0
 CCL3            Christina Lake                   -- CA  5563 -11075     0  0
 CCM4            Port Au Choix                    -- CA  5069  -5733     0  0
 CCN2            Grand Manan                      -- CA  4471  -6680     0  0
@@ -65,6 +67,7 @@ CED4            Fox Creek                        -- CA  5438 -11677     0  0
 CEE4            Hinton                           -- CA  5338 -11770     0  0
 CEE5            Wabasca                          -- CA  5596 -11382     0  0
 CEE8            Viking                           -- CA  5311 -11186     0  0
+CEG3            Lacombe                          -- CA  5249 -11371     0  0
 CEG4            Drumheller                       -- CA  5150 -11275     0  0
 CEH5            Red Earth Creek                  -- CA  5655 -11527     0  0
 CEH6            Provost                          -- CA  5234 -11028     0  0
@@ -101,11 +104,14 @@ CJE3            Weyburn                          -- CA  4970 -10380     0  0
 CJR3            The Pas                          -- CA  5383 -10121     0  0
 CJR5            Gladstone                        -- CA  5016  -9894     0  0
 CJS5            Killarney                        -- CA  4915  -9969     0  0
+CJQ4            Maple Creek                      -- CA  4990 -10948     0  0
 CJQ6            Tanquary                         -- CA  8141  -7688     0  0
 CJY3            Tisdale                          -- CA  5284 -10407     0  0
 CJY4            Sandy Bay                        -- CA  5555 -10227     0  0
 CKB2            Patuanak                         -- CA  5590 -10772     0  0
+CKB6            Wapekeka                         -- CA  5385  -8959     0  0
 CKD5            Kipling                          -- CA  5010 -10261     0  0
+# CKE9            
 CKF4            Goodsoil                         -- CA  5442 -10923     0  0
 CKL3            Wunnumin Lake                    -- CA  5289  -8929     0  0
 CKS8            Cree Lake                        -- CA  5746 -10675     0  0
@@ -137,11 +143,13 @@ CPM3            Pourvoririe Mirage               -- CA  5380  -7284     0  0
 CPR3            Palmerston                       -- CA  4385  -8078     0  0
 CPT2            Killarney                        -- CA  4598  -8150     0  0
 CPU6            Tyendinaga Mohawk                -- CA  4419  -7711     0  0
+CPV8            Keewaywin                        -- CA  5299  -9284     0  0
 CRL2            Westport                         -- CA  4467  -7640     0  0
 CRL4            Kirby Lake                       -- CA  5536 -11064     0  0
 CSB3            St Mathieu De Beloeil            -- CA  4559  -7324     0  0
 CSC3            Drummondville                    -- CA  4585  -7239     0  0
 CSD4            Mont Laurier                     -- CA  4656  -7557     0  0
+# CSD5
 CSE4            Lachute                          -- CA  4564  -7437     0  0
 CSE5            Montmagny                        -- CA  4700  -7052     0  0
 CSG3            Joliette                         -- CA  4605  -7350     0  0
@@ -166,14 +174,17 @@ CTG3            Du Rocher Perce                  -- CA  4338  -6456     0  0
 # CTSJ                   
 CTT5            La Romaine                       -- CA  5026  -6068     0  0
 CYAC            Cat Lake                         ON CA  5172  -9182     0  0
+CYAG            Fort Frances                     ON CA  4865  -9344     0  0
 CYAL            Alert Bay                        BC CA  5058 -12692     0  0
 CYAQ            Kasabonika                       -- CA  5352  -8864     0  0
 CYAV            Winnipeg St Andrews              -- CA  5006  -9703     0  0
 CYBA            Banff                            -- CA  5121 -11554     0  0
 CYBE            Uranium City                     SK CA  5956 -10848     0  0
+CYBF            Bonnyville                       -- CA  5430 -11074     0  0
 CYBT            Brochet                          -- CA  5789 -10168     0  0
 CYCC            Cornwall                         ON CA  4509  -7456     0  0
 CYCD            Nanaimo                          -- CA  4905 -12387     0  0
+CYCE            Centralia                        -- CA  4329  -8151     0  0
 CYCN            Cochrane                         -- CA  4911  -8101     0  0
 CYCR            Cross Lake                       -- CA  5461  -9776     0  0
 CYCW            Chilliwack                       -- CA  4915 -12194     0  0
@@ -221,7 +232,9 @@ CYRM            Alta                             -- CA  5243 -11490     0  0
 CYRS            Red Sucker Lake                  -- CA  5417  -9356     0  0
 CYST            St Theresa Point                 -- CA  5385  -9485     0  0
 CYSW            Sparkwood Elk Valley             -- CA  4983 -11488     0  0
+CYTF            Alma                             QC CA  4851  -7164     0  0
 CYVB            Bonaventure                      -- CA  4807  -6546     0  0
+CYVD            Virden                           MB CA  4988 -10092     0  0
 CYVG            Vermilion                        AB CA  5336 -11082     0  0
 CYVK            Vernon                           -- CA  5025 -11933     0  0
 CYWM            Athabasca                        AB CA  5474 -11321     0  0
