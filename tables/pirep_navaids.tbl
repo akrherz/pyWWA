@@ -54,11 +54,13 @@ CCL3            Christina Lake                   -- CA  5563 -11075     0  0
 CCM4            Port Au Choix                    -- CA  5069  -5733     0  0
 CCN2            Grand Manan                      -- CA  4471  -6680     0  0
 CCP4            Port Hope Simpson                -- CA  5253  -5629     0  0
+CCQ3            Debert                           -- CA  4542  -6346     0  0
 CCS3            St Stephen                       -- CA  4521  -6725     0  0
 CCW3            Waterville                       -- CA  4505  -6465     0  0
 CDA4            Pokemouche                       -- CA  4772  -6488     0  0
 CDC4            St Quentin                       -- CA  4752  -6742     0  0
-CDC5            Dougall Campbell                 -- CA  5201 -12121     0  0  
+CDC5            Dougall Campbell                 -- CA  5201 -12121     0  0
+CDU6            Doaktown                         -- CA  4655  -6609     0  0 
 # CEA3            
 CEA5            Hardisty                         -- CA  5265 -11138     0  0
 CEB5            Fairview                         -- CA  5608 -11843     0  0
@@ -95,6 +97,7 @@ CFM7            Boyle                            -- CA  5457 -11282     0  0
 CFS5            Spirit River                     -- CA  5578 -11884     0  0
 CFT8            Pelican                          -- CA  5616 -11347     0  0
 CFV2            Beiseker                         -- CA  5139 -11347     0  0
+# CFW8            
 CFX2            Calgary / Okotoks                -- CA  5074 -11393     0  0
 CFX4            Manning                          -- CA  5695 -11764     0  0
 CFX5            Renard                           -- CA  5273  -7222     0  0
@@ -129,6 +132,7 @@ CNH2            Natuashish                       -- CA  5591  -6118     0  0
 # CNH3            
 CNK4            Parry Sound                      -- CA  4526  -7983     0  0
 CNL3            Brockville                       -- CA  4464  -7575     0  0
+CNM5            Kingfisher Lake                  -- CA  5301  -8985     0  0
 # CNQ4
 # CNQ7            
 CNR4            Tobermory                        -- CA  4522  -8163     0  0
@@ -144,6 +148,7 @@ CPR3            Palmerston                       -- CA  4385  -8078     0  0
 CPT2            Killarney                        -- CA  4598  -8150     0  0
 CPU6            Tyendinaga Mohawk                -- CA  4419  -7711     0  0
 CPV8            Keewaywin                        -- CA  5299  -9284     0  0
+# CRD3            
 CRL2            Westport                         -- CA  4467  -7640     0  0
 CRL4            Kirby Lake                       -- CA  5536 -11064     0  0
 CSB3            St Mathieu De Beloeil            -- CA  4559  -7324     0  0
@@ -237,6 +242,7 @@ CYVB            Bonaventure                      -- CA  4807  -6546     0  0
 CYVD            Virden                           MB CA  4988 -10092     0  0
 CYVG            Vermilion                        AB CA  5336 -11082     0  0
 CYVK            Vernon                           -- CA  5025 -11933     0  0
+CYVZ            Deer Lake                        ON CA  5266  -9406     0  0
 CYWM            Athabasca                        AB CA  5474 -11321     0  0
 CYWP            Webequie                         ON CA  5296  -8738     0  0
 CYWV            Wainwright                       -- CA  5280 -11088     0  0
