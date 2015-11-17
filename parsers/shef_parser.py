@@ -525,16 +525,6 @@ def got_results(res, product_id, sid, network):
         enter_unknown(sid, product_id, network)
 
 
-def dump_memory():
-    """Dump some memory stats"""
-    from pympler import muppy
-    from pympler import summary
-    all_objects = muppy.get_objects()
-    sum1 = summary.summarize(all_objects)
-    summary.print_(sum1)
-    reactor.callLater(300, dump_memory)
-
-
 def job_size(jobs):
     """
     Print out some debug information to the log on the current size of the
@@ -562,7 +552,6 @@ def main(res):
         cooperate(worker(jobs))
 
     reactor.callLater(300, job_size, jobs)
-    reactor.callLater(60, dump_memory)
     lc = LoopingCall(save_current)
     lc.start(373, now=False)
 
