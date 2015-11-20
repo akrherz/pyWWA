@@ -140,7 +140,7 @@ def real_parser(txn, raw):
         data = line[7:]
         # Find the right most ) and chomp everything up until it
         pos = data.rfind(")")
-        meat = data[:pos+1]
+        meat = data[:pos+1].upper()
         condition = data[(pos+1):].upper().strip()
         if meat.strip() == '':
             continue
