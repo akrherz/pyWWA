@@ -21,7 +21,7 @@ mkdir ${YYYY}
 cd ${YYYY}
 mkdir ${MM}
 cd ${MM}
-put ${R}radar.tgz
+put ${R}_${YYYYMMDD}.tgz
 bye
 EOM
 rm ${R}radar.tar ${R}_${YYYYMMDD}.tgz
