@@ -18,7 +18,7 @@ from metar.metar import Metar
 from metar.metar import ParserError as MetarParserError
 import datetime
 import pytz
-import common
+import common  # @UnresolvedImport
 
 IEMDB = common.get_database('iem')
 ASOSDB = common.get_database('asos')
@@ -246,6 +246,8 @@ def save_data(txn, iem, mtr, clean_metar, orig_metar):
     if mtr.precip_24hr:
         iem.data['p24i'] = mtr.precip_24hr.value("IN")
 
+    if mtr.snowdepth:
+        iem.data['snowd'] = mtr.snowdepth.value("IN")
     if mtr.vis:
         iem.data['vsby'] = mtr.vis.value("SM")
     if mtr.press:
