@@ -1,7 +1,5 @@
 import psycopg2
-from pyiem.nws import product
 from pyiem.nws.products.vtec import parser
-from pyiem.nws.ugc import UGC
 import sys
 import datetime
 import pytz
@@ -24,8 +22,9 @@ cursor.execute("""
  init_expire at time zone 'UTC', report, svs, phenomena,
  eventid, significance
  from """+table+""" where
- wfo = %s
-""", (sys.argv[2], ))
+ (expire - issue) > '3 days'::interval and phenomena in ('WS')
+ and significance = 'W'
+""")
 
 for row in cursor:
     oid = row[0]
@@ -38,9 +37,12 @@ for row in cursor:
     phenomena = row[7]
     eventid = row[8]
     significance = row[9]
-    issue0 = row[2].replace(tzinfo=pytz.timezone("UTC")) if row[2] is not None else None
-    expire0 = row[3].replace(tzinfo=pytz.timezone("UTC")) if row[3] is not None else None
-    init_expire0 = row[4].replace(tzinfo=pytz.timezone("UTC")) if row[4] is not None else None
+    issue0 = row[2].replace(
+        tzinfo=pytz.timezone("UTC")) if row[2] is not None else None
+    expire0 = row[3].replace(
+        tzinfo=pytz.timezone("UTC")) if row[3] is not None else None
+    init_expire0 = row[4].replace(
+        tzinfo=pytz.timezone("UTC")) if row[4] is not None else None
     svss.insert(0, report)
 
     expire1 = None
@@ -66,7 +68,10 @@ for row in cursor:
                         vtec.ETN == eventid and
                         vtec.significance == significance):
                     if i == 0:
-                        init_expire1 = vtec.endts if vtec.endts is not None else prod.valid + datetime.timedelta(hours=144)
+                        init_expire1 = (vtec.endts
+                                        if vtec.endts is not None
+                                        else prod.valid +
+                                        datetime.timedelta(hours=144))
                         expire1 = init_expire1
                     if vtec.begints is not None:
                         if vtec.begints != issue1:
@@ -81,7 +86,8 @@ for row in cursor:
                                                            p(vtec.endts)))
                         expire1 = vtec.endts
                     if vtec.action in ['EXA', 'EXB']:
-                        issue1 = prod.valid if vtec.begints is None else vtec.begints
+                        issue1 = (prod.valid
+                                  if vtec.begints is None else vtec.begints)
                     if vtec.action in ['UPG', 'CAN']:
                         expire1 = prod.valid
 
