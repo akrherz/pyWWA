@@ -52,7 +52,7 @@ def load_stations(txn):
 
 windAlerts = {}
 
-TORNADO_RE = re.compile(r" +FC |TORNADO")
+TORNADO_RE = re.compile(r" \+FC |TORNADO")
 FUNNEL_RE = re.compile(r" FC |FUNNEL")
 HAIL_RE = re.compile(r"GR")
 
@@ -294,7 +294,7 @@ def save_data(txn, iem, mtr, clean_metar, orig_metar):
     if len(TORNADO_RE.findall(clean_metar)) > 0:
         sendAlert(txn, iem.data['station'], "Tornado", clean_metar)
     elif len(FUNNEL_RE.findall(clean_metar)) > 0:
-        sendAlert(txn, iem.data['station'], "Funnel", clean_metar)
+        sendAlert(txn, iem.data['station'], "Funnel Cloud", clean_metar)
     else:
         for weatheri in mtr.weather:
             for x in weatheri:
