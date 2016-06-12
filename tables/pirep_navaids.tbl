@@ -60,6 +60,7 @@ CCD3            Woodstock                        -- CA  4615  -6755     0  0
 CCH4            Charlottetown                    -- CA  5277  -5611     0  0
 CCK3            Grand Falls                      -- CA  4708  -6769     0  0
 CCL3            Christina Lake                   -- CA  5563 -11075     0  0
+CCM3            Sevogle                          -- CA  4719  -6616     0  0
 CCM4            Port Au Choix                    -- CA  5069  -5733     0  0
 CCN2            Grand Manan                      -- CA  4471  -6680     0  0
 CCP4            Port Hope Simpson                -- CA  5253  -5629     0  0
@@ -132,6 +133,7 @@ CJA5            Nestor Falls                     -- CA  4914  -9392     0  0
 CJC2            Craik                            -- CA  5106 -10584     0  0
 CJE3            Weyburn                          -- CA  4970 -10380     0  0
 CJK3            Beauval                          -- CA  5511 -10772     0  0
+CJL2            Hatchet Lake                     -- CA  5866 -10354     0  0
 CJL4            La Loche                         -- CA  5647 -10940     0  0
 CJP2            Kerrobert                        -- CA  5193 -10913     0  0
 CJQ4            Maple Creek                      -- CA  4990 -10948     0  0
@@ -157,6 +159,7 @@ CKF4            Goodsoil                         -- CA  5442 -10923     0  0
 CKL3            Wunnumin Lake                    -- CA  5289  -8929     0  0
 CKQ9            Pine Dock                        -- CA  5162  -9681     0  0
 CKS8            Cree Lake                        -- CA  5746 -10675     0  0
+CKZ3            Elk Island                       -- CA  5467  -9415     0  0
 CKZ7            Winkler                          -- CA  4917  -9792     0  0
 # CLA4
 CLM2            Leamington                       -- CA  4203  -8253     0  0
@@ -180,6 +183,7 @@ CNQ3            Welland / Niagara Central        -- CA  4298  -7932     0  0
 CNR4            Tobermory                        -- CA  4522  -8163     0  0
 CNT7            Picton                           -- CA  4399  -7714     0  0
 CNW3            Bancroft                         -- CA  4507  -7788     0  0
+CNU4            Belleville                       -- CA  4419  -7731     0  0
 # CNV4            
 CNV8            Edenvale                         -- CA  4444  -7997     0  0
 CNV9            Neuville                         -- CA  4672  -7158     0  0
@@ -228,7 +232,9 @@ CSU2            Chisasibi                        -- CA  5381  -7892     0  0
 CSU3            St Hyacinthe                     -- CA  4561  -7301     0  0
 # CSV2            
 CSY3            Sorel                            -- CA  4598  -7304     0  0
+CSY4            St Donat                         -- CA  4631  -7418     0  0
 CSZ4            St Frederic                      -- CA  4633  -7096     0  0
+CTA3            Ile aux Coudres                  -- CA  4739  -7038     0  0
 CTG3            Du Rocher Perce                  -- CA  4338  -6456     0  0
 # CTH3            
 # CTK6     
