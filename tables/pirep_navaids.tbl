@@ -129,6 +129,7 @@ CFX2            Calgary / Okotoks                -- CA  5074 -11393     0  0
 CFX4            Manning                          -- CA  5695 -11764     0  0
 CFX5            Renard                           -- CA  5273  -7222     0  0
 CFX6            Vulcan                           -- CA  5040 -11328     0  0
+# CHB3
 CJA5            Nestor Falls                     -- CA  4914  -9392     0  0
 CJC2            Craik                            -- CA  5106 -10584     0  0
 CJE3            Weyburn                          -- CA  4970 -10380     0  0
@@ -139,6 +140,7 @@ CJP2            Kerrobert                        -- CA  5193 -10913     0  0
 CJQ4            Maple Creek                      -- CA  4990 -10948     0  0
 CJQ6            Tanquary                         -- CA  8141  -7688     0  0
 CJR3            The Pas                          -- CA  5383 -10121     0  0
+CJR4            Eston                            -- CA  5115 -10876     0  0
 CJR5            Gladstone                        -- CA  5016  -9894     0  0
 CJS5            Killarney                        -- CA  4915  -9969     0  0
 CJT4            Cumberland House                 -- CA  5395 -10230     0  0
@@ -156,6 +158,7 @@ CKB6            Wapekeka                         -- CA  5385  -8959     0  0
 CKD5            Kipling                          -- CA  5010 -10261     0  0
 # CKE9            
 CKF4            Goodsoil                         -- CA  5442 -10923     0  0
+CKJ7            Starbuck                         -- CA  4971  -9768     0  0
 CKL3            Wunnumin Lake                    -- CA  5289  -8929     0  0
 CKQ9            Pine Dock                        -- CA  5162  -9681     0  0
 CKS8            Cree Lake                        -- CA  5746 -10675     0  0
@@ -170,6 +173,7 @@ CNC3            Brampton                         -- CA  4376  -7988     0  0
 CNC4            Guelph                           -- CA  4356  -8020     0  0
 CND4            Stanhope                         -- CA  4511  -7864     0  0
 CNE3            Bearskin Lake                    -- CA  5397  -9103     0  0
+CNE4            Iroquois Falls                   -- CA  4874  -8079     0  0
 CNF4            Lindsay                          -- CA  4436  -7878     0  0
 CNH2            Natuashish                       -- CA  5591  -6118     0  0
 # CNH3            
@@ -177,6 +181,7 @@ CNH2            Natuashish                       -- CA  5591  -6118     0  0
 CNK4            Parry Sound                      -- CA  4526  -7983     0  0
 CNL3            Brockville                       -- CA  4464  -7575     0  0
 CNM5            Kingfisher Lake                  -- CA  5301  -8985     0  0
+CNP3            Arnprior                         -- CA  4541  -7637     0  0
 CNQ3            Welland / Niagara Central        -- CA  4298  -7932     0  0
 # CNQ4
 # CNQ7            
@@ -188,7 +193,9 @@ CNU4            Belleville                       -- CA  4419  -7731     0  0
 CNV8            Edenvale                         -- CA  4444  -7997     0  0
 CNV9            Neuville                         -- CA  4672  -7158     0  0
 CNY3            Collingwood                      -- CA  4445  -8016     0  0
+CNZ4            Barrys Bay                       -- CA  4550  -7764     0  0
 CNZ8            Grimsby                          -- CA  4316  -7960     0  0
+# COB4
 # CPF9            
 # CPJ5 
 CPL4            Grand Bend                       -- CA  4329  -8171     0  0
@@ -202,6 +209,7 @@ CPU6            Tyendinaga Mohawk                -- CA  4419  -7711     0  0
 CPV7            Poplar Hill                      -- CA  5211  -9426     0  0
 CPV8            Keewaywin                        -- CA  5299  -9284     0  0
 CRB4            Riviere Bonnard                  -- CA  5070  -7116     0  0
+# CRC3
 # CRD3            
 CRL2            Westport                         -- CA  4467  -7640     0  0
 CRL4            Kirby Lake                       -- CA  5536 -11064     0  0
@@ -214,6 +222,7 @@ CSE4            Lachute                          -- CA  4564  -7437     0  0
 CSE5            Montmagny                        -- CA  4700  -7052     0  0
 CSF3            Poste Montagnais                 -- CA  5189  -6572     0  0
 CSG3            Joliette                         -- CA  4605  -7350     0  0
+# CSH2
 CSH4            Lebel-sur-quevillion             -- CA  4903  -7702     0  0
 CSJ4            Louiseville                      -- CA  4625  -7290     0  0
 CSK3            Mascouche                        -- CA  4572  -7360     0  0
