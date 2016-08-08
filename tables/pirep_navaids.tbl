@@ -6,6 +6,7 @@ CAA8            Invermere                        -- CA  5052 -11600     0  0
 # CAC8            
 CAD4            Trail                            -- CA  4906 -11761     0  0
 CAD5            Merritt                          -- CA  5012 -12074     0  0
+# CAE9
 CAF4            Tsuniah                          -- CA  5153 -12417     0  0
 CAG3            Chilko Lake                      -- CA  5163 -12414     0  0
 # CAG8            
@@ -31,8 +32,10 @@ CAU4            Vanderhoof                       -- CA  5405 -12401     0  0
 # CAU8            
 CAV3            One Hundred Mile House           -- CA  5164 -12131     0  0
 CAV4            McBride                          -- CA  5332 -12017     0  0
+# CAW5
 # CAW8            
 # CAX6            
+# CAY2
 CAZ5            Cache Creek                      -- CA  5078 -12132     0  0
 CBB7            Tipella                          -- CA  4974 -12216     0  0
 CBB9            Osoyoos                          -- CA  4904 -11949     0  0
@@ -84,6 +87,7 @@ CEE5            Wabasca                          -- CA  5596 -11382     0  0
 CEE8            Viking                           -- CA  5311 -11186     0  0
 CEG3            Lacombe                          -- CA  5249 -11371     0  0
 CEG4            Drumheller                       -- CA  5150 -11275     0  0
+CEH2            Cu Nim                           -- CA  5072 -11418     0  0
 CEH3            Ponoka                           -- CA  5265 -11361     0  0
 CEH5            Red Earth Creek                  -- CA  5655 -11527     0  0
 CEH6            Provost                          -- CA  5234 -11028     0  0
@@ -102,9 +106,11 @@ CEN4            High River                       -- CA  5053 -11383     0  0
 CEN5            Cold Lake                        -- CA  5448 -11027     0  0
 CEP3            Barrhead                         -- CA  5410 -11443     0  0
 CEQ3            Camrose                          -- CA  5304 -11282     0  0
+CEQ4            Del Bonita                       -- CA  4900 -11278     0  0
 CEQ5            Grande Cache                     -- CA  5392 -11887     0  0
 CER3            Drayton Valley                   -- CA  5327 -11496     0  0
 CES4            Westlock                         -- CA  5414 -11374     0  0
+CEU2            Beaverlodge                      -- CA  5518 -11945     0  0
 CEV3            Vegreville                       -- CA  5351 -11203     0  0
 CEW3            St Paul                          -- CA  5399 -11138     0  0
 CEX3            Wetaskiwin                       -- CA  5297 -11341     0  0
@@ -119,6 +125,7 @@ CFM4            Donnelly                         -- CA  5571 -11709     0  0
 CFM7            Boyle                            -- CA  5457 -11282     0  0
 CFN5            La Crete                         -- CA  5817 -11633     0  0
 CFN7            Sundre                           -- CA  5177 -11468     0  0
+# CFS3
 CFS5            Spirit River                     -- CA  5578 -11884     0  0
 CFS6            Loon River                       -- CA  5714 -11508     0  0
 CFT8            Pelican                          -- CA  5616 -11347     0  0
@@ -162,11 +169,14 @@ CKJ7            Starbuck                         -- CA  4971  -9768     0  0
 CKL3            Wunnumin Lake                    -- CA  5289  -8929     0  0
 CKQ9            Pine Dock                        -- CA  5162  -9681     0  0
 CKS8            Cree Lake                        -- CA  5746 -10675     0  0
+# CKW7
 CKZ3            Elk Island                       -- CA  5467  -9415     0  0
 CKZ7            Winkler                          -- CA  4917  -9792     0  0
 # CLA4
+# CLJ2
 CLM2            Leamington                       -- CA  4203  -8253     0  0
 CMB7            Maxville                         -- CA  4525  -7481     0  0
+CMN5            Manic-5                          -- CA  5066  -6883     0  0
 CMR2            Mary River                       -- CA  7132  -7935     0  0
 CNA9            Tomvale                          -- CA  4492  -7694     0  0
 CNC3            Brampton                         -- CA  4376  -7988     0  0
@@ -201,6 +211,7 @@ CNZ8            Grimsby                          -- CA  4316  -7960     0  0
 CPL4            Grand Bend                       -- CA  4329  -8171     0  0
 CPL6            Parkland                         -- CA  5347 -11383     0  0
 CPM3            Pourvoririe Mirage               -- CA  5380  -7284     0  0
+CPN5            Listowel                         -- CA  4374  -8099     0  0
 # CPQ3            
 CPR3            Palmerston                       -- CA  4385  -8078     0  0
 CPR5            Woodstock                        -- CA  4311  -8082     0  0
@@ -234,6 +245,7 @@ CSP3            Stony Plain                      -- CA  5354 -11407     0  0
 CSQ2            Shuswap                          -- CA  5088 -11959     0  0
 CSQ3            Valcourt                         -- CA  4548  -7231     0  0
 CSR3            Victoriaville                    -- CA  4611  -7193     0  0
+# CSR6
 CSR8            La Sarre                         -- CA  4892  -7918     0  0
 CSS3            Montreal                         -- CA  4535  -7408     0  0
 CSS4            St Dominique                     -- CA  4563  -7282     0  0
@@ -271,8 +283,10 @@ CYCT            Coronation Marine                -- CA  5208 -11145     0  0
 CYCW            Chilliwack                       -- CA  4915 -12194     0  0
 CYCZ            Fairmont Hot Springs             -- CA  5033 -11587     0  0
 CYDO            Dolbeau St Methode               QC CA  4878  -7238     0  0
+CYEA            Empress                          AB CA  5093 -11001     0  0
 CYEE            MIDLAND                          -- CA  4468  -7993     0  0
 CYEM            Manitowaning                     ON CA  4584  -8186     0  0
+CYES            Edmundston                       NB CA  4749  -6848     0  0
 CYFA            Fort Albany                      ON CA  5220  -8170     0  0
 CYFD            Brantford                        -- CA  4313  -8034     0  0
 CYFE            Forestville                      QC CA  4875  -6910     0  0
