@@ -77,6 +77,8 @@ def load_stations(txn):
                 TIMEZONES[row[3]] = pytz.timezone("UTC")
 
     log.msg("loaded %s stations" % (len(LOC2STATE),))
+    # Reload every 12 hours
+    reactor.callLater(12*60*60, HADSDB.runInteraction, load_stations)
 
 
 MULTIPLIER = {"US": 0.87,  # Convert MPH to KNT
