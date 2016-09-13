@@ -26,7 +26,7 @@ def main():
                             "/mnt/level2/raw/OP5R/%s" % (fn,))
                 os.chdir("/mnt/level2/raw/OP5R")
                 subprocess.call(("ls -l OP5R* | "
-                                 "awk '{print $5 " " $9}' > dir2.list"
+                                 "awk '{print $5 \" \" $9}' > dir2.list"
                                  ), shell=True)
                 shutil.move("dir2.list", "dir.list")
 
