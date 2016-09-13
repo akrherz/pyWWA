@@ -74,6 +74,7 @@ CCS4            Chipman                          -- CA  4615  -6590     0  0
 CCW3            Waterville                       -- CA  4505  -6465     0  0
 CDA4            Pokemouche                       -- CA  4772  -6488     0  0
 CDA5            St Andrews Codroy Valley         -- CA  4777  -5931     0  0
+# CDB5
 CDC4            St Quentin                       -- CA  4752  -6742     0  0
 CDC5            Dougall Campbell                 -- CA  5201 -12121     0  0
 CDU6            Doaktown                         -- CA  4655  -6609     0  0 
@@ -139,6 +140,7 @@ CFX5            Renard                           -- CA  5273  -7222     0  0
 CFX6            Vulcan                           -- CA  5040 -11328     0  0
 # CHB3
 CJA5            Nestor Falls                     -- CA  4914  -9392     0  0
+CJB3            Stienbach                        -- CA  4955  -9668     0  0
 CJC2            Craik                            -- CA  5106 -10584     0  0
 CJE3            Weyburn                          -- CA  4970 -10380     0  0
 CJK3            Beauval                          -- CA  5511 -10772     0  0
@@ -169,6 +171,8 @@ CKD9            Slate Falls                      -- CA  5113  -9167     0  0
 CKF4            Goodsoil                         -- CA  5442 -10923     0  0
 CKJ7            Starbuck                         -- CA  4971  -9768     0  0
 CKL3            Wunnumin Lake                    -- CA  5289  -8929     0  0
+CKM8            Opapimiskan Lake                 -- CA  5261  -9038     0  0
+CKQ3            North Spirit Lake                -- CA  5249  -9297     0  0
 CKQ9            Pine Dock                        -- CA  5162  -9681     0  0
 CKS8            Cree Lake                        -- CA  5746 -10675     0  0
 # CKW7
@@ -318,6 +322,7 @@ CYLQ            La Tuque                         -- CA  4710  -7279     0  0
 CYME            Matane                           -- CA  4886  -6745     0  0
 CYMG            Manitouwadge                     ON CA  4908  -8586     0  0
 CYMW            Maniwaki                         -- CA  4627  -7599     0  0
+CYNL            Points North Landing             SK CA  5828 -10408     0  0
 CYNJ            Langley Tower                    -- CA  4910 -12263     0  0
 CYNR            Fort MacKay                      -- CA  5738 -11170     0  0
 CYOH            Oxford House                     MB CA  5493  -9528     0  0
