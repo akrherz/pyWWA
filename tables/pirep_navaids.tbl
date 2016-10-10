@@ -114,6 +114,7 @@ CER3            Drayton Valley                   -- CA  5327 -11496     0  0
 CES4            Westlock                         -- CA  5414 -11374     0  0
 CEU2            Beaverlodge                      -- CA  5518 -11945     0  0
 CEV3            Vegreville                       -- CA  5351 -11203     0  0
+CEV7            Tofield                          -- CA  5337 -11270     0  0
 CEW3            St Paul                          -- CA  5399 -11138     0  0
 CEX3            Wetaskiwin                       -- CA  5297 -11341     0  0
 CEZ3            Edmonton                         -- CA  5343 -11312     0  0
@@ -158,6 +159,7 @@ CJV2            Neilburg                         -- CA  5283 -10964     0  0
 CJV5            Neepawa                          -- CA  5023  -9951     0  0
 CJV7            Summer Beaver                    -- CA  5271  -8854     0  0
 CJV8            Grand Rapids                     -- CA  5317  -9932     0  0
+CJV9            Melville                         -- CA  5094 -10274     0  0
 CJW7            Cigar Lake                       -- CA  5805 -10448     0  0
 CJX4            Rosetown                         -- CA  5156 -10792     0  0
 CJY3            Tisdale                          -- CA  5284 -10407     0  0
@@ -171,6 +173,7 @@ CKD9            Slate Falls                      -- CA  5113  -9167     0  0
 CKF4            Goodsoil                         -- CA  5442 -10923     0  0
 CKJ7            Starbuck                         -- CA  4971  -9768     0  0
 CKL3            Wunnumin Lake                    -- CA  5289  -8929     0  0
+CKM4            Jan Lake                         -- CA  5483 -10279     0  0
 CKM8            Opapimiskan Lake                 -- CA  5261  -9038     0  0
 CKQ3            North Spirit Lake                -- CA  5249  -9297     0  0
 CKQ9            Pine Dock                        -- CA  5162  -9681     0  0
@@ -182,6 +185,7 @@ CKZ7            Winkler                          -- CA  4917  -9792     0  0
 # CLH4
 # CLJ2
 CLM2            Leamington                       -- CA  4203  -8253     0  0
+# CLT2
 CMB7            Maxville                         -- CA  4525  -7481     0  0
 CMN5            Manic-5                          -- CA  5066  -6883     0  0
 CMR2            Mary River                       -- CA  7132  -7935     0  0
@@ -195,6 +199,7 @@ CNF4            Lindsay                          -- CA  4436  -7878     0  0
 CNH2            Natuashish                       -- CA  5591  -6118     0  0
 # CNH3            
 # CNH4
+CNJ4            Orillia                          -- CA  4468  -7931     0  0
 CNK4            Parry Sound                      -- CA  4526  -7983     0  0
 CNL3            Brockville                       -- CA  4464  -7575     0  0
 CNM5            Kingfisher Lake                  -- CA  5301  -8985     0  0
@@ -262,6 +267,7 @@ CSU3            St Hyacinthe                     -- CA  4561  -7301     0  0
 # CSV2            
 CSY3            Sorel                            -- CA  4598  -7304     0  0
 CSY4            St Donat                         -- CA  4631  -7418     0  0
+CSZ3            St Jovite                        -- CA  4615  -7458     0  0
 CSZ4            St Frederic                      -- CA  4633  -7096     0  0
 CTA3            Ile aux Coudres                  -- CA  4739  -7038     0  0
 CTG3            Du Rocher Perce                  -- CA  4338  -6456     0  0
@@ -322,6 +328,7 @@ CYLQ            La Tuque                         -- CA  4710  -7279     0  0
 CYME            Matane                           -- CA  4886  -6745     0  0
 CYMG            Manitouwadge                     ON CA  4908  -8586     0  0
 CYMW            Maniwaki                         -- CA  4627  -7599     0  0
+CYNH            Hudson Hope                      BC CA  5604 -12198     0  0
 CYNL            Points North Landing             SK CA  5828 -10408     0  0
 CYNJ            Langley Tower                    -- CA  4910 -12263     0  0
 CYNR            Fort MacKay                      -- CA  5738 -11170     0  0
@@ -375,6 +382,7 @@ CZSN            South Indian Lake                MB CA  5679  -9891     0  0
 CZSW            Prince Rupert Seal Cove          -- CA  5433 -13028     0  0
 CZTA            Bloodvein River                  -- CA  5178  -9669     0  0
 CZTM            Shamattawa                       -- CA  5587  -9208     0  0
+CZWG            Winnipeg Centre                  MB CA  4990  -9726     0  0
 CZWH            Lac Brochet                      -- CA  5861 -10147     0  0
 CZWL            Wollaston                        SK CA  5811 -10317     0  0
 # 
