@@ -155,9 +155,9 @@ def make_jabber_client(resource_prefix):
                     settings.get('pywwa_jabber_domain', 'nwschat.weather.gov'),
                     resource_prefix,
                     datetime.datetime.utcnow().strftime("%Y%m%d%H%M%S")))
-    factory = jclient.basicClientFactory(myJid,
-                                         settings.get('pywwa_jabber_password',
-                                                      'secret'))
+    factory = jclient.XMPPClientFactory(myJid,
+                                        settings.get('pywwa_jabber_password',
+                                                     'secret'))
 
     jabber = JabberClient(myJid)
 
