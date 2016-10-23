@@ -159,8 +159,8 @@ def write_mapserver_metadata(sat, tmpfn, epsg):
 """ % (sat.get_bird(), sat.get_sector(), sat.get_channel(),
        sat.metadata['valid'].strftime("%Y-%m-%dT%H:%M:%SZ")))
     out.close()
-    cmd = ("%s -p 'gis c 000000000000 gis/images/%s/goes/%s bogus msinc' %s"
-           ) % (PQINSERT, epsg,
+    cmd = ("%s -p 'gis c %s gis/images/%s/goes/%s bogus msinc' %s"
+           ) % (PQINSERT, sat.metadata['valid'].strftime("%Y%m%d%H%M"), epsg,
                 sat.current_filename().replace("png", "msinc"), metafn)
     subprocess.call(cmd, shell=True)
     os.unlink(metafn)
@@ -181,9 +181,9 @@ def write_metadata_epsg(sat, tmpfn, epsg):
     json.dump(metadata, out)
     out.close()
 
-    cmd = ("%s -p 'gis c 000000000000 gis/images/%s/goes/%s bogus json' "
+    cmd = ("%s -p 'gis c %s gis/images/%s/goes/%s bogus json' "
            "%s_%s.json"
-           ) % (PQINSERT, epsg,
+           ) % (PQINSERT, sat.metadata['valid'].strftime("%Y%m%d%H%M"), epsg,
                 sat.current_filename().replace("png", "json"), tmpfn, epsg)
     subprocess.call(cmd, shell=True)
     os.unlink("%s_%s.json" % (tmpfn, epsg))
@@ -220,15 +220,17 @@ def gdalwarp(sat, tmpfn, epsg):
         logger.error("gdalwarp() convert error message: %s" % (output,))
     os.unlink("%s_%s.tif" % (tmpfn, epsg))
 
-    cmd = ("%s -i -p 'gis c 000000000000 gis/images/%s/goes/%s bogus wld' "
+    cmd = ("%s -i -p 'gis c %s gis/images/%s/goes/%s bogus wld' "
            "%s_%s.tfw"
-           ) % (PQINSERT, epsg, sat.current_filename().replace('png', 'wld'),
+           ) % (PQINSERT, sat.metadata['valid'].strftime("%Y%m%d%H%M"),
+                epsg, sat.current_filename().replace('png', 'wld'),
                 tmpfn, epsg)
     subprocess.call(cmd, shell=True)
 
-    cmd = ("%s -i -p 'gis c 000000000000 gis/images/%s/goes/%s bogus png' "
+    cmd = ("%s -i -p 'gis c %s gis/images/%s/goes/%s bogus png' "
            "%s_%s.png"
-           ) % (PQINSERT, epsg, sat.current_filename(), tmpfn, epsg)
+           ) % (PQINSERT, sat.metadata['valid'].strftime("%Y%m%d%H%M"),
+                epsg, sat.current_filename(), tmpfn, epsg)
     subprocess.call(cmd, shell=True)
 
     os.unlink("%s_%s.png" % (tmpfn, epsg))
