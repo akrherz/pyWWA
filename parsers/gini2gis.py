@@ -136,7 +136,7 @@ def write_metadata(sat, tmpfn):
     json.dump(metadata, out)
     out.close()
 
-    cmd = ("%s -p 'gis c %s gis/images/awips%s/%s GIS/sat/%s json' %s.json"
+    cmd = ("%s -i -p 'gis c %s gis/images/awips%s/%s GIS/sat/%s json' %s.json"
            ) % (PQINSERT, sat.metadata['valid'].strftime("%Y%m%d%H%M"),
                 sat.awips_grid(),
                 sat.current_filename().replace("png", "json"),
@@ -159,7 +159,7 @@ def write_mapserver_metadata(sat, tmpfn, epsg):
 """ % (sat.get_bird(), sat.get_sector(), sat.get_channel(),
        sat.metadata['valid'].strftime("%Y-%m-%dT%H:%M:%SZ")))
     out.close()
-    cmd = ("%s -p 'gis c %s gis/images/%s/goes/%s bogus msinc' %s"
+    cmd = ("%s -i -p 'gis c %s gis/images/%s/goes/%s bogus msinc' %s"
            ) % (PQINSERT, sat.metadata['valid'].strftime("%Y%m%d%H%M"), epsg,
                 sat.current_filename().replace("png", "msinc"), metafn)
     subprocess.call(cmd, shell=True)
@@ -181,7 +181,7 @@ def write_metadata_epsg(sat, tmpfn, epsg):
     json.dump(metadata, out)
     out.close()
 
-    cmd = ("%s -p 'gis c %s gis/images/%s/goes/%s bogus json' "
+    cmd = ("%s -i -p 'gis c %s gis/images/%s/goes/%s bogus json' "
            "%s_%s.json"
            ) % (PQINSERT, sat.metadata['valid'].strftime("%Y%m%d%H%M"), epsg,
                 sat.current_filename().replace("png", "json"), tmpfn, epsg)
