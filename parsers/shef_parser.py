@@ -8,7 +8,6 @@ import datetime
 # Twisted Python imports
 from syslog import LOG_LOCAL2
 from twisted.python import syslog
-syslog.startLogging(prefix='pyWWA/shef_parser', facility=LOG_LOCAL2)
 from twisted.python import log
 
 # Stuff I wrote
@@ -16,7 +15,7 @@ from pyiem.observation import Observation
 from pyiem.nws import product
 from pyiem import reference
 from pyldm import ldmbridge
-import common
+import common  # @UnresolvedImport
 import pytz
 
 # Third Party Stuff
@@ -26,57 +25,64 @@ from twisted.internet.task import cooperate
 from twisted.internet import reactor, protocol
 from twisted.internet.task import LoopingCall
 
+# Start Logging
+syslog.startLogging(prefix='pyWWA/shef_parser', facility=LOG_LOCAL2)
+
 # Setup Database Links
 # the current_shef table is not very safe when two processes attempt to update
 # it at the same time, use a single process for this connection
-ACCESSDB = common.get_database('iem', module_name='psycopg2')
-HADSDB = common.get_database('hads', module_name='psycopg2')
+ACCESSDB = common.get_database('iem', module_name='psycopg2', cp_max=10)
+HADSDB = common.get_database('hads', module_name='psycopg2', cp_max=10)
 
-# Necessary for the shefit program to run A-OK
-_MYDIR = os.path.dirname(os.path.abspath(__file__))
-PATH = os.path.normpath(os.path.join(_MYDIR,
-                                     "..", "shef_workspace"))
-log.msg("Changing cwd to %s" % (PATH,))
-os.chdir(PATH)
 
-# Load up our lookup table of stations to networks
-LOC2STATE = {}
-LOC2NETWORK = {}
-LOC2TZ = {}
-LOC2VALID = {}
-TIMEZONES = {None: pytz.timezone('UTC')}
+# stations we don't know about
+UNKNOWN = dict()
+# station metadata
+LOCS = dict()
+# database timezones to pytz cache
+TIMEZONES = dict()
+# a queue for saving database IO
 CURRENT_QUEUE = {}
+U1980 = datetime.datetime.utcnow()
+U1980 = U1980.replace(day=1, year=1980, tzinfo=pytz.timezone("UTC"))
 
 
 def load_stations(txn):
-    """
-    Load up station metadata to help us with writing data to the IEM database
-    @param txn database transaction
+    """Load station metadata
+
+    We need this information as we can't reliably convert a station ID found
+    in a SHEF encoded product to a network that is necessary to update IEM
+    Access.
+
+    Args:
+      txn: a database transaction
     """
     log.msg("load_stations called...")
-    txn.execute("""SELECT id, network, state, tzname from stations
+    txn.execute("""
+        SELECT id, network, tzname from stations
         WHERE network ~* 'COOP' or network ~* 'DCP' or
         network in ('KCCI','KIMT','KELO', 'ISUSM')
-        ORDER by network ASC""")
-    u1980 = datetime.datetime.utcnow()
-    u1980 = u1980.replace(day=1, year=1980, tzinfo=pytz.timezone("UTC"))
-    for row in txn:
-        stid = row[0]
-        LOC2VALID.setdefault(stid, u1980)
-        LOC2STATE[stid] = row[2]
-        LOC2TZ[stid] = row[3]
-        if stid in LOC2NETWORK:
-            del LOC2NETWORK[stid]
-        else:
-            LOC2NETWORK[stid] = row[1]
-        if row[3] not in TIMEZONES:
-            try:
-                TIMEZONES[row[3]] = pytz.timezone(row[3])
-            except:
-                log.msg("pytz does not like tzname: %s" % (row[3],))
-                TIMEZONES[row[3]] = pytz.timezone("UTC")
+        ORDER by network ASC
+        """)
 
-    log.msg("loaded %s stations" % (len(LOC2STATE),))
+    LOCS.clear()  # clear out our current cache
+    for (stid, network, tzname) in txn:
+        if stid in UNKNOWN:
+            log.msg("  station: %s is no longer unknown!" % (stid,))
+            UNKNOWN.pop(stid)
+        if tzname is None or tzname == '':
+            log.msg("  station: %s has tzname: %s" % (stid, tzname))
+        metadata = LOCS.setdefault(stid, dict())
+        if network not in metadata:
+            metadata[network] = dict(valid=U1980, tzname=tzname)
+        if tzname not in TIMEZONES:
+            try:
+                TIMEZONES[tzname] = pytz.timezone(tzname)
+            except:
+                log.msg("pytz does not like tzname: %s" % (tzname,))
+                TIMEZONES[tzname] = pytz.utc
+
+    log.msg("loaded %s stations" % (len(LOCS),))
     # Reload every 12 hours
     reactor.callLater(12*60*60, HADSDB.runInteraction, load_stations)
 
@@ -349,7 +355,8 @@ def enter_unknown(sid, product_id, network):
     @param product_id string
     @param network string of the guessed network
     """
-    if len(sid) < 5:
+    # Eh, lets not care about non-5 char IDs
+    if len(sid) != 5:
         return
     # log.msg("Found unknown %s %s %s" % (sid, tp.get_product_id(), network))
     HADSDB.runOperation("""
@@ -410,11 +417,60 @@ def save_current():
     log.msg("save_current() processed %s entries, %s skipped" % (cnt, skipped))
 
 
+def get_localtime(sid, ts):
+    """Compute the local timestamp for this location"""
+    if sid not in LOCS:
+        return ts
+    _network = LOCS[sid].keys()[0]
+    return ts.astimezone(TIMEZONES.get(LOCS[sid][_network]['tzname'],
+                                       pytz.utc))
+
+
+def get_network(tp, sid, ts, data):
+    """Figure out which network this belongs to"""
+    networks = LOCS.get(sid, dict()).keys()
+    # This is the best we can hope for
+    if len(networks) == 1:
+        return networks[0]
+    # Our simple determination if the site is a COOP site
+    is_coop = False
+    if tp.afos[:3] == 'RR3':
+        is_coop = True
+    elif tp.afos[:3] in ['RR1', 'RR2'] and checkvars(data.keys()):
+        log.msg("Guessing COOP? %s %s %s" % (sid, tp.get_product_id(),
+                                             data.keys()))
+        is_coop = True
+    pnetwork = 'COOP' if is_coop else 'DCP'
+    # filter networks now
+    networks = [s for s in networks if s.find(pnetwork) > 0]
+    if len(networks) == 1:
+        return networks[0]
+
+    # If networks is zero length, then we have to try some things
+    if len(networks) == 0:
+        enter_unknown(sid, tp.get_product_id(), "")
+        if len(sid) == 5:
+            state = reference.nwsli2state.get(sid[3:])
+            country = reference.nwsli2country.get(sid[3:])
+            if country in ['CA', 'MX']:
+                return "%s_%s_%s" % (country, state, pnetwork)
+            elif country == 'US':
+                return "%s_%s" % (state, pnetwork)
+            else:
+                return "%s__%s" % (country, pnetwork)
+
+    if sid not in UNKNOWN:
+        UNKNOWN[sid] = True
+        log.msg(("get_network failure for sid: %s tp: %s"
+                 ) % (sid, tp.get_product_id()))
+    return None
+
+
 def process_site(tp, sid, ts, data):
     """
     I process a dictionary of data for a particular site
     """
-    localts = ts.astimezone(TIMEZONES[LOC2TZ.get(sid)])
+    localts = get_localtime(sid, ts)
     # log.msg("%s sid: %s ts: %s %s" % (tp.get_product_id(), sid, ts, localts))
     # Insert data into database regardless
     for varname in data.keys():
@@ -434,46 +490,23 @@ def process_site(tp, sid, ts, data):
             cur['value'] = value
             cur['dirty'] = True
 
-    # Deterime if we want to waste the DB's time
-    network = LOC2NETWORK.get(sid)
-    if network in ['KCCI', 'KIMT', 'KELO', 'ISUSM']:
+    # Don't bother with stranger locations
+    if len(sid) == 8 and sid[0] == 'X':
         return
-    if network is None:
-        # Our simple determination if the site is a COOP site
-        is_coop = False
-        if tp.afos[:3] == 'RR3':
-            is_coop = True
-        elif tp.afos[:3] in ['RR1', 'RR2'] and checkvars(data.keys()):
-            log.msg("Guessing COOP? %s %s %s" % (sid, tp.get_product_id(),
-                                                 data.keys()))
-            is_coop = True
-        state = LOC2STATE.get(sid)
-        if state is None and len(sid) == 8 and sid[0] == 'X':
-            return
-        # Base the state on the 2 char station ID!
-        if (state is None and len(sid) == 5 and
-                sid[3:] in reference.nwsli2state):
-            state = reference.nwsli2state.get(sid[3:])
-            LOC2STATE[sid] = state
-        if state is None:
-            enter_unknown(sid, tp.get_product_id(), "")
-            return
-        if is_coop:
-            network = "%s_COOP" % (state,)
-        # We are left with DCP
-        else:
-            country = reference.nwsli2country.get(sid[3:])
-            if country in ['CA', 'MX']:
-                network = "%s_%s_DCP" % (country, state)
-            elif country == 'US':
-                network = "%s_DCP" % (state,)
-            else:
-                network = "%s__DCP" % (country,)
+    # Don't bother with unknown sites
+    if sid in UNKNOWN:
+        return
+    network = get_network(tp, sid, ts, data)
+    if network in ['KCCI', 'KIMT', 'KELO', 'ISUSM', None]:
+        return
 
     # Do not send DCP sites with old data to IEMAccess
-    if network.find("_DCP") > 0 and localts < LOC2VALID.get(sid, localts):
+    if network.find("_DCP") > 0 and localts < LOCS.get(
+            sid, dict()).get('valid', localts):
         return
-    LOC2VALID[sid] = localts
+    metadata = LOCS.setdefault(sid,
+                               {network: dict(valid=localts, tzname=None)})
+    metadata[network]['valid'] = localts
 
     # Okay, time for a hack, if our observation is at midnight!
     if localts.hour == 0 and localts.minute == 0:
@@ -563,8 +596,19 @@ def fullstop(err):
     log.err(err)
     reactor.stop()
 
-if __name__ == '__main__':
+
+def bootstrap():
+    # Necessary for the shefit program to run A-OK
+    mydir = os.path.dirname(os.path.abspath(__file__))
+    path = os.path.normpath(os.path.join(mydir, "..", "shef_workspace"))
+    log.msg("Changing cwd to %s" % (path,))
+    os.chdir(path)
+
+    # Load the station metadata before we fire up the ingesting
     df = HADSDB.runInteraction(load_stations)
     df.addCallback(main)
     df.addErrback(fullstop)
     reactor.run()
+
+if __name__ == '__main__':
+    bootstrap()
