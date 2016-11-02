@@ -194,9 +194,9 @@ def save_data(txn, iem, mtr, clean_metar, orig_metar):
             val = mtr.temp.value("F")
             # Place reasonable bounds on the temperature before saving it!
             if val > -90 and val < 150:
-                iem.data['tmpf'] = val
+                iem.data['tmpf'] = round(val, 1)
         if mtr.dewpt:
-            iem.data['dwpf'] = mtr.dewpt.value("F")
+            iem.data['dwpf'] = round(mtr.dewpt.value("F"), 1)
         # Daabase only allows len 254
         iem.data['raw'] = orig_metar[:254]
 
@@ -228,17 +228,17 @@ def save_data(txn, iem, mtr, clean_metar, orig_metar):
             tzinfo=pytz.timezone("UTC"))
 
     if mtr.max_temp_6hr:
-        iem.data['max_tmpf_6hr'] = mtr.max_temp_6hr.value("F")
+        iem.data['max_tmpf_6hr'] = round(mtr.max_temp_6hr.value("F"), 1)
         if iem.data['valid'].hour >= 6:
-            iem.data['max_tmpf'] = mtr.max_temp_6hr.value("F")
+            iem.data['max_tmpf'] = round(mtr.max_temp_6hr.value("F"), 1)
     if mtr.min_temp_6hr:
-        iem.data['min_tmpf_6hr'] = mtr.min_temp_6hr.value("F")
+        iem.data['min_tmpf_6hr'] = round(mtr.min_temp_6hr.value("F"), 1)
         if iem.data['valid'].hour >= 6:
-            iem.data['min_tmpf'] = mtr.min_temp_6hr.value("F")
+            iem.data['min_tmpf'] = round(mtr.min_temp_6hr.value("F"), 1)
     if mtr.max_temp_24hr:
-        iem.data['max_tmpf_24hr'] = mtr.max_temp_24hr.value("F")
+        iem.data['max_tmpf_24hr'] = round(mtr.max_temp_24hr.value("F"), 1)
     if mtr.min_temp_24hr:
-        iem.data['min_tmpf_24hr'] = mtr.min_temp_24hr.value("F")
+        iem.data['min_tmpf_24hr'] = round(mtr.min_temp_24hr.value("F"), 1)
     if mtr.precip_3hr:
         iem.data['p03i'] = mtr.precip_3hr.value("IN")
     if mtr.precip_6hr:
