@@ -541,23 +541,32 @@ def process_site(tp, sid, ts, data):
         iemob.data['raw'] = tp.get_product_id()
 
         deffer = ACCESSDB.runInteraction(iemob.save)
-        deffer.addCallback(got_results, tp.get_product_id(), sid, network)
+        deffer.addCallback(got_results, tp.get_product_id(), sid, network,
+                           localts)
         deffer.addErrback(common.email_error, tp.text)
         deffer.addErrback(log.err)
     # else:
     #    print 'NODATA?', sid, network, localts, data
 
 
-def got_results(res, product_id, sid, network):
+def got_results(res, product_id, sid, network, localts):
     """
     Callback after our iemdb work
     @param res response
     @param product_id product_id
     @param sid stationID
     @param network string network
+    @param localts timestamptz of the observation
     """
-    if not res:
-        enter_unknown(sid, product_id, network)
+    if res:
+        return
+    basets = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
+    basets -= datetime.timedelta(hours=48)
+    # If this is old data, we likely recently added this station and are
+    # simply missing a database entry for it?
+    if localts < basets:
+        return
+    enter_unknown(sid, product_id, network)
 
 
 def job_size(jobs):
