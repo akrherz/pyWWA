@@ -3,6 +3,7 @@
 """
 # System Imports
 import os
+import re
 import datetime
 
 # Twisted Python imports
@@ -34,6 +35,8 @@ syslog.startLogging(prefix='pyWWA/shef_parser', facility=LOG_LOCAL2)
 ACCESSDB = common.get_database('iem', module_name='psycopg2', cp_max=10)
 HADSDB = common.get_database('hads', module_name='psycopg2', cp_max=10)
 
+# a form for IDs we will log as unknown
+NWSLIRE = re.compile("[A-Z]{4}[0-9]")
 
 # stations we don't know about
 UNKNOWN = dict()
@@ -356,7 +359,7 @@ def enter_unknown(sid, product_id, network):
     @param network string of the guessed network
     """
     # Eh, lets not care about non-5 char IDs
-    if len(sid) != 5:
+    if NWSLIRE.match(sid) is None:
         return
     # log.msg("Found unknown %s %s %s" % (sid, tp.get_product_id(), network))
     HADSDB.runOperation("""
