@@ -14,6 +14,7 @@ CAG3            Chilko Lake                      -- CA  5163 -12414     0  0
 CAH4            Valemount                        -- CA  5285 -11933     0  0
 CAJ2            Wiley                            -- CA  6649 -13657     0  0
 CAJ3            Sutcliffe Field                  -- CA  4904 -11650     0  0
+CAJ7            Cayley A J Flying Ranch          -- CA  5045 -11375     0  0
 CAJ9            Fort Ware                        -- CA  5743 -12565     0  0
 # CAK2            
 CAL3            Douglas Lake                     -- CA  5017 -12017     0  0
@@ -45,10 +46,12 @@ CBE2            Elko                             -- CA  4928 -11515     0  0
 CBF9            Mabel Lake                       -- CA  5061 -11873     0  0
 CBG2            Green Lake                       -- CA  5143 -12121     0  0
 CBH2            Helmet                           -- CA  5943 -12080     0  0
+# CBJ8
 # CBJ9            
 CBL6            Radium Hot Springs               -- CA  5063 -11610     0  0
 # CBN4            
 CBN9            Tsay Keh                         -- CA  5691 -12497     0  0
+# CBP2
 # CBP3 
 CBQ2            Fort Langley                     -- CA  4917 -12255     0  0
 CBR2            Kaslo                            -- CA  4990 -11694     0  0
@@ -80,6 +83,7 @@ CDC5            Dougall Campbell                 -- CA  5201 -12121     0  0
 CDU6            Doaktown                         -- CA  4655  -6609     0  0 
 CEA3            Olds Didsbury                    -- CA  5171 -11411     0  0            
 CEA5            Hardisty                         -- CA  5265 -11138     0  0
+CEA6            Cardston                         -- CA  4916 -11324     0  0
 CEB5            Fairview                         -- CA  5608 -11843     0  0
 CEC3            Fox Lake                         -- CA  5847 -11454     0  0
 CEC4            Hinton                           -- CA  5332 -11775     0  0
@@ -87,6 +91,7 @@ CED4            Fox Creek                        -- CA  5438 -11677     0  0
 CEE4            Hinton                           -- CA  5338 -11770     0  0
 CEE5            Wabasca                          -- CA  5596 -11382     0  0
 CEE8            Viking                           -- CA  5311 -11186     0  0
+CEF4            Airdrie                          -- CA  5126 -11393     0  0
 CEG3            Lacombe                          -- CA  5249 -11371     0  0
 CEG4            Drumheller                       -- CA  5150 -11275     0  0
 CEH2            Cu Nim                           -- CA  5072 -11418     0  0
@@ -111,6 +116,7 @@ CEQ3            Camrose                          -- CA  5304 -11282     0  0
 CEQ4            Del Bonita                       -- CA  4900 -11278     0  0
 CEQ5            Grande Cache                     -- CA  5392 -11887     0  0
 CER3            Drayton Valley                   -- CA  5327 -11496     0  0
+CER4            Fort McMurray                    -- CA  5706 -11158     0  0
 CES4            Westlock                         -- CA  5414 -11374     0  0
 CEU2            Beaverlodge                      -- CA  5518 -11945     0  0
 CEV3            Vegreville                       -- CA  5351 -11203     0  0
@@ -123,7 +129,9 @@ CFB3            Hespero                          -- CA  5230 -11446     0  0
 CFB6            Joesphburg                       -- CA  5372 -11309     0  0
 CFG6            Fort Mackay                      -- CA  5728 -11098     0  0
 CFH4            Fox Harbour                      -- CA  4587  -6346     0  0
+CFH8            Warburg/Zajes                    -- CA  5322 -11434     0  0
 CFK4            Calling Lake                     -- CA  5532 -11325     0  0
+CFK6            Olds                             -- CA  5185 -11407     0  0
 CFM4            Donnelly                         -- CA  5571 -11709     0  0
 CFM7            Boyle                            -- CA  5457 -11282     0  0
 CFN5            La Crete                         -- CA  5817 -11633     0  0
@@ -144,6 +152,8 @@ CJA5            Nestor Falls                     -- CA  4914  -9392     0  0
 CJB3            Stienbach                        -- CA  4955  -9668     0  0
 CJC2            Craik                            -- CA  5106 -10584     0  0
 CJE3            Weyburn                          -- CA  4970 -10380     0  0
+CJG2            Eatonia                          -- CA  5122 -10939     0  0
+CJK2            Gunisao Lake                     -- CA  5352  -9637     0  0
 CJK3            Beauval                          -- CA  5511 -10772     0  0
 CJL2            Hatchet Lake                     -- CA  5866 -10354     0  0
 CJL4            La Loche                         -- CA  5647 -10940     0  0
@@ -195,6 +205,7 @@ CNC4            Guelph                           -- CA  4356  -8020     0  0
 CND4            Stanhope                         -- CA  4511  -7864     0  0
 CNE3            Bearskin Lake                    -- CA  5397  -9103     0  0
 CNE4            Iroquois Falls                   -- CA  4874  -8079     0  0
+CNF3            Pendleton                        -- CA  4549  -7510     0  0
 CNF4            Lindsay                          -- CA  4436  -7878     0  0
 CNH2            Natuashish                       -- CA  5591  -6118     0  0
 # CNH3            
@@ -203,6 +214,7 @@ CNJ4            Orillia                          -- CA  4468  -7931     0  0
 CNK4            Parry Sound                      -- CA  4526  -7983     0  0
 CNL3            Brockville                       -- CA  4464  -7575     0  0
 CNM5            Kingfisher Lake                  -- CA  5301  -8985     0  0
+CNN3            Shelburne                        -- CA  4403  -8021     0  0
 CNP3            Arnprior                         -- CA  4541  -7637     0  0
 CNQ3            Welland / Niagara Central        -- CA  4298  -7932     0  0
 # CNQ4
@@ -248,6 +260,7 @@ CSF3            Poste Montagnais                 -- CA  5189  -6572     0  0
 CSG3            Joliette                         -- CA  4605  -7350     0  0
 # CSH2
 CSH4            Lebel-sur-quevillion             -- CA  4903  -7702     0  0
+# CSH6
 CSJ4            Louiseville                      -- CA  4625  -7290     0  0
 CSK3            Mascouche                        -- CA  4572  -7360     0  0
 CSL3            Lac a la Tortue                  -- CA  4662  -7263     0  0
@@ -298,6 +311,7 @@ CYCW            Chilliwack                       -- CA  4915 -12194     0  0
 CYCZ            Fairmont Hot Springs             -- CA  5033 -11587     0  0
 CYDO            Dolbeau St Methode               QC CA  4878  -7238     0  0
 CYEA            Empress                          AB CA  5093 -11001     0  0
+# CYEC
 CYEE            MIDLAND                          -- CA  4468  -7993     0  0
 CYEM            Manitowaning                     ON CA  4584  -8186     0  0
 CYES            Edmundston                       NB CA  4749  -6848     0  0
@@ -346,6 +360,7 @@ CYRS            Red Sucker Lake                  -- CA  5417  -9356     0  0
 # CYRU            
 CYST            St Theresa Point                 -- CA  5385  -9485     0  0
 CYSW            Sparkwood Elk Valley             -- CA  4983 -11488     0  0
+CYSZ            Sainte Anne des Monts            QC CA  4912  -6653     0  0
 CYTB            Tillsonburg                      -- CA  4293  -8075     0  0
 CYTF            Alma                             QC CA  4851  -7164     0  0
 CYVB            Bonaventure                      -- CA  4807  -6546     0  0
