@@ -30,6 +30,7 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
 
     def process_data(self, raw):
         ''' Process a chunk of data '''
+        raw = raw.upper()
         df = DBPOOL.runInteraction(real_process, raw)
         df.addErrback(common.email_error, raw)
 
