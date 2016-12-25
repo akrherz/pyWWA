@@ -36,6 +36,14 @@ def shutdown():
     reactor.callWhenRunning(reactor.stop)
 
 
+def error_wrapper(exp, buf):
+    """Don't whine about known invalid products"""
+    if buf.find("HWOBYZ") > -1:
+        log.msg("Skipping Error for HWOBYZ")
+        return
+    common.email_error(exp, buf)
+
+
 # LDM Ingestor
 class MyProductIngestor(ldmbridge.LDMProductReceiver):
     """ I receive products from ldmbridge and process them 1 by 1 :) """
@@ -49,7 +57,7 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
     def process_data(self, buf):
         """ Process the product """
         defer = PGCONN.runInteraction(really_process_data, buf)
-        defer.addErrback(common.email_error, buf)
+        defer.addErrback(error_wrapper, buf)
         defer.addErrback(log.err)
 
 
