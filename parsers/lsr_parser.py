@@ -82,7 +82,7 @@ def real_processor(txn, text):
         raise Exception("No LSRs parsed!", text)
 
     for lsr in prod.lsrs:
-        if lsr.typetext not in reference.lsr_events:
+        if lsr.typetext.upper() not in reference.lsr_events:
             errmsg = "Unknown LSR typecode '%s'" % (lsr.typetext,)
             common.email_error(errmsg, text)
         uniquekey = hash(lsr.text)
