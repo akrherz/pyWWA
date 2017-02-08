@@ -85,8 +85,8 @@ def real_parser(txn, buf):
         and outlook_type = %s and day = %s
         """, (spc.valid, spc.expire, spc.outlook_type, spc.day))
 
-    wfos = {'TSTM': [], 'EXTM': [], 'SLGT': [], 'CRIT': [], 'MDT': [],
-            'HIGH': []}
+    wfos = {'TSTM': [], 'EXTM': [], 'MRGL': [], 'SLGT': [], 'ENH': [],
+            'CRIT': [], 'MDT': [], 'HIGH': []}
 
     for outlook in spc.outlooks:
         arWFO = consume(txn, spc, outlook)
@@ -130,13 +130,14 @@ def real_parser(txn, buf):
     if tp.afos not in ('PTSDY1', 'PFWFD1'):
         return
 
-    codes = {'SLGT': "Slight", 'MDT': "Moderate", 'HIGH': 'High',
+    codes = {'MRGL': 'Marginal', 'SLGT': "Slight", 'ENH': 'Enhanced',
+             'MDT': "Moderate", 'HIGH': 'High',
              'CRIT': 'Critical', 'EXTM': 'Extreme'}
 
     msgs = {}
     htmlmsgs = {}
     twts = {}
-    for cat in ['SLGT', 'MDT', 'HIGH', 'CRIT', 'EXTM']:
+    for cat in ['MRGL', 'SLGT', 'ENH', 'MDT', 'HIGH', 'CRIT', 'EXTM']:
         for z in wfos[cat]:
             for wfo in z:
                 msgs[wfo] = ("The Storm Prediction Center issues Day 1 %s "
