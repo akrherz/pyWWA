@@ -158,28 +158,32 @@ def realprocessor(txn, prod, data):
         return
     updatesql = []
     logmsg = []
-    if data['data'].get('temperature_maximum'):
+
+    if data['data'].get('temperature_maximum') is not None:
         climax = data['data']['temperature_maximum']
         if int(climax) != row['max_tmpf']:
             updatesql.append(' max_tmpf = %s' % (climax,))
             logmsg.append('MaxT O:%s N:%s' % (row['max_tmpf'], climax))
-    if data['data'].get('temperature_minimum'):
+
+    if data['data'].get('temperature_minimum') is not None:
         climin = data['data']['temperature_minimum']
         if int(climin) != row['min_tmpf']:
             updatesql.append(' min_tmpf = %s' % (climin,))
             logmsg.append('MinT O:%s N:%s' % (row['min_tmpf'], climin))
-    if data['data'].get('precip_month'):
+
+    if data['data'].get('precip_month') is not None:
         val = data['data']['precip_month']
         if val != row['pmonth']:
             updatesql.append(' pmonth = %s' % (val,))
             logmsg.append('PMonth O:%s N:%s' % (row['pmonth'], val))
-    if data['data'].get('precip_today'):
+
+    if data['data'].get('precip_today') is not None:
         val = data['data']['precip_today']
         if val != row['pday']:
             updatesql.append(' pday = %s' % (val,))
             logmsg.append('PDay O:%s N:%s' % (row['pday'], val))
 
-    if data['data'].get('snow_today'):
+    if data['data'].get('snow_today') is not None:
         val = data['data']['snow_today']
         if row['snow'] is None or val != row['snow']:
             updatesql.append(' snow = %s' % (val,))
