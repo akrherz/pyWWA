@@ -18,8 +18,10 @@ CAJ3            Sutcliffe Field                  -- CA  4904 -11650     0  0
 CAJ7            Cayley A J Flying Ranch          -- CA  5045 -11375     0  0
 CAJ9            Fort Ware                        -- CA  5743 -12565     0  0
 # CAK2            
+CAK3            Delta Heritage                   -- CA  4908 -12294     0  0
 CAL3            Douglas Lake                     -- CA  5017 -12017     0  0
 CAL4            Fort MacKay                      -- CA  5722 -11142     0  0
+CAL8            Ste-anne-du-lac                  -- CA  4688  -7533     0  0
 # CAM3
 # CAN3            
 # CAN6            
@@ -66,6 +68,7 @@ CBX7            Tumbler Ridge                    -- CA  5503 -12094     0  0
 # CBZ7
 # CCB3
 CCD3            Woodstock                        -- CA  4615  -6755     0  0
+CCD4            Postville                        -- CA  5491  -5979     0  0
 CCH4            Charlottetown                    -- CA  5277  -5611     0  0
 CCK3            Grand Falls                      -- CA  4708  -6769     0  0
 CCL3            Christina Lake                   -- CA  5563 -11075     0  0
@@ -74,8 +77,10 @@ CCM4            Port Au Choix                    -- CA  5069  -5733     0  0
 CCN2            Grand Manan                      -- CA  4471  -6680     0  0
 CCP4            Port Hope Simpson                -- CA  5253  -5629     0  0
 CCQ3            Debert                           -- CA  4542  -6346     0  0
+CCR3            Florenceville                    -- CA  4623  -6763     0  0
 CCS3            St Stephen                       -- CA  4521  -6725     0  0
 CCS4            Chipman                          -- CA  4615  -6590     0  0
+CCS5            Havelock                         -- CA  4599  -6530     0  0
 CCW3            Waterville                       -- CA  4505  -6465     0  0
 CDA4            Pokemouche                       -- CA  4772  -6488     0  0
 CDA5            St Andrews Codroy Valley         -- CA  4777  -5931     0  0
@@ -157,6 +162,7 @@ CJC2            Craik                            -- CA  5106 -10584     0  0
 CJE3            Weyburn                          -- CA  4970 -10380     0  0
 CJG2            Eatonia                          -- CA  5122 -10939     0  0
 CJK2            Gunisao Lake                     -- CA  5352  -9637     0  0
+CJH3            Maidstone                        -- CA  5310 -10933     0  0
 CJK3            Beauval                          -- CA  5511 -10772     0  0
 CJL2            Hatchet Lake                     -- CA  5866 -10354     0  0
 CJL4            La Loche                         -- CA  5647 -10940     0  0
@@ -191,6 +197,7 @@ CKM4            Jan Lake                         -- CA  5483 -10279     0  0
 CKM8            Opapimiskan Lake                 -- CA  5261  -9038     0  0
 CKQ3            North Spirit Lake                -- CA  5249  -9297     0  0
 CKQ9            Pine Dock                        -- CA  5162  -9681     0  0
+CKR4            Lundar                           -- CA  5070  -9806     0  0
 CKS8            Cree Lake                        -- CA  5746 -10675     0  0
 # CKW7
 CKZ3            Elk Island                       -- CA  5467  -9415     0  0
@@ -206,6 +213,7 @@ CMR2            Mary River                       -- CA  7132  -7935     0  0
 CNA9            Tomvale                          -- CA  4492  -7694     0  0
 CNC3            Brampton                         -- CA  4376  -7988     0  0
 CNC4            Guelph                           -- CA  4356  -8020     0  0
+# CNC9
 CND4            Stanhope                         -- CA  4511  -7864     0  0
 CNE3            Bearskin Lake                    -- CA  5397  -9103     0  0
 CNE4            Iroquois Falls                   -- CA  4874  -8079     0  0
@@ -270,6 +278,7 @@ CSF3            Poste Montagnais                 -- CA  5189  -6572     0  0
 CSG3            Joliette                         -- CA  4605  -7350     0  0
 # CSH2
 CSH4            Lebel-sur-quevillion             -- CA  4903  -7702     0  0
+CSH5            St Ferdinand                     -- CA  4613  -7154     0  0
 # CSH6
 CSJ4            Louiseville                      -- CA  4625  -7290     0  0
 CSK3            Mascouche                        -- CA  4572  -7360     0  0
@@ -332,6 +341,7 @@ CYFA            Fort Albany                      ON CA  5220  -8170     0  0
 CYFD            Brantford                        -- CA  4313  -8034     0  0
 CYFE            Forestville                      QC CA  4875  -6910     0  0
 CYFH            Fort Hope                        ON CA  5156  -8791     0  0
+# CYFI
 CYFJ            Riviere Rouge                    -- CA  4641  -7478     0  0
 # CYFM
 # CYFN
@@ -361,6 +371,7 @@ CYNH            Hudson Hope                      BC CA  5604 -12198     0  0
 CYNL            Points North Landing             SK CA  5828 -10408     0  0
 CYNJ            Langley Tower                    -- CA  4910 -12263     0  0
 CYNR            Fort MacKay                      -- CA  5738 -11170     0  0
+# CYNW
 CYOH            Oxford House                     MB CA  5493  -9528     0  0
 CYOP            Rainbow Lake                     AB CA  5849 -11941     0  0
 CYPM            Pokangikum                       -- CA  5182  -9397     0  0
@@ -400,6 +411,7 @@ CZGF            Grand Forks                      BC CA  4902 -11842     0  0
 CZGI            Gods River                       MB CA  5484  -9408     0  0
 CZGR            Little Grand Rapids              -- CA  5205  -9547     0  0
 CZHP            High Prairie                     AB CA  5539 -11648     0  0
+CZJN            Swan River                       MB CA  5212 -10124     0  0
 CZML            108 Mile                         BC CA  5174 -12133     0  0
 CZNG            Poplar River                     MB CA  5300  -9727     0  0
 CZNL            Nelson                           BC CA  4949 -11730     0  0
