@@ -1,7 +1,8 @@
 """
  Feed archived NCR data to nexrad3_attr.py , should be run like
 
- python util/feed_archived_ncr.py NEXRAD YYYY MM | YYYY=2009 MM=01 python nexrad3_attr.py
+ python util/feed_archived_ncr.py NEXRAD YYYY MM
+   | YYYY=2009 MM=01 python nexrad3_attr.py
 """
 
 import subprocess
@@ -27,7 +28,7 @@ while now < ets:
         sys.stderr.write('Missing %s\n' % (afn,))
         now += interval
         continue
-    
+
     subprocess.call("tar -x -z -C /tmp/l3tmp -f %s NCR" % (afn,), shell=True)
     if not os.path.isdir("/tmp/l3tmp/NCR"):
         sys.stderr.write("Missing NCR data for %s\n" % (afn,))
@@ -43,12 +44,12 @@ while now < ets:
             continue
         if data[0] == 'S':
             sys.stdout.write('\001\r\r\n000\r\r\n')
-        sys.stdout.write( data )
+        sys.stdout.write(data)
         if data[-4:] != '\r\r\n\003':
             sys.stdout.write('\r\r\n\003')
         time.sleep(0.25)
-    
+
     if os.path.isdir("/tmp/l3tmp/NCR"):
         subprocess.call("rm -rf /tmp/l3tmp/NCR", shell=True)
-    
+
     now += interval

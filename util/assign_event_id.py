@@ -26,6 +26,7 @@ def load_touches(ugc, wfo):
         a = touches.setdefault(ugc, [])
         a.append(row[0])
 
+
 cursor.execute("""
   SELECT oid, issue, expire, ugc, wfo, phenomena, significance
   from """ + table + """ WHERE
@@ -87,7 +88,7 @@ for row in cursor:
                 cursor2.execute("""UPDATE """ + table + """ SET eventid = %s
                 WHERE oid = %s""", (events[i] + 1, oid))
                 continue
-            print 'HERE', oid, issue, issues[i], issues[i+1], events[i], events[i+1]
+            print 'HERE', oid, issue, issues[i], issues[i+1], events[i]
             continue
 
     # see if this is a DUP!

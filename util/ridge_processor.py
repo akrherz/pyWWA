@@ -97,6 +97,7 @@ def run():
 
     channel.start_consuming()
 
+
 if __name__ == '__main__':
     o = open("ridge_processor.pid", 'w')
     o.write("%s" % (os.getpid(),))

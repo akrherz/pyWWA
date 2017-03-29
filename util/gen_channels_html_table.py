@@ -305,6 +305,7 @@ def main():
     </script>
     """)
 
+
 if __name__ == '__main__':
     # Go Main Go
     main()

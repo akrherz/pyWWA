@@ -27,5 +27,6 @@ def main():
     yesterday = datetime.date.today() - datetime.timedelta(days=1)
     run(yesterday)
 
+
 if __name__ == '__main__':
     main()
