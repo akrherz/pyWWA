@@ -11,6 +11,7 @@ import sys
 
 ugc_dict = {}
 nwsli_dict = {}
+prodDefinitions['MCD'] = 'Mesoscale Convective Discussion (MCD)'
 
 C1 = "&lt;wfo&gt;"
 C2 = "&lt;vtec_phenomena&gt;.&lt;vtec_significance&gt;"
@@ -18,6 +19,7 @@ C3 = "&lt;afos_pil&gt;"
 C4 = "&lt;vtec_phenomena&gt;.&lt;vtec_significance&gt;.&lt;wfo&gt;"
 C5 = "&lt;vtec_phenomena&gt;.&lt;vtec_significance&gt;.&lt;ugc&gt;"
 C6 = "&lt;ugc&gt;"
+C7 = "&lt;afos_pil&gt;.&lt;wfo&gt;"
 D = {
      '10-313': 'http://www.nws.noaa.gov/directives/sym/pd01003013curr.pdf',
      '10-314': 'http://www.nws.noaa.gov/directives/sym/pd01003014curr.pdf',
@@ -94,6 +96,11 @@ GEN_PRODUCTS = [
     dict(afos='LAE', directive='10-1701', channels=[C3]),
     dict(afos='LCO', directive='10-1701', channels=[C3]),
     dict(afos='LSR', directive='10-1701', channels=[C3]),
+    dict(afos='MCD', directive='10-517', channels=[C1, C3, C7],
+         notes=("Eventually, this product will not default to the main WFO"
+                " channel, but only the SWOMCD.&lt;wfo&gt; channel. The WFOs"
+                " included are based on the ones highlighted by SPC within "
+                "the text and not from a spatial check of their polygon.")),
     dict(afos='MIS', directive='10-1701', channels=[C3]),
     dict(afos='MWS', directive='10-314', channels=[C3]),
     dict(afos='NOW', directive='10-1701', channels=[C3]),
@@ -160,7 +167,7 @@ def load_dicts():
 
 def do_generic():
     print("""
-    <h3>NWS Local Office Products</h3>
+    <h3>NWS Local Office / National Products</h3>
     <table class="table table-bordered table-condensed">
     <thead>
     <tr><td></td><th>AFOS PIL + Product Name</th><th>Directive</th>
@@ -178,7 +185,7 @@ def do_generic():
             sys.stderr.write(str(exp))
             sys.stderr.write(afos+"\n")
             continue
-        j = v.get_jabbers("http://mesonet.agron.iastate.edu/p.php")
+        j = v.get_jabbers("https://mesonet.agron.iastate.edu/p.php")
         jmsg = ""
         tweet = ""
         channels = []
@@ -190,13 +197,14 @@ def do_generic():
                     channels.append(channel)
         channels.sort()
         print("""<tr><td><a name="channel_%s"/>
-        <a id="%s_btn" class="btn btn-small" role="button"
-        href="javascript: revdiv('%s');"><i class="glyphicon glyphicon-plus"></i></a>
+<a id="%s_btn" class="btn btn-small" role="button"
+ href="javascript: revdiv('%s');"><i class="glyphicon glyphicon-plus"></i></a>
         </td><td>%s</td><td><a href="%s">%s</a></td><td>%s</td></tr>
         <tr><td colspan="4"><div id="%s" style="display:none;">
         <dl class="dl-horizontal">
         %s
-        <dt>Example Raw Text:</dt><dd><a href="http://mesonet.agron.iastate.edu/p.php?pid=%s">View Text</a></dd>
+        <dt>Example Raw Text:</dt>
+<dd><a href="https://mesonet.agron.iastate.edu/p.php?pid=%s">View Text</a></dd>
         <dt>Channels for Product Example:</dt><dd>%s</dd>
         <dt>XMPP Chatroom Example:</dt><dd>%s</dd>
         <dt>Twitter Example:</dt><dd>%s</dd>
@@ -206,11 +214,14 @@ def do_generic():
         </tr>
         """ % (afos, afos, afos, prodDefinitions.get(afos, afos),
                D[entry['directive']], entry['directive'],
-               " ".join(["<span class=\"badge\">%s</span>" % (s,) for s in entry['channels']]),
+               " ".join(["<span class=\"badge\">%s</span>" % (s,)
+                         for s in entry['channels']]),
                afos,
-               '<dt>Notes</dt><dd>%s</dd>' % (entry.get('notes'),) if 'notes' in entry else '',
+               '<dt>Notes</dt><dd>%s</dd>' % (entry.get('notes'),)
+               if 'notes' in entry else '',
                v.get_product_id(),
-               " ".join(["<span class=\"badge\">%s</span>" % (s,) for s in channels]),
+               " ".join(["<span class=\"badge\">%s</span>" % (s,)
+                         for s in channels]),
                jmsg, tweet))
 
     print("""</table>""")
@@ -231,8 +242,8 @@ def do_vtec():
             continue
         v = vtec_parser(get_data(afos), ugc_provider=ugc_dict,
                         nwsli_provider=nwsli_dict)
-        j = v.get_jabbers("http://mesonet.agron.iastate.edu/vtec/",
-                          "http://mesonet.agron.iastate.edu/vtec/")
+        j = v.get_jabbers("https://mesonet.agron.iastate.edu/vtec/",
+                          "https://mesonet.agron.iastate.edu/vtec/")
         jmsg = ""
         tweet = ""
         channels = []
@@ -245,12 +256,13 @@ def do_vtec():
         channels.sort()
         print("""<tr><td><a name="channel_%s"/>
         <a id="%s_btn" class="btn btn-small" role="button"
-        href="javascript: revdiv('%s');"><i class="glyphicon glyphicon-plus"></i></a>
+ href="javascript: revdiv('%s');"><i class="glyphicon glyphicon-plus"></i></a>
         </td><td>%s</td><td><a href="%s">%s</a></td><td>%s</td></tr>
         <tr><td colspan="4"><div id="%s" style="display:none;">
         <dl class="dl-horizontal">
         %s
-        <dt>Example Raw Text:</dt><dd><a href="http://mesonet.agron.iastate.edu/p.php?pid=%s">View Text</a></dd>
+        <dt>Example Raw Text:</dt>
+<dd><a href="https://mesonet.agron.iastate.edu/p.php?pid=%s">View Text</a></dd>
         <dt>Channels for Product Example:</dt><dd>%s</dd>
         <dt>XMPP Chatroom Example:</dt><dd>%s</dd>
         <dt>Twitter Example:</dt><dd>%s</dd>
@@ -260,11 +272,14 @@ def do_vtec():
         </tr>
         """ % (afos, afos, afos, prodDefinitions.get(afos, afos),
                D[entry['directive']], entry['directive'],
-               " ".join(["<span class=\"badge\">%s</span>" % (s,) for s in entry['channels']]),
+               " ".join(["<span class=\"badge\">%s</span>" % (s,)
+                         for s in entry['channels']]),
                afos,
-               '<dt>Notes</dt><dd>%s</dd>' % (entry.get('notes'),) if 'notes' in entry else '',
+               '<dt>Notes</dt><dd>%s</dd>' % (entry.get('notes'),)
+               if 'notes' in entry else '',
                v.get_product_id(),
-               " ".join(["<span class=\"badge\">%s</span>" % (s,) for s in channels]),
+               " ".join(["<span class=\"badge\">%s</span>" % (s,)
+                         for s in channels]),
                jmsg, tweet))
 
     print("""</table>""")
