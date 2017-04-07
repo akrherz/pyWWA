@@ -78,9 +78,6 @@ def real_processor(txn, text):
     """ Lets actually process! """
     prod = lsrparser(text)
 
-    if len(prod.lsrs) == 0:
-        raise Exception("No LSRs parsed!", text)
-
     for lsr in prod.lsrs:
         if lsr.typetext.upper() not in reference.lsr_events:
             errmsg = "Unknown LSR typecode '%s'" % (lsr.typetext,)
@@ -97,6 +94,12 @@ def real_processor(txn, text):
     j = prod.get_jabbers(common.settings.get('pywwa_lsr_url', 'pywwa_lsr_url'))
     for (p, h, x) in j:
         JABBER.sendMessage(p, h, x)
+
+    if len(prod.warnings) > 0:
+        common.email_error("\n\n".join(prod.warnings), text)
+    elif len(prod.lsrs) == 0:
+        raise Exception("No LSRs parsed!", text)
+
 
 reactor.callLater(0, loaddb)
 JABBER = common.make_jabber_client("lsr_parser")
