@@ -274,7 +274,10 @@ class JabberClient:
         x = message.addElement('x', 'nwschat:nwsbot')
         for key in xtra.keys():
             x[key] = xtra[key]
-        self.xmlstream.send(message)
+        # So sendMessage may be getting called from 'threads' and the writing
+        # of data to the transport is not thread safe, so we must ensure that
+        # this gets called from the main thread
+        reactor.callFromThread(self.xmlstream.send, message)
 
     def debug(self, elem):
         """
