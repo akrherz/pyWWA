@@ -55,7 +55,7 @@ def real_parser(txn, buf):
     utcnow = utcnow.replace(tzinfo=pytz.timezone("UTC"))
 
     try:
-        nws = product.TextProduct(buf)
+        nws = product.TextProduct(buf, utcnow=UTCNOW)
     except UGCParseException:
         log.msg("UGCParseException swallowed for %s" % (buf[11:29],))
         return
@@ -90,10 +90,15 @@ def real_parser(txn, buf):
                                                          nws.valid,
                                                          nws.source, nws.wmo))
 
+
 if __name__ == '__main__':
     # Go
     MANUAL = False
-    if len(sys.argv) == 2 and sys.argv[1] == 'manual':
+    UTCNOW = None
+    if len(sys.argv) == 6 and sys.argv[1] == 'manual':
         MANUAL = True
+        UTCNOW = datetime.datetime(int(sys.argv[2]), int(sys.argv[3]),
+                                   int(sys.argv[4]), int(sys.argv[5])
+                                   ).replace(tzinfo=pytz.utc)
     ldmbridge.LDMProductFactory(MyProductIngestor())
     reactor.run()
