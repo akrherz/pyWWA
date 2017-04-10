@@ -108,6 +108,8 @@ def email_error(exp, message):
     if isinstance(exp, failure.Failure):
         traceback.print_exc(file=cstr)
         log.err(exp)
+    else:
+        log.msg(exp)
     cstr.seek(0)
     if isinstance(message, str):
         log.msg(message[:100])
