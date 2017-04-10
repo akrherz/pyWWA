@@ -254,7 +254,11 @@ def async(buf):
     @param buf string of the raw NOAAPort Product
     """
     defer = Deferred()
-    proc = SHEFIT(buf)
+    try:
+        proc = SHEFIT(buf)
+    except Exception as exp:
+        common.email_error(exp, buf)
+        return
     proc.deferred = defer
     proc.deferred.addErrback(log.err)
 
