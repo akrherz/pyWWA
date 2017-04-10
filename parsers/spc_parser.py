@@ -40,8 +40,11 @@ def real_parser(txn, buf):
     # spc.draw_outlooks()
     spc.compute_wfos(txn)
     spc.sql(txn)
-    for (txt, html, xtra) in spc.get_jabbers(""):
+    jmsgs = spc.get_jabbers("")
+    for (txt, html, xtra) in jmsgs:
         jabber.sendMessage(txt, html, xtra)
+    log.msg("Sent %s messages for product %s" % (len(jmsgs),
+                                                 spc.get_product_id()))
 
 
 if __name__ == '__main__':
