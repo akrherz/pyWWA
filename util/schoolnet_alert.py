@@ -1,7 +1,6 @@
 """
 Called when there is a schoolnet alert
 """
-
 import re
 import sys
 import smtplib

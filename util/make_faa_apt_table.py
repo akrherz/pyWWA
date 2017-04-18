@@ -12,6 +12,7 @@ def convert_geo(val):
         number = 0 - number
     return number
 
+
 for line in open(sys.argv[1]):
     if line[:3] != 'APT':
         continue

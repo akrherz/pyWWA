@@ -1,5 +1,4 @@
 #!/bin/csh -f
-#set echo
 set nexrad=$1
 
 cd /mnt/mtarchive/nexrd2/raw/$1

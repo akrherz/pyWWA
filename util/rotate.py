@@ -7,11 +7,12 @@ import gzip
 
 BASE = "/home/ldm/data/"
 
-if __name__ == '__main__':
-    # blah/file_
+
+def main(argv):
+    """Do SOmething"""
     data = sys.stdin.read()
-    fnbase = sys.argv[1]
-    fmt = sys.argv[2]
+    fnbase = argv[1]
+    fmt = argv[2]
 
     dirname = "%s/%s" % (BASE, os.path.dirname(fnbase))
     if not os.path.isdir(dirname):
@@ -24,9 +25,9 @@ if __name__ == '__main__':
             if os.path.isfile(oldfp):
                 os.rename(oldfp, newfp)
 
-        o = open("%s/%s%s.%s" % (BASE, fnbase, 0, fmt), 'wb')
-        o.write(data)
-        o.close()
+        output = open("%s/%s%s.%s" % (BASE, fnbase, 0, fmt), 'wb')
+        output.write(data)
+        output.close()
 
         data = gzip.open("%s/%s%s.%s" % (BASE, fnbase, 0, fmt), 'rb').read()
         fmt = "tif"
@@ -37,6 +38,10 @@ if __name__ == '__main__':
         if os.path.isfile(oldfp):
             os.rename(oldfp, newfp)
 
-    o = open("%s/%s%s.%s" % (BASE, fnbase, 0, fmt), 'wb')
-    o.write(data)
-    o.close()
+    output = open("%s/%s%s.%s" % (BASE, fnbase, 0, fmt), 'wb')
+    output.write(data)
+    output.close()
+
+
+if __name__ == '__main__':
+    main(sys.argv)

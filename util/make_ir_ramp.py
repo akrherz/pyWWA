@@ -1,3 +1,6 @@
+from PIL import Image, ImageDraw, ImageFont
+import numpy as np
+
 TABLE = """127,14,123,-70
 121,21,137,-69
 107,26,139,-68
@@ -101,67 +104,70 @@ TABLE = """127,14,123,-70
 131,4,10,30
 129,3,8,31"""
 # Generate a color ramp image, please
-from PIL import Image, ImageDraw, ImageFont
-import numpy as np
-
-font = ImageFont.truetype("/home/akrherz/projects/pyVBCam/lib/veramono.ttf", 10)
-
-rampin = np.zeros( (256,3), np.uint8)
-ramp = np.zeros( (256,3), np.uint8)
-data = np.zeros( (30,256), np.uint8)
 
 
-temps = []
-for i, line in enumerate(TABLE.split("\n")):
-    tokens = line.split(",")
-    rampin[i,0] = int(tokens[0])
-    rampin[i,1] = int(tokens[1])
-    rampin[i,2] = int(tokens[2])
-    temps.append(float(tokens[3]))
-temps = np.array(temps)
+def main():
+    """Do something"""
+    font = ImageFont.truetype("/home/akrherz/projects/pyVBCam/lib/veramono.ttf", 10)
 
-sattemps = []
-for i in range(256):
-    if i > 176:
-        val = (418-i) - 273
-    else:
-        val = (330. - (i/2.)) - 273.
-    sattemps.append(val)
-    if i < 255:
-        data[0:15,i:i+1] = i
-    if val < -81:
-        ramp[i,:] = [0,0,0]
-    elif val > max(temps):
-        ramp[i,:] = [0,0,0]
-    elif val < min(temps):
-        ramp[i,:] = [255,255,255]
-    else:
-        idx = np.digitize([val,], temps)[0]
-        ramp[i,:] = rampin[idx,:]
+    rampin = np.zeros( (256,3), np.uint8)
+    ramp = np.zeros( (256,3), np.uint8)
+    data = np.zeros( (30,256), np.uint8)
+
+    temps = []
+    for i, line in enumerate(TABLE.split("\n")):
+        tokens = line.split(",")
+        rampin[i,0] = int(tokens[0])
+        rampin[i,1] = int(tokens[1])
+        rampin[i,2] = int(tokens[2])
+        temps.append(float(tokens[3]))
+    temps = np.array(temps)
+
+    sattemps = []
+    for i in range(256):
+        if i > 176:
+            val = (418-i) - 273
+        else:
+            val = (330. - (i/2.)) - 273.
+        sattemps.append(val)
+        if i < 255:
+            data[0:15,i:i+1] = i
+        if val < -81:
+            ramp[i,:] = [0,0,0]
+        elif val > max(temps):
+            ramp[i,:] = [0,0,0]
+        elif val < min(temps):
+            ramp[i,:] = [255,255,255]
+        else:
+            idx = np.digitize([val,], temps)[0]
+            ramp[i,:] = rampin[idx,:]
+
+    o = open('gini_ir_ramp.txt', 'w')
+    for i in range(256):
+        o.write("%s %s %s\n" % (ramp[i,0], ramp[i,1], ramp[i,2]))
+    o.close()
+
+    ramp[255,:] = [255,255,255]
+
+    png = Image.fromarray( np.fliplr(data) )
+    png.putpalette( tuple(ramp.ravel()) )
+    draw = ImageDraw.Draw(png)
+
+    for i, temp in enumerate(sattemps):
+        if temp % 20 != 0 or temp < -70:
+            continue
+        print temp % 20, temp
+        lbl = "%.0f" % (temp,)
+        (w,h) = font.getsize(lbl)
+        draw.line( [255-i,17,255-i,10], fill=255)
+        draw.text( (255-i-(w/2),18), lbl ,fill=255, font=font)
+
+    draw.text( (235,18), 'C',fill=255, font=font)
+
+    #draw.line( [0,0,255,0,255,29,0,29,0,0], fill=255)
+
+    png.save("test.png")
 
 
-o = open('gini_ir_ramp.txt', 'w')
-for i in range(256):
-    o.write("%s %s %s\n" % (ramp[i,0], ramp[i,1], ramp[i,2]))
-o.close()
-
-ramp[255,:] = [255,255,255]
-
-png = Image.fromarray( np.fliplr(data) )
-png.putpalette( tuple(ramp.ravel()) )
-draw = ImageDraw.Draw(png)
-
-for i, temp in enumerate(sattemps):
-    if temp % 20 != 0 or temp < -70:
-        continue
-    print temp % 20, temp
-    lbl = "%.0f" % (temp,)
-    (w,h) = font.getsize(lbl)
-    draw.line( [255-i,17,255-i,10], fill=255)
-    draw.text( (255-i-(w/2),18), lbl ,fill=255, font=font)
-
-draw.text( (235,18), 'C',fill=255, font=font)
-
-#draw.line( [0,0,255,0,255,29,0,29,0,0], fill=255)
-
-png.save("test.png")
+if __name__ == '__main__':
+    main()

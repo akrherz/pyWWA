@@ -1,25 +1,16 @@
+"""Make a file on disk appear more noaaport ish"""
 import sys
-import os
+from pyiem.util import noaaport_text
 
-fn = sys.argv[1]
-fn2 = fn + ".tmp"
 
-lines = open(fn).readlines()
+def main(argv):
+    """Do Main Things"""
+    fn = argv[1]
+    data = noaaport_text(open(fn).read())
+    output = open(fn, 'w')
+    output.write(data)
+    output.close()
 
-out = open(fn2, 'w')
 
-for i in range(len(lines)):
-    line = lines[i]
-    if i == 0 and lines[0] != '\001':
-        out.write("\001\r\r\n")
-    if line[-3:] != '\r\r\n':
-        if line[-2:] == '\r\n':
-            out.write(line[:-2] + "\r\r\n")
-        else:
-            out.write(line[:-1] + "\r\r\n")
-    else:
-        out.write(line)
-
-out.write("\003")
-out.close()
-os.rename(fn2, fn)
+if __name__ == '__main__':
+    main(sys.argv)
