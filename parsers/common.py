@@ -80,16 +80,20 @@ def load_settings():
 
 
 def should_email():
-    '''
-    Logic to prevent email bombs, we currently want no more than 10 per hour
+    """Prevent email bombs
+
+    Use the setting `pywwa_email_limit` to threshold the number of emails
+    permitted within the past hour
+
     @return boolean if we should email or not
-    '''
+    """
     utcnow = datetime.datetime.utcnow()
     email_timestamps.insert(0, utcnow)
     delta = email_timestamps[0] - email_timestamps[-1]
-    if len(email_timestamps) < 10:
+    email_limit = int(settings.get('pywwa_email_limit', 10))
+    if len(email_timestamps) < email_limit:
         return True
-    while len(email_timestamps) > 10:
+    while len(email_timestamps) > email_limit:
         email_timestamps.pop()
 
     return (delta > datetime.timedelta(hours=1))
@@ -118,7 +122,8 @@ def email_error(exp, message):
 
     # Logic to prevent email bombs
     if not should_email():
-        log.msg("Email threshold exceeded, so no email sent!")
+        log.msg(("Email threshold of %s exceeded, so no email sent!"
+                 ) % (settings.get('pywwa_email_limit', 10)))
         return False
 
     msg = MIMEText("""
@@ -305,6 +310,7 @@ class JabberClient:
             return
         log.msg('SEND %s' % (unicode(data, 'utf-8',
                                      'ignore').encode('ascii', 'replace'),))
+
 
 # This is blocking, but necessary to make sure settings are loaded before
 # we go on our merry way

@@ -18,6 +18,7 @@ Constants Used
 
 key | value
 ------------- | -------------
+pywwa_email_limit | Number of debug emails an individual ingestor is permitted to send within 60 minutes of time
 pywwa_lsr_url | URL Base for the LSR App
 pywwa_product_url | URL Base for simple text product viewer
 pywwa_river_url | URL Base for the River App
