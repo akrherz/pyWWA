@@ -23,7 +23,7 @@ import numpy as np
 logger = logging.getLogger('gini2gis')
 logger.setLevel(logging.INFO)
 handler = SysLogHandler(address='/dev/log',
-                        facility=SysLogHandler.LOG_LOCAL1)
+                        facility=SysLogHandler.LOG_LOCAL2)
 handler.setFormatter(
     logging.Formatter('gini2gis['+str(os.getpid())+']: %(message)s'))
 logger.addHandler(handler)
