@@ -4,28 +4,29 @@ I convert raw GINI noaaport imagery into geo-referenced PNG files both in the
 
 Questions? daryl herzmann akrherz@iastate.edu
 """
-
-# https://github.com/akrherz/pyIEM
-from pyiem.nws import gini
-import pytz
+from __future__ import print_function
 import cStringIO
 import sys
-from PIL import Image
 import datetime
 import logging
+from logging.handlers import SysLogHandler
 import os
 import tempfile
 import json
-import numpy as np
 import subprocess
 
-FORMAT = "%(asctime)-15s:[" + str(os.getpid()) + "]: %(message)s"
-LOG_FN = ('logs/gini2gis-%s.log'
-          ) % (datetime.datetime.utcnow().strftime("%Y%m%d"), )
-logging.basicConfig(filename=LOG_FN, filemode='a+', format=FORMAT)
-logger = logging.getLogger()
-logger.addHandler(logging.StreamHandler())
+from pyiem.nws import gini
+import pytz
+from PIL import Image
+import numpy as np
+
+logger = logging.getLogger('gini2gis')
 logger.setLevel(logging.INFO)
+handler = SysLogHandler(address='/dev/log',
+                        facility=SysLogHandler.LOG_LOCAL1)
+handler.setFormatter(
+    logging.Formatter('gini2gis['+str(os.getpid())+']: %(message)s'))
+logger.addHandler(handler)
 
 PQINSERT = "/home/ldm/bin/pqinsert"
 
@@ -45,7 +46,7 @@ def process_input():
 
 def do_legacy_ir(sat, tmpfn):
     """ since some are unable to process non-grayscale """
-    print("Doing legacy IR junk...")
+    logger.info("Doing legacy IR junk...")
     png = Image.fromarray(np.array(sat.data[:-1, :], np.uint8))
     png.save('%s.png' % (tmpfn,))
 
@@ -247,7 +248,8 @@ def cleanup(tmpfn):
 
 
 def workflow():
-    logger.info("Starting Ingest for: %s" % (" ".join(sys.argv),))
+    """workflow"""
+    logger.info("Starting Ingest for: %s", " ".join(sys.argv))
 
     sat = process_input()
     logger.info("Processed archive file: " + sat.archive_filename())
@@ -273,6 +275,7 @@ def workflow():
     cleanup(tmpfn)
 
     logger.info("Done!")
+
 
 if __name__ == '__main__':
     workflow()
