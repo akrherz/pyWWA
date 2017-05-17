@@ -1,20 +1,27 @@
-# Send products from AFOS database to pyWWA
+"""Send products from AFOS database to pyWWA"""
+import sys
 
 import psycopg2
-import sys
-AFOS = psycopg2.connect(database='afos', host='iemdb', port=5555,
-                        user='nobody')
-acursor = AFOS.cursor()
+from pyiem.util import noaaport_text
 
-PIL = sys.argv[1]
 
-o = open('%s.txt' % (PIL, ), 'a')
-acursor.execute("""
-    SELECT data, entered from products_2017_0106
-    WHERE pil = %s
-    ORDER by entered LIMIT 2""", (PIL, ))
-for row in acursor:
-    # o.write('\001\r\r\n')
-    o.write(row[0])
-    o.write('\r\r\n\003')
-o.close()
+def main(argv):
+    """Go Main"""
+    pgconn = psycopg2.connect(database='afos', host='iemdb', port=5555,
+                              user='nobody')
+    acursor = pgconn.cursor()
+
+    pil = argv[1]
+
+    output = open('%s.txt' % (pil, ), 'a')
+    acursor.execute("""
+        SELECT data, entered from products
+        WHERE pil = %s
+        ORDER by entered ASC""", (pil, ))
+    for row in acursor:
+        output.write(noaaport_text(row[0]))
+    output.close()
+
+
+if __name__ == '__main__':
+    main(sys.argv)
