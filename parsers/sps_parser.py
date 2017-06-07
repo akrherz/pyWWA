@@ -111,7 +111,7 @@ def real_process(txn, raw):
                 (seg.ugcexpire -
                  datetime.timedelta(hours=reference.offsets.get(prod.z, 0))
                  ).strftime("%-I:%M %p"), prod.z)
-        xtra['channels'] = prod.source[1:]
+        xtra['channels'] = prod.afos
         mess = "%s issues %s for %s %s %s?pid=%s" % (prod.source[1:],
                                                      headline, counties,
                                                      expire, PYWWA_PRODUCT_URL,
