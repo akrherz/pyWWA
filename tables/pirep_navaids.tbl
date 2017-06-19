@@ -7,6 +7,7 @@ CAA8            Invermere                        -- CA  5052 -11600     0  0
 CAD4            Trail                            -- CA  4906 -11761     0  0
 CAD5            Merritt                          -- CA  5012 -12074     0  0
 # CAE3
+# CAE7
 # CAE9
 CAF4            Tsuniah                          -- CA  5153 -12417     0  0
 CAG3            Chilko Lake                      -- CA  5163 -12414     0  0
@@ -23,11 +24,14 @@ CAL3            Douglas Lake                     -- CA  5017 -12017     0  0
 CAL4            Fort MacKay                      -- CA  5722 -11142     0  0
 CAL8            Ste-anne-du-lac                  -- CA  4688  -7533     0  0
 # CAM3
+CAM5            Houston                          -- CA  5444 -12678     0  0
+# CAM9
 # CAN3            
 # CAN6            
 CAP3            Sechelt                          -- CA  4946 -12372     0  0
 CAQ4            Springhouse                      -- CA  5196 -12214     0  0
 CAQ5            Nakusp                           -- CA  5027 -11781     0  0
+# CAQ6
 CAT4            Qualicum Beach                   -- CA  4934 -12440     0  0
 CAT5            Port Mcneill                     -- CA  5057 -12702     0  0
 CAU3            Oliver                           -- CA  4917 -11955     0  0
@@ -36,6 +40,7 @@ CAU4            Vanderhoof                       -- CA  5405 -12401     0  0
 # CAU8            
 CAV3            One Hundred Mile House           -- CA  5164 -12131     0  0
 CAV4            McBride                          -- CA  5332 -12017     0  0
+# CAV8
 # CAW5
 # CAW8            
 # CAX6            
@@ -53,12 +58,14 @@ CBH2            Helmet                           -- CA  5943 -12080     0  0
 # CBK5
 # CBJ9            
 CBL6            Radium Hot Springs               -- CA  5063 -11610     0  0
+CBM6            Midway                           -- CA  4901 -11879     0  0
 # CBN4            
 CBN9            Tsay Keh                         -- CA  5691 -12497     0  0
 # CBP2
 # CBP3 
 CBQ2            Fort Langley                     -- CA  4917 -12255     0  0
 CBR2            Kaslo                            -- CA  4990 -11694     0  0
+# CBR7
 CBS8            Port Alberni                     -- CA  4932 -12493     0  0
 CBW2            Kitimat                          -- CA  5417 -12858     0  0
 CBW4            Bob Quinn Ags                    BC CA  5697 -13025     0  0
@@ -66,6 +73,7 @@ CBX5            Tungsten                         -- CA  6196 -12820     0  0
 CBX7            Tumbler Ridge                    -- CA  5503 -12094     0  0
 # CBY5            
 # CBZ7
+CBZ9            Fraser Lake                      -- CA  5401 -12477     0  0
 # CCB3
 CCD3            Woodstock                        -- CA  4615  -6755     0  0
 CCD4            Postville                        -- CA  5491  -5979     0  0
@@ -108,6 +116,7 @@ CEH5            Red Earth Creek                  -- CA  5655 -11527     0  0
 CEH6            Provost                          -- CA  5234 -11028     0  0
 CEJ3            Stettler                         -- CA  5231 -11275     0  0
 CEJ4            Claresholm                       -- CA  5000 -11363     0  0
+CEK2            Braeburn                         -- CA  6148 -13578     0  0
 # CEK4
 CEK6            Killam _ Segdewick               -- CA  5280 -11176     0  0
 CEL5            Valleyview                       -- CA  5503 -11730     0  0
@@ -149,6 +158,7 @@ CFN7            Sundre                           -- CA  5177 -11468     0  0
 # CFS3
 CFS5            Spirit River                     -- CA  5578 -11884     0  0
 CFS6            Loon River                       -- CA  5714 -11508     0  0
+CFS8            Clearwater                       -- CA  5199 -11523     0  0
 CFT8            Pelican                          -- CA  5616 -11347     0  0
 CFU4            Garden River                     -- CA  5871 -11388     0  0
 CFV2            Beiseker                         -- CA  5139 -11347     0  0
@@ -158,10 +168,12 @@ CFX4            Manning                          -- CA  5695 -11764     0  0
 CFX5            Renard                           -- CA  5273  -7222     0  0
 CFX6            Vulcan                           -- CA  5040 -11328     0  0
 # CHB3
+# CHL6
 CJA5            Nestor Falls                     -- CA  4914  -9392     0  0
 CJB3            Stienbach                        -- CA  4955  -9668     0  0
 CJC2            Craik                            -- CA  5106 -10584     0  0
 CJE3            Weyburn                          -- CA  4970 -10380     0  0
+CJE4            Snow Lake                        -- CA  5490  -9982     0  0
 CJG2            Eatonia                          -- CA  5122 -10939     0  0
 CJK2            Gunisao Lake                     -- CA  5352  -9637     0  0
 CJH3            Maidstone                        -- CA  5310 -10933     0  0
@@ -194,6 +206,7 @@ CKD9            Slate Falls                      -- CA  5113  -9167     0  0
 # CKE9            
 CKF4            Goodsoil                         -- CA  5442 -10923     0  0
 CKJ7            Starbuck                         -- CA  4971  -9768     0  0
+CKL2            Selkirk                          -- CA  5017  -9687     0  0
 CKL3            Wunnumin Lake                    -- CA  5289  -8929     0  0
 CKM4            Jan Lake                         -- CA  5483 -10279     0  0
 CKM8            Opapimiskan Lake                 -- CA  5261  -9038     0  0
@@ -205,10 +218,12 @@ CKS8            Cree Lake                        -- CA  5746 -10675     0  0
 CKZ3            Elk Island                       -- CA  5467  -9415     0  0
 CKZ7            Winkler                          -- CA  4917  -9792     0  0
 # CLA4
+# CLA6
 # CLH4
 # CLJ2
 CLM2            Leamington                       -- CA  4203  -8253     0  0
 # CLT2
+CMB2            Meadowbank                       -- CA  6503  -9607     0  0
 CMB7            Maxville                         -- CA  4525  -7481     0  0
 CMN5            Manic-5                          -- CA  5066  -6883     0  0
 CMR2            Mary River                       -- CA  7132  -7935     0  0
@@ -239,6 +254,7 @@ CNR4            Tobermory                        -- CA  4522  -8163     0  0
 CNT7            Picton                           -- CA  4399  -7714     0  0
 CNW3            Bancroft                         -- CA  4507  -7788     0  0
 CNU4            Belleville                       -- CA  4419  -7731     0  0
+CNU8            Markham                          -- CA  4394  -7962     0  0
 # CNV4            
 CNV8            Edenvale                         -- CA  4444  -7997     0  0
 CNV9            Neuville                         -- CA  4672  -7158     0  0
@@ -375,6 +391,7 @@ CYNL            Points North Landing             SK CA  5828 -10408     0  0
 CYNJ            Langley Tower                    -- CA  4910 -12263     0  0
 CYNR            Fort MacKay                      -- CA  5738 -11170     0  0
 # CYNW
+CYOG            Old Glory Mountain               BC CA  4915 -11791     0  0
 CYOH            Oxford House                     MB CA  5493  -9528     0  0
 CYOP            Rainbow Lake                     AB CA  5849 -11941     0  0
 CYPM            Pokangikum                       -- CA  5182  -9397     0  0
@@ -427,6 +444,7 @@ CZSN            South Indian Lake                MB CA  5679  -9891     0  0
 CZSW            Prince Rupert Seal Cove          -- CA  5433 -13028     0  0
 CZTA            Bloodvein River                  -- CA  5178  -9669     0  0
 CZTM            Shamattawa                       -- CA  5587  -9208     0  0
+# CZUC
 CZWG            Winnipeg Centre                  MB CA  4990  -9726     0  0
 CZWH            Lac Brochet                      -- CA  5861 -10147     0  0
 CZWL            Wollaston                        SK CA  5811 -10317     0  0
