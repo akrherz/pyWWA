@@ -136,6 +136,7 @@ CER3            Drayton Valley                   -- CA  5327 -11496     0  0
 CER4            Fort McMurray                    -- CA  5706 -11158     0  0
 CES4            Westlock                         -- CA  5414 -11374     0  0
 CEU2            Beaverlodge                      -- CA  5518 -11945     0  0
+CEU9            Trout Lake                       -- CA  6042 -12127     0  0
 CEV3            Vegreville                       -- CA  5351 -11203     0  0
 CEV7            Tofield                          -- CA  5337 -11270     0  0
 CEW3            St Paul                          -- CA  5399 -11138     0  0
@@ -168,7 +169,9 @@ CFX4            Manning                          -- CA  5695 -11764     0  0
 CFX5            Renard                           -- CA  5273  -7222     0  0
 CFX6            Vulcan                           -- CA  5040 -11328     0  0
 # CHB3
+CHC5            Hayes Camp Aerodome              -- CA  6665  -9154     0  0
 # CHL6
+# CHT3
 CJA5            Nestor Falls                     -- CA  4914  -9392     0  0
 CJB3            Stienbach                        -- CA  4955  -9668     0  0
 CJC2            Craik                            -- CA  5106 -10584     0  0
@@ -209,6 +212,7 @@ CKJ7            Starbuck                         -- CA  4971  -9768     0  0
 CKL2            Selkirk                          -- CA  5017  -9687     0  0
 CKL3            Wunnumin Lake                    -- CA  5289  -8929     0  0
 CKM4            Jan Lake                         -- CA  5483 -10279     0  0
+# CKM7
 CKM8            Opapimiskan Lake                 -- CA  5261  -9038     0  0
 CKQ3            North Spirit Lake                -- CA  5249  -9297     0  0
 CKQ9            Pine Dock                        -- CA  5162  -9681     0  0
@@ -262,6 +266,7 @@ CNY3            Collingwood                      -- CA  4445  -8016     0  0
 CNZ4            Barrys Bay                       -- CA  4550  -7764     0  0
 CNZ8            Grimsby                          -- CA  4316  -7960     0  0
 # COB4
+# CPC9
 # CPF9            
 CPG5            Hawkesbury                       -- CA  4558  -7455     0  0
 # CPJ5 
@@ -273,6 +278,7 @@ CPN5            Listowel                         -- CA  4374  -8099     0  0
 # CPQ3            
 CPR3            Palmerston                       -- CA  4385  -8078     0  0
 CPR5            Woodstock                        -- CA  4311  -8082     0  0
+# CPS1
 CPT2            Killarney                        -- CA  4598  -8150     0  0
 CPU6            Tyendinaga Mohawk                -- CA  4419  -7711     0  0
 CPV7            Poplar Hill                      -- CA  5211  -9426     0  0
@@ -294,6 +300,7 @@ CSE4            Lachute                          -- CA  4564  -7437     0  0
 CSE5            Montmagny                        -- CA  4700  -7052     0  0
 CSF3            Poste Montagnais                 -- CA  5189  -6572     0  0
 CSG3            Joliette                         -- CA  4605  -7350     0  0
+# CSG9
 # CSH2
 CSH4            Lebel-sur-quevillion             -- CA  4903  -7702     0  0
 CSH5            St Ferdinand                     -- CA  4613  -7154     0  0
