@@ -72,7 +72,7 @@ def real_parser(txn, buf):
         table = "products_%s_0106" % (nws.valid.year,)
 
     if nws.afos is None:
-        if MANUAL:
+        if MANUAL or nws.source[0] not in ['K', 'P']:
             return
         raise ParseError("TextProduct.afos is null")
 
