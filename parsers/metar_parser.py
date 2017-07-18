@@ -24,12 +24,10 @@ IEMDB = common.get_database('iem')
 ASOSDB = common.get_database('asos')
 
 LOC2NETWORK = {}
-LOC2TZ = {}
-TIMEZONES = {None: pytz.timezone('UTC')}
 
 
 def load_stations(txn):
-    txn.execute("""SELECT id, network, tzname from stations
+    txn.execute("""SELECT id, network from stations
         where network ~* 'ASOS' or network = 'AWOS' or network = 'WTM'
         """)
     news = 0
@@ -37,14 +35,6 @@ def load_stations(txn):
         if row['id'] not in LOC2NETWORK:
             news += 1
             LOC2NETWORK[row['id']] = row['network']
-
-        LOC2TZ[row['id']] = row['tzname']
-        if row['tzname'] not in TIMEZONES:
-            try:
-                TIMEZONES[row['tzname']] = pytz.timezone(row['tzname'])
-            except:
-                log.msg("pytz does not like tzname: %s" % (row['tzname'],))
-                TIMEZONES[row['tzname']] = pytz.timezone("UTC")
 
     log.msg("Loaded %s new stations" % (news,))
     # Reload every 12 hours
@@ -136,10 +126,13 @@ def process_site(orig_metar, clean_metar):
         traceback.print_exc(file=io)
         errormsg = str(inst)
         if errormsg.find("Unparsed groups: ") == 0:
-            tokens = errormsg.split(": ")
-            newmetar = clean_metar.replace(tokens[1].replace("'", ''), "")
+            badchar = errormsg.split(": ")[1].split(" in ")[0]
+            newmetar = clean_metar.replace(badchar.replace("'", ''), "")
             if newmetar != clean_metar:
                 reactor.callLater(0, process_site, orig_metar, newmetar)
+            else:
+                print("unparsed groups regex fail: %s %s" % (repr(badchar),
+                                                             clean_metar))
         else:
             log.msg(io.getvalue())
             log.msg(clean_metar)
@@ -172,8 +165,7 @@ def process_site(orig_metar, clean_metar):
         log.msg("%s METAR [%s] timestamp in the future!" % (iemid, gts))
         return
 
-    iem = Observation(iemid, network,
-                      gts.astimezone(TIMEZONES[LOC2TZ.get(iemid, None)]))
+    iem = Observation(iemid, network, gts)
     deffer = IEMDB.runInteraction(save_data, iem, mtr, clean_metar, orig_metar)
     deffer.addErrback(common.email_error, clean_metar)
     # deffer.addCallback(got_results, tp, sid, network)
