@@ -1,50 +1,42 @@
-""" METAR product ingestor """
+"""METAR product ingestor
 
-# Twisted Python imports
-from syslog import LOG_LOCAL2
-from twisted.python import syslog
-syslog.startLogging(prefix='pyWWA/metar_parser', facility=LOG_LOCAL2)
-from twisted.python import log
-from twisted.internet import reactor
+NOTE: It is difficult to keep track of where I am getting the `Metar` library.
+So let us document it here for my own sanity.
 
+18 Jul 2017: `snowdepth` branch of my python-metar fork installed with pip
+"""
+from __future__ import print_function
 import re
 import traceback
 import StringIO
+from syslog import LOG_LOCAL2
+import datetime
+
+# Twisted Python imports
+from twisted.python import syslog
+from twisted.python import log
+from twisted.internet import reactor
+from twisted.internet.task import deferLater
 from pyiem import datatypes
 from pyiem.observation import Observation
 from pyldm import ldmbridge
-from twisted.internet.task import deferLater
-from metar.metar import Metar
-from metar.metar import ParserError as MetarParserError
-import datetime
+from metar.Metar import Metar
+from metar.Metar import ParserError as MetarParserError
 import pytz
 import common  # @UnresolvedImport
 
+syslog.startLogging(prefix='pyWWA/metar_parser', facility=LOG_LOCAL2)
 IEMDB = common.get_database('iem')
 ASOSDB = common.get_database('asos')
 
 LOC2NETWORK = {}
-
-
-def load_stations(txn):
-    txn.execute("""SELECT id, network from stations
-        where network ~* 'ASOS' or network = 'AWOS' or network = 'WTM'
-        """)
-    news = 0
-    for row in txn:
-        if row['id'] not in LOC2NETWORK:
-            news += 1
-            LOC2NETWORK[row['id']] = row['network']
-
-    log.msg("Loaded %s new stations" % (news,))
-    # Reload every 12 hours
-    reactor.callLater(12*60*60, IEMDB.runInteraction, load_stations)
-
-windAlerts = {}
+WINDALERTS = {}
 
 TORNADO_RE = re.compile(r" \+FC |TORNADO")
 FUNNEL_RE = re.compile(r" FC |FUNNEL")
 HAIL_RE = re.compile(r"GR")
+ERROR_RE = re.compile("Unparsed groups in body '(?P<msg>.*)' while processing")
+NIL_RE = re.compile(r"[\s\n]NIL")
 
 
 class myProductIngestor(ldmbridge.LDMProductReceiver):
@@ -66,6 +58,23 @@ class myProductIngestor(ldmbridge.LDMProductReceiver):
         d.addErrback(common.email_error, buf)
 
 
+def load_stations(txn):
+    """load station metadata to build a xref of stations to networks"""
+    txn.execute("""
+        SELECT id, network from stations
+        where network ~* 'ASOS' or network = 'AWOS' or network = 'WTM'
+    """)
+    news = 0
+    for row in txn:
+        if row['id'] not in LOC2NETWORK:
+            news += 1
+            LOC2NETWORK[row['id']] = row['network']
+
+    log.msg("Loaded %s new stations" % (news,))
+    # Reload every 12 hours
+    reactor.callLater(12*60*60, IEMDB.runInteraction, load_stations)
+
+
 def sanitize(metar):
     """
     Preprocess our metar into something we can deal with :/
@@ -79,7 +88,7 @@ def sanitize(metar):
                                             " ").replace("\003",
                                                          "").replace("COR ",
                                                                      "")
-    metar = re.sub("\s+", " ", metar.strip())
+    metar = re.sub(r"\s+", " ", metar.strip())
     # Look to see that our METAR starts with A-Z
     if re.match("^[0-9]", metar):
         log.msg("Found METAR starting with number, gleaning: %s" % (metar,))
@@ -95,7 +104,7 @@ def real_processor(buf):
     tokens = buf.split("=")
     for metar in tokens:
         # Dump METARs that have NIL in them
-        if metar.find(" NIL") > -1:
+        if NIL_RE.search(metar):
             continue
         elif metar.find("METAR") > -1:
             metar = metar[metar.find("METAR")+5:]
@@ -120,33 +129,37 @@ def process_site(orig_metar, clean_metar):
     if len(clean_metar) < 10:
         return
     try:
-        mtr = Metar(clean_metar, allexceptions=True)
+        mtr = Metar(clean_metar)
     except MetarParserError as inst:
-        io = StringIO.StringIO()
-        traceback.print_exc(file=io)
-        errormsg = str(inst)
-        if errormsg.find("Unparsed groups: ") == 0:
-            badchar = errormsg.split(": ")[1].split(" in ")[0]
-            newmetar = clean_metar.replace(badchar.replace("'", ''), "")
+        tokens = ERROR_RE.findall(str(inst))
+        if tokens:
+            if tokens[0] == clean_metar or clean_metar.startswith(tokens[0]):
+                return
+            # So tokens contains a series of groups that needs updated
+            newmetar = clean_metar
+            for token in tokens[0].split():
+                newmetar = newmetar.replace(" %s" % (token, ), "")
             if newmetar != clean_metar:
+                # recursion
                 reactor.callLater(0, process_site, orig_metar, newmetar)
             else:
-                print("unparsed groups regex fail: %s %s" % (repr(badchar),
-                                                             clean_metar))
+                print("unparsed groups regex fail: %s" % (inst, ))
         else:
+            io = StringIO.StringIO()
+            traceback.print_exc(file=io)
             log.msg(io.getvalue())
             log.msg(clean_metar)
         return
 
-    # Determine the ID, unfortunately I use 3 char ids for now :(
     if mtr.station_id is None:
-        log.msg("METAR station_id is None: %s" % (orig_metar,))
+        log.msg("FAIL: can't find identifier: %s" % (orig_metar,))
         return
     iemid = mtr.station_id[-3:]
     if mtr.station_id[0] != "K":
         iemid = mtr.station_id
     if iemid not in LOC2NETWORK:
-        log.msg("Unknown ID: %s: %s" % (iemid, orig_metar))
+        log.msg(("FAIL: station [%s] unknown in mesosite %s"
+                 ) % (iemid, orig_metar))
         deffer = ASOSDB.runOperation("""
             INSERT into unknown(id) values (%s)
             """, (iemid,))
@@ -155,14 +168,14 @@ def process_site(orig_metar, clean_metar):
     network = LOC2NETWORK[iemid]
 
     if mtr.time is None:
-        log.msg("%s METAR has none-time: %s" % (iemid, orig_metar))
+        log.msg("FAIL: unknown observation time %s" % (orig_metar, ))
         return
     gts = mtr.time.replace(tzinfo=pytz.timezone("UTC"))
     future = datetime.datetime.utcnow().replace(tzinfo=pytz.timezone("UTC"))
     future = future + datetime.timedelta(hours=1)
     # Make sure that the ob is not from the future!
     if gts > future:
-        log.msg("%s METAR [%s] timestamp in the future!" % (iemid, gts))
+        log.msg("FAIL: %s METAR [%s] timestamp in the future!" % (iemid, gts))
         return
 
     iem = Observation(iemid, network, gts)
@@ -172,6 +185,15 @@ def process_site(orig_metar, clean_metar):
 
 
 def save_data(txn, iem, mtr, clean_metar, orig_metar):
+    """Persist METAR data to database
+
+    Args:
+      txn (cursor): Database cursor to do our work with
+      iem (Observation): Observation object
+      mtr (Metar): Metar Object
+      clean_metar (str): The cleaned METAR string
+      orig_metar (str): Our original METAR string
+    """
 
     # Load the observation from the database, if the same time exists!
     iem.load(txn)
@@ -274,8 +296,8 @@ def save_data(txn, iem, mtr, clean_metar, orig_metar):
         iem.data['presentwx'] = (",".join(pwx))[:24]
 
     if not iem.save(txn):
-        log.msg("Unknown station [%s] METAR [%s]" % (iem.data['station'],
-                                                     clean_metar))
+        log.msg(("INFO: IEMAccess update of %s returned false: %s"
+                 ) % (iem.data['station'], clean_metar))
         deffer = ASOSDB.runOperation("""
             INSERT into unknown(id, valid)
             values (%s, %s)
@@ -283,9 +305,9 @@ def save_data(txn, iem, mtr, clean_metar, orig_metar):
         deffer.addErrback(common.email_error, iem.data['station'])
 
     # Search for tornado
-    if len(TORNADO_RE.findall(clean_metar)) > 0:
+    if TORNADO_RE.findall(clean_metar):
         sendAlert(txn, iem.data['station'], "Tornado", clean_metar)
-    elif len(FUNNEL_RE.findall(clean_metar)) > 0:
+    elif FUNNEL_RE.findall(clean_metar):
         sendAlert(txn, iem.data['station'], "Funnel Cloud", clean_metar)
     else:
         for weatheri in mtr.weather:
@@ -315,22 +337,22 @@ def save_data(txn, iem, mtr, clean_metar, orig_metar):
         key = "%s;%s;%s" % (mtr.station_id, v, t)
         # log.msg("PEAK GUST FOUND: %s %s %s %s" % \
         #        (mtr.station_id, v, t, clean_metar))
-        if v >= 50 and key not in windAlerts:
-            windAlerts[key] = 1
+        if v >= 50 and key not in WINDALERTS:
+            WINDALERTS[key] = 1
             sendWindAlert(txn, iem.data['station'], v, d, t, clean_metar)
 
 
 def sendAlert(txn, iemid, what, clean_metar):
     if iemid == 'FYM':
-        print 'Skipping FYM alert'
+        print('Skipping FYM alert')
         return
-    print "ALERTING for [%s]" % (iemid,)
+    print("ALERTING for [%s]" % (iemid,))
     txn.execute("""SELECT wfo, state, name, ST_x(geom) as lon,
            ST_y(geom) as lat, network from stations
            WHERE id = '%s' and (network ~* 'ASOS' or network = 'AWOS')
            """ % (iemid,))
     if txn.rowcount == 0:
-        print "I not find WFO for sid: %s " % (iemid,)
+        print("I not find WFO for sid: %s " % (iemid,))
         return
     row = txn.fetchone()
     wfo = row['wfo']
@@ -342,7 +364,7 @@ def sendAlert(txn, iemid, what, clean_metar):
     network = row['network']
 
     extra = ""
-    if (clean_metar.find("$") > 0):
+    if clean_metar.find("$"):
         extra = "(Caution: Maintenance Check Indicator)"
     url = ("http://mesonet.agron.iastate.edu/ASOS/current.phtml?network=%s"
            ) % (network,)
@@ -351,7 +373,7 @@ def sendAlert(txn, iemid, what, clean_metar):
     xtra = {'channels': wfo,
             'lat':  str(row['lat']), 'long': str(row['lon'])}
     xtra['twitter'] = "%s,%s (%s) ASOS reports %s" % (nm, st, iemid, what)
-    jabber.sendMessage(jtxt, jtxt, xtra)
+    JABBER.sendMessage(jtxt, jtxt, xtra)
 
 
 def drct2dirTxt(idir):
@@ -396,12 +418,12 @@ def sendWindAlert(txn, iemid, v, d, t, clean_metar):
     Send a wind alert please
     """
     speed = datatypes.speed(v, 'KT')
-    print "ALERTING for [%s]" % (iemid,)
+    print("ALERTING for [%s]" % (iemid,))
     txn.execute("""SELECT wfo, state, name, ST_x(geom) as lon,
            ST_y(geom) as lat, network from stations
            WHERE id = '%s' """ % (iemid, ))
     if txn.rowcount == 0:
-        print "I not find WFO for sid: %s " % (iemid,)
+        print("I not find WFO for sid: %s " % (iemid,))
         return
     row = txn.fetchone()
     wfo = row['wfo']
@@ -428,16 +450,22 @@ def sendWindAlert(txn, iemid, v, d, t, clean_metar):
                        ) % (nm, st, iemid, speed.value('KT'),
                             speed.value('MPH'), drct2dirTxt(d),
                             t.strftime("%H%MZ"))
-    jabber.sendMessage(jtxt, "<p>%s</p>" % (jtxt,), xtra)
+    JABBER.sendMessage(jtxt, "<p>%s</p>" % (jtxt,), xtra)
 
 
 def ready(bogus):
-
+    """callback once our database load is done"""
     ingest = myProductIngestor()
     ldmbridge.LDMProductFactory(ingest)
 
-jabber = common.make_jabber_client("metar_parser")
 
-df = IEMDB.runInteraction(load_stations)
-df.addCallback(ready)
-reactor.run()
+def run():
+    """Run once at startup"""
+    df = IEMDB.runInteraction(load_stations)
+    df.addCallback(ready)
+    reactor.run()
+
+
+if __name__ == '__main__':
+    JABBER = common.make_jabber_client("metar_parser")
+    run()
