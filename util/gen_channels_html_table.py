@@ -1,13 +1,15 @@
 """Utility script to generate the HTML used for IEMBot Channel Documentation
 """
+from __future__ import print_function
+import re
+import sys
+
 from pyiem.reference import prodDefinitions
 from pyiem.nws.ugc import UGC
 from pyiem.nws.nwsli import NWSLI
 from pyiem.nws.products.vtec import parser as vtec_parser
 from pyiem.nws.products import parser as productparser
 import psycopg2.extras
-import re
-import sys
 
 ugc_dict = {}
 nwsli_dict = {}
@@ -20,6 +22,7 @@ C4 = "&lt;vtec_phenomena&gt;.&lt;vtec_significance&gt;.&lt;wfo&gt;"
 C5 = "&lt;vtec_phenomena&gt;.&lt;vtec_significance&gt;.&lt;ugc&gt;"
 C6 = "&lt;ugc&gt;"
 C7 = "&lt;afos_pil&gt;.&lt;wfo&gt;"
+C8 = "&lt;wmo_source&gt;.&lt;aaa&gt;"
 D = {
      '10-313': 'http://www.nws.noaa.gov/directives/sym/pd01003013curr.pdf',
      '10-314': 'http://www.nws.noaa.gov/directives/sym/pd01003014curr.pdf',
@@ -124,7 +127,7 @@ GEN_PRODUCTS = [
     dict(afos='SPS', directive='10-1701', channels=[C3]),
     dict(afos='SRF', directive='10-1701', channels=[C3]),
     dict(afos='SPW', directive='10-1701', channels=[C3]),
-    dict(afos='TAF', directive='10-1701', channels=[C3]),
+    dict(afos='TAF', directive='10-1701', channels=[C3, C8]),
     dict(afos='TIB', directive='10-1701', channels=[C3]),
     dict(afos='TID', directive='10-320', channels=[C3]),
     dict(afos='TOE', directive='10-1701', channels=[C3]),
@@ -181,7 +184,7 @@ def do_generic():
         try:
             v = productparser(get_data(afos), ugc_provider=ugc_dict,
                               nwsli_provider=nwsli_dict)
-        except Exception, exp:
+        except Exception as exp:
             sys.stderr.write(str(exp))
             sys.stderr.write(afos+"\n")
             continue
@@ -198,7 +201,7 @@ def do_generic():
         channels.sort()
         print("""<tr><td><a name="channel_%s"/>
 <a id="%s_btn" class="btn btn-small" role="button"
- href="javascript: revdiv('%s');"><i class="glyphicon glyphicon-plus"></i></a>
+ href="javascript: revdiv('%s');"><i class="fa fa-plus"></i></a>
         </td><td>%s</td><td><a href="%s">%s</a></td><td>%s</td></tr>
         <tr><td colspan="4"><div id="%s" style="display:none;">
         <dl class="dl-horizontal">
@@ -228,6 +231,7 @@ def do_generic():
 
 
 def do_vtec():
+    """Do VTEC"""
     print("""
     <h3>NWS Products with P-VTEC and/or H-VTEC Included</h3>
     <table class="table table-bordered table-condensed">
@@ -256,7 +260,7 @@ def do_vtec():
         channels.sort()
         print("""<tr><td><a name="channel_%s"/>
         <a id="%s_btn" class="btn btn-small" role="button"
- href="javascript: revdiv('%s');"><i class="glyphicon glyphicon-plus"></i></a>
+ href="javascript: revdiv('%s');"><i class="fa fa-plus"></i></a>
         </td><td>%s</td><td><a href="%s">%s</a></td><td>%s</td></tr>
         <tr><td colspan="4"><div id="%s" style="display:none;">
         <dl class="dl-horizontal">
@@ -309,12 +313,12 @@ def main():
       var $a = $('#'+myid);
       if ($a.css('display') == 'block'){
         $a.css('display', 'none');
-        $("#"+myid+"_btn").html('<i class="glyphicon glyphicon-plus"></i>');
+        $("#"+myid+"_btn").html('<i class="fa fa-plus"></i>');
       } else {
         window.location.hash = '#channel_'+myid;
         $("#"+myid+"_btn").parent().parent().addClass('info');
         $a.css('display', 'block');
-        $("#"+myid+"_btn").html('<i class="glyphicon glyphicon-minus"></i>');
+        $("#"+myid+"_btn").html('<i class="fa fa-minus"></i>');
       }
     }
     </script>
