@@ -202,7 +202,7 @@ def do_generic():
         print("""<tr><td><a name="channel_%s"/>
 <a id="%s_btn" class="btn btn-small" role="button"
  href="javascript: revdiv('%s');"><i class="fa fa-plus"></i></a>
-        </td><td>%s</td><td><a href="%s">%s</a></td><td>%s</td></tr>
+        </td><td>%s (%s)</td><td><a href="%s">%s</a></td><td>%s</td></tr>
         <tr><td colspan="4"><div id="%s" style="display:none;">
         <dl class="dl-horizontal">
         %s
@@ -215,7 +215,7 @@ def do_generic():
         </div>
         </td>
         </tr>
-        """ % (afos, afos, afos, prodDefinitions.get(afos, afos),
+        """ % (afos, afos, afos, prodDefinitions.get(afos, afos), afos,
                D[entry['directive']], entry['directive'],
                " ".join(["<span class=\"badge\">%s</span>" % (s,)
                          for s in entry['channels']]),
@@ -261,7 +261,7 @@ def do_vtec():
         print("""<tr><td><a name="channel_%s"/>
         <a id="%s_btn" class="btn btn-small" role="button"
  href="javascript: revdiv('%s');"><i class="fa fa-plus"></i></a>
-        </td><td>%s</td><td><a href="%s">%s</a></td><td>%s</td></tr>
+        </td><td>%s (%s)</td><td><a href="%s">%s</a></td><td>%s</td></tr>
         <tr><td colspan="4"><div id="%s" style="display:none;">
         <dl class="dl-horizontal">
         %s
@@ -274,7 +274,7 @@ def do_vtec():
         </div>
         </td>
         </tr>
-        """ % (afos, afos, afos, prodDefinitions.get(afos, afos),
+        """ % (afos, afos, afos, prodDefinitions.get(afos, afos), afos,
                D[entry['directive']], entry['directive'],
                " ".join(["<span class=\"badge\">%s</span>" % (s,)
                          for s in entry['channels']]),
