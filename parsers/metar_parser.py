@@ -31,6 +31,8 @@ ASOSDB = common.get_database('asos')
 
 LOC2NETWORK = {}
 WINDALERTS = {}
+# Manual list of sites that are sent to jabber :/
+JABBER_SITES = {'KJFK': None, 'KLGA': None, 'KEWR': None, 'KTEB': None}
 
 TORNADO_RE = re.compile(r" \+FC |TORNADO")
 FUNNEL_RE = re.compile(r" FC |FUNNEL")
@@ -154,6 +156,12 @@ def process_site(orig_metar, clean_metar):
     if mtr.station_id is None:
         log.msg("FAIL: can't find identifier: %s" % (orig_metar,))
         return
+    if mtr.station_id in JABBER_SITES:
+        if mtr.time != JABBER_SITES[mtr.station_id]:
+            JABBER_SITES[mtr.station_id] = mtr.time
+            channel = "METAR.%s" % (mtr.station_id, )
+            JABBER.sendMessage(clean_metar, clean_metar,
+                               dict(channels=channel))
     iemid = mtr.station_id[-3:]
     if mtr.station_id[0] != "K":
         iemid = mtr.station_id
