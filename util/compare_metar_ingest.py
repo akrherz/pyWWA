@@ -30,13 +30,13 @@ def main():
             continue
         lrow = laptop[row[1]]
         if row[4] > lrow[4]:
+            print("_______")
             print("ID: %s IEM valid: %s laptop: %s" % (row[1],
                                                        row[4],
                                                        lrow[4]))
         elif row[3] != lrow[3]:
-            print("iemid: %s\nlaptop: '%s'\nIEM   : '%s'" % (row[1],
-                                                             lrow[3],
-                                                             row[3]))
+            print("_______")
+            print("laptop: '%s'\nIEM   : '%s'" % (lrow[3], row[3]))
 
 
 if __name__ == '__main__':

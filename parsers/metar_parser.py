@@ -6,464 +6,105 @@ So let us document it here for my own sanity.
 18 Jul 2017: `snowdepth` branch of my python-metar fork installed with pip
 """
 from __future__ import print_function
-import re
-import traceback
-import StringIO
 from syslog import LOG_LOCAL2
-import datetime
 
 # Twisted Python imports
 from twisted.python import syslog
 from twisted.python import log
 from twisted.internet import reactor
-from twisted.internet.task import deferLater
-from pyiem import datatypes
-from pyiem.observation import Observation
+from pyiem.nws.products import metarcollect
 from pyldm import ldmbridge
-from metar.Metar import Metar
-from metar.Metar import ParserError as MetarParserError
-import pytz
 import common  # @UnresolvedImport
 
 syslog.startLogging(prefix='pyWWA/metar_parser', facility=LOG_LOCAL2)
 IEMDB = common.get_database('iem')
 ASOSDB = common.get_database('asos')
 
-LOC2NETWORK = {}
-WINDALERTS = {}
+NWSLI_PROVIDER = {}
 # Manual list of sites that are sent to jabber :/
-JABBER_SITES = {'KJFK': None, 'KLGA': None, 'KEWR': None, 'KTEB': None}
-
-TORNADO_RE = re.compile(r" \+FC |TORNADO")
-FUNNEL_RE = re.compile(r" FC |FUNNEL")
-HAIL_RE = re.compile(r"GR")
-ERROR_RE = re.compile("Unparsed groups in body '(?P<msg>.*)' while processing")
-NIL_RE = re.compile(r"[\s\n]NIL")
-
-
-class myProductIngestor(ldmbridge.LDMProductReceiver):
-    stations_loaded = False
-
-    def connectionLost(self, reason):
-        log.msg('connectionLost')
-        log.err(reason)
-        reactor.callLater(30, self.shutdown)
-
-    def shutdown(self):
-        reactor.callWhenRunning(reactor.stop)
-
-    def process_data(self, buf):
-
-        buf = unicode(buf, errors='ignore')
-        d = deferLater(reactor, 0, real_processor, buf.encode('ascii',
-                                                              'ignore'))
-        d.addErrback(common.email_error, buf)
+metarcollect.JABBER_SITES = {'KJFK': None, 'KLGA': None, 'KEWR': None,
+                             'KTEB': None}
 
 
 def load_stations(txn):
     """load station metadata to build a xref of stations to networks"""
     txn.execute("""
-        SELECT id, network from stations
+        SELECT *, ST_X(geom) as lon, ST_Y(geom) as lat from stations
         where network ~* 'ASOS' or network = 'AWOS' or network = 'WTM'
     """)
     news = 0
     for row in txn:
-        if row['id'] not in LOC2NETWORK:
+        if row['id'] not in NWSLI_PROVIDER:
             news += 1
-            LOC2NETWORK[row['id']] = row['network']
+            NWSLI_PROVIDER[row['id']] = row
 
     log.msg("Loaded %s new stations" % (news,))
     # Reload every 12 hours
-    reactor.callLater(12*60*60, IEMDB.runInteraction, load_stations)
+    reactor.callLater(12*60*60, IEMDB.runInteraction,  # @UndefinedVariable
+                      load_stations)
 
 
-def sanitize(metar):
-    """
-    Preprocess our metar into something we can deal with :/
-    @param metar string
-    @return metar string
-    """
-    metar = re.sub("\015\015\012", " ", metar)
-    metar = re.sub("\015", " ", metar)
-    # Remove any multiple whitespace, bad chars
-    metar = metar.encode('latin-1').replace('\xa0',
-                                            " ").replace("\003",
-                                                         "").replace("COR ",
-                                                                     "")
-    metar = re.sub(r"\s+", " ", metar.strip())
-    # Look to see that our METAR starts with A-Z
-    if re.match("^[0-9]", metar):
-        log.msg("Found METAR starting with number, gleaning: %s" % (metar,))
-        tokens = metar.split()
-        metar = " ".join(tokens[1:])
-    return metar
+class MyProductIngestor(ldmbridge.LDMProductReceiver):
+    """Our LDM pqact product receiver"""
+
+    def connectionLost(self, reason):
+        """The connection was lost for some reason"""
+        log.msg('connectionLost')
+        log.err(reason)
+        reactor.callLater(30, self.shutdown)  # @UndefinedVariable
+
+    def shutdown(self):
+        """Shutdown"""
+        reactor.callWhenRunning(reactor.stop)  # @UndefinedVariable
+
+    def process_data(self, data):
+        """Callback when we have data to process"""
+
+        data = unicode(data, errors='ignore')
+        try:
+            real_processor(data.encode('ascii', 'ignore'))
+        except Exception as exp:
+            common.email_error(exp, data, -1)
 
 
-def real_processor(buf):
-    """
-    Actually process a raw string of one or more METARs
-    """
-    tokens = buf.split("=")
-    for metar in tokens:
-        # Dump METARs that have NIL in them
-        if NIL_RE.search(metar):
-            continue
-        elif metar.find("METAR") > -1:
-            metar = metar[metar.find("METAR")+5:]
-        elif metar.find("LWIS ") > -1:
-            metar = metar[metar.find("LWIS ")+5:]
-        elif metar.find("SPECI") > -1:
-            metar = metar[metar.find("SPECI")+5:]
-        elif len(metar.strip()) < 5:
-            continue
-        # We actually have something
-        metar = sanitize(metar)
-        process_site(metar, metar)
-
-
-def process_site(orig_metar, clean_metar):
-    """
-    Actually process the raw string of a metar
-    @param string original string of the metar to save in database
-    @param string current working version of the string metar
-    """
-    # Check the length I have
-    if len(clean_metar) < 10:
-        return
-    try:
-        mtr = Metar(clean_metar)
-    except MetarParserError as inst:
-        tokens = ERROR_RE.findall(str(inst))
-        if tokens:
-            if tokens[0] == clean_metar or clean_metar.startswith(tokens[0]):
-                return
-            # So tokens contains a series of groups that needs updated
-            newmetar = clean_metar
-            for token in tokens[0].split():
-                newmetar = newmetar.replace(" %s" % (token, ), "")
-            if newmetar != clean_metar:
-                # recursion
-                reactor.callLater(0, process_site, orig_metar, newmetar)
-            else:
-                print("unparsed groups regex fail: %s" % (inst, ))
-        else:
-            io = StringIO.StringIO()
-            traceback.print_exc(file=io)
-            log.msg(io.getvalue())
-            log.msg(clean_metar)
-        return
-
-    if mtr.station_id is None:
-        log.msg("FAIL: can't find identifier: %s" % (orig_metar,))
-        return
-    if mtr.station_id in JABBER_SITES:
-        if mtr.time != JABBER_SITES[mtr.station_id]:
-            JABBER_SITES[mtr.station_id] = mtr.time
-            channel = "METAR.%s" % (mtr.station_id, )
-            JABBER.sendMessage(clean_metar, clean_metar,
-                               dict(channels=channel))
-    iemid = mtr.station_id[-3:]
-    if mtr.station_id[0] != "K":
-        iemid = mtr.station_id
-    if iemid not in LOC2NETWORK:
-        log.msg(("FAIL: station [%s] unknown in mesosite %s"
-                 ) % (iemid, orig_metar))
-        deffer = ASOSDB.runOperation("""
+def real_processor(text):
+    """Process this product, please"""
+    collect = metarcollect.parser(text, nwsli_provider=NWSLI_PROVIDER)
+    if collect.warnings:
+        common.email_error("\n".join(collect.warnings), collect.unixtext)
+    jmsgs = collect.get_jabbers(("https://mesonet.agron.iastate.edu/ASOS/"
+                                 "current.phtml?network="))
+    for jmsg in jmsgs:
+        JABBER.sendMessage(*jmsg)
+    for mtr in collect.metars:
+        if mtr.network is None:
+            log.msg(("station: '%s' is unknown to metadata table"),
+                    (mtr.station_id))
+            deffer = ASOSDB.runOperation("""
             INSERT into unknown(id) values (%s)
-            """, (iemid,))
-        deffer.addErrback(common.email_error, iemid)
-        return
-    network = LOC2NETWORK[iemid]
-
-    if mtr.time is None:
-        log.msg("FAIL: unknown observation time %s" % (orig_metar, ))
-        return
-    gts = mtr.time.replace(tzinfo=pytz.timezone("UTC"))
-    future = datetime.datetime.utcnow().replace(tzinfo=pytz.timezone("UTC"))
-    future = future + datetime.timedelta(hours=1)
-    # Make sure that the ob is not from the future!
-    if gts > future:
-        log.msg("FAIL: %s METAR [%s] timestamp in the future!" % (iemid, gts))
-        return
-
-    iem = Observation(iemid, network, gts)
-    deffer = IEMDB.runInteraction(save_data, iem, mtr, clean_metar, orig_metar)
-    deffer.addErrback(common.email_error, clean_metar)
-    # deffer.addCallback(got_results, tp, sid, network)
+            """, (mtr.station_id,))
+            deffer.addErrback(common.email_error, text)
+            continue
+        deffer = IEMDB.runInteraction(do_db, mtr)
+        deffer.addErrback(common.email_error, collect.unixtext)
 
 
-def save_data(txn, iem, mtr, clean_metar, orig_metar):
-    """Persist METAR data to database
-
-    Args:
-      txn (cursor): Database cursor to do our work with
-      iem (Observation): Observation object
-      mtr (Metar): Metar Object
-      clean_metar (str): The cleaned METAR string
-      orig_metar (str): Our original METAR string
-    """
-
-    # Load the observation from the database, if the same time exists!
-    iem.load(txn)
-
-    # Need to figure out if we have a duplicate ob, if so, check
-    # the length of the raw data, if greater, take the temps
-    if (iem.data['raw'] is not None and
-            len(iem.data['raw']) >= len(clean_metar)):
-        pass
-    else:
-        if mtr.temp:
-            val = mtr.temp.value("F")
-            # Place reasonable bounds on the temperature before saving it!
-            if val > -90 and val < 150:
-                iem.data['tmpf'] = round(val, 1)
-        if mtr.dewpt:
-            iem.data['dwpf'] = round(mtr.dewpt.value("F"), 1)
-        # Daabase only allows len 254
-        iem.data['raw'] = orig_metar[:254]
-
-    if mtr.wind_speed:
-        iem.data['sknt'] = mtr.wind_speed.value("KT")
-    if mtr.wind_gust:
-        iem.data['gust'] = mtr.wind_gust.value("KT")
-    if mtr.wind_dir:
-        if mtr.wind_dir.value() == 'VRB':
-            iem.data['drct'] = 0
-        else:
-            iem.data['drct'] = float(mtr.wind_dir.value())
-
-    if not mtr.wind_speed_peak:
-        old_max_wind = max([iem.data.get('max_sknt', 0),
-                            iem.data.get('max_gust', 0)])
-        new_max_wind = max([iem.data.get('sknt', 0),
-                            iem.data.get('gust', 0)])
-        if new_max_wind > old_max_wind:
-            # print 'Setting max_drct manually: %s' % (clean_metar,)
-            iem.data['max_drct'] = iem.data.get('drct', 0)
-
-    if mtr.wind_speed_peak:
-        iem.data['max_gust'] = mtr.wind_speed_peak.value("KT")
-    if mtr.wind_dir_peak:
-        iem.data['max_drct'] = mtr.wind_dir_peak.value()
-    if mtr.peak_wind_time:
-        iem.data['max_gust_ts'] = mtr.peak_wind_time.replace(
-            tzinfo=pytz.timezone("UTC"))
-
-    if mtr.max_temp_6hr:
-        iem.data['max_tmpf_6hr'] = round(mtr.max_temp_6hr.value("F"), 1)
-        if iem.data['valid'].hour >= 6:
-            iem.data['max_tmpf'] = round(mtr.max_temp_6hr.value("F"), 1)
-    if mtr.min_temp_6hr:
-        iem.data['min_tmpf_6hr'] = round(mtr.min_temp_6hr.value("F"), 1)
-        if iem.data['valid'].hour >= 6:
-            iem.data['min_tmpf'] = round(mtr.min_temp_6hr.value("F"), 1)
-    if mtr.max_temp_24hr:
-        iem.data['max_tmpf_24hr'] = round(mtr.max_temp_24hr.value("F"), 1)
-    if mtr.min_temp_24hr:
-        iem.data['min_tmpf_24hr'] = round(mtr.min_temp_24hr.value("F"), 1)
-    if mtr.precip_3hr:
-        iem.data['p03i'] = mtr.precip_3hr.value("IN")
-    if mtr.precip_6hr:
-        iem.data['p06i'] = mtr.precip_6hr.value("IN")
-    if mtr.precip_24hr:
-        iem.data['p24i'] = mtr.precip_24hr.value("IN")
-
-    if mtr.snowdepth:
-        iem.data['snowd'] = mtr.snowdepth.value("IN")
-    if mtr.vis:
-        iem.data['vsby'] = mtr.vis.value("SM")
-    if mtr.press:
-        iem.data['alti'] = mtr.press.value("IN")
-    if mtr.press_sea_level:
-        iem.data['mslp'] = mtr.press_sea_level.value("MB")
-    if mtr.press_sea_level and mtr.press:
-        alti = mtr.press.value("MB")
-        mslp = mtr.press_sea_level.value("MB")
-        if abs(alti - mslp) > 25:
-            log.msg("PRESSURE ERROR %s %s ALTI: %s MSLP: %s" % (
-                iem.data['station'], iem.data['valid'], alti, mslp))
-            if alti > mslp:
-                iem.data['mslp'] += 100.
-            else:
-                iem.data['mslp'] -= 100.
-    iem.data['phour'] = 0
-    if mtr.precip_1hr:
-        iem.data['phour'] = mtr.precip_1hr.value("IN")
-    # Do something with sky coverage
-    for i in range(len(mtr.sky)):
-        (c, h, _) = mtr.sky[i]
-        iem.data['skyc%s' % (i+1)] = c
-        if h is not None:
-            iem.data['skyl%s' % (i+1)] = h.value("FT")
-
-    # Presentwx
-    if mtr.weather:
-        pwx = []
-        for x in mtr.weather:
-            pwx.append(("").join([a for a in x if a is not None]))
-        iem.data['presentwx'] = (",".join(pwx))[:24]
-
-    if not iem.save(txn):
+def do_db(txn, mtr):
+    """Do database transaction"""
+    iem, res = mtr.to_iemaccess(txn)
+    if not res:
         log.msg(("INFO: IEMAccess update of %s returned false: %s"
-                 ) % (iem.data['station'], clean_metar))
+                 ) % (iem.data['station'], mtr.code))
         deffer = ASOSDB.runOperation("""
             INSERT into unknown(id, valid)
             values (%s, %s)
         """, (iem.data['station'], iem.data['valid']))
         deffer.addErrback(common.email_error, iem.data['station'])
 
-    # Search for tornado
-    if TORNADO_RE.findall(clean_metar):
-        sendAlert(txn, iem.data['station'], "Tornado", clean_metar)
-    elif FUNNEL_RE.findall(clean_metar):
-        sendAlert(txn, iem.data['station'], "Funnel Cloud", clean_metar)
-    else:
-        for weatheri in mtr.weather:
-            for x in weatheri:
-                if x is not None and "GR" in x:
-                    sendAlert(txn, iem.data['station'], "Hail", clean_metar)
 
-    # Search for Peak wind gust info....
-    if mtr.wind_gust or mtr.wind_speed_peak:
-        d = 0
-        v = 0
-        if mtr.wind_gust:
-            v = mtr.wind_gust.value("KT")
-            if mtr.wind_dir:
-                d = mtr.wind_dir.value()
-            t = mtr.time.replace(tzinfo=pytz.timezone("UTC"))
-        if mtr.wind_speed_peak:
-            v1 = mtr.wind_speed_peak.value("KT")
-            d1 = mtr.wind_dir_peak.value()
-            t1 = mtr.peak_wind_time.replace(tzinfo=pytz.timezone("UTC"))
-            if v1 > v:
-                v = v1
-                d = d1
-                t = t1
-
-        # We store a key for this event
-        key = "%s;%s;%s" % (mtr.station_id, v, t)
-        # log.msg("PEAK GUST FOUND: %s %s %s %s" % \
-        #        (mtr.station_id, v, t, clean_metar))
-        if v >= 50 and key not in WINDALERTS:
-            WINDALERTS[key] = 1
-            sendWindAlert(txn, iem.data['station'], v, d, t, clean_metar)
-
-
-def sendAlert(txn, iemid, what, clean_metar):
-    if iemid == 'FYM':
-        print('Skipping FYM alert')
-        return
-    print("ALERTING for [%s]" % (iemid,))
-    txn.execute("""SELECT wfo, state, name, ST_x(geom) as lon,
-           ST_y(geom) as lat, network from stations
-           WHERE id = '%s' and (network ~* 'ASOS' or network = 'AWOS')
-           """ % (iemid,))
-    if txn.rowcount == 0:
-        print("I not find WFO for sid: %s " % (iemid,))
-        return
-    row = txn.fetchone()
-    wfo = row['wfo']
-    if wfo is None or wfo == '':
-        log.msg("Unknown WFO for id: %s, skipping alert" % (iemid,))
-        return
-    st = row['state']
-    nm = row['name']
-    network = row['network']
-
-    extra = ""
-    if clean_metar.find("$"):
-        extra = "(Caution: Maintenance Check Indicator)"
-    url = ("http://mesonet.agron.iastate.edu/ASOS/current.phtml?network=%s"
-           ) % (network,)
-    jtxt = ("%s,%s (%s) ASOS %s reports %s\n%s %s"
-            ) % (nm, st, iemid, extra, what, clean_metar, url)
-    xtra = {'channels': wfo,
-            'lat':  str(row['lat']), 'long': str(row['lon'])}
-    xtra['twitter'] = "%s,%s (%s) ASOS reports %s" % (nm, st, iemid, what)
-    JABBER.sendMessage(jtxt, jtxt, xtra)
-
-
-def drct2dirTxt(idir):
-    if idir is None:
-        return "N"
-    if idir >= 350 or idir < 13:
-        return "N"
-    elif idir >= 13 and idir < 35:
-        return "NNE"
-    elif idir >= 35 and idir < 57:
-        return "NE"
-    elif idir >= 57 and idir < 80:
-        return "ENE"
-    elif idir >= 80 and idir < 102:
-        return "E"
-    elif idir >= 102 and idir < 127:
-        return "ESE"
-    elif idir >= 127 and idir < 143:
-        return "SE"
-    elif idir >= 143 and idir < 166:
-        return "SSE"
-    elif idir >= 166 and idir < 190:
-        return "S"
-    elif idir >= 190 and idir < 215:
-        return "SSW"
-    elif idir >= 215 and idir < 237:
-        return "SW"
-    elif idir >= 237 and idir < 260:
-        return "WSW"
-    elif idir >= 260 and idir < 281:
-        return "W"
-    elif idir >= 281 and idir < 304:
-        return "WNW"
-    elif idir >= 304 and idir < 324:
-        return "NW"
-    elif idir >= 324 and idir < 350:
-        return "NNW"
-
-
-def sendWindAlert(txn, iemid, v, d, t, clean_metar):
-    """
-    Send a wind alert please
-    """
-    speed = datatypes.speed(v, 'KT')
-    print("ALERTING for [%s]" % (iemid,))
-    txn.execute("""SELECT wfo, state, name, ST_x(geom) as lon,
-           ST_y(geom) as lat, network from stations
-           WHERE id = '%s' """ % (iemid, ))
-    if txn.rowcount == 0:
-        print("I not find WFO for sid: %s " % (iemid,))
-        return
-    row = txn.fetchone()
-    wfo = row['wfo']
-    if wfo is None or wfo == '':
-        log.msg("Unknown WFO for id: %s, skipping WindAlert" % (iemid,))
-        return
-    st = row['state']
-    nm = row['name']
-
-    extra = ""
-    if clean_metar.find("$") > 0:
-        extra = "(Caution: Maintenance Check Indicator)"
-
-    jtxt = ("%s,%s (%s) ASOS %s reports gust of %.0f knots (%.1f mph) "
-            "from %s @ %s\n%s"
-            ) % (nm, st, iemid, extra, speed.value('KT'), speed.value('MPH'),
-                 drct2dirTxt(d), t.strftime("%H%MZ"), clean_metar)
-    xtra = {'channels': wfo,
-            'lat': str(row['lat']),
-            'long': str(row['lon'])}
-
-    xtra['twitter'] = ("%s,%s (%s) ASOS reports gust of %.1f knots "
-                       "(%.1f mph) from %s @ %s"
-                       ) % (nm, st, iemid, speed.value('KT'),
-                            speed.value('MPH'), drct2dirTxt(d),
-                            t.strftime("%H%MZ"))
-    JABBER.sendMessage(jtxt, "<p>%s</p>" % (jtxt,), xtra)
-
-
-def ready(bogus):
+def ready(_):
     """callback once our database load is done"""
-    ingest = myProductIngestor()
+    ingest = MyProductIngestor()
     ldmbridge.LDMProductFactory(ingest)
 
 
@@ -471,7 +112,7 @@ def run():
     """Run once at startup"""
     df = IEMDB.runInteraction(load_stations)
     df.addCallback(ready)
-    reactor.run()
+    reactor.run()  # @UndefinedVariable
 
 
 if __name__ == '__main__':
