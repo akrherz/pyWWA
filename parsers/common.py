@@ -99,7 +99,7 @@ def should_email():
     return (delta > datetime.timedelta(hours=1))
 
 
-def email_error(exp, message):
+def email_error(exp, message, trimstr=100):
     """
     Helper function to generate error emails when necessary and hopefully
     not flood!
@@ -116,7 +116,7 @@ def email_error(exp, message):
         log.msg(exp)
     cstr.seek(0)
     if isinstance(message, str):
-        log.msg(message[:100])
+        log.msg(message[:trimstr])
     else:
         log.msg(message)
 
