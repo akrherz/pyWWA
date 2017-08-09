@@ -54,10 +54,10 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
         log.err(reason)
         reactor.callLater(7, shutdown)
 
-    def process_data(self, buf):
+    def process_data(self, data):
         """ Process the product """
-        defer = PGCONN.runInteraction(really_process_data, buf)
-        defer.addErrback(error_wrapper, buf)
+        defer = PGCONN.runInteraction(really_process_data, data)
+        defer.addErrback(error_wrapper, data)
         defer.addErrback(log.err)
 
 
@@ -86,7 +86,7 @@ def really_process_data(txn, buf):
         INSERT into text_products(product, product_id) values (%s,%s)
         """
         myargs = (sqlraw, product_id)
-        if (len(prod.segments) > 0 and prod.segments[0].sbw):
+        if prod.segments and prod.segments[0].sbw:
             giswkt = ('SRID=4326;%s'
                       ) % (MultiPolygon([prod.segments[0].sbw]).wkt, )
             sql = """
@@ -125,7 +125,7 @@ def load_ugc(txn):
     return None
 
 
-def ready(dummy):
+def ready(_):
     ''' cb when our database work is done '''
     ldmbridge.LDMProductFactory(MyProductIngestor())
 
@@ -134,6 +134,7 @@ def dbload():
     ''' Load up database stuff '''
     df = PGCONN.runInteraction(load_ugc)
     df.addCallback(ready)
+
 
 if __name__ == '__main__':
 
