@@ -1,24 +1,24 @@
 """ PIREP parser! """
 from syslog import LOG_LOCAL2
-from twisted.python import syslog
-from __builtin__ import True
-syslog.startLogging(prefix='pyWWA/pirep_parser', facility=LOG_LOCAL2)
-
-# Twisted Python imports
-from twisted.internet import reactor
-from twisted.python import log
-
-# Standard Python modules
 import datetime
-import common
 import os
 
+from twisted.python import syslog
+from twisted.internet import reactor
+from twisted.python import log
+import common
 from pyldm import ldmbridge
 from pyiem.nws.products.pirep import parser as pirepparser
+
+syslog.startLogging(prefix='pyWWA/pirep_parser', facility=LOG_LOCAL2)
 
 TABLESDIR = os.path.join(os.path.dirname(__file__), "../tables")
 
 PIREPS = {}
+DBPOOL = common.get_database("postgis")
+JABBER = common.make_jabber_client('pirep')
+# Load LOCS table
+LOCS = {}
 
 
 def cleandb():
@@ -27,23 +27,19 @@ def cleandb():
     """
     thres = datetime.datetime.utcnow() - datetime.timedelta(hours=24*1)
     init_size = len(PIREPS.keys())
-    for key in PIREPS.keys():
-        if (PIREPS[key] < thres):
+    for key in PIREPS:
+        if PIREPS[key] < thres:
             del PIREPS[key]
 
     fin_size = len(PIREPS.keys())
     log.msg("cleandb() init_size: %s final_size: %s" % (init_size, fin_size))
 
     # Call Again in 30 minutes
-    reactor.callLater(60*30, cleandb)
-
-DBPOOL = common.get_database("postgis")
-
-# Load LOCS table
-LOCS = {}
+    reactor.callLater(60*30, cleandb)  # @UndefinedVariable
 
 
 def load_locs(txn):
+    """Build locations table"""
     log.msg("load_locs() called...")
     txn.execute("""SELECT id, name, st_x(geom) as lon, st_y(geom) as lat
         from stations WHERE network ~* 'ASOS' or network ~* 'AWOS'""")
@@ -89,17 +85,19 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
     """ I receive products from ldmbridge and process them 1 by 1 :) """
 
     def connectionLost(self, reason):
+        """Connection was lost for some reason"""
         log.msg('connectionLost')
         log.err(reason)
-        reactor.callLater(5, self.shutdown)
+        reactor.callLater(5, self.shutdown)  # @UndefinedVariable
 
     def shutdown(self):
-        reactor.callWhenRunning(reactor.stop)
+        """shutdown"""
+        reactor.callWhenRunning(reactor.stop)  # @UndefinedVariable
 
-    def process_data(self, buf):
+    def process_data(self, data):
         """ Process the product """
-        defer = DBPOOL.runInteraction(real_parser, buf)
-        defer.addErrback(common.email_error, buf)
+        defer = DBPOOL.runInteraction(real_parser, data)
+        defer.addErrback(common.email_error, data)
         defer.addErrback(log.err)
 
 
@@ -115,28 +113,29 @@ def real_parser(txn, buf):
         PIREPS[report.text] = datetime.datetime.utcnow()
 
     j = prod.get_jabbers()
-    if len(prod.warnings) > 0:
+    if prod.warnings:
         common.email_error("\n".join(prod.warnings), buf)
     for msg in j:
         JABBER.sendMessage(msg[0], msg[1], msg[2])
 
     prod.sql(txn)
 
-JABBER = common.make_jabber_client('pirep')
 
-
-def ready(bogus):
-    reactor.callLater(20, cleandb)
+def ready(_bogus):
+    """We are ready to ingest"""
+    reactor.callLater(20, cleandb)  # @UndefinedVariable
     ldmbridge.LDMProductFactory(MyProductIngestor())
 
 
 def shutdown(err):
+    """a shutown method"""
     log.msg(err)
-    reactor.stop()
+    reactor.stop()  # @UndefinedVariable
+
 
 if __name__ == '__main__':
     df = DBPOOL.runInteraction(load_locs)
     df.addCallback(ready)
     df.addErrback(shutdown)
 
-    reactor.run()
+    reactor.run()  # @UndefinedVariable
