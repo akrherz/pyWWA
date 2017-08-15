@@ -1,0 +1,67 @@
+
+371 
+FOUS63 KMSR 150147
+FFGDMX
+                                                                        
+COUNTY FLASH FLOOD GUIDANCE                                             
+NWS NORTH CENTRAL RIVER FORECAST CENTER TWIN CITIES/CHANHASSEN MN       
+846 PM CDT MON AUG 14 2017
+                                                                        
+DES MOINES HYDROLOGIC SERVICE AREA                                      
+                                                                        
+AVERAGE INCHES OF RAINFALL FOR GIVEN DURATIONS REQUIRED TO INITIATE     
+FLASH FLOODING ON SMALL STREAMS.  GENERAL FLASH FLOOD GUIDANCE FOR      
+STEEP TERRAIN AND URBAN AREAS ARE ONE TO TWO INCHES OR MORE IN ONE      
+TO TWO HOURS OR LESS RESPECTIVELY.                                      
+                                                                        
+.B MSR 170815 Z DH00/DC1708150146 /DUE/PPHCF/PPTCF/PPQCF
+:                                                                       
+:IDENT    1HR   3HR   6HR  ZONE NAME
+:======= ====  ====  ====  ====================
+:                                                                       
+:      *** IOWA COUNTIES ***                                            
+:                                                                       
+IAC013    2.4/  2.9/  3.6 :BLACK HAWK         
+IAC015    2.4/  3.0/  3.8 :BOONE              
+IAC017    2.4/  2.9/  3.6 :BREMER             
+IAC023    2.4/  2.9/  3.6 :BUTLER             
+IAC025    2.6/  3.1/  3.8 :CALHOUN            
+IAC027    2.3/  2.9/  3.6 :CARROLL            
+IAC033    2.2/  2.7/  3.3 :CERRO GORDO        
+IAC039    2.9/  3.7/  4.8 :CLARKE             
+IAC049    2.6/  3.3/  4.1 :DALLAS             
+IAC051    2.6/  3.4/  4.3 :DAVIS              
+IAC063    2.1/  2.5/  3.1 :EMMET              
+IAC069    2.2/  2.7/  3.4 :FRANKLIN           
+IAC073    2.5/  3.1/  3.9 :GREEN              
+IAC075    2.0/  2.5/  3.1 :GRUNDY             
+IAC077    2.4/  3.1/  3.9 :GUTHRIE            
+IAC079    2.3/  2.9/  3.5 :HAMILTON           
+IAC081    2.1/  2.5/  3.1 :HANCOCK            
+IAC083    2.1/  2.6/  3.3 :HARDIN             
+IAC091    2.4/  2.9/  3.6 :HUMBOLDT           
+IAC099    2.2/  2.8/  3.5 :JASPER             
+IAC109    2.0/  2.5/  3.0 :KOSSUTH            
+IAC117    2.8/  3.7/  4.7 :LUCAS              
+IAC121    2.7/  3.4/  4.4 :MADISON            
+IAC123    2.5/  3.1/  4.0 :MAHASKA            
+IAC125    2.7/  3.4/  4.4 :MARION             
+IAC127    2.2/  2.7/  3.4 :MARSHALL           
+IAC135    2.7/  3.6/  4.6 :MONROE             
+IAC147    2.3/  2.7/  3.4 :PALO ALTO          
+IAC151    2.5/  3.0/  3.6 :POCAHONTAS         
+IAC153    2.6/  3.3/  4.1 :POLK               
+IAC157    1.9/  2.5/  3.2 :POWESHIEK          
+IAC161    2.4/  3.0/  3.7 :SAC                
+IAC169    2.4/  3.0/  3.7 :STORY              
+IAC171    2.1/  2.6/  3.3 :TAMA               
+IAC179    2.7/  3.4/  4.3 :WAPELLO            
+IAC181    2.7/  3.5/  4.5 :WARREN             
+IAC187    2.4/  3.0/  3.7 :WEBSTER            
+IAC189    1.9/  2.3/  2.9 :WINNEBAGO          
+IAC195    2.0/  2.4/  2.9 :WORTH              
+IAC197    2.3/  2.7/  3.4 :WRIGHT             
+.END
+$$
+
+
