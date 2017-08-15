@@ -1,6 +1,5 @@
 """Support lib for the parser scripts found in this directory"""
 from __future__ import print_function
-import inspect
 import json
 import os
 import pwd
@@ -35,16 +34,9 @@ ILLEGAL_XML_CHARS_RE = re.compile(MYREGEX)
 
 SETTINGS = {}
 EMAIL_TIMESTAMPS = []
-
-
-def get_config_filename():
-    """Attempt to resolve where settings.json resides"""
-    # up one directory from calling script
-    callfn = inspect.stack()[-1][1]
-    return os.path.join(os.path.dirname(callfn), "../settings.json")
-
-
-CONFIG = json.load(open(get_config_filename()))
+# Careful modifying this, be sure to test from LDM account
+CONFIG = json.load(open(os.path.join(os.path.dirname(__file__),
+                                     '../settings.json')))
 
 
 def get_database(dbname, cp_max=5, module_name='pyiem.twistedpg'):
