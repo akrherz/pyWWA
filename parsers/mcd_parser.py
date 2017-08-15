@@ -14,7 +14,7 @@ from pyldm import ldmbridge
 
 import common
 
-DBPOOL = common.get_database(common.config['databaserw']['postgis'],
+DBPOOL = common.get_database(common.CONFIG['databaserw']['postgis'],
                              cp_max=2)
 
 
@@ -60,10 +60,10 @@ def real_process(txn, raw):
     prod = mcdparser(raw)
     prod.cwsus = find_cwsus(txn, prod)
 
-    j = prod.get_jabbers(common.settings.get('pywwa_product_url',
+    j = prod.get_jabbers(common.SETTINGS.get('pywwa_product_url',
                                              'pywwa_product_url'))
     if len(j) == 1:
-        JABBER.sendMessage(j[0][0], j[0][1], j[0][2])
+        JABBER.send_message(j[0][0], j[0][1], j[0][2])
 
     prod.database_save(txn)
 

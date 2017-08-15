@@ -114,9 +114,9 @@ def send_tweet(prod):
     """ Send the tweet for this prod """
 
     jres = prod.get_jabbers(
-        common.settings.get('pywwa_product_url', 'pywwa_product_url'))
+        common.SETTINGS.get('pywwa_product_url', 'pywwa_product_url'))
     for j in jres:
-        jabber.sendMessage(j[0], j[1], j[2])
+        jabber.send_message(j[0], j[1], j[2])
 
 
 def preprocessor(txn, text):

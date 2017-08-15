@@ -24,7 +24,7 @@ from pyiem.nws import ugc
 from pyiem.nws import nwsli
 
 import common
-DB_ON = bool(common.settings.get('pywwa_save_text_products', False))
+DB_ON = bool(common.SETTINGS.get('pywwa_save_text_products', False))
 
 ugc_dict = {}
 nwsli_dict = {}
@@ -72,11 +72,11 @@ def really_process_data(txn, buf):
 
     # Do the Jabber work necessary after the database stuff has completed
     for (plain, html, xtra) in prod.get_jabbers(
-            common.settings.get('pywwa_product_url', 'pywwa_product_url')):
+            common.SETTINGS.get('pywwa_product_url', 'pywwa_product_url')):
         if xtra.get('channels', '') == '':
             common.email_error("xtra[channels] is empty!", buf)
         if not MANUAL:
-            jabber.sendMessage(plain, html, xtra)
+            jabber.send_message(plain, html, xtra)
 
     if DB_ON:
         # Insert into database

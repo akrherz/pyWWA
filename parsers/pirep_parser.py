@@ -116,7 +116,7 @@ def real_parser(txn, buf):
     if prod.warnings:
         common.email_error("\n".join(prod.warnings), buf)
     for msg in j:
-        JABBER.sendMessage(msg[0], msg[1], msg[2])
+        JABBER.send_message(msg[0], msg[1], msg[2])
 
     prod.sql(txn)
 

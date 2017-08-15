@@ -73,7 +73,7 @@ DBPOOL = common.get_database('postgis')
 
 from twisted.internet import reactor
 
-IEM_URL = common.settings.get('pywwa_watch_url', 'pywwa_watch_url')
+IEM_URL = common.SETTINGS.get('pywwa_watch_url', 'pywwa_watch_url')
 
 
 def cancel_watch(report, ww_num):
@@ -96,7 +96,7 @@ def cancel_watch(report, ww_num):
            "http://www.spc.noaa.gov/products/watch/ww%04i.html"
            "") % (ww_num, int(ww_num))
     xtra = dict(channels='SPC')
-    jabber.sendMessage(msg, msg, xtra)
+    jabber.send_message(msg, msg, xtra)
 
 dirs = {'NNE': 22.5, 'ENE': 67.5, 'NE':  45.0, 'E': 90.0, 'ESE': 112.5,
         'SSE': 157.5, 'SE': 135.0, 'S': 180.0, 'SSW': 202.5,
@@ -333,7 +333,7 @@ def real_process(raw):
             wfo = rs[i]['wfo']
             channels.append(wfo)
         xtra = {'channels': ','.join(channels)}
-        jabber.sendMessage(jabberTxt, jabberTxtHTML, xtra)
+        jabber.send_message(jabberTxt, jabberTxtHTML, xtra)
 
         # Special message for SPC
         lines = raw.split("\n")
@@ -341,7 +341,7 @@ def real_process(raw):
         twt += (" http://www.spc.noaa.gov/products/watch/ww%04i.html"
                 ) % (int(ww_num), )
         xtra['channels'] = 'SPC'
-        jabber.sendMessage(twt, twt, xtra)
+        jabber.send_message(twt, twt, xtra)
 
     df = DBPOOL.runInteraction(runner2)
     df.addErrback(common.email_error, raw)

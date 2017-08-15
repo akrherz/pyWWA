@@ -80,8 +80,8 @@ def final_step(_, prod):
 
     """
     for j in prod.get_jabbers(
-            common.settings.get('pywwa_product_url', 'pywwa_product_url'), ''):
-        jabber.sendMessage(j[0], j[1], j[2])
+            common.SETTINGS.get('pywwa_product_url', 'pywwa_product_url'), ''):
+        jabber.send_message(j[0], j[1], j[2])
 
 MESOSITE = common.get_database('mesosite')
 

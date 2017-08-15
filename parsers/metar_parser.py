@@ -75,7 +75,7 @@ def real_processor(text):
     jmsgs = collect.get_jabbers(("https://mesonet.agron.iastate.edu/ASOS/"
                                  "current.phtml?network="))
     for jmsg in jmsgs:
-        JABBER.sendMessage(*jmsg)
+        JABBER.send_message(*jmsg)
     for mtr in collect.metars:
         if mtr.network is None:
             log.msg(("station: '%s' is unknown to metadata table"),

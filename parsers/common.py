@@ -1,18 +1,16 @@
 """Support lib for the parser scripts found in this directory"""
-
-# stdlib
+from __future__ import print_function
+import inspect
 import json
 import os
 import pwd
-# http://bugs.python.org/issue7980
 import datetime
-datetime.datetime.strptime('2013', '%Y')
 import re
 import traceback
 import StringIO
 import socket
 import sys
-from email.MIMEText import MIMEText
+from email.mime.text import MIMEText
 
 # 3rd party
 import psycopg2
@@ -30,14 +28,24 @@ from twisted.words.xish import domish, xpath
 from twisted.mail import smtp
 from twisted.enterprise import adbapi
 
-_myregex = u'[\x00-\x08\x0b\x0c\x0e-\x1F\uD800-\uDFFF\uFFFE\uFFFF]'
-_illegal_xml_chars_RE = re.compile(_myregex)
+# http://bugs.python.org/issue7980
+datetime.datetime.strptime('2013', '%Y')
+MYREGEX = u'[\x00-\x08\x0b\x0c\x0e-\x1F\uD800-\uDFFF\uFFFE\uFFFF]'
+ILLEGAL_XML_CHARS_RE = re.compile(MYREGEX)
+
+SETTINGS = {}
+EMAIL_TIMESTAMPS = []
 
 
-config = json.load(open(os.path.join(os.path.dirname(__file__),
-                                     '../settings.json')))
-settings = {}
-email_timestamps = []
+def get_config_filename():
+    """Attempt to resolve where settings.json resides"""
+    # up one directory from calling script
+    callfn = inspect.stack()[-1][1]
+    print(callfn)
+    return os.path.join(os.path.dirname(callfn), "../settings.json")
+
+
+CONFIG = json.load(open(get_config_filename()))
 
 
 def get_database(dbname, cp_max=5, module_name='pyiem.twistedpg'):
@@ -48,14 +56,14 @@ def get_database(dbname, cp_max=5, module_name='pyiem.twistedpg'):
       cp_max (int): The maximum number of connections to make to the database
       module_name (str): The python module to use for the ConnectionPool
     """
-    host = config.get('databaserw').get('host')
+    host = CONFIG.get('databaserw').get('host')
     if dbname == 'hads':
         host = 'iemdb-hads'
     return adbapi.ConnectionPool(module_name, database=dbname,
                                  cp_reconnect=True, cp_max=cp_max,
                                  host=host,
-                                 user=config.get('databaserw').get('user'),
-                                 password=config.get('databaserw'
+                                 user=CONFIG.get('databaserw').get('user'),
+                                 password=CONFIG.get('databaserw'
                                                      ).get('password'))
 
 
@@ -63,18 +71,18 @@ def load_settings():
     """ Load settings immediately, so we don't have to worry about the settings
         not being loaded for subsequent usage """
 
-    dbconn = psycopg2.connect(database=config.get('databasero').get('openfire'
+    dbconn = psycopg2.connect(database=CONFIG.get('databasero').get('openfire'
                                                                     ),
-                              host=config.get('databasero').get('host'),
-                              password=config.get('databasero').get('password'
+                              host=CONFIG.get('databasero').get('host'),
+                              password=CONFIG.get('databasero').get('password'
                                                                     ),
-                              user=config.get('databasero').get('user'))
+                              user=CONFIG.get('databasero').get('user'))
     cursor = dbconn.cursor()
     cursor.execute("""SELECT propname, propvalue from properties""")
     for row in cursor:
-        settings[row[0]] = row[1]
+        SETTINGS[row[0]] = row[1]
     log.msg(("common.load_settings loaded %s settings from database"
-             ) % (len(settings), ))
+             ) % (len(SETTINGS), ))
     cursor.close()
     dbconn.close()
 
@@ -88,15 +96,15 @@ def should_email():
     @return boolean if we should email or not
     """
     utcnow = datetime.datetime.utcnow()
-    email_timestamps.insert(0, utcnow)
-    delta = email_timestamps[0] - email_timestamps[-1]
-    email_limit = int(settings.get('pywwa_email_limit', 10))
-    if len(email_timestamps) < email_limit:
+    EMAIL_TIMESTAMPS.insert(0, utcnow)
+    delta = EMAIL_TIMESTAMPS[0] - EMAIL_TIMESTAMPS[-1]
+    email_limit = int(SETTINGS.get('pywwa_email_limit', 10))
+    if len(EMAIL_TIMESTAMPS) < email_limit:
         return True
-    while len(email_timestamps) > email_limit:
-        email_timestamps.pop()
+    while len(EMAIL_TIMESTAMPS) > email_limit:
+        EMAIL_TIMESTAMPS.pop()
 
-    return (delta > datetime.timedelta(hours=1))
+    return delta > datetime.timedelta(hours=1)
 
 
 def email_error(exp, message, trimstr=100):
@@ -123,7 +131,7 @@ def email_error(exp, message, trimstr=100):
     # Logic to prevent email bombs
     if not should_email():
         log.msg(("Email threshold of %s exceeded, so no email sent!"
-                 ) % (settings.get('pywwa_email_limit', 10)))
+                 ) % (SETTINGS.get('pywwa_email_limit', 10)))
         return False
 
     msg = MIMEText("""
@@ -146,9 +154,9 @@ Message:
     # Send the email already!
     msg['subject'] = ("[pyWWA] %s Traceback -- %s"
                       ) % (sys.argv[0].split("/")[-1], socket.gethostname())
-    msg['From'] = settings.get('pywwa_errors_from', 'ldm@localhost')
-    msg['To'] = settings.get('pywwa_errors_to', 'ldm@localhost')
-    df = smtp.sendmail(settings.get('pywwa_smtp', 'smtp'),
+    msg['From'] = SETTINGS.get('pywwa_errors_from', 'ldm@localhost')
+    msg['To'] = SETTINGS.get('pywwa_errors_to', 'ldm@localhost')
+    df = smtp.sendmail(SETTINGS.get('pywwa_smtp', 'smtp'),
                        msg["From"], msg["To"], msg)
     df.addErrback(log.err)
     return True
@@ -157,79 +165,103 @@ Message:
 def make_jabber_client(resource_prefix):
     """ Generate a jabber client, please """
 
-    myJid = jid.JID('%s@%s/%s_%s' % (
-                    settings.get('pywwa_jabber_username', 'nwsbot_ingest'),
-                    settings.get('pywwa_jabber_domain', 'nwschat.weather.gov'),
+    myjid = jid.JID('%s@%s/%s_%s' % (
+                    SETTINGS.get('pywwa_jabber_username', 'nwsbot_ingest'),
+                    SETTINGS.get('pywwa_jabber_domain', 'nwschat.weather.gov'),
                     resource_prefix,
                     datetime.datetime.utcnow().strftime("%Y%m%d%H%M%S")))
-    factory = jclient.XMPPClientFactory(myJid,
-                                        settings.get('pywwa_jabber_password',
+    factory = jclient.XMPPClientFactory(myjid,
+                                        SETTINGS.get('pywwa_jabber_password',
                                                      'secret'))
 
-    jabber = JabberClient(myJid)
+    jabber = JabberClient(myjid)
 
     factory.addBootstrap('//event/stream/authd', jabber.authd)
-    factory.addBootstrap("//event/client/basicauth/invaliduser", jabber.debug)
-    factory.addBootstrap("//event/client/basicauth/authfailed", jabber.debug)
-    factory.addBootstrap("//event/stream/error", jabber.debug)
-    factory.addBootstrap(xmlstream.STREAM_END_EVENT, jabber._disconnect)
+    factory.addBootstrap("//event/client/basicauth/invaliduser", debug)
+    factory.addBootstrap("//event/client/basicauth/authfailed", debug)
+    factory.addBootstrap("//event/stream/error", debug)
+    factory.addBootstrap(xmlstream.STREAM_END_EVENT, jabber.disconnect)
 
-    reactor.connectTCP(settings.get('pywwa_jabber_host', 'localhost'), 5222,
-                       factory)
+    reactor.connectTCP(SETTINGS.get('pywwa_jabber_host',  # @UndefinedVariable
+                                    'localhost'),
+                       5222, factory)
 
     return jabber
 
 
-class JabberClient:
+def message_processor(stanza):
+    """ Process a message stanza """
+    body = xpath.queryForString("/message/body", stanza)
+    log.msg("Message from %s Body: %s" % (stanza['from'], body))
+    if body is None:
+        return
+    if body.lower().strip() == "shutdown":
+        log.msg("I got shutdown message, shutting down...")
+        reactor.callWhenRunning(reactor.stop)  # @UndefinedVariable
+
+
+def raw_data_in(data):
+    """
+    Debug method
+    @param data string of what was received from the server
+    """
+    log.msg('RECV %s' % (unicode(data, 'utf-8',
+                                 'ignore').encode('ascii', 'replace'),))
+
+
+def debug(elem):
+    """
+    Debug method
+    @param elem twisted.works.xish
+    """
+    log.msg(elem.toXml().encode('utf-8'))
+
+
+def raw_data_out(data):
+    """
+    Debug method
+    @param data string of what data was sent
+    """
+    if data == ' ':
+        return
+    log.msg('SEND %s' % (unicode(data, 'utf-8',
+                                 'ignore').encode('ascii', 'replace'),))
+
+
+class JabberClient(object):
     """
     I am an important class of a jabber client against the chat server,
     used by pretty much every ingestor as that is how messages are routed
     to nwsbot
     """
 
-    def __init__(self, myJid):
+    def __init__(self, myjid):
         """
         Constructor
 
-        @param myJid twisted.words.jid object
+        @param jid twisted.words.jid object
         """
-        self.myJid = myJid
+        self.myjid = myjid
         self.xmlstream = None
         self.authenticated = False
-        self.routerJid = "%s@%s" % (settings.get('bot.username', 'nwsbot'),
-                                    settings.get('pywwa_jabber_domain',
+        self.routerjid = "%s@%s" % (SETTINGS.get('bot.username', 'nwsbot'),
+                                    SETTINGS.get('pywwa_jabber_domain',
                                                  'nwschat.weather.gov'))
 
-    def has_football(self):
-        """
-        Check to make sure we have the football before doing important things
-        """
-        return os.path.isfile("/home/nwschat/public_html/service.no")
-
-    def message_processor(self, stanza):
-        """ Process a message stanza """
-        body = xpath.queryForString("/message/body", stanza)
-        log.msg("Message from %s Body: %s" % (stanza['from'], body))
-        if body is None:
-            return
-        if body.lower().strip() == "shutdown":
-            log.msg("I got shutdown message, shutting down...")
-            reactor.callWhenRunning(reactor.stop)
-
-    def authd(self, xs):
+    def authd(self, xstream):
         """
         Callbacked once authentication succeeds
         @param xs twisted.words.xish.xmlstream
         """
-        log.msg("Logged in as %s" % (self.myJid,))
+        log.msg("Logged in as %s" % (self.myjid,))
         self.authenticated = True
 
-        self.xmlstream = xs
-        self.xmlstream.rawDataInFn = self.rawDataInFn
-        self.xmlstream.rawDataOutFn = self.rawDataOutFn
+        self.xmlstream = xstream
+        self.xmlstream.rawDataInFn = raw_data_in
+        self.xmlstream.rawDataOutFn = raw_data_out
 
         # Process Messages
-        self.xmlstream.addObserver('/message/body',  self.message_processor)
+        self.xmlstream.addObserver('/message/body',  message_processor)
 
         # Send initial presence
         presence = domish.Element(('jabber:client', 'presence'))
@@ -247,14 +279,14 @@ class JabberClient:
         """
         self.xmlstream.send(' ')
 
-    def _disconnect(self, xs):
+    def disconnect(self, _xs):
         """
         Called when we are disconnected from the server, I guess
         """
         log.msg("SETTING authenticated to false!")
         self.authenticated = False
 
-    def sendMessage(self, body, html, xtra):
+    def send_message(self, body, html, xtra):
         """
         Send a message to nwsbot.  This message should have
         @param body plain text variant
@@ -263,53 +295,31 @@ class JabberClient:
         """
         if not self.authenticated:
             log.msg("No Connection, Lets wait and try later...")
-            reactor.callLater(3, self.sendMessage, body, html, xtra)
+            reactor.callLater(3,  # @UndefinedVariable
+                              self.send_message, body, html, xtra)
             return
         message = domish.Element(('jabber:client', 'message'))
-        message['to'] = self.routerJid
+        message['to'] = self.routerjid
         message['type'] = 'chat'
 
         # message.addElement('subject',None,subject)
-        body = _illegal_xml_chars_RE.sub('', body)
+        body = ILLEGAL_XML_CHARS_RE.sub('', body)
         if html:
-            html = _illegal_xml_chars_RE.sub('', html)
+            html = ILLEGAL_XML_CHARS_RE.sub('', html)
         message.addElement('body', None, body)
-        h = message.addElement('html', 'http://jabber.org/protocol/xhtml-im')
-        b = h.addElement('body', 'http://www.w3.org/1999/xhtml')
-        b.addRawXml(html or body)
+        helem = message.addElement('html',
+                                   'http://jabber.org/protocol/xhtml-im')
+        belem = helem.addElement('body', 'http://www.w3.org/1999/xhtml')
+        belem.addRawXml(html or body)
         # channels is of most important
-        x = message.addElement('x', 'nwschat:nwsbot')
+        xelem = message.addElement('x', 'nwschat:nwsbot')
         for key in xtra.keys():
-            x[key] = xtra[key]
-        # So sendMessage may be getting called from 'threads' and the writing
+            xelem[key] = xtra[key]
+        # So send_message may be getting called from 'threads' and the writing
         # of data to the transport is not thread safe, so we must ensure that
         # this gets called from the main thread
-        reactor.callFromThread(self.xmlstream.send, message)
-
-    def debug(self, elem):
-        """
-        Debug method
-        @param elem twisted.works.xish
-        """
-        log.msg(elem.toXml().encode('utf-8'))
-
-    def rawDataInFn(self, data):
-        """
-        Debug method
-        @param data string of what was received from the server
-        """
-        log.msg('RECV %s' % (unicode(data, 'utf-8',
-                                     'ignore').encode('ascii', 'replace'),))
-
-    def rawDataOutFn(self, data):
-        """
-        Debug method
-        @param data string of what data was sent
-        """
-        if data == ' ':
-            return
-        log.msg('SEND %s' % (unicode(data, 'utf-8',
-                                     'ignore').encode('ascii', 'replace'),))
+        reactor.callFromThread(self.xmlstream.send,  # @UndefinedVariable
+                               message)
 
 
 # This is blocking, but necessary to make sure settings are loaded before

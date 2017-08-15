@@ -14,9 +14,9 @@ from pyldm import ldmbridge
 
 from pyiem.nws import product
 POSTGIS = common.get_database('postgis', cp_max=1)
-PYWWA_PRODUCT_URL = common.settings.get('pywwa_product_url',
+PYWWA_PRODUCT_URL = common.SETTINGS.get('pywwa_product_url',
                                         'pywwa_product_url')
-DB_ON = bool(common.settings.get('pywwa_save_text_products', False))
+DB_ON = bool(common.SETTINGS.get('pywwa_save_text_products', False))
 
 
 def shutdown():
@@ -70,7 +70,7 @@ def real_process(txn, raw):
                 "<a href='%s?pid=%s'>Satellite Precipitation Estimates</a>"
                 "</p>"
                 ) % (PYWWA_PRODUCT_URL, product_id)
-    jabber.sendMessage(body, htmlbody, xtra)
+    jabber.send_message(body, htmlbody, xtra)
 
 
 def killer():

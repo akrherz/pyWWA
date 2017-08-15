@@ -16,7 +16,7 @@ from pyldm import ldmbridge
 from shapely.geometry import MultiPolygon
 
 POSTGIS = common.get_database('postgis')
-PYWWA_PRODUCT_URL = common.settings.get('pywwa_product_url',
+PYWWA_PRODUCT_URL = common.SETTINGS.get('pywwa_product_url',
                                         'pywwa_product_url')
 
 ugc_dict = {}
@@ -123,7 +123,7 @@ def real_process(txn, raw):
                                                       expire,
                                                       PYWWA_PRODUCT_URL,
                                                       product_id)
-        jabber.sendMessage(mess, htmlmess, xtra)
+        jabber.send_message(mess, htmlmess, xtra)
 
 jabber = common.make_jabber_client('sps_parser')
 

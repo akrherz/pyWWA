@@ -63,7 +63,7 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
             really_process_data(buf)
         except TextProductException, (channel, mess):
             if not MANUAL:
-                jabber.sendMessage(mess, mess, {'channels': '%s,%s' % (channel,
+                jabber.send_message(mess, mess, {'channels': '%s,%s' % (channel,
                                                                        "ERROR")
                                                 }
                                    )
@@ -102,12 +102,12 @@ def step2(dummy, text_product):
 
     # Do the Jabber work necessary after the database stuff has completed
     for (plain, html, xtra) in text_product.get_jabbers(
-            common.settings.get('pywwa_vtec_url', 'pywwa_vtec_url'),
-            common.settings.get('pywwa_river_url', 'pywwa_river_url')):
+            common.SETTINGS.get('pywwa_vtec_url', 'pywwa_vtec_url'),
+            common.SETTINGS.get('pywwa_river_url', 'pywwa_river_url')):
         if xtra.get('channels', '') == '':
             common.email_error("xtra[channels] is empty!", text_product.text)
         if not MANUAL:
-            jabber.sendMessage(plain, html, xtra)
+            jabber.send_message(plain, html, xtra)
 
 
 def load_ugc(txn):
@@ -156,7 +156,7 @@ if __name__ == '__main__':
         MANUAL = True
 
     # Fire up!
-    PGCONN = common.get_database(common.config['databaserw']['postgis'],
+    PGCONN = common.get_database(common.CONFIG['databaserw']['postgis'],
                                  cp_max=(5 if not MANUAL else 1))
     df = PGCONN.runInteraction(load_ugc)
     df.addCallback(ready)

@@ -20,7 +20,7 @@ from pyldm import ldmbridge
 # IEM python Stuff
 import common
 import datetime
-DBPOOL = common.get_database(common.config['databaserw']['postgis'])
+DBPOOL = common.get_database(common.CONFIG['databaserw']['postgis'])
 
 # Cheap datastore for LSRs to avoid Dups!
 LSRDB = {}
@@ -91,9 +91,9 @@ def real_processor(txn, text):
             tzinfo=pytz.timezone("UTC"))
         lsr.sql(txn)
 
-    j = prod.get_jabbers(common.settings.get('pywwa_lsr_url', 'pywwa_lsr_url'))
+    j = prod.get_jabbers(common.SETTINGS.get('pywwa_lsr_url', 'pywwa_lsr_url'))
     for (p, h, x) in j:
-        JABBER.sendMessage(p, h, x)
+        JABBER.send_message(p, h, x)
 
     if len(prod.warnings) > 0:
         common.email_error("\n\n".join(prod.warnings), text)

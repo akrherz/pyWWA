@@ -80,9 +80,9 @@ def really_process_data(txn, data):
     if tp.afos[:3] == 'FRH':
         return
     jmsgs = tp.get_jabbers(
-        common.settings.get('pywwa_product_url', 'pywwa_product_url'))
+        common.SETTINGS.get('pywwa_product_url', 'pywwa_product_url'))
     for jmsg in jmsgs:
-        JABBER.sendMessage(*jmsg)
+        JABBER.send_message(*jmsg)
 
 
 if __name__ == '__main__':

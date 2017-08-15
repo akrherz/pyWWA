@@ -1,20 +1,18 @@
 """ Twisted Way to dump data to the database """
-
-# Twisted Python imports
 from syslog import LOG_LOCAL2
+import sys
+import datetime
+
+import pytz
 from twisted.python import syslog
-syslog.startLogging(prefix='pyWWA/afos_dump', facility=LOG_LOCAL2)
 from twisted.python import log
 from twisted.internet import reactor
-
-import sys
-
 from pyldm import ldmbridge
 from pyiem.nws import product
 from pyiem.nws.ugc import UGCParseException
-import common
-import datetime
-import pytz
+import common  # @UnresolvedImport
+
+syslog.startLogging(prefix='pyWWA/afos_dump', facility=LOG_LOCAL2)
 
 DBPOOL = common.get_database('afos')
 
@@ -22,7 +20,7 @@ DBPOOL = common.get_database('afos')
 def shutdown():
     """ Down we go! """
     log.msg("Stopping...")
-    reactor.callWhenRunning(reactor.stop)
+    reactor.callWhenRunning(reactor.stop)  # @UndefinedVariable
 
 
 # LDM Ingestor
@@ -33,12 +31,12 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
         """ called when the connection is lost """
         log.msg('connectionLost')
         log.err(reason)
-        reactor.callLater(5, shutdown)
+        reactor.callLater(5, shutdown)  # @UndefinedVariable
 
-    def process_data(self, buf):
+    def process_data(self, data):
         """ Process the product """
-        defer = DBPOOL.runInteraction(real_parser, buf)
-        defer.addErrback(common.email_error, buf)
+        defer = DBPOOL.runInteraction(real_parser, data)
+        defer.addErrback(common.email_error, data)
         defer.addErrback(log.err)
 
 
@@ -101,4 +99,4 @@ if __name__ == '__main__':
                                    int(sys.argv[4]), int(sys.argv[5])
                                    ).replace(tzinfo=pytz.utc)
     ldmbridge.LDMProductFactory(MyProductIngestor())
-    reactor.run()
+    reactor.run()  # @UndefinedVariable

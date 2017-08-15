@@ -14,3 +14,5 @@
 /cfg.ini
 /logs
 /settings.json
+parser/gemglb.nts
+parsers/last.nts
