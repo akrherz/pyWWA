@@ -77,6 +77,7 @@ GEN_PRODUCTS = [
     dict(afos='CEM', directive='10-1701', channels=[C3]),
     dict(afos='CGR', directive='10-1701', channels=[C3]),
     dict(afos='CLI', directive='10-1701', channels=[C3]),
+    dict(afos='CRF', directive='10-912', channels=[C3]),
     dict(afos='CWF', directive='10-1701', channels=[C3]),
     dict(afos='DGT', directive='10-1701', channels=[C3]),
     dict(afos='ESF', directive='10-1701', channels=[C3]),
