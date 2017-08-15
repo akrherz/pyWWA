@@ -13,7 +13,6 @@ import psycopg2.extras
 
 ugc_dict = {}
 nwsli_dict = {}
-prodDefinitions['MCD'] = 'Mesoscale Convective Discussion (MCD)'
 
 C1 = "&lt;wfo&gt;"
 C2 = "&lt;vtec_phenomena&gt;.&lt;vtec_significance&gt;"
@@ -99,10 +98,13 @@ GEN_PRODUCTS = [
     dict(afos='LAE', directive='10-1701', channels=[C3]),
     dict(afos='LCO', directive='10-1701', channels=[C3]),
     dict(afos='LSR', directive='10-1701', channels=[C3]),
-    dict(afos='MCD', directive='10-517', channels=[C1, C3, C7],
-         notes=("Eventually, this product will not default to the main WFO"
-                " channel, but only the SWOMCD.&lt;wfo&gt; channel. The WFOs"
+    dict(afos='MCD', directive='10-517', channels=[C3, C7],
+         notes=("The WFOs"
                 " included are based on the ones highlighted by SPC within "
+                "the text and not from a spatial check of their polygon.")),
+    dict(afos='MPD', directive='10-517', channels=[C3, C7],
+         notes=("The WFOs"
+                " included are based on the ones highlighted by WPC within "
                 "the text and not from a spatial check of their polygon.")),
     dict(afos='MIS', directive='10-1701', channels=[C3]),
     dict(afos='MWS', directive='10-314', channels=[C3]),

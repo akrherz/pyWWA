@@ -43,6 +43,7 @@ CAV4            McBride                          -- CA  5332 -12017     0  0
 # CAV8
 # CAW5
 # CAW8            
+CAX5            Likely                           -- CA  5262 -12150     0  0
 # CAX6            
 # CAY2
 CAZ5            Cache Creek                      -- CA  5078 -12132     0  0
@@ -57,6 +58,7 @@ CBH2            Helmet                           -- CA  5943 -12080     0  0
 # CBJ8
 # CBK5
 CBK6            Quesnel Lake                     -- CA  5252 -12105     0  0
+# CBJ4
 # CBJ9            
 CBL6            Radium Hot Springs               -- CA  5063 -11610     0  0
 CBM6            Midway                           -- CA  4901 -11879     0  0
@@ -146,6 +148,7 @@ CEW3            St Paul                          -- CA  5399 -11138     0  0
 CEX3            Wetaskiwin                       -- CA  5297 -11341     0  0
 CEZ3            Edmonton                         -- CA  5343 -11312     0  0
 CEZ4            Fort Vermillion                  -- CA  5840 -11595     0  0
+CFA5            Grande                           -- CA  5630 -11223     0  0
 CFB3            Hespero                          -- CA  5230 -11446     0  0
 CFB6            Joesphburg                       -- CA  5372 -11309     0  0
 CFD4            Foremost                         -- CA  4948 -11149     0  0
@@ -237,6 +240,7 @@ CLM2            Leamington                       -- CA  4203  -8253     0  0
 # CLT2
 CMB2            Meadowbank                       -- CA  6503  -9607     0  0
 CMB7            Maxville                         -- CA  4525  -7481     0  0
+# CMB9
 CMN5            Manic-5                          -- CA  5066  -6883     0  0
 CMR2            Mary River                       -- CA  7132  -7935     0  0
 CNA9            Tomvale                          -- CA  4492  -7694     0  0
@@ -297,6 +301,7 @@ CPV8            Keewaywin                        -- CA  5299  -9284     0  0
 CRB4            Riviere Bonnard                  -- CA  5070  -7116     0  0
 # CRC3
 # CRD3            
+# CRF2
 CRJ2            Stoney Point                     -- CA  4229  -8260     0  0
 CRL2            Westport                         -- CA  4467  -7640     0  0
 CRL4            Kirby Lake                       -- CA  5536 -11064     0  0
@@ -441,6 +446,7 @@ CYWV            Wainwright                       -- CA  5280 -11088     0  0
 CYXK            Rimouski                         QC CA  4848  -6850     0  0
 CYYM            Cowley                           AB CA  4964 -11409     0  0
 CYYO            Wynward                          SK CA  5181 -10417     0  0
+# CYYV
 CYZD            Toronto Downsview                ON CA  4374  -7947     0  0
 CZAC            York Landing                     MB CA  5609  -9609     0  0
 CZAM            Salmon                           BC CA  5068 -11923     0  0

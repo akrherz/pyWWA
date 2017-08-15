@@ -14,5 +14,6 @@
 /cfg.ini
 /logs
 /settings.json
-parser/gemglb.nts
+parsers/gemglb.nts
 parsers/last.nts
+util/ridge_processor.pid
