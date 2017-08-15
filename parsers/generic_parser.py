@@ -1,29 +1,22 @@
 """ Generic NWS Product Parser """
-
-# Twisted Python imports
 from syslog import LOG_LOCAL2
-from twisted.python import syslog
-syslog.startLogging(prefix='pyWWA/generic_parser', facility=LOG_LOCAL2)
-from twisted.python import log
-from twisted.internet import reactor
-
-# Standard Python modules
 import re
 import datetime
 import sys
 
-# third party
+from twisted.python import syslog
+from twisted.python import log
+from twisted.internet import reactor
 import pytz
 from shapely.geometry import MultiPolygon
-
-# pyLDM https://github.com/akrherz/pyLDM
 from pyldm import ldmbridge
-# pyIEM https://github.com/akrherz/pyIEM
 from pyiem.nws.products import parser as productparser
 from pyiem.nws import ugc
 from pyiem.nws import nwsli
 
 import common
+
+syslog.startLogging(prefix='pyWWA/generic_parser', facility=LOG_LOCAL2)
 DB_ON = bool(common.SETTINGS.get('pywwa_save_text_products', False))
 
 ugc_dict = {}

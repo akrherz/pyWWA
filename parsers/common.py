@@ -41,7 +41,6 @@ def get_config_filename():
     """Attempt to resolve where settings.json resides"""
     # up one directory from calling script
     callfn = inspect.stack()[-1][1]
-    print(callfn)
     return os.path.join(os.path.dirname(callfn), "../settings.json")
 
 
