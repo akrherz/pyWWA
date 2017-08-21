@@ -44,6 +44,11 @@ def load_stations(txn):
                       load_stations)
 
 
+def shutdown():
+    """Shut this down, gracefully"""
+    reactor.callWhenRunning(reactor.stop)  # @UndefinedVariable
+
+
 class MyProductIngestor(ldmbridge.LDMProductReceiver):
     """Our LDM pqact product receiver"""
 
@@ -51,11 +56,7 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
         """The connection was lost for some reason"""
         log.msg('connectionLost')
         log.err(reason)
-        reactor.callLater(30, self.shutdown)  # @UndefinedVariable
-
-    def shutdown(self):
-        """Shutdown"""
-        reactor.callWhenRunning(reactor.stop)  # @UndefinedVariable
+        reactor.callLater(30, shutdown)  # @UndefinedVariable
 
     def process_data(self, data):
         """Callback when we have data to process"""
@@ -95,11 +96,11 @@ def do_db(txn, mtr):
     if not res:
         log.msg(("INFO: IEMAccess update of %s returned false: %s"
                  ) % (iem.data['station'], mtr.code))
-        deffer = ASOSDB.runOperation("""
+        df = ASOSDB.runOperation("""
             INSERT into unknown(id, valid)
             values (%s, %s)
         """, (iem.data['station'], iem.data['valid']))
-        deffer.addErrback(common.email_error, iem.data['station'])
+        df.addErrback(common.email_error, iem.data['station'])
 
 
 def ready(_):
