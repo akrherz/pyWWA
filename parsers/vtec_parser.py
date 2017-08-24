@@ -57,10 +57,11 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
         log.err(reason)
         reactor.callLater(7, shutdown)
 
-    def process_data(self, buf):
+    def process_data(self, data):
         """ Process the product """
         try:
-            really_process_data(buf)
+            # converts any str with non-ascii to UTF-8
+            really_process_data(data.decode('utf-8'))
         except TextProductException, (channel, mess):
             if not MANUAL:
                 jabber.send_message(mess, mess, {'channels': '%s,%s' % (channel,
@@ -68,7 +69,7 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
                                                 }
                                    )
         except Exception, myexp:  # pylint: disable=W0703
-            common.email_error(myexp, buf)
+            common.email_error(myexp, data)
 
 
 def really_process_data(buf):
