@@ -94,12 +94,14 @@ CCR3            Florenceville                    -- CA  4623  -6763     0  0
 CCS3            St Stephen                       -- CA  4521  -6725     0  0
 CCS4            Chipman                          -- CA  4615  -6590     0  0
 CCS5            Havelock                         -- CA  4599  -6530     0  0
+CCT2            Cookstown                        -- CA  4424  -7964     0  0
 CCW3            Waterville                       -- CA  4505  -6465     0  0
 CDA4            Pokemouche                       -- CA  4772  -6488     0  0
 CDA5            St Andrews Codroy Valley         -- CA  4777  -5931     0  0
 # CDB5
 CDC4            St Quentin                       -- CA  4752  -6742     0  0
 CDC5            Dougall Campbell                 -- CA  5201 -12121     0  0
+# CDH6
 CDT5            Bouctouche                       -- CA  4651  -6469     0  0
 CDU6            Doaktown                         -- CA  4655  -6609     0  0 
 CEA3            Olds Didsbury                    -- CA  5171 -11411     0  0            
@@ -143,6 +145,7 @@ CES4            Westlock                         -- CA  5414 -11374     0  0
 CEU2            Beaverlodge                      -- CA  5518 -11945     0  0
 CEU9            Trout Lake                       -- CA  6042 -12127     0  0
 CEV3            Vegreville                       -- CA  5351 -11203     0  0
+CEV5            Mayerthorpe                      -- CA  5394 -11518     0  0
 CEV7            Tofield                          -- CA  5337 -11270     0  0
 CEW3            St Paul                          -- CA  5399 -11138     0  0
 CEX3            Wetaskiwin                       -- CA  5297 -11341     0  0
@@ -200,6 +203,7 @@ CJQ6            Tanquary                         -- CA  8141  -7688     0  0
 CJR3            The Pas                          -- CA  5383 -10121     0  0
 CJR4            Eston                            -- CA  5115 -10876     0  0
 CJR5            Gladstone                        -- CA  5016  -9894     0  0
+CJS4            Moose Jaw                        -- CA  5043 -10539     0  0
 CJS5            Killarney                        -- CA  4915  -9969     0  0
 CJT4            Cumberland House                 -- CA  5395 -10230     0  0
 CJV2            Neilburg                         -- CA  5283 -10964     0  0
