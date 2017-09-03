@@ -49,6 +49,8 @@ def real_parser(txn, buf):
     """ Actually do something with the buffer, please """
     if buf.strip() == "":
         return
+    # Convert to UTF-8
+    buf = buf.decode('utf-8')
     utcnow = datetime.datetime.utcnow()
     utcnow = utcnow.replace(tzinfo=pytz.timezone("UTC"))
 
