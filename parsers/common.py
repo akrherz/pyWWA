@@ -116,6 +116,8 @@ def email_error(exp, message, trimstr=100):
     cstr.seek(0)
     if isinstance(message, str):
         log.msg(message[:trimstr])
+    if isinstance(message, unicode):
+        log.msg(message.encode('utf-8')[:trimstr])
     else:
         log.msg(message)
 
