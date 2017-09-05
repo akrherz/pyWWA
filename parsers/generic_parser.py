@@ -56,6 +56,7 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
 
 def really_process_data(txn, buf):
     ''' Actually do some processing '''
+    buf = buf.decode('utf-8')
     utcnow = datetime.datetime.utcnow()
     utcnow = utcnow.replace(tzinfo=pytz.timezone("UTC"))
 
