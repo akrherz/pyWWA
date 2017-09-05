@@ -47,5 +47,12 @@ def real_process(buf):
     np = parser(cStringIO.StringIO("NLDN" + buf))
     DBPOOL.runInteraction(np.sql)
 
-ldm = ldmbridge.LDMProductFactory(myProductIngestor())
-reactor.run()
+
+def main():
+    """Go Main"""
+    _ = ldmbridge.LDMProductFactory(myProductIngestor(isbinary=True))
+    reactor.run()  # @UndefinedVariable
+
+
+if __name__ == '__main__':
+    main()

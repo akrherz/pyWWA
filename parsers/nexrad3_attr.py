@@ -328,7 +328,7 @@ def main(_):
     """
     log.msg("main() has fired...")
     jobs = DeferredQueue()
-    ingest = MyProductIngestor()
+    ingest = MyProductIngestor(isbinary=True)
     ingest.jobs = jobs
     ldmbridge.LDMProductFactory(ingest)
 
