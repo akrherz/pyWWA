@@ -227,6 +227,8 @@ def clnstr(buf):
     """
     Get rid of cruft we don't wish to work with
     """
+    # pyLDM provides us unicode, but it appears twisted does not support this
+    buf = buf.encode('ascii', 'ignore')
     return buf.replace("\015\015\012",
                        "\n").replace("\003", "").replace("\001", "")
 

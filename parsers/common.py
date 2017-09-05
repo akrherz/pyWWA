@@ -114,9 +114,6 @@ def email_error(exp, message, trimstr=100):
     else:
         log.msg(exp)
     cstr.seek(0)
-    if isinstance(message, unicode):
-        message = ("!!!unicode error converted to ascii!!!\n" +
-                   message.encode('ascii', 'ignore'))
     if isinstance(message, str):
         log.msg(message[:trimstr])
     else:
@@ -143,7 +140,7 @@ Message:
          pyiem.__version__,
          datetime.datetime.utcnow(),
          os.getpid(), ' '.join(['%.2f' % (_,) for _ in os.getloadavg()]),
-         cstr.read(), exp, message))
+         cstr.read(), exp, message), "plain", "utf-8")
 
     # Send the email already!
     msg['subject'] = ("[pyWWA] %s Traceback -- %s"

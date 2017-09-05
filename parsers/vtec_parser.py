@@ -60,8 +60,7 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
     def process_data(self, data):
         """ Process the product """
         try:
-            # converts any str with non-ascii to UTF-8
-            really_process_data(data.decode('utf-8'))
+            really_process_data(data)
         except TextProductException, (channel, mess):
             if not MANUAL:
                 jabber.send_message(mess, mess, {'channels': '%s,%s' % (channel,

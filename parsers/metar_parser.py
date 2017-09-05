@@ -60,9 +60,10 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
 
     def process_data(self, data):
         """Callback when we have data to process"""
-
-        data = unicode(data, errors='ignore')
         try:
+            # pyLDM provides us with unicode, this unicode may be trouble for
+            # the METAR library, so lets encode it to ASCII and ignore anything
+            # non-ASCII
             real_processor(data.encode('ascii', 'ignore'))
         except Exception as exp:
             common.email_error(exp, data, -1)
