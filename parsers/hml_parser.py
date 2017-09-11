@@ -1,20 +1,15 @@
 """ HML parser! """
 from syslog import LOG_LOCAL2
-from twisted.python import syslog
-syslog.startLogging(prefix='pyWWA/hml_parser', facility=LOG_LOCAL2)
 
-# Twisted Python imports
 from twisted.internet import reactor
 from twisted.python import log
-
-# Standard Python modules
-import datetime
-import common
-import os
-
+from twisted.python import syslog
 from pyldm import ldmbridge
 from pyiem.nws.products.hml import parser as hmlparser
 
+import common  # @UnresolvedImport
+
+syslog.startLogging(prefix='pyWWA/hml_parser', facility=LOG_LOCAL2)
 DBPOOL = common.get_database("hads")
 
 
@@ -23,17 +18,15 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
     """ I receive products from ldmbridge and process them 1 by 1 :) """
 
     def connectionLost(self, reason):
+        """Connection was lost"""
         log.msg('connectionLost')
         log.err(reason)
-        reactor.callLater(5, self.shutdown)
+        reactor.callLater(5, reactor.stop)  # @UndefinedVariable
 
-    def shutdown(self):
-        reactor.callWhenRunning(reactor.stop)
-
-    def process_data(self, buf):
+    def process_data(self, data):
         """ Process the product """
-        defer = DBPOOL.runInteraction(real_parser, buf)
-        defer.addErrback(common.email_error, buf)
+        defer = DBPOOL.runInteraction(real_parser, data)
+        defer.addErrback(common.email_error, data)
         defer.addErrback(log.err)
 
 
@@ -43,15 +36,11 @@ def real_parser(txn, buf):
     """
     prod = hmlparser(buf)
     prod.sql(txn)
-    if len(prod.warnings) > 0:
+    if prod.warnings:
         common.email_error("\n".join(prod.warnings), buf)
 
-
-def shutdown(err):
-    log.msg(err)
-    reactor.stop()
 
 if __name__ == '__main__':
     ldmbridge.LDMProductFactory(MyProductIngestor())
 
-    reactor.run()
+    reactor.run()  # @UndefinedVariable
