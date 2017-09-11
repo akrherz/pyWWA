@@ -84,6 +84,9 @@ def really_process_data(buf):
     # Create our TextProduct instance
     text_product = vtecparser(buf, utcnow=gmtnow, ugc_provider=ugc_dict,
                               nwsli_provider=nwsli_dict)
+    # Don't parse these as they contain duplicated information
+    if text_product.source == 'KNHC' and text_product.afos[3:] == 'TCV':
+        return
     # Skip spanish products
     if text_product.source == 'TJSJ' and text_product.afos[3:] == 'SPN':
         return
