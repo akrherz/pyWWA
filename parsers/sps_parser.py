@@ -85,8 +85,9 @@ def real_process(txn, raw):
             ets = prod.segments[0].ugcexpire
         giswkt = 'SRID=4326;%s' % (MultiPolygon([prod.segments[0].sbw]).wkt,)
         sql = """INSERT into text_products(product, product_id, geom,
-            issue, expire) values (%s, %s, %s, %s, %s)"""
-        myargs = (prod.unixtext, product_id, giswkt, prod.valid, ets)
+            issue, expire, pil) values (%s, %s, %s, %s, %s, %s)"""
+        myargs = (prod.unixtext, product_id, giswkt, prod.valid, ets,
+                  prod.afos)
 
     else:
         sql = "INSERT into text_products(product, product_id) values (%s,%s)"
