@@ -59,7 +59,7 @@ CBH2            Helmet                           -- CA  5943 -12080     0  0
 # CBJ8
 # CBK5
 CBK6            Quesnel Lake                     -- CA  5252 -12105     0  0
-# CBJ4
+CBJ4            Echo Valley                      -- CA  5124 -12199     0  0
 # CBJ9            
 CBL6            Radium Hot Springs               -- CA  5063 -11610     0  0
 CBM6            Midway                           -- CA  4901 -11879     0  0
@@ -127,6 +127,7 @@ CEJ4            Claresholm                       -- CA  5000 -11363     0  0
 CEK2            Braeburn                         -- CA  6148 -13578     0  0
 # CEK4
 CEK6            Killam _ Segdewick               -- CA  5280 -11176     0  0
+CEL4            Hanna                            -- CA  5163 -11190     0  0
 CEL5            Valleyview                       -- CA  5503 -11730     0  0
 CEL8            Eleonore                         -- CA  5272  -7608     0  0
 CEM3            Whati                            -- CA  6313 -11725     0  0
@@ -165,6 +166,7 @@ CFK2            Bashaw                           -- CA  5256 -11296     0  0
 CFK4            Calling Lake                     -- CA  5532 -11325     0  0
 CFK6            Olds                             -- CA  5185 -11407     0  0
 CFM4            Donnelly                         -- CA  5571 -11709     0  0
+CFM5            Hamburg                          -- CA  5735 -11976     0  0
 CFM7            Boyle                            -- CA  5457 -11282     0  0
 CFN5            La Crete                         -- CA  5817 -11633     0  0
 CFN7            Sundre                           -- CA  5177 -11468     0  0
@@ -232,6 +234,7 @@ CKM4            Jan Lake                         -- CA  5483 -10279     0  0
 # CKM7
 CKM8            Opapimiskan Lake                 -- CA  5261  -9038     0  0
 CKQ3            North Spirit Lake                -- CA  5249  -9297     0  0
+CKQ6            Erickson                         -- CA  5049  -9990     0  0
 CKQ9            Pine Dock                        -- CA  5162  -9681     0  0
 CKR4            Lundar                           -- CA  5070  -9806     0  0
 CKS8            Cree Lake                        -- CA  5746 -10675     0  0
@@ -300,6 +303,7 @@ CPN5            Listowel                         -- CA  4374  -8099     0  0
 CPR3            Palmerston                       -- CA  4385  -8078     0  0
 CPR5            Woodstock                        -- CA  4311  -8082     0  0
 # CPS1
+CPS2            Elmhirst Resort                  -- CA  4425  -7811     0  0
 CPT2            Killarney                        -- CA  4598  -8150     0  0
 CPU6            Tyendinaga Mohawk                -- CA  4419  -7711     0  0
 CPV7            Poplar Hill                      -- CA  5211  -9426     0  0
@@ -423,6 +427,7 @@ CYMW            Maniwaki                         -- CA  4627  -7599     0  0
 CYNH            Hudson Hope                      BC CA  5604 -12198     0  0
 CYNL            Points North Landing             SK CA  5828 -10408     0  0
 CYNJ            Langley Tower                    -- CA  4910 -12263     0  0
+CYNN            Nejanilini Lake                  MB CA  5949  -9778     0  0
 CYNR            Fort MacKay                      -- CA  5738 -11170     0  0
 # CYNW
 CYOG            Old Glory Mountain               BC CA  4915 -11791     0  0
@@ -455,6 +460,7 @@ CYXK            Rimouski                         QC CA  4848  -6850     0  0
 CYYM            Cowley                           AB CA  4964 -11409     0  0
 CYYO            Wynward                          SK CA  5181 -10417     0  0
 # CYYV
+# CYYX
 CYZD            Toronto Downsview                ON CA  4374  -7947     0  0
 CZAC            York Landing                     MB CA  5609  -9609     0  0
 CZAM            Salmon                           BC CA  5068 -11923     0  0
