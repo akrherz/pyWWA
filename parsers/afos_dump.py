@@ -52,11 +52,7 @@ def real_parser(txn, buf):
     utcnow = datetime.datetime.utcnow()
     utcnow = utcnow.replace(tzinfo=pytz.timezone("UTC"))
 
-    try:
-        nws = product.TextProduct(buf, utcnow=UTCNOW)
-    except UGCParseException:
-        log.msg("UGCParseException swallowed for %s" % (buf[11:29],))
-        return
+    nws = product.TextProduct(buf, utcnow=UTCNOW, parse_segments=False)
 
     # When we are in realtime processing, do not consider old data, typically
     # when a WFO fails to update the date in their MND
