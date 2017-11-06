@@ -11,6 +11,7 @@ CAD5            Merritt                          -- CA  5012 -12074     0  0
 # CAE7
 # CAE9
 CAF4            Tsuniah                          -- CA  5153 -12417     0  0
+# CAF8
 CAG3            Chilko Lake                      -- CA  5163 -12414     0  0
 # CAG8            
 # CAH3            
@@ -30,6 +31,7 @@ CAM5            Houston                          -- CA  5444 -12678     0  0
 # CAN3            
 # CAN6            
 CAP3            Sechelt                          -- CA  4946 -12372     0  0
+CAP5            Victoria                         -- CA  4865 -12345     0  0
 CAQ4            Springhouse                      -- CA  5196 -12214     0  0
 CAQ5            Nakusp                           -- CA  5027 -11781     0  0
 # CAQ6
@@ -264,6 +266,7 @@ CNF4            Lindsay                          -- CA  4436  -7878     0  0
 CNH2            Natuashish                       -- CA  5591  -6118     0  0
 # CNH3            
 # CNH4
+# CNH9
 CNJ4            Orillia                          -- CA  4468  -7931     0  0
 CNK4            Parry Sound                      -- CA  4526  -7983     0  0
 CNL3            Brockville                       -- CA  4464  -7575     0  0
@@ -288,7 +291,9 @@ CNY3            Collingwood                      -- CA  4445  -8016     0  0
 CNZ4            Barrys Bay                       -- CA  4550  -7764     0  0
 CNZ8            Grimsby                          -- CA  4316  -7960     0  0
 # COB4
+# COL2
 # CPC9
+CPF4            Bruce McPhail                    -- CA  4560  -7683     0  0
 # CPF7
 # CPF9            
 CPG5            Hawkesbury                       -- CA  4558  -7455     0  0
@@ -305,6 +310,7 @@ CPR5            Woodstock                        -- CA  4311  -8082     0  0
 # CPS1
 CPS2            Elmhirst Resort                  -- CA  4425  -7811     0  0
 CPT2            Killarney                        -- CA  4598  -8150     0  0
+CPT3            Rockton                          -- CA  4332  -8018     0  0
 CPU6            Tyendinaga Mohawk                -- CA  4419  -7711     0  0
 CPV7            Poplar Hill                      -- CA  5211  -9426     0  0
 CPV8            Keewaywin                        -- CA  5299  -9284     0  0
@@ -348,6 +354,7 @@ CSR8            La Sarre                         -- CA  4892  -7918     0  0
 CSS3            Montreal                         -- CA  4535  -7408     0  0
 CSS4            St Dominique                     -- CA  4563  -7282     0  0
 # CST2
+CST3            Montreal                         -- CA  4539  -7413     0  0
 CSU2            Chisasibi                        -- CA  5381  -7892     0  0
 CSU3            St Hyacinthe                     -- CA  4561  -7301     0  0
 # CSU7
