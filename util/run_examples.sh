@@ -77,7 +77,7 @@ echo "stoia_parser.py"
 cat examples/LSR.txt | python parsers/lsr_parser.py || echo "LSR Error $fn"
 
 echo "vtec_parser.py"
-gp="WCN WSW TOR TCV FFWTWC_tilde"
+gp="WCN WSW TOR TCV FFWTWC_tilde WCNMEG"
 for fn in $gp; do
 	cat examples/${fn}.txt | python parsers/vtec_parser.py || echo "vtec Error $fn"
 done
