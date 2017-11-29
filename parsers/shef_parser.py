@@ -166,6 +166,7 @@ class MyDict(dict):
             self.__setitem__(key, '')
             return ''
 
+
 MAPPING = MyDict()
 
 
@@ -292,27 +293,23 @@ def really_process(tp, data):
     # log.msg("\n"+data)
     mydata = {}
     for line in data.split("\n"):
-        # Skip blank output lines
-        if line.strip() == "":
+        # Skip blank output lines or short lines
+        if line.strip() == "" or len(line) < 90:
             continue
-        tokens = line.split()
-        if len(tokens) < 7:
-            log.msg("NO ENOUGH TOKENS %s" % (line,))
-            continue
-        sid = tokens[0]
+        # data is fixed, so we should parse it
+        sid = line[:8].strip()
         if len(sid) > 8:
             log.msg("SiteID Len Error: [%s] %s" % (sid, tp.get_product_id()))
             continue
         if sid not in mydata:
             mydata[sid] = {}
-        tstamp = make_datetime(tokens[1], tokens[2])
-        modelruntime = make_datetime(tokens[3], tokens[4])
+        modelruntime = make_datetime(line[31:41], line[42:50])
         if modelruntime is not None:
             # print("Skipping forecast data for %s" % (sid, ))
             continue
+        tstamp = make_datetime(line[10:20], line[21:29])
         # We don't care about data in the future!
-        utcnow = datetime.datetime.utcnow().replace(tzinfo=pytz.timezone("UTC"
-                                                                         ))
+        utcnow = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
         if tstamp > (utcnow + datetime.timedelta(hours=1)):
             continue
         if tstamp < (utcnow - datetime.timedelta(days=60)):
@@ -321,12 +318,18 @@ def really_process(tp, data):
         s_data = mydata.setdefault(sid, dict())
         st_data = s_data.setdefault(tstamp, dict())
 
-        varname = tokens[5]
-        if tokens[6].find("****") == 0:
+        varname = line[52:59].strip()
+        value = line[60:73].strip()
+        if value.find("****") > -1:
             log.msg("Bad Data from %s\n%s" % (tp.get_product_id(), data))
             value = -9999.0
         else:
-            value = float(tokens[6])
+            value = float(value)
+        # Handle variable time length data
+        if varname[2] == 'V':
+            itime = line[87:91]
+            if itime[0] == '2':
+                varname = "%sDVD%s" % (varname, itime[-2:])
         # Handle 7.4.6 Paired Value ("Vector") Physical Elements
         if varname[:2] in ['HQ', 'MD', 'MN', 'MS', 'MV', 'NO', 'ST', 'TB',
                            'TE', 'TV']:
