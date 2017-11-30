@@ -2,12 +2,13 @@
 import datetime
 import os
 import subprocess
-from pyiem.util import send2box
+from pyiem.ftpsession import send2box
 
 NEXRADS = "DMX DVN OAX ARX FSD MPX EAX ABR UDX".split()
 
 
 def run(date):
+    """Process this date please"""
     for nexrad in NEXRADS:
         os.chdir("/mnt/nexrad3/nexrad/NIDS/%s" % (nexrad, ))
         cmd = ("tar -czf /mesonet/tmp/%sradar.tgz ???/???_%s_*"
@@ -24,6 +25,7 @@ def run(date):
 
 
 def main():
+    """Go Main Go"""
     yesterday = datetime.date.today() - datetime.timedelta(days=1)
     run(yesterday)
 
