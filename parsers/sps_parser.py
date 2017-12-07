@@ -24,9 +24,12 @@ ugc_dict = {}
 
 def load_ugc(txn):
     """ load ugc dict """
-    sql = """SELECT name, ugc from ugcs
-        WHERE name IS NOT Null and end_ts is null"""
-    txn.execute(sql)
+    # Careful here not to load things from the future
+    txn.execute("""
+        SELECT name, ugc, wfo from ugcs WHERE
+        name IS NOT Null and begin_ts < now() and
+        (end_ts is null or end_ts > now())
+    """)
     for row in txn:
         name = (row["name"]).replace("\x92", " ")
         ugc_dict[row['ugc']] = name

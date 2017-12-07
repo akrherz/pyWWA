@@ -99,7 +99,7 @@ def really_process_data(buf):
 
 def step2(dummy, text_product):
     ''' After the SQL is done, lets do other things '''
-    if len(text_product.warnings) > 0:
+    if text_product.warnings:
         common.email_error("\n\n".join(text_product.warnings),
                            text_product.text)
 
@@ -115,9 +115,12 @@ def step2(dummy, text_product):
 
 def load_ugc(txn):
     """ load ugc"""
-    sql = """SELECT name, ugc, wfo from ugcs WHERE
-        name IS NOT Null and end_ts is null"""
-    txn.execute(sql)
+    # Careful here not to load things from the future
+    txn.execute("""
+        SELECT name, ugc, wfo from ugcs WHERE
+        name IS NOT Null and begin_ts < now() and
+        (end_ts is null or end_ts > now())
+    """)
     for row in txn:
         nm = (row["name"]).replace("\x92", " ").replace("\xc2", " ")
         wfos = re.findall(r'([A-Z][A-Z][A-Z])', row['wfo'])
