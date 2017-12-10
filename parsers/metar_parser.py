@@ -7,6 +7,7 @@ So let us document it here for my own sanity.
 """
 from __future__ import print_function
 from syslog import LOG_LOCAL2
+import sys
 
 # Twisted Python imports
 from twisted.python import syslog
@@ -20,6 +21,7 @@ syslog.startLogging(prefix='pyWWA/metar_parser', facility=LOG_LOCAL2)
 IEMDB = common.get_database('iem')
 ASOSDB = common.get_database('asos')
 
+MANUAL = ('MANUAL' in sys.argv)
 NWSLI_PROVIDER = {}
 # Manual list of sites that are sent to jabber :/
 metarcollect.JABBER_SITES = {'KJFK': None, 'KLGA': None, 'KEWR': None,
@@ -76,8 +78,9 @@ def real_processor(text):
         common.email_error("\n".join(collect.warnings), collect.unixtext)
     jmsgs = collect.get_jabbers(("https://mesonet.agron.iastate.edu/ASOS/"
                                  "current.phtml?network="))
-    for jmsg in jmsgs:
-        JABBER.send_message(*jmsg)
+    if not MANUAL:
+        for jmsg in jmsgs:
+            JABBER.send_message(*jmsg)
     for mtr in collect.metars:
         if mtr.network is None:
             log.msg(("station: '%s' is unknown to metadata table"),
@@ -93,7 +96,8 @@ def real_processor(text):
 
 def do_db(txn, mtr):
     """Do database transaction"""
-    iem, res = mtr.to_iemaccess(txn)
+    iem, res = mtr.to_iemaccess(txn, force_current_log=MANUAL,
+                                skip_current=MANUAL)
     if not res:
         log.msg(("INFO: IEMAccess update of %s returned false: %s"
                  ) % (iem.data['station'], mtr.code))
