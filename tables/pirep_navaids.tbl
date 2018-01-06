@@ -1,6 +1,7 @@
 LVR             Big River Lake                   AK US  6081 -15229     0  0
 # Sites found while parsing real data
 # CAA2 
+# CAA4
 CAA8            Invermere                        -- CA  5052 -11600     0  0
 # CAB3            
 # CAC8            
@@ -146,6 +147,7 @@ CEQ5            Grande Cache                     -- CA  5392 -11887     0  0
 CER3            Drayton Valley                   -- CA  5327 -11496     0  0
 CER4            Fort McMurray                    -- CA  5706 -11158     0  0
 CES4            Westlock                         -- CA  5414 -11374     0  0
+CET2            Conklin                          -- CA  5570 -11128     0  0
 CEU2            Beaverlodge                      -- CA  5518 -11945     0  0
 CEU9            Trout Lake                       -- CA  6042 -12127     0  0
 CEV3            Vegreville                       -- CA  5351 -11203     0  0
@@ -177,6 +179,7 @@ CFS5            Spirit River                     -- CA  5578 -11884     0  0
 CFS6            Loon River                       -- CA  5714 -11508     0  0
 CFS8            Clearwater                       -- CA  5199 -11523     0  0
 CFT8            Pelican                          -- CA  5616 -11347     0  0
+CFT9            Zama Lake                        -- CA  5906 -11889     0  0
 CFU4            Garden River                     -- CA  5871 -11388     0  0
 CFV2            Beiseker                         -- CA  5139 -11347     0  0
 # CFW8            
@@ -184,6 +187,7 @@ CFX2            Calgary / Okotoks                -- CA  5074 -11393     0  0
 CFX4            Manning                          -- CA  5695 -11764     0  0
 CFX5            Renard                           -- CA  5273  -7222     0  0
 CFX6            Vulcan                           -- CA  5040 -11328     0  0
+CFX8            Chestermere                      -- CA  5104 -11375     0  0
 # CHB3
 CHC5            Hayes Camp Aerodome              -- CA  6665  -9154     0  0
 # CHL6
@@ -221,6 +225,7 @@ CJW7            Cigar Lake                       -- CA  5805 -10448     0  0
 CJX4            Rosetown                         -- CA  5156 -10792     0  0
 CJY3            Tisdale                          -- CA  5284 -10407     0  0
 CJY4            Sandy Bay                        -- CA  5555 -10227     0  0
+CJZ3            Melfort                          -- CA  5287 -10470     0  0
 CKA9            Southend                         -- CA  5634 -10329     0  0
 CKB2            Patuanak                         -- CA  5590 -10772     0  0
 CKB6            Wapekeka                         -- CA  5385  -8959     0  0
@@ -252,6 +257,7 @@ CLM2            Leamington                       -- CA  4203  -8253     0  0
 CMB2            Meadowbank                       -- CA  6503  -9607     0  0
 CMB7            Maxville                         -- CA  4525  -7481     0  0
 # CMB9
+# CMH3
 CMN5            Manic-5                          -- CA  5066  -6883     0  0
 CMR2            Mary River                       -- CA  7132  -7935     0  0
 CNA9            Tomvale                          -- CA  4492  -7694     0  0
@@ -369,6 +375,7 @@ CTG3            Du Rocher Perce                  -- CA  4338  -6456     0  0
 # CTK6     
 # CTSJ                   
 CTT5            La Romaine                       -- CA  5026  -6068     0  0
+CTU2            Fontanges                        -- CA  5455  -7117     0  0
 # CUQR
 CVB2            Voiseys Bay                      -- CA  5634  -6209     0  0
 # CVM2
@@ -482,6 +489,7 @@ CZGR            Little Grand Rapids              -- CA  5205  -9547     0  0
 CZHP            High Prairie                     AB CA  5539 -11648     0  0
 CZJN            Swan River                       MB CA  5212 -10124     0  0
 CZML            108 Mile                         BC CA  5174 -12133     0  0
+# CZND
 CZNG            Poplar River                     MB CA  5300  -9727     0  0
 CZNL            Nelson                           BC CA  4949 -11730     0  0
 CZJG            Jenpeg                           -- CA  5452  -9805     0  0
