@@ -4,12 +4,12 @@ from __future__ import print_function
 import re
 import sys
 
+import psycopg2.extras
 from pyiem.reference import prodDefinitions
 from pyiem.nws.ugc import UGC
 from pyiem.nws.nwsli import NWSLI
 from pyiem.nws.products.vtec import parser as vtec_parser
 from pyiem.nws.products import parser as productparser
-import psycopg2.extras
 
 ugc_dict = {}
 nwsli_dict = {}
@@ -98,7 +98,7 @@ GEN_PRODUCTS = [
     dict(afos='ICE', directive='10-330', channels=[C3]),
     dict(afos='LAE', directive='10-1701', channels=[C3]),
     dict(afos='LCO', directive='10-1701', channels=[C3]),
-    dict(afos='LSR', directive='10-1701', channels=[C3]),
+    dict(afos='LSR', directive='10-517', channels=[C3]),
     dict(afos='MCD', directive='10-517', channels=[C3, C7],
          notes=("The WFOs"
                 " included are based on the ones highlighted by SPC within "
