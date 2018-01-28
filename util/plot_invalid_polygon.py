@@ -1,8 +1,8 @@
 """Make a simple plot to illustrate an invalid polygon"""
 import matplotlib.pyplot as plt
 
-X = [-106.21, -106.2, -106.26, -106.38, -106.36, -106.26, -106.21]
-Y = [35.47, 35.45, 35.49, 35.56, 35.53, 35.51, 35.47]
+X = [-90.92, -91.02, -90.93, -91.02, -90.92]
+Y = [30.4, 30.4, 30.5, 30.5, 30.4]
 
 
 def main():
@@ -17,7 +17,7 @@ def main():
     ax.set_ylim(min(Y) - 0.02, max(Y) + 0.02)
     ax.set_ylabel(r"Latitude [$^\circ$N]")
     ax.set_xlabel(r"Longitude [$^\circ$E]")
-    ax.set_title("2017 ABQ Flood Warning (FL.W) #4 Polygon")
+    ax.set_title("2018 LIX Flood Warning (FL.W) #8 Polygon")
     ax.grid(True)
     for tick in ax.get_xticklabels():
         tick.set_rotation(45)
