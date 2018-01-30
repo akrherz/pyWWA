@@ -36,6 +36,7 @@ CAP5            Victoria                         -- CA  4865 -12345     0  0
 CAQ4            Springhouse                      -- CA  5196 -12214     0  0
 CAQ5            Nakusp                           -- CA  5027 -11781     0  0
 # CAQ6
+# CAR5
 CAT4            Qualicum Beach                   -- CA  4934 -12440     0  0
 CAT5            Port Mcneill                     -- CA  5057 -12702     0  0
 CAU3            Oliver                           -- CA  4917 -11955     0  0
@@ -158,6 +159,7 @@ CEV7            Tofield                          -- CA  5337 -11270     0  0
 CEW3            St Paul                          -- CA  5399 -11138     0  0
 # CEW9
 CEX3            Wetaskiwin                       -- CA  5297 -11341     0  0
+# CEYV
 CEZ3            Edmonton                         -- CA  5343 -11312     0  0
 CEZ4            Fort Vermillion                  -- CA  5840 -11595     0  0
 CFA5            Grande                           -- CA  5630 -11223     0  0
@@ -165,6 +167,7 @@ CFB3            Hespero                          -- CA  5230 -11446     0  0
 CFB6            Joesphburg                       -- CA  5372 -11309     0  0
 CFD4            Foremost                         -- CA  4948 -11149     0  0
 CFF7            Wainwright                       -- CA  5283 -11090     0  0
+CFG5            John DOr Prairie                 -- CA  5849 -11514     0  0
 CFG6            Fort Mackay                      -- CA  5728 -11098     0  0
 CFH4            Fox Harbour                      -- CA  4587  -6346     0  0
 CFH8            Warburg/Zajes                    -- CA  5322 -11434     0  0
@@ -248,6 +251,7 @@ CKQ9            Pine Dock                        -- CA  5162  -9681     0  0
 CKR4            Lundar                           -- CA  5070  -9806     0  0
 CKS8            Cree Lake                        -- CA  5746 -10675     0  0
 # CKW7
+CKY2            Whitewood                        -- CA  5033 -10227     0  0
 CKZ3            Elk Island                       -- CA  5467  -9415     0  0
 CKZ7            Winkler                          -- CA  4917  -9792     0  0
 # CLA4
@@ -300,6 +304,7 @@ CNZ4            Barrys Bay                       -- CA  4550  -7764     0  0
 CNZ8            Grimsby                          -- CA  4316  -7960     0  0
 # COB4
 # COL2
+# COYW
 # CPC9
 CPF4            Bruce McPhail                    -- CA  4560  -7683     0  0
 # CPF7
@@ -367,6 +372,7 @@ CSU2            Chisasibi                        -- CA  5381  -7892     0  0
 CSU3            St Hyacinthe                     -- CA  4561  -7301     0  0
 # CSU7
 # CSV2            
+# CSW5
 CSY3            Sorel                            -- CA  4598  -7304     0  0
 CSY4            St Donat                         -- CA  4631  -7418     0  0
 CSZ3            St Jovite                        -- CA  4615  -7458     0  0
