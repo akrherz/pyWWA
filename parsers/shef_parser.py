@@ -5,26 +5,24 @@
 import os
 import re
 import datetime
-
-# Twisted Python imports
 from syslog import LOG_LOCAL2
+
+import pytz
 from twisted.python import syslog
 from twisted.python import log
-
-# Stuff I wrote
-from pyiem.observation import Observation
-from pyiem.nws import product
-from pyiem import reference
-from pyldm import ldmbridge
-import common  # @UnresolvedImport
-import pytz
-
-# Third Party Stuff
 from twisted.internet import task
 from twisted.internet.defer import DeferredQueue, Deferred
 from twisted.internet.task import cooperate
 from twisted.internet import reactor, protocol
 from twisted.internet.task import LoopingCall
+
+from pyiem.reference import TRACE_VALUE
+from pyiem.observation import Observation
+from pyiem.nws import product
+from pyiem import reference
+from pyldm import ldmbridge
+import common  # @UnresolvedImport
+
 
 # Start Logging
 syslog.startLogging(prefix='pyWWA/shef_parser', facility=LOG_LOCAL2)
@@ -325,6 +323,11 @@ def really_process(tp, data):
             value = -9999.0
         else:
             value = float(value)
+            # shefit generates 0.001 for trace, IEM uses something else
+            if (value > 0.0009 and value < 0.0011 and
+                    varname[:2] in ['PC', 'PP', 'QA', 'QD', 'QR', 'QT',
+                                    'SD', 'SF', 'SW']):
+                value = TRACE_VALUE
         # Handle variable time length data
         if varname[2] == 'V':
             itime = line[87:91]
@@ -540,7 +543,7 @@ def process_site(tp, sid, ts, data):
         iemob.data[MAPPING[var]] = myval
         # Convert 0.001 to 0.0001 for Trace values
         if myval == 0.001 and MAPPING[var] in ['pday', 'snow', 'snowd']:
-            iemob.data[MAPPING[var]] = 0.0001
+            iemob.data[MAPPING[var]] = TRACE_VALUE
         if iscoop:
             # Save COOP 'at-ob' temperature into summary table
             if MAPPING[var] == 'tmpf':
