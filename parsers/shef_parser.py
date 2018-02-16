@@ -4,6 +4,7 @@
 # System Imports
 import os
 import re
+from collections import namedtuple
 import datetime
 from syslog import LOG_LOCAL2
 
@@ -22,7 +23,10 @@ from pyiem.nws import product
 from pyiem import reference
 from pyldm import ldmbridge
 import common  # @UnresolvedImport
+# from pympler import tracker, summary, muppy
 
+
+# TR = tracker.SummaryTracker()
 
 # Start Logging
 syslog.startLogging(prefix='pyWWA/shef_parser', facility=LOG_LOCAL2)
@@ -46,6 +50,8 @@ TIMEZONES = dict()
 CURRENT_QUEUE = {}
 U1980 = datetime.datetime.utcnow()
 U1980 = U1980.replace(day=1, year=1980, tzinfo=pytz.timezone("UTC"))
+
+TEXTPRODUCT = namedtuple('TextProduct', ['product_id', 'afos', 'text'])
 
 
 def load_stations(txn):
@@ -159,10 +165,9 @@ class MyDict(dict):
         if pei in DIRECTMAP:
             self.__setitem__(key, DIRECTMAP[pei])
             return DIRECTMAP[pei]
-        else:
-            log.msg('Can not map var %s' % (key,))
-            self.__setitem__(key, '')
-            return ''
+        log.msg('Can not map var %s' % (key,))
+        self.__setitem__(key, '')
+        return ''
 
 
 MAPPING = MyDict()
@@ -173,11 +178,12 @@ class SHEFIT(protocol.ProcessProtocol):
     My process protocol for dealing with the SHEFIT program from the NWS
     """
 
-    def __init__(self, buf):
+    def __init__(self, prod):
         """
         Constructor
         """
-        self.tp = product.TextProduct(buf)
+        self.deferred = None
+        self.prod = prod
         self.data = ""
 
     def connectionMade(self):
@@ -186,7 +192,7 @@ class SHEFIT(protocol.ProcessProtocol):
         """
         # print "sending %d bytes!" % len(self.shefdata)
         # print "SENDING", self.shefdata
-        self.transport.write(self.tp.text)
+        self.transport.write(self.prod.text)
         self.transport.closeStdin()
 
     def outReceived(self, data):
@@ -212,14 +218,10 @@ class SHEFIT(protocol.ProcessProtocol):
         """
         Once the program is done, we need to do something with the data
         """
-        # if self.data == "":
-        #    rejects = open("empty.shef", 'a')
-        #    rejects.write( self.tp.raw +"\003")
-        #    rejects.close()
-        #    return
-        t = task.deferLater(reactor, 0, really_process, self.tp, self.data)
-        t.addErrback(common.email_error, self.tp.text)
-        self.deferred.callback(self)
+        df = task.deferLater(reactor, 0, really_process, self.prod,
+                             self.data)
+        df.addErrback(common.email_error, self.prod.text)
+        self.deferred.callback("")
 
 
 def clnstr(buf):
@@ -232,34 +234,43 @@ def clnstr(buf):
                        "\n").replace("\003", "").replace("\001", "")
 
 
+def shutdown():
+    """Start the shutdown"""
+    log.msg("shutdown() called...")
+    reactor.callWhenRunning(reactor.stop)
+
+
 class MyProductIngestor(ldmbridge.LDMProductReceiver):
 
     def connectionLost(self, reason):
         log.msg('connectionLost')
         log.err(reason)
-        reactor.callLater(15, self.shutdown)
+        reactor.callLater(15, shutdown)
 
-    def shutdown(self):
-        reactor.callWhenRunning(reactor.stop)
+    def process_data(self, data):
+        """callback when a full data product is ready for processing
 
-    def process_data(self, buf):
+        This string is cleaned and placed into the job queue for processing
+
+        Args:
+          data (str): unicode string of data
         """
-        I am called from the ldmbridge when data is ahoy
-        """
-        self.jobs.put(clnstr(buf))
+        self.jobs.put(clnstr(data))
 
 
-def async(buf):
-    """
-    Async caller of reactor processes
-    @param buf string of the raw NOAAPort Product
+def async_func(data):
+    """spawn a process with a deferred given the inbound data product
     """
     defer = Deferred()
     try:
-        proc = SHEFIT(buf)
+        tp = product.TextProduct(data, parse_segments=False)
     except Exception as exp:
-        common.email_error(exp, buf)
+        common.email_error(exp, data)
         return
+    prod = TEXTPRODUCT(product_id=tp.get_product_id(),
+                       afos=tp.afos,
+                       text=tp.text)
+    proc = SHEFIT(prod)
     proc.deferred = defer
     proc.deferred.addErrback(log.err)
 
@@ -269,9 +280,9 @@ def async(buf):
 
 def worker(jobs):
     while True:
-        yield jobs.get().addCallback(async).addErrback(common.email_error,
-                                                       'Unhandled Error'
-                                                       ).addErrback(log.err)
+        yield jobs.get().addCallback(
+            async_func).addErrback(common.email_error, 'Unhandled Error'
+                                   ).addErrback(log.err)
 
 
 def make_datetime(dpart, tpart):
@@ -283,7 +294,7 @@ def make_datetime(dpart, tpart):
     return tstamp.replace(tzinfo=pytz.timezone("UTC"))
 
 
-def really_process(tp, data):
+def really_process(prod, data):
     """
     This processes the output we get from the SHEFIT program
     """
@@ -297,7 +308,7 @@ def really_process(tp, data):
         # data is fixed, so we should parse it
         sid = line[:8].strip()
         if len(sid) > 8:
-            log.msg("SiteID Len Error: [%s] %s" % (sid, tp.get_product_id()))
+            log.msg("SiteID Len Error: [%s] %s" % (sid, prod.product_id))
             continue
         if sid not in mydata:
             mydata[sid] = {}
@@ -319,7 +330,7 @@ def really_process(tp, data):
         varname = line[52:59].strip()
         value = line[60:73].strip()
         if value.find("****") > -1:
-            log.msg("Bad Data from %s\n%s" % (tp.get_product_id(), data))
+            log.msg("Bad Data from %s\n%s" % (prod.product_id, data))
             value = -9999.0
         else:
             value = float(value)
@@ -352,7 +363,7 @@ def really_process(tp, data):
                     continue
                 common.email_error(("sid: %s varname: %s value: %s "
                                     "is too large") % (sid, varname, value),
-                                   "%s\n%s" % (data, tp.unixtext))
+                                   "%s\n%s" % (data, prod.text))
             continue
         st_data[varname] = value
     # Now we process each station we found in the report! :)
@@ -360,7 +371,7 @@ def really_process(tp, data):
         times = mydata[sid].keys()
         times.sort()
         for tstamp in times:
-            process_site(tp, sid, tstamp, mydata[sid][tstamp])
+            process_site(prod, sid, tstamp, mydata[sid][tstamp])
 
 
 def enter_unknown(sid, product_id, network):
@@ -373,7 +384,6 @@ def enter_unknown(sid, product_id, network):
     # Eh, lets not care about non-5 char IDs
     if NWSLIRE.match(sid) is None:
         return
-    # log.msg("Found unknown %s %s %s" % (sid, tp.get_product_id(), network))
     HADSDB.runOperation("""
             INSERT into unknown(nwsli, product, network)
             values ('%s', '%s', '%s')
@@ -441,7 +451,7 @@ def get_localtime(sid, ts):
                                        pytz.utc))
 
 
-def get_network(tp, sid, ts, data):
+def get_network(prod, sid, ts, data):
     """Figure out which network this belongs to"""
     networks = LOCS.get(sid, dict()).keys()
     # This is the best we can hope for
@@ -449,10 +459,10 @@ def get_network(tp, sid, ts, data):
         return networks[0]
     # Our simple determination if the site is a COOP site
     is_coop = False
-    if tp.afos[:3] == 'RR3':
+    if prod.afos[:3] == 'RR3':
         is_coop = True
-    elif tp.afos[:3] in ['RR1', 'RR2'] and checkvars(data.keys()):
-        log.msg("Guessing COOP? %s %s %s" % (sid, tp.get_product_id(),
+    elif prod.afos[:3] in ['RR1', 'RR2'] and checkvars(data.keys()):
+        log.msg("Guessing COOP? %s %s %s" % (sid, prod.product_id,
                                              data.keys()))
         is_coop = True
     pnetwork = 'COOP' if is_coop else 'DCP'
@@ -462,8 +472,8 @@ def get_network(tp, sid, ts, data):
         return networks[0]
 
     # If networks is zero length, then we have to try some things
-    if len(networks) == 0:
-        enter_unknown(sid, tp.get_product_id(), "")
+    if not networks:
+        enter_unknown(sid, prod.product_id, "")
         if len(sid) == 5:
             state = reference.nwsli2state.get(sid[3:])
             country = reference.nwsli2country.get(sid[3:])
@@ -477,16 +487,15 @@ def get_network(tp, sid, ts, data):
     if sid not in UNKNOWN:
         UNKNOWN[sid] = True
         log.msg(("get_network failure for sid: %s tp: %s"
-                 ) % (sid, tp.get_product_id()))
+                 ) % (sid, prod.product_id))
     return None
 
 
-def process_site(tp, sid, ts, data):
+def process_site(prod, sid, ts, data):
     """
     I process a dictionary of data for a particular site
     """
     localts = get_localtime(sid, ts)
-    # log.msg("%s sid: %s ts: %s %s" % (tp.get_product_id(), sid, ts, localts))
     # Insert data into database regardless
     for varname in data.keys():
         value = data[varname]
@@ -494,7 +503,7 @@ def process_site(tp, sid, ts, data):
                 (station, valid, key, value)
                 VALUES(%s,%s, %s, %s)
                 """, (sid, ts.strftime("%Y-%m-%d %H:%M+00"), varname, value))
-        deffer.addErrback(common.email_error, tp.text)
+        deffer.addErrback(common.email_error, prod.text)
         deffer.addErrback(log.err)
 
         key = "%s|%s" % (sid, varname)
@@ -511,7 +520,7 @@ def process_site(tp, sid, ts, data):
     # Don't bother with unknown sites
     if sid in UNKNOWN:
         return
-    network = get_network(tp, sid, ts, data)
+    network = get_network(prod, sid, ts, data)
     if network in ['KCCI', 'KIMT', 'KELO', 'ISUSM', None]:
         return
 
@@ -553,12 +562,12 @@ def process_site(tp, sid, ts, data):
                                 'snow', 'snowd']:
                 iemob.data['coop_valid'] = iemob.data['valid']
     if hasdata:
-        iemob.data['raw'] = tp.get_product_id()
+        iemob.data['raw'] = prod.product_id
 
         deffer = ACCESSDB.runInteraction(iemob.save)
-        deffer.addCallback(got_results, tp.get_product_id(), sid, network,
+        deffer.addCallback(got_results, prod.product_id, sid, network,
                            localts)
-        deffer.addErrback(common.email_error, tp.text)
+        deffer.addErrback(common.email_error, prod.text)
         deffer.addErrback(log.err)
     # else:
     #    print 'NODATA?', sid, network, localts, data
@@ -584,17 +593,26 @@ def got_results(res, product_id, sid, network, localts):
     enter_unknown(sid, product_id, network)
 
 
-def job_size(jobs):
+def service_guard(jobs):
+    """Make sure things are not getting sideways
+
+    When we call shutdown, this closes the inbound STDIN pipe, which termintes
+    the LDM pqact process and starts up a new one.  This process then sits and
+    spins as it works off its database queue.  This all is not ideal!
     """
-    Print out some debug information to the log on the current size of the
-    job queue
-    """
-    log.msg("deferredQueue waiting: %s pending: %s" % (len(jobs.waiting),
-                                                       len(jobs.pending)))
+    # all_objects = muppy.get_objects()
+    # sum1 = summary.summarize(all_objects)
+    # summary.print_(sum1)
+    # log.msg("DIFF--------------")
+    # TR.print_diff()
+    log.msg(("service_guard jobs[waiting: %s, pending: %s] "
+             "dbpool queuesz[hads:%s, access:%s]"
+             ) % (len(jobs.waiting), len(jobs.pending),
+                  HADSDB.threadpool._queue.qsize(),
+                  ACCESSDB.threadpool._queue.qsize()))
     if len(jobs.pending) > 1000:
-        log.msg("ABORT")
-        reactor.callWhenRunning(reactor.stop)
-    reactor.callLater(300, job_size, jobs)
+        log.msg("Starting shutdown due to more than 1000 jobs in queue")
+        shutdown()
 
 
 def main(res):
@@ -607,12 +625,13 @@ def main(res):
     ingest.jobs = jobs
     ldmbridge.LDMProductFactory(ingest)
 
-    for _ in range(3):
+    for _ in range(6):
         cooperate(worker(jobs))
 
-    reactor.callLater(300, job_size, jobs)
     lc = LoopingCall(save_current)
     lc.start(373, now=False)
+    lc2 = LoopingCall(service_guard, jobs)
+    lc2.start(61, now=False)
 
 
 def fullstop(err):
@@ -633,6 +652,7 @@ def bootstrap():
     df.addCallback(main)
     df.addErrback(fullstop)
     reactor.run()
+
 
 if __name__ == '__main__':
     bootstrap()
