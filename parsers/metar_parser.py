@@ -93,6 +93,9 @@ def real_processor(text):
         deffer = IEMDB.runInteraction(do_db, mtr)
         deffer.addErrback(common.email_error, collect.unixtext)
 
+    # if not collect.metars and collect.source[0] == 'K' and text.find("NIL=") == -1:
+    #    common.email_error("No METARs found?", text)
+
 
 def do_db(txn, mtr):
     """Do database transaction"""
