@@ -1,3 +1,4 @@
+"""Playback some data in a slow fashion to avoid over-running ingest"""
 import sys
 import time
 from pyiem.util import noaaport_text

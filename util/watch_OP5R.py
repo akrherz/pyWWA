@@ -1,4 +1,5 @@
 """Monitor a directory for new files and then do the level II dance"""
+from __future__ import print_function
 import inotify.adapters
 import re
 import os
@@ -14,7 +15,7 @@ def main():
     try:
         for event in i.event_gen():
             if event is not None:
-                (header, type_names, watch_path, filename) = event
+                (_header, type_names, watch_path, filename) = event
                 if 'IN_CLOSE_WRITE' not in type_names:
                     continue
                 fn = filename.decode('utf-8')

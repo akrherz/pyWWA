@@ -5,9 +5,9 @@ there is one 2 one relationship here.  This likely breaks other things, but
 alas
 
 """
-import psycopg2
-pgconn = psycopg2.connect(database='postgis', host='localhost', port=5555,
-                          user='mesonet')
+from __future__ import print_function
+from pyiem.util import get_dbconn
+pgconn = get_dbconn('postgis')
 cursor = pgconn.cursor()
 cursor2 = pgconn.cursor()
 
@@ -33,7 +33,7 @@ for row in cursor:
     table = "warnings_%s" % (row[2].year,)
     cursor2.execute("""UPDATE """+table+""" SET ugc = %s,
     gid = get_gid(%s,issue) WHERE oid = %s""", (xref[ugc], xref[ugc], oid))
-    print cursor2.rowcount, row[2], ugc, xref[ugc]
+    print("%s %s %s %s" % (cursor2.rowcount, row[2], ugc, xref[ugc]))
 
 cursor2.close()
 pgconn.commit()

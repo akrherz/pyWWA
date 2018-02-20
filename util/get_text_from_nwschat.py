@@ -1,7 +1,7 @@
 """
 Hit the NWSChat quasi web service to get the text IEM may have missed :(
 """
-
+from __future__ import print_function
 import sys
 
 import requests
@@ -16,7 +16,7 @@ def wrap(data):
 def process(j):
     ''' Process the json data j '''
     if len(j['data']) == 0:
-        print 'ERROR: No results found!'
+        print('ERROR: No results found!')
         return
 
     out = open('/tmp/vtec_data.txt', 'w')

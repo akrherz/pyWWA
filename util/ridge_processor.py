@@ -1,6 +1,7 @@
 """
  I process activemq messages 10,000 at a time!
 """
+from __future__ import print_function
 import os
 import subprocess
 import datetime
@@ -25,8 +26,8 @@ def generate_image(ch, method, properties, body):
     # Convert Java ticks into local time
     gts = datetime.datetime(1970,
                             1, 1) + datetime.timedelta(seconds=(ticks / 1000))
-    gts = gts.replace(tzinfo=pytz.timezone("UTC"))
-    utcnow = datetime.datetime.utcnow().replace(tzinfo=pytz.timezone("UTC"))
+    gts = gts.replace(tzinfo=pytz.utc)
+    utcnow = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
     routes = "ac"
     if (utcnow - gts).seconds > 3600:
         routes = "a"
@@ -74,7 +75,7 @@ def generate_image(ch, method, properties, body):
         if os.path.isfile(fn):
             os.unlink(fn)
         else:
-            print 'Strange file: %s was missing, but should be deleted' % (fn,)
+            print('Strange file: %s was missing, but should be deleted' % (fn,))
 
 
 def run():

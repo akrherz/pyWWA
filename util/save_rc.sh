@@ -1,7 +1,7 @@
 #
 # This is run async after the ingestor fires a product into LDM
 # which triggers this script
-# TODO: this should be depreciated
+
 ts="$1"
 hhmm=$(echo $1 | cut -c 9-12)
 

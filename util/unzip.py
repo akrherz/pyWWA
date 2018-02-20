@@ -13,6 +13,7 @@ BASE = "/home/ldm/data"
 
 
 def ranstr():
+    """used in tmpfn creation"""
     return ''.join(random.SystemRandom(
                     ).choice(string.ascii_uppercase + string.digits)
                    for _ in range(8))
