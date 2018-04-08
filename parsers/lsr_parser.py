@@ -92,12 +92,13 @@ def real_processor(txn, text):
         lsr.sql(txn)
 
     j = prod.get_jabbers(common.SETTINGS.get('pywwa_lsr_url', 'pywwa_lsr_url'))
-    for (p, h, x) in j:
-        JABBER.send_message(p, h, x)
+    for i, (p, h, x) in enumerate(j):
+        # delay some to perhaps stop triggering SPAM lock outs at twitter
+        reactor.callLater(i, JABBER.send_message, p, h, x)
 
-    if len(prod.warnings) > 0:
+    if prod.warnings:
         common.email_error("\n\n".join(prod.warnings), text)
-    elif len(prod.lsrs) == 0:
+    elif not prod.lsrs:
         raise Exception("No LSRs parsed!", text)
 
 
