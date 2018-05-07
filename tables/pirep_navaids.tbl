@@ -51,6 +51,7 @@ CAV4            McBride                          -- CA  5332 -12017     0  0
 CAX5            Likely                           -- CA  5262 -12150     0  0
 # CAX6            
 # CAY2
+# CAY4
 CAZ5            Cache Creek                      -- CA  5078 -12132     0  0
 CBB7            Tipella                          -- CA  4974 -12216     0  0
 CBB9            Osoyoos                          -- CA  4904 -11949     0  0
@@ -119,6 +120,7 @@ CEB5            Fairview                         -- CA  5608 -11843     0  0
 CEC3            Fox Lake                         -- CA  5847 -11454     0  0
 CEC4            Hinton                           -- CA  5332 -11775     0  0
 CED4            Fox Creek                        -- CA  5438 -11677     0  0
+CED5            Taber                            -- CA  4983 -11219     0  0
 CEE4            Hinton                           -- CA  5338 -11770     0  0
 CEE5            Wabasca                          -- CA  5596 -11382     0  0
 CEE8            Viking                           -- CA  5311 -11186     0  0
@@ -148,6 +150,7 @@ CEP3            Barrhead                         -- CA  5410 -11443     0  0
 CEQ3            Camrose                          -- CA  5304 -11282     0  0
 CEQ4            Del Bonita                       -- CA  4900 -11278     0  0
 CEQ5            Grande Cache                     -- CA  5392 -11887     0  0
+CER2            Castor                           -- CA  5222 -11193     0  0
 CER3            Drayton Valley                   -- CA  5327 -11496     0  0
 CER4            Fort McMurray                    -- CA  5706 -11158     0  0
 CES4            Westlock                         -- CA  5414 -11374     0  0
@@ -252,6 +255,7 @@ CKQ6            Erickson                         -- CA  5049  -9990     0  0
 CKQ9            Pine Dock                        -- CA  5162  -9681     0  0
 CKR4            Lundar                           -- CA  5070  -9806     0  0
 CKS8            Cree Lake                        -- CA  5746 -10675     0  0
+# CKT8
 # CKW7
 CKY2            Whitewood                        -- CA  5033 -10227     0  0
 CKZ3            Elk Island                       -- CA  5467  -9415     0  0
@@ -294,6 +298,7 @@ CNQ3            Welland / Niagara Central        -- CA  4298  -7932     0  0
 # CNQ7            
 # CNR2
 CNR4            Tobermory                        -- CA  4522  -8163     0  0
+CNS8            Morrisburg                       -- CA  4495  -7508     0  0
 CNT7            Picton                           -- CA  4399  -7714     0  0
 CNW3            Bancroft                         -- CA  4507  -7788     0  0
 CNU4            Belleville                       -- CA  4419  -7731     0  0
@@ -385,6 +390,7 @@ CTA3            Ile aux Coudres                  -- CA  4739  -7038     0  0
 CTG3            Du Rocher Perce                  -- CA  4338  -6456     0  0
 # CTH3            
 # CTK6     
+# CTR4
 # CTSJ                   
 CTT5            La Romaine                       -- CA  5026  -6068     0  0
 CTU2            Fontanges                        -- CA  5455  -7117     0  0
@@ -474,6 +480,7 @@ CYSW            Sparkwood Elk Valley             -- CA  4983 -11488     0  0
 CYSZ            Sainte Anne des Monts            QC CA  4912  -6653     0  0
 CYTB            Tillsonburg                      -- CA  4293  -8075     0  0
 CYTF            Alma                             QC CA  4851  -7164     0  0
+# CYTW
 CYVB            Bonaventure                      -- CA  4807  -6546     0  0
 CYVD            Virden                           MB CA  4988 -10092     0  0
 CYVG            Vermilion                        AB CA  5336 -11082     0  0
