@@ -6,14 +6,13 @@ import pwd
 import datetime
 import re
 import traceback
-import StringIO
+from io import BytesIO
 import socket
 import sys
 from email.mime.text import MIMEText
 
 # 3rd party
 import psycopg2
-import pyiem
 
 # twisted
 from twisted.python import log
@@ -26,6 +25,7 @@ from twisted.internet import reactor
 from twisted.words.xish import domish, xpath
 from twisted.mail import smtp
 from twisted.enterprise import adbapi
+import pyiem
 
 # http://bugs.python.org/issue7980
 datetime.datetime.strptime('2013', '%Y')
@@ -107,7 +107,7 @@ def email_error(exp, message, trimstr=100):
     @return boolean If an email was sent or not...
     """
     # Always log a message about our fun
-    cstr = StringIO.StringIO()
+    cstr = BytesIO()
     if isinstance(exp, failure.Failure):
         traceback.print_exc(file=cstr)
         log.err(exp)
@@ -116,8 +116,6 @@ def email_error(exp, message, trimstr=100):
     cstr.seek(0)
     if isinstance(message, str):
         log.msg(message[:trimstr])
-    if isinstance(message, unicode):
-        log.msg(message.encode('utf-8')[:trimstr])
     else:
         log.msg(message)
 
@@ -142,7 +140,7 @@ Message:
          pyiem.__version__,
          datetime.datetime.utcnow(),
          os.getpid(), ' '.join(['%.2f' % (_,) for _ in os.getloadavg()]),
-         cstr.read(), exp, message), "plain", "utf-8")
+         cstr.read().decode('utf-8'), exp, message), "plain", "utf-8")
 
     # Send the email already!
     msg['subject'] = ("[pyWWA] %s Traceback -- %s"
@@ -198,8 +196,9 @@ def raw_data_in(data):
     Debug method
     @param data string of what was received from the server
     """
-    log.msg('RECV %s' % (unicode(data, 'utf-8',
-                                 'ignore').encode('ascii', 'replace'),))
+    if isinstance(data, bytes):
+        data = data.decode('utf-8', errors='ignore')
+    log.msg('RECV %s' % (data, ))
 
 
 def debug(elem):
@@ -215,10 +214,11 @@ def raw_data_out(data):
     Debug method
     @param data string of what data was sent
     """
+    if isinstance(data, bytes):
+        data = data.decode('utf-8', errors='ignore')
     if data == ' ':
         return
-    log.msg('SEND %s' % (unicode(data, 'utf-8',
-                                 'ignore').encode('ascii', 'replace'),))
+    log.msg('SEND %s' % (data, ))
 
 
 class JabberClient(object):
@@ -254,7 +254,7 @@ class JabberClient(object):
         self.xmlstream.rawDataOutFn = raw_data_out
 
         # Process Messages
-        self.xmlstream.addObserver('/message/body',  message_processor)
+        self.xmlstream.addObserver('/message/body', message_processor)
 
         # Send initial presence
         presence = domish.Element(('jabber:client', 'presence'))

@@ -1,63 +1,18 @@
 """ ASOS Daily Summary Message Parser ingestor """
 
-# Twisted Python imports
 from syslog import LOG_LOCAL2
-from twisted.python import syslog
-syslog.startLogging(prefix='pyWWA/dsm_parser', facility=LOG_LOCAL2)
-from twisted.python import log
-
-# Twisted Python imports
-from twisted.internet import reactor
-
-# Standard Python modules
 import re
-
-# Python 3rd Party Add-Ons
 import datetime
 
-# pyWWA stuff
+from twisted.internet import reactor
+from twisted.python import syslog
+from twisted.python import log
 from pyldm import ldmbridge
 import common
 
+syslog.startLogging(prefix='pyWWA/dsm_parser', facility=LOG_LOCAL2)
 DBPOOL = common.get_database("iem", cp_max=1)
-
-
-class MyProductIngestor(ldmbridge.LDMProductReceiver):
-    """ I receive products from ldmbridge and process them 1 by 1 :) """
-
-    def connectionLost(self, reason):
-        log.msg('connectionLost')
-        log.err(reason)
-        reactor.callLater(5, self.shutdown)
-
-    def shutdown(self):
-        reactor.callWhenRunning(reactor.stop)
-
-    def process_data(self, buf):
-        """ Process the product """
-        try:
-            real_parser(buf)
-        except Exception, myexp:
-            common.email_error(myexp, buf)
-
-
-def real_parser(buf):
-    # KAMW DS 19/07 761539/ 540532// 76/ 54//0062028/00/00/00/00/00/00/00/
-    # 00/00/00/00/00/00/00/00/00/00/00/00/00/00/00/00/00/00/25/12091717/
-    # 14131452=
-    # Split lines
-    raw = buf.replace("\015\015\012", "\n")
-    lines = raw.split("\n")
-    if len(lines[3]) < 10:
-        meat = ("".join(lines[4:])).split("=")
-    else:
-        meat = ("".join(lines[3:])).split("=")
-    for data in meat:
-        if data == "":
-            continue
-        process_dsm(data)
-
-PARSER_RE = re.compile("""^(?P<id>[A-Z][A-Z0-9]{3})\s+
+PARSER_RE = re.compile(r"""^(?P<id>[A-Z][A-Z0-9]{3})\s+
    DS\s+
    (COR\s)?
    ([0-9]{4}\s)?
@@ -82,7 +37,48 @@ PARSER_RE = re.compile("""^(?P<id>[A-Z][A-Z0-9]{3})\s+
 """, re.VERBOSE)
 
 
+class MyProductIngestor(ldmbridge.LDMProductReceiver):
+    """ I receive products from ldmbridge and process them 1 by 1 :) """
+
+    def connectionLost(self, reason):
+        """sys.stdin was closed"""
+        log.msg('connectionLost')
+        log.err(reason)
+        reactor.callLater(5, self.shutdown)
+
+    def shutdown(self):
+        """shut us down"""
+        reactor.callWhenRunning(reactor.stop)
+
+    def process_data(self, data):
+        """ Process the product """
+        try:
+            real_parser(data)
+        except Exception as myexp:
+            common.email_error(myexp, data)
+
+
+def real_parser(buf):
+    """
+    KAMW DS 19/07 761539/ 540532// 76/ 54//0062028/00/00/00/00/00/00/00/
+    00/00/00/00/00/00/00/00/00/00/00/00/00/00/00/00/00/00/25/12091717/
+    14131452=
+    """
+    # Split lines
+    raw = buf.replace("\015\015\012", "\n")
+    lines = raw.split("\n")
+    if len(lines[3]) < 10:
+        meat = ("".join(lines[4:])).split("=")
+    else:
+        meat = ("".join(lines[3:])).split("=")
+    for data in meat:
+        if data == "":
+            continue
+        process_dsm(data)
+
+
 def process_dsm(data):
+    """Please process some data"""
     m = PARSER_RE.match(data)
     if m is None:
         log.msg("FAIL ||%s||" % (data, ))
@@ -119,9 +115,10 @@ def process_dsm(data):
                ts.strftime("%Y-%m-%d"))
     log.msg("%s %s H:%s L:%s P:%s" % (d['id'], ts.strftime("%Y-%m-%d"),
                                       d['high'], d['low'], d['precip']))
-    if len(updater) > 0:
+    if updater:
         defer = DBPOOL.runOperation(sql)
         defer.addErrback(common.email_error, sql)
+
 
 if __name__ == '__main__':
     ldm = ldmbridge.LDMProductFactory(MyProductIngestor())

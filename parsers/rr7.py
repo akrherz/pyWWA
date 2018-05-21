@@ -5,21 +5,23 @@ import re
 import datetime
 
 import pytz
-import psycopg2
+from pyiem.util import get_dbconn
 
 
 def main():
     """Go"""
-    pgconn = psycopg2.connect(database="afos", host='iemdb')
+    pgconn = get_dbconn("afos")
 
     acursor = pgconn.cursor()
 
-    data = sys.stdin.read().replace("\r\r\n", "z")
+    payload = getattr(sys.stdin, 'buffer', sys.stdin).read()
+    payload = payload.decode('ascii', errors='ignore')
+    data = payload.replace("\r\r\n", "z")
 
     tokens = re.findall(r"(\.A [A-Z0-9]{3} .*?=)", data)
 
     utcnow = datetime.datetime.utcnow()
-    gmt = utcnow.replace(tzinfo=pytz.timezone("UTC"))
+    gmt = utcnow.replace(tzinfo=pytz.utc)
     gmt = gmt.replace(second=0)
 
     table = "products_%s_0106" % (gmt.year,)
@@ -27,6 +29,7 @@ def main():
         table = "products_%s_0712" % (gmt.year,)
 
     for token in tokens:
+        # print(tokens)
         sql = """
         INSERT into """ + table + """
         (pil, data, entered) values(%s,%s,%s)

@@ -3,20 +3,21 @@ Split the MAV product into bitesized chunks that the AFOS viewer can see
 """
 import re
 import sys
+
+from pyiem.util import get_dbconn
 from pyiem.nws import product
-import psycopg2
 
 
 def main():
     """Go!"""
-    pgconn = psycopg2.connect(database='afos', host='iemdb')
+    pgconn = get_dbconn('afos')
     cursor = pgconn.cursor()
 
-    prod = product.TextProduct(sys.stdin.read())
+    payload = getattr(sys.stdin, 'buffer', sys.stdin).read()
+    prod = product.TextProduct(payload.decode('ascii', errors='ignore'))
     prod.valid = prod.valid.replace(second=0, minute=0, microsecond=0)
-    offset = prod.text.find(prod.afos[:3]) + 7
-
-    sections = re.split("\n\n", prod.text[offset:])
+    offset = prod.unixtext.find(prod.afos[:3]) + 7
+    sections = re.split("\n\n", prod.unixtext[offset:])
 
     table = "products_%s_0106" % (prod.valid.year,)
     if prod.valid.month > 6:
@@ -25,7 +26,8 @@ def main():
     for sect in sections:
         if sect[1:4].strip() == "":
             continue
-        # print prod.afos[:3] + sect[1:4], prod.source, prod.valid, prod.wmo
+        # print("%s%s %s %s %s" % (prod.afos[:3], sect[1:4], prod.source,
+        #                          prod.valid, prod.wmo))
         cursor.execute("""
             INSERT into """+table+"""
             (pil, data, source, entered, wmo) values (%s, %s, %s, %s, %s)

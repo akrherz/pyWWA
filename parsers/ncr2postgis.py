@@ -17,7 +17,7 @@ def write_data():
     """
     tmpfn = tempfile.mktemp().lower()
     fp = open("%s.ncr" % (tmpfn,), 'wb')
-    fp.write(sys.stdin.read())
+    fp.write(getattr(sys.stdin, 'buffer', sys.stdin).read())
     fp.close()
     return tmpfn
 
@@ -50,7 +50,7 @@ def do_gempak(tmpfn):
     proc = subprocess.Popen("/home/ldm/bin/gpnids_vg",
                             stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                             stderr=subprocess.PIPE)
-    (_stdoutdata, _stderrdata) = proc.communicate(cmd)
+    (_stdoutdata, _stderrdata) = proc.communicate(cmd.encode('utf-8'))
     for suffix in ['gif', 'ncr']:
         if os.path.isfile('%s.%s' % (tmpfn, suffix)):
             os.unlink("%s.%s" % (tmpfn, suffix))

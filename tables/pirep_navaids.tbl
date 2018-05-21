@@ -84,10 +84,12 @@ CBX7            Tumbler Ridge                    -- CA  5503 -12094     0  0
 # CBZ7
 CBZ9            Fraser Lake                      -- CA  5401 -12477     0  0
 # CCB3
+CCD2            Springdale                       -- CA  4948  -5618     0  0
 CCD3            Woodstock                        -- CA  4615  -6755     0  0
 CCD4            Postville                        -- CA  5491  -5979     0  0
 # CCH3
 CCH4            Charlottetown                    -- CA  5277  -5611     0  0
+CCI9            Cortes Island                    -- CA  5002 -12498     0  0
 CCK3            Grand Falls                      -- CA  4708  -6769     0  0
 CCL3            Christina Lake                   -- CA  5563 -11075     0  0
 CCM3            Sevogle                          -- CA  4719  -6616     0  0
@@ -119,11 +121,13 @@ CEA6            Cardston                         -- CA  4916 -11324     0  0
 CEB5            Fairview                         -- CA  5608 -11843     0  0
 CEC3            Fox Lake                         -- CA  5847 -11454     0  0
 CEC4            Hinton                           -- CA  5332 -11775     0  0
+CED3            Oyen                             -- CA  5133 -11049     0  0
 CED4            Fox Creek                        -- CA  5438 -11677     0  0
 CED5            Taber                            -- CA  4983 -11219     0  0
 CEE4            Hinton                           -- CA  5338 -11770     0  0
 CEE5            Wabasca                          -- CA  5596 -11382     0  0
 CEE8            Viking                           -- CA  5311 -11186     0  0
+CEF3            Bow Island                       -- CA  4988 -11133     0  0
 CEF4            Airdrie                          -- CA  5126 -11393     0  0
 CEG3            Lacombe                          -- CA  5249 -11371     0  0
 CEG4            Drumheller                       -- CA  5150 -11275     0  0
@@ -262,6 +266,7 @@ CKZ3            Elk Island                       -- CA  5467  -9415     0  0
 CKZ7            Winkler                          -- CA  4917  -9792     0  0
 # CLA4
 # CLA6
+# CLD3
 # CLH4
 # CLJ2
 CLM2            Leamington                       -- CA  4203  -8253     0  0
@@ -272,6 +277,7 @@ CMB7            Maxville                         -- CA  4525  -7481     0  0
 # CMH3
 CMN5            Manic-5                          -- CA  5066  -6883     0  0
 CMR2            Mary River                       -- CA  7132  -7935     0  0
+CNA3            Springwater Barrie               -- CA  4441  -7973     0  0
 CNA9            Tomvale                          -- CA  4492  -7694     0  0
 CNC3            Brampton                         -- CA  4376  -7988     0  0
 CNC4            Guelph                           -- CA  4356  -8020     0  0

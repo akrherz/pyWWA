@@ -1,11 +1,10 @@
-"""
+"""Convert noaaport GINI imagery into GIS PNGs
+
 I convert raw GINI noaaport imagery into geo-referenced PNG files both in the
 'native' projection and 4326.
-
-Questions? daryl herzmann akrherz@iastate.edu
 """
 from __future__ import print_function
-import cStringIO
+from io import BytesIO
 import sys
 import datetime
 import logging
@@ -15,10 +14,10 @@ import tempfile
 import json
 import subprocess
 
-from pyiem.nws import gini
 import pytz
 from PIL import Image
 import numpy as np
+from pyiem.nws import gini
 
 logger = logging.getLogger('gini2gis')
 logger.setLevel(logging.INFO)
@@ -36,8 +35,8 @@ def process_input():
     Process what was provided to use by LDM on stdin
     @return GINIZFile instance
     """
-    cstr = cStringIO.StringIO()
-    cstr.write(sys.stdin.read())
+    cstr = BytesIO()
+    cstr.write(getattr(sys.stdin, 'buffer', sys.stdin).read())
     cstr.seek(0)
     sat = gini.GINIZFile(cstr)
     logger.info(str(sat))
@@ -218,7 +217,7 @@ def gdalwarp(sat, tmpfn, epsg):
                             stdout=subprocess.PIPE)
     output = proc.stderr.read()
     if output != "":
-        logger.error("gdalwarp() convert error message: %s" % (output,))
+        logger.error("gdalwarp() convert error message: %s", output)
     os.unlink("%s_%s.tif" % (tmpfn, epsg))
 
     cmd = ("%s -i -p 'gis c %s gis/images/%s/goes/%s bogus wld' "
@@ -252,7 +251,7 @@ def workflow():
     logger.info("Starting Ingest for: %s", " ".join(sys.argv))
 
     sat = process_input()
-    logger.info("Processed archive file: " + sat.archive_filename())
+    logger.info("Processed archive file: %s", sat.archive_filename())
     if sat.awips_grid() is None:
         logger.info("ABORT: Unknown awips grid!")
         return
