@@ -1,21 +1,24 @@
+"""Parse CLI text products
+
+The CLI report has lots of good data that is hard to find in other products,
+so we take what data we find in this product and overwrite the database
+storage of what we got from the automated observations
 """
-  The CLI report has lots of good data that is hard to find in other products,
-  so we take what data we find in this product and overwrite the database
-  storage of what we got from the automated observations
-"""
-from pyiem.nws.products import parser
-from pyldm import ldmbridge
-from pyiem.network import Table as NetworkTable
-import common
+from __future__ import print_function
+from syslog import LOG_LOCAL2
 
 from twisted.internet import reactor
-from syslog import LOG_LOCAL2
 from twisted.python import syslog
-syslog.startLogging(prefix='pyWWA/cli_parser', facility=LOG_LOCAL2)
 from twisted.python import log
+from pyldm import ldmbridge
+from pyiem.nws.products import parser
+from pyiem.network import Table as NetworkTable
+import common
+syslog.startLogging(prefix='pyWWA/cli_parser', facility=LOG_LOCAL2)
 
 DBPOOL = common.get_database('iem', cp_max=1)
 NT = NetworkTable("NWSCLI")
+HARDCODED = {'PKTN': 'PAKT'}
 
 
 # LDM Ingestor
@@ -27,16 +30,17 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
         log.err(reason)
         reactor.callLater(7, reactor.callWhenRunning, reactor.stop)
 
-    def process_data(self, text):
+    def process_data(self, data):
         """ Process the product """
-        deffer = DBPOOL.runInteraction(preprocessor, text)
-        deffer.addErrback(common.email_error, text)
+        deffer = DBPOOL.runInteraction(preprocessor, data)
+        deffer.addErrback(common.email_error, data)
 
 
 def save_data(txn, prod, station, data):
     """ Save atomic data to cli_data table """
     # Use four char here
     station = "%s%s" % (prod.source[0], station)
+    station = HARDCODED.get(station, station)
 
     if station not in NT.sts:
         common.email_error("Unknown CLI Station: %s" % (station,),
@@ -122,7 +126,7 @@ def send_tweet(prod):
 def preprocessor(txn, text):
     """ Protect the realprocessor """
     prod = parser(text)
-    if len(prod.data) == 0:
+    if not prod.data:
         return
     for data in prod.data:
         realprocessor(txn, prod, data)
@@ -152,8 +156,8 @@ def realprocessor(txn, prod, data):
         """, (data['cli_valid'], station))
     row = txn.fetchone()
     if row is None:
-        print 'No %s rows found for %s on %s' % (table, station,
-                                                 data['cli_valid'])
+        print(('No %s rows found for %s on %s'
+               ) % (table, station, data['cli_valid']))
         save_data(txn, prod, station, data)
         return
     updatesql = []
@@ -189,7 +193,7 @@ def realprocessor(txn, prod, data):
             updatesql.append(' snow = %s' % (val,))
             logmsg.append('Snow O:%s N:%s' % (row['snow'], val))
 
-    if len(updatesql) > 0:
+    if updatesql:
         txn.execute("""UPDATE """+table+""" d SET
         """ + ','.join(updatesql) + """
          FROM stations t WHERE t.iemid = d.iemid and d.day = %s and t.id = %s
