@@ -5,16 +5,13 @@ so we take what data we find in this product and overwrite the database
 storage of what we got from the automated observations
 """
 from __future__ import print_function
-from syslog import LOG_LOCAL2
 
 from twisted.internet import reactor
-from twisted.python import syslog
 from twisted.python import log
 from pyldm import ldmbridge
 from pyiem.nws.products import parser
 from pyiem.network import Table as NetworkTable
 import common
-syslog.startLogging(prefix='pyWWA/cli_parser', facility=LOG_LOCAL2)
 
 DBPOOL = common.get_database('iem', cp_max=1)
 NT = NetworkTable("NWSCLI")

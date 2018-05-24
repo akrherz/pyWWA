@@ -1,14 +1,11 @@
 """ SPC Watch Ingestor """
-from syslog import LOG_LOCAL2
 
-from twisted.python import syslog
 from twisted.python import log
 from twisted.internet import reactor
 from pyiem.nws.products.saw import parser as sawparser
 from pyldm import ldmbridge
 import common  # @UnresolvedImport
 
-syslog.startLogging(prefix='pyWWA/watch_parser', facility=LOG_LOCAL2)
 DBPOOL = common.get_database('postgis', cp_max=1)
 IEM_URL = common.SETTINGS.get('pywwa_watch_url', 'pywwa_watch_url')
 JABBER = common.make_jabber_client("new_watch")

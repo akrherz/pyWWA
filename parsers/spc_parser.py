@@ -1,14 +1,11 @@
 """SPC Geo Products Parser!"""
-from syslog import LOG_LOCAL2
 
-from twisted.python import syslog
 from twisted.python import log
 from twisted.internet import reactor
 from pyldm import ldmbridge
 from pyiem.nws.products.spcpts import parser
 import common  # @UnresolvedImport
 
-syslog.startLogging(prefix='pyWWA/spc_parser', facility=LOG_LOCAL2)
 DBPOOL = common.get_database('postgis')
 WAITFOR = 20
 JABBER = common.make_jabber_client('spc_parser')

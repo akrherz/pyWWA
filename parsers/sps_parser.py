@@ -1,9 +1,6 @@
 """SPS product ingestor"""
-from syslog import LOG_LOCAL2
 import datetime
 
-
-from twisted.python import syslog
 from twisted.python import log
 from twisted.internet import reactor
 from shapely.geometry import MultiPolygon
@@ -12,7 +9,6 @@ from pyiem import reference
 from pyldm import ldmbridge
 import common
 
-syslog.startLogging(prefix='pyWWA/sps_parser', facility=LOG_LOCAL2)
 POSTGIS = common.get_database('postgis')
 PYWWA_PRODUCT_URL = common.SETTINGS.get('pywwa_product_url',
                                         'pywwa_product_url')

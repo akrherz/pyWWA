@@ -1,15 +1,12 @@
 """ Aviation Product Parser! """
 import os
-from syslog import LOG_LOCAL2
 
 from twisted.internet import reactor
-from twisted.python import syslog
 from twisted.python import log
 from pyldm import ldmbridge
 from pyiem.nws.products.sigmet import parser
 import common
 
-syslog.startLogging(prefix='pyWWA/aviation', facility=LOG_LOCAL2)
 DBPOOL = common.get_database('postgis')
 
 # Load LOCS table

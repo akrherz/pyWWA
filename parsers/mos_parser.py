@@ -1,15 +1,10 @@
 """ MOS Data Ingestor, why not? """
 from __future__ import print_function
-from syslog import LOG_LOCAL2
-
 
 from twisted.internet import reactor
-from twisted.python import syslog
 from pyldm import ldmbridge
 from pyiem.nws.products.mos import parser
 import common  # @UnresolvedImport
-syslog.startLogging(prefix='pyWWA/mos_parser', facility=LOG_LOCAL2)
-
 
 DBPOOL = common.get_database('mos')
 MEMORY = {'ingested': 0}

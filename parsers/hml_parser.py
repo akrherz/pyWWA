@@ -1,15 +1,12 @@
 """ HML parser! """
-from syslog import LOG_LOCAL2
 
 from twisted.internet import reactor
 from twisted.python import log
-from twisted.python import syslog
 from pyldm import ldmbridge
 from pyiem.nws.products.hml import parser as hmlparser
 
 import common  # @UnresolvedImport
 
-syslog.startLogging(prefix='pyWWA/hml_parser', facility=LOG_LOCAL2)
 DBPOOL = common.get_database("hads")
 
 

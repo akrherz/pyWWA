@@ -10,13 +10,11 @@ with watches.  Lets try to explain
     init_expire <- When did this product initially expire
     product_issue <- When was this product issued by the NWS
 """
-from syslog import LOG_LOCAL2
 import re
 import datetime
 import sys
 
 import pytz
-from twisted.python import syslog
 from twisted.python import log
 from twisted.internet import reactor
 from twisted.web.client import HTTPClientFactory
@@ -26,7 +24,6 @@ from pyiem.nws.products.vtec import parser as vtecparser
 from pyiem.nws import ugc
 from pyiem.nws import nwsli
 import common
-syslog.startLogging(prefix='pyWWA/vtec_parser', facility=LOG_LOCAL2)
 
 
 def shutdown():

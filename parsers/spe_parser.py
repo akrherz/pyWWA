@@ -1,15 +1,12 @@
 """SPENES product ingestor"""
 import re
-from syslog import LOG_LOCAL2
 
-from twisted.python import syslog
 from twisted.python import log
 from twisted.internet import reactor
 from pyldm import ldmbridge
 from pyiem.nws import product
 import common
 
-syslog.startLogging(prefix='pyWWA/spe_parser', facility=LOG_LOCAL2)
 POSTGIS = common.get_database('postgis', cp_max=1)
 PYWWA_PRODUCT_URL = common.SETTINGS.get('pywwa_product_url',
                                         'pywwa_product_url')

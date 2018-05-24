@@ -1,16 +1,12 @@
 """ ASOS Daily Summary Message Parser ingestor """
-
-from syslog import LOG_LOCAL2
 import re
 import datetime
 
 from twisted.internet import reactor
-from twisted.python import syslog
 from twisted.python import log
 from pyldm import ldmbridge
 import common
 
-syslog.startLogging(prefix='pyWWA/dsm_parser', facility=LOG_LOCAL2)
 DBPOOL = common.get_database("iem", cp_max=1)
 PARSER_RE = re.compile(r"""^(?P<id>[A-Z][A-Z0-9]{3})\s+
    DS\s+

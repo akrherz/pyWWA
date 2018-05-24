@@ -2,16 +2,13 @@
  Support SPC's MCD product
  Support WPC's FFG product
 """
-from syslog import LOG_LOCAL2
 
-from twisted.python import syslog
 from twisted.python import log
 from twisted.internet import reactor
 from pyiem.nws.products.mcd import parser as mcdparser
 from pyldm import ldmbridge
 import common
 
-syslog.startLogging(prefix='pyWWA/mcd_parser', facility=LOG_LOCAL2)
 DBPOOL = common.get_database(common.CONFIG['databaserw']['postgis'],
                              cp_max=2)
 

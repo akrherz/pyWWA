@@ -6,18 +6,15 @@ So let us document it here for my own sanity.
 18 Jul 2017: `snowdepth` branch of my python-metar fork installed with pip
 """
 from __future__ import print_function
-from syslog import LOG_LOCAL2
 import sys
 
 # Twisted Python imports
-from twisted.python import syslog
 from twisted.python import log
 from twisted.internet import reactor
 from pyiem.nws.products import metarcollect
 from pyldm import ldmbridge
 import common  # @UnresolvedImport
 
-syslog.startLogging(prefix='pyWWA/metar_parser', facility=LOG_LOCAL2)
 IEMDB = common.get_database('iem')
 ASOSDB = common.get_database('asos')
 

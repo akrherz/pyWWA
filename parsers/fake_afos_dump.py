@@ -1,14 +1,10 @@
 """Dump some stuff without AFOS PILs"""
-from syslog import LOG_LOCAL2
 
-from twisted.python import syslog
 from twisted.python import log
 from twisted.internet import reactor
 from pyiem.nws.product import TextProduct
 from pyldm import ldmbridge
 import common
-
-syslog.startLogging(prefix='pyWWA/fake_afos_dump', facility=LOG_LOCAL2)
 
 
 def compute_afos(textprod):

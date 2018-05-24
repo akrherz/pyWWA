@@ -1,16 +1,12 @@
 """ PIREP parser! """
-from syslog import LOG_LOCAL2
 import datetime
 import os
 
-from twisted.python import syslog
 from twisted.internet import reactor
 from twisted.python import log
 from pyldm import ldmbridge
 from pyiem.nws.products.pirep import parser as pirepparser
 import common
-
-syslog.startLogging(prefix='pyWWA/pirep_parser', facility=LOG_LOCAL2)
 
 TABLESDIR = os.path.join(os.path.dirname(__file__), "../tables")
 

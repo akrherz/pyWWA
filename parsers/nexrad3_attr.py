@@ -4,11 +4,9 @@
 """
 import os
 import math
-from syslog import LOG_LOCAL2
 import datetime
 
 import pytz
-from twisted.python import syslog
 from twisted.python import log
 from twisted.internet.defer import DeferredQueue, Deferred
 from twisted.internet.task import cooperate
@@ -18,7 +16,6 @@ from pyiem.util import utc
 import common
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
-syslog.startLogging(prefix='pyWWA/nexrad3_attr', facility=LOG_LOCAL2)
 
 # Setup Database Links
 POSTGISDB = common.get_database('postgis')

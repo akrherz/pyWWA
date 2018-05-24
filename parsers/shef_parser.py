@@ -7,10 +7,8 @@ import re
 from collections import namedtuple
 import datetime
 from io import BytesIO
-from syslog import LOG_LOCAL2
 
 import pytz
-from twisted.python import syslog
 from twisted.python import log
 from twisted.internet import task
 from twisted.internet.defer import DeferredQueue, Deferred
@@ -28,9 +26,6 @@ import common  # @UnresolvedImport
 
 
 # TR = tracker.SummaryTracker()
-
-# Start Logging
-syslog.startLogging(prefix='pyWWA/shef_parser', facility=LOG_LOCAL2)
 
 # Setup Database Links
 # the current_shef table is not very safe when two processes attempt to update

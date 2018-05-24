@@ -1,18 +1,14 @@
 """ Twisted Way to dump data to the database """
-from syslog import LOG_LOCAL2
 import sys
 import datetime
 
 import pytz
-from twisted.python import syslog
 from twisted.python import log
 from twisted.internet import reactor
 from pyldm import ldmbridge
 from pyiem.nws import product
 from pyiem.util import utc
 import common  # @UnresolvedImport
-
-syslog.startLogging(prefix='pyWWA/afos_dump', facility=LOG_LOCAL2)
 
 DBPOOL = common.get_database('afos')
 

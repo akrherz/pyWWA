@@ -2,10 +2,8 @@
 import pickle
 import os
 import datetime
-from syslog import LOG_LOCAL2
 
 import pytz
-from twisted.python import syslog
 from twisted.python import log
 from twisted.internet import reactor
 from pyiem import reference
@@ -13,7 +11,6 @@ from pyiem.nws.products.lsr import parser as lsrparser
 from pyldm import ldmbridge
 import common
 
-syslog.startLogging(prefix='pyWWA/lsr_parser', facility=LOG_LOCAL2)
 DBPOOL = common.get_database(common.CONFIG['databaserw']['postgis'])
 
 # Cheap datastore for LSRs to avoid Dups!

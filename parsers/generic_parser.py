@@ -1,10 +1,8 @@
 """ Generic NWS Product Parser """
-from syslog import LOG_LOCAL2
 import re
 import datetime
 import sys
 
-from twisted.python import syslog
 from twisted.python import log
 from twisted.internet import reactor
 import pytz
@@ -16,7 +14,6 @@ from pyiem.nws import nwsli
 
 import common
 
-syslog.startLogging(prefix='pyWWA/generic_parser', facility=LOG_LOCAL2)
 DB_ON = bool(common.SETTINGS.get('pywwa_save_text_products', False))
 
 ugc_dict = {}

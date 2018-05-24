@@ -1,16 +1,11 @@
 """ NLDN """
-from syslog import LOG_LOCAL2
 from io import BytesIO
 
-from twisted.python import syslog
 from twisted.internet import reactor
-
-# pyWWA stuff
 from pyldm import ldmbridge
 from pyiem.nws.products.nldn import parser
 import common
 
-syslog.startLogging(prefix='pyWWA/nldn_parser', facility=LOG_LOCAL2)
 DBPOOL = common.get_database('postgis')
 
 

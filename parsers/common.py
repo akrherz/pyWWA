@@ -2,6 +2,7 @@
 from __future__ import print_function
 import json
 import os
+import inspect
 import pwd
 import datetime
 import re
@@ -9,12 +10,14 @@ from io import StringIO
 import socket
 import sys
 from email.mime.text import MIMEText
+from syslog import LOG_LOCAL2
 
 # 3rd party
 import psycopg2
 
 # twisted
 from twisted.python import log
+from twisted.python import syslog
 from twisted.python import failure
 from twisted.words.xish.xmlstream import STREAM_END_EVENT
 from twisted.words.protocols.jabber import client as jclient
@@ -36,6 +39,16 @@ EMAIL_TIMESTAMPS = []
 # Careful modifying this, be sure to test from LDM account
 CONFIG = json.load(open(os.path.join(os.path.dirname(__file__),
                                      '../settings.json')))
+
+
+def setup_syslog():
+    """Setup how we want syslogging to work"""
+    # https://stackoverflow.com/questions/13699283
+    frame = inspect.stack()[-1]
+    module = inspect.getmodule(frame[0])
+    filename = os.path.basename(module.__file__)
+    syslog.startLogging(prefix='pyWWA/%s' % (filename, ),
+                        facility=LOG_LOCAL2)
 
 
 def get_database(dbname, cp_max=5, module_name='pyiem.twistedpg'):
@@ -319,4 +332,5 @@ class JabberClient(object):
 
 # This is blocking, but necessary to make sure settings are loaded before
 # we go on our merry way
+setup_syslog()
 load_settings()
