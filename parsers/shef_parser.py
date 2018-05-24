@@ -442,14 +442,14 @@ def get_localtime(sid, ts):
     """Compute the local timestamp for this location"""
     if sid not in LOCS:
         return ts
-    _network = LOCS[sid].keys()[0]
+    _network = list(LOCS[sid].keys())[0]
     return ts.astimezone(TIMEZONES.get(LOCS[sid][_network]['tzname'],
                                        pytz.utc))
 
 
 def get_network(prod, sid, _ts, data):
     """Figure out which network this belongs to"""
-    networks = LOCS.get(sid, dict()).keys()
+    networks = list(LOCS.get(sid, dict()).keys())
     # This is the best we can hope for
     if len(networks) == 1:
         return networks[0]
@@ -457,7 +457,7 @@ def get_network(prod, sid, _ts, data):
     is_coop = False
     if prod.afos[:3] == 'RR3':
         is_coop = True
-    elif prod.afos[:3] in ['RR1', 'RR2'] and checkvars(data.keys()):
+    elif prod.afos[:3] in ['RR1', 'RR2'] and checkvars(list(data.keys())):
         log.msg("Guessing COOP? %s %s %s" % (sid, prod.product_id,
                                              data.keys()))
         is_coop = True
@@ -492,7 +492,7 @@ def process_site(prod, sid, ts, data):
     """
     localts = get_localtime(sid, ts)
     # Insert data into database regardless
-    for varname in data.keys():
+    for varname in data:
         value = data[varname]
         deffer = HADSDB.runOperation("""INSERT into raw_inbound
                 (station, valid, key, value)
@@ -536,7 +536,7 @@ def process_site(prod, sid, ts, data):
     iemob = Observation(sid, network, localts)
     iscoop = (network.find('COOP') > 0)
     hasdata = False
-    for var in data.keys():
+    for var in data:
         if data[var] == -9999:
             continue
         iemvar = MAPPING[var]

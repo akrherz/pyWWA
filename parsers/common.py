@@ -9,6 +9,7 @@ import re
 from io import StringIO
 import socket
 import sys
+import traceback
 from email.mime.text import MIMEText
 from syslog import LOG_LOCAL2
 
@@ -124,7 +125,7 @@ def email_error(exp, message, trimstr=100):
         exp.printTraceback(file=cstr)
         log.err(exp)
     elif isinstance(exp, Exception):
-        exp.printTraceback(file=cstr)
+        traceback.print_exc(file=cstr)
         log.err(exp)
     else:
         log.msg(exp)
