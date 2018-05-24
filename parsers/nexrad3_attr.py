@@ -317,8 +317,6 @@ def main(_):
     log.msg("main() has fired...")
     jobs = DeferredQueue()
     ingest = MyProductIngestor(isbinary=True)
-    # a HACK until we cleanup pyLDM for python 2-3
-    ingest.product_end = ingest.product_end.encode('utf-8')
     ingest.jobs = jobs
     ldmbridge.LDMProductFactory(ingest)
 

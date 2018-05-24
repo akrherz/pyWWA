@@ -6,6 +6,7 @@ import os
 import re
 from collections import namedtuple
 import datetime
+from io import BytesIO
 from syslog import LOG_LOCAL2
 
 import pytz
@@ -184,23 +185,22 @@ class SHEFIT(protocol.ProcessProtocol):
         """
         self.deferred = None
         self.prod = prod
-        self.data = ""
+        self.data = BytesIO()
 
     def connectionMade(self):
         """
         Fired when the program starts up and wants stdin
         """
-        # print "sending %d bytes!" % len(self.shefdata)
-        # print "SENDING", self.shefdata
-        self.transport.write(self.prod.text)
+        # prod.text is <str> need to write bytes
+        self.transport.write(self.prod.text.encode('utf-8'))
         self.transport.closeStdin()
 
     def outReceived(self, data):
         """
         Save the stdout we get from the program for later processing
         """
-        # print "GOT", data
-        self.data = self.data + data
+        # data should come to us as <bytes>
+        self.data.write(data)
 
     def errReceived(self, data):
         """
@@ -219,7 +219,7 @@ class SHEFIT(protocol.ProcessProtocol):
         Once the program is done, we need to do something with the data
         """
         df = task.deferLater(reactor, 0, really_process, self.prod,
-                             self.data)
+                             self.data.getvalue().decode('utf-8'))
         df.addErrback(common.email_error, self.prod.text)
         self.deferred.callback("")
 
@@ -369,7 +369,7 @@ def really_process(prod, data):
         st_data[varname] = value
     # Now we process each station we found in the report! :)
     for sid in mydata:
-        times = mydata[sid].keys()
+        times = list(mydata[sid].keys())
         times.sort()
         for tstamp in times:
             process_site(prod, sid, tstamp, mydata[sid][tstamp])
