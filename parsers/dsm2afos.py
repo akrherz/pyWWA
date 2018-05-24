@@ -1,16 +1,14 @@
-"""
-Move DSM messages into the text database with the proper PIL
-"""
+"""Move DSM messages into the text database with the proper PIL"""
 import sys
 import re
 
-import psycopg2
+from pyiem.util import get_dbconn
 from pyiem.nws import product
 
 
 def main():
     """Go!"""
-    pgconn = psycopg2.connect(database='afos', host='iemdb')
+    pgconn = get_dbconn('afos')
     acursor = pgconn.cursor()
 
     raw = sys.stdin.read()

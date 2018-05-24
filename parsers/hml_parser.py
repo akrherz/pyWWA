@@ -31,9 +31,7 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
 
 
 def real_parser(txn, buf):
-    """
-    I'm gonna do the heavy lifting here
-    """
+    """I'm gonna do the heavy lifting here"""
     prod = hmlparser(buf)
     prod.sql(txn)
     if prod.warnings:

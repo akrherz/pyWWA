@@ -6,9 +6,9 @@ import os
 from twisted.python import syslog
 from twisted.internet import reactor
 from twisted.python import log
-import common
 from pyldm import ldmbridge
 from pyiem.nws.products.pirep import parser as pirepparser
+import common
 
 syslog.startLogging(prefix='pyWWA/pirep_parser', facility=LOG_LOCAL2)
 
@@ -41,9 +41,11 @@ def cleandb():
 def load_locs(txn):
     """Build locations table"""
     log.msg("load_locs() called...")
-    txn.execute("""SELECT id, name, st_x(geom) as lon, st_y(geom) as lat
-        from stations WHERE network ~* 'ASOS' or network ~* 'AWOS'""")
-    for row in txn:
+    txn.execute("""
+        SELECT id, name, st_x(geom) as lon, st_y(geom) as lat
+        from stations WHERE network ~* 'ASOS' or network ~* 'AWOS'
+    """)
+    for row in txn.fetchall():
         LOCS[row['id']] = {'id': row['id'], 'name': row['name'],
                            'lon': row['lon'], 'lat': row['lat']}
 

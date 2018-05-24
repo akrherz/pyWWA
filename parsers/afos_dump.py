@@ -9,7 +9,7 @@ from twisted.python import log
 from twisted.internet import reactor
 from pyldm import ldmbridge
 from pyiem.nws import product
-from pyiem.nws.ugc import UGCParseException
+from pyiem.util import utc
 import common  # @UnresolvedImport
 
 syslog.startLogging(prefix='pyWWA/afos_dump', facility=LOG_LOCAL2)
@@ -50,7 +50,7 @@ def real_parser(txn, buf):
     if buf.strip() == "":
         return
     utcnow = datetime.datetime.utcnow()
-    utcnow = utcnow.replace(tzinfo=pytz.timezone("UTC"))
+    utcnow = utcnow.replace(tzinfo=pytz.utc)
 
     nws = product.TextProduct(buf, utcnow=UTCNOW, parse_segments=False)
 
@@ -72,17 +72,17 @@ def real_parser(txn, buf):
 
     # Run the database transaction
     if MANUAL:
-        txn.execute("""SELECT * from """+table+""" WHERE
-        pil = %s and entered = %s and source = %s and wmo = %s
+        txn.execute("""
+            SELECT * from """+table+""" WHERE
+            pil = %s and entered = %s and source = %s and wmo = %s
         """, (nws.afos.strip(), nws.valid, nws.source, nws.wmo))
         if txn.rowcount == 1:
             log.msg("Duplicate: %s" % (nws.get_product_id(),))
             return
-    txn.execute("""INSERT into """+table+"""(pil, data, entered,
-                source, wmo) VALUES(%s,%s,%s,%s,%s)""", (nws.afos.strip(),
-                                                         nws.text,
-                                                         nws.valid,
-                                                         nws.source, nws.wmo))
+    txn.execute("""
+        INSERT into """+table+"""(pil, data, entered,
+        source, wmo) VALUES(%s, %s, %s, %s, %s)
+    """, (nws.afos.strip(), nws.text, nws.valid, nws.source, nws.wmo))
 
 
 if __name__ == '__main__':
@@ -91,8 +91,7 @@ if __name__ == '__main__':
     UTCNOW = None
     if len(sys.argv) == 6 and sys.argv[1] == 'manual':
         MANUAL = True
-        UTCNOW = datetime.datetime(int(sys.argv[2]), int(sys.argv[3]),
-                                   int(sys.argv[4]), int(sys.argv[5])
-                                   ).replace(tzinfo=pytz.utc)
+        UTCNOW = utc(int(sys.argv[2]), int(sys.argv[3]),
+                     int(sys.argv[4]), int(sys.argv[5]))
     ldmbridge.LDMProductFactory(MyProductIngestor())
     reactor.run()  # @UndefinedVariable

@@ -35,7 +35,7 @@ def load_stations(txn):
         where network ~* 'ASOS' or network = 'AWOS' or network = 'WTM'
     """)
     news = 0
-    for row in txn:
+    for row in txn.fetchall():
         if row['id'] not in NWSLI_PROVIDER:
             news += 1
             NWSLI_PROVIDER[row['id']] = row
@@ -63,10 +63,8 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
     def process_data(self, data):
         """Callback when we have data to process"""
         try:
-            # pyLDM provides us with unicode, this unicode may be trouble for
-            # the METAR library, so lets encode it to ASCII and ignore anything
-            # non-ASCII
-            real_processor(data.encode('ascii', 'ignore'))
+            # BUG make sure we are okay here after we resolve pyLDM str issues
+            real_processor(data)
         except Exception as exp:
             common.email_error(exp, data, -1)
 
@@ -92,9 +90,6 @@ def real_processor(text):
             continue
         deffer = IEMDB.runInteraction(do_db, mtr)
         deffer.addErrback(common.email_error, collect.unixtext)
-
-    # if not collect.metars and collect.source[0] == 'K' and text.find("NIL=") == -1:
-    #    common.email_error("No METARs found?", text)
 
 
 def do_db(txn, mtr):

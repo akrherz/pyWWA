@@ -1,18 +1,15 @@
 """SPENES product ingestor"""
-# Twisted Python imports
+import re
 from syslog import LOG_LOCAL2
+
 from twisted.python import syslog
 from twisted.python import log
-syslog.startLogging(prefix='pyWWA/spe_parser', facility=LOG_LOCAL2)
 from twisted.internet import reactor
-
-import re
-import common
-# pyLDM https://github.com/akrherz/pyLDM
 from pyldm import ldmbridge
-
-
 from pyiem.nws import product
+import common
+
+syslog.startLogging(prefix='pyWWA/spe_parser', facility=LOG_LOCAL2)
 POSTGIS = common.get_database('postgis', cp_max=1)
 PYWWA_PRODUCT_URL = common.SETTINGS.get('pywwa_product_url',
                                         'pywwa_product_url')
@@ -34,14 +31,15 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
         log.err(reason)
         reactor.callLater(7, shutdown)
 
-    def process_data(self, buf):
+    def process_data(self, data):
         """ Process the product """
-        df = POSTGIS.runInteraction(real_process, buf)
-        df.addErrback(common.email_error, buf)
+        df = POSTGIS.runInteraction(real_process, data)
+        df.addErrback(common.email_error, data)
         df.addErrback(log.err)
 
 
 def real_process(txn, raw):
+    """Do work please"""
     sqlraw = raw.replace("\015\015\012", "\n")
     prod = product.TextProduct(raw)
 
@@ -56,7 +54,7 @@ def real_process(txn, raw):
     tokens = re.findall("ATTN (WFOS|RFCS)(.*)", raw)
     channels = []
     for tpair in tokens:
-        for center in re.findall("([A-Z]+)\.\.\.", tpair[1]):
+        for center in re.findall(r"([A-Z]+)\.\.\.", tpair[1]):
             channels.append("SPENES.%s" % (center, ))
     xtra = {'product_id': product_id}
     xtra['channels'] = ','.join(channels)
@@ -74,7 +72,9 @@ def real_process(txn, raw):
 
 
 def killer():
+    """Stop Right Now!"""
     reactor.stop()
+
 
 if __name__ == '__main__':
     jabber = common.make_jabber_client("spe_parser")

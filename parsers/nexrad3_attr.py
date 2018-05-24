@@ -2,32 +2,23 @@
   Take the NCR NEXRAD Level III product and run it through gpnids to get the
   attribute table, which we then dump into the database
 """
-# System Imports
 import os
 import math
-
-# Setup Standard Logging we use
-# Twisted Python imports
 from syslog import LOG_LOCAL2
+import datetime
+
+import pytz
 from twisted.python import syslog
-syslog.startLogging(prefix='pyWWA/nexrad3_attr', facility=LOG_LOCAL2)
 from twisted.python import log
-
-
-# Need to do this in order to get the subsequent calls to work??
-os.chdir(os.path.dirname(os.path.abspath(__file__)))
-
-# Stuff I wrote
-from pyldm import ldmbridge
-
-# Third Party Stuff
 from twisted.internet.defer import DeferredQueue, Deferred
 from twisted.internet.task import cooperate
 from twisted.internet import reactor, protocol
-import datetime
-import pytz
+from pyldm import ldmbridge
+from pyiem.util import utc
 import common
 
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
+syslog.startLogging(prefix='pyWWA/nexrad3_attr', facility=LOG_LOCAL2)
 
 # Setup Database Links
 POSTGISDB = common.get_database('postgis')
@@ -37,9 +28,7 @@ ST = {}
 # For archive reprocessing, we need to specify the month and year
 _UTCNOW = None
 if "YYYY" in os.environ:
-    _UTCNOW = datetime.datetime(int(os.environ['YYYY']),
-                                int(os.environ['MM']), 1)
-    _UTCNOW = _UTCNOW.replace(tzinfo=pytz.timezone("UTC"))
+    _UTCNOW = utc(int(os.environ['YYYY']), int(os.environ['MM']), 1)
     log.msg("Date is hard coded to %s" % (_UTCNOW,))
 
 
@@ -50,7 +39,7 @@ def load_station_table(txn):
         SELECT id, ST_x(geom) as lon, ST_y(geom) as lat from stations
         where network in ('NEXRAD','TWDR')
     """)
-    for row in txn:
+    for row in txn.fetchall():
         ST[row['id']] = {'lat': row['lat'],
                          'lon': row['lon']}
     log.msg("Station Table size %s" % (len(ST.keys(),)))
@@ -64,18 +53,18 @@ def compute_ts(tstring):
     minute = int(tstring[16:18])
 
     if _UTCNOW is None:
-        utc = datetime.datetime.utcnow()
-        utc = utc.replace(tzinfo=pytz.timezone("UTC"), second=0, microsecond=0,
-                          hour=hour, minute=minute)
-        if utc.day > 25 and day == 1:  # Next month!
-            utc += datetime.timedelta(days=15)  # careful
-        if utc.day == 1 and day > 25:  # Last month!
-            utc -= datetime.timedelta(days=15)
-        utc = utc.replace(day=day)
+        utcnow = datetime.datetime.utcnow()
+        utcnow = utcnow.replace(tzinfo=pytz.utc, second=0, microsecond=0,
+                                hour=hour, minute=minute)
+        if utcnow.day > 25 and day == 1:  # Next month!
+            utcnow += datetime.timedelta(days=15)  # careful
+        if utcnow.day == 1 and day > 25:  # Last month!
+            utcnow -= datetime.timedelta(days=15)
+        utcnow = utcnow.replace(day=day)
     else:
-        utc = _UTCNOW.replace(day=day, hour=hour, minute=minute)
+        utcnow = _UTCNOW.replace(day=day, hour=hour, minute=minute)
 
-    return utc
+    return utcnow
 
 
 class PROC(protocol.ProcessProtocol):
@@ -88,28 +77,26 @@ class PROC(protocol.ProcessProtocol):
         Constructor
         """
         # log.msg("init() of PROC")
-        self.res = ""
+        self.res = b""
         self.ts = None
         self.wmo = None
         self.afos = None
         self.deferred = None
         self.buf = buf
 
-        lines = buf.split("\r\r\n")
+        lines = buf.split(b"\r\r\n")
         if len(lines) < 4:
             log.msg("INCOMPLETE PRODUCT!")
             return
-        self.wmo = lines[2]
-        self.afos = lines[3]
+        self.wmo = lines[2].decode('ascii')
+        self.afos = lines[3].decode('ascii')
         self.ts = compute_ts(self.wmo)
         # log.msg("end of init() of PROC")
 
     def connectionMade(self):
-        """
-        Fired when the program starts up and wants stdin
-        """
+        """Fired when the program starts up and wants stdin"""
         # log.msg("Connection Made")
-        self.transport.write(self.buf + "\r\r\n\003")
+        self.transport.write(self.buf + b"\r\r\n\003")
         self.transport.closeStdin()
 
     def outReceived(self, data):
@@ -144,7 +131,7 @@ class PROC(protocol.ProcessProtocol):
         Once the program is done, we need to do something with the data
         """
         # log.msg("Teardown")
-        if self.res == '' or self.res.find("NO STORMS DETECTED") > -1:
+        if self.res == b'' or self.res.find(b"NO STORMS DETECTED") > -1:
             defer = POSTGISDB.runInteraction(delete_prev_attrs, self.afos[3:])
             defer.addErrback(log.err)
             self.deferred.callback(self)
@@ -157,27 +144,25 @@ class PROC(protocol.ProcessProtocol):
 
 
 class MyProductIngestor(ldmbridge.LDMProductReceiver):
-    """ My ingest protocol """
+    """My ingest protocol"""
 
     def connectionLost(self, reason):
-        """ Called when stdin is closed """
+        """Called when stdin is closed"""
         log.msg('connectionLost')
         log.err(reason)
         reactor.callLater(15, reactor.callWhenRunning, reactor.stop)
 
-    def process_data(self, buf):
-        """
-        I am called from the ldmbridge when data is ahoy
-        """
-        self.jobs.put(buf)
+    def process_data(self, data):
+        """I am called from the ldmbridge when data is ahoy"""
+        self.jobs.put(data)
 
 
 def delete_prev_attrs(txn, nexrad):
-    ''' Remove any previous attributes for this nexrad '''
+    """Remove any previous attributes for this nexrad"""
     txn.execute("DELETE from nexrad_attributes WHERE nexrad = %s", (nexrad,))
 
 
-def async(buf):
+def async_func(buf):
     """
     Async caller of reactor processes
     @param buf string of the raw NOAAPort Product
@@ -199,9 +184,9 @@ def async(buf):
 def worker(jobs):
     """ I am a worker that processes jobs """
     while True:
-        yield jobs.get().addCallback(async).addErrback(common.email_error,
-                                                       'Unhandled Error'
-                                                       ).addErrback(log.err)
+        yield jobs.get().addCallback(
+            async_func).addErrback(common.email_error, 'Unhandled Error'
+                                   ).addErrback(log.err)
 
 
 def really_process(txn, res, nexrad, ts):
@@ -222,6 +207,7 @@ def really_process(txn, res, nexrad, ts):
          J0  127/134 NONE NONE     UNKNOWN       24  51 20.2  33.9    NEW
     """
     delete_prev_attrs(txn, nexrad)
+    res = res.decode('ascii')
 
     cenlat = float(ST[nexrad]['lat'])
     cenlon = float(ST[nexrad]['lon'])
@@ -258,7 +244,7 @@ def really_process(txn, res, nexrad, ts):
         d["meso"] = tokens[4]
         d["posh"] = tokens[5]
         d["poh"] = tokens[6] if tokens[6] != "***" else None
-        if (tokens[7] == "<0.50"):
+        if tokens[7] == "<0.50":
             tokens[7] = 0.01
         d["max_size"] = tokens[7]
 
@@ -287,14 +273,16 @@ def really_process(txn, res, nexrad, ts):
 
         for table in ['nexrad_attributes',
                       'nexrad_attributes_%s' % (ts.year,)]:
-            sql = """INSERT into """ + table + """
+            sql = """
+                INSERT into """ + table + """
                 (nexrad, storm_id, geom, azimuth,
                 range, tvs, meso, posh, poh, max_size, vil, max_dbz,
                 max_dbz_height, top, drct, sknt, valid)
                 values (%(nexrad)s, %(storm_id)s, ST_GeomFromEWKT(%(geom)s),
                 %(azimuth)s, %(range)s, %(tvs)s, %(meso)s, %(posh)s,
                 %(poh)s, %(max_size)s, %(vil)s, %(max_dbz)s,
-                %(max_dbz_height)s, %(top)s, %(drct)s, %(sknt)s, %(valid)s)"""
+                %(max_dbz_height)s, %(top)s, %(drct)s, %(sknt)s, %(valid)s)
+            """
             txn.execute(sql, d)
 
     if co == 0:
@@ -329,6 +317,8 @@ def main(_):
     log.msg("main() has fired...")
     jobs = DeferredQueue()
     ingest = MyProductIngestor(isbinary=True)
+    # a HACK until we cleanup pyLDM for python 2-3
+    ingest.product_end = ingest.product_end.encode('utf-8')
     ingest.jobs = jobs
     ldmbridge.LDMProductFactory(ingest)
 
@@ -342,6 +332,7 @@ def errback(res):
     ''' ERRORBACK '''
     log.err(res)
     reactor.stop()
+
 
 df = POSTGISDB.runInteraction(load_station_table)
 df.addCallback(main)

@@ -1,20 +1,18 @@
 """SPS product ingestor"""
-
-# Twisted Python imports
 from syslog import LOG_LOCAL2
+import datetime
+
+
 from twisted.python import syslog
-syslog.startLogging(prefix='pyWWA/sps_parser', facility=LOG_LOCAL2)
 from twisted.python import log
 from twisted.internet import reactor
-
-import datetime
-import common
+from shapely.geometry import MultiPolygon
 from pyiem.nws import product
 from pyiem import reference
 from pyldm import ldmbridge
+import common
 
-from shapely.geometry import MultiPolygon
-
+syslog.startLogging(prefix='pyWWA/sps_parser', facility=LOG_LOCAL2)
 POSTGIS = common.get_database('postgis')
 PYWWA_PRODUCT_URL = common.SETTINGS.get('pywwa_product_url',
                                         'pywwa_product_url')
@@ -30,7 +28,7 @@ def load_ugc(txn):
         name IS NOT Null and begin_ts < now() and
         (end_ts is null or end_ts > now())
     """)
-    for row in txn:
+    for row in txn.fetchall():
         name = (row["name"]).replace("\x92", " ")
         ugc_dict[row['ugc']] = name
 
@@ -51,24 +49,28 @@ def countyText(ugcs):
             name = ugc_dict[str(ugc)]
         countyState[stateAB].append(name)
 
-    for st in countyState.keys():
-        countyState[stateAB].sort()
+    for st in countyState:
+        countyState[st].sort()
         c += " %s [%s] and" % (", ".join(countyState[st]), st)
     return c[:-4]
 
 
 class myProductIngestor(ldmbridge.LDMProductReceiver):
+    """My ingestor"""
 
-    def process_data(self, buf):
-        deffer = POSTGIS.runInteraction(real_process, buf)
-        deffer.addErrback(common.email_error, buf)
+    def process_data(self, data):
+        """Got data"""
+        deffer = POSTGIS.runInteraction(real_process, data)
+        deffer.addErrback(common.email_error, data)
 
     def connectionLost(self, reason):
+        """stdin was closed"""
         log.msg('connectionLost')
         log.err(reason)
         reactor.callLater(5, self.shutdown)
 
     def shutdown(self):
+        """We want to shutdown"""
         reactor.callWhenRunning(reactor.stop)
 
 
@@ -84,11 +86,13 @@ def real_process(txn, raw):
 
     if prod.segments[0].sbw:
         ets = prod.valid + datetime.timedelta(hours=1)
-        if len(prod.segments) > 0 and prod.segments[0].ugcexpire is not None:
+        if prod.segments and prod.segments[0].ugcexpire is not None:
             ets = prod.segments[0].ugcexpire
         giswkt = 'SRID=4326;%s' % (MultiPolygon([prod.segments[0].sbw]).wkt,)
-        sql = """INSERT into text_products(product, product_id, geom,
-            issue, expire, pil) values (%s, %s, %s, %s, %s, %s)"""
+        sql = """
+            INSERT into text_products(product, product_id, geom,
+            issue, expire, pil) values (%s, %s, %s, %s, %s, %s)
+        """
         myargs = (prod.unixtext, product_id, giswkt, prod.valid, ets,
                   prod.afos)
 
@@ -98,10 +102,10 @@ def real_process(txn, raw):
     txn.execute(sql, myargs)
 
     for seg in prod.segments:
-        if len(seg.ugcs) == 0:
+        if seg.ugcs:
             continue
         headline = "[NO HEADLINE FOUND IN SPS]"
-        if len(seg.headlines) > 0:
+        if seg.headlines:
             headline = (seg.headlines[0]).replace("\n", " ")
         elif raw.find("SPECIAL WEATHER STATEMENT") > 0:
             headline = "Special Weather Statement"
@@ -129,16 +133,20 @@ def real_process(txn, raw):
                                                       product_id)
         jabber.send_message(mess, htmlmess, xtra)
 
+
 jabber = common.make_jabber_client('sps_parser')
 
 
-def ready(bogus):
+def ready(_bogus):
+    """we are ready to go"""
     ldmbridge.LDMProductFactory(myProductIngestor())
 
 
 def killer(err):
+    """hard stop"""
     log.err(err)
     reactor.stop()
+
 
 df = POSTGIS.runInteraction(load_ugc)
 df.addCallback(ready)

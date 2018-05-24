@@ -3,17 +3,15 @@
  Support WPC's FFG product
 """
 from syslog import LOG_LOCAL2
-from twisted.python import syslog
-syslog.startLogging(prefix='pyWWA/mcd_parser', facility=LOG_LOCAL2)
 
+from twisted.python import syslog
 from twisted.python import log
 from twisted.internet import reactor
-
 from pyiem.nws.products.mcd import parser as mcdparser
 from pyldm import ldmbridge
-
 import common
 
+syslog.startLogging(prefix='pyWWA/mcd_parser', facility=LOG_LOCAL2)
 DBPOOL = common.get_database(common.CONFIG['databaserw']['postgis'],
                              cp_max=2)
 
@@ -28,11 +26,12 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
         log.err(reason)
         reactor.callLater(15, reactor.callWhenRunning, reactor.stop)
 
-    def process_data(self, raw):
+    def process_data(self, data):
         ''' Process a chunk of data '''
-        raw = raw.upper()
-        df = DBPOOL.runInteraction(real_process, raw)
-        df.addErrback(common.email_error, raw)
+        # BUG
+        data = data.upper()
+        df = DBPOOL.runInteraction(real_process, data)
+        df.addErrback(common.email_error, data)
 
 
 def find_cwsus(txn, prod):
@@ -43,12 +42,13 @@ def find_cwsus(txn, prod):
     ST_Covers does polygon exist inside CWSU
     '''
     wkt = 'SRID=4326;%s' % (prod.geometry.wkt,)
-    sql = """select distinct id from cwsu WHERE
-           st_overlaps('%s', geom) or
-           st_covers(geom, '%s') ORDER by id ASC""" % (wkt, wkt)
+    sql = """
+        select distinct id from cwsu WHERE st_overlaps('%s', geom) or
+        st_covers(geom, '%s') ORDER by id ASC
+    """ % (wkt, wkt)
     txn.execute(sql)
     cwsus = []
-    for row in txn:
+    for row in txn.fetchall():
         cwsus.append(row['id'])
     return cwsus
 
@@ -66,6 +66,7 @@ def real_process(txn, raw):
         JABBER.send_message(j[0][0], j[0][1], j[0][2])
 
     prod.database_save(txn)
+
 
 ldmbridge.LDMProductFactory(MyProductIngestor())
 JABBER = common.make_jabber_client('mcd_parser')

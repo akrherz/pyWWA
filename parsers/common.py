@@ -5,8 +5,7 @@ import os
 import pwd
 import datetime
 import re
-import traceback
-from io import BytesIO
+from io import StringIO
 import socket
 import sys
 from email.mime.text import MIMEText
@@ -107,9 +106,12 @@ def email_error(exp, message, trimstr=100):
     @return boolean If an email was sent or not...
     """
     # Always log a message about our fun
-    cstr = BytesIO()
+    cstr = StringIO()
     if isinstance(exp, failure.Failure):
-        traceback.print_exc(file=cstr)
+        exp.printTraceback(file=cstr)
+        log.err(exp)
+    elif isinstance(exp, Exception):
+        exp.printTraceback(file=cstr)
         log.err(exp)
     else:
         log.msg(exp)
@@ -140,7 +142,7 @@ Message:
          pyiem.__version__,
          datetime.datetime.utcnow(),
          os.getpid(), ' '.join(['%.2f' % (_,) for _ in os.getloadavg()]),
-         cstr.read().decode('utf-8'), exp, message), "plain", "utf-8")
+         cstr.read(), exp, message), "plain", "utf-8")
 
     # Send the email already!
     msg['subject'] = ("[pyWWA] %s Traceback -- %s"

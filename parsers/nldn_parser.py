@@ -1,56 +1,55 @@
 """ NLDN """
-
-# Twisted Python imports
 from syslog import LOG_LOCAL2
-from twisted.python import syslog
-syslog.startLogging(prefix='pyWWA/nldn_parser', facility=LOG_LOCAL2)
+from io import BytesIO
 
-# Twisted Python imports
+from twisted.python import syslog
 from twisted.internet import reactor
 
 # pyWWA stuff
 from pyldm import ldmbridge
 from pyiem.nws.products.nldn import parser
 import common
-import cStringIO
 
+syslog.startLogging(prefix='pyWWA/nldn_parser', facility=LOG_LOCAL2)
 DBPOOL = common.get_database('postgis')
 
 
 class myProductIngestor(ldmbridge.LDMProductReceiver):
-    product_end = 'NLDN'
+    """My hacky ingest"""
+    product_end = b'NLDN'
 
-    def process_data(self, buf):
-        """
-        Actual ingestor
-        """
-        if buf == "":
+    def process_data(self, data):
+        """Actual ingestor"""
+        if data == b"":
             return
+        real_process(data)
         try:
-            real_process(buf)
-        except Exception, myexp:
-            common.email_error(myexp, buf)
+            real_process(data)
+        except Exception as myexp:
+            common.email_error(myexp, data)
 
     def connectionLost(self, reason):
         """
         Called when ldm closes the pipe
         """
-        print 'connectionLost', reason
+        print('connectionLost')
+        print(reason)
         reactor.callLater(5, self.shutdown)
 
     def shutdown(self):
+        """shutdown please"""
         reactor.callWhenRunning(reactor.stop)
 
 
 def real_process(buf):
     """ The real processor of the raw data, fun! """
-    np = parser(cStringIO.StringIO("NLDN" + buf))
+    np = parser(BytesIO(b"NLDN" + buf))
     DBPOOL.runInteraction(np.sql)
 
 
 def main():
     """Go Main"""
-    _ = ldmbridge.LDMProductFactory(myProductIngestor(isbinary=True))
+    ldmbridge.LDMProductFactory(myProductIngestor(isbinary=True))
     reactor.run()  # @UndefinedVariable
 
 

@@ -1,25 +1,19 @@
 """ LSR product ingestor """
-
-# stdlib
 import pickle
 import os
-
-# Twisted Python imports
+import datetime
 from syslog import LOG_LOCAL2
+
+import pytz
 from twisted.python import syslog
-syslog.startLogging(prefix='pyWWA/lsr_parser', facility=LOG_LOCAL2)
 from twisted.python import log
 from twisted.internet import reactor
-
-# Third party python stuff
-import pytz
 from pyiem import reference
 from pyiem.nws.products.lsr import parser as lsrparser
 from pyldm import ldmbridge
-
-# IEM python Stuff
 import common
-import datetime
+
+syslog.startLogging(prefix='pyWWA/lsr_parser', facility=LOG_LOCAL2)
 DBPOOL = common.get_database(common.CONFIG['databaserw']['postgis'])
 
 # Cheap datastore for LSRs to avoid Dups!
@@ -38,7 +32,7 @@ def cleandb():
     """ To keep LSRDB from growing too big, we clean it out
         Lets hold 7 days of data!
     """
-    utc = datetime.datetime.utcnow().replace(tzinfo=pytz.timezone("UTC"))
+    utc = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
     thres = utc - datetime.timedelta(hours=24*7)
     init_size = len(LSRDB)
     for key in LSRDB.keys():
@@ -62,10 +56,10 @@ def pickledb():
 class MyProductIngestor(ldmbridge.LDMProductReceiver):
     """ I process products handed off to me from faithful LDM """
 
-    def process_data(self, text):
+    def process_data(self, data):
         """ @buf: String that is a Text Product """
-        defer = DBPOOL.runInteraction(real_processor, text)
-        defer.addErrback(common.email_error, text)
+        defer = DBPOOL.runInteraction(real_processor, data)
+        defer.addErrback(common.email_error, data)
 
     def connectionLost(self, reason):
         ''' the connection was lost! '''
@@ -88,7 +82,7 @@ def real_processor(txn, text):
             lsr.duplicate = True
             continue
         LSRDB[uniquekey] = datetime.datetime.utcnow().replace(
-            tzinfo=pytz.timezone("UTC"))
+            tzinfo=pytz.utc)
         lsr.sql(txn)
 
     j = prod.get_jabbers(common.SETTINGS.get('pywwa_lsr_url', 'pywwa_lsr_url'))

@@ -1,11 +1,11 @@
 """ SPC Watch Ingestor """
 from syslog import LOG_LOCAL2
 
-from pyiem.nws.products.saw import parser as sawparser
-from pyldm import ldmbridge
 from twisted.python import syslog
 from twisted.python import log
 from twisted.internet import reactor
+from pyiem.nws.products.saw import parser as sawparser
+from pyldm import ldmbridge
 import common  # @UnresolvedImport
 
 syslog.startLogging(prefix='pyWWA/watch_parser', facility=LOG_LOCAL2)

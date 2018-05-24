@@ -57,7 +57,7 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
 def really_process_data(txn, buf):
     ''' Actually do some processing '''
     utcnow = datetime.datetime.utcnow()
-    utcnow = utcnow.replace(tzinfo=pytz.timezone("UTC"))
+    utcnow = utcnow.replace(tzinfo=pytz.utc)
 
     # Create our TextProduct instance
     prod = productparser(buf, utcnow=utcnow, ugc_provider=ugc_dict,
@@ -98,7 +98,7 @@ def load_ugc(txn):
         name IS NOT Null and begin_ts < now() and
         (end_ts is null or end_ts > now())
     """)
-    for row in txn:
+    for row in txn.fetchall():
         nm = (row["name"]).replace("\x92", " ").replace("\xc2", " ")
         wfos = re.findall(r'([A-Z][A-Z][A-Z])', row['wfo'])
         ugc_dict[row['ugc']] = ugc.UGC(row['ugc'][:2], row['ugc'][2],
@@ -108,11 +108,13 @@ def load_ugc(txn):
 
     log.msg("ugc_dict loaded %s entries" % (len(ugc_dict),))
 
-    sql = """SELECT nwsli,
+    sql = """
+     SELECT nwsli,
      river_name || ' ' || proximity || ' ' || name || ' ['||state||']' as rname
-     from hvtec_nwsli"""
+     from hvtec_nwsli
+    """
     txn.execute(sql)
-    for row in txn:
+    for row in txn.fetchall():
         nm = row['rname'].replace("&", " and ")
         nwsli_dict[row['nwsli']] = nwsli.NWSLI(row['nwsli'], name=nm)
 

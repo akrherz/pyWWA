@@ -49,7 +49,7 @@ TIMEZONES = dict()
 # a queue for saving database IO
 CURRENT_QUEUE = {}
 U1980 = datetime.datetime.utcnow()
-U1980 = U1980.replace(day=1, year=1980, tzinfo=pytz.timezone("UTC"))
+U1980 = U1980.replace(day=1, year=1980, tzinfo=pytz.utc)
 
 TEXTPRODUCT = namedtuple('TextProduct', ['product_id', 'afos', 'text'])
 
@@ -73,7 +73,7 @@ def load_stations(txn):
         """)
 
     LOCS.clear()  # clear out our current cache
-    for (stid, network, tzname) in txn:
+    for (stid, network, tzname) in txn.fetchall():
         if stid in UNKNOWN:
             log.msg("  station: %s is no longer unknown!" % (stid,))
             UNKNOWN.pop(stid)
@@ -85,7 +85,7 @@ def load_stations(txn):
         if tzname not in TIMEZONES:
             try:
                 TIMEZONES[tzname] = pytz.timezone(tzname)
-            except:
+            except Exception as exp:
                 log.msg("pytz does not like tzname: %s" % (tzname,))
                 TIMEZONES[tzname] = pytz.utc
 
@@ -228,8 +228,6 @@ def clnstr(buf):
     """
     Get rid of cruft we don't wish to work with
     """
-    # pyLDM provides us unicode, but it appears twisted does not support this
-    buf = buf.encode('ascii', 'ignore')
     return buf.replace("\015\015\012",
                        "\n").replace("\003", "").replace("\001", "")
 
@@ -241,8 +239,10 @@ def shutdown():
 
 
 class MyProductIngestor(ldmbridge.LDMProductReceiver):
+    """My actual ingestor"""
 
     def connectionLost(self, reason):
+        """stdin was closed"""
         log.msg('connectionLost')
         log.err(reason)
         reactor.callLater(15, shutdown)
@@ -253,7 +253,7 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
         This string is cleaned and placed into the job queue for processing
 
         Args:
-          data (str): unicode string of data
+          data (str)
         """
         self.jobs.put(clnstr(data))
 
@@ -279,6 +279,7 @@ def async_func(data):
 
 
 def worker(jobs):
+    """Our long running worker"""
     while True:
         yield jobs.get().addCallback(
             async_func).addErrback(common.email_error, 'Unhandled Error'
@@ -291,7 +292,7 @@ def make_datetime(dpart, tpart):
         return None
     dstr = "%s %s" % (dpart, tpart)
     tstamp = datetime.datetime.strptime(dstr, "%Y-%m-%d %H:%M:%S")
-    return tstamp.replace(tzinfo=pytz.timezone("UTC"))
+    return tstamp.replace(tzinfo=pytz.utc)
 
 
 def really_process(prod, data):
@@ -367,7 +368,7 @@ def really_process(prod, data):
             continue
         st_data[varname] = value
     # Now we process each station we found in the report! :)
-    for sid in mydata.keys():
+    for sid in mydata:
         times = mydata[sid].keys()
         times.sort()
         for tstamp in times:
@@ -451,7 +452,7 @@ def get_localtime(sid, ts):
                                        pytz.utc))
 
 
-def get_network(prod, sid, ts, data):
+def get_network(prod, sid, _ts, data):
     """Figure out which network this belongs to"""
     networks = LOCS.get(sid, dict()).keys()
     # This is the best we can hope for
@@ -481,8 +482,7 @@ def get_network(prod, sid, ts, data):
                 return "%s_%s_%s" % (country, state, pnetwork)
             elif country == 'US':
                 return "%s_%s" % (state, pnetwork)
-            else:
-                return "%s__%s" % (country, pnetwork)
+            return "%s__%s" % (country, pnetwork)
 
     if sid not in UNKNOWN:
         UNKNOWN[sid] = True

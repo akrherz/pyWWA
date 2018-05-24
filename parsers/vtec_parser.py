@@ -10,35 +10,23 @@ with watches.  Lets try to explain
     init_expire <- When did this product initially expire
     product_issue <- When was this product issued by the NWS
 """
-
-# Twisted Python imports
 from syslog import LOG_LOCAL2
-from twisted.python import syslog
-from twisted.python import log
-from twisted.internet import reactor
-
-# http://stackoverflow.com/questions/7016602
-from twisted.web.client import HTTPClientFactory
-from twisted.mail.smtp import SMTPSenderFactory
-
-# Standard Python modules
 import re
 import datetime
 import sys
 
-# third party
 import pytz
-
-# pyLDM https://github.com/akrherz/pyLDM
+from twisted.python import syslog
+from twisted.python import log
+from twisted.internet import reactor
+from twisted.web.client import HTTPClientFactory
+from twisted.mail.smtp import SMTPSenderFactory
 from pyldm import ldmbridge
-
-# pyIEM https://github.com/akrherz/pyIEM
 from pyiem.nws.products.vtec import parser as vtecparser
-from pyiem.nws.product import TextProductException
 from pyiem.nws import ugc
 from pyiem.nws import nwsli
-
 import common
+syslog.startLogging(prefix='pyWWA/vtec_parser', facility=LOG_LOCAL2)
 
 
 def shutdown():
@@ -61,20 +49,14 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
         """ Process the product """
         try:
             really_process_data(data)
-        except TextProductException, (channel, mess):
-            if not MANUAL:
-                jabber.send_message(mess, mess, {'channels': '%s,%s' % (channel,
-                                                                       "ERROR")
-                                                }
-                                   )
-        except Exception, myexp:  # pylint: disable=W0703
+        except Exception as myexp:  # pylint: disable=W0703
             common.email_error(myexp, data)
 
 
 def really_process_data(buf):
     ''' Actually do some processing '''
     gmtnow = datetime.datetime.utcnow()
-    gmtnow = gmtnow.replace(tzinfo=pytz.timezone("UTC"))
+    gmtnow = gmtnow.replace(tzinfo=pytz.utc)
 
     # Make sure we have a trailing $$, if not report error and slap one on
     if buf.find("$$") == -1:
@@ -97,8 +79,8 @@ def really_process_data(buf):
     df.addErrback(log.err)
 
 
-def step2(dummy, text_product):
-    ''' After the SQL is done, lets do other things '''
+def step2(_dummy, text_product):
+    """After the SQL is done, lets do other things"""
     if text_product.warnings:
         common.email_error("\n\n".join(text_product.warnings),
                            text_product.text)
@@ -121,7 +103,7 @@ def load_ugc(txn):
         name IS NOT Null and begin_ts < now() and
         (end_ts is null or end_ts > now())
     """)
-    for row in txn:
+    for row in txn.fetchall():
         nm = (row["name"]).replace("\x92", " ").replace("\xc2", " ")
         wfos = re.findall(r'([A-Z][A-Z][A-Z])', row['wfo'])
         ugc_dict[row['ugc']] = ugc.UGC(row['ugc'][:2], row['ugc'][2],
@@ -131,11 +113,13 @@ def load_ugc(txn):
 
     log.msg("ugc_dict loaded %s entries" % (len(ugc_dict),))
 
-    sql = """SELECT nwsli,
+    sql = """
+     SELECT nwsli,
      river_name || ' ' || proximity || ' ' || name || ' ['||state||']' as rname
-     from hvtec_nwsli"""
+     from hvtec_nwsli
+    """
     txn.execute(sql)
-    for row in txn:
+    for row in txn.fetchall():
         nm = row['rname'].replace("&", " and ")
         nwsli_dict[row['nwsli']] = nwsli.NWSLI(row['nwsli'],
                                                name=nm)
@@ -145,12 +129,19 @@ def load_ugc(txn):
     return None
 
 
-def ready(dummy):
+def ready(_dummy):
     ''' cb when our database work is done '''
     ldmbridge.LDMProductFactory(MyProductIngestor(dedup=True))
 
+
+def bootstrap():
+    """Things to do at startup"""
+    df = PGCONN.runInteraction(load_ugc)
+    df.addCallback(ready)
+    df.addErrback(common.email_error, "load_ugc failure!")
+
+
 if __name__ == '__main__':
-    syslog.startLogging(prefix='pyWWA/vtec_parser', facility=LOG_LOCAL2)
     HTTPClientFactory.noisy = False
     SMTPSenderFactory.noisy = False
     ugc_dict = {}
@@ -164,9 +155,7 @@ if __name__ == '__main__':
     # Fire up!
     PGCONN = common.get_database(common.CONFIG['databaserw']['postgis'],
                                  cp_max=(5 if not MANUAL else 1))
-    df = PGCONN.runInteraction(load_ugc)
-    df.addCallback(ready)
-    df.addErrback(common.email_error, "load_ugc failure!")
+    bootstrap()
     jabber = common.make_jabber_client('vtec_parser')
 
     reactor.run()

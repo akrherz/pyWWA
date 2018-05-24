@@ -1,13 +1,9 @@
-"""
-  Dump some stuff without AFOS PILs
-"""
-import sys
-
+"""Dump some stuff without AFOS PILs"""
 from syslog import LOG_LOCAL2
+
 from twisted.python import syslog
 from twisted.python import log
 from twisted.internet import reactor
-import psycopg2
 from pyiem.nws.product import TextProduct
 from pyldm import ldmbridge
 import common
@@ -22,7 +18,7 @@ def compute_afos(textprod):
         afos = 'ADM%s' % (textprod.source[1:], )
     elif ttaaii == 'FAUS20':
         afos = "MIS%s" % (textprod.source[1:], )
-    elif ttaaii in ['FAUS21', 'FAUS22', 'FAUS23',  'FAUS24', 'FAUS25',
+    elif ttaaii in ['FAUS21', 'FAUS22', 'FAUS23', 'FAUS24', 'FAUS25',
                     'FAUS26']:
         afos = "CWA%s" % (textprod.source[1:], )
     elif ttaaii[:4] == 'FOUS':
@@ -39,7 +35,7 @@ def compute_afos(textprod):
 
 
 def shutdown():
-    ''' Stop this app '''
+    """Stop this app"""
     log.msg("Shutting down...")
     reactor.callWhenRunning(reactor.stop)
 

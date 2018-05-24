@@ -1,4 +1,4 @@
-""" SPC Geo Products Parser! """
+"""SPC Geo Products Parser!"""
 from syslog import LOG_LOCAL2
 
 from twisted.python import syslog

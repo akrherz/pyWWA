@@ -1,18 +1,15 @@
 """ Aviation Product Parser! """
-import common
 import os
-
-# Twisted Python imports
-from twisted.internet import reactor
 from syslog import LOG_LOCAL2
-from twisted.python import syslog
-syslog.startLogging(prefix='pyWWA/aviation', facility=LOG_LOCAL2)
-from twisted.python import log
 
-# pyWWA stuff
+from twisted.internet import reactor
+from twisted.python import syslog
+from twisted.python import log
 from pyldm import ldmbridge
 from pyiem.nws.products.sigmet import parser
+import common
 
+syslog.startLogging(prefix='pyWWA/aviation', facility=LOG_LOCAL2)
 DBPOOL = common.get_database('postgis')
 
 # Load LOCS table
@@ -28,7 +25,7 @@ def load_database(txn):
         SELECT id, name, ST_x(geom) as lon, ST_y(geom) as lat from stations
         WHERE network ~* 'ASOS' or network ~* 'AWOS'
         """)
-    for row in txn:
+    for row in txn.fetchall():
         LOCS[row['id']] = row
 
     for line in open(TABLE_PATH + '/vors.tbl'):
@@ -55,41 +52,44 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
     """ I receive products from ldmbridge and process them 1 by 1 :) """
 
     def connectionLost(self, reason):
+        """Stdin was closed"""
         log.msg('connectionLost')
         log.err(reason)
         reactor.callLater(5, self.shutdown)
 
     def shutdown(self):
+        """shutdown soonish"""
         reactor.callWhenRunning(reactor.stop)
 
-    def process_data(self, buf):
+    def process_data(self, data):
         """ Process the product """
         try:
-            prod = parser(buf, nwsli_provider=LOCS)
+            prod = parser(data, nwsli_provider=LOCS)
             # prod.draw()
-        except Exception, myexp:
-            common.email_error(myexp, buf)
+        except Exception as myexp:
+            common.email_error(myexp, data)
             return
         defer = DBPOOL.runInteraction(prod.sql)
         defer.addCallback(final_step, prod)
-        defer.addErrback(common.email_error, buf)
+        defer.addErrback(common.email_error, data)
 
 
 def final_step(_, prod):
-    """
-
-    """
+    """send messages"""
     for j in prod.get_jabbers(
             common.SETTINGS.get('pywwa_product_url', 'pywwa_product_url'), ''):
         jabber.send_message(j[0], j[1], j[2])
+
 
 MESOSITE = common.get_database('mesosite')
 
 
 def onready(res):
+    """Database has loaded"""
     log.msg("onready() called...")
     ldmbridge.LDMProductFactory(MyProductIngestor())
     MESOSITE.close()
+
 
 df = MESOSITE.runInteraction(load_database)
 df.addCallback(onready)

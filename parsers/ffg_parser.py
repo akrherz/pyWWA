@@ -11,7 +11,6 @@ import common  # @UnresolvedImport
 syslog.startLogging(prefix='pyWWA/ffg_parser', facility=LOG_LOCAL2)
 
 DBPOOL = common.get_database('postgis', cp_max=1)
-WAITFOR = 20
 
 
 # LDM Ingestor
@@ -50,7 +49,7 @@ def real_parser(txn, buf):
 
 def main():
     """Our main method"""
-    _ = ldmbridge.LDMProductFactory(MyProductIngestor())
+    ldmbridge.LDMProductFactory(MyProductIngestor())
     reactor.run()  # @UndefinedVariable
 
 
