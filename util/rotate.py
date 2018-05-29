@@ -10,7 +10,7 @@ BASE = "/home/ldm/data/"
 
 def main(argv):
     """Do SOmething"""
-    data = sys.stdin.read()
+    data = sys.stdin.buffer.read()
     fnbase = argv[1]
     fmt = argv[2]
 
