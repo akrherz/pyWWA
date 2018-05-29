@@ -216,7 +216,7 @@ def gdalwarp(sat, tmpfn, epsg):
     proc = subprocess.Popen(cmd, shell=True, stderr=subprocess.PIPE,
                             stdout=subprocess.PIPE)
     output = proc.stderr.read()
-    if output != "":
+    if output != b"":
         logger.error("gdalwarp() convert error message: %s", output)
     os.unlink("%s_%s.tif" % (tmpfn, epsg))
 

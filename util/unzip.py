@@ -5,7 +5,7 @@ called from pqact_iemvs.conf
 import sys
 import os
 import zipfile
-import StringIO
+from io import BytesIO
 import random
 import string
 
@@ -21,7 +21,7 @@ def ranstr():
 
 def main():
     """ Read the zipfile from stdin and do important things """
-    data = StringIO.StringIO(sys.stdin.read())
+    data = BytesIO(sys.stdin.buffer.read())
     zf = zipfile.ZipFile(data)
     filename = sys.argv[1]
     # Makedir if it does not exist
