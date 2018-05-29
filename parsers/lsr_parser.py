@@ -20,7 +20,7 @@ LSRDB = {}
 def loaddb():
     ''' load memory '''
     if os.path.isfile('lsrdb.p'):
-        mydict = pickle.load(open('lsrdb.p'))
+        mydict = pickle.load(open('lsrdb.p', 'rb'))
         for key in mydict:
             LSRDB[key] = mydict[key]
 
@@ -47,7 +47,7 @@ def cleandb():
 
 def pickledb():
     """ Dump our database to a flat file """
-    pickle.dump(LSRDB, open('lsrdb.p', 'w'))
+    pickle.dump(LSRDB, open('lsrdb.p', 'wb'))
 
 
 class MyProductIngestor(ldmbridge.LDMProductReceiver):
