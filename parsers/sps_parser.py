@@ -1,11 +1,10 @@
 """SPS product ingestor"""
-import datetime
+import re
 
 from twisted.python import log
 from twisted.internet import reactor
-from shapely.geometry import MultiPolygon
-from pyiem.nws import product
-from pyiem import reference
+from pyiem.nws.products.sps import parser
+from pyiem.nws.ugc import UGC
 from pyldm import ldmbridge
 import common
 
@@ -13,7 +12,7 @@ POSTGIS = common.get_database('postgis')
 PYWWA_PRODUCT_URL = common.SETTINGS.get('pywwa_product_url',
                                         'pywwa_product_url')
 
-ugc_dict = {}
+ugc_provider = {}
 
 
 def load_ugc(txn):
@@ -25,30 +24,14 @@ def load_ugc(txn):
         (end_ts is null or end_ts > now())
     """)
     for row in txn.fetchall():
-        name = (row["name"]).replace("\x92", " ")
-        ugc_dict[row['ugc']] = name
+        nm = (row["name"]).replace("\x92", " ").replace("\xc2", " ")
+        wfos = re.findall(r'([A-Z][A-Z][A-Z])', row['wfo'])
+        ugc_provider[row['ugc']] = UGC(row['ugc'][:2], row['ugc'][2],
+                                       row['ugc'][3:],
+                                       name=nm,
+                                       wfos=wfos)
 
     log.msg("ugc_dict is loaded...")
-
-
-def countyText(ugcs):
-    """ Turn an array of UGC objects into string for message relay """
-    countyState = {}
-    c = ""
-    for ugc in ugcs:
-        stateAB = ugc.state
-        if stateAB not in countyState:
-            countyState[stateAB] = []
-        if str(ugc) not in ugc_dict:
-            name = "((%s))" % (str(ugc),)
-        else:
-            name = ugc_dict[str(ugc)]
-        countyState[stateAB].append(name)
-
-    for st in countyState:
-        countyState[st].sort()
-        c += " %s [%s] and" % (", ".join(countyState[st]), st)
-    return c[:-4]
 
 
 class myProductIngestor(ldmbridge.LDMProductReceiver):
@@ -75,58 +58,10 @@ def real_process(txn, raw):
     if raw.find("$$") == -1:
         log.msg("$$ was missing from this product")
         raw += "\r\r\n$$\r\r\n"
-    prod = product.TextProduct(raw)
-    product_id = prod.get_product_id()
-    xtra = {'product_id': product_id,
-            'channels': ''}
-
-    if prod.segments[0].sbw:
-        ets = prod.valid + datetime.timedelta(hours=1)
-        if prod.segments and prod.segments[0].ugcexpire is not None:
-            ets = prod.segments[0].ugcexpire
-        giswkt = 'SRID=4326;%s' % (MultiPolygon([prod.segments[0].sbw]).wkt,)
-        sql = """
-            INSERT into text_products(product, product_id, geom,
-            issue, expire, pil) values (%s, %s, %s, %s, %s, %s)
-        """
-        myargs = (prod.unixtext, product_id, giswkt, prod.valid, ets,
-                  prod.afos)
-
-    else:
-        sql = "INSERT into text_products(product, product_id) values (%s,%s)"
-        myargs = (prod.unixtext, product_id)
-    txn.execute(sql, myargs)
-
-    for seg in prod.segments:
-        if not seg.ugcs:
-            continue
-        headline = "[NO HEADLINE FOUND IN SPS]"
-        if seg.headlines:
-            headline = (seg.headlines[0]).replace("\n", " ")
-        elif raw.find("SPECIAL WEATHER STATEMENT") > 0:
-            headline = "Special Weather Statement"
-        counties = countyText(seg.ugcs)
-        if counties.strip() == "":
-            counties = "entire area"
-
-        expire = ""
-        if seg.ugcexpire is not None:
-            expire = "till %s %s" % (
-                (seg.ugcexpire -
-                 datetime.timedelta(hours=reference.offsets.get(prod.z, 0))
-                 ).strftime("%-I:%M %p"), prod.z)
-        xtra['channels'] = prod.afos
-        mess = "%s issues %s for %s %s %s?pid=%s" % (prod.source[1:],
-                                                     headline, counties,
-                                                     expire, PYWWA_PRODUCT_URL,
-                                                     product_id)
-        htmlmess = ("<p>%s issues <a href='%s?pid=%s'>%s</a> for %s %s</p>"
-                    ) % (prod.source[1:], PYWWA_PRODUCT_URL, product_id,
-                         headline, counties, expire)
-        xtra['twitter'] = "%s for %s %s %s?pid=%s" % (headline, counties,
-                                                      expire,
-                                                      PYWWA_PRODUCT_URL,
-                                                      product_id)
+    prod = parser(raw, ugc_provider=ugc_provider)
+    prod.sql(txn)
+    jmsgs = prod.get_jabbers(PYWWA_PRODUCT_URL)
+    for (mess, htmlmess, xtra) in jmsgs:
         jabber.send_message(mess, htmlmess, xtra)
 
 
