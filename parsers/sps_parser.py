@@ -98,7 +98,7 @@ def real_process(txn, raw):
     txn.execute(sql, myargs)
 
     for seg in prod.segments:
-        if seg.ugcs:
+        if not seg.ugcs:
             continue
         headline = "[NO HEADLINE FOUND IN SPS]"
         if seg.headlines:
