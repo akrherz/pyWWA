@@ -2,9 +2,12 @@
 import datetime
 import os
 import subprocess
+# import logging
 from pyiem.ftpsession import send2box
 
 NEXRADS = "DMX DVN OAX ARX FSD MPX EAX ABR UDX".split()
+# log = logging.getLogger()
+# log.setLevel(logging.DEBUG)
 
 
 def run(date):
