@@ -37,6 +37,7 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
     def process_data(self, data):
         """ Process the product """
         defer = DBPOOL.runInteraction(real_parser, data)
+        defer.addCallback(write_memcache)
         defer.addErrback(common.email_error, data)
         defer.addErrback(log.err)
 
@@ -44,6 +45,20 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
 class ParseError(Exception):
     """ general exception """
     pass
+
+
+def write_memcache(nws):
+    """write our TextProduct to memcached"""
+    if nws is None:
+        return
+    # 10 minutes should be enough time
+    # log.msg("writing %s to memcache" % (nws.get_product_id(), ))
+    df = MEMCACHE_CLIENT.set(
+        nws.get_product_id().encode('utf-8'),
+        nws.unixtext.replace("\001\n", "").encode('utf-8'),
+        expireTime=600
+    )
+    df.addErrback(log.err)
 
 
 def real_parser(txn, buf):
@@ -87,14 +102,7 @@ def real_parser(txn, buf):
     if MANUAL or nws.afos[:3] in MEMCACHE_EXCLUDE:
         return
 
-    log.msg("writing %s to memcache" % (nws.get_product_id(), ))
-    # 10 minutes should be enough time
-    df = MEMCACHE_CLIENT.set(
-        nws.get_product_id().encode('utf-8'),
-        nws.unixtext.replace("\001\n", "").encode('utf-8'),
-        expireTime=600
-    )
-    df.addErrback(log.err)
+    return nws
 
 
 if __name__ == '__main__':
