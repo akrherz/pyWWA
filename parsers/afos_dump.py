@@ -5,12 +5,17 @@ import datetime
 import pytz
 from twisted.python import log
 from twisted.internet import reactor
+from txyam.client import YamClient
 from pyldm import ldmbridge
 from pyiem.nws import product
 from pyiem.util import utc
 import common  # @UnresolvedImport
 
 DBPOOL = common.get_database('afos')
+MEMCACHE_EXCLUDE = ['RR1', 'RR2', 'RR3', 'RR4', 'RR5', 'RR6', 'RR7', 'RR8',
+                    'RR9', 'ROB', 'HML']
+MEMCACHE_CLIENT = YamClient(reactor, ['tcp:iem-memcached3:11211', ])
+MEMCACHE_CLIENT.connect()
 
 
 def shutdown():
@@ -79,6 +84,17 @@ def real_parser(txn, buf):
         INSERT into """+table+"""(pil, data, entered,
         source, wmo) VALUES(%s, %s, %s, %s, %s)
     """, (nws.afos.strip(), nws.text, nws.valid, nws.source, nws.wmo))
+    if MANUAL or nws.afos[:3] in MEMCACHE_EXCLUDE:
+        return
+
+    log.msg("writing %s to memcache" % (nws.get_product_id(), ))
+    # 10 minutes should be enough time
+    df = MEMCACHE_CLIENT.set(
+        nws.get_product_id().encode('utf-8'),
+        nws.unixtext.replace("\001\n", "").encode('utf-8'),
+        expireTime=600
+    )
+    df.addErrback(log.err)
 
 
 if __name__ == '__main__':
