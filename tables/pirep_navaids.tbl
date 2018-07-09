@@ -56,6 +56,7 @@ CAZ5            Cache Creek                      -- CA  5078 -12132     0  0
 CBB7            Tipella                          -- CA  4974 -12216     0  0
 CBB9            Osoyoos                          -- CA  4904 -11949     0  0
 CBE2            Elko                             -- CA  4928 -11515     0  0
+# CBE9
 # CBF6 
 # CBF7            
 CBF9            Mabel Lake                       -- CA  5061 -11873     0  0
@@ -259,6 +260,7 @@ CKM4            Jan Lake                         -- CA  5483 -10279     0  0
 CKM8            Opapimiskan Lake                 -- CA  5261  -9038     0  0
 CKQ3            North Spirit Lake                -- CA  5249  -9297     0  0
 CKQ6            Erickson                         -- CA  5049  -9990     0  0
+CKQ7            Vermillion Bay                   -- CA  4988  -9344     0  0
 CKQ9            Pine Dock                        -- CA  5162  -9681     0  0
 CKR4            Lundar                           -- CA  5070  -9806     0  0
 CKS8            Cree Lake                        -- CA  5746 -10675     0  0
@@ -402,6 +404,7 @@ CTA3            Ile aux Coudres                  -- CA  4739  -7038     0  0
 # CTBL
 CTG3            Du Rocher Perce                  -- CA  4338  -6456     0  0
 # CTH3            
+# CTH7
 # CTK6     
 # CTR4
 # CTSJ                   
@@ -508,6 +511,7 @@ CYYM            Cowley                           AB CA  4964 -11409     0  0
 CYYO            Wynward                          SK CA  5181 -10417     0  0
 # CYYV
 # CYYX
+CYZC            Beatton River                    BC CA  5738 -12138     0  0
 CYZD            Toronto Downsview                ON CA  4374  -7947     0  0
 CZAC            York Landing                     MB CA  5609  -9609     0  0
 CZAM            Salmon                           BC CA  5068 -11923     0  0
