@@ -323,7 +323,10 @@ class JabberClient(object):
         # channels is of most important
         xelem = message.addElement('x', 'nwschat:nwsbot')
         for key in xtra.keys():
-            xelem[key] = xtra[key]
+            if isinstance(xtra[key], list):
+                xelem[key] = ",".join(xtra[key])
+            else:
+                xelem[key] = xtra[key]
         # So send_message may be getting called from 'threads' and the writing
         # of data to the transport is not thread safe, so we must ensure that
         # this gets called from the main thread
