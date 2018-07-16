@@ -1,32 +1,18 @@
-"""
-  Take the NCR NEXRAD Level III product and run it through gpnids to get the
-  attribute table, which we then dump into the database
-"""
-import os
+"""Process and Archive the NEXRAD Level III NCR Attribute Table"""
+from io import BytesIO
 import math
-import datetime
 
 import pytz
 from twisted.python import log
-from twisted.internet.defer import DeferredQueue, Deferred
-from twisted.internet.task import cooperate
-from twisted.internet import reactor, protocol
+from twisted.internet import reactor
+from metpy.io.nexrad import Level3File
 from pyldm import ldmbridge
-from pyiem.util import utc
 import common
-
-os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 # Setup Database Links
 POSTGISDB = common.get_database('postgis')
 
 ST = {}
-
-# For archive reprocessing, we need to specify the month and year
-_UTCNOW = None
-if "YYYY" in os.environ:
-    _UTCNOW = utc(int(os.environ['YYYY']), int(os.environ['MM']), 1)
-    log.msg("Date is hard coded to %s" % (_UTCNOW,))
 
 
 def load_station_table(txn):
@@ -42,104 +28,6 @@ def load_station_table(txn):
     log.msg("Station Table size %s" % (len(ST.keys(),)))
 
 
-def compute_ts(tstring):
-    """ Figure out the timestamp of this product """
-    # log.msg("tstring is %s" % (tstring,))
-    day = int(tstring[12:14])
-    hour = int(tstring[14:16])
-    minute = int(tstring[16:18])
-
-    if _UTCNOW is None:
-        utcnow = datetime.datetime.utcnow()
-        utcnow = utcnow.replace(tzinfo=pytz.utc, second=0, microsecond=0,
-                                hour=hour, minute=minute)
-        if utcnow.day > 25 and day == 1:  # Next month!
-            utcnow += datetime.timedelta(days=15)  # careful
-        if utcnow.day == 1 and day > 25:  # Last month!
-            utcnow -= datetime.timedelta(days=15)
-        utcnow = utcnow.replace(day=day)
-    else:
-        utcnow = _UTCNOW.replace(day=day, hour=hour, minute=minute)
-
-    return utcnow
-
-
-class PROC(protocol.ProcessProtocol):
-    """
-    My process protocol
-    """
-
-    def __init__(self, buf):
-        """
-        Constructor
-        """
-        # log.msg("init() of PROC")
-        self.res = b""
-        self.ts = None
-        self.wmo = None
-        self.afos = None
-        self.deferred = None
-        self.buf = buf
-
-        lines = buf.split(b"\r\r\n")
-        if len(lines) < 4:
-            log.msg("INCOMPLETE PRODUCT!")
-            return
-        self.wmo = lines[2].decode('ascii')
-        self.afos = lines[3].decode('ascii')
-        self.ts = compute_ts(self.wmo)
-        # log.msg("end of init() of PROC")
-
-    def connectionMade(self):
-        """Fired when the program starts up and wants stdin"""
-        # log.msg("Connection Made")
-        self.transport.write(self.buf + b"\r\r\n\003")
-        self.transport.closeStdin()
-
-    def outReceived(self, data):
-        """
-        Save the stdout we get from the program for later processing
-        """
-        # log.msg("Got %d bytes!" % len(data))
-        self.res += data
-
-    def errReceived(self, data):
-        """
-        In case something comes to stderr
-        """
-        log.msg("errReceived! with %d bytes!" % len(data))
-        log.msg(data)
-        if not isinstance(data, str):
-            self.deferred.errback(data)
-
-    def cancelDB(self, _):
-        """ cancel DB session"""
-        # log.msg("cancelDB()")
-        self.deferred.callback(self)
-
-    def log_error(self, err):
-        """ Log an error """
-        log.msg(self.res)
-        log.msg(err)
-        common.email_error(err, self.res)
-
-    def outConnectionLost(self):
-        """
-        Once the program is done, we need to do something with the data
-        """
-        # log.msg("Teardown")
-        if self.res == b'' or self.res.find(b"NO STORMS DETECTED") > -1:
-            defer = POSTGISDB.runInteraction(delete_prev_attrs, self.afos[3:])
-            defer.addErrback(log.err)
-            self.deferred.callback(self)
-            return
-        defer = POSTGISDB.runInteraction(really_process, self.res,
-                                         self.afos[3:], self.ts)
-        defer.addCallback(self.cancelDB)
-        defer.addErrback(self.log_error)
-        defer.addErrback(log.err)
-
-
 class MyProductIngestor(ldmbridge.LDMProductReceiver):
     """My ingest protocol"""
 
@@ -151,7 +39,26 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
 
     def process_data(self, data):
         """I am called from the ldmbridge when data is ahoy"""
-        self.jobs.put(data)
+        bio = BytesIO()
+        bio.write(data)
+        bio.seek(0)
+        process(bio)
+
+
+def process(bio):
+    """Process our data, please"""
+    l3 = Level3File(bio)
+    del bio
+    ctx = {}
+    ctx['nexrad'] = l3.siteID
+    ctx['ts'] = l3.metadata['vol_time'].replace(tzinfo=pytz.UTC)
+    ctx['lines'] = []
+    for page in l3.graph_pages:
+        for line in page:
+            if 'text' in line:
+                ctx['lines'].append(line['text'])
+    df = POSTGISDB.runInteraction(really_process, ctx)
+    df.addErrback(common.email_error, ctx)
 
 
 def delete_prev_attrs(txn, nexrad):
@@ -159,34 +66,7 @@ def delete_prev_attrs(txn, nexrad):
     txn.execute("DELETE from nexrad_attributes WHERE nexrad = %s", (nexrad,))
 
 
-def async_func(buf):
-    """
-    Async caller of reactor processes
-    @param buf string of the raw NOAAPort Product
-    """
-    # log.msg('async() called...')
-    defer = Deferred()
-    proc = PROC(buf)
-    proc.deferred = defer
-    proc.deferred.addErrback(log.err)
-    if proc.afos is not None:
-        reactor.spawnProcess(proc, "python",
-                             ["python", "ncr2postgis.py", proc.afos[3:],
-                              proc.ts.strftime("%Y%m%d%H%M")], {})
-    else:
-        proc.cancelDB('bogus')
-    return proc.deferred
-
-
-def worker(jobs):
-    """ I am a worker that processes jobs """
-    while True:
-        yield jobs.get().addCallback(
-            async_func).addErrback(common.email_error, 'Unhandled Error'
-                                   ).addErrback(log.err)
-
-
-def really_process(txn, res, nexrad, ts):
+def really_process(txn, ctx):
     """
     This processes the output we get from the GEMPAK!
 
@@ -203,18 +83,16 @@ def really_process(txn, res, nexrad, ts):
          U8  154/126 NONE NONE     UNKNOWN       11  47 18.8  23.1  271/ 70
          J0  127/134 NONE NONE     UNKNOWN       24  51 20.2  33.9    NEW
     """
-    delete_prev_attrs(txn, nexrad)
-    res = res.decode('ascii')
+    delete_prev_attrs(txn, ctx['nexrad'])
 
-    cenlat = float(ST[nexrad]['lat'])
-    cenlon = float(ST[nexrad]['lon'])
+    cenlat = float(ST[ctx['nexrad']]['lat'])
+    cenlon = float(ST[ctx['nexrad']]['lon'])
     latscale = 111137.0
     lonscale = 111137.0 * math.cos(cenlat * math.pi / 180.0)
 
     #   STM ID  AZ/RAN TVS  MESO POSH/POH/MX SIZE VIL DBZM  HT  TOP  FCST MVMT
-    lines = res.split("\n")
     co = 0
-    for line in lines:
+    for line in ctx['lines']:
         if len(line) < 5:
             continue
         if line[1] != " ":
@@ -259,17 +137,17 @@ def really_process(txn, res, nexrad, ts):
         else:
             d["drct"] = int(float(tokens[12]))
             d["sknt"] = tokens[13]
-        d["nexrad"] = nexrad
+        d["nexrad"] = ctx['nexrad']
 
         cosaz = math.cos(d["azimuth"] * math.pi / 180.0)
         sinaz = math.sin(d["azimuth"] * math.pi / 180.0)
         mylat = cenlat + (cosaz * (d["range"] * 1000.0) / latscale)
         mylon = cenlon + (sinaz * (d["range"] * 1000.0) / lonscale)
         d["geom"] = "SRID=4326;POINT(%s %s)" % (mylon, mylat)
-        d["valid"] = ts
+        d["valid"] = ctx['ts']
 
         for table in ['nexrad_attributes',
-                      'nexrad_attributes_%s' % (ts.year,)]:
+                      'nexrad_attributes_%s' % (ctx['ts'].year,)]:
             sql = """
                 INSERT into """ + table + """
                 (nexrad, storm_id, geom, azimuth,
@@ -282,45 +160,15 @@ def really_process(txn, res, nexrad, ts):
             """
             txn.execute(sql, d)
 
-    if co == 0:
-        # Had a problem with GEMPAK corrupting its last.nts and/or gemglb.nts,
-        # so when the ingestor senses trouble (no output), remove these files
-        # and continue happily on
-        log.msg("Got zero entries ||%s||" % (res,))
-        for fn in ['gemglb.nts', 'last.nts']:
-            if os.path.isfile(fn):
-                os.unlink(fn)
     log.msg(("%s %s Processed %s entries"
-             ) % (nexrad, ts.strftime("%Y-%m-%d %H:%M UTC"), co))
+             ) % (ctx['nexrad'], ctx['ts'].strftime("%Y-%m-%d %H:%M UTC"), co))
 
 
-def job_size(jobs):
-    """
-    Print out some debug information to the log on the current size of the
-    job queue
-    """
-    log.msg("deferredQueue waiting: %s pending: %s" % (len(jobs.waiting),
-                                                       len(jobs.pending)))
-    if len(jobs.pending) > 1000:
-        log.msg("ABORT")
-        reactor.callWhenRunning(reactor.stop)
-    reactor.callLater(300, job_size, jobs)
-
-
-def main(_):
-    """
-    Go main Go!
-    """
-    log.msg("main() has fired...")
-    jobs = DeferredQueue()
+def on_ready(_unused):
+    """ready to fire things up"""
+    log.msg("on_ready() has fired...")
     ingest = MyProductIngestor(isbinary=True)
-    ingest.jobs = jobs
     ldmbridge.LDMProductFactory(ingest)
-
-    for _ in range(3):
-        cooperate(worker(jobs))
-
-    reactor.callLater(30, job_size, jobs)
 
 
 def errback(res):
@@ -329,7 +177,13 @@ def errback(res):
     reactor.stop()
 
 
-df = POSTGISDB.runInteraction(load_station_table)
-df.addCallback(main)
-df.addErrback(errback)
-reactor.run()
+def main():
+    """Go Main Go"""
+    df = POSTGISDB.runInteraction(load_station_table)
+    df.addCallback(on_ready)
+    df.addErrback(errback)
+    reactor.run()
+
+
+if __name__ == '__main__':
+    main()
