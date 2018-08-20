@@ -23,6 +23,7 @@ C5 = "&lt;vtec_phenomena&gt;.&lt;vtec_significance&gt;.&lt;ugc&gt;"
 C6 = "&lt;ugc&gt;"
 C7 = "&lt;afos_pil&gt;.&lt;wfo&gt;"
 C8 = "&lt;wmo_source&gt;.&lt;aaa&gt;"
+C9 = "&lt;afos_pil&gt;.&lt;ugc&gt;"
 D = {
      '10-313': 'http://www.nws.noaa.gov/directives/sym/pd01003013curr.pdf',
      '10-314': 'http://www.nws.noaa.gov/directives/sym/pd01003014curr.pdf',
@@ -130,7 +131,7 @@ GEN_PRODUCTS = [
     dict(afos='RWS', directive='10-1701', channels=S2),
     dict(afos='RVS', directive='10-1701', channels=S2),
     dict(afos='STF', directive='10-1701', channels=S2),
-    dict(afos='SPS', directive='10-1701', channels=S2),
+    dict(afos='SPS', directive='10-1701', channels=[C3, C3p, C6, C9]),
     dict(afos='SRF', directive='10-1701', channels=S2),
     dict(afos='SPW', directive='10-1701', channels=S2),
     dict(afos='TAF', directive='10-1701', channels=[C3, C3p, C8]),
@@ -202,6 +203,8 @@ def do_generic():
         for (_, html, xtra) in j:
             tweet += xtra['twitter'] + "<br />"
             jmsg += html
+            if isinstance(xtra['channels'], list):
+                xtra['channels'] = ",".join(xtra['channels'])
             for channel in xtra['channels'].split(","):
                 if channel not in channels:
                     channels.append(channel)
