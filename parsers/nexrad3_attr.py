@@ -53,6 +53,9 @@ def process(bio):
     ctx['nexrad'] = l3.siteID
     ctx['ts'] = l3.metadata['vol_time'].replace(tzinfo=pytz.UTC)
     ctx['lines'] = []
+    if not hasattr(l3, 'graph_pages'):
+        log.msg("%s %s has no graph_pages" % (ctx['nexrad'], ctx['ts']))
+        return
     for page in l3.graph_pages:
         for line in page:
             if 'text' in line:
@@ -98,7 +101,7 @@ def really_process(txn, ctx):
         if line[1] != " ":
             continue
         tokens = line.replace(">", " ").replace("/", " ").split()
-        if len(tokens) < 1 or tokens[0] == "STM":
+        if not tokens or tokens[0] == "STM":
             continue
         if tokens[5] == 'UNKNOWN':
             tokens[5] = 0
@@ -160,7 +163,9 @@ def really_process(txn, ctx):
             """
             txn.execute(sql, d)
 
-    log.msg(("%s %s Processed %s entries"
+    if co > 0:
+        log.msg(
+            ("%s %s Processed %s entries"
              ) % (ctx['nexrad'], ctx['ts'].strftime("%Y-%m-%d %H:%M UTC"), co))
 
 
