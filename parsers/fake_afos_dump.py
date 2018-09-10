@@ -22,7 +22,7 @@ def compute_afos(textprod):
     elif ttaaii[:2] == 'FO' and ttaaii[2:4] in ['CA', 'UE', 'UM', 'CN', 'GX',
                                                 'UW']:
         afos = "FRHT%s" % (ttaaii[4:], )
-    elif ttaaii == 'URNT12' and textprod.source == 'KNHC':
+    elif ttaaii == 'URNT12' and textprod.source in ['KNHC', 'KWBC']:
         afos = "REPNT2"
     else:
         raise Exception("Unknown TTAAII %s conversion" % (ttaaii, ))
