@@ -32,7 +32,8 @@ def cleandb():
     utc = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
     thres = utc - datetime.timedelta(hours=24*7)
     init_size = len(LSRDB)
-    for key in LSRDB.keys():
+    # keys() is now a generator, so generate all values before deletion
+    for key in list(LSRDB.keys()):
         if LSRDB[key] < thres:
             del LSRDB[key]
 
