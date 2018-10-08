@@ -20,6 +20,7 @@ C3 = "&lt;afos_pil&gt;"
 C3p = "&lt;afos_pil_prefix&gt;..."
 C4 = "&lt;vtec_phenomena&gt;.&lt;vtec_significance&gt;.&lt;wfo&gt;"
 C5 = "&lt;vtec_phenomena&gt;.&lt;vtec_significance&gt;.&lt;ugc&gt;"
+C5s = "&lt;vtec_phenomena&gt;.&lt;vtec_significance&gt;.&lt;state&gt;"
 C6 = "&lt;ugc&gt;"
 C7 = "&lt;afos_pil&gt;.&lt;wfo&gt;"
 C8 = "&lt;wmo_source&gt;.&lt;aaa&gt;"
@@ -43,7 +44,7 @@ D = {
 
 # TODO: TCV TSU ADR CDW DSA EQW HMW HPA LEw NUW RHW VOW PQS CWA
 # Our dictionary of products!
-S1 = [C1, C2, C3, C3p, C4, C5, C6]
+S1 = [C1, C2, C3, C3p, C4, C5, C5s, C6]
 VTEC_PRODUCTS = [
     dict(afos='CFW', directive='10-320', channels=S1),
     dict(afos='EWW', directive='10-601', channels=S1),
