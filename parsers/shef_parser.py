@@ -30,8 +30,8 @@ import common  # @UnresolvedImport
 # Setup Database Links
 # the current_shef table is not very safe when two processes attempt to update
 # it at the same time, use a single process for this connection
-ACCESSDB = common.get_database('iem', module_name='psycopg2', cp_max=10)
-HADSDB = common.get_database('hads', module_name='psycopg2', cp_max=10)
+ACCESSDB = common.get_database('iem', module_name='psycopg2', cp_max=20)
+HADSDB = common.get_database('hads', module_name='psycopg2', cp_max=20)
 
 # a form for IDs we will log as unknown
 NWSLIRE = re.compile("[A-Z]{4}[0-9]")
