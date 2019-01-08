@@ -21,8 +21,10 @@ ASOSDB = common.get_database('asos')
 MANUAL = ('MANUAL' in sys.argv)
 NWSLI_PROVIDER = {}
 # Manual list of sites that are sent to jabber :/
-metarcollect.JABBER_SITES = {'KJFK': None, 'KLGA': None, 'KEWR': None,
-                             'KTEB': None}
+metarcollect.JABBER_SITES = {
+    'KJFK': None, 'KLGA': None, 'KEWR': None, 'KTEB': None,
+    'KIAD': None, 'KDCA': None, 'KBWI': None, 'KRIC': None
+}
 
 
 def load_stations(txn):
