@@ -42,6 +42,7 @@ CAQ5            Nakusp                           -- CA  5027 -11781     0  0
 # CAR5
 CAT4            Qualicum Beach                   -- CA  4934 -12440     0  0
 CAT5            Port Mcneill                     -- CA  5057 -12702     0  0
+# CAT7
 CAU3            Oliver                           -- CA  4917 -11955     0  0
 CAU4            Vanderhoof                       -- CA  5405 -12401     0  0
 # CAU6
@@ -89,6 +90,7 @@ CBX7            Tumbler Ridge                    -- CA  5503 -12094     0  0
 # CBY5            
 # CBY6
 # CBY7
+# CBZ2
 # CBZ7
 CBZ9            Fraser Lake                      -- CA  5401 -12477     0  0
 # CCB3
@@ -113,6 +115,7 @@ CCS5            Havelock                         -- CA  4599  -6530     0  0
 CCT2            Cookstown                        -- CA  4424  -7964     0  0
 CCW3            Waterville                       -- CA  4505  -6465     0  0
 CCY3            Sussex                           -- CA  4569  -6554     0  0
+CCZ2            Rigolet                          -- CA  5418  -5846     0  0
 CDA4            Pokemouche                       -- CA  4772  -6488     0  0
 CDA5            St Andrews Codroy Valley         -- CA  4777  -5931     0  0
 # CDB5
@@ -122,6 +125,7 @@ CDC5            Dougall Campbell                 -- CA  5201 -12121     0  0
 # CDF5
 # CDH5
 # CDH6
+# CDM2
 CDT5            Bouctouche                       -- CA  4651  -6469     0  0
 CDU6            Doaktown                         -- CA  4655  -6609     0  0 
 CEA3            Olds Didsbury                    -- CA  5171 -11411     0  0            
@@ -198,6 +202,7 @@ CFM4            Donnelly                         -- CA  5571 -11709     0  0
 CFM5            Hamburg                          -- CA  5735 -11976     0  0
 CFM7            Boyle                            -- CA  5457 -11282     0  0
 CFN5            La Crete                         -- CA  5817 -11633     0  0
+# CFN6
 CFN7            Sundre                           -- CA  5177 -11468     0  0
 # CFS3
 CFS5            Spirit River                     -- CA  5578 -11884     0  0
@@ -222,6 +227,8 @@ CJA3            Morden                           -- CA  4912  -9806     0  0
 CJA5            Nestor Falls                     -- CA  4914  -9392     0  0
 CJB3            Stienbach                        -- CA  4955  -9668     0  0
 CJC2            Craik                            -- CA  5106 -10584     0  0
+CJC3            Davidson                         -- CA  5125 -10598     0  0
+CJC5            Shaunavon                        -- CA  4966 -10841     0  0
 CJE3            Weyburn                          -- CA  4970 -10380     0  0
 CJE4            Snow Lake                        -- CA  5490  -9982     0  0
 CJE7            Ashern                           -- CA  5116  -9833     0  0
@@ -254,6 +261,7 @@ CJV9            Melville                         -- CA  5094 -10274     0  0
 CJW4            Pelican Narrows                  -- CA  5529 -10275     0  0
 CJW7            Cigar Lake                       -- CA  5805 -10448     0  0
 CJX4            Rosetown                         -- CA  5156 -10792     0  0
+CJX5            Souris Glenwood                  -- CA  4963 -10020     0  0
 CJY3            Tisdale                          -- CA  5284 -10407     0  0
 CJY4            Sandy Bay                        -- CA  5555 -10227     0  0
 CJZ3            Melfort                          -- CA  5287 -10470     0  0
@@ -261,6 +269,7 @@ CKA9            Southend                         -- CA  5634 -10329     0  0
 CKB2            Patuanak                         -- CA  5590 -10772     0  0
 CKB6            Wapekeka                         -- CA  5385  -8959     0  0
 CKB7            Roblin                           -- CA  5123 -10139     0  0
+CKC7            Rockglen                         -- CA  4917 -10593     0  0
 CKD5            Kipling                          -- CA  5010 -10261     0  0
 CKD9            Slate Falls                      -- CA  5113  -9167     0  0
 # CKE9            
@@ -278,6 +287,7 @@ CKQ6            Erickson                         -- CA  5049  -9990     0  0
 CKQ7            Vermillion Bay                   -- CA  4988  -9344     0  0
 CKQ9            Pine Dock                        -- CA  5162  -9681     0  0
 CKR4            Lundar                           -- CA  5070  -9806     0  0
+CKR9            Outlook                          -- CA  5148 -10704     0  0
 CKS8            Cree Lake                        -- CA  5746 -10675     0  0
 # CKT8
 # CKW7
@@ -295,6 +305,7 @@ CMB2            Meadowbank                       -- CA  6503  -9607     0  0
 CMB7            Maxville                         -- CA  4525  -7481     0  0
 # CMB9
 # CMH3
+# CML2
 CMN5            Manic-5                          -- CA  5066  -6883     0  0
 CMR2            Mary River                       -- CA  7132  -7935     0  0
 CNA3            Springwater Barrie               -- CA  4441  -7973     0  0
@@ -332,6 +343,7 @@ CNR4            Tobermory                        -- CA  4522  -8163     0  0
 CNS8            Morrisburg                       -- CA  4495  -7508     0  0
 CNT7            Picton                           -- CA  4399  -7714     0  0
 CNW3            Bancroft                         -- CA  4507  -7788     0  0
+CNS4            Alexandria                       -- CA  4533  -7463     0  0
 CNU4            Belleville                       -- CA  4419  -7731     0  0
 CNU8            Markham                          -- CA  4394  -7962     0  0
 # CNV4            
@@ -342,6 +354,7 @@ CNZ4            Barrys Bay                       -- CA  4550  -7764     0  0
 CNZ8            Grimsby                          -- CA  4316  -7960     0  0
 # COB4
 # COL2
+# COL4
 # COYW
 # CPC9
 # CPF3
@@ -424,6 +437,8 @@ CSZ3            St Jovite                        -- CA  4615  -7458     0  0
 CSZ4            St Frederic                      -- CA  4633  -7096     0  0
 CTA3            Ile aux Coudres                  -- CA  4739  -7038     0  0
 # CTBL
+# CTDF
+# CTD4
 CTG3            Du Rocher Perce                  -- CA  4338  -6456     0  0
 # CTH3            
 # CTH7
@@ -438,6 +453,7 @@ CTU2            Fontanges                        -- CA  5455  -7117     0  0
 CVB2            Voiseys Bay                      -- CA  5634  -6209     0  0
 # CVM2
 # CXYT            
+# CXYU
 CYAC            Cat Lake                         ON CA  5172  -9182     0  0
 CYAG            Fort Frances                     ON CA  4865  -9344     0  0
 CYAL            Alert Bay                        BC CA  5058 -12692     0  0
@@ -447,6 +463,7 @@ CYAX            Lac du Bonnet                    MB CA  5029  -9601     0  0
 CYBA            Banff                            -- CA  5121 -11554     0  0
 CYBE            Uranium City                     SK CA  5956 -10848     0  0
 CYBF            Bonnyville                       -- CA  5430 -11074     0  0
+CYBG            Bagotville                       QB CA  4833  -7099     0  0
 CYBP            Brooks                           AB CA  5063 -11193     0  0
 CYBT            Brochet                          -- CA  5789 -10168     0  0
 CYCC            Cornwall                         ON CA  4509  -7456     0  0
@@ -558,6 +575,7 @@ CZNG            Poplar River                     MB CA  5300  -9727     0  0
 CZNL            Nelson                           BC CA  4949 -11730     0  0
 CZJG            Jenpeg                           -- CA  5452  -9805     0  0
 CZPB            Sachigo Lake                     -- CA  5389  -9220     0  0
+CZPO            Pinehouse Lake                   SK CA  5553 -10658     0  0
 CZQM            Moncton Centre                   NB CA  4607  -6477     0  0
 CZRJ            Round Lake                       ON CA  5294  -9131     0  0
 CZKE            Kaschechewan                     -- CA  5228  -8168     0  0
@@ -569,6 +587,7 @@ CZTM            Shamattawa                       -- CA  5587  -9208     0  0
 CZWG            Winnipeg Centre                  MB CA  4990  -9726     0  0
 CZWH            Lac Brochet                      -- CA  5861 -10147     0  0
 CZWL            Wollaston                        SK CA  5811 -10317     0  0
+# CZYF
 # 
 AAA           0 ABRAHAM                          -- --  4016  -8934     0  0                    
 AAF           0 APALACHICOLA                     -- --  2972  -8503     0  0                    
