@@ -1,36 +1,36 @@
 """ ASOS Daily Summary Message Parser ingestor """
-import re
-import datetime
 
+import pytz
 from twisted.internet import reactor
 from twisted.python import log
 from pyldm import ldmbridge
+from pyiem.nws.products.dsm import parser
+from pyiem.util import get_dbconn
 import common
 
 DBPOOL = common.get_database("iem", cp_max=1)
-PARSER_RE = re.compile(r"""^(?P<id>[A-Z][A-Z0-9]{3})\s+
-   DS\s+
-   (COR\s)?
-   ([0-9]{4}\s)?
-   (?P<day>\d\d)/(?P<month>\d\d)\s?
-   ((?P<highmiss>M)|((?P<high>(-?\d+))(?P<hightime>[0-9]{4})))/\s?
-   ((?P<lowmiss>M)|((?P<low>(-?\d+))(?P<lowtime>[0-9]{4})))//\s?
-   (?P<coophigh>(-?\d+|M))/\s?
-   (?P<cooplow>(-?\d+|M))//
-   (?P<minslp>M|[\-0-9]{3,4})(?P<slptime>[0-9]{4})?/
-   (?P<precip>T|M|[0-9]{,4})/
- (?P<p01>T|M|\-|[0-9]{,4})/(?P<p02>T|M|\-|[0-9]{,4})/(?P<p03>T|M|\-|[0-9]{,4})/
- (?P<p04>T|M|\-|[0-9]{,4})/(?P<p05>T|M|\-|[0-9]{,4})/(?P<p06>T|M|\-|[0-9]{,4})/
- (?P<p07>T|M|\-|[0-9]{,4})/(?P<p08>T|M|\-|[0-9]{,4})/(?P<p09>T|M|\-|[0-9]{,4})/
- (?P<p10>T|M|\-|[0-9]{,4})/(?P<p11>T|M|\-|[0-9]{,4})/(?P<p12>T|M|\-|[0-9]{,4})/
- (?P<p13>T|M|\-|[0-9]{,4})/(?P<p14>T|M|\-|[0-9]{,4})/(?P<p15>T|M|\-|[0-9]{,4})/
- (?P<p16>T|M|\-|[0-9]{,4})/(?P<p17>T|M|\-|[0-9]{,4})/(?P<p18>T|M|\-|[0-9]{,4})/
- (?P<p19>T|M|\-|[0-9]{,4})/(?P<p20>T|M|\-|[0-9]{,4})/(?P<p21>T|M|\-|[0-9]{,4})/
- (?P<p22>T|M|\-|[0-9]{,4})/(?P<p23>T|M|\-|[0-9]{,4})/(?P<p24>T|M|\-|[0-9]{,4})/
-   (?P<avg_sped>[0-9]{3})?/?
-   (?P<drct_sped_max>[0-9]{2})?(?P<sped_max>[0-9]{2})?(?P<time_sped_max>[0-9]{4})?/?
-   (?P<drct_gust_max>[0-9]{2})?(?P<sped_gust_max>[0-9]{2})?(?P<time_gust_max>[0-9]{4})?
-""", re.VERBOSE)
+# database timezones to pytz cache
+TIMEZONES = dict()
+STATIONS = dict()
+
+
+def load_stations(txn):
+    """load station metadata to build a xref."""
+    txn.execute("""
+        SELECT id, tzname from stations
+        where network ~* 'ASOS' or network = 'AWOS'
+    """)
+    for row in txn:
+        # we need four char station IDs
+        station = row[0] if len(row[0]) == 4 else "K" + row[0]
+        tzname = row[1]
+        if tzname not in TIMEZONES:
+            try:
+                TIMEZONES[tzname] = pytz.timezone(tzname)
+            except Exception as exp:
+                log.msg("pytz does not like tzname: %s %s" % (tzname, exp))
+                TIMEZONES[tzname] = pytz.UTC
+        STATIONS[station] = TIMEZONES[tzname]
 
 
 class MyProductIngestor(ldmbridge.LDMProductReceiver):
@@ -48,74 +48,30 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
 
     def process_data(self, data):
         """ Process the product """
-        try:
-            real_parser(data)
-        except Exception as myexp:
-            common.email_error(myexp, data)
+        df = DBPOOL.runInteraction(real_parser, data)
+        df.addErrback(common.email_error, data)
 
 
-def real_parser(buf):
-    """
-    KAMW DS 19/07 761539/ 540532// 76/ 54//0062028/00/00/00/00/00/00/00/
-    00/00/00/00/00/00/00/00/00/00/00/00/00/00/00/00/00/00/25/12091717/
-    14131452=
-    """
-    # Split lines
-    raw = buf.replace("\015\015\012", "\n")
-    lines = raw.split("\n")
-    if len(lines[3]) < 10:
-        meat = ("".join(lines[4:])).split("=")
-    else:
-        meat = ("".join(lines[3:])).split("=")
-    for data in meat:
-        if data == "":
-            continue
-        process_dsm(data)
-
-
-def process_dsm(data):
+def real_parser(txn, data):
     """Please process some data"""
-    m = PARSER_RE.match(data)
-    if m is None:
-        log.msg("FAIL ||%s||" % (data, ))
-        common.email_error("DSM RE Match Failure", data)
-        return
-    d = m.groupdict()
-    # Only parse United States Sites
-    if d['id'][0] != "K":
-        return
-    # Figure out the timestamp
-    now = datetime.datetime.now()
-    if d['day'] == '00' or d['month'] == '00':
-        common.email_error("ERROR: Invalid Timestamp", data)
-        return
-    ts = now.replace(day=int(d['day']), month=int(d['month']))
-    if ts.month == 12 and now.month == 1:
-        ts -= datetime.timedelta(days=360)
-        ts = ts.replace(day=int(d['day']))
-    updater = []
-    if d['high'] is not None and d['high'] != "M":
-        updater.append("max_tmpf = %s" % (d['high'],))
-    if d['low'] is not None and d['low'] != "M":
-        updater.append("min_tmpf = %s" % (d['low'],))
+    prod = parser(data)
+    prod.tzlocalize(STATIONS)
+    prod.sql(txn)
+    if prod.warnings:
+        common.email_error("\n".join(prod.warnings), data)
 
-    if d['precip'] is not None and d['precip'] not in ["M", "T"]:
-        updater.append("pday = %s" % (float(d['precip']) / 100.0,))
-    elif d['precip'] == "T":
-        updater.append("pday = 0.0001")
 
-    sql = """
-        UPDATE summary_%s s SET %s FROM stations t WHERE t.iemid = s.iemid
-        and t.id = '%s' and day = '%s'
-        """ % (ts.year, " , ".join(updater), d['id'][1:],
-               ts.strftime("%Y-%m-%d"))
-    log.msg("%s %s H:%s L:%s P:%s" % (d['id'], ts.strftime("%Y-%m-%d"),
-                                      d['high'], d['low'], d['precip']))
-    if updater:
-        defer = DBPOOL.runOperation(sql)
-        defer.addErrback(common.email_error, sql)
+def bootstrap():
+    """build things up."""
+    # sync
+    pgconn = get_dbconn('mesosite')
+    cursor = pgconn.cursor()
+    load_stations(cursor)
+    pgconn.close()
+
+    ldmbridge.LDMProductFactory(MyProductIngestor())
+    reactor.run()
 
 
 if __name__ == '__main__':
-    ldm = ldmbridge.LDMProductFactory(MyProductIngestor())
-    reactor.run()
+    bootstrap()
