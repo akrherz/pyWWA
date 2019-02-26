@@ -36,7 +36,7 @@ def real_parser(txn, buf):
     if ffg.afos == 'FFGMPD':
         return
     ffg.sql(txn)
-    if ffg.warnings:
+    if ffg.warnings and ffg.warnings[0].find("termination") == -1:
         common.email_error("\n".join(ffg.warnings), buf)
     sz = 0 if ffg.data is None else len(ffg.data.index)
     log.msg("FFG found %s entries for product %s" % (sz,
