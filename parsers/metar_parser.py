@@ -80,8 +80,9 @@ def real_processor(text):
             JABBER.send_message(*jmsg)
     for mtr in collect.metars:
         if mtr.network is None:
-            log.msg(("station: '%s' is unknown to metadata table"),
-                    (mtr.station_id))
+            log.msg((
+                "station: '%s' is unknown to metadata table"
+                ) % (mtr.station_id, ))
             deffer = ASOSDB.runOperation("""
             INSERT into unknown(id) values (%s)
             """, (mtr.station_id,))
