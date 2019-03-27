@@ -23,7 +23,8 @@ NWSLI_PROVIDER = {}
 # Manual list of sites that are sent to jabber :/
 metarcollect.JABBER_SITES = {
     'KJFK': None, 'KLGA': None, 'KEWR': None, 'KTEB': None,
-    'KIAD': None, 'KDCA': None, 'KBWI': None, 'KRIC': None
+    'KIAD': None, 'KDCA': None, 'KBWI': None, 'KRIC': None,
+    'KPHL': None
 }
 
 
