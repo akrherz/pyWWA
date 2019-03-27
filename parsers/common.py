@@ -141,7 +141,7 @@ def email_error(exp, message, trimstr=100):
                  ) % (SETTINGS.get('pywwa_email_limit', 10)))
         return False
 
-    msg = MIMEText("""
+    txt = """
 System          : %s@%s [CWD: %s]
 pyiem.version   : %s
 System UTC date : %s
@@ -156,8 +156,9 @@ Message:
          pyiem.__version__,
          datetime.datetime.utcnow(),
          os.getpid(), ' '.join(['%.2f' % (_,) for _ in os.getloadavg()]),
-         cstr.read(), exp, message), "plain", "utf-8")
-
+         cstr.read(), exp, message)
+    # prevent any noaaport text from making ugly emails
+    msg = MIMEText(txt.replace("\r\r\n", "\n"), "plain", "utf-8")
     # Send the email already!
     msg['subject'] = ("[pyWWA] %s Traceback -- %s"
                       ) % (sys.argv[0].split("/")[-1], socket.gethostname())
