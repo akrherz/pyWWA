@@ -191,6 +191,7 @@ CFB3            Hespero                          -- CA  5230 -11446     0  0
 CFB4            Trout Lake                       -- CA  5650 -11455     0  0
 CFB6            Joesphburg                       -- CA  5372 -11309     0  0
 CFD4            Foremost                         -- CA  4948 -11149     0  0
+CFF2            Christina Basin                  -- CA  5559 -11182     0  0
 CFF7            Wainwright                       -- CA  5283 -11090     0  0
 CFG5            John DOr Prairie                 -- CA  5849 -11514     0  0
 CFG6            Fort Mackay                      -- CA  5728 -11098     0  0
@@ -238,6 +239,7 @@ CJF3            LLe-a-la-Crosse                  -- CA  5549 -10793     0  0
 CJF8            Biggar                           -- CA  5205 -10799     0  0
 CJG2            Eatonia                          -- CA  5122 -10939     0  0
 CJK2            Gunisao Lake                     -- CA  5352  -9637     0  0
+CJK9            Preeceville                      -- CA  5195 -10265     0  0
 CJH3            Maidstone                        -- CA  5310 -10933     0  0
 CJK3            Beauval                          -- CA  5511 -10772     0  0
 CJK4            Esterhazy                        -- CA  5064 -10210     0  0
@@ -387,7 +389,9 @@ CPV8            Keewaywin                        -- CA  5299  -9284     0  0
 CRB4            Riviere Bonnard                  -- CA  5070  -7116     0  0
 # CRC3
 # CRD3            
+CRE2            Edzo                             -- CA  6277 -11608     0  0
 # CRF2
+# CRF5
 CRJ2            Stoney Point                     -- CA  4229  -8260     0  0
 CRL2            Westport                         -- CA  4467  -7640     0  0
 CRL4            Kirby Lake                       -- CA  5536 -11064     0  0
@@ -483,6 +487,7 @@ CYEA            Empress                          AB CA  5093 -11001     0  0
 CYEE            MIDLAND                          -- CA  4468  -7993     0  0
 CYEM            Manitowaning                     ON CA  4584  -8186     0  0
 CYES            Edmundston                       NB CA  4749  -6848     0  0
+CYEU            Eureka Man                       -- CA  7999  -8581     0  0
 CYFA            Fort Albany                      ON CA  5220  -8170     0  0
 CYFD            Brantford                        -- CA  4313  -8034     0  0
 CYFE            Forestville                      QC CA  4875  -6910     0  0
