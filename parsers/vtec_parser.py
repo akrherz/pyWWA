@@ -145,7 +145,7 @@ if __name__ == '__main__':
     nwsli_dict = {}
 
     MANUAL = False
-    if len(sys.argv) == 2 and sys.argv[1] == 'manual':
+    if len(sys.argv) == 2 and sys.argv[1].lower() == 'manual':
         log.msg("Manual runtime (no jabber, 1 database connection) requested")
         MANUAL = True
 
