@@ -537,7 +537,7 @@ def process_site(prod, sid, ts, data):
     iscoop = (network.find('COOP') > 0)
     hasdata = False
     for var in data:
-        if data[var] == -9999:
+        if data[var] < -9998:
             continue
         iemvar = MAPPING[var]
         if iemvar == '':
@@ -545,9 +545,13 @@ def process_site(prod, sid, ts, data):
         hasdata = True
         myval = data[var] * MULTIPLIER.get(var[:2], 1.0)
         iemob.data[MAPPING[var]] = myval
-        # Convert 0.001 to 0.0001 for Trace values
-        if myval == 0.001 and MAPPING[var] in ['pday', 'snow', 'snowd']:
-            iemob.data[MAPPING[var]] = TRACE_VALUE
+        if MAPPING[var] in ['pday', 'snow', 'snowd']:
+            # Convert 0.001 to 0.0001 for Trace values
+            if myval == 0.001:
+                iemob.data[MAPPING[var]] = TRACE_VALUE
+            # Prevent negative numbers
+            elif myval < 0:
+                iemob.data[MAPPING[var]] = 0
         if iscoop:
             # Save COOP 'at-ob' temperature into summary table
             if MAPPING[var] == 'tmpf':
