@@ -49,6 +49,7 @@ CAU4            Vanderhoof                       -- CA  5405 -12401     0  0
 # CAU8            
 CAV3            One Hundred Mile House           -- CA  5164 -12131     0  0
 CAV4            McBride                          -- CA  5332 -12017     0  0
+CAV5            Sullivan Bay                     -- CA  5089 -12683     0  0
 # CAV8
 # CAW5
 # CAW8            
@@ -77,7 +78,7 @@ CBM6            Midway                           -- CA  4901 -11879     0  0
 # CBN4            
 CBN9            Tsay Keh                         -- CA  5691 -12497     0  0
 # CBP2
-# CBP3 
+CBP3            Fernie                           -- CA  4951 -11506     0  0 
 CBQ2            Fort Langley                     -- CA  4917 -12255     0  0
 CBR2            Kaslo                            -- CA  4990 -11694     0  0
 # CBR7
@@ -184,13 +185,16 @@ CEV7            Tofield                          -- CA  5337 -11270     0  0
 CEW3            St Paul                          -- CA  5399 -11138     0  0
 # CEW9
 CEX3            Wetaskiwin                       -- CA  5297 -11341     0  0
+CEY3            Fort Macleod                     -- CA  4970 -11342     0  0
 # CEYV
 CEZ3            Edmonton                         -- CA  5343 -11312     0  0
 CEZ4            Fort Vermillion                  -- CA  5840 -11595     0  0
 CFA5            Grande                           -- CA  5630 -11223     0  0
+CFA7            Taltheilei                       -- CA  6260 -11154     0  0
 CFB3            Hespero                          -- CA  5230 -11446     0  0
 CFB4            Trout Lake                       -- CA  5650 -11455     0  0
 CFB6            Joesphburg                       -- CA  5372 -11309     0  0
+CFC7            Rimbey                           -- CA  5268 -11424     0  0
 CFD4            Foremost                         -- CA  4948 -11149     0  0
 CFF2            Christina Basin                  -- CA  5559 -11182     0  0
 CFF7            Wainwright                       -- CA  5283 -11090     0  0
@@ -221,8 +225,11 @@ CFX4            Manning                          -- CA  5695 -11764     0  0
 CFX5            Renard                           -- CA  5273  -7222     0  0
 CFX6            Vulcan                           -- CA  5040 -11328     0  0
 CFX8            Chestermere                      -- CA  5104 -11375     0  0
+CFY4            Indus/Winters Aire Park          -- CA  5090 -11378     0  0
 # CGC2
 # CGC3
+CGK2            Gahcho                           -- CA  6344 -10915     0  0
+CGM2            Smoky Lake                       -- CA  5412 -11247     0  0
 # CHB3
 CHC5            Hayes Camp Aerodome              -- CA  6665  -9154     0  0
 # CHL6
@@ -318,7 +325,7 @@ CNA9            Tomvale                          -- CA  4492  -7694     0  0
 # CNB2
 CNC3            Brampton                         -- CA  4376  -7988     0  0
 CNC4            Guelph                           -- CA  4356  -8020     0  0
-# CNC9
+CNC9            Perth                            -- CA  4491  -7625     0  0
 CND4            Stanhope                         -- CA  4511  -7864     0  0
 CNE3            Bearskin Lake                    -- CA  5397  -9103     0  0
 CNE4            Iroquois Falls                   -- CA  4874  -8079     0  0
