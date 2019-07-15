@@ -1,6 +1,4 @@
-"""
-Hit the NWSChat quasi web service to get the text IEM may have missed :(
-"""
+"""Hit the NWSChat quasi web service to get the text IEM may have missed :("""
 from __future__ import print_function
 import sys
 
@@ -15,7 +13,7 @@ def wrap(data):
 
 def process(j):
     ''' Process the json data j '''
-    if len(j['data']) == 0:
+    if not j['data']:
         print('ERROR: No results found!')
         return
 
@@ -27,13 +25,13 @@ def process(j):
     out.close()
 
 
-def main():
+def main(argv):
     """Do Work please"""
-    year = sys.argv[1]
-    wfo = sys.argv[2]
-    phenomena = sys.argv[3]
-    significance = sys.argv[4]
-    eventid = sys.argv[5]
+    year = argv[1]
+    wfo = argv[2]
+    phenomena = argv[3]
+    significance = argv[4]
+    eventid = argv[5]
     uri = ("https://nwschat.weather.gov/vtec/json-text.php?"
            "year=%s&wfo=%s&phenomena=%s&eventid=%s&significance=%s"
            ) % (year, wfo, phenomena, eventid, significance)
@@ -43,4 +41,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv)

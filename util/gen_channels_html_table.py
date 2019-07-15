@@ -177,6 +177,7 @@ def load_dicts():
 
 
 def do_generic():
+    """Handle the generic case."""
     print("""
     <h3>NWS Local Office / National Products</h3>
     <table class="table table-bordered table-condensed">

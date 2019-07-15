@@ -2,11 +2,11 @@
 Script that merges the upstream HVTEC NWSLI information into the database. We
 are called like so
 
-python merge_hvtec_nwsli.py NWSLI_List_March_1_2013.txt
+python merge_hvtec_nwsli.py hvtec_list_07092019.csv
 
 Whereby the argument to the script is the filename stored here:
 
-http://www.nws.noaa.gov/os/vtec/hydro_vtec.shtml
+https://www.weather.gov/vtec/Valid-Time-Event-Code
 
 hvtec_nwsli table:
  nwsli      | character(5)           |
@@ -20,45 +20,49 @@ from __future__ import print_function
 import sys
 
 import requests
-import psycopg2
+from pyiem.util import get_dbconn, logger
 
 
 def main(argv):
     """Go Main"""
+    log = logger()
     if len(argv) < 2:
         print('USAGE: python merge_hvtec_nwsli.py FILENAME')
         return
 
-    dbconn = psycopg2.connect(database='postgis',
-                              host='iemdb')
+    dbconn = get_dbconn('postgis', user='mesonet')
     cursor = dbconn.cursor()
-    print(' - Connected to database: postgis')
+    log.info(' - Connected to database: postgis')
 
     fn = argv[1]
-    uri = "http://www.nws.noaa.gov/os/vtec/hydro/%s" % (fn,)
+    uri = "https://www.weather.gov/media/vtec/%s" % (fn,)
 
-    print(' - Fetching file: %s' % (uri,))
+    log.info(' - Fetching file: %s', uri)
     req = requests.get(uri)
     updated = 0
     new = 0
     bad = 0
-    for linenum, line in enumerate(req.content.split("\n")):
+    for linenum, line in enumerate(req.content.decode('ascii').split("\n")):
         if line.strip() == "":
             continue
         tokens = line.strip().split(",")
         if len(tokens) != 7:
-            print((' + Linenum %s had %s tokens, instead of 7\n%s'
-                   ) % (linenum+1, len(tokens), line)),
+            log.info(
+                ' + Linenum %s had %s tokens, instead of 7\n%s',
+                linenum + 1, len(tokens), line
+            )
             bad += 1
             continue
         (nwsli, river_name, proximity, name, state, lat, lon) = tokens
         if len(nwsli) != 5:
-            print((' + Linenum %s had a NWSLI "%s" '
-                   'not of 5 character length\n%s'
-                   ) % (linenum+1, nwsli, line)),
+            log.info(
+                ' + Linenum %s had a NWSLI "%s" not of 5 character length\n%s',
+                linenum+1, nwsli, line)
             bad += 1
             continue
-        cursor.execute("DELETE from hvtec_nwsli WHERE nwsli = '%s'" % (nwsli,))
+        cursor.execute("""
+            DELETE from hvtec_nwsli WHERE nwsli = %s
+        """, (nwsli, ))
         if cursor.rowcount == 1:
             updated += 1
         else:
@@ -74,7 +78,7 @@ def main(argv):
 
     cursor.close()
     dbconn.commit()
-    print(' - DONE! %s updated %s new, %s bad entries' % (updated, new, bad))
+    log.info(' - DONE! %s updated %s new, %s bad entries', updated, new, bad)
 
 
 if __name__ == '__main__':

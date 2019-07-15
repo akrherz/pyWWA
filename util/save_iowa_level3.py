@@ -1,4 +1,4 @@
-"""Save our local NEXRAD level 3 RADARs to CyBox"""
+"""Save our local NEXRAD level 3 RADARs to CyBox."""
 import datetime
 import os
 import subprocess
@@ -20,8 +20,10 @@ def run(date):
 
     filenames = ['/mesonet/tmp/%sradar.tgz' % (x, ) for x in NEXRADS]
     remotenames = ['%s_%s.tgz' % (x, date.strftime("%Y%m%d")) for x in NEXRADS]
-    send2box(filenames, "/IowaNexrad3/%s" % (date.strftime("%Y/%m"),),
-             remotenames=remotenames)
+    send2box(
+        filenames, "/IowaNexrad3/%s" % (date.strftime("%Y/%m"),),
+        remotenames=remotenames
+    )
     for filename in filenames:
         if os.path.isfile(filename):
             os.unlink(filename)

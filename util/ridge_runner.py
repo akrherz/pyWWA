@@ -1,6 +1,4 @@
-"""
- need something that keeps ridge_processor alive and kicking
-"""
+"""An infinite loop to get ridge_runner.py going."""
 from __future__ import print_function
 import time
 import subprocess

@@ -1,6 +1,4 @@
-"""
-Do the rotation action that some products need
-"""
+"""Do the rotation action that some products need."""
 import sys
 import os
 import gzip

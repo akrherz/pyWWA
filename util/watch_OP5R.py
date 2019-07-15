@@ -1,14 +1,16 @@
 """Monitor a directory for new files and then do the level II dance"""
 from __future__ import print_function
-import inotify.adapters
 import re
 import os
 import subprocess
+
+import inotify.adapters
 
 FNPATTERN = re.compile("OP5R_[0-9]{8}_[0-9]{4}")
 
 
 def main():
+    """Go Main Go."""
     i = inotify.adapters.Inotify()
 
     i.add_watch('/home/op5r')

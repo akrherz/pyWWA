@@ -1,8 +1,14 @@
 """Make a simple plot to illustrate an invalid polygon"""
 import matplotlib.pyplot as plt
+from pyiem.nws.vtec import VTEC_PHENOMENA, VTEC_SIGNIFICANCE
 
 X = [-90.92, -91.02, -90.93, -91.02, -90.92]
 Y = [30.4, 30.4, 30.5, 30.5, 30.4]
+WFO = "LIX"
+ETN = 8
+PHENOMENA = "FL"
+SIGNIFICANCE = "W"
+YEAR = "2018"
 
 
 def main():
@@ -17,12 +23,18 @@ def main():
     ax.set_ylim(min(Y) - 0.02, max(Y) + 0.02)
     ax.set_ylabel(r"Latitude [$^\circ$N]")
     ax.set_xlabel(r"Longitude [$^\circ$E]")
-    ax.set_title("2018 LIX Flood Warning (FL.W) #8 Polygon")
+    ax.set_title(
+        "%s %s %s %s (%s.%s) #%s Polygon" % (
+            YEAR, WFO, VTEC_PHENOMENA[PHENOMENA],
+            VTEC_SIGNIFICANCE[SIGNIFICANCE], PHENOMENA, SIGNIFICANCE, ETN
+        ))
     ax.grid(True)
     for tick in ax.get_xticklabels():
         tick.set_rotation(45)
     ax.set_position([0.2, 0.2, 0.7, 0.7])
-    fig.savefig('test.png')
+    fn = "/tmp/%s_%s_%s_%s_%s.png" % (YEAR, WFO, PHENOMENA, SIGNIFICANCE, ETN)
+    print("writing %s" % (fn, ))
+    fig.savefig(fn)
 
 
 if __name__ == '__main__':

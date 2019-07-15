@@ -1,11 +1,10 @@
-"""
- I process activemq messages 10,000 at a time!
-"""
+"""I process activemq messages 10,000 at a time!"""
 from __future__ import print_function
 import os
 import subprocess
 import datetime
 import json
+
 import pytz
 import pika
 
@@ -27,7 +26,7 @@ def generate_image(ch, method, properties, body):
     gts = datetime.datetime(1970,
                             1, 1) + datetime.timedelta(seconds=(ticks / 1000))
     gts = gts.replace(tzinfo=pytz.utc)
-    utcnow = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
+    utcnow = datetime.datetime.utcnow().replace(tzinfo=pytz.UTC)
     routes = "ac"
     if (utcnow - gts).seconds > 3600:
         routes = "a"
@@ -75,7 +74,8 @@ def generate_image(ch, method, properties, body):
         if os.path.isfile(fn):
             os.unlink(fn)
         else:
-            print('Strange file: %s was missing, but should be deleted' % (fn,))
+            print(
+                'Strange file: %s was missing, but should be deleted' % (fn,))
 
 
 def run():
@@ -84,8 +84,8 @@ def run():
 
     channel = connection.channel()
 
-    channel.exchange_declare(exchange='ridgeProductExchange', type='fanout',
-                             durable=True)
+    channel.exchange_declare(
+        exchange='ridgeProductExchange', type='fanout', durable=True)
     result = channel.queue_declare(exclusive=True)
     queue_name = result.method.queue
 

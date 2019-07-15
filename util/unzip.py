@@ -19,11 +19,11 @@ def ranstr():
                    for _ in range(8))
 
 
-def main():
+def main(argv):
     """ Read the zipfile from stdin and do important things """
     data = BytesIO(sys.stdin.buffer.read())
     zf = zipfile.ZipFile(data)
-    filename = sys.argv[1]
+    filename = argv[1]
     # Makedir if it does not exist
     dirname = "%s/%s" % (BASE, os.path.dirname(filename))
     if not os.path.isdir(dirname):
@@ -51,4 +51,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv)
