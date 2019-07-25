@@ -5,10 +5,10 @@ LVR             Big River Lake                   AK US  6081 -15229     0  0
 CAA8            Invermere                        -- CA  5052 -11600     0  0
 CAB3            Bedwell Harbour                  -- CA  4875 -12323     0  0            
 # CAB4
-# CAC8            
+CAC8            Nanaimo                          -- CA  4918 -12395     0  0            
 CAD4            Trail                            -- CA  4906 -11761     0  0
 CAD5            Merritt                          -- CA  5012 -12074     0  0
-# CAE3
+CAE3            Campbell River Seaplane          -- CA  5005 -12525     0  0
 # CAE5
 # CAE7
 # CAE9
@@ -64,7 +64,7 @@ CBB9            Osoyoos                          -- CA  4904 -11949     0  0
 CBD6            Nahanni Butte                    -- CA  6103 -12339     0  0
 CBE2            Elko                             -- CA  4928 -11515     0  0
 # CBE9
-# CBF6 
+CBF6            Prince Rupert                    -- CA  5433 -13028     0  0
 # CBF7            
 CBF9            Mabel Lake                       -- CA  5061 -11873     0  0
 CBG2            Green Lake                       -- CA  5143 -12121     0  0
@@ -232,7 +232,7 @@ CFX6            Vulcan                           -- CA  5040 -11328     0  0
 CFX8            Chestermere                      -- CA  5104 -11375     0  0
 CFY4            Indus/Winters Aire Park          -- CA  5090 -11378     0  0
 # CGC2
-# CGC3
+CGC3            Grande Cache                     -- CA  5389 -11912     0  0
 CGK2            Gahcho                           -- CA  6344 -10915     0  0
 CGM2            Smoky Lake                       -- CA  5412 -11247     0  0
 # CHB3
@@ -416,6 +416,7 @@ CRE2            Edzo                             -- CA  6277 -11608     0  0
 CRJ2            Stoney Point                     -- CA  4229  -8260     0  0
 CRL2            Westport                         -- CA  4467  -7640     0  0
 CRL4            Kirby Lake                       -- CA  5536 -11064     0  0
+CRL7            Reindeer Lake                    -- CA  5729 -10253     0  0
 # CRS2
 # CSB2
 CSB3            St Mathieu De Beloeil            -- CA  4559  -7324     0  0
@@ -466,6 +467,7 @@ CTA3            Ile aux Coudres                  -- CA  4739  -7038     0  0
 # CTBL
 # CTDF
 # CTD4
+CTE3            Havre St Pierre                  -- CA  5026  -6355     0  0
 CTG3            Du Rocher Perce                  -- CA  4338  -6456     0  0
 # CTH3            
 # CTH7
