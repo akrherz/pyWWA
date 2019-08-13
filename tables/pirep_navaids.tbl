@@ -5,6 +5,7 @@ LVR             Big River Lake                   AK US  6081 -15229     0  0
 CAA8            Invermere                        -- CA  5052 -11600     0  0
 CAB3            Bedwell Harbour                  -- CA  4875 -12323     0  0            
 # CAB4
+CAB7            Kelowna Heliport                 -- CA  4986 -11957     0  0
 CAC8            Nanaimo                          -- CA  4918 -12395     0  0            
 CAD4            Trail                            -- CA  4906 -11761     0  0
 CAD5            Merritt                          -- CA  5012 -12074     0  0
@@ -13,7 +14,8 @@ CAE3            Campbell River Seaplane          -- CA  5005 -12525     0  0
 # CAE7
 # CAE9
 CAF4            Tsuniah                          -- CA  5153 -12417     0  0
-# CAF8
+CAF6            Big Bay                          -- CA  5040 -12513     0  0
+CAF8            Nimpo Lake                       -- CA  5233 -12515     0  0
 CAG3            Chilko Lake                      -- CA  5163 -12414     0  0
 CAG8            Pender Habour Seaplane Base      -- CA  4962 -12402     0  0            
 CAH3            Courtenay                        -- CA  4968 -12498     0  0
@@ -186,7 +188,7 @@ CEV3            Vegreville                       -- CA  5351 -11203     0  0
 CEV5            Mayerthorpe                      -- CA  5394 -11518     0  0
 CEV7            Tofield                          -- CA  5337 -11270     0  0
 CEW3            St Paul                          -- CA  5399 -11138     0  0
-# CEW9
+CEW9            Canmore                          -- CA  5108 -11534     0  0
 CEX3            Wetaskiwin                       -- CA  5297 -11341     0  0
 CEY3            Fort Macleod                     -- CA  4970 -11342     0  0
 # CEYV
@@ -297,6 +299,7 @@ CKD9            Slate Falls                      -- CA  5113  -9167     0  0
 CKF4            Goodsoil                         -- CA  5442 -10923     0  0
 # CKJ2
 CKJ7            Starbuck                         -- CA  4971  -9768     0  0
+CKJ8            Molson Lake                      -- CA  5426  -9702     0  0
 CKK7            Steinbach (South)                -- CA  4949  -9670     0  0
 CKL2            Selkirk                          -- CA  5017  -9687     0  0
 CKL3            Wunnumin Lake                    -- CA  5289  -8929     0  0
@@ -304,6 +307,7 @@ CKL5            Shoal Lake                       -- CA  5046 -10061     0  0
 CKM4            Jan Lake                         -- CA  5483 -10279     0  0
 # CKM7
 CKM8            Opapimiskan Lake                 -- CA  5261  -9038     0  0
+# CKN7
 CKQ3            North Spirit Lake                -- CA  5249  -9297     0  0
 CKQ6            Erickson                         -- CA  5049  -9990     0  0
 CKQ7            Vermillion Bay                   -- CA  4988  -9344     0  0
@@ -410,6 +414,7 @@ CPW9            Port Alberni Seaplane            -- CA  4924 -12482     0  0
 CRB4            Riviere Bonnard                  -- CA  5070  -7116     0  0
 # CRC3
 # CRD3            
+CRD5            Red Deer                         -- CA  5269 -11392     0  0
 CRE2            Edzo                             -- CA  6277 -11608     0  0
 # CRF2
 # CRF5
