@@ -62,7 +62,7 @@ def get_database(dbname, cp_max=5, module_name='pyiem.twistedpg'):
     """
     host = CONFIG.get('databaserw').get('host')
     if dbname in ['hads', 'mos', 'radar']:
-        host = 'iemdb-%s' % (dbname, )
+        host = 'iemdb-%s.local' % (dbname, )
     return adbapi.ConnectionPool(module_name, database=dbname,
                                  cp_reconnect=True, cp_max=cp_max,
                                  host=host,
