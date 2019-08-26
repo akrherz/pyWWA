@@ -6,7 +6,7 @@ from pyldm import ldmbridge
 from pyiem.nws.products.nldn import parser
 import common
 
-DBPOOL = common.get_database('postgis')
+DBPOOL = common.get_database('nldn')
 
 
 class myProductIngestor(ldmbridge.LDMProductReceiver):
