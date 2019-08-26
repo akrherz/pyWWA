@@ -10,7 +10,7 @@ from pyldm import ldmbridge
 import common
 
 # Setup Database Links
-POSTGISDB = common.get_database('postgis')
+PGCONN = common.get_database('radar')
 
 ST = {}
 
@@ -60,7 +60,7 @@ def process(bio):
         for line in page:
             if 'text' in line:
                 ctx['lines'].append(line['text'])
-    df = POSTGISDB.runInteraction(really_process, ctx)
+    df = PGCONN.runInteraction(really_process, ctx)
     df.addErrback(common.email_error, ctx)
 
 
@@ -169,9 +169,10 @@ def really_process(txn, ctx):
              ) % (ctx['nexrad'], ctx['ts'].strftime("%Y-%m-%d %H:%M UTC"), co))
 
 
-def on_ready(_unused):
+def on_ready(_unused, mesosite):
     """ready to fire things up"""
     log.msg("on_ready() has fired...")
+    mesosite.close()
     ingest = MyProductIngestor(isbinary=True)
     ldmbridge.LDMProductFactory(ingest)
 
@@ -184,8 +185,9 @@ def errback(res):
 
 def main():
     """Go Main Go"""
-    df = POSTGISDB.runInteraction(load_station_table)
-    df.addCallback(on_ready)
+    mesosite = common.get_database('mesosite', cp_max=1)
+    df = mesosite.runInteraction(load_station_table)
+    df.addCallback(on_ready, mesosite)
     df.addErrback(errback)
     reactor.run()
 
