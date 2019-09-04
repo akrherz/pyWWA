@@ -9,7 +9,7 @@ import pytz
 import pika
 
 
-def generate_image(ch, method, properties, body):
+def generate_image(_ch, _method, properties, body):
     """
     Generate a Lite Image given the ActiveMQ message
     @param pyactivemq.BytesMessage
@@ -43,28 +43,25 @@ def generate_image(ch, method, properties, body):
                   gts.strftime("%Y%m%d%H%M"))
 
     pngfn = '/tmp/%s_%s_%s.png' % (siteID, productID, gts.strftime("%H%M"))
-    o = open(pngfn, 'wb')
-    o.write(body)
-    o.close()
+    with open(pngfn, 'wb') as fh:
+        fh.write(body)
 
     metafn = '/tmp/%s_%s_%s.json' % (siteID, productID, gts.strftime("%H%M"))
-    o = open(metafn, 'w')
-    json.dump(metadata, o)
-    o.close()
+    with open(metafn, 'w') as fh:
+        json.dump(metadata, fh)
 
     wldfn = '/tmp/%s_%s_%s.wld' % (siteID, productID, gts.strftime("%H%M"))
-    o = open(wldfn, 'w')
-    o.write("%.6f\n" % ((lowerRightLon - upperLeftLon)/1000.0,))  # dx
-    o.write("0.0\n")
-    o.write("0.0\n")
-    o.write("%.6f\n" % (0 - (upperLeftLat - lowerRightLat)/1000.0,))  # dy
-    o.write("%.6f\n" % (upperLeftLon,))  # UL Lon
-    o.write("%.6f\n" % (upperLeftLat,))  # UL Lat
-    o.close()
+    with open(wldfn, 'w') as fh:
+        fh.write("%.6f\n" % ((lowerRightLon - upperLeftLon)/1000.0,))  # dx
+        fh.write("0.0\n")
+        fh.write("0.0\n")
+        fh.write("%.6f\n" % (0 - (upperLeftLat - lowerRightLat)/1000.0,))  # dy
+        fh.write("%.6f\n" % (upperLeftLon,))  # UL Lon
+        fh.write("%.6f\n" % (upperLeftLat,))  # UL Lat
 
     # Use -i to allow for duplicate file content as the product id *should*
     # always be unique
-    pqstr = "pqinsert -i -p '%s' %s" % (pqstr, pngfn)
+    pqstr = "/home/ldm/bin/pqinsert -i -p '%s' %s" % (pqstr, pngfn)
     subprocess.call(pqstr, shell=True)
     subprocess.call(pqstr.replace("png", "wld"), shell=True)
     metapq = pqstr.replace("png", "json").replace(" ac ", " c ")
@@ -79,31 +76,29 @@ def generate_image(ch, method, properties, body):
 
 
 def run():
-    connection = pika.BlockingConnection(pika.ConnectionParameters(
-        host='localhost'))
+    """Go run Go."""
+    with open("ridge_processor.pid", 'w') as fh:
+        fh.write("%s" % (os.getpid(),))
 
+    connection = pika.BlockingConnection(
+        pika.ConnectionParameters(host='iem-rabbitmq.local')
+    )
     channel = connection.channel()
 
     channel.exchange_declare(
-        exchange='ridgeProductExchange', type='fanout', durable=True)
-    result = channel.queue_declare(exclusive=True)
+        'ridgeProductExchange', exchange_type='fanout', durable=True
+    )
+    result = channel.queue_declare('ridgeProductExchange', exclusive=True)
     queue_name = result.method.queue
 
     channel.queue_bind(exchange='ridgeProductExchange',
                        queue=queue_name)
 
-    channel.basic_consume(generate_image,
-                          queue=queue_name,
-                          no_ack=True)
+    channel.basic_consume(
+        queue_name, generate_image, auto_ack=True)
 
     channel.start_consuming()
 
 
 if __name__ == '__main__':
-    o = open("ridge_processor.pid", 'w')
-    o.write("%s" % (os.getpid(),))
-    o.close()
-    try:
-        run()
-    except KeyboardInterrupt:
-        pass
+    run()
