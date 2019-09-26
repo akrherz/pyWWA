@@ -59,13 +59,14 @@ CAW6            Fort Ware Seaplane               -- CA  5742 -12565     0  0
 CAX5            Likely                           -- CA  5262 -12150     0  0
 CAX6            Ganges Seaplane                  -- CA  4885 -12350     0  0            
 # CAY2
-# CAY4
+CAY4            Hartley Bay                      -- CA  5342 -12925     0  0
 CAZ5            Cache Creek                      -- CA  5078 -12132     0  0
 CBB7            Tipella                          -- CA  4974 -12216     0  0
 CBB9            Osoyoos                          -- CA  4904 -11949     0  0
 CBD6            Nahanni Butte                    -- CA  6103 -12339     0  0
 CBE2            Elko                             -- CA  4928 -11515     0  0
-# CBE9
+CBE9            Whistler                         -- CA  5017 -12290     0  0
+CBF5            Mayne Island                     -- CA  4885 -12328     0  0
 CBF6            Prince Rupert                    -- CA  5433 -13028     0  0
 # CBF7            
 CBF9            Mabel Lake                       -- CA  5061 -11873     0  0
@@ -74,6 +75,7 @@ CBH2            Helmet                           -- CA  5943 -12080     0  0
 # CBJ8
 # CBK5
 CBK6            Quesnel Lake                     -- CA  5252 -12105     0  0
+CBK9            Little Parker Island             -- CA  4890 -12342     0  0
 CBJ4            Echo Valley                      -- CA  5124 -12199     0  0
 # CBJ9            
 CBL6            Radium Hot Springs               -- CA  5063 -11610     0  0
@@ -127,11 +129,12 @@ CDA5            St Andrews Codroy Valley         -- CA  4777  -5931     0  0
 CDC4            St Quentin                       -- CA  4752  -6742     0  0
 CDC5            Dougall Campbell                 -- CA  5201 -12121     0  0
 # CDF5
-# CDH5
+CDH5            Nanaimo Habour                   -- CA  4916 -12392     0  0
 # CDH6
 # CDM2
 CDT5            Bouctouche                       -- CA  4651  -6469     0  0
 CDU6            Doaktown                         -- CA  4655  -6609     0  0 
+CDY3            Fogo                             -- CA  4966  -5424     0  0
 CEA3            Olds Didsbury                    -- CA  5171 -11411     0  0            
 CEA5            Hardisty                         -- CA  5265 -11138     0  0
 CEA6            Cardston                         -- CA  4916 -11324     0  0
@@ -141,6 +144,7 @@ CEC4            Hinton                           -- CA  5332 -11775     0  0
 CED3            Oyen                             -- CA  5133 -11049     0  0
 CED4            Fox Creek                        -- CA  5438 -11677     0  0
 CED5            Taber                            -- CA  4983 -11219     0  0
+CED8            Thunder Bay/Eldorado             -- CA  4857  -8882     0  0
 CEE4            Hinton                           -- CA  5338 -11770     0  0
 CEE5            Wabasca                          -- CA  5596 -11382     0  0
 CEE8            Viking                           -- CA  5311 -11186     0  0
@@ -237,6 +241,7 @@ CFY4            Indus/Winters Aire Park          -- CA  5090 -11378     0  0
 CGC3            Grande Cache                     -- CA  5389 -11912     0  0
 CGK2            Gahcho                           -- CA  6344 -10915     0  0
 CGM2            Smoky Lake                       -- CA  5412 -11247     0  0
+CGP4            Nanaimo Gabriola                 -- CA  4918 -12384     0  0
 # CHB3
 CHC5            Hayes Camp Aerodome              -- CA  6665  -9154     0  0
 # CHL6
@@ -391,6 +396,7 @@ CPF4            Bruce McPhail                    -- CA  4560  -7683     0  0
 # CPF7
 # CPF9            
 CPG5            Hawkesbury                       -- CA  4558  -7455     0  0
+CPH9            Fordwich                         -- CA  4389  -8100     0  0
 # CPJ5 
 CPK2            Strathroy                        -- CA  4297  -8159     0  0
 CPL4            Grand Bend                       -- CA  4329  -8171     0  0
@@ -404,6 +410,7 @@ CPR5            Woodstock                        -- CA  4311  -8082     0  0
 CPR7            Wingham                          -- CA  4387  -8129     0  0
 # CPS1
 CPS2            Elmhirst Resort                  -- CA  4425  -7811     0  0
+CPS4            Lucan                            -- CA  4316  -8141     0  0
 CPT2            Killarney                        -- CA  4598  -8150     0  0
 CPT3            Rockton                          -- CA  4332  -8018     0  0
 CPU6            Tyendinaga Mohawk                -- CA  4419  -7711     0  0
@@ -520,7 +527,7 @@ CYFA            Fort Albany                      ON CA  5220  -8170     0  0
 CYFD            Brantford                        -- CA  4313  -8034     0  0
 CYFE            Forestville                      QC CA  4875  -6910     0  0
 CYFH            Fort Hope                        ON CA  5156  -8791     0  0
-# CYFI
+CYFI            Firt MacKay                      -- CA  5728 -11098     0  0
 CYFJ            Riviere Rouge                    -- CA  4641  -7478     0  0
 # CYFM
 # CYFN
