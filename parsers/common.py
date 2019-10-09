@@ -60,9 +60,7 @@ def get_database(dbname, cp_max=5, module_name='pyiem.twistedpg'):
       cp_max (int): The maximum number of connections to make to the database
       module_name (str): The python module to use for the ConnectionPool
     """
-    host = CONFIG.get('databaserw').get('host')
-    if dbname in ['hads', 'mos', 'radar', 'nldn']:
-        host = 'iemdb-%s.local' % (dbname, )
+    host = 'iemdb-%s.local' % (dbname, )
     return adbapi.ConnectionPool(module_name, database=dbname,
                                  cp_reconnect=True, cp_max=cp_max,
                                  host=host,
