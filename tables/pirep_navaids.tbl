@@ -99,6 +99,7 @@ CBX7            Tumbler Ridge                    -- CA  5503 -12094     0  0
 # CBZ2
 # CBZ7
 CBZ9            Fraser Lake                      -- CA  5401 -12477     0  0
+CCA3            Cable Head                       -- CA  4644  -6259     0  0
 # CCB3
 CCD2            Springdale                       -- CA  4948  -5618     0  0
 CCD3            Woodstock                        -- CA  4615  -6755     0  0
@@ -222,7 +223,7 @@ CFM7            Boyle                            -- CA  5457 -11282     0  0
 CFN5            La Crete                         -- CA  5817 -11633     0  0
 # CFN6
 CFN7            Sundre                           -- CA  5177 -11468     0  0
-# CFS3
+CFS3            Fort Selkirk                     -- CA  6277 -13738     0  0
 CFS5            Spirit River                     -- CA  5578 -11884     0  0
 CFS6            Loon River                       -- CA  5714 -11508     0  0
 CFS8            Clearwater                       -- CA  5199 -11523     0  0
@@ -341,6 +342,7 @@ CMB7            Maxville                         -- CA  4525  -7481     0  0
 CMN5            Manic-5                          -- CA  5066  -6883     0  0
 CMR2            Mary River                       -- CA  7132  -7935     0  0
 CNA3            Springwater Barrie               -- CA  4441  -7973     0  0
+CNA4            Emsdale                          -- CA  4555  -7935     0  0
 CNA9            Tomvale                          -- CA  4492  -7694     0  0
 # CNB2
 CNC3            Brampton                         -- CA  4376  -7988     0  0
@@ -382,6 +384,7 @@ CNU8            Markham                          -- CA  4394  -7962     0  0
 CNV8            Edenvale                         -- CA  4444  -7997     0  0
 CNV9            Neuville                         -- CA  4672  -7158     0  0
 CNY3            Collingwood                      -- CA  4445  -8016     0  0
+CNY4            Alliston                         -- CA  4418  -7983     0  0
 CNZ4            Barrys Bay                       -- CA  4550  -7764     0  0
 CNZ8            Grimsby                          -- CA  4316  -7960     0  0
 # COB4
@@ -443,7 +446,7 @@ CSE5            Montmagny                        -- CA  4700  -7052     0  0
 CSF3            Poste Montagnais                 -- CA  5189  -6572     0  0
 CSG3            Joliette                         -- CA  4605  -7350     0  0
 # CSG9
-# CSH2
+CSH2            Isle-aux-Grues                   -- CA  4707  -7053     0  0
 CSH4            Lebel-sur-quevillion             -- CA  4903  -7702     0  0
 CSH5            St Ferdinand                     -- CA  4613  -7154     0  0
 # CSH6

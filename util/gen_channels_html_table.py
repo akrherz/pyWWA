@@ -154,7 +154,7 @@ def get_data(afos):
 
 def load_dicts():
     """Load up the directionaries"""
-    pgconn = psycopg2.connect(database='postgis', host='iemdb', user='nobody')
+    pgconn = psycopg2.connect(database='postgis', host='iemdb-postgis.local', user='nobody')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     sql = """SELECT name, ugc, wfo from ugcs WHERE
         name IS NOT Null and end_ts is null"""
