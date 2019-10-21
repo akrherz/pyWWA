@@ -72,13 +72,12 @@ CBF6            Prince Rupert                    -- CA  5433 -13028     0  0
 CBF9            Mabel Lake                       -- CA  5061 -11873     0  0
 CBG2            Green Lake                       -- CA  5143 -12121     0  0
 CBH2            Helmet                           -- CA  5943 -12080     0  0
-# CBJ8
+CBJ4            Echo Valley                      -- CA  5124 -12199     0  0
 # CBK5
 CBK6            Quesnel Lake                     -- CA  5252 -12105     0  0
 CBK9            Little Parker Island             -- CA  4890 -12342     0  0
-CBJ4            Echo Valley                      -- CA  5124 -12199     0  0
-# CBJ9            
 CBL6            Radium Hot Springs               -- CA  5063 -11610     0  0
+CBL9            Elkin Creek Guest Ranch          -- CA  5151 -12380     0  0
 CBM6            Midway                           -- CA  4901 -11879     0  0
 # CBN4            
 CBN9            Tsay Keh                         -- CA  5691 -12497     0  0
@@ -131,7 +130,7 @@ CDC4            St Quentin                       -- CA  4752  -6742     0  0
 CDC5            Dougall Campbell                 -- CA  5201 -12121     0  0
 # CDF5
 CDH5            Nanaimo Habour                   -- CA  4916 -12392     0  0
-# CDH6
+CDH6            Delhi                            -- CA  4288  -8041     0  0
 # CDM2
 CDT5            Bouctouche                       -- CA  4651  -6469     0  0
 CDU6            Doaktown                         -- CA  4655  -6609     0  0 
@@ -199,6 +198,7 @@ CEY3            Fort Macleod                     -- CA  4970 -11342     0  0
 # CEYV
 CEZ3            Edmonton                         -- CA  5343 -11312     0  0
 CEZ4            Fort Vermillion                  -- CA  5840 -11595     0  0
+CEZ5            Whitehorse Seaplane              -- CA  6069 -13504     0  0
 CFA4            Carcross                         -- CA  6017 -13470     0  0
 CFA5            Grande                           -- CA  5630 -11223     0  0
 CFA7            Taltheilei                       -- CA  6260 -11154     0  0
