@@ -5,6 +5,7 @@ import re
 import sys
 
 import psycopg2.extras
+from pyiem.util import get_dbconn
 from pyiem.reference import prodDefinitions
 from pyiem.nws.ugc import UGC
 from pyiem.nws.nwsli import NWSLI
@@ -78,6 +79,7 @@ GEN_PRODUCTS = [
     dict(afos='AVA', directive='10-1701', channels=S2),
     dict(afos='AVW', directive='10-1701', channels=S2),
     dict(afos='AQA', directive='10-1701', channels=S2),
+    dict(afos='BLU', directive='10-1701', channels=S2),
     dict(afos='CAE', directive='10-1701', channels=S2),
     dict(afos='CEM', directive='10-1701', channels=S2),
     dict(afos='CGR', directive='10-1701', channels=S2),
@@ -154,10 +156,12 @@ def get_data(afos):
 
 def load_dicts():
     """Load up the directionaries"""
-    pgconn = psycopg2.connect(database='postgis', host='iemdb-postgis.local', user='nobody')
+    pgconn = get_dbconn('postgis')
     cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    sql = """SELECT name, ugc, wfo from ugcs WHERE
-        name IS NOT Null and end_ts is null"""
+    sql = """
+        SELECT name, ugc, wfo from ugcs WHERE
+        name IS NOT Null and end_ts is null
+    """
     cursor.execute(sql)
     for row in cursor:
         nm = (row["name"]).replace("\x92", " ").replace("\xc2", " ")
