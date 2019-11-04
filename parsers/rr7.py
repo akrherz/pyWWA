@@ -14,8 +14,8 @@ def main():
 
     acursor = pgconn.cursor()
 
-    payload = getattr(sys.stdin, 'buffer', sys.stdin).read()
-    payload = payload.decode('ascii', errors='ignore')
+    payload = getattr(sys.stdin, "buffer", sys.stdin).read()
+    payload = payload.decode("ascii", errors="ignore")
     data = payload.replace("\r\r\n", "z")
 
     tokens = re.findall(r"(\.A [A-Z0-9]{3} .*?=)", data)
@@ -30,11 +30,15 @@ def main():
 
     for token in tokens:
         # print(tokens)
-        sql = """
-        INSERT into """ + table + """
+        sql = (
+            """
+        INSERT into """
+            + table
+            + """
         (pil, data, entered) values(%s,%s,%s)
         """
-        sqlargs = ("%s%s" % ('RR7', token[3:6]), token.replace("z", "\n"), gmt)
+        )
+        sqlargs = ("%s%s" % ("RR7", token[3:6]), token.replace("z", "\n"), gmt)
         acursor.execute(sql, sqlargs)
 
     acursor.close()
@@ -42,5 +46,5 @@ def main():
     pgconn.close()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

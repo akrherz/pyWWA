@@ -14,9 +14,10 @@ BASE = "/home/ldm/data"
 
 def ranstr():
     """used in tmpfn creation"""
-    return ''.join(random.SystemRandom(
-                    ).choice(string.ascii_uppercase + string.digits)
-                   for _ in range(8))
+    return "".join(
+        random.SystemRandom().choice(string.ascii_uppercase + string.digits)
+        for _ in range(8)
+    )
 
 
 def main(argv):
@@ -34,7 +35,7 @@ def main(argv):
         fn = info.filename
         tmpfn = "%s/%s_%s" % (dirname, ranstr(), fn)
         newfn = "%s/%s" % (dirname, fn)
-        output = open(tmpfn, 'wb')
+        output = open(tmpfn, "wb")
         output.write(zf.read(fn))
         output.close()
         work.append([tmpfn, newfn])
@@ -45,10 +46,10 @@ def main(argv):
 
     # Write the file
     data.seek(0)
-    output = open("%s/%s" % (BASE, filename,), 'wb')
+    output = open("%s/%s" % (BASE, filename), "wb")
     output.write(data.read())
     output.close()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main(sys.argv)

@@ -16,10 +16,12 @@ STATIONS = dict()
 
 def load_stations(txn):
     """load station metadata to build a xref."""
-    txn.execute("""
+    txn.execute(
+        """
         SELECT id, tzname from stations
         where network ~* 'ASOS' or network = 'AWOS'
-    """)
+    """
+    )
     for row in txn:
         # we need four char station IDs
         station = row[0] if len(row[0]) == 4 else "K" + row[0]
@@ -38,7 +40,7 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
 
     def connectionLost(self, reason):
         """sys.stdin was closed"""
-        log.msg('connectionLost')
+        log.msg("connectionLost")
         log.err(reason)
         reactor.callLater(5, self.shutdown)
 
@@ -64,7 +66,7 @@ def real_parser(txn, data):
 def bootstrap():
     """build things up."""
     # sync
-    pgconn = get_dbconn('mesosite')
+    pgconn = get_dbconn("mesosite")
     cursor = pgconn.cursor()
     load_stations(cursor)
     pgconn.close()
@@ -73,5 +75,5 @@ def bootstrap():
     reactor.run()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     bootstrap()

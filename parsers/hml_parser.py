@@ -16,7 +16,7 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
 
     def connectionLost(self, reason):
         """Connection was lost"""
-        log.msg('connectionLost')
+        log.msg("connectionLost")
         log.err(reason)
         reactor.callLater(5, reactor.stop)  # @UndefinedVariable
 
@@ -35,7 +35,7 @@ def real_parser(txn, buf):
         common.email_error("\n".join(prod.warnings), buf)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     ldmbridge.LDMProductFactory(MyProductIngestor())
 
     reactor.run()  # @UndefinedVariable

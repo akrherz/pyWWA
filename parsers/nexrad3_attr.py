@@ -10,7 +10,7 @@ from pyldm import ldmbridge
 import common
 
 # Setup Database Links
-PGCONN = common.get_database('radar')
+PGCONN = common.get_database("radar")
 
 ST = {}
 
@@ -18,14 +18,15 @@ ST = {}
 def load_station_table(txn):
     """ Load the station table of NEXRAD sites """
     log.msg("load_station_table called() ...")
-    txn.execute("""
+    txn.execute(
+        """
         SELECT id, ST_x(geom) as lon, ST_y(geom) as lat from stations
         where network in ('NEXRAD','TWDR')
-    """)
+    """
+    )
     for row in txn.fetchall():
-        ST[row['id']] = {'lat': row['lat'],
-                         'lon': row['lon']}
-    log.msg("Station Table size %s" % (len(ST.keys(),)))
+        ST[row["id"]] = {"lat": row["lat"], "lon": row["lon"]}
+    log.msg("Station Table size %s" % (len(ST.keys())))
 
 
 class MyProductIngestor(ldmbridge.LDMProductReceiver):
@@ -33,7 +34,7 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
 
     def connectionLost(self, reason):
         """Called when stdin is closed"""
-        log.msg('connectionLost')
+        log.msg("connectionLost")
         log.err(reason)
         reactor.callLater(15, reactor.callWhenRunning, reactor.stop)
 
@@ -50,16 +51,16 @@ def process(bio):
     l3 = Level3File(bio)
     del bio
     ctx = {}
-    ctx['nexrad'] = l3.siteID
-    ctx['ts'] = l3.metadata['vol_time'].replace(tzinfo=pytz.UTC)
-    ctx['lines'] = []
-    if not hasattr(l3, 'graph_pages'):
-        log.msg("%s %s has no graph_pages" % (ctx['nexrad'], ctx['ts']))
+    ctx["nexrad"] = l3.siteID
+    ctx["ts"] = l3.metadata["vol_time"].replace(tzinfo=pytz.UTC)
+    ctx["lines"] = []
+    if not hasattr(l3, "graph_pages"):
+        log.msg("%s %s has no graph_pages" % (ctx["nexrad"], ctx["ts"]))
         return
     for page in l3.graph_pages:
         for line in page:
-            if 'text' in line:
-                ctx['lines'].append(line['text'])
+            if "text" in line:
+                ctx["lines"].append(line["text"])
     df = PGCONN.runInteraction(really_process, ctx)
     df.addErrback(common.email_error, ctx)
 
@@ -86,16 +87,16 @@ def really_process(txn, ctx):
          U8  154/126 NONE NONE     UNKNOWN       11  47 18.8  23.1  271/ 70
          J0  127/134 NONE NONE     UNKNOWN       24  51 20.2  33.9    NEW
     """
-    delete_prev_attrs(txn, ctx['nexrad'])
+    delete_prev_attrs(txn, ctx["nexrad"])
 
-    cenlat = float(ST[ctx['nexrad']]['lat'])
-    cenlon = float(ST[ctx['nexrad']]['lon'])
+    cenlat = float(ST[ctx["nexrad"]]["lat"])
+    cenlon = float(ST[ctx["nexrad"]]["lon"])
     latscale = 111137.0
     lonscale = 111137.0 * math.cos(cenlat * math.pi / 180.0)
 
     #   STM ID  AZ/RAN TVS  MESO POSH/POH/MX SIZE VIL DBZM  HT  TOP  FCST MVMT
     co = 0
-    for line in ctx['lines']:
+    for line in ctx["lines"]:
         if len(line) < 5:
             continue
         if line[1] != " ":
@@ -103,7 +104,7 @@ def really_process(txn, ctx):
         tokens = line.replace(">", " ").replace("/", " ").split()
         if not tokens or tokens[0] == "STM":
             continue
-        if tokens[5] == 'UNKNOWN':
+        if tokens[5] == "UNKNOWN":
             tokens[5] = 0
             tokens.insert(5, 0)
             tokens.insert(5, 0)
@@ -114,7 +115,7 @@ def really_process(txn, ctx):
         co += 1
         d["storm_id"] = tokens[0]
         d["azimuth"] = float(tokens[1])
-        if tokens[2] == '***':
+        if tokens[2] == "***":
             log.msg("skipping bad line |%s|" % (line,))
             continue
         d["range"] = float(tokens[2]) * 1.852
@@ -126,7 +127,7 @@ def really_process(txn, ctx):
             tokens[7] = 0.01
         d["max_size"] = tokens[7]
 
-        if tokens[8] == 'UNKNOWN':
+        if tokens[8] == "UNKNOWN":
             d["vil"] = 0
         else:
             d["vil"] = tokens[8]
@@ -140,19 +141,24 @@ def really_process(txn, ctx):
         else:
             d["drct"] = int(float(tokens[12]))
             d["sknt"] = tokens[13]
-        d["nexrad"] = ctx['nexrad']
+        d["nexrad"] = ctx["nexrad"]
 
         cosaz = math.cos(d["azimuth"] * math.pi / 180.0)
         sinaz = math.sin(d["azimuth"] * math.pi / 180.0)
         mylat = cenlat + (cosaz * (d["range"] * 1000.0) / latscale)
         mylon = cenlon + (sinaz * (d["range"] * 1000.0) / lonscale)
         d["geom"] = "SRID=4326;POINT(%s %s)" % (mylon, mylat)
-        d["valid"] = ctx['ts']
+        d["valid"] = ctx["ts"]
 
-        for table in ['nexrad_attributes',
-                      'nexrad_attributes_%s' % (ctx['ts'].year,)]:
-            sql = """
-                INSERT into """ + table + """
+        for table in [
+            "nexrad_attributes",
+            "nexrad_attributes_%s" % (ctx["ts"].year,),
+        ]:
+            sql = (
+                """
+                INSERT into """
+                + table
+                + """
                 (nexrad, storm_id, geom, azimuth,
                 range, tvs, meso, posh, poh, max_size, vil, max_dbz,
                 max_dbz_height, top, drct, sknt, valid)
@@ -161,12 +167,14 @@ def really_process(txn, ctx):
                 %(poh)s, %(max_size)s, %(vil)s, %(max_dbz)s,
                 %(max_dbz_height)s, %(top)s, %(drct)s, %(sknt)s, %(valid)s)
             """
+            )
             txn.execute(sql, d)
 
     if co > 0:
         log.msg(
-            ("%s %s Processed %s entries"
-             ) % (ctx['nexrad'], ctx['ts'].strftime("%Y-%m-%d %H:%M UTC"), co))
+            ("%s %s Processed %s entries")
+            % (ctx["nexrad"], ctx["ts"].strftime("%Y-%m-%d %H:%M UTC"), co)
+        )
 
 
 def on_ready(_unused, mesosite):
@@ -178,19 +186,19 @@ def on_ready(_unused, mesosite):
 
 
 def errback(res):
-    ''' ERRORBACK '''
+    """ ERRORBACK """
     log.err(res)
     reactor.stop()
 
 
 def main():
     """Go Main Go"""
-    mesosite = common.get_database('mesosite', cp_max=1)
+    mesosite = common.get_database("mesosite", cp_max=1)
     df = mesosite.runInteraction(load_station_table)
     df.addCallback(on_ready, mesosite)
     df.addErrback(errback)
     reactor.run()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

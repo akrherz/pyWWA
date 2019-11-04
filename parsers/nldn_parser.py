@@ -6,12 +6,13 @@ from pyldm import ldmbridge
 from pyiem.nws.products.nldn import parser
 import common
 
-DBPOOL = common.get_database('nldn')
+DBPOOL = common.get_database("nldn")
 
 
 class myProductIngestor(ldmbridge.LDMProductReceiver):
     """My hacky ingest"""
-    product_end = b'NLDN'
+
+    product_end = b"NLDN"
 
     def process_data(self, data):
         """Actual ingestor"""
@@ -27,7 +28,7 @@ class myProductIngestor(ldmbridge.LDMProductReceiver):
         """
         Called when ldm closes the pipe
         """
-        print('connectionLost')
+        print("connectionLost")
         print(reason)
         reactor.callLater(5, self.shutdown)
 
@@ -48,5 +49,5 @@ def main():
     reactor.run()  # @UndefinedVariable
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

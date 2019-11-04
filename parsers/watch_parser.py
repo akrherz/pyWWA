@@ -6,8 +6,8 @@ from pyiem.nws.products.saw import parser as sawparser
 from pyldm import ldmbridge
 import common  # @UnresolvedImport
 
-DBPOOL = common.get_database('postgis', cp_max=1)
-IEM_URL = common.SETTINGS.get('pywwa_watch_url', 'pywwa_watch_url')
+DBPOOL = common.get_database("postgis", cp_max=1)
+IEM_URL = common.SETTINGS.get("pywwa_watch_url", "pywwa_watch_url")
 JABBER = common.make_jabber_client("new_watch")
 
 
@@ -21,7 +21,7 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
 
     def connectionLost(self, reason):
         """STDIN is shut, so lets shutdown"""
-        log.msg('connectionLost')
+        log.msg("connectionLost")
         log.err(reason)
         reactor.callLater(7, shutdown)  # @UndefinedVariable
 
@@ -49,5 +49,5 @@ def main():
     reactor.run()  # @UndefinedVariable
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -27,29 +27,31 @@ def main(argv):
     """Go Main"""
     log = logger()
     if len(argv) < 2:
-        print('USAGE: python merge_hvtec_nwsli.py FILENAME')
+        print("USAGE: python merge_hvtec_nwsli.py FILENAME")
         return
 
-    dbconn = get_dbconn('postgis', user='mesonet')
+    dbconn = get_dbconn("postgis", user="mesonet")
     cursor = dbconn.cursor()
-    log.info(' - Connected to database: postgis')
+    log.info(" - Connected to database: postgis")
 
     fn = argv[1]
     uri = "https://www.weather.gov/media/vtec/%s" % (fn,)
 
-    log.info(' - Fetching file: %s', uri)
+    log.info(" - Fetching file: %s", uri)
     req = requests.get(uri)
     updated = 0
     new = 0
     bad = 0
-    for linenum, line in enumerate(req.content.decode('ascii').split("\n")):
+    for linenum, line in enumerate(req.content.decode("ascii").split("\n")):
         if line.strip() == "":
             continue
         tokens = line.strip().split(",")
         if len(tokens) != 7:
             log.info(
-                ' + Linenum %s had %s tokens, instead of 7\n%s',
-                linenum + 1, len(tokens), line
+                " + Linenum %s had %s tokens, instead of 7\n%s",
+                linenum + 1,
+                len(tokens),
+                line,
             )
             bad += 1
             continue
@@ -57,12 +59,18 @@ def main(argv):
         if len(nwsli) != 5:
             log.info(
                 ' + Linenum %s had a NWSLI "%s" not of 5 character length\n%s',
-                linenum+1, nwsli, line)
+                linenum + 1,
+                nwsli,
+                line,
+            )
             bad += 1
             continue
-        cursor.execute("""
+        cursor.execute(
+            """
             DELETE from hvtec_nwsli WHERE nwsli = %s
-        """, (nwsli, ))
+        """,
+            (nwsli,),
+        )
         if cursor.rowcount == 1:
             updated += 1
         else:
@@ -72,14 +80,21 @@ def main(argv):
              state, geom) values (%s, %s, %s, %s, %s,
              'SRID=4326;POINT(%s %s)')
              """
-        args = (nwsli, river_name, proximity, name, state, 0 - float(lon),
-                float(lat))
+        args = (
+            nwsli,
+            river_name,
+            proximity,
+            name,
+            state,
+            0 - float(lon),
+            float(lat),
+        )
         cursor.execute(sql, args)
 
     cursor.close()
     dbconn.commit()
-    log.info(' - DONE! %s updated %s new, %s bad entries', updated, new, bad)
+    log.info(" - DONE! %s updated %s new, %s bad entries", updated, new, bad)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main(sys.argv)

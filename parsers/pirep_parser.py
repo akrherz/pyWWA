@@ -12,7 +12,7 @@ TABLESDIR = os.path.join(os.path.dirname(__file__), "../tables")
 
 PIREPS = {}
 DBPOOL = common.get_database("postgis")
-JABBER = common.make_jabber_client('pirep')
+JABBER = common.make_jabber_client("pirep")
 # Load LOCS table
 LOCS = {}
 
@@ -21,7 +21,7 @@ def cleandb():
     """ To keep LSRDB from growing too big, we clean it out
         Lets hold 1 days of data!
     """
-    thres = datetime.datetime.utcnow() - datetime.timedelta(hours=24*1)
+    thres = datetime.datetime.utcnow() - datetime.timedelta(hours=24 * 1)
     init_size = len(PIREPS.keys())
     for key in PIREPS:
         if PIREPS[key] < thres:
@@ -31,49 +31,55 @@ def cleandb():
     log.msg("cleandb() init_size: %s final_size: %s" % (init_size, fin_size))
 
     # Call Again in 30 minutes
-    reactor.callLater(60*30, cleandb)  # @UndefinedVariable
+    reactor.callLater(60 * 30, cleandb)  # @UndefinedVariable
 
 
 def load_locs(txn):
     """Build locations table"""
     log.msg("load_locs() called...")
-    txn.execute("""
+    txn.execute(
+        """
         SELECT id, name, st_x(geom) as lon, st_y(geom) as lat
         from stations WHERE network ~* 'ASOS' or network ~* 'AWOS'
-    """)
+    """
+    )
     for row in txn.fetchall():
-        LOCS[row['id']] = {'id': row['id'], 'name': row['name'],
-                           'lon': row['lon'], 'lat': row['lat']}
+        LOCS[row["id"]] = {
+            "id": row["id"],
+            "name": row["name"],
+            "lon": row["lon"],
+            "lat": row["lat"],
+        }
 
-    for line in open(TABLESDIR+'/faa_apt.tbl'):
-        if len(line) < 70 or line[0] == '!':
+    for line in open(TABLESDIR + "/faa_apt.tbl"):
+        if len(line) < 70 or line[0] == "!":
             continue
         sid = line[:4].strip()
         lat = float(line[56:60]) / 100.0
         lon = float(line[61:67]) / 100.0
         name = line[16:47].strip()
         if sid not in LOCS:
-            LOCS[sid] = {'lat': lat, 'lon': lon, 'name': name}
+            LOCS[sid] = {"lat": lat, "lon": lon, "name": name}
 
-    for line in open(TABLESDIR+'/vors.tbl'):
-        if len(line) < 70 or line[0] == '!':
+    for line in open(TABLESDIR + "/vors.tbl"):
+        if len(line) < 70 or line[0] == "!":
             continue
         sid = line[:3]
         lat = float(line[56:60]) / 100.0
         lon = float(line[61:67]) / 100.0
         name = line[16:47].strip()
         if sid not in LOCS:
-            LOCS[sid] = {'lat': lat, 'lon': lon, 'name': name}
+            LOCS[sid] = {"lat": lat, "lon": lon, "name": name}
 
     # Finally, GEMPAK!
-    for line in open(TABLESDIR+'/pirep_navaids.tbl'):
-        if len(line) < 60 or line[0] in ['!', '#']:
+    for line in open(TABLESDIR + "/pirep_navaids.tbl"):
+        if len(line) < 60 or line[0] in ["!", "#"]:
             continue
         sid = line[:4].strip()
         lat = float(line[56:60]) / 100.0
         lon = float(line[61:67]) / 100.0
         if sid not in LOCS:
-            LOCS[sid] = {'lat': lat, 'lon': lon}
+            LOCS[sid] = {"lat": lat, "lon": lon}
 
     log.msg("... %s locations loaded" % (len(LOCS),))
 
@@ -84,7 +90,7 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
 
     def connectionLost(self, reason):
         """Connection was lost for some reason"""
-        log.msg('connectionLost')
+        log.msg("connectionLost")
         log.err(reason)
         reactor.callLater(5, self.shutdown)  # @UndefinedVariable
 
@@ -131,7 +137,7 @@ def shutdown(err):
     reactor.stop()  # @UndefinedVariable
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     df = DBPOOL.runInteraction(load_locs)
     df.addCallback(ready)
     df.addErrback(shutdown)

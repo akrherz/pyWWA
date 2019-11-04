@@ -6,8 +6,8 @@ from pyldm import ldmbridge
 from pyiem.nws.products.mos import parser
 import common  # @UnresolvedImport
 
-DBPOOL = common.get_database('mos')
-MEMORY = {'ingested': 0}
+DBPOOL = common.get_database("mos")
+MEMORY = {"ingested": 0}
 
 
 class MyProductIngestor(ldmbridge.LDMProductReceiver):
@@ -30,13 +30,13 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
 
     def shutdown(self):
         """Shutdown"""
-        print("Saved %s entries to the database" % (MEMORY['ingested'], ))
+        print("Saved %s entries to the database" % (MEMORY["ingested"],))
         reactor.callWhenRunning(reactor.stop)
 
 
 def got_data(res):
     """Callback from the database save"""
-    MEMORY['ingested'] += res
+    MEMORY["ingested"] += res
 
 
 def real_process(text):
@@ -47,6 +47,6 @@ def real_process(text):
     df.addErrback(common.email_error, text)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     ldmbridge.LDMProductFactory(MyProductIngestor())
     reactor.run()

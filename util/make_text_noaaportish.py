@@ -8,10 +8,10 @@ def main(argv):
     """Do Main Things"""
     fn = argv[1]
     data = noaaport_text(open(fn).read())
-    output = open(fn, 'w')
+    output = open(fn, "w")
     output.write(data)
     output.close()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main(sys.argv)

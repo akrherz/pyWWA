@@ -6,7 +6,7 @@ from pyldm import ldmbridge
 from pyiem.nws.products.ffg import parser
 import common  # @UnresolvedImport
 
-DBPOOL = common.get_database('postgis', cp_max=1)
+DBPOOL = common.get_database("postgis", cp_max=1)
 
 
 # LDM Ingestor
@@ -15,7 +15,7 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
 
     def connectionLost(self, reason):
         """Connection was lost"""
-        log.msg('connectionLost')
+        log.msg("connectionLost")
         log.err(reason)
         reactor.callLater(5, shutdown)  # @UndefinedVariable
 
@@ -33,14 +33,13 @@ def shutdown():
 def real_parser(txn, buf):
     """callback func"""
     ffg = parser(buf)
-    if ffg.afos == 'FFGMPD':
+    if ffg.afos == "FFGMPD":
         return
     ffg.sql(txn)
     if ffg.warnings and ffg.warnings[0].find("termination") == -1:
         common.email_error("\n".join(ffg.warnings), buf)
     sz = 0 if ffg.data is None else len(ffg.data.index)
-    log.msg("FFG found %s entries for product %s" % (sz,
-                                                     ffg.get_product_id()))
+    log.msg("FFG found %s entries for product %s" % (sz, ffg.get_product_id()))
 
 
 def main():
@@ -49,5 +48,5 @@ def main():
     reactor.run()  # @UndefinedVariable
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
