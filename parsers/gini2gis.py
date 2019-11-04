@@ -175,8 +175,8 @@ def write_metadata(sat, tmpfn):
 
 
 def write_mapserver_metadata(sat, tmpfn, epsg):
-    """ Write out and pqinsert a metadata file that mapserver can use to provide
-    WMS metadata """
+    """ Write out and pqinsert a metadata file that mapserver can use to
+    provide WMS metadata. """
     metafn = "%s.txt" % (tmpfn,)
     out = open(metafn, "w")
     out.write(
@@ -316,21 +316,21 @@ def workflow():
         return
 
     # Generate a temporary filename to use for our work
-    tmpfn = tempfile.mktemp()
-    # Write PNG
-    write_gispng(sat, tmpfn)
+    with tempfile.NamedTemporaryFile() as tmpfd:
+        # Write PNG
+        write_gispng(sat, tmpfd.name)
 
-    if get_ldm_routes(sat) == "ac":
-        # Write JSON metadata
-        write_metadata(sat, tmpfn)
-        # Write JSON metadata for 4326 file
-        write_metadata_epsg(sat, tmpfn, 4326)
-        # write mapserver include metadatab
-        write_mapserver_metadata(sat, tmpfn, 4326)
-        # Warp the file into 4326
-        gdalwarp(sat, tmpfn, 4326)
-    # cleanup after ourself
-    cleanup(tmpfn)
+        if get_ldm_routes(sat) == "ac":
+            # Write JSON metadata
+            write_metadata(sat, tmpfd.name)
+            # Write JSON metadata for 4326 file
+            write_metadata_epsg(sat, tmpfd.name, 4326)
+            # write mapserver include metadatab
+            write_mapserver_metadata(sat, tmpfd.name, 4326)
+            # Warp the file into 4326
+            gdalwarp(sat, tmpfd.name, 4326)
+        # cleanup after ourself
+        cleanup(tmpfd.name)
 
     logger.info("Done!")
 
