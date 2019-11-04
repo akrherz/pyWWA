@@ -8,9 +8,10 @@ from pyiem.nws.ugc import UGC
 from pyldm import ldmbridge
 import common
 
-POSTGIS = common.get_database('postgis')
-PYWWA_PRODUCT_URL = common.SETTINGS.get('pywwa_product_url',
-                                        'pywwa_product_url')
+POSTGIS = common.get_database("postgis")
+PYWWA_PRODUCT_URL = common.SETTINGS.get(
+    "pywwa_product_url", "pywwa_product_url"
+)
 
 ugc_provider = {}
 
@@ -18,18 +19,19 @@ ugc_provider = {}
 def load_ugc(txn):
     """ load ugc dict """
     # Careful here not to load things from the future
-    txn.execute("""
+    txn.execute(
+        """
         SELECT name, ugc, wfo from ugcs WHERE
         name IS NOT Null and begin_ts < now() and
         (end_ts is null or end_ts > now())
-    """)
+    """
+    )
     for row in txn.fetchall():
         nm = (row["name"]).replace("\x92", " ").replace("\xc2", " ")
-        wfos = re.findall(r'([A-Z][A-Z][A-Z])', row['wfo'])
-        ugc_provider[row['ugc']] = UGC(row['ugc'][:2], row['ugc'][2],
-                                       row['ugc'][3:],
-                                       name=nm,
-                                       wfos=wfos)
+        wfos = re.findall(r"([A-Z][A-Z][A-Z])", row["wfo"])
+        ugc_provider[row["ugc"]] = UGC(
+            row["ugc"][:2], row["ugc"][2], row["ugc"][3:], name=nm, wfos=wfos
+        )
 
     log.msg("ugc_dict is loaded...")
 
@@ -44,7 +46,7 @@ class myProductIngestor(ldmbridge.LDMProductReceiver):
 
     def connectionLost(self, reason):
         """stdin was closed"""
-        log.msg('connectionLost')
+        log.msg("connectionLost")
         log.err(reason)
         reactor.callLater(5, self.shutdown)
 
@@ -65,7 +67,7 @@ def real_process(txn, raw):
         jabber.send_message(mess, htmlmess, xtra)
 
 
-jabber = common.make_jabber_client('sps_parser')
+jabber = common.make_jabber_client("sps_parser")
 
 
 def ready(_bogus):

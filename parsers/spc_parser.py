@@ -6,9 +6,9 @@ from pyldm import ldmbridge
 from pyiem.nws.products.spcpts import parser
 import common  # @UnresolvedImport
 
-DBPOOL = common.get_database('postgis')
+DBPOOL = common.get_database("postgis")
 WAITFOR = 20
-JABBER = common.make_jabber_client('spc_parser')
+JABBER = common.make_jabber_client("spc_parser")
 
 
 # LDM Ingestor
@@ -17,7 +17,7 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
 
     def connectionLost(self, reason):
         """shutdown"""
-        log.msg('connectionLost')
+        log.msg("connectionLost")
         log.err(reason)
         reactor.callLater(5, self.shutdown)  # @UndefinedVariable
 
@@ -41,10 +41,11 @@ def real_parser(txn, buf):
     jmsgs = spc.get_jabbers("")
     for (txt, html, xtra) in jmsgs:
         JABBER.send_message(txt, html, xtra)
-    log.msg("Sent %s messages for product %s" % (len(jmsgs),
-                                                 spc.get_product_id()))
+    log.msg(
+        "Sent %s messages for product %s" % (len(jmsgs), spc.get_product_id())
+    )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     ldmbridge.LDMProductFactory(MyProductIngestor())
     reactor.run()  # @UndefinedVariable

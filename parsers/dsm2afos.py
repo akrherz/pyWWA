@@ -8,7 +8,7 @@ from pyiem.nws import product
 
 def main():
     """Go!"""
-    pgconn = get_dbconn('afos')
+    pgconn = get_dbconn("afos")
     acursor = pgconn.cursor()
 
     raw = sys.stdin.read()
@@ -22,14 +22,22 @@ def main():
     if gmt.month > 6:
         table = "products_%s_0712" % (gmt.year,)
 
-    sql = """
-        INSERT into """+table+"""(pil, data, source, wmo, entered)
+    sql = (
+        """
+        INSERT into """
+        + table
+        + """(pil, data, source, wmo, entered)
         values(%s,%s,%s,%s,%s)
     """
+    )
     for token in tokens:
-        sqlargs = ("%s%s" % (sys.argv[1], token[1:4]),
-                   token.replace("z", "\n"),
-                   nws.source, nws.wmo, gmt.strftime("%Y-%m-%d %H:%M+00"))
+        sqlargs = (
+            "%s%s" % (sys.argv[1], token[1:4]),
+            token.replace("z", "\n"),
+            nws.source,
+            nws.wmo,
+            gmt.strftime("%Y-%m-%d %H:%M+00"),
+        )
         acursor.execute(sql, sqlargs)
 
     acursor.close()
@@ -37,5 +45,5 @@ def main():
     pgconn.close()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

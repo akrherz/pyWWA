@@ -26,14 +26,16 @@ def main(argv):
     now = sts
     while now < ets:
         afn = now.strftime(
-            "/mesonet/ARCHIVE/nexrad/%Y_%m/"+nexrad+"_%Y%m%d.tgz")
+            "/mesonet/ARCHIVE/nexrad/%Y_%m/" + nexrad + "_%Y%m%d.tgz"
+        )
         if not os.path.isfile(afn):
-            sys.stderr.write('Missing %s\n' % (afn,))
+            sys.stderr.write("Missing %s\n" % (afn,))
             now += interval
             continue
 
         subprocess.call(
-            "tar -x -z -C /tmp/l3tmp -f %s NCR" % (afn,), shell=True)
+            "tar -x -z -C /tmp/l3tmp -f %s NCR" % (afn,), shell=True
+        )
         if not os.path.isdir("/tmp/l3tmp/NCR"):
             sys.stderr.write("Missing NCR data for %s\n" % (afn,))
             now += interval
@@ -42,15 +44,15 @@ def main(argv):
         files = glob.glob("/tmp/l3tmp/NCR/NCR_*")
         for fn in files:
             # Need fake seq id
-            data = open(fn, 'rb').read()
+            data = open(fn, "rb").read()
             if len(data) < 20:
                 sys.stderr.write("short read on %s\n" % (fn,))
                 continue
-            if data[0] == 'S':
-                sys.stdout.write('\001\r\r\n000\r\r\n')
+            if data[0] == "S":
+                sys.stdout.write("\001\r\r\n000\r\r\n")
             sys.stdout.write(data)
-            if data[-4:] != '\r\r\n\003':
-                sys.stdout.write('\r\r\n\003')
+            if data[-4:] != "\r\r\n\003":
+                sys.stdout.write("\r\r\n\003")
             time.sleep(0.25)
 
         if os.path.isdir("/tmp/l3tmp/NCR"):
@@ -59,5 +61,5 @@ def main(argv):
         now += interval
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main(sys.argv)

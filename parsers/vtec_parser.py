@@ -27,7 +27,7 @@ import common
 
 
 def shutdown():
-    ''' Stop this app '''
+    """ Stop this app """
     log.msg("Shutting down...")
     reactor.callWhenRunning(reactor.stop)
 
@@ -37,8 +37,8 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
     """ I receive products from ldmbridge and process them 1 by 1 :) """
 
     def connectionLost(self, reason):
-        ''' callback when the stdin reader connection is closed '''
-        log.msg('connectionLost() called...')
+        """ callback when the stdin reader connection is closed """
+        log.msg("connectionLost() called...")
         log.err(reason)
         reactor.callLater(7, shutdown)
 
@@ -51,7 +51,7 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
 
 
 def really_process_data(buf):
-    ''' Actually do some processing '''
+    """ Actually do some processing """
     gmtnow = datetime.datetime.utcnow()
     gmtnow = gmtnow.replace(tzinfo=pytz.utc)
 
@@ -61,13 +61,14 @@ def really_process_data(buf):
         buf += "\n\n$$\n\n"
 
     # Create our TextProduct instance
-    text_product = vtecparser(buf, utcnow=gmtnow, ugc_provider=ugc_dict,
-                              nwsli_provider=nwsli_dict)
+    text_product = vtecparser(
+        buf, utcnow=gmtnow, ugc_provider=ugc_dict, nwsli_provider=nwsli_dict
+    )
     # Don't parse these as they contain duplicated information
-    if text_product.source == 'KNHC' and text_product.afos[:3] == 'TCV':
+    if text_product.source == "KNHC" and text_product.afos[:3] == "TCV":
         return
     # Skip spanish products
-    if text_product.source == 'TJSJ' and text_product.afos[3:] == 'SPN':
+    if text_product.source == "TJSJ" and text_product.afos[3:] == "SPN":
         return
 
     df = PGCONN.runInteraction(text_product.sql)
@@ -79,14 +80,16 @@ def really_process_data(buf):
 def step2(_dummy, text_product):
     """After the SQL is done, lets do other things"""
     if text_product.warnings:
-        common.email_error("\n\n".join(text_product.warnings),
-                           text_product.text)
+        common.email_error(
+            "\n\n".join(text_product.warnings), text_product.text
+        )
 
     # Do the Jabber work necessary after the database stuff has completed
     for (plain, html, xtra) in text_product.get_jabbers(
-            common.SETTINGS.get('pywwa_vtec_url', 'pywwa_vtec_url'),
-            common.SETTINGS.get('pywwa_river_url', 'pywwa_river_url')):
-        if xtra.get('channels', '') == '':
+        common.SETTINGS.get("pywwa_vtec_url", "pywwa_vtec_url"),
+        common.SETTINGS.get("pywwa_river_url", "pywwa_river_url"),
+    ):
+        if xtra.get("channels", "") == "":
             common.email_error("xtra[channels] is empty!", text_product.text)
         if not MANUAL:
             jabber.send_message(plain, html, xtra)
@@ -95,18 +98,19 @@ def step2(_dummy, text_product):
 def load_ugc(txn):
     """ load ugc"""
     # Careful here not to load things from the future
-    txn.execute("""
+    txn.execute(
+        """
         SELECT name, ugc, wfo from ugcs WHERE
         name IS NOT Null and begin_ts < now() and
         (end_ts is null or end_ts > now())
-    """)
+    """
+    )
     for row in txn.fetchall():
         nm = (row["name"]).replace("\x92", " ").replace("\xc2", " ")
-        wfos = re.findall(r'([A-Z][A-Z][A-Z])', row['wfo'])
-        ugc_dict[row['ugc']] = ugc.UGC(row['ugc'][:2], row['ugc'][2],
-                                       row['ugc'][3:],
-                                       name=nm,
-                                       wfos=wfos)
+        wfos = re.findall(r"([A-Z][A-Z][A-Z])", row["wfo"])
+        ugc_dict[row["ugc"]] = ugc.UGC(
+            row["ugc"][:2], row["ugc"][2], row["ugc"][3:], name=nm, wfos=wfos
+        )
 
     log.msg("ugc_dict loaded %s entries" % (len(ugc_dict),))
 
@@ -117,9 +121,8 @@ def load_ugc(txn):
     """
     txn.execute(sql)
     for row in txn.fetchall():
-        nm = row['rname'].replace("&", " and ")
-        nwsli_dict[row['nwsli']] = nwsli.NWSLI(row['nwsli'],
-                                               name=nm)
+        nm = row["rname"].replace("&", " and ")
+        nwsli_dict[row["nwsli"]] = nwsli.NWSLI(row["nwsli"], name=nm)
 
     log.msg("nwsli_dict loaded %s entries" % (len(nwsli_dict),))
 
@@ -127,7 +130,7 @@ def load_ugc(txn):
 
 
 def ready(_dummy):
-    ''' cb when our database work is done '''
+    """ cb when our database work is done """
     ldmbridge.LDMProductFactory(MyProductIngestor(dedup=True))
 
 
@@ -138,21 +141,22 @@ def bootstrap():
     df.addErrback(common.email_error, "load_ugc failure!")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     HTTPClientFactory.noisy = False
     SMTPSenderFactory.noisy = False
     ugc_dict = {}
     nwsli_dict = {}
 
     MANUAL = False
-    if len(sys.argv) == 2 and sys.argv[1].lower() == 'manual':
+    if len(sys.argv) == 2 and sys.argv[1].lower() == "manual":
         log.msg("Manual runtime (no jabber, 1 database connection) requested")
         MANUAL = True
 
     # Fire up!
-    PGCONN = common.get_database(common.CONFIG['databaserw']['postgis'],
-                                 cp_max=(5 if not MANUAL else 1))
+    PGCONN = common.get_database(
+        common.CONFIG["databaserw"]["postgis"], cp_max=(5 if not MANUAL else 1)
+    )
     bootstrap()
-    jabber = common.make_jabber_client('vtec_parser')
+    jabber = common.make_jabber_client("vtec_parser")
 
     reactor.run()

@@ -11,16 +11,16 @@ from pyiem.nws.products.lsr import parser as lsrparser
 from pyldm import ldmbridge
 import common
 
-DBPOOL = common.get_database(common.CONFIG['databaserw']['postgis'])
+DBPOOL = common.get_database(common.CONFIG["databaserw"]["postgis"])
 
 # Cheap datastore for LSRs to avoid Dups!
 LSRDB = {}
 
 
 def loaddb():
-    ''' load memory '''
-    if os.path.isfile('lsrdb.p'):
-        mydict = pickle.load(open('lsrdb.p', 'rb'))
+    """ load memory """
+    if os.path.isfile("lsrdb.p"):
+        mydict = pickle.load(open("lsrdb.p", "rb"))
         for key in mydict:
             LSRDB[key] = mydict[key]
 
@@ -30,7 +30,7 @@ def cleandb():
         Lets hold 7 days of data!
     """
     utc = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
-    thres = utc - datetime.timedelta(hours=24*7)
+    thres = utc - datetime.timedelta(hours=24 * 7)
     init_size = len(LSRDB)
     # keys() is now a generator, so generate all values before deletion
     for key in list(LSRDB.keys()):
@@ -43,12 +43,12 @@ def cleandb():
     reactor.callInThread(pickledb)
 
     # Call Again in 30 minutes
-    reactor.callLater(60*30, cleandb)
+    reactor.callLater(60 * 30, cleandb)
 
 
 def pickledb():
     """ Dump our database to a flat file """
-    pickle.dump(LSRDB, open('lsrdb.p', 'wb'))
+    pickle.dump(LSRDB, open("lsrdb.p", "wb"))
 
 
 class MyProductIngestor(ldmbridge.LDMProductReceiver):
@@ -60,8 +60,8 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
         defer.addErrback(common.email_error, data)
 
     def connectionLost(self, reason):
-        ''' the connection was lost! '''
-        log.msg('connectionLost')
+        """ the connection was lost! """
+        log.msg("connectionLost")
         log.err(reason)
         reactor.callLater(5, reactor.callWhenRunning, reactor.stop)
 
@@ -79,11 +79,10 @@ def real_processor(txn, text):
             prod.duplicates += 1
             lsr.duplicate = True
             continue
-        LSRDB[uniquekey] = datetime.datetime.utcnow().replace(
-            tzinfo=pytz.utc)
+        LSRDB[uniquekey] = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
         lsr.sql(txn)
 
-    j = prod.get_jabbers(common.SETTINGS.get('pywwa_lsr_url', 'pywwa_lsr_url'))
+    j = prod.get_jabbers(common.SETTINGS.get("pywwa_lsr_url", "pywwa_lsr_url"))
     for i, (p, h, x) in enumerate(j):
         # delay some to perhaps stop triggering SPAM lock outs at twitter
         reactor.callLater(i, JABBER.send_message, p, h, x)

@@ -7,14 +7,15 @@ from pyldm import ldmbridge
 from pyiem.nws import product
 import common
 
-POSTGIS = common.get_database('postgis', cp_max=1)
-PYWWA_PRODUCT_URL = common.SETTINGS.get('pywwa_product_url',
-                                        'pywwa_product_url')
-DB_ON = bool(common.SETTINGS.get('pywwa_save_text_products', False))
+POSTGIS = common.get_database("postgis", cp_max=1)
+PYWWA_PRODUCT_URL = common.SETTINGS.get(
+    "pywwa_product_url", "pywwa_product_url"
+)
+DB_ON = bool(common.SETTINGS.get("pywwa_save_text_products", False))
 
 
 def shutdown():
-    ''' Stop this app '''
+    """ Stop this app """
     log.msg("Shutting down...")
     reactor.callWhenRunning(reactor.stop)
 
@@ -23,8 +24,8 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
     """ I receive products from ldmbridge and process them 1 by 1 :) """
 
     def connectionLost(self, reason):
-        ''' callback when the stdin reader connection is closed '''
-        log.msg('connectionLost() called...')
+        """ callback when the stdin reader connection is closed """
+        log.msg("connectionLost() called...")
         log.err(reason)
         reactor.callLater(7, shutdown)
 
@@ -52,19 +53,22 @@ def real_process(txn, raw):
     channels = []
     for tpair in tokens:
         for center in re.findall(r"([A-Z]+)\.\.\.", tpair[1]):
-            channels.append("SPENES.%s" % (center, ))
-    xtra = {'product_id': product_id}
-    xtra['channels'] = ','.join(channels)
-    xtra['twitter'] = ("NESDIS issues Satellite Precipitation "
-                       "Estimates %s?pid=%s") % (PYWWA_PRODUCT_URL,
-                                                 product_id)
+            channels.append("SPENES.%s" % (center,))
+    xtra = {"product_id": product_id}
+    xtra["channels"] = ",".join(channels)
+    xtra["twitter"] = (
+        "NESDIS issues Satellite Precipitation " "Estimates %s?pid=%s"
+    ) % (PYWWA_PRODUCT_URL, product_id)
 
-    body = ("NESDIS issues Satellite Precipitation Estimates %s?pid=%s"
-            ) % (PYWWA_PRODUCT_URL, product_id)
-    htmlbody = ("<p>NESDIS issues "
-                "<a href='%s?pid=%s'>Satellite Precipitation Estimates</a>"
-                "</p>"
-                ) % (PYWWA_PRODUCT_URL, product_id)
+    body = ("NESDIS issues Satellite Precipitation Estimates %s?pid=%s") % (
+        PYWWA_PRODUCT_URL,
+        product_id,
+    )
+    htmlbody = (
+        "<p>NESDIS issues "
+        "<a href='%s?pid=%s'>Satellite Precipitation Estimates</a>"
+        "</p>"
+    ) % (PYWWA_PRODUCT_URL, product_id)
     jabber.send_message(body, htmlbody, xtra)
 
 
@@ -73,7 +77,7 @@ def killer():
     reactor.stop()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     jabber = common.make_jabber_client("spe_parser")
     ldmbridge.LDMProductFactory(MyProductIngestor(dedup=True))
     reactor.run()
