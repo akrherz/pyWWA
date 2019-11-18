@@ -7,7 +7,7 @@ yyyymmdd=$(date --date "$1 day ago" +'%Y%m%d')
 yyyy=$(date --date "$1 day ago" +'%Y')
 mm=$(date --date "$1 day ago" +'%m')
 
-cd ~/offline/text/
+cd /mesonet/tmp/offline/text/
 tar -czf ${yyyymmdd}.tgz ${yyyymmdd}??.txt
 rm -f ${yyyymmdd}??.txt
 mkdir -p /mesonet/ARCHIVE/raw/noaaport/$yyyy
