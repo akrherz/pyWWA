@@ -23,8 +23,9 @@ def process(path, fn):
         valid = datetime.datetime.strptime(nc.start_date_time, "%Y%j%H%M%S")
         bird = nc.satellite_id
         channel = nc.channel_id
+        lon_0 = nc.satellite_longitude
         h = nc.variables["fixedgrid_projection"].perspective_point_height
-        # swa = nc.variables['fixedgrid_projection'].sweep_angle_axis
+        swa = nc.variables["fixedgrid_projection"].sweep_angle_axis
         x0 = nc.variables["x"][0]
         dx = nc.variables["x"].scale_factor / 1e6 * h
         y0 = nc.variables["y"][0] / 1e6 * h
@@ -56,6 +57,23 @@ def process(path, fn):
             subprocess.call(
                 "pqinsert -i -p '%s' /tmp/daryl.wld"
                 % (pqstr.replace("png", "wld"),),
+                shell=True,
+            )
+            with open("/tmp/daryl.msinc", "w") as fh:
+                fh.write(
+                    (
+                        "PROJECTION\n"
+                        "proj=geos\n"
+                        "h=%s\n"
+                        "lon_0=%s\n"
+                        "sweep=%s\n"
+                        "END\n"
+                    )
+                    % (h, lon_0, swa)
+                )
+            subprocess.call(
+                "pqinsert -i -p '%s' /tmp/daryl.msinc"
+                % (pqstr.replace("png", "msinc"),),
                 shell=True,
             )
 
