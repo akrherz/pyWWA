@@ -13,6 +13,44 @@ import numpy as np
 from netCDF4 import Dataset
 
 DIRPATH = "/mnt/goestemp"
+RAMPS = {}
+
+
+def build_ramps():
+    """Make our color ramps."""
+    # WV
+    RAMPS["wv"] = np.loadtxt("wvramp.txt")
+    RAMPS["ir"] = np.loadtxt("irramp.txt")
+
+
+def make_image(nc):
+    """Generate a PIL Image."""
+    channel = nc.channel_id
+    ncvar = nc.variables["Sectorized_CMI"]
+    data = ncvar[:]
+    valid_min = ncvar.valid_min * ncvar.scale_factor + ncvar.add_offset
+    valid_max = ncvar.valid_max * ncvar.scale_factor + ncvar.add_offset
+
+    # default grayscale
+    colors = np.repeat(range(256), 3)
+    if channel in [1, 2, 3, 4]:
+        # guidance is to take square root of data and apply grayscale
+        imgdata = data ** 0.5 * 255
+    elif channel in [7]:
+        imgdata = np.where(data < 242, (418.0 - data), ((330.0 - data) * 2.0))
+        colors = RAMPS["ir"][:, 1:].astype("i").ravel()
+    elif channel in [9, 10]:
+        # Convert to Celsius?
+        imgdata = np.digitize(data - 273.15, RAMPS["wv"][:, 0])
+        colors = RAMPS["wv"][:, 1:].astype("i").ravel()
+    elif channel in [13]:
+        imgdata = np.where(data < 242, (418.0 - data), ((330.0 - data) * 2.0))
+    else:
+        # scale from min to max
+        imgdata = (data - valid_min) / (valid_max - valid_min) * 255.0
+    png = Image.fromarray(imgdata.astype("u1"))
+    png.putpalette(list(colors))
+    return png
 
 
 def process(path, fn):
@@ -31,51 +69,47 @@ def process(path, fn):
         y0 = nc.variables["y"][0] / 1e6 * h
         x0 = nc.variables["x"][0] / 1e6 * h
         dy = nc.variables["y"].scale_factor / 1e6 * h
-        if nc.channel_id < 5:
-            # guidance is to take square root of data and scale it to 255
-            imgdata = (data ** 0.5 * 255).astype("u1")
-            png = Image.fromarray(imgdata)
-            png.putpalette(list(np.repeat(range(256), 3)))
-            png.save("/tmp/daryl.png")
+        png = make_image(nc)
+        png.save("/tmp/daryl.png")
 
-            pqstr = (
-                "gis c %s gis/images/GOES/%s/channel%02i/%s_C%02i.png %s png"
-            ) % (
-                valid.strftime("%Y%m%d%H%M"),
-                nc.source_scene,
-                channel,
-                bird,
-                channel,
-                valid.strftime("%Y%m%d%H%M%S"),
-            )
-            subprocess.call(
-                "pqinsert -i -p '%s' /tmp/daryl.png" % (pqstr,), shell=True
-            )
-            with open("/tmp/daryl.wld", "w") as fh:
-                args = [dx, 0, 0, dy, x0, y0]
-                fh.write("\n".join([str(s) for s in args]))
-            subprocess.call(
-                "pqinsert -i -p '%s' /tmp/daryl.wld"
-                % (pqstr.replace("png", "wld"),),
-                shell=True,
-            )
-            with open("/tmp/daryl.msinc", "w") as fh:
-                fh.write(
-                    (
-                        "PROJECTION\n"
-                        "proj=geos\n"
-                        "h=%s\n"
-                        "lon_0=%s\n"
-                        "sweep=%s\n"
-                        "END\n"
-                    )
-                    % (h, lon_0, swa)
+        pqstr = (
+            "gis c %s gis/images/GOES/%s/channel%02i/%s_C%02i.png %s png"
+        ) % (
+            valid.strftime("%Y%m%d%H%M"),
+            nc.source_scene,
+            channel,
+            bird,
+            channel,
+            valid.strftime("%Y%m%d%H%M%S"),
+        )
+        subprocess.call(
+            "pqinsert -i -p '%s' /tmp/daryl.png" % (pqstr,), shell=True
+        )
+        with open("/tmp/daryl.wld", "w") as fh:
+            args = [dx, 0, 0, dy, x0, y0]
+            fh.write("\n".join([str(s) for s in args]))
+        subprocess.call(
+            "pqinsert -i -p '%s' /tmp/daryl.wld"
+            % (pqstr.replace("png", "wld"),),
+            shell=True,
+        )
+        with open("/tmp/daryl.msinc", "w") as fh:
+            fh.write(
+                (
+                    "PROJECTION\n"
+                    "proj=geos\n"
+                    "h=%s\n"
+                    "lon_0=%s\n"
+                    "sweep=%s\n"
+                    "END\n"
                 )
-            subprocess.call(
-                "pqinsert -i -p '%s' /tmp/daryl.msinc"
-                % (pqstr.replace("png", "msinc"),),
-                shell=True,
+                % (h, lon_0, swa)
             )
+        subprocess.call(
+            "pqinsert -i -p '%s' /tmp/daryl.msinc"
+            % (pqstr.replace("png", "msinc"),),
+            shell=True,
+        )
 
     # np.digitize(data, bins)
 
@@ -105,4 +139,5 @@ def main():
 
 
 if __name__ == "__main__":
+    build_ramps()
     main()
