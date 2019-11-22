@@ -21,10 +21,20 @@ def build_ramps():
     # WV
     RAMPS["wv"] = np.loadtxt("wvramp.txt")
     RAMPS["ir"] = np.loadtxt("irramp.txt")
+    # This is matplotlib's ramp
+    RAMPS["greys"] = np.loadtxt("greysramp.txt")
 
 
 def make_image(nc):
-    """Generate a PIL Image."""
+    """Generate a PIL Image.
+
+    Thanks to help/code from College of Dupage, we have a fighting chance
+    understanding how we should convert the raw netcdf data into PNG with a
+    good color ramp for the data provided by the channel.  Some notes here:
+
+    - The matplotlib Greys_r ramp is not exactly linear.
+
+    """
     channel = nc.channel_id
     ncvar = nc.variables["Sectorized_CMI"]
     data = ncvar[:]
@@ -32,19 +42,19 @@ def make_image(nc):
     valid_max = ncvar.valid_max * ncvar.scale_factor + ncvar.add_offset
 
     # default grayscale
-    colors = np.repeat(range(256), 3)
-    if channel in [1, 2, 3, 4]:
+    colors = RAMPS["greys"][:, 1:].astype("i").ravel()
+    if channel in [1, 2, 3, 4, 5, 6]:
         # guidance is to take square root of data and apply grayscale
         imgdata = data ** 0.5 * 255
     elif channel in [7]:
         imgdata = np.where(data < 242, (418.0 - data), ((330.0 - data) * 2.0))
-        colors = RAMPS["ir"][:, 1:].astype("i").ravel()
-    elif channel in [9, 10]:
+    elif channel in [8, 9, 10]:
         # Convert to Celsius?
         imgdata = np.digitize(data - 273.15, RAMPS["wv"][:, 0])
         colors = RAMPS["wv"][:, 1:].astype("i").ravel()
-    elif channel in [13]:
+    elif channel in [13, 14, 15]:
         imgdata = np.where(data < 242, (418.0 - data), ((330.0 - data) * 2.0))
+        colors = RAMPS["ir"][:, 1:].astype("i").ravel()
     else:
         # scale from min to max
         imgdata = (data - valid_min) / (valid_max - valid_min) * 255.0
@@ -57,7 +67,6 @@ def process(path, fn):
     """Actually process this file!"""
     ncfn = "%s/%s" % (path, fn)
     with Dataset(ncfn) as nc:
-        data = nc.variables["Sectorized_CMI"][:]
         valid = datetime.datetime.strptime(nc.start_date_time, "%Y%j%H%M%S")
         bird = nc.satellite_id
         channel = nc.channel_id

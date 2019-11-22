@@ -18,3 +18,4 @@ parsers/gemglb.nts
 parsers/last.nts
 util/ridge_processor.pid
 /.vscode
+/goes/*.nc
