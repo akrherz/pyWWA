@@ -17,9 +17,11 @@ RAMPS = {}
 SECTORS = {
     "C": "CONUS",
     "HI": "Hawaii",
-    "PR": "Puerto Rico",
+    "PR": "PuertoRico",
     "AK": "Alaska",
     "F": "FullDisk",
+    "M1": "Mesoscale-1",
+    "M2": "Mesoscale-2",
 }
 
 
