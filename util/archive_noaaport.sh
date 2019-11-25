@@ -13,13 +13,11 @@ rm -f ${yyyymmdd}??.txt
 mkdir -p /mesonet/ARCHIVE/raw/noaaport/$yyyy
 
 # Upload this file to box
-# NOTE: once we update lftp, we can do a mkdir -p
+# Requires RHEL8 for the mkdir syntax below to work
 lftp -u akrherz@iastate.edu ftps://ftp.box.com << EOM
 cd NOAAPortText
-mkdir ${yyyy}
-cd ${yyyy}
-mkdir ${mm}
-cd ${mm}
+mkdir -p -f ${yyyy}/${mm}
+cd ${yyyy}/${mm}
 put ${yyyymmdd}.tgz
 bye
 EOM
