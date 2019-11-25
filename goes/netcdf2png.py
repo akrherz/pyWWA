@@ -14,6 +14,13 @@ from netCDF4 import Dataset
 
 DIRPATH = "/mnt/goestemp"
 RAMPS = {}
+SECTORS = {
+    "C": "CONUS",
+    "HI": "Hawaii",
+    "PR": "Puerto Rico",
+    "AK": "Alaska",
+    "F": "FullDisk",
+}
 
 
 def build_ramps():
@@ -63,9 +70,18 @@ def make_image(nc):
     return png
 
 
+def get_sector(fn):
+    """Figure out the label to associate with this file, sigh."""
+    # NB nc.source_scene is not the region of view
+    tokens = fn.split("-")
+    s = tokens[2].replace("CMIP", "")
+    return SECTORS.get(s, s)
+
+
 def process(path, fn):
     """Actually process this file!"""
     ncfn = "%s/%s" % (path, fn)
+    sector = get_sector(fn)
     with Dataset(ncfn) as nc:
         valid = datetime.datetime.strptime(nc.start_date_time, "%Y%j%H%M%S")
         bird = nc.satellite_id
@@ -85,7 +101,7 @@ def process(path, fn):
             "gis c %s gis/images/GOES/%s/channel%02i/%s_C%02i.png %s png"
         ) % (
             valid.strftime("%Y%m%d%H%M"),
-            nc.source_scene,
+            sector,
             channel,
             bird,
             channel,
