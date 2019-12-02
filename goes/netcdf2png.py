@@ -6,12 +6,17 @@ The devil is in the details here :)
 import datetime
 import subprocess
 import traceback
-import inotify.adapters
+import tempfile
+import os
+import sys
 
+import inotify.adapters
 from PIL import Image
 import numpy as np
 from netCDF4 import Dataset
+from pyiem.util import logger
 
+LOG = logger()
 DIRPATH = "/mnt/goestemp"
 RAMPS = {}
 SECTORS = {
@@ -80,10 +85,11 @@ def get_sector(fn):
     return SECTORS.get(s, s)
 
 
-def process(path, fn):
+def process(ncfn):
     """Actually process this file!"""
-    ncfn = "%s/%s" % (path, fn)
-    sector = get_sector(fn)
+    if not os.path.isfile(ncfn):
+        return
+    sector = get_sector(ncfn)
     with Dataset(ncfn) as nc:
         valid = datetime.datetime.strptime(nc.start_date_time, "%Y%j%H%M%S")
         bird = nc.satellite_id
@@ -97,7 +103,9 @@ def process(path, fn):
         x0 = nc.variables["x"][0] / 1e6 * h
         dy = nc.variables["y"].scale_factor / 1e6 * h
         png = make_image(nc)
-        png.save("/tmp/daryl.png")
+        tmpfd = tempfile.NamedTemporaryFile(delete=False)
+        png.save(tmpfd, format="PNG")
+        tmpfd.close()
 
         pqstr = (
             "gis c %s gis/images/GOES/%s/channel%02i/%s_C%02i.png %s png"
@@ -110,17 +118,19 @@ def process(path, fn):
             valid.strftime("%Y%m%d%H%M%S"),
         )
         subprocess.call(
-            "pqinsert -i -p '%s' /tmp/daryl.png" % (pqstr,), shell=True
+            "pqinsert -i -p '%s' %s" % (pqstr, tmpfd.name), shell=True
         )
-        with open("/tmp/daryl.wld", "w") as fh:
-            args = [dx, 0, 0, dy, x0, y0]
-            fh.write("\n".join([str(s) for s in args]))
+        os.unlink(tmpfd.name)
+        tmpfd = tempfile.NamedTemporaryFile(mode="w", delete=False)
+        args = [dx, 0, 0, dy, x0, y0]
+        tmpfd.write("\n".join([str(s) for s in args]))
+        tmpfd.close()
         subprocess.call(
-            "pqinsert -i -p '%s' /tmp/daryl.wld"
-            % (pqstr.replace("png", "wld"),),
+            "pqinsert -i -p '%s' %s"
+            % (pqstr.replace("png", "wld"), tmpfd.name),
             shell=True,
         )
-        with open("/tmp/daryl.msinc", "w") as fh:
+        with open(tmpfd.name, "w") as fh:
             fh.write(
                 (
                     "PROJECTION\n"
@@ -133,16 +143,19 @@ def process(path, fn):
                 % (h, lon_0, swa)
             )
         subprocess.call(
-            "pqinsert -i -p '%s' /tmp/daryl.msinc"
-            % (pqstr.replace("png", "msinc"),),
+            "pqinsert -i -p '%s' %s"
+            % (pqstr.replace("png", "msinc"), tmpfd.name),
             shell=True,
         )
+        os.unlink(tmpfd.name)
 
     # np.digitize(data, bins)
 
 
-def main():
+def main(argv):
     """Go Main Go."""
+    # Shard by bird, either G16 or G17
+    bird = "_%s_" % (argv[1],)
     inotif = inotify.adapters.Inotify()
     inotif.add_watch(DIRPATH)
     try:
@@ -150,15 +163,21 @@ def main():
             if event is None:
                 continue
             (_header, type_names, watch_path, fn) = event
+            # Careful here, it seems like we get the IN_CLOSE_NOWRITE when
+            # we double back with the netcdf read statement above closing.
             if "IN_CLOSE_WRITE" not in type_names:
                 continue
-            if not fn.endswith(".nc"):
+            # LOG.debug("fn: %s type_names: %s", fn, type_names)
+            if not fn.endswith(".nc") or fn.find(bird) == -1:
                 continue
+            ncfn = "%s/%s" % (watch_path, fn)
             try:
-                process(watch_path, fn)
-                subprocess.call("rm -f %s/%s" % (watch_path, fn), shell=True)
+                # LOG.debug("Processing %s", ncfn)
+                process(ncfn)
+                if os.path.isfile(ncfn):
+                    os.unlink(ncfn)
             except Exception as exp:
-                with open("%s/%s.error" % (watch_path, fn), "w") as fp:
+                with open("%s.error" % (ncfn,), "w") as fp:
                     fp.write(str(exp) + "\n")
                     traceback.print_exc(file=fp)
     finally:
@@ -167,4 +186,4 @@ def main():
 
 if __name__ == "__main__":
     build_ramps()
-    main()
+    main(sys.argv)
