@@ -111,7 +111,7 @@ def process(ncfn):
             "gis c %s gis/images/GOES/%s/channel%02i/%s_C%02i.png %s png"
         ) % (
             valid.strftime("%Y%m%d%H%M"),
-            sector,
+            sector.lower(),
             channel,
             bird,
             channel,
