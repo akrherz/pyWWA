@@ -116,7 +116,7 @@ def real_parser(txn, buf):
             report.is_duplicate = True
         PIREPS[report.text] = datetime.datetime.utcnow()
 
-    j = prod.get_jabbers()
+    j = prod.get_jabbers("unused")
     if prod.warnings:
         common.email_error("\n".join(prod.warnings), buf)
     for msg in j:
