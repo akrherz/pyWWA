@@ -1,20 +1,46 @@
 """
-Split the MAV product into bitesized chunks that the AFOS viewer can see
+Chunk the MOS text data into easier to search values.
 """
 import re
-import sys
 
-from pyiem.util import get_dbconn
+from twisted.internet import reactor
+from twisted.python import log
+from pyldm import ldmbridge
 from pyiem.nws import product
+import common  # @UnresolvedImport
+
+DBPOOL = common.get_database("afos")
 
 
-def main():
+class MyProductIngestor(ldmbridge.LDMProductReceiver):
+    """Do what we do!"""
+
+    prods = 0
+
+    def process_data(self, data):
+        """
+        Actual ingestor
+        """
+        self.prods += 1
+        defer = DBPOOL.runInteraction(real_process, data)
+        defer.addErrback(common.email_error, data)
+
+    def connectionLost(self, reason):
+        """
+        Called when ldm closes the pipe
+        """
+        log.msg("processed %s prods" % (self.prods,))
+        reactor.callLater(5, shutdown)
+
+
+def shutdown():
+    """Shutme off"""
+    reactor.callWhenRunning(reactor.stop)
+
+
+def real_process(txn, data):
     """Go!"""
-    pgconn = get_dbconn("afos")
-    cursor = pgconn.cursor()
-
-    payload = getattr(sys.stdin, "buffer", sys.stdin).read()
-    prod = product.TextProduct(payload.decode("ascii", errors="ignore"))
+    prod = product.TextProduct(data)
     prod.valid = prod.valid.replace(second=0, minute=0, microsecond=0)
     offset = prod.unixtext.find(prod.afos[:3]) + 7
     sections = re.split("\n\n", prod.unixtext[offset:])
@@ -28,7 +54,7 @@ def main():
             continue
         # print("%s%s %s %s %s" % (prod.afos[:3], sect[1:4], prod.source,
         #                          prod.valid, prod.wmo))
-        cursor.execute(
+        txn.execute(
             """
             INSERT into """
             + table
@@ -44,10 +70,7 @@ def main():
             ),
         )
 
-    cursor.close()
-    pgconn.commit()
-    pgconn.close()
-
 
 if __name__ == "__main__":
-    main()
+    ldmbridge.LDMProductFactory(MyProductIngestor())
+    reactor.run()
