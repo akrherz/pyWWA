@@ -40,9 +40,10 @@ def shutdown():
 
 def real_process(txn, data):
     """Go!"""
-    prod = product.TextProduct(data)
+    # need to dump non-ascii garbage
+    prod = product.TextProduct(data.encode("ascii", "ignore").decode("ascii"))
     prod.valid = prod.valid.replace(second=0, minute=0, microsecond=0)
-    offset = prod.unixtext.find(prod.afos[:3]) + 7
+    offset = prod.unixtext.find(prod.afos[:3]) + 8
     sections = re.split("\n\n", prod.unixtext[offset:])
 
     table = "products_%s_0106" % (prod.valid.year,)
@@ -63,7 +64,7 @@ def real_process(txn, data):
         """,
             (
                 prod.afos[:3] + sect[1:4],
-                prod.text[:offset] + sect,
+                prod.unixtext[: offset - 1] + sect,
                 prod.source,
                 prod.valid,
                 prod.wmo,
