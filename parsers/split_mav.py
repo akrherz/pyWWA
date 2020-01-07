@@ -50,7 +50,9 @@ def real_process(txn, data):
     )
     raw = prod.unixtext + "\n"
     raw = raw.replace("\n", "___").replace("\x1e", "")
-    sections = re.findall(r"([A-Z0-9]{4}\s+... ... GUIDANCE .*?)______", raw)
+    sections = re.findall(
+        r"([A-Z0-9]{4}\s+[A-Z]{3,4} MOS GUIDANCE .*?)______", raw
+    )
 
     table = "products_%s_0106" % (prod.valid.year,)
     if prod.valid.month > 6:
