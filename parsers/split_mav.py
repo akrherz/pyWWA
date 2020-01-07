@@ -40,19 +40,23 @@ def shutdown():
 
 def real_process(txn, data):
     """Go!"""
-    # need to dump non-ascii garbage
-    prod = product.TextProduct(data.encode("ascii", "ignore").decode("ascii"))
-    prod.valid = prod.valid.replace(second=0, minute=0, microsecond=0)
-    offset = prod.unixtext.find(prod.afos[:3]) + 8
-    sections = re.split("\n\n", prod.unixtext[offset:])
+    prod = product.TextProduct(data)
+    # replicate functionality in pyiem/nws/products/mos.py
+    header = "000 \n%s %s %s\n%s\n" % (
+        prod.wmo,
+        prod.source,
+        prod.valid.strftime("%d%H%M"),
+        prod.afos,
+    )
+    raw = prod.unixtext + "\n"
+    raw = raw.replace("\n", "___").replace("\x1e", "")
+    sections = re.findall(r"([A-Z0-9]{4}\s+... ... GUIDANCE .*?)______", raw)
 
     table = "products_%s_0106" % (prod.valid.year,)
     if prod.valid.month > 6:
         table = "products_%s_0712" % (prod.valid.year,)
 
     for sect in sections:
-        if sect[1:4].strip() == "":
-            continue
         # print("%s%s %s %s %s" % (prod.afos[:3], sect[1:4], prod.source,
         #                          prod.valid, prod.wmo))
         txn.execute(
@@ -64,7 +68,7 @@ def real_process(txn, data):
         """,
             (
                 prod.afos[:3] + sect[1:4],
-                prod.unixtext[: offset - 1] + sect,
+                header + sect.replace("___", "\n"),
                 prod.source,
                 prod.valid,
                 prod.wmo,
