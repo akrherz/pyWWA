@@ -50,16 +50,19 @@ def real_process(data):
 
     # Strip off stuff at the top
     msg = MIMEText(prod.unixtext[2:], "plain", "utf-8")
-    # Send the email already!
-    msg["subject"] = prod.afos
-    if prod.afos[:3] == "ADM":
-        msg["subject"] = "ADMIN NOTICE %s" % (prod.afos[3:],)
-    elif prod.afos[:3] == "RER":
-        msg["subject"] = "[RER] %s %s" % (prod.source, prod.afos[3:])
+    # some products have no AWIPS ID, sigh
+    subject = prod.wmo
+    if prod.afos is not None:
+        subject = prod.afos
+        if prod.afos[:3] == "ADM":
+            subject = "ADMIN NOTICE %s" % (prod.afos[3:],)
+        elif prod.afos[:3] == "RER":
+            subject = "[RER] %s %s" % (prod.source, prod.afos[3:])
+            if prod.source in IOWA_WFOS:
+                msg["Cc"] = "Justin.Glisan@iowaagriculture.gov"
+    msg["subject"] = subject
     msg["From"] = common.SETTINGS.get("pywwa_errors_from", "ldm@localhost")
     msg["To"] = "akrherz@iastate.edu"
-    if prod.afos[:3] == "RER" and prod.source in IOWA_WFOS:
-        msg["Cc"] = "Justin.Glisan@iowaagriculture.gov"
     df = smtp.sendmail(
         common.SETTINGS.get("pywwa_smtp", "smtp"), msg["From"], msg["To"], msg
     )
