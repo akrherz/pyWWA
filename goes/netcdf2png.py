@@ -7,6 +7,7 @@ import datetime
 import subprocess
 import traceback
 import tempfile
+import json
 import os
 import sys
 
@@ -103,53 +104,56 @@ def process(ncfn):
         x0 = nc.variables["x"][0] / 1e6 * h
         dy = nc.variables["y"].scale_factor / 1e6 * h
         png = make_image(nc)
-        tmpfd = tempfile.NamedTemporaryFile(delete=False)
-        png.save(tmpfd, format="PNG")
-        tmpfd.close()
 
-        pqstr = (
-            "gis c %s gis/images/GOES/%s/channel%02i/%s_C%02i.png %s png"
-        ) % (
-            valid.strftime("%Y%m%d%H%M"),
-            sector.lower(),
-            channel,
-            bird,
-            channel,
-            valid.strftime("%Y%m%d%H%M%S"),
-        )
-        subprocess.call(
-            "pqinsert -i -p '%s' %s" % (pqstr, tmpfd.name), shell=True
-        )
-        os.unlink(tmpfd.name)
-        tmpfd = tempfile.NamedTemporaryFile(mode="w", delete=False)
-        args = [dx, 0, 0, dy, x0, y0]
-        tmpfd.write("\n".join([str(s) for s in args]))
-        tmpfd.close()
-        subprocess.call(
-            "pqinsert -i -p '%s' %s"
-            % (pqstr.replace("png", "wld"), tmpfd.name),
-            shell=True,
-        )
-        with open(tmpfd.name, "w") as fh:
-            fh.write(
-                (
-                    "PROJECTION\n"
-                    "proj=geos\n"
-                    "h=%s\n"
-                    "lon_0=%s\n"
-                    "sweep=%s\n"
-                    "END\n"
-                )
-                % (h, lon_0, swa)
+    tmpfd = tempfile.NamedTemporaryFile(delete=False)
+    png.save(tmpfd, format="PNG")
+    tmpfd.close()
+
+    pqstr = ("gis c %s gis/images/GOES/%s/channel%02i/%s_C%02i.png %s png") % (
+        valid.strftime("%Y%m%d%H%M"),
+        sector.lower(),
+        channel,
+        bird,
+        channel,
+        valid.strftime("%Y%m%d%H%M%S"),
+    )
+    subprocess.call("pqinsert -i -p '%s' %s" % (pqstr, tmpfd.name), shell=True)
+    os.unlink(tmpfd.name)
+    tmpfd = tempfile.NamedTemporaryFile(mode="w", delete=False)
+    args = [dx, 0, 0, dy, x0, y0]
+    tmpfd.write("\n".join([str(s) for s in args]))
+    tmpfd.close()
+    subprocess.call(
+        "pqinsert -i -p '%s' %s" % (pqstr.replace("png", "wld"), tmpfd.name),
+        shell=True,
+    )
+    with open(tmpfd.name, "w") as fh:
+        fh.write(
+            (
+                "PROJECTION\n"
+                "proj=geos\n"
+                "h=%s\n"
+                "lon_0=%s\n"
+                "sweep=%s\n"
+                "END\n"
             )
-        subprocess.call(
-            "pqinsert -i -p '%s' %s"
-            % (pqstr.replace("png", "msinc"), tmpfd.name),
-            shell=True,
+            % (h, lon_0, swa)
         )
-        os.unlink(tmpfd.name)
+    subprocess.call(
+        "pqinsert -i -p '%s' %s" % (pqstr.replace("png", "msinc"), tmpfd.name),
+        shell=True,
+    )
 
-    # np.digitize(data, bins)
+    # Make the json metadata file
+    meta = {"meta": {"valid": valid.strftime("%Y-%m-%dT%H:%M:%SZ")}}
+    with open(tmpfd.name, "w") as fh:
+        fh.write(json.dumps(meta))
+    subprocess.call(
+        "pqinsert -i -p '%s' %s" % (pqstr.replace("png", "json"), tmpfd.name),
+        shell=True,
+    )
+
+    os.unlink(tmpfd.name)
 
 
 def main(argv):
