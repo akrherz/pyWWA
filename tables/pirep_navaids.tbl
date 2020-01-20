@@ -63,8 +63,10 @@ CAY4            Hartley Bay                      -- CA  5342 -12925     0  0
 CAZ5            Cache Creek                      -- CA  5078 -12132     0  0
 CBB7            Tipella                          -- CA  4974 -12216     0  0
 CBB9            Osoyoos                          -- CA  4904 -11949     0  0
+CBC7            Vancouver Heliport               -- CA  4949 -12311     0  0
 CBD6            Nahanni Butte                    -- CA  6103 -12339     0  0
 CBE2            Elko                             -- CA  4928 -11515     0  0
+CBE3            Beamsville                       -- CA  4319  -7947     0  0
 CBE9            Whistler                         -- CA  5017 -12290     0  0
 CBF5            Mayne Island                     -- CA  4885 -12328     0  0
 CBF6            Prince Rupert                    -- CA  5433 -13028     0  0
@@ -333,6 +335,7 @@ CKZ7            Winkler                          -- CA  4917  -9792     0  0
 # CLH4
 # CLJ2
 CLM2            Leamington                       -- CA  4203  -8253     0  0
+CLM5            Lake Muskoka                     -- CA  4496  -7943     0  0
 # CLT2
 CMB2            Meadowbank                       -- CA  6503  -9607     0  0
 CMB7            Maxville                         -- CA  4525  -7481     0  0
@@ -341,6 +344,7 @@ CMB7            Maxville                         -- CA  4525  -7481     0  0
 # CML2
 CMN5            Manic-5                          -- CA  5066  -6883     0  0
 CMR2            Mary River                       -- CA  7132  -7935     0  0
+CMX2            Maxville                         -- CA  4530  -7485     0  0
 CNA3            Springwater Barrie               -- CA  4441  -7973     0  0
 CNA4            Emsdale                          -- CA  4555  -7935     0  0
 CNA9            Tomvale                          -- CA  4492  -7694     0  0
@@ -383,6 +387,7 @@ CNU8            Markham                          -- CA  4394  -7962     0  0
 # CNV4            
 CNV8            Edenvale                         -- CA  4444  -7997     0  0
 CNV9            Neuville                         -- CA  4672  -7158     0  0
+CNW9            Vancouver/New Westminister       -- CA  4923 -12289     0  0
 CNY3            Collingwood                      -- CA  4445  -8016     0  0
 CNY4            Alliston                         -- CA  4418  -7983     0  0
 CNZ4            Barrys Bay                       -- CA  4550  -7764     0  0
