@@ -150,7 +150,8 @@ def process(ncfn):
         "generated_at": utc().strftime(ISO),
         "meta": {
             "valid": valid.strftime(ISO),
-            "proj4str": "+proj=geos h=%s lon_0=%s sweep=%s" % (h, lon_0, swa),
+            "proj4str": "+proj=geos +h=%s +lon_0=%s +sweep=%s"
+            % (h, lon_0, swa),
         },
     }
     with open(tmpfd.name, "w") as fh:
