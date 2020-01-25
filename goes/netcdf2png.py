@@ -15,9 +15,10 @@ import inotify.adapters
 from PIL import Image
 import numpy as np
 from netCDF4 import Dataset
-from pyiem.util import logger
+from pyiem.util import logger, utc
 
 LOG = logger()
+ISO = "%Y-%m-%dT%H:%M:%SZ"
 DIRPATH = "/mnt/goestemp"
 RAMPS = {}
 SECTORS = {
@@ -145,7 +146,13 @@ def process(ncfn):
     )
 
     # Make the json metadata file
-    meta = {"meta": {"valid": valid.strftime("%Y-%m-%dT%H:%M:%SZ")}}
+    meta = {
+        "generated_at": utc().strftime(ISO),
+        "meta": {
+            "valid": valid.strftime(ISO),
+            "proj4str": "+proj=geos h=%s lon_0=%s sweep=%s" % (h, lon_0, swa),
+        },
+    }
     with open(tmpfd.name, "w") as fh:
         fh.write(json.dumps(meta))
     subprocess.call(
