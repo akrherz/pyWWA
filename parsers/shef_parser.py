@@ -272,7 +272,7 @@ def async_func(data):
     proc.deferred = defer
     proc.deferred.addErrback(log.err)
 
-    reactor.spawnProcess(proc, "shefit", ["shefit"], {})
+    reactor.spawnProcess(proc, "./shefit", ["shefit"], {})
     return proc.deferred
 
 
