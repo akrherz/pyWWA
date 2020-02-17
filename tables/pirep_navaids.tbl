@@ -105,7 +105,7 @@ CCA3            Cable Head                       -- CA  4644  -6259     0  0
 CCD2            Springdale                       -- CA  4948  -5618     0  0
 CCD3            Woodstock                        -- CA  4615  -6755     0  0
 CCD4            Postville                        -- CA  5491  -5979     0  0
-# CCH3
+CCH3            Canmore Heliport                 -- CA  5109 -11535     0  0
 CCH4            Charlottetown                    -- CA  5277  -5611     0  0
 CCI9            Cortes Island                    -- CA  5002 -12498     0  0
 CCK3            Grand Falls                      -- CA  4708  -6769     0  0
@@ -259,6 +259,7 @@ CJE3            Weyburn                          -- CA  4970 -10380     0  0
 CJE4            Snow Lake                        -- CA  5490  -9982     0  0
 CJE7            Ashern                           -- CA  5116  -9833     0  0
 CJF3            LLe-a-la-Crosse                  -- CA  5549 -10793     0  0
+CJF4            Buffalo Jaques                   -- CA  5086 -11065     0  0
 CJF8            Biggar                           -- CA  5205 -10799     0  0
 CJG2            Eatonia                          -- CA  5122 -10939     0  0
 CJK2            Gunisao Lake                     -- CA  5352  -9637     0  0
@@ -434,6 +435,7 @@ CRD5            Red Deer                         -- CA  5269 -11392     0  0
 CRE2            Edzo                             -- CA  6277 -11608     0  0
 # CRF2
 # CRF5
+CRF6            Quamichan Lake                   -- CA  4881 -12365     0  0
 CRJ2            Stoney Point                     -- CA  4229  -8260     0  0
 CRL2            Westport                         -- CA  4467  -7640     0  0
 CRL4            Kirby Lake                       -- CA  5536 -11064     0  0
@@ -464,6 +466,7 @@ CSM3            Thetford Mines                   -- CA  4605  -7126     0  0
 CSM5            St Michel Des Saints             -- CA  4668  -7399     0  0
 CSN3            St Jerome                        -- CA  4578  -7406     0  0
 CSN7            Farnham                          -- CA  4529  -7301     0  0
+CSP2            Stony Plain Westview             -- CA  5355 -11398     0  0
 CSP3            Stony Plain                      -- CA  5354 -11407     0  0
 CSP5            St Mathias                       -- CA  4550  -7324     0  0
 CSQ2            Shuswap                          -- CA  5088 -11959     0  0
