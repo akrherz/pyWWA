@@ -75,7 +75,8 @@ def save_data(txn, prod, station, data):
         snow_dec1, precip_dec1, precip_dec1_normal, precip_jan1_normal,
         high_time, low_time, snow_record_years, snow_record,
         snow_jun1_normal, snow_jul1_normal, snow_dec1_normal,
-        snow_month_normal, precip_jun1, precip_jun1_normal)
+        snow_month_normal, precip_jun1, precip_jun1_normal,
+        average_sky_cover)
         VALUES (
         %s, %s, %s, %s, %s, %s,
         %s, %s, %s, %s, %s,
@@ -85,7 +86,8 @@ def save_data(txn, prod, station, data):
         %s, %s,
         %s, %s, %s, %s,
         %s, %s, %s, %s,
-        %s, %s, %s, %s, %s, %s
+        %s, %s, %s, %s, %s, %s,
+        %s
         )
     """,
         (
@@ -126,6 +128,7 @@ def save_data(txn, prod, station, data):
             data["data"].get("snow_month_normal"),
             data["data"].get("precip_jun1"),
             data["data"].get("precip_jun1_normal"),
+            data["data"].get("average_sky_cover"),
         ),
     )
 
