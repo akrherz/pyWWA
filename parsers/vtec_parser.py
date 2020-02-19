@@ -15,9 +15,10 @@ import datetime
 import sys
 
 import pytz
+from bs4 import BeautifulSoup
+import treq
 from twisted.python import log
 from twisted.internet import reactor
-from twisted.web.client import HTTPClientFactory
 from twisted.mail.smtp import SMTPSenderFactory
 from pyldm import ldmbridge
 from pyiem.nws.products.vtec import parser as vtecparser
@@ -92,7 +93,43 @@ def step2(_dummy, text_product):
         if xtra.get("channels", "") == "":
             common.email_error("xtra[channels] is empty!", text_product.text)
         if not MANUAL:
-            jabber.send_message(plain, html, xtra)
+            send_jabber_message(plain, html, xtra)
+
+
+def send_jabber_message(plain, html, extra):
+    """Some hacky logic to get ahead of web crawlers."""
+
+    def _send(*_args, **_kwargs):
+        """Just send it already :("""
+        jabber.send_message(plain, html, extra)
+
+    def _cbBody(body):
+        """Finally got the HTML"""
+        soup = BeautifulSoup(body, "html.parser")
+        url = soup.find("meta", property="og:image")["content"]
+        url = url.replace("https", "http").replace(
+            "mesonet.agron.iastate.edu", "iem.local"
+        )
+        d = treq.get(url)
+        d.addCallback(_send)
+        d.addErrback(_send)
+
+    def _cb(response):
+        """Got a response."""
+        d = treq.text_content(response)
+        d.addCallback(_cbBody)
+        d.addErrback(_send)
+
+    url = plain.split()[-1]
+    if url.find("/f/") > 0:
+        url = url.replace("https", "http").replace(
+            "mesonet.agron.iastate.edu", "iem.local"
+        )
+        d = treq.get(url)
+        d.addCallback(_cb)
+        d.addErrback(_send)
+    else:
+        _send()
 
 
 def load_ugc(txn):
@@ -142,7 +179,6 @@ def bootstrap():
 
 
 if __name__ == "__main__":
-    HTTPClientFactory.noisy = False
     SMTPSenderFactory.noisy = False
     ugc_dict = {}
     nwsli_dict = {}
