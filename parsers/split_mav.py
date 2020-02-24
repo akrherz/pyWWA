@@ -49,9 +49,10 @@ def real_process(txn, data):
         prod.afos,
     )
     raw = prod.unixtext + "\n"
-    raw = raw.replace("\n", "___").replace("\x1e", "")
+    raw = raw.replace("\n", ";;;").replace("\x1e", "")
     sections = re.findall(
-        r"([A-Z0-9]{4}\s+[A-Z]{3,4} MOS GUIDANCE .*?)______", raw
+        r"([A-Z0-9_]{3,10}\s+....? V?[0-9]?\.?[0-9]?\s?... GUIDANCE .*?);;;;;;",
+        raw,
     )
 
     table = "products_%s_0106" % (prod.valid.year,)
@@ -59,6 +60,9 @@ def real_process(txn, data):
         table = "products_%s_0712" % (prod.valid.year,)
 
     for sect in sections:
+        # Only take 4 char IDs :/
+        if len(sect[:100].split()[0]) != 4:
+            continue
         # print("%s%s %s %s %s" % (prod.afos[:3], sect[1:4], prod.source,
         #                          prod.valid, prod.wmo))
         txn.execute(
@@ -70,7 +74,7 @@ def real_process(txn, data):
         """,
             (
                 prod.afos[:3] + sect[1:4],
-                header + sect.replace("___", "\n"),
+                header + sect.replace(";;;", "\n"),
                 prod.source,
                 prod.valid,
                 prod.wmo,
