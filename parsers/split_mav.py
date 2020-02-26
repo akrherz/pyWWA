@@ -49,17 +49,17 @@ def real_process(txn, data):
         prod.afos,
     )
     raw = prod.unixtext + "\n"
-    raw = raw.replace("\n", ";;;").replace("\x1e", "")
-    sections = re.findall(
-        r"([A-Z0-9_]{3,10}\s+....? V?[0-9]?\.?[0-9]?\s?... GUIDANCE .*?);;;;;;",
-        raw,
-    )
-
-    table = "products_%s_0106" % (prod.valid.year,)
-    if prod.valid.month > 6:
-        table = "products_%s_0712" % (prod.valid.year,)
+    # Since we only do realtime processing, this is OK, I hope
+    sections = raw.split("\x1e")
 
     for sect in sections:
+        tokens = re.findall(
+            r"(^[A-Z0-9_]{3,10}\s+....? V?[0-9]?\.?[0-9]?\s?... GUIDANCE)",
+            sect,
+        )
+        if not tokens:
+            # log.msg("Nothing found in section of len=%s" % (len(sect), ))
+            continue
         # Only take 4 char IDs :/
         if len(sect[:100].split()[0]) != 4:
             continue
@@ -67,9 +67,7 @@ def real_process(txn, data):
         #                          prod.valid, prod.wmo))
         txn.execute(
             """
-            INSERT into """
-            + table
-            + """
+            INSERT into products
             (pil, data, source, entered, wmo) values (%s, %s, %s, %s, %s)
         """,
             (
