@@ -583,27 +583,32 @@ def process_site(prod, sid, ts, data):
     iscoop = network.find("COOP") > 0
     hasdata = False
     for var in data:
-        if data[var] < -9998:
-            continue
+        # shefit uses -9999 as a missing sentinel
+        val = None if data[var] < -9998 else data[var]
         iemvar = MAPPING[var]
         if iemvar == "":
             continue
+        if val is None:
+            # Behold, glorious hack here to force nulls into the summary
+            # database that uses coerce
+            iemob.data["null_%s" % (iemvar,)] = None
+        else:
+            val *= MULTIPLIER.get(var[:2], 1.0)
         hasdata = True
-        myval = data[var] * MULTIPLIER.get(var[:2], 1.0)
-        iemob.data[MAPPING[var]] = myval
+        iemob.data[iemvar] = val
         if MAPPING[var] in ["pday", "snow", "snowd"]:
             # Convert 0.001 to 0.0001 for Trace values
-            if myval == 0.001:
-                iemob.data[MAPPING[var]] = TRACE_VALUE
+            if val is not None and val == 0.001:
+                iemob.data[iemvar] = TRACE_VALUE
             # Prevent negative numbers
-            elif myval < 0:
-                iemob.data[MAPPING[var]] = 0
+            elif val is not None and val < 0:
+                iemob.data[iemvar] = 0
         if iscoop:
             # Save COOP 'at-ob' temperature into summary table
-            if MAPPING[var] == "tmpf":
-                iemob.data["coop_tmpf"] = myval
+            if iemvar == "tmpf":
+                iemob.data["coop_tmpf"] = val
             # Save observation time into the summary table
-            if MAPPING[var] in [
+            if iemvar in [
                 "tmpf",
                 "max_tmpf",
                 "min_tmpf",
