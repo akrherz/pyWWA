@@ -84,7 +84,7 @@ def load_stations(txn):
         if tzname not in TIMEZONES:
             try:
                 TIMEZONES[tzname] = pytz.timezone(tzname)
-            except Exception as exp:
+            except Exception:
                 log.msg("pytz does not like tzname: %s" % (tzname,))
                 TIMEZONES[tzname] = pytz.utc
 
@@ -238,6 +238,8 @@ def shutdown():
 
 class MyProductIngestor(ldmbridge.LDMProductReceiver):
     """My actual ingestor"""
+
+    jobs = []
 
     def connectionLost(self, reason):
         """stdin was closed"""
@@ -661,6 +663,7 @@ def service_guard(jobs):
         % (
             len(jobs.waiting),
             len(jobs.pending),
+            # pylint: disable=protected-access
             HADSDB.threadpool._queue.qsize(),
             ACCESSDB.threadpool._queue.qsize(),
         )
@@ -670,7 +673,7 @@ def service_guard(jobs):
         shutdown()
 
 
-def main(res):
+def main(_res):
     """
     Go main Go!
     """
@@ -690,12 +693,14 @@ def main(res):
 
 
 def fullstop(err):
+    """more forcable stop."""
     log.msg("fullstop() called...")
     log.err(err)
     reactor.stop()
 
 
 def bootstrap():
+    """We startup."""
     # Necessary for the shefit program to run A-OK
     mydir = os.path.dirname(os.path.abspath(__file__))
     path = os.path.normpath(os.path.join(mydir, "..", "shef_workspace"))
