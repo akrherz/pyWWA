@@ -109,8 +109,10 @@ def real_processor(text):
 
 def do_db(txn, mtr):
     """Do database transaction"""
+    # We always want data to at least go to current_log incase we are getting
+    # data out of order :/
     iem, res = mtr.to_iemaccess(
-        txn, force_current_log=MANUAL, skip_current=MANUAL
+        txn, force_current_log=True, skip_current=MANUAL
     )
     if not res:
         log.msg(
