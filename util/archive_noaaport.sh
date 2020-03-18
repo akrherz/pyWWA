@@ -12,16 +12,8 @@ tar -czf ${yyyymmdd}.tgz ${yyyymmdd}??.txt
 rm -f ${yyyymmdd}??.txt
 mkdir -p /mesonet/ARCHIVE/raw/noaaport/$yyyy
 
-# Upload this file to box
-# Requires RHEL8 for the mkdir syntax below to work
-lftp -u akrherz@iastate.edu ftps://ftp.box.com << EOM
-cd NOAAPortText
-mkdir -p -f ${yyyy}/${mm}
-cd ${yyyy}/${mm}
-put ${yyyymmdd}.tgz
-bye
-EOM
-
+rpath="/stage/NOAAPortText/${yyyy}/${mm}"
+rsync -a --rsync-path "mkdir -p $rpath && rsync" ${yyyymmdd}.tgz meteor_ldm@metl60.agron.iastate.edu:$rpath
 
 mv ${yyyymmdd}.tgz /mesonet/ARCHIVE/raw/noaaport/$yyyy/
 # END
