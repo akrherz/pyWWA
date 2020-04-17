@@ -17,18 +17,9 @@ def main():
 
     nws = product.TextProduct(raw)
 
-    gmt = nws.valid
-    table = "products_%s_0106" % (gmt.year,)
-    if gmt.month > 6:
-        table = "products_%s_0712" % (gmt.year,)
-
     sql = (
-        """
-        INSERT into """
-        + table
-        + """(pil, data, source, wmo, entered)
-        values(%s,%s,%s,%s,%s)
-    """
+        "INSERT into products (pil, data, source, wmo, entered) "
+        "values(%s,%s,%s,%s,%s) "
     )
     for token in tokens:
         sqlargs = (
@@ -36,7 +27,7 @@ def main():
             token.replace("z", "\n"),
             nws.source,
             nws.wmo,
-            gmt.strftime("%Y-%m-%d %H:%M+00"),
+            nws.valid.strftime("%Y-%m-%d %H:%M+00"),
         )
         acursor.execute(sql, sqlargs)
 

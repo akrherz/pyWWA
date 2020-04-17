@@ -69,16 +69,10 @@ def really_process_data(txn, data):
     tp = TextProduct(data)
     if tp.afos is None:
         compute_afos(tp)
-    utc = tp.valid
-    table = "products_%s_0106" % (utc.year,)
-    if utc.month > 6:
-        table = "products_%s_0712" % (utc.year,)
 
     sql = (
-        """INSERT into """
-        + table
-        + """
-        (pil, data, source, wmo, entered) values(%s,%s,%s,%s,%s)"""
+        "INSERT into products "
+        "(pil, data, source, wmo, entered) values(%s,%s,%s,%s,%s)"
     )
 
     sqlargs = (
@@ -86,7 +80,7 @@ def really_process_data(txn, data):
         tp.text,
         tp.source,
         tp.wmo,
-        utc.strftime("%Y-%m-%d %H:%M+00"),
+        tp.valid.strftime("%Y-%m-%d %H:%M+00"),
     )
     txn.execute(sql, sqlargs)
 

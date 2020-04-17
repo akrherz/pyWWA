@@ -24,21 +24,10 @@ def main():
     gmt = utcnow.replace(tzinfo=pytz.utc)
     gmt = gmt.replace(second=0)
 
-    table = "products_%s_0106" % (gmt.year,)
-    if gmt.month > 6:
-        table = "products_%s_0712" % (gmt.year,)
-
     for token in tokens:
         # print(tokens)
-        sql = (
-            """
-        INSERT into """
-            + table
-            + """
-        (pil, data, entered) values(%s,%s,%s)
-        """
-        )
-        sqlargs = ("%s%s" % ("RR7", token[3:6]), token.replace("z", "\n"), gmt)
+        sql = "INSERT into products (pil, data, entered) values(%s,%s,%s)"
+        sqlargs = (f"RR7{token[3:6]}", token.replace("z", "\n"), gmt)
         acursor.execute(sql, sqlargs)
 
     acursor.close()

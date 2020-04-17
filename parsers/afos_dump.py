@@ -89,11 +89,6 @@ def real_parser(txn, buf):
     ):
         raise ParseError("Very Latent Product! %s" % (nws.valid,))
 
-    if nws.valid.month > 6:
-        table = "products_%s_0712" % (nws.valid.year,)
-    else:
-        table = "products_%s_0106" % (nws.valid.year,)
-
     if nws.afos is None:
         if MANUAL or nws.source[0] not in ["K", "P"]:
             return
@@ -102,24 +97,16 @@ def real_parser(txn, buf):
     # Run the database transaction
     if MANUAL:
         txn.execute(
-            """
-            SELECT * from """
-            + table
-            + """ WHERE
-            pil = %s and entered = %s and source = %s and wmo = %s
-        """,
+            "SELECT * from products WHERE "
+            "pil = %s and entered = %s and source = %s and wmo = %s ",
             (nws.afos.strip(), nws.valid, nws.source, nws.wmo),
         )
         if txn.rowcount == 1:
             log.msg("Duplicate: %s" % (nws.get_product_id(),))
             return
     txn.execute(
-        """
-        INSERT into """
-        + table
-        + """(pil, data, entered,
-        source, wmo) VALUES(%s, %s, %s, %s, %s)
-    """,
+        "INSERT into products (pil, data, entered, "
+        "source, wmo) VALUES(%s, %s, %s, %s, %s)",
         (nws.afos.strip(), nws.text, nws.valid, nws.source, nws.wmo),
     )
     if MANUAL or nws.afos[:3] in MEMCACHE_EXCLUDE:
