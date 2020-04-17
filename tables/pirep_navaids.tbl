@@ -190,6 +190,7 @@ CER4            Fort McMurray                    -- CA  5706 -11158     0  0
 CES4            Westlock                         -- CA  5414 -11374     0  0
 CET2            Conklin                          -- CA  5570 -11128     0  0
 CEU2            Beaverlodge                      -- CA  5518 -11945     0  0
+CEU8            Norman Wells                     -- CA  6526 -12669     0  0
 CEU9            Trout Lake                       -- CA  6042 -12127     0  0
 CEV3            Vegreville                       -- CA  5351 -11203     0  0
 CEV5            Mayerthorpe                      -- CA  5394 -11518     0  0
@@ -332,7 +333,7 @@ CKY2            Whitewood                        -- CA  5033 -10227     0  0
 CKZ3            Elk Island                       -- CA  5467  -9415     0  0
 CKZ7            Winkler                          -- CA  4917  -9792     0  0
 # CLA4
-# CLA6
+CLA6            Lancaster Airpark                -- CA  4520  -7436     0  0
 # CLD3
 # CLH4
 # CLJ2
@@ -442,7 +443,7 @@ CRL2            Westport                         -- CA  4467  -7640     0  0
 CRL4            Kirby Lake                       -- CA  5536 -11064     0  0
 CRL7            Reindeer Lake                    -- CA  5729 -10253     0  0
 # CRS2
-# CSB2
+CSB2            Sable Island                     -- CA  4393  -5996     0  0
 CSB3            St Mathieu De Beloeil            -- CA  4559  -7324     0  0
 CSC3            Drummondville                    -- CA  4585  -7239     0  0
 CSC5            Lake Etchemin                    -- CA  4641  -7050     0  0
@@ -458,7 +459,7 @@ CSG3            Joliette                         -- CA  4605  -7350     0  0
 CSH2            Isle-aux-Grues                   -- CA  4707  -7053     0  0
 CSH4            Lebel-sur-quevillion             -- CA  4903  -7702     0  0
 CSH5            St Ferdinand                     -- CA  4613  -7154     0  0
-# CSH6
+CSH6            Montreal / Les Cedres            -- CA  4535  -7408     0  0
 CSJ4            Louiseville                      -- CA  4625  -7290     0  0
 CSK3            Mascouche                        -- CA  4572  -7360     0  0
 # CSK8
@@ -524,6 +525,7 @@ CYCC            Cornwall                         ON CA  4509  -7456     0  0
 CYCD            Nanaimo                          -- CA  4905 -12387     0  0
 CYCE            Centralia                        -- CA  4329  -8151     0  0
 # CYCF
+CYCH            Miramichi                        -- CA  4701  -6546     0  0
 CYCN            Cochrane                         -- CA  4911  -8101     0  0
 CYCR            Cross Lake                       -- CA  5461  -9776     0  0
 CYCT            Coronation Marine                -- CA  5208 -11145     0  0
@@ -581,6 +583,7 @@ CYOQ            Eddy Point                       NS CA  4352  -6125     0  0
 CYPM            Pokangikum                       -- CA  5182  -9397     0  0
 CYPN            Port Menier Man                  -- CA  4984  -6429     0  0
 CYPP            Parent                           -- CA  4793  -7461     0  0
+CYPS            Pemberton                        -- CA  5030 -12274     0  0
 CYQB            Quebec                           -- CA  4679  -7139     0  0
 CYQN            Nakina                           ON CA  5018  -8670     0  0
 CYQO            Clear Creek                      -- CA  4258  -8057     0  0
@@ -616,6 +619,7 @@ CZAM            Salmon                           BC CA  5068 -11923     0  0
 CZBA            Burlington                       ON CA  4344  -7985     0  0
 CZBD            Ilford                           MB CA  5606  -9561     0  0
 CZBM            Bromont                          -- CA  4529  -7274     0  0
+# CZE3
 CZEE            Kelsey                           MB CA  5604  -9651     0  0
 CZEG            Edmonton Centre ACC              AB CA  5331 -11358     0  0
 CZFG            Pukatawagan                      -- CA  5575 -10126     0  0
