@@ -33,106 +33,6 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
         deffer.addErrback(common.email_error, data)
 
 
-def save_data(txn, prod, station, data):
-    """ Save atomic data to cli_data table """
-    # Use four char here
-    station = "%s%s" % (prod.source[0], station)
-    station = HARDCODED.get(station, station)
-
-    if station not in NT.sts:
-        common.email_error(
-            "Unknown CLI Station: %s" % (station,), prod.unixtext
-        )
-
-    txn.execute(
-        """
-    SELECT product from cli_data where station = %s and valid = %s
-    """,
-        (station, data["cli_valid"]),
-    )
-    if txn.rowcount == 1:
-        row = txn.fetchone()
-        if prod.get_product_id() < row["product"]:
-            print(
-                ("Skip save of %s as previous %s row newer?")
-                % (prod.get_product_id(), row["product"])
-            )
-            return
-        txn.execute(
-            """DELETE from cli_data WHERE station = %s and valid = %s
-        """,
-            (station, data["cli_valid"]),
-        )
-
-    txn.execute(
-        """INSERT into cli_data(
-        station, product, valid, high, high_normal, high_record,
-        high_record_years, low, low_normal, low_record, low_record_years,
-        precip, precip_month, precip_jan1, precip_jul1, precip_normal,
-        precip_record,
-        precip_record_years, precip_month_normal, snow, snow_month,
-        snow_jun1, snow_jul1,
-        snow_dec1, precip_dec1, precip_dec1_normal, precip_jan1_normal,
-        high_time, low_time, snow_record_years, snow_record,
-        snow_jun1_normal, snow_jul1_normal, snow_dec1_normal,
-        snow_month_normal, precip_jun1, precip_jun1_normal,
-        average_sky_cover)
-        VALUES (
-        %s, %s, %s, %s, %s, %s,
-        %s, %s, %s, %s, %s,
-        %s, %s, %s, %s, %s,
-        %s,
-        %s, %s, %s, %s,
-        %s, %s,
-        %s, %s, %s, %s,
-        %s, %s, %s, %s,
-        %s, %s, %s, %s, %s, %s,
-        %s
-        )
-    """,
-        (
-            station,
-            prod.get_product_id(),
-            data["cli_valid"],
-            data["data"].get("temperature_maximum"),
-            data["data"].get("temperature_maximum_normal"),
-            data["data"].get("temperature_maximum_record"),
-            data["data"].get("temperature_maximum_record_years", []),
-            data["data"].get("temperature_minimum"),
-            data["data"].get("temperature_minimum_normal"),
-            data["data"].get("temperature_minimum_record"),
-            data["data"].get("temperature_minimum_record_years", []),
-            data["data"].get("precip_today"),
-            data["data"].get("precip_month"),
-            data["data"].get("precip_jan1"),
-            data["data"].get("precip_jul1"),
-            data["data"].get("precip_today_normal"),
-            data["data"].get("precip_today_record"),
-            data["data"].get("precip_today_record_years", []),
-            data["data"].get("precip_month_normal"),
-            data["data"].get("snow_today"),
-            data["data"].get("snow_month"),
-            data["data"].get("snow_jun1"),
-            data["data"].get("snow_jul1"),
-            data["data"].get("snow_dec1"),
-            data["data"].get("precip_dec1"),
-            data["data"].get("precip_dec1_normal"),
-            data["data"].get("precip_jan1_normal"),
-            data["data"].get("temperature_maximum_time"),
-            data["data"].get("temperature_minimum_time"),
-            data["data"].get("snow_today_record_years", []),
-            data["data"].get("snow_today_record"),
-            data["data"].get("snow_jun1_normal"),
-            data["data"].get("snow_jul1_normal"),
-            data["data"].get("snow_dec1_normal"),
-            data["data"].get("snow_month_normal"),
-            data["data"].get("precip_jun1"),
-            data["data"].get("precip_jun1_normal"),
-            data["data"].get("average_sky_cover"),
-        ),
-    )
-
-
 def send_tweet(prod):
     """ Send the tweet for this prod """
 
@@ -148,8 +48,12 @@ def preprocessor(txn, text):
     prod = parser(text)
     if not prod.data:
         return
+    # Run each data through my local processor, which will set the db_station
     for data in prod.data:
         realprocessor(txn, prod, data)
+        print(data["db_station"])
+    # Run through database save now
+    prod.sql(txn)
     send_tweet(prod)
 
 
@@ -170,6 +74,9 @@ def realprocessor(txn, prod, data):
             return
     else:
         station = prod.afos[3:]
+    data["db_station"] = "%s%s" % (prod.source[0], station)
+    data["db_station"] = HARDCODED.get(data["db_station"], data["db_station"])
+
     table = "summary_%s" % (data["cli_valid"].year,)
     txn.execute(
         """
@@ -187,7 +94,6 @@ def realprocessor(txn, prod, data):
             ("No %s rows found for %s on %s")
             % (table, station, data["cli_valid"])
         )
-        save_data(txn, prod, station, data)
         return
     updatesql = []
     logmsg = []
@@ -243,8 +149,6 @@ def realprocessor(txn, prod, data):
                 ",".join(logmsg),
             )
         )
-
-    save_data(txn, prod, station, data)
 
 
 if __name__ == "__main__":
