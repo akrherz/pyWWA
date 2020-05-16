@@ -1,7 +1,7 @@
 LVR             Big River Lake                   AK US  6081 -15229     0  0
 # Sites found while parsing real data
-# CAA2 
-# CAA4
+CAA2            Saint Andre Avellin              -- CA  4574  -7507     0  0 
+CAA4            Saint Apollinaire                -- CA  4659  -7156     0  0
 CAA8            Invermere                        -- CA  5052 -11600     0  0
 CAB3            Bedwell Harbour                  -- CA  4875 -12323     0  0            
 # CAB4
@@ -100,6 +100,7 @@ CBX7            Tumbler Ridge                    -- CA  5503 -12094     0  0
 # CBZ2
 # CBZ7
 CBZ9            Fraser Lake                      -- CA  5401 -12477     0  0
+# CC19
 CCA3            Cable Head                       -- CA  4644  -6259     0  0
 # CCB3
 CCD2            Springdale                       -- CA  4948  -5618     0  0
@@ -214,6 +215,7 @@ CFC7            Rimbey                           -- CA  5268 -11424     0  0
 CFD4            Foremost                         -- CA  4948 -11149     0  0
 CFF2            Christina Basin                  -- CA  5559 -11182     0  0
 CFF7            Wainwright                       -- CA  5283 -11090     0  0
+CFG3            Consort                          -- CA  5202 -11075     0  0
 CFG5            John DOr Prairie                 -- CA  5849 -11514     0  0
 CFG6            Fort Mackay                      -- CA  5728 -11098     0  0
 CFH4            Fox Harbour                      -- CA  4587  -6346     0  0
@@ -397,7 +399,7 @@ CNZ4            Barrys Bay                       -- CA  4550  -7764     0  0
 CNZ8            Grimsby                          -- CA  4316  -7960     0  0
 # COB4
 # COL2
-# COL4
+COL4            Sicamous                         -- CA  5081 -11897     0  0
 # COYW
 CPA2            Mount Forest                     -- CA  4397  -8074     0  0
 # CPC9
