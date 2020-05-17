@@ -59,7 +59,17 @@ def make_image(nc):
 
     # default grayscale
     colors = RAMPS["greys"][:, 1:].astype("i").ravel()
-    if channel in [1, 2, 3, 4, 5, 6]:
+    if channel in [1, 2]:
+        # Sometimes, values can be greater than 1, so we apply a suggested
+        # conversion by Pete Pokerant, see pjpokran/goes16codes
+        data = np.where(
+            data < 0.91,
+            np.sqrt(data),
+            0.9539 + (1.0 - (1.16 - data) / 0.25) * 0.0461,
+        )
+        # Belt and Suspenders as values could be higher than 1.16?
+        imgdata = np.where(data > 1, 1, data) * 255
+    elif channel in [3, 4, 5, 6]:
         # guidance is to take square root of data and apply grayscale
         imgdata = data ** 0.5 * 255
     elif channel in [7]:
