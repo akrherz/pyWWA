@@ -19,10 +19,8 @@ def load_station_table(txn):
     """ Load the station table of NEXRAD sites """
     log.msg("load_station_table called() ...")
     txn.execute(
-        """
-        SELECT id, ST_x(geom) as lon, ST_y(geom) as lat from stations
-        where network in ('NEXRAD','TWDR')
-    """
+        "SELECT id, ST_x(geom) as lon, ST_y(geom) as lat from stations "
+        "where network in ('NEXRAD','TWDR')"
     )
     for row in txn.fetchall():
         ST[row["id"]] = {"lat": row["lat"], "lon": row["lon"]}
@@ -121,7 +119,7 @@ def really_process(txn, ctx):
         d["range"] = float(tokens[2]) * 1.852
         d["tvs"] = tokens[3]
         d["meso"] = tokens[4]
-        d["posh"] = tokens[5]
+        d["posh"] = tokens[5] if tokens[5] != "***" else None
         d["poh"] = tokens[6] if tokens[6] != "***" else None
         if tokens[7] == "<0.50":
             tokens[7] = 0.01
@@ -154,12 +152,8 @@ def really_process(txn, ctx):
             "nexrad_attributes",
             "nexrad_attributes_%s" % (ctx["ts"].year,),
         ]:
-            sql = (
-                """
-                INSERT into """
-                + table
-                + """
-                (nexrad, storm_id, geom, azimuth,
+            sql = f"""
+                INSERT into {table} (nexrad, storm_id, geom, azimuth,
                 range, tvs, meso, posh, poh, max_size, vil, max_dbz,
                 max_dbz_height, top, drct, sknt, valid)
                 values (%(nexrad)s, %(storm_id)s, ST_GeomFromEWKT(%(geom)s),
@@ -167,7 +161,6 @@ def really_process(txn, ctx):
                 %(poh)s, %(max_size)s, %(vil)s, %(max_dbz)s,
                 %(max_dbz_height)s, %(top)s, %(drct)s, %(sknt)s, %(valid)s)
             """
-            )
             txn.execute(sql, d)
 
     if co > 0:
