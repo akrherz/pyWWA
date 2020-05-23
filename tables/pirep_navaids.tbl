@@ -52,7 +52,7 @@ CAU8            Rivers Inlet Seaplane            -- CA  5168 -12725     0  0
 CAV3            One Hundred Mile House           -- CA  5164 -12131     0  0
 CAV4            McBride                          -- CA  5332 -12017     0  0
 CAV5            Sullivan Bay                     -- CA  5089 -12683     0  0
-# CAV8
+CAV8            Shawnigan Lake                   -- CA  4863 -12363     0  0
 # CAW5
 CAW6            Fort Ware Seaplane               -- CA  5742 -12565     0  0
 # CAW8            
@@ -500,6 +500,7 @@ CTG3            Du Rocher Perce                  -- CA  4338  -6456     0  0
 # CTH3            
 # CTH7
 # CTK6     
+CTQ6            St Anselme                       -- CA  4662  -7096     0  0
 # CTR4
 # CTSF
 # CTSJ                   
