@@ -213,6 +213,7 @@ CFB5            Namur Lake                       -- CA  5738 -11280     0  0
 CFB6            Joesphburg                       -- CA  5372 -11309     0  0
 CFC7            Rimbey                           -- CA  5268 -11424     0  0
 CFD4            Foremost                         -- CA  4948 -11149     0  0
+CFD5            Grimshaw                         -- CA  5620 -11763     0  0
 CFF2            Christina Basin                  -- CA  5559 -11182     0  0
 CFF7            Wainwright                       -- CA  5283 -11090     0  0
 CFG3            Consort                          -- CA  5202 -11075     0  0
@@ -244,6 +245,7 @@ CFX5            Renard                           -- CA  5273  -7222     0  0
 CFX6            Vulcan                           -- CA  5040 -11328     0  0
 CFX8            Chestermere                      -- CA  5104 -11375     0  0
 CFY4            Indus/Winters Aire Park          -- CA  5090 -11378     0  0
+CGB2            Carstairs                        -- CA  5158 -11405     0  0
 # CGC2
 CGC3            Grande Cache                     -- CA  5389 -11912     0  0
 CGK2            Gahcho                           -- CA  6344 -10915     0  0
@@ -266,6 +268,7 @@ CJF3            LLe-a-la-Crosse                  -- CA  5549 -10793     0  0
 CJF4            Buffalo Jaques                   -- CA  5086 -11065     0  0
 CJF8            Biggar                           -- CA  5205 -10799     0  0
 CJG2            Eatonia                          -- CA  5122 -10939     0  0
+CJJ8            Macklin                          -- CA  5234 -10992     0  0
 CJK2            Gunisao Lake                     -- CA  5352  -9637     0  0
 CJK9            Preeceville                      -- CA  5195 -10265     0  0
 CJH3            Maidstone                        -- CA  5310 -10933     0  0
@@ -499,7 +502,7 @@ CTE3            Havre St Pierre                  -- CA  5026  -6355     0  0
 CTG3            Du Rocher Perce                  -- CA  4338  -6456     0  0
 # CTH3            
 # CTH7
-# CTK6     
+CTK6            Kegaska                          -- CA  5020  -6127     0  0
 CTQ6            St Anselme                       -- CA  4662  -7096     0  0
 # CTR4
 # CTSF
