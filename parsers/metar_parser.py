@@ -32,6 +32,8 @@ metarcollect.JABBER_SITES = {
     "KRIC": None,
     "KPHL": None,
 }
+# Try to prevent Jabber message dups
+JABBER_MESSAGES = []
 
 
 def load_stations(txn):
@@ -88,6 +90,9 @@ def real_processor(text):
     )
     if not MANUAL:
         for jmsg in jmsgs:
+            if jmsg[0] in JABBER_MESSAGES:
+                continue
+            JABBER_MESSAGES.append(jmsg[0])
             JABBER.send_message(*jmsg)
     for mtr in collect.metars:
         if mtr.network is None:
@@ -129,10 +134,19 @@ def do_db(txn, mtr):
         df.addErrback(common.email_error, iem.data["station"])
 
 
+def cleandb():
+    """Reset the JABBER_MESSAGES."""
+    log.msg("cleandb() called...")
+    JABBER_MESSAGES.clear()
+    # Call Again in 1440 minutes
+    reactor.callLater(1440, cleandb)
+
+
 def ready(_):
     """callback once our database load is done"""
     ingest = MyProductIngestor()
     ldmbridge.LDMProductFactory(ingest)
+    cleandb()
 
 
 def run():
