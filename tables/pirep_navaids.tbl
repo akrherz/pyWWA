@@ -460,6 +460,7 @@ CSE4            Lachute                          -- CA  4564  -7437     0  0
 CSE5            Montmagny                        -- CA  4700  -7052     0  0
 CSF3            Poste Montagnais                 -- CA  5189  -6572     0  0
 CSG3            Joliette                         -- CA  4605  -7350     0  0
+CSG5            St Jean Chrysostome              -- CA  4668  -7115     0  0
 # CSG9
 CSH2            Isle-aux-Grues                   -- CA  4707  -7053     0  0
 CSH4            Lebel-sur-quevillion             -- CA  4903  -7702     0  0
@@ -483,8 +484,9 @@ CSR3            Victoriaville                    -- CA  4611  -7193     0  0
 CSR8            La Sarre                         -- CA  4892  -7918     0  0
 CSS3            Montreal                         -- CA  4535  -7408     0  0
 CSS4            St Dominique                     -- CA  4563  -7282     0  0
-# CST2
+CST2            Montreal Marina Venise           -- CA  4563  -7378     0  0
 CST3            Montreal                         -- CA  4539  -7413     0  0
+CST7            St Lambert                       -- CA  4656  -7118     0  0
 CSU2            Chisasibi                        -- CA  5381  -7892     0  0
 CSU3            St Hyacinthe                     -- CA  4561  -7301     0  0
 # CSU7
