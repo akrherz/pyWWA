@@ -9,8 +9,9 @@ for p in "${dirs[@]}"
 do
   cd /mesonet/data/madis/$p
   gzip ${YYYYMMDD}*nc
-  mkdir -p /mnt/longterm2/madis/$p/${YYYY}
-  mv ${YYYYMMDD}*nc.gz /mnt/longterm2/madis/$p/${YYYY}
+  rsync -a --remove-source-files \
+    --rsync-path "mkdir -p /stage/iemoffline/madis/$p/$YYYY && rsync" \
+    ${YYYYMMDD}*nc.gz metl60.agron.iastate.edu:/stage/iemoffline/madis/$p/$YYYY/
 done
 
 #END
