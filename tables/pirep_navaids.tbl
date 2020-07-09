@@ -55,7 +55,7 @@ CAV5            Sullivan Bay                     -- CA  5089 -12683     0  0
 CAV8            Shawnigan Lake                   -- CA  4863 -12363     0  0
 # CAW5
 CAW6            Fort Ware Seaplane               -- CA  5742 -12565     0  0
-# CAW8            
+CAW8            Bella Bella                      -- CA  5215 -12808     0  0            
 CAX5            Likely                           -- CA  5262 -12150     0  0
 CAX6            Ganges Seaplane                  -- CA  4885 -12350     0  0            
 # CAY2
@@ -156,6 +156,7 @@ CEF3            Bow Island                       -- CA  4988 -11133     0  0
 CEF4            Airdrie                          -- CA  5126 -11393     0  0
 CEG3            Lacombe                          -- CA  5249 -11371     0  0
 CEG4            Drumheller                       -- CA  5150 -11275     0  0
+CEG6            Nordegg                          -- CA  5249 -11605     0  0
 CEH2            Cu Nim                           -- CA  5072 -11418     0  0
 CEH3            Ponoka                           -- CA  5265 -11361     0  0
 CEH5            Red Earth Creek                  -- CA  5655 -11527     0  0
@@ -214,6 +215,7 @@ CFB6            Joesphburg                       -- CA  5372 -11309     0  0
 CFC7            Rimbey                           -- CA  5268 -11424     0  0
 CFD4            Foremost                         -- CA  4948 -11149     0  0
 CFD5            Grimshaw                         -- CA  5620 -11763     0  0
+CFE7            Kananaskis Village               -- CA  5092 -11514     0  0
 CFF2            Christina Basin                  -- CA  5559 -11182     0  0
 CFF7            Wainwright                       -- CA  5283 -11090     0  0
 CFG3            Consort                          -- CA  5202 -11075     0  0
@@ -258,9 +260,11 @@ CHC5            Hayes Camp Aerodome              -- CA  6665  -9154     0  0
 CJA3            Morden                           -- CA  4912  -9806     0  0
 CJA5            Nestor Falls                     -- CA  4914  -9392     0  0
 CJB3            Stienbach                        -- CA  4955  -9668     0  0
+CJB8            Kyle                             -- CA  5083 -10807     0  0
 CJC2            Craik                            -- CA  5106 -10584     0  0
 CJC3            Davidson                         -- CA  5125 -10598     0  0
 CJC5            Shaunavon                        -- CA  4966 -10841     0  0
+CJD5            Leader                           -- CA  5087 -10950     0  0
 CJE3            Weyburn                          -- CA  4970 -10380     0  0
 CJE4            Snow Lake                        -- CA  5490  -9982     0  0
 CJE7            Ashern                           -- CA  5116  -9833     0  0
@@ -502,7 +506,7 @@ CTA3            Ile aux Coudres                  -- CA  4739  -7038     0  0
 # CTD4
 CTE3            Havre St Pierre                  -- CA  5026  -6355     0  0
 CTG3            Du Rocher Perce                  -- CA  4338  -6456     0  0
-# CTH3            
+CTH3            Grandes Bergeronnes              -- CA  4823  -6954     0  0            
 # CTH7
 CTK6            Kegaska                          -- CA  5020  -6127     0  0
 CTQ6            St Anselme                       -- CA  4662  -7096     0  0
@@ -600,6 +604,7 @@ CYRC            Chicoutimi St Honore             -- CA  4852  -7105     0  0
 CYRM            Alta                             -- CA  5243 -11490     0  0
 CYRS            Red Sucker Lake                  -- CA  5417  -9356     0  0
 # CYRU            
+CYSE            Squamish                         -- CA  4978 -12316     0  0
 CYST            St Theresa Point                 -- CA  5385  -9485     0  0
 CYSW            Sparkwood Elk Valley             -- CA  4983 -11488     0  0
 CYSZ            Sainte Anne des Monts            QC CA  4912  -6653     0  0
@@ -630,6 +635,7 @@ CZBM            Bromont                          -- CA  4529  -7274     0  0
 # CZE3
 CZEE            Kelsey                           MB CA  5604  -9651     0  0
 CZEG            Edmonton Centre ACC              AB CA  5331 -11358     0  0
+CZFD            Fond-du-Lac                      -- CA  5933 -10718     0  0
 CZFG            Pukatawagan                      -- CA  5575 -10126     0  0
 CZGF            Grand Forks                      BC CA  4902 -11842     0  0
 CZGI            Gods River                       MB CA  5484  -9408     0  0
