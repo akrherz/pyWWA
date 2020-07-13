@@ -54,7 +54,7 @@ def real_process(txn, data):
 
     for sect in sections:
         tokens = re.findall(
-            r"(^[A-Z0-9_]{3,10}\s+....? V?[0-9]?\.?[0-9]?\s?... GUIDANCE)",
+            r"(^[A-Z0-9_]{3,10}\s+....? V?[0-9]?\.?[0-9]?\s?....? GUIDANCE)",
             sect,
         )
         if not tokens:
