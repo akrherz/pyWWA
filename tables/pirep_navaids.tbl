@@ -135,6 +135,7 @@ CDC5            Dougall Campbell                 -- CA  5201 -12121     0  0
 # CDF5
 CDH5            Nanaimo Habour                   -- CA  4916 -12392     0  0
 CDH6            Delhi                            -- CA  4288  -8041     0  0
+CDJ5            Strathmore (DJ Murray)           -- CA  5113 -11356     0  0
 # CDM2
 CDT5            Bouctouche                       -- CA  4651  -6469     0  0
 CDU6            Doaktown                         -- CA  4655  -6609     0  0 
@@ -295,6 +296,7 @@ CJR5            Gladstone                        -- CA  5016  -9894     0  0
 CJS4            Moose Jaw                        -- CA  5043 -10539     0  0
 CJS5            Killarney                        -- CA  4915  -9969     0  0
 CJT4            Cumberland House                 -- CA  5395 -10230     0  0
+CJU7            Edam                             -- CA  5319 -10879     0  0
 CJV2            Neilburg                         -- CA  5283 -10964     0  0
 CJV5            Neepawa                          -- CA  5023  -9951     0  0
 CJV7            Summer Beaver                    -- CA  5271  -8854     0  0
@@ -376,7 +378,7 @@ CNH2            Natuashish                       -- CA  5591  -6118     0  0
 # CNH9
 CNJ4            Orillia                          -- CA  4468  -7931     0  0
 CNK4            Parry Sound                      -- CA  4526  -7983     0  0
-# CNK7
+CNK7            Kananaskis                       -- CA  5110 -11501     0  0
 CNL2            Fort McMurray                    -- CA  5714 -11329     0  0
 CNL3            Brockville                       -- CA  4464  -7575     0  0
 CNL4            Port Elgin                       -- CA  4441  -8141     0  0
@@ -440,7 +442,7 @@ CPV8            Keewaywin                        -- CA  5299  -9284     0  0
 CPW9            Port Alberni Seaplane            -- CA  4924 -12482     0  0
 # CPZO
 CRB4            Riviere Bonnard                  -- CA  5070  -7116     0  0
-# CRC3
+CRC3            Ross Creek                       -- CA  5097 -11923     0  0
 # CRD3            
 CRD5            Red Deer                         -- CA  5269 -11392     0  0
 CRE2            Edzo                             -- CA  6277 -11608     0  0
@@ -452,6 +454,7 @@ CRL2            Westport                         -- CA  4467  -7640     0  0
 CRL4            Kirby Lake                       -- CA  5536 -11064     0  0
 CRL7            Reindeer Lake                    -- CA  5729 -10253     0  0
 # CRS2
+CSA2            Lac Agile Mascouche              -- CA  4579  -7364     0  0
 CSB2            Sable Island                     -- CA  4393  -5996     0  0
 CSB3            St Mathieu De Beloeil            -- CA  4559  -7324     0  0
 CSC3            Drummondville                    -- CA  4585  -7239     0  0
@@ -465,7 +468,7 @@ CSE5            Montmagny                        -- CA  4700  -7052     0  0
 CSF3            Poste Montagnais                 -- CA  5189  -6572     0  0
 CSG3            Joliette                         -- CA  4605  -7350     0  0
 CSG5            St Jean Chrysostome              -- CA  4668  -7115     0  0
-# CSG9
+CSG9            Sagard                           -- CA  4799  -7008     0  0
 CSH2            Isle-aux-Grues                   -- CA  4707  -7053     0  0
 CSH4            Lebel-sur-quevillion             -- CA  4903  -7702     0  0
 CSH5            St Ferdinand                     -- CA  4613  -7154     0  0
@@ -539,6 +542,7 @@ CYCD            Nanaimo                          -- CA  4905 -12387     0  0
 CYCE            Centralia                        -- CA  4329  -8151     0  0
 # CYCF
 CYCH            Miramichi                        -- CA  4701  -6546     0  0
+CYCL            Charlo                           -- CA  4799  -6633     0  0
 CYCN            Cochrane                         -- CA  4911  -8101     0  0
 CYCR            Cross Lake                       -- CA  5461  -9776     0  0
 CYCT            Coronation Marine                -- CA  5208 -11145     0  0
