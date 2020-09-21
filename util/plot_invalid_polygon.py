@@ -1,14 +1,15 @@
 """Make a simple plot to illustrate an invalid polygon"""
-import matplotlib.pyplot as plt
+from pyiem.plot.use_agg import plt
 from pyiem.nws.vtec import VTEC_PHENOMENA, VTEC_SIGNIFICANCE
+import matplotlib.patheffects as PathEffects
 
-X = [-90.92, -91.02, -90.93, -91.02, -90.92]
-Y = [30.4, 30.4, 30.5, 30.5, 30.4]
-WFO = "LIX"
-ETN = 8
-PHENOMENA = "FL"
+X = [-81.15, -81.17]
+Y = [29.39, 29.44]
+WFO = "JAX"
+ETN = 81
+PHENOMENA = "FA"
 SIGNIFICANCE = "W"
-YEAR = "2018"
+YEAR = "2020"
 
 
 def main():
@@ -22,8 +23,15 @@ def main():
             Y[i + 1] - Y[i],
             head_width=0.003,
             width=0.0005,
+            length_includes_head=True,
+            color="skyblue",
         )
-        ax.text(X[i] + 0.005, Y[i] + 0.005, str(i + 1), va="top")
+        txt = ax.text(
+            X[i], Y[i], str(i + 1), va="center", ha="center", color="red"
+        )
+        txt.set_path_effects(
+            [PathEffects.withStroke(linewidth=2, foreground="white")]
+        )
 
     ax.set_xlim(min(X) - 0.02, max(X) + 0.02)
     ax.set_ylim(min(Y) - 0.02, max(Y) + 0.02)
