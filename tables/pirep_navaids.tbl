@@ -23,6 +23,7 @@ CAH4            Valemount                        -- CA  5285 -11933     0  0
 CAJ2            Wiley                            -- CA  6649 -13657     0  0
 CAJ3            Sutcliffe Field                  -- CA  4904 -11650     0  0
 CAJ7            Cayley A J Flying Ranch          -- CA  5045 -11375     0  0
+CAJ8            Pitt Meadows Seaplane            -- CA  4921 -12271     0  0
 CAJ9            Fort Ware                        -- CA  5743 -12565     0  0
 # CAK2            
 CAK3            Delta Heritage                   -- CA  4908 -12294     0  0
@@ -353,7 +354,7 @@ CLM5            Lake Muskoka                     -- CA  4496  -7943     0  0
 # CLT2
 CMB2            Meadowbank                       -- CA  6503  -9607     0  0
 CMB7            Maxville                         -- CA  4525  -7481     0  0
-# CMB9
+CMB9            Port Renfrew Mill Bay            -- CA  4856 -12441     0  0
 # CMH3
 # CML2
 CMN5            Manic-5                          -- CA  5066  -6883     0  0
@@ -475,7 +476,7 @@ CSH5            St Ferdinand                     -- CA  4613  -7154     0  0
 CSH6            Montreal / Les Cedres            -- CA  4535  -7408     0  0
 CSJ4            Louiseville                      -- CA  4625  -7290     0  0
 CSK3            Mascouche                        -- CA  4572  -7360     0  0
-# CSK8
+CSK8            Surrey / King George             -- CA  4909 -12282     0  0
 CSL3            Lac a la Tortue                  -- CA  4662  -7263     0  0
 CSM3            Thetford Mines                   -- CA  4605  -7126     0  0
 CSM5            St Michel Des Saints             -- CA  4668  -7399     0  0
@@ -498,7 +499,7 @@ CSU2            Chisasibi                        -- CA  5381  -7892     0  0
 CSU3            St Hyacinthe                     -- CA  4561  -7301     0  0
 # CSU7
 # CSV2            
-# CSW5
+CSW5            Montreal Bell                    -- CA  4569  -7393     0  0
 CSY3            Sorel                            -- CA  4598  -7304     0  0
 CSY4            St Donat                         -- CA  4631  -7418     0  0
 CSZ3            St Jovite                        -- CA  4615  -7458     0  0
