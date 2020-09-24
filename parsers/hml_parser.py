@@ -7,7 +7,7 @@ from pyiem.nws.products.hml import parser as hmlparser
 
 import common  # @UnresolvedImport
 
-DBPOOL = common.get_database("hads")
+DBPOOL = common.get_database("hml")
 
 
 # LDM Ingestor
