@@ -68,7 +68,7 @@ def get_database(dbname, cp_max=5, module_name="pyiem.twistedpg"):
         cp_max=cp_max,
         host=host,
         user=CONFIG.get("databaserw").get("user"),
-        password=CONFIG.get("databaserw").get("password"),
+        gssencmode="disable",
     )
 
 

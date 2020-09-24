@@ -4,15 +4,13 @@
 	 "postgis": "postgis",
 	 "archive": "notused",
 	 "host": "postgreswrite",
-	 "user": "nwschatwrite",
-	 "password": "secret"
+	 "user": "nwschatwrite"
    }, 
   "databasero": {
 	 "openfire": "openfire",
 	 "postgis": "postgis",
 	 "archive": "notused",
 	 "host": "postgresread",
-	 "user": "nwschatread",
-	 "password": "secret"
+	 "user": "nwschatread"
   }
 }
