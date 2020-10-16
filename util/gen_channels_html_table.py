@@ -1,6 +1,5 @@
 """Utility script to generate the HTML used for IEMBot Channel Documentation
 """
-from __future__ import print_function
 import re
 import sys
 
@@ -19,6 +18,7 @@ C1 = "&lt;wfo&gt;"
 C2 = "&lt;vtec_phenomena&gt;.&lt;vtec_significance&gt;"
 C3 = "&lt;afos_pil&gt;"
 C3p = "&lt;afos_pil_prefix&gt;..."
+C35 = "&lt;afos_pil_first5&gt;..."
 C4 = "&lt;vtec_phenomena&gt;.&lt;vtec_significance&gt;.&lt;wfo&gt;"
 C5 = "&lt;vtec_phenomena&gt;.&lt;vtec_significance&gt;.&lt;ugc&gt;"
 C5s = "&lt;vtec_phenomena&gt;.&lt;vtec_significance&gt;.&lt;state&gt;"
@@ -74,6 +74,7 @@ VTEC_PRODUCTS = [
     dict(afos="WCN", directive="10-511", channels=S1),
     dict(afos="WSW", directive="10-513", channels=S1),
 ]
+S21 = [C3, C3p, C35]
 S2 = [C3, C3p]
 GEN_PRODUCTS = [
     dict(afos="ADA", directive="10-1701", channels=S2),
@@ -156,9 +157,14 @@ GEN_PRODUCTS = [
     dict(afos="SRF", directive="10-1701", channels=S2),
     dict(afos="SPW", directive="10-1701", channels=S2),
     dict(afos="TAF", directive="10-1701", channels=[C3, C3p, C8]),
+    dict(afos="TCD", directive="10-1701", channels=S21),
+    dict(afos="TCM", directive="10-1701", channels=S21),
+    dict(afos="TCP", directive="10-1701", channels=S21),
+    dict(afos="TCU", directive="10-1701", channels=S21),
     dict(afos="TIB", directive="10-1701", channels=S2),
     dict(afos="TID", directive="10-320", channels=S2),
     dict(afos="TOE", directive="10-1701", channels=S2),
+    dict(afos="TWO", directive="10-1701", channels=S21),
     dict(afos="WSV", directive="10-1701", channels=S2),
     dict(afos="VAA", directive="10-1701", channels=S2),
     dict(afos="WRK", directive="10-1701", channels=S2),
