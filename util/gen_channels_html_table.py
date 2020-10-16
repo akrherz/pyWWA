@@ -174,9 +174,7 @@ GEN_PRODUCTS = [
 
 def get_data(afos):
     """Return the text data for a given afos identifier"""
-    return open(
-        ("/home/akrherz/projects/pyIEM/data/channel_examples/%s.txt") % (afos,)
-    ).read()
+    return open(("../examples/%s.txt") % (afos,)).read()
 
 
 def load_dicts():
