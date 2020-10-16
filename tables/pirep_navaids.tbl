@@ -71,7 +71,7 @@ CBE3            Beamsville                       -- CA  4319  -7947     0  0
 CBE9            Whistler                         -- CA  5017 -12290     0  0
 CBF5            Mayne Island                     -- CA  4885 -12328     0  0
 CBF6            Prince Rupert                    -- CA  5433 -13028     0  0
-# CBF7            
+CBF7            Victoria Habour                  -- CA  4842 -12339     0  0            
 CBF9            Mabel Lake                       -- CA  5061 -11873     0  0
 CBG2            Green Lake                       -- CA  5143 -12121     0  0
 CBH2            Helmet                           -- CA  5943 -12080     0  0
@@ -99,7 +99,7 @@ CBX7            Tumbler Ridge                    -- CA  5503 -12094     0  0
 # CBY6
 # CBY7
 # CBZ2
-# CBZ7
+CBZ7            Victoria Harbour                 -- CA  4842 -12339     0  0
 CBZ9            Fraser Lake                      -- CA  5401 -12477     0  0
 # CC19
 CCA3            Cable Head                       -- CA  4644  -6259     0  0
@@ -137,6 +137,7 @@ CDC5            Dougall Campbell                 -- CA  5201 -12121     0  0
 CDH5            Nanaimo Habour                   -- CA  4916 -12392     0  0
 CDH6            Delhi                            -- CA  4288  -8041     0  0
 CDJ5            Strathmore (DJ Murray)           -- CA  5113 -11356     0  0
+CDK2            Diavik                           -- CA  6451 -11029     0  0
 # CDM2
 CDT5            Bouctouche                       -- CA  4651  -6469     0  0
 CDU6            Doaktown                         -- CA  4655  -6609     0  0 
@@ -242,6 +243,7 @@ CFT8            Pelican                          -- CA  5616 -11347     0  0
 CFT9            Zama Lake                        -- CA  5906 -11889     0  0
 CFU4            Garden River                     -- CA  5871 -11388     0  0
 CFV2            Beiseker                         -- CA  5139 -11347     0  0
+CFW5            Taltson River                    -- CA  6039 -11135     0  0
 # CFW8            
 CFX2            Calgary / Okotoks                -- CA  5074 -11393     0  0
 CFX4            Manning                          -- CA  5695 -11764     0  0
@@ -304,6 +306,7 @@ CJV7            Summer Beaver                    -- CA  5271  -8854     0  0
 CJV8            Grand Rapids                     -- CA  5317  -9932     0  0
 CJV9            Melville                         -- CA  5094 -10274     0  0
 CJW4            Pelican Narrows                  -- CA  5529 -10275     0  0
+CJW5            Russell                          -- CA  5076 -10129     0  0
 CJW7            Cigar Lake                       -- CA  5805 -10448     0  0
 CJX4            Rosetown                         -- CA  5156 -10792     0  0
 CJX5            Souris Glenwood                  -- CA  4963 -10020     0  0
@@ -474,6 +477,7 @@ CSH2            Isle-aux-Grues                   -- CA  4707  -7053     0  0
 CSH4            Lebel-sur-quevillion             -- CA  4903  -7702     0  0
 CSH5            St Ferdinand                     -- CA  4613  -7154     0  0
 CSH6            Montreal / Les Cedres            -- CA  4535  -7408     0  0
+CSJ2            Kanawata                         -- CA  4759  -7413     0  0
 CSJ4            Louiseville                      -- CA  4625  -7290     0  0
 CSK3            Mascouche                        -- CA  4572  -7360     0  0
 CSK8            Surrey / King George             -- CA  4909 -12282     0  0
@@ -500,6 +504,7 @@ CSU3            St Hyacinthe                     -- CA  4561  -7301     0  0
 # CSU7
 # CSV2            
 CSW5            Montreal Bell                    -- CA  4569  -7393     0  0
+CSW6            Hastings                         -- CA  4435  -7793     0  0
 CSY3            Sorel                            -- CA  4598  -7304     0  0
 CSY4            St Donat                         -- CA  4631  -7418     0  0
 CSZ3            St Jovite                        -- CA  4615  -7458     0  0
@@ -514,6 +519,7 @@ CTG3            Du Rocher Perce                  -- CA  4338  -6456     0  0
 CTH3            Grandes Bergeronnes              -- CA  4823  -6954     0  0            
 # CTH7
 CTK6            Kegaska                          -- CA  5020  -6127     0  0
+CTP9            Kattiniq                         -- CA  6166  -7332     0  0
 CTQ6            St Anselme                       -- CA  4662  -7096     0  0
 # CTR4
 # CTSF
@@ -574,6 +580,7 @@ CYHN            Hornepayne                       ON CA  4919  -8476     0  0
 CYHO            Hopedale                         -- CA  5545  -6023     0  0
 CYHR            Chevery                          -- CA  5047  -5964     0  0
 CYHS            Saugeen Mun                      -- CA  4416  -8106     0  0
+CYID            Digby                            -- CA  4455  -6579     0  0
 CYIF            St Augustin                      QC CA  5121  -5866     0  0
 CYJA            Jasper                           AB CA  5300 -11806     0  0
 CYKC            Collins Bay                      SK CA  5824 -10368     0  0
