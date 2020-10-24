@@ -53,7 +53,7 @@ def find_cwsus(txn, prod):
 
 
 def real_process(txn, raw):
-    """"
+    """ "
     Actually process a single MCD
     """
     prod = mcdparser(raw)

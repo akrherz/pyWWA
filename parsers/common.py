@@ -53,7 +53,7 @@ def setup_syslog():
 
 
 def get_database(dbname, cp_max=5, module_name="pyiem.twistedpg"):
-    """ Get a twisted database connection
+    """Get a twisted database connection
 
     Args:
       dbname (str): The string name of the database to connect to
@@ -73,8 +73,8 @@ def get_database(dbname, cp_max=5, module_name="pyiem.twistedpg"):
 
 
 def load_settings():
-    """ Load settings immediately, so we don't have to worry about the settings
-        not being loaded for subsequent usage """
+    """Load settings immediately, so we don't have to worry about the settings
+    not being loaded for subsequent usage"""
 
     dbconn = psycopg2.connect(
         database=CONFIG.get("databasero").get("openfire"),

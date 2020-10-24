@@ -259,8 +259,7 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
 
 
 def async_func(data):
-    """spawn a process with a deferred given the inbound data product
-    """
+    """spawn a process with a deferred given the inbound data product"""
     defer = Deferred()
     try:
         tp = product.TextProduct(data, parse_segments=False)

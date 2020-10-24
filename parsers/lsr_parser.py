@@ -26,8 +26,8 @@ def loaddb():
 
 
 def cleandb():
-    """ To keep LSRDB from growing too big, we clean it out
-        Lets hold 7 days of data!
+    """To keep LSRDB from growing too big, we clean it out
+    Lets hold 7 days of data!
     """
     utc = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
     thres = utc - datetime.timedelta(hours=24 * 7)

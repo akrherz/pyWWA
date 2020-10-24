@@ -18,8 +18,8 @@ LOCS = {}
 
 
 def cleandb():
-    """ To keep LSRDB from growing too big, we clean it out
-        Lets hold 1 days of data!
+    """To keep LSRDB from growing too big, we clean it out
+    Lets hold 1 days of data!
     """
     thres = datetime.datetime.utcnow() - datetime.timedelta(hours=24 * 1)
     init_size = len(PIREPS.keys())

@@ -175,8 +175,8 @@ def write_metadata(sat, tmpfn):
 
 
 def write_mapserver_metadata(sat, tmpfn, epsg):
-    """ Write out and pqinsert a metadata file that mapserver can use to
-    provide WMS metadata. """
+    """Write out and pqinsert a metadata file that mapserver can use to
+    provide WMS metadata."""
     metafn = "%s.txt" % (tmpfn,)
     out = open(metafn, "w")
     out.write(
