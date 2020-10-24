@@ -3,6 +3,7 @@ from __future__ import print_function
 import json
 import os
 import inspect
+import logging
 import pwd
 import datetime
 import re
@@ -29,6 +30,7 @@ from twisted.words.xish import domish, xpath
 from twisted.mail import smtp
 from twisted.enterprise import adbapi
 import pyiem
+from pyiem.util import LOG
 
 # http://bugs.python.org/issue7980
 datetime.datetime.strptime("2013", "%Y")
@@ -50,6 +52,11 @@ def setup_syslog():
     module = inspect.getmodule(frame[0])
     filename = os.path.basename(module.__file__)
     syslog.startLogging(prefix="pyWWA/%s" % (filename,), facility=LOG_LOCAL2)
+    # pyIEM does logging via python stdlib logging, so we need to patch those
+    # messages into twisted's logger.
+    LOG.addHandler(logging.StreamHandler(stream=log.logfile))
+    # Allow for more verbosity when we are running this manually.
+    LOG.setLevel(logging.DEBUG if sys.stdout.isatty() else logging.INFO)
 
 
 def get_database(dbname, cp_max=5, module_name="pyiem.twistedpg"):
