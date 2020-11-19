@@ -5,7 +5,6 @@ So let us document it here for my own sanity.
 
 18 Jul 2017: `snowdepth` branch of my python-metar fork installed with pip
 """
-from __future__ import print_function
 import sys
 
 # Twisted Python imports
@@ -18,7 +17,7 @@ import common  # @UnresolvedImport
 IEMDB = common.get_database("iem")
 ASOSDB = common.get_database("asos")
 
-MANUAL = "MANUAL" in sys.argv
+MANUAL = "manual" in [x.lower() for x in sys.argv]
 NWSLI_PROVIDER = {}
 # Manual list of sites that are sent to jabber :/
 metarcollect.JABBER_SITES = {
@@ -39,18 +38,17 @@ JABBER_MESSAGES = []
 def load_stations(txn):
     """load station metadata to build a xref of stations to networks"""
     txn.execute(
-        """
-        SELECT *, ST_X(geom) as lon, ST_Y(geom) as lat from stations
-        where network ~* 'ASOS' or network = 'AWOS' or network = 'WTM'
-    """
+        "SELECT *, ST_X(geom) as lon, ST_Y(geom) as lat from stations "
+        "where network ~* 'ASOS' or network = 'AWOS'"
     )
     news = 0
+    # Need the fetchall due to non-async here
     for row in txn.fetchall():
         if row["id"] not in NWSLI_PROVIDER:
             news += 1
             NWSLI_PROVIDER[row["id"]] = row
 
-    log.msg("Loaded %s new stations" % (news,))
+    log.msg(f"Loaded {news} new stations")
     # Reload every 12 hours
     reactor.callLater(
         12 * 60 * 60, IEMDB.runInteraction, load_stations  # @UndefinedVariable
@@ -74,7 +72,6 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
     def process_data(self, data):
         """Callback when we have data to process"""
         try:
-            # BUG make sure we are okay here after we resolve pyLDM str issues
             real_processor(data)
         except Exception as exp:
             common.email_error(exp, data, -1)
@@ -86,7 +83,7 @@ def real_processor(text):
     if collect.warnings:
         common.email_error("\n".join(collect.warnings), collect.unixtext)
     jmsgs = collect.get_jabbers(
-        ("https://mesonet.agron.iastate.edu/ASOS/" "current.phtml?network=")
+        "https://mesonet.agron.iastate.edu/ASOS/current.phtml?network="
     )
     if not MANUAL:
         for jmsg in jmsgs:
@@ -96,15 +93,9 @@ def real_processor(text):
             JABBER.send_message(*jmsg)
     for mtr in collect.metars:
         if mtr.network is None:
-            log.msg(
-                ("station: '%s' is unknown to metadata table")
-                % (mtr.station_id,)
-            )
+            log.msg("station: '{mtr.station_id}' is unknown to metadata table")
             deffer = ASOSDB.runOperation(
-                """
-            INSERT into unknown(id) values (%s)
-            """,
-                (mtr.station_id,),
+                "INSERT into unknown(id) values (%s)", (mtr.station_id,)
             )
             deffer.addErrback(common.email_error, text)
             continue
@@ -125,10 +116,7 @@ def do_db(txn, mtr):
             % (iem.data["station"], mtr.code)
         )
         df = ASOSDB.runOperation(
-            """
-            INSERT into unknown(id, valid)
-            values (%s, %s)
-        """,
+            "INSERT into unknown(id, valid) values (%s, %s)",
             (iem.data["station"], iem.data["valid"]),
         )
         df.addErrback(common.email_error, iem.data["station"])
