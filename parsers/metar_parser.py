@@ -11,6 +11,7 @@ import sys
 from twisted.python import log
 from twisted.internet import reactor
 from pyiem.nws.products import metarcollect
+from pyiem.util import get_properties
 from pyldm import ldmbridge
 import common  # @UnresolvedImport
 
@@ -33,6 +34,29 @@ metarcollect.JABBER_SITES = {
 }
 # Try to prevent Jabber message dups
 JABBER_MESSAGES = []
+# List of sites to IGNORE and not send Jabber Messages for.
+# iem property `pywwa_metar_ignorelist` should be a comma delimited 4 char ids
+IGNORELIST = []
+
+
+def load_ignorelist():
+    """Sync what the properties database has for sites to ignore."""
+    try:
+        prop = get_properties().get("pywwa_metar_ignorelist", "")
+        IGNORELIST.clear()
+        for sid in [x.strip() for x in prop.split(",")]:
+            if sid == "":
+                continue
+            if len(sid) != 4:
+                log.msg(f"Not adding {sid} to IGNORELIST as not 4 char id")
+                continue
+            IGNORELIST.append(sid)
+    except Exception as exp:
+        log.err(exp)
+    log.msg(f"Updated ignorelist is now {len(IGNORELIST)} long")
+
+    # Call every 15 minutes
+    reactor.callLater(15 * 60, load_ignorelist)
 
 
 def load_stations(txn):
@@ -89,8 +113,18 @@ def real_processor(text):
         for jmsg in jmsgs:
             if jmsg[0] in JABBER_MESSAGES:
                 continue
+            # Hacky here, but get the METAR.XXXX channel to find which site
+            # this is.
+            skip = False
+            channels = jmsg[2].get("channels", [])
+            for channel in channels.split(","):
+                if channel.startswith("METAR."):
+                    if channel.split(".")[1] in IGNORELIST:
+                        log.msg(f"IGNORELIST Jabber relay of {jmsg[0]}")
+                        skip = True
             JABBER_MESSAGES.append(jmsg[0])
-            JABBER.send_message(*jmsg)
+            if not skip:
+                JABBER.send_message(*jmsg)
     for mtr in collect.metars:
         if mtr.network is None:
             log.msg("station: '{mtr.station_id}' is unknown to metadata table")
@@ -135,6 +169,7 @@ def ready(_):
     ingest = MyProductIngestor()
     ldmbridge.LDMProductFactory(ingest)
     cleandb()
+    load_ignorelist()
 
 
 def run():
