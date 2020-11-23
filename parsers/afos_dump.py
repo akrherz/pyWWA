@@ -53,12 +53,6 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
         defer.addErrback(log.err)
 
 
-class ParseError(Exception):
-    """ general exception """
-
-    pass
-
-
 def write_memcache(nws):
     """write our TextProduct to memcached"""
     if nws is None:
@@ -87,12 +81,12 @@ def real_parser(txn, buf):
     if not MANUAL and (
         (utcnow - nws.valid).days > 180 or (utcnow - nws.valid).days < -180
     ):
-        raise ParseError("Very Latent Product! %s" % (nws.valid,))
+        raise Exception(f"Very Latent Product! {nws.valid}")
 
     if nws.afos is None:
         if MANUAL or nws.source[0] not in ["K", "P"]:
             return
-        raise ParseError("TextProduct.afos is null")
+        raise Exception("TextProduct.afos is null")
 
     # Run the database transaction
     if MANUAL:
