@@ -39,6 +39,8 @@ rasterstats
 scipy
 shapely
 tqdm
+# vtec_parser
+treq
 twisted
 # prevent xarray 0.12.2 bug
 xarray

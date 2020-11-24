@@ -16,7 +16,10 @@ cat examples/CWA.txt | python parsers/fake_afos_dump.py $OPTS || exit 2
 
 cat examples/FFGDMX.txt | python parsers/ffg_parser.py $OPTS || exit 2
 
-cat examples/AFD.txt | python parsers/generic_parser.py $OPTS || exit 2
+gp="AFD ADR AFD2 ADMNFD ADR AT5 VAA TOE"
+for fn in $gp; do
+    cat examples/${fn}.txt | python parsers/generic_parser.py $OPTS || exit 2
+done
 
 cat examples/HMLARX.txt | python parsers/hml_parser.py $OPTS || exit 2
 
@@ -45,8 +48,6 @@ cat examples/SPE.txt | python parsers/spe_parser.py $OPTS || exit 2
 cat examples/METNC1.txt | python parsers/split_mav.py $OPTS || exit 2
 
 cat examples/SPS.txt | python parsers/sps_parser.py $OPTS || exit 2
-
-cat examples/LSR.txt | python parsers/lsr_parser.py $OPTS || exit 2
 
 gp="WCN WSW TOR TCV FFWTWC_tilde WCNMEG"
 for fn in $gp; do
