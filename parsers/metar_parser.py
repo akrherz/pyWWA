@@ -130,7 +130,7 @@ def real_processor(text):
             )
             deffer.addErrback(common.email_error, text)
             continue
-        if not common.CTX.disable_dbwrite:
+        if common.dbwrite_enabled():
             deffer = IEMDB.runInteraction(do_db, mtr)
             deffer.addErrback(common.email_error, collect.unixtext)
 

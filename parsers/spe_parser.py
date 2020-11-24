@@ -41,7 +41,7 @@ def real_process(txn, raw):
     prod = product.TextProduct(raw)
 
     product_id = prod.get_product_id()
-    if not common.CTX.disable_dbwrite:
+    if common.dbwrite_enabled():
         sql = """
             INSERT into text_products(product, product_id) values (%s,%s)
         """

@@ -5,7 +5,6 @@ from twisted.internet import reactor
 from txyam.client import YamClient
 from pyldm import ldmbridge
 from pyiem.nws import product
-from pyiem.util import utc
 import common  # @UnresolvedImport
 
 DBPOOL = common.get_database("afos")
@@ -68,7 +67,7 @@ def real_parser(txn, buf):
     """ Actually do something with the buffer, please """
     if buf.strip() == "":
         return None
-    utcnow = utc() if common.CTX.utcnow is None else common.CTX.utcnow
+    utcnow = common.utcnow()
 
     nws = product.TextProduct(buf, utcnow=utcnow, parse_segments=False)
 

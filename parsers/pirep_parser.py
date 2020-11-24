@@ -121,7 +121,7 @@ def real_parser(txn, buf):
         common.email_error("\n".join(prod.warnings), buf)
     for msg in j:
         JABBER.send_message(msg[0], msg[1], msg[2])
-    if not common.CTX.disable_dbwrite:
+    if common.dbwrite_enabled():
         prod.sql(txn)
 
 

@@ -27,7 +27,7 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
 def processor(txn, text):
     """ Protect the realprocessor """
     prod = parser(text)
-    if not common.CTX.disable_dbwrite:
+    if common.dbwrite_enabled():
         prod.sql(txn)
 
 

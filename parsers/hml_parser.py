@@ -30,7 +30,7 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
 def real_parser(txn, buf):
     """I'm gonna do the heavy lifting here"""
     prod = hmlparser(buf)
-    if not common.CTX.disable_dbwrite:
+    if common.dbwrite_enabled():
         prod.sql(txn)
     if prod.warnings:
         common.email_error("\n".join(prod.warnings), buf)

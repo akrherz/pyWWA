@@ -22,7 +22,6 @@ from pyldm import ldmbridge
 from pyiem.nws.products.vtec import parser as vtecparser
 from pyiem.nws import ugc
 from pyiem.nws import nwsli
-from pyiem.util import utc
 import common
 
 
@@ -52,8 +51,6 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
 
 def really_process_data(buf):
     """ Actually do some processing """
-    utcnow = utc() if common.CTX.utcnow is None else common.CTX.utcnow
-
     # Make sure we have a trailing $$, if not report error and slap one on
     if buf.find("$$") == -1:
         common.email_error("No $$ Found!", buf)
@@ -61,7 +58,10 @@ def really_process_data(buf):
 
     # Create our TextProduct instance
     text_product = vtecparser(
-        buf, utcnow=utcnow, ugc_provider=ugc_dict, nwsli_provider=nwsli_dict
+        buf,
+        utcnow=common.utcnow(),
+        ugc_provider=ugc_dict,
+        nwsli_provider=nwsli_dict,
     )
     # Don't parse these as they contain duplicated information
     if text_product.source == "KNHC" and text_product.afos[:3] == "TCV":

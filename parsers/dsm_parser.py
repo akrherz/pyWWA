@@ -56,7 +56,7 @@ def real_parser(txn, data):
     """Please process some data"""
     prod = parser(data)
     prod.tzlocalize(STATIONS)
-    if not common.CTX.disable_dbwrite:
+    if common.dbwrite_enabled():
         prod.sql(txn)
     if prod.warnings:
         common.email_error("\n".join(prod.warnings), data)

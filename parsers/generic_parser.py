@@ -8,7 +8,6 @@ from pyldm import ldmbridge
 from pyiem.nws.products import parser as productparser
 from pyiem.nws import ugc
 from pyiem.nws import nwsli
-from pyiem.util import utc
 
 import common
 
@@ -49,11 +48,13 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
 
 def really_process_data(txn, buf):
     """ Actually do some processing """
-    utcnow = utc() if common.CTX.utcnow is None else common.CTX.utcnow
 
     # Create our TextProduct instance
     prod = productparser(
-        buf, utcnow=utcnow, ugc_provider=ugc_dict, nwsli_provider=nwsli_dict
+        buf,
+        utcnow=common.utcnow(),
+        ugc_provider=ugc_dict,
+        nwsli_provider=nwsli_dict,
     )
 
     # Do the Jabber work necessary after the database stuff has completed
@@ -64,7 +65,7 @@ def really_process_data(txn, buf):
             common.email_error("xtra[channels] is empty!", buf)
         jabber.send_message(plain, html, xtra)
 
-    if common.CTX.disable_dbwrite:
+    if not common.dbwrite_enabled():
         return
     # Insert into database
     product_id = prod.get_product_id()

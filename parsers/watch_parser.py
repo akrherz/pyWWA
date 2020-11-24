@@ -37,7 +37,7 @@ def real_process(txn, raw):
     if prod.is_test():
         log.msg("TEST watch found, skipping")
         return
-    if not common.CTX.disable_dbwrite:
+    if common.dbwrite_enabled():
         prod.sql(txn)
     prod.compute_wfos(txn)
     for (txt, html, xtra) in prod.get_jabbers(IEM_URL):

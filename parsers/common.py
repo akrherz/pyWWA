@@ -32,7 +32,7 @@ from twisted.words.xish import domish, xpath
 from twisted.mail import smtp
 from twisted.enterprise import adbapi
 import pyiem
-from pyiem.util import LOG
+from pyiem.util import LOG, utc
 
 # http://bugs.python.org/issue7980
 datetime.datetime.strptime("2013", "%Y")
@@ -45,6 +45,16 @@ EMAIL_TIMESTAMPS = []
 CONFIG = json.load(
     open(os.path.join(os.path.dirname(__file__), "../settings.json"))
 )
+
+
+def utcnow():
+    """Return what utcnow is based on command line."""
+    return utc() if CTX.utcnow is None else CTX.utcnow
+
+
+def dbwrite_enabled():
+    """Is database writing not-disabled as per command line."""
+    return not CTX.disable_dbwrite
 
 
 def parse_cmdline():
@@ -159,8 +169,7 @@ def should_email():
 
     @return boolean if we should email or not
     """
-    utcnow = datetime.datetime.utcnow()
-    EMAIL_TIMESTAMPS.insert(0, utcnow)
+    EMAIL_TIMESTAMPS.insert(0, utc())
     delta = EMAIL_TIMESTAMPS[0] - EMAIL_TIMESTAMPS[-1]
     email_limit = int(SETTINGS.get("pywwa_email_limit", 10))
     if len(EMAIL_TIMESTAMPS) < email_limit:
@@ -219,7 +228,7 @@ Message:
         socket.gethostname(),
         os.getcwd(),
         pyiem.__version__,
-        datetime.datetime.utcnow(),
+        utc(),
         os.getpid(),
         " ".join(["%.2f" % (_,) for _ in os.getloadavg()]),
         cstr.read(),
@@ -254,7 +263,7 @@ def make_jabber_client(resource_prefix):
             SETTINGS.get("pywwa_jabber_username", "nwsbot_ingest"),
             SETTINGS.get("pywwa_jabber_domain", "nwschat.weather.gov"),
             resource_prefix,
-            datetime.datetime.utcnow().strftime("%Y%m%d%H%M%S"),
+            utc().strftime("%Y%m%d%H%M%S"),
         )
     )
     factory = jclient.XMPPClientFactory(

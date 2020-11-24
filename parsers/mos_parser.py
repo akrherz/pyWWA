@@ -41,7 +41,7 @@ def got_data(res):
 def real_process(text):
     """ The real processor of the raw data, fun! """
     prod = parser(text)
-    if common.CTX.disable_dbwrite:
+    if not common.dbwrite_enabled():
         return
     df = DBPOOL.runInteraction(prod.sql)
     df.addCallback(got_data)
