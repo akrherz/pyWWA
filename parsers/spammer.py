@@ -33,12 +33,7 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
         Called when ldm closes the pipe
         """
         log.msg("processed %s prods" % (self.prods,))
-        reactor.callLater(5, shutdown)
-
-
-def shutdown():
-    """Shutme off"""
-    reactor.callWhenRunning(reactor.stop)
+        common.shutdown()
 
 
 def real_process(data):

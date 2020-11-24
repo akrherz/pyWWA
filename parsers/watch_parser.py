@@ -11,19 +11,12 @@ IEM_URL = common.SETTINGS.get("pywwa_watch_url", "pywwa_watch_url")
 JABBER = common.make_jabber_client("new_watch")
 
 
-def shutdown():
-    """Shut things down, please"""
-    reactor.callWhenRunning(reactor.stop)  # @UndefinedVariable
-
-
 class MyProductIngestor(ldmbridge.LDMProductReceiver):
     """ I receive products from ldmbridge and process them 1 by 1 :) """
 
     def connectionLost(self, reason):
         """STDIN is shut, so lets shutdown"""
-        log.msg("connectionLost")
-        log.err(reason)
-        reactor.callLater(7, shutdown)  # @UndefinedVariable
+        common.shutdown()
 
     def process_data(self, data):
         """Process the product!"""

@@ -1,7 +1,6 @@
 """Parse CF6 text products."""
 
 from twisted.internet import reactor
-from twisted.python import log
 from pyldm import ldmbridge
 from pyiem.nws.products.cf6 import parser
 import common
@@ -15,8 +14,7 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
 
     def connectionLost(self, reason):
         """ Connection was lost! """
-        log.err(reason)
-        reactor.callLater(7, reactor.callWhenRunning, reactor.stop)
+        common.shutdown()
 
     def process_data(self, data):
         """ Process the product """

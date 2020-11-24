@@ -47,6 +47,13 @@ CONFIG = json.load(
 )
 
 
+def shutdown(default=5):
+    """Shutdown method in given number of seconds."""
+    delay = CTX.shutdown_delay if CTX.shutdown_delay is not None else default
+    log.msg(f"Shutting down in {delay} seconds...")
+    reactor.callLater(delay, reactor.callFromThread, reactor.stop)
+
+
 def utcnow():
     """Return what utcnow is based on command line."""
     return utc() if CTX.utcnow is None else CTX.utcnow
@@ -70,10 +77,25 @@ def parse_cmdline():
         ),
     )
     parser.add_argument(
+        "-e",
+        "--disable-email",
+        action="store_true",
+        help="Disable sending any emails.",
+    )
+    parser.add_argument(
         "-l",
         "--stdout-logging",
         action="store_true",
         help="Also log to stdout.",
+    )
+    parser.add_argument(
+        "-s",
+        "--shutdown-delay",
+        type=int,
+        help=(
+            "Number of seconds to wait before shutting down process when "
+            "STDIN is closed to the process.  0 is immediate."
+        ),
     )
 
     def _parsevalid(val):
@@ -150,12 +172,11 @@ def load_settings():
         user=CONFIG.get("databasero").get("user"),
     )
     cursor = dbconn.cursor()
-    cursor.execute("""SELECT propname, propvalue from properties""")
+    cursor.execute("SELECT propname, propvalue from properties")
     for row in cursor:
         SETTINGS[row[0]] = row[1]
     log.msg(
-        ("common.load_settings loaded %s settings from database")
-        % (len(SETTINGS),)
+        f"common.load_settings loaded {len(SETTINGS)} settings from database"
     )
     cursor.close()
     dbconn.close()
@@ -244,10 +265,13 @@ Message:
     )
     msg["From"] = SETTINGS.get("pywwa_errors_from", "ldm@localhost")
     msg["To"] = SETTINGS.get("pywwa_errors_to", "ldm@localhost")
-    df = smtp.sendmail(
-        SETTINGS.get("pywwa_smtp", "smtp"), msg["From"], msg["To"], msg
-    )
-    df.addErrback(log.err)
+    if not CTX.disable_email:
+        df = smtp.sendmail(
+            SETTINGS.get("pywwa_smtp", "smtp"), msg["From"], msg["To"], msg
+        )
+        df.addErrback(log.err)
+    else:
+        log.msg("Sending email disabled by command line `-e` flag.")
     return True
 
 

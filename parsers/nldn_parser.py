@@ -28,13 +28,7 @@ class myProductIngestor(ldmbridge.LDMProductReceiver):
         """
         Called when ldm closes the pipe
         """
-        print("connectionLost")
-        print(reason)
-        reactor.callLater(5, self.shutdown)
-
-    def shutdown(self):
-        """shutdown please"""
-        reactor.callWhenRunning(reactor.stop)
+        common.shutdown()
 
 
 def real_process(buf):

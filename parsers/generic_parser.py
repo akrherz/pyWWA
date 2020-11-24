@@ -25,8 +25,8 @@ def error_wrapper(exp, buf):
     """Don't whine about known invalid products"""
     if buf.find("HWOBYZ") > -1:
         log.msg("Skipping Error for HWOBYZ")
-        return
-    common.email_error(exp, buf)
+    else:
+        common.email_error(exp, buf)
 
 
 # LDM Ingestor
@@ -35,9 +35,7 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
 
     def connectionLost(self, reason):
         """ callback when the stdin reader connection is closed """
-        log.msg("connectionLost() called...")
-        log.err(reason)
-        reactor.callLater(7, shutdown)
+        common.shutdown()
 
     def process_data(self, data):
         """ Process the product """
@@ -85,11 +83,8 @@ def load_ugc(txn):
     """ load ugc"""
     # Careful here not to load things from the future
     txn.execute(
-        """
-        SELECT name, ugc, wfo from ugcs WHERE
-        name IS NOT Null and begin_ts < now() and
-        (end_ts is null or end_ts > now())
-    """
+        "SELECT name, ugc, wfo from ugcs WHERE name IS NOT null and "
+        "begin_ts < now() and (end_ts is null or end_ts > now())"
     )
     for row in txn.fetchall():
         nm = (row["name"]).replace("\x92", " ").replace("\xc2", " ")
@@ -100,12 +95,10 @@ def load_ugc(txn):
 
     log.msg("ugc_dict loaded %s entries" % (len(ugc_dict),))
 
-    sql = """
-     SELECT nwsli,
-     river_name || ' ' || proximity || ' ' || name || ' ['||state||']' as rname
-     from hvtec_nwsli
-    """
-    txn.execute(sql)
+    txn.execute(
+        "SELECT nwsli, river_name || ' ' || proximity || ' ' || name || "
+        "' ['||state||']' as rname from hvtec_nwsli"
+    )
     for row in txn.fetchall():
         nm = row["rname"].replace("&", " and ")
         nwsli_dict[row["nwsli"]] = nwsli.NWSLI(row["nwsli"], name=nm)
@@ -118,10 +111,17 @@ def ready(_):
     ldmbridge.LDMProductFactory(MyProductIngestor())
 
 
+def errback(err):
+    """Called back when initial load fails."""
+    log.err(err)
+    common.shutdown()
+
+
 def dbload():
     """ Load up database stuff """
     df = PGCONN.runInteraction(load_ugc)
     df.addCallback(ready)
+    df.addErrback(errback)
 
 
 if __name__ == "__main__":

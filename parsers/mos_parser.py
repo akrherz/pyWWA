@@ -25,12 +25,8 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
         """
         Called when ldm closes the pipe
         """
-        reactor.callLater(5, self.shutdown)
-
-    def shutdown(self):
-        """Shutdown"""
         print("Saved %s entries to the database" % (MEMORY["ingested"],))
-        reactor.callWhenRunning(reactor.stop)
+        common.shutdown()
 
 
 def got_data(res):

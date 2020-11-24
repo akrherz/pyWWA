@@ -228,12 +228,6 @@ def clnstr(buf):
     )
 
 
-def shutdown():
-    """Start the shutdown"""
-    log.msg("shutdown() called...")
-    reactor.callWhenRunning(reactor.stop)
-
-
 class MyProductIngestor(ldmbridge.LDMProductReceiver):
     """My actual ingestor"""
 
@@ -241,9 +235,7 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
 
     def connectionLost(self, reason):
         """stdin was closed"""
-        log.msg("connectionLost")
-        log.err(reason)
-        reactor.callLater(15, shutdown)
+        common.shutdown(15)
 
     def process_data(self, data):
         """callback when a full data product is ready for processing
@@ -672,7 +664,7 @@ def service_guard(jobs):
     )
     if len(jobs.pending) > 1000:
         log.msg("Starting shutdown due to more than 1000 jobs in queue")
-        shutdown()
+        common.shutdown()
 
 
 def main(_res):

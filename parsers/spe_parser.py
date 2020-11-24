@@ -13,20 +13,12 @@ PYWWA_PRODUCT_URL = common.SETTINGS.get(
 )
 
 
-def shutdown():
-    """ Stop this app """
-    log.msg("Shutting down...")
-    reactor.callWhenRunning(reactor.stop)
-
-
 class MyProductIngestor(ldmbridge.LDMProductReceiver):
     """ I receive products from ldmbridge and process them 1 by 1 :) """
 
     def connectionLost(self, reason):
         """ callback when the stdin reader connection is closed """
-        log.msg("connectionLost() called...")
-        log.err(reason)
-        reactor.callLater(7, shutdown)
+        common.shutdown()
 
     def process_data(self, data):
         """ Process the product """

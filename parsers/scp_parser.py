@@ -1,6 +1,5 @@
 """ NESDIS SCP Ingestor """
 
-from twisted.python import log
 from twisted.internet import reactor
 from pyiem.nws.products.scp import parser
 from pyldm import ldmbridge
@@ -19,9 +18,7 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
 
     def connectionLost(self, reason):
         """STDIN is shut, so lets shutdown"""
-        log.msg("connectionLost")
-        log.err(reason)
-        reactor.callLater(7, shutdown)  # @UndefinedVariable
+        common.shutdown()
 
     def process_data(self, data):
         """Process the product!"""

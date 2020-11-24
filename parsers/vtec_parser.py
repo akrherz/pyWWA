@@ -11,7 +11,6 @@ with watches.  Lets try to explain
     product_issue <- When was this product issued by the NWS
 """
 import re
-import sys
 
 from bs4 import BeautifulSoup
 import treq
@@ -25,21 +24,13 @@ from pyiem.nws import nwsli
 import common
 
 
-def shutdown():
-    """ Stop this app """
-    log.msg("Shutting down...")
-    reactor.callWhenRunning(reactor.stop)
-
-
 # LDM Ingestor
 class MyProductIngestor(ldmbridge.LDMProductReceiver):
     """ I receive products from ldmbridge and process them 1 by 1 :) """
 
     def connectionLost(self, reason):
         """ callback when the stdin reader connection is closed """
-        log.msg("connectionLost() called...")
-        log.err(reason)
-        reactor.callLater(7, shutdown)
+        common.shutdown(7)
 
     def process_data(self, data):
         """ Process the product """
@@ -91,8 +82,7 @@ def step2(_dummy, text_product):
     ):
         if xtra.get("channels", "") == "":
             common.email_error("xtra[channels] is empty!", text_product.text)
-        if not MANUAL:
-            send_jabber_message(plain, html, xtra)
+        send_jabber_message(plain, html, xtra)
 
 
 def send_jabber_message(plain, html, extra):
@@ -174,7 +164,7 @@ def bootstrap():
     """Things to do at startup"""
     df = PGCONN.runInteraction(load_ugc)
     df.addCallback(ready)
-    df.addErrback(common.email_error, "load_ugc failure!")
+    df.addErrback(common.shutdown)
 
 
 if __name__ == "__main__":
@@ -182,14 +172,9 @@ if __name__ == "__main__":
     ugc_dict = {}
     nwsli_dict = {}
 
-    MANUAL = False
-    if len(sys.argv) == 2 and sys.argv[1].lower() == "manual":
-        log.msg("Manual runtime (no jabber, 1 database connection) requested")
-        MANUAL = True
-
     # Fire up!
     PGCONN = common.get_database(
-        common.CONFIG["databaserw"]["postgis"], cp_max=(5 if not MANUAL else 1)
+        common.CONFIG["databaserw"]["postgis"], cp_max=1
     )
     bootstrap()
     jabber = common.make_jabber_client("vtec_parser")

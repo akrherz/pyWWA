@@ -1,15 +1,11 @@
 pyWWA
 =====
 
-These are NWS product ingestors and processors.  Not sure how useful this is to
-anybody else, but perhaps!  If you have questions, please let me know:
+This repository is an integration of [pyIEM backed](https://github.com/akrherz/pyIEM) NWS product parsers.  These are intended to be run from [Unidata LDM](https://github.com/Unidata/LDM)'s `pqact` process.
 
-   daryl herzmann
-   akrherz@iastate.edu
-   515-294-5978
+[![Build Status](https://api.travis-ci.com/akrherz/pyWWA.svg)](https://travis-ci.com/github/akrherz/pyWWA)
 
-Feel free to do whatever you wish with these, including throwing them in the
-trash. Someday, I'll be a real programmer and write a libary that is usable.
+Python 3.6+ is required to use this code.
 
 Command Line Options
 --------------------
@@ -20,8 +16,10 @@ their execution.
 Short Flag | Long Flag | Description
 --- | --- | ---
 -d | --disable-dbwrite | Turn off any database writing.  The script still may attempt read access to initialize tables.
+-e | --disable-email | Disable sending any emails.
 -l | --stdout-logging | Emit any log message to stdout.
 -u | --utcnow | Provide an ISO-9660 timestamp to the ingestor to denote what the current UTC timestamp is.  This is sometimes necessary for parsing old text products that have ambiguous timestamps (ie METAR).  Defaults to real-time.
+-s | --shutdown-delay | The number of seconds to wait before attempting to shutdown the process when STDIN is closed.  Default is 5.
 -x | --disable-xmpp | Disable any XMPP/Jabber functionality.
 
 Constants Used

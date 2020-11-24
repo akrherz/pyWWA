@@ -1,0 +1,6 @@
+# Get from pypi
+pyIEM
+# LDM bridge
+git+https://github.com/akrherz/pyLDM.git
+# memcached
+txyam2

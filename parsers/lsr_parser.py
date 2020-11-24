@@ -61,9 +61,7 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
 
     def connectionLost(self, reason):
         """ the connection was lost! """
-        log.msg("connectionLost")
-        log.err(reason)
-        reactor.callLater(5, reactor.callWhenRunning, reactor.stop)
+        common.shutdown()
 
 
 def real_processor(txn, text):
