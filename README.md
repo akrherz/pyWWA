@@ -16,6 +16,7 @@ their execution.
 Short Flag | Long Flag | Description
 --- | --- | ---
 -d | --disable-dbwrite | Turn off any database writing.  The script still may attempt read access to initialize tables.
+-e | --disable-email | Disable sending any emails.
 -l | --stdout-logging | Emit any log message to stdout.
 -u | --utcnow | Provide an ISO-9660 timestamp to the ingestor to denote what the current UTC timestamp is.  This is sometimes necessary for parsing old text products that have ambiguous timestamps (ie METAR).  Defaults to real-time.
 -s | --shutdown-delay | The number of seconds to wait before attempting to shutdown the process when STDIN is closed.  Default is 5.

@@ -77,6 +77,12 @@ def parse_cmdline():
         ),
     )
     parser.add_argument(
+        "-e",
+        "--disable-email",
+        action="store_true",
+        help="Disable sending any emails.",
+    )
+    parser.add_argument(
         "-l",
         "--stdout-logging",
         action="store_true",
@@ -259,10 +265,13 @@ Message:
     )
     msg["From"] = SETTINGS.get("pywwa_errors_from", "ldm@localhost")
     msg["To"] = SETTINGS.get("pywwa_errors_to", "ldm@localhost")
-    df = smtp.sendmail(
-        SETTINGS.get("pywwa_smtp", "smtp"), msg["From"], msg["To"], msg
-    )
-    df.addErrback(log.err)
+    if not CTX.disable_email:
+        df = smtp.sendmail(
+            SETTINGS.get("pywwa_smtp", "smtp"), msg["From"], msg["To"], msg
+        )
+        df.addErrback(log.err)
+    else:
+        log.msg("Sending email disabled by command line `-e` flag.")
     return True
 
 

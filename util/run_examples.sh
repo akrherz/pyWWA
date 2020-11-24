@@ -1,6 +1,6 @@
 # Run the various examples through their ingest
 set -x
-OPTS="-l -x -s 1"
+OPTS="-l -x -s 1 -e"
 
 cat examples/ESF.txt | python parsers/afos_dump.py $OPTS || exit 2
 
@@ -16,10 +16,7 @@ cat examples/CWA.txt | python parsers/fake_afos_dump.py $OPTS || exit 2
 
 cat examples/FFGDMX.txt | python parsers/ffg_parser.py $OPTS || exit 2
 
-gp="AFD ADR AFD2 ADMNFD ADR AT5 VAA TOE"
-for fn in $gp; do
-	cat examples/${fn}.txt | python parsers/generic_parser.py $OPTS || exit 2
-done
+cat examples/AFD.txt | python parsers/generic_parser.py $OPTS || exit 2
 
 cat examples/HMLARX.txt | python parsers/hml_parser.py $OPTS || exit 2
 
