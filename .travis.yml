@@ -55,4 +55,5 @@ before_script:
   - cd ..
 
 script:
+  - cp settings.json-template settings.json
   - sh util/run_examples.sh

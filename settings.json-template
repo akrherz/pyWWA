@@ -1,16 +1,14 @@
 {
   "databaserw": {
-	 "openfire": "openfire",
+	 "openfire": "mesosite",
 	 "postgis": "postgis",
-	 "archive": "notused",
-	 "host": "postgreswrite",
-	 "user": "nwschatwrite"
+	 "host": "iemdb-postgis.local",
+	 "user": "ldm"
    }, 
   "databasero": {
-	 "openfire": "openfire",
+	 "openfire": "mesosite",
 	 "postgis": "postgis",
-	 "archive": "notused",
-	 "host": "postgresread",
-	 "user": "nwschatread"
+	 "host": "iemdb-postgis.local",
+	 "user": "ldm"
   }
 }
