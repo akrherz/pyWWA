@@ -25,21 +25,13 @@ MEMCACHE_CLIENT = YamClient(reactor, ["tcp:iem-memcached3:11211"])
 MEMCACHE_CLIENT.connect()
 
 
-def shutdown():
-    """ Down we go! """
-    log.msg("Stopping...")
-    reactor.callWhenRunning(reactor.stop)  # @UndefinedVariable
-
-
 # LDM Ingestor
 class MyProductIngestor(ldmbridge.LDMProductReceiver):
     """ I receive products from ldmbridge and process them 1 by 1 :) """
 
     def connectionLost(self, reason):
         """ called when the connection is lost """
-        log.msg("connectionLost")
-        log.err(reason)
-        reactor.callLater(5, shutdown)  # @UndefinedVariable
+        common.shutdown()
 
     def process_data(self, data):
         """ Process the product """

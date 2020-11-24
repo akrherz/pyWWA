@@ -4,7 +4,6 @@ Chunk the MOS text data into easier to search values.
 import re
 
 from twisted.internet import reactor
-from twisted.python import log
 from pyldm import ldmbridge
 from pyiem.nws import product
 import common  # @UnresolvedImport
@@ -29,13 +28,7 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
         """
         Called when ldm closes the pipe
         """
-        log.msg("processed %s prods" % (self.prods,))
-        reactor.callLater(5, shutdown)
-
-
-def shutdown():
-    """Shutme off"""
-    reactor.callWhenRunning(reactor.stop)
+        common.shutdown()
 
 
 def real_process(txn, data):

@@ -3,7 +3,6 @@
  Support WPC's FFG product
 """
 
-from twisted.python import log
 from twisted.internet import reactor
 from pyiem.nws.products.mcd import parser as mcdparser
 from pyldm import ldmbridge
@@ -18,9 +17,7 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
 
     def connectionLost(self, reason):
         """ Called when the STDIN connection is lost """
-        log.msg("connectionLost")
-        log.err(reason)
-        reactor.callLater(15, reactor.callWhenRunning, reactor.stop)
+        common.shutdown()
 
     def process_data(self, data):
         """ Process a chunk of data """

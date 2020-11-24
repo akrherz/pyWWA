@@ -32,9 +32,7 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
 
     def connectionLost(self, reason):
         """Called when stdin is closed"""
-        log.msg("connectionLost")
-        log.err(reason)
-        reactor.callLater(15, reactor.callWhenRunning, reactor.stop)
+        common.shutdown(15)
 
     def process_data(self, data):
         """I am called from the ldmbridge when data is ahoy"""

@@ -47,6 +47,13 @@ CONFIG = json.load(
 )
 
 
+def shutdown(default=5):
+    """Shutdown method in given number of seconds."""
+    delay = CTX.shutdown_delay if CTX.shutdown_delay is not None else default
+    log.msg(f"Shutting down in {delay} seconds...")
+    reactor.callLater(delay, reactor.callFromThread, reactor.stop)
+
+
 def utcnow():
     """Return what utcnow is based on command line."""
     return utc() if CTX.utcnow is None else CTX.utcnow
@@ -74,6 +81,15 @@ def parse_cmdline():
         "--stdout-logging",
         action="store_true",
         help="Also log to stdout.",
+    )
+    parser.add_argument(
+        "-s",
+        "--shutdown-delay",
+        type=int,
+        help=(
+            "Number of seconds to wait before shutting down process when "
+            "STDIN is closed to the process.  0 is immediate."
+        ),
     )
 
     def _parsevalid(val):

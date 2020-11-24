@@ -87,9 +87,7 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
 
     def connectionLost(self, reason):
         """The connection was lost for some reason"""
-        log.msg("connectionLost")
-        log.err(reason)
-        reactor.callLater(30, shutdown)  # @UndefinedVariable
+        common.shutdown(30)
 
     def process_data(self, data):
         """Callback when we have data to process"""

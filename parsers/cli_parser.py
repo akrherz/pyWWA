@@ -23,8 +23,7 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
 
     def connectionLost(self, reason):
         """ Connection was lost! """
-        log.err(reason)
-        reactor.callLater(7, reactor.callWhenRunning, reactor.stop)
+        common.shutdown()
 
     def process_data(self, data):
         """ Process the product """

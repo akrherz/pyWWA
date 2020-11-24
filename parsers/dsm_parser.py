@@ -38,13 +38,7 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
 
     def connectionLost(self, reason):
         """sys.stdin was closed"""
-        log.msg("connectionLost")
-        log.err(reason)
-        reactor.callLater(5, self.shutdown)
-
-    def shutdown(self):
-        """shut us down"""
-        reactor.callWhenRunning(reactor.stop)
+        common.shutdown()
 
     def process_data(self, data):
         """ Process the product """
