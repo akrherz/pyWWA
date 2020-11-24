@@ -23,7 +23,6 @@ def shutdown():
 
 def error_wrapper(exp, buf):
     """Don't whine about known invalid products"""
-    log.msg("error_wrapper")
     if buf.find("HWOBYZ") > -1:
         log.msg("Skipping Error for HWOBYZ")
     else:
@@ -40,9 +39,10 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
 
     def process_data(self, data):
         """ Process the product """
-        defer = PGCONN.runInteraction(really_process_data, data)
-        defer.addErrback(error_wrapper, data)
-        defer.addErrback(log.err)
+        really_process_data(None, data)
+        # defer = PGCONN.runInteraction(really_process_data, data)
+        # defer.addErrback(error_wrapper, data)
+        # defer.addErrback(log.err)
 
 
 def really_process_data(txn, buf):
