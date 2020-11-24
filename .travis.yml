@@ -30,6 +30,7 @@ addons:
     - iemdb-isuag.local
     - iemdb-portfolio.local
     - iemdb-smos.local
+    - iem-memcached3
 env:
   global:
     - MPLLOCALFREETYPE=1
@@ -41,7 +42,7 @@ before_install:
   - git clone --depth 1 https://github.com/akrherz/iem-database.git database
   - git clone --depth 1 https://github.com/akrherz/ci_tooling.git .ci_tooling
   - . .ci_tooling/postgres.sh
-
+  - . .ci_tooling/memcached.sh
 
 install:
   - . .ci_tooling/miniconda.sh
