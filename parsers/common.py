@@ -1,5 +1,6 @@
 """Support lib for the parser scripts found in this directory"""
 from __future__ import print_function
+import argparse
 import json
 import os
 import inspect
@@ -19,6 +20,7 @@ import psycopg2
 
 # twisted
 from twisted.python import log
+from twisted.logger import formatEvent
 from twisted.python import syslog
 from twisted.python import failure
 from twisted.words.xish.xmlstream import STREAM_END_EVENT
@@ -34,7 +36,7 @@ from pyiem.util import LOG
 
 # http://bugs.python.org/issue7980
 datetime.datetime.strptime("2013", "%Y")
-MYREGEX = u"[\x00-\x08\x0b\x0c\x0e-\x1F\uD800-\uDFFF\uFFFE\uFFFF]"
+MYREGEX = "[\x00-\x08\x0b\x0c\x0e-\x1F\uD800-\uDFFF\uFFFE\uFFFF]"
 ILLEGAL_XML_CHARS_RE = re.compile(MYREGEX)
 
 SETTINGS = {}
@@ -45,16 +47,29 @@ CONFIG = json.load(
 )
 
 
+def parse_cmdline():
+    """Parse command line for context settings."""
+    parser = argparse.ArgumentParser(description="pyWWA Parser.")
+    parser.add_argument("-l", action="store_true", help="Also log to stdout.")
+    return parser.parse_args(sys.argv[1:])
+
+
 def setup_syslog():
     """Setup how we want syslogging to work"""
     # https://stackoverflow.com/questions/13699283
     frame = inspect.stack()[-1]
     module = inspect.getmodule(frame[0])
     filename = os.path.basename(module.__file__)
-    syslog.startLogging(prefix="pyWWA/%s" % (filename,), facility=LOG_LOCAL2)
+    syslog.startLogging(
+        prefix=f"pyWWA/{filename}", facility=LOG_LOCAL2, setStdout=not CTX.l
+    )
     # pyIEM does logging via python stdlib logging, so we need to patch those
     # messages into twisted's logger.
     LOG.addHandler(logging.StreamHandler(stream=log.logfile))
+    # Log stuff to stdout if we are running from command line.
+    if CTX.l:
+        log.addObserver(lambda x: print(formatEvent(x)))
+        log.msg("Copying logging to stdout.")
     # Allow for more verbosity when we are running this manually.
     LOG.setLevel(logging.DEBUG if sys.stdout.isatty() else logging.INFO)
 
@@ -369,5 +384,6 @@ class JabberClient(object):
 
 # This is blocking, but necessary to make sure settings are loaded before
 # we go on our merry way
+CTX = parse_cmdline()
 setup_syslog()
 load_settings()
