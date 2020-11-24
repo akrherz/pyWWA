@@ -1,0 +1,58 @@
+sudo: required
+
+dist: bionic
+
+addons:
+  artifacts:
+    target_paths: /$PYTHON_VERSION
+  hosts:
+    - iemdb.local
+    - iemdb-hads.local
+    - iemdb-mos.local
+    - iemdb-idep.local
+    - iemdb-iemre.local
+    - iemdb2.local
+    - iemdb-postgis.local
+    - iemdb-mesosite.local
+    - iemdb-afos.local
+    - iemdb-asos.local
+    - iemdb-nldn.local
+    - iemdb-snet.local
+    - iemdb-mos.local
+    - iemdb-rwis.local
+    - iemdb-squaw.local
+    - iemdb-awos.local
+    - iemdb-iem.local
+    - iemdb-other.local
+    - iemdb-scan.local
+    - iemdb-wepp.local
+    - iemdb-coop.local
+    - iemdb-isuag.local
+    - iemdb-portfolio.local
+    - iemdb-smos.local
+env:
+  global:
+    - MPLLOCALFREETYPE=1
+  matrix:
+    - PYTHON_VERSION=3.8
+language: python
+
+before_install:
+  - git clone --depth 1 https://github.com/akrherz/iem-database.git database
+  - git clone --depth 1 https://github.com/akrherz/ci_tooling.git .ci_tooling
+  - . .ci_tooling/postgres.sh
+
+
+install:
+  - . .ci_tooling/miniconda.sh
+
+before_script:
+  # https://travis-ci.community/t/t/712/12
+  - export PATH="/usr/lib/postgresql/11/bin:$PATH"
+  - psql -c 'CREATE ROLE travis SUPERUSER LOGIN CREATEDB;' -U postgres || true
+  - cd database; sh bootstrap.sh
+  - python schema_manager.py
+  - cd ..
+
+script:
+  - sh util/run_examples.sh
