@@ -23,10 +23,11 @@ def shutdown():
 
 def error_wrapper(exp, buf):
     """Don't whine about known invalid products"""
+    log.msg("error_wrapper")
     if buf.find("HWOBYZ") > -1:
         log.msg("Skipping Error for HWOBYZ")
-        return
-    common.email_error(exp, buf)
+    else:
+        common.email_error(exp, buf)
 
 
 # LDM Ingestor
