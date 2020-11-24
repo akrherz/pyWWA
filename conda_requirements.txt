@@ -1,4 +1,6 @@
 affine
+# vtec_parser
+beautifulsoup4
 cartopy>=0.18
 cython
 descartes
