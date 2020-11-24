@@ -150,12 +150,11 @@ def load_settings():
         user=CONFIG.get("databasero").get("user"),
     )
     cursor = dbconn.cursor()
-    cursor.execute("""SELECT propname, propvalue from properties""")
+    cursor.execute("SELECT propname, propvalue from properties")
     for row in cursor:
         SETTINGS[row[0]] = row[1]
     log.msg(
-        ("common.load_settings loaded %s settings from database")
-        % (len(SETTINGS),)
+        f"common.load_settings loaded {len(SETTINGS)} settings from database"
     )
     cursor.close()
     dbconn.close()

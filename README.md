@@ -5,6 +5,8 @@ This repository is an integration of [pyIEM backed](https://github.com/akrherz/p
 
 [![Build Status](https://api.travis-ci.com/akrherz/pyWWA.svg)](https://travis-ci.com/github/akrherz/pyWWA)
 
+Python 3.6+ is required to use this code.
+
 Command Line Options
 --------------------
 
