@@ -82,7 +82,8 @@ def really_process_data(txn, data):
         tp.wmo,
         tp.valid.strftime("%Y-%m-%d %H:%M+00"),
     )
-    txn.execute(sql, sqlargs)
+    if not common.CTX.disable_dbwrite:
+        txn.execute(sql, sqlargs)
 
     if tp.afos[:3] == "FRH":
         return

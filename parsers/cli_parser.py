@@ -4,7 +4,6 @@ The CLI report has lots of good data that is hard to find in other products,
 so we take what data we find in this product and overwrite the database
 storage of what we got from the automated observations
 """
-from __future__ import print_function
 
 from twisted.internet import reactor
 from twisted.python import log
@@ -51,7 +50,6 @@ def preprocessor(txn, text):
     # Run each data through my local processor, which will set the db_station
     for data in prod.data:
         realprocessor(txn, prod, data)
-        print(data["db_station"])
     # Run through database save now
     prod.sql(txn)
     send_tweet(prod)

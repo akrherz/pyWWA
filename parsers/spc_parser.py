@@ -37,7 +37,8 @@ def real_parser(txn, buf):
     spc = parser(buf)
     # spc.draw_outlooks()
     spc.compute_wfos(txn)
-    spc.sql(txn)
+    if not common.CTX.disable_dbwrite:
+        spc.sql(txn)
     jmsgs = spc.get_jabbers("")
     for (txt, html, xtra) in jmsgs:
         JABBER.send_message(txt, html, xtra)

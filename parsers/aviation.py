@@ -17,6 +17,7 @@ TABLE_PATH = os.path.normpath(os.path.join(_MYDIR, "..", "tables"))
 
 
 def load_database(txn):
+    """Load database stations."""
 
     txn.execute(
         """
@@ -82,19 +83,26 @@ def final_step(_, prod):
 
 
 MESOSITE = common.get_database("mesosite")
+jabber = common.make_jabber_client("aviation")
 
 
-def onready(res):
+def onready(_res):
     """Database has loaded"""
     log.msg("onready() called...")
     ldmbridge.LDMProductFactory(MyProductIngestor())
     MESOSITE.close()
 
 
-df = MESOSITE.runInteraction(load_database)
-df.addCallback(onready)
-df.addErrback(common.email_error, "ERROR on load_database")
-df.addErrback(log.err)
+def bootstrap():
+    """Fire things up."""
+    df = MESOSITE.runInteraction(load_database)
+    df.addCallback(onready)
+    df.addErrback(common.email_error, "ERROR on load_database")
+    df.addErrback(log.err)
 
-jabber = common.make_jabber_client("aviation")
-reactor.run()
+    reactor.run()
+
+
+if __name__ == "__main__":
+    # Go
+    bootstrap()

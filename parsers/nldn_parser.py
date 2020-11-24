@@ -40,7 +40,8 @@ class myProductIngestor(ldmbridge.LDMProductReceiver):
 def real_process(buf):
     """ The real processor of the raw data, fun! """
     np = parser(BytesIO(b"NLDN" + buf))
-    DBPOOL.runInteraction(np.sql)
+    if not common.CTX.disable_dbwrite:
+        DBPOOL.runInteraction(np.sql)
 
 
 def main():

@@ -1,20 +1,16 @@
 """ Generic NWS Product Parser """
 import re
-import datetime
-import sys
 
 from twisted.python import log
 from twisted.internet import reactor
-import pytz
 from shapely.geometry import MultiPolygon
 from pyldm import ldmbridge
 from pyiem.nws.products import parser as productparser
 from pyiem.nws import ugc
 from pyiem.nws import nwsli
+from pyiem.util import utc
 
 import common
-
-DB_ON = bool(common.SETTINGS.get("pywwa_save_text_products", False))
 
 ugc_dict = {}
 nwsli_dict = {}
@@ -53,8 +49,7 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
 
 def really_process_data(txn, buf):
     """ Actually do some processing """
-    utcnow = datetime.datetime.utcnow()
-    utcnow = utcnow.replace(tzinfo=pytz.utc)
+    utcnow = utc() if common.CTX.utcnow is None else common.CTX.utcnow
 
     # Create our TextProduct instance
     prod = productparser(
@@ -67,27 +62,22 @@ def really_process_data(txn, buf):
     ):
         if xtra.get("channels", "") == "":
             common.email_error("xtra[channels] is empty!", buf)
-        if not MANUAL:
-            jabber.send_message(plain, html, xtra)
+        jabber.send_message(plain, html, xtra)
 
-    if DB_ON:
-        # Insert into database
-        product_id = prod.get_product_id()
-        sqlraw = buf.replace("\015\015\012", "\n").replace("\000", "").strip()
-        sql = """
-        INSERT into text_products(product, product_id) values (%s,%s)
-        """
-        myargs = (sqlraw, product_id)
-        if prod.segments and prod.segments[0].sbw:
-            giswkt = ("SRID=4326;%s") % (
-                MultiPolygon([prod.segments[0].sbw]).wkt,
-            )
-            sql = """
-                INSERT into text_products(product, product_id, geom)
-                values (%s,%s,%s)
-            """
-            myargs = (sqlraw, product_id, giswkt)
-        txn.execute(sql, myargs)
+    if common.CTX.disable_dbwrite:
+        return
+    # Insert into database
+    product_id = prod.get_product_id()
+    sqlraw = buf.replace("\015\015\012", "\n").replace("\000", "").strip()
+    giswkt = None
+    if prod.segments and prod.segments[0].sbw:
+        giswkt = ("SRID=4326;%s") % (MultiPolygon([prod.segments[0].sbw]).wkt,)
+    sql = """
+        INSERT into text_products(product, product_id, geom)
+        values (%s,%s,%s)
+    """
+    myargs = (sqlraw, product_id, giswkt)
+    txn.execute(sql, myargs)
 
 
 def load_ugc(txn):
@@ -121,8 +111,6 @@ def load_ugc(txn):
 
     log.msg("nwsli_dict loaded %s entries" % (len(nwsli_dict),))
 
-    return None
-
 
 def ready(_):
     """ cb when our database work is done """
@@ -136,14 +124,8 @@ def dbload():
 
 
 if __name__ == "__main__":
-
-    MANUAL = False
-    if len(sys.argv) == 2 and sys.argv[1] == "manual":
-        log.msg("Manual runtime (no jabber, 1 database connection) requested")
-        MANUAL = True
-
     # Fire up!
-    PGCONN = common.get_database("postgis", cp_max=(5 if not MANUAL else 1))
+    PGCONN = common.get_database("postgis", cp_max=1)
     dbload()
     jabber = common.make_jabber_client("generic_parser")
 

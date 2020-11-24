@@ -32,7 +32,8 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
 def real_process(txn, raw):
     """Process the product, please"""
     prod = parser(raw)
-    prod.sql(txn)
+    if not common.CTX.disable_dbwrite:
+        prod.sql(txn)
 
 
 def main():

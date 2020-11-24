@@ -64,8 +64,8 @@ def real_process(txn, raw):
     )
     if len(j) == 1:
         JABBER.send_message(j[0][0], j[0][1], j[0][2])
-
-    prod.database_save(txn)
+    if not common.CTX.disable_dbwrite:
+        prod.database_save(txn)
 
 
 ldmbridge.LDMProductFactory(MyProductIngestor())

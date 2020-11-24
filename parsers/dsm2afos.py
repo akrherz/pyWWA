@@ -1,4 +1,4 @@
-"""Move DSM messages into the text database with the proper PIL"""
+"""Move DSM messages into the text database with the proper PIL."""
 import sys
 import re
 

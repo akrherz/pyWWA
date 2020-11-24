@@ -1,6 +1,4 @@
-"""
- SHEF product ingestor
-"""
+"""SHEF product ingestor."""
 # System Imports
 import os
 import re

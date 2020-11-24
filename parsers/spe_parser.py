@@ -11,7 +11,6 @@ POSTGIS = common.get_database("postgis", cp_max=1)
 PYWWA_PRODUCT_URL = common.SETTINGS.get(
     "pywwa_product_url", "pywwa_product_url"
 )
-DB_ON = bool(common.SETTINGS.get("pywwa_save_text_products", False))
 
 
 def shutdown():
@@ -42,7 +41,7 @@ def real_process(txn, raw):
     prod = product.TextProduct(raw)
 
     product_id = prod.get_product_id()
-    if DB_ON:
+    if not common.CTX.disable_dbwrite:
         sql = """
             INSERT into text_products(product, product_id) values (%s,%s)
         """

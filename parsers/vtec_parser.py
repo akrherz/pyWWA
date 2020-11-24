@@ -11,10 +11,8 @@ with watches.  Lets try to explain
     product_issue <- When was this product issued by the NWS
 """
 import re
-import datetime
 import sys
 
-import pytz
 from bs4 import BeautifulSoup
 import treq
 from twisted.python import log
@@ -24,6 +22,7 @@ from pyldm import ldmbridge
 from pyiem.nws.products.vtec import parser as vtecparser
 from pyiem.nws import ugc
 from pyiem.nws import nwsli
+from pyiem.util import utc
 import common
 
 
@@ -53,8 +52,7 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
 
 def really_process_data(buf):
     """ Actually do some processing """
-    gmtnow = datetime.datetime.utcnow()
-    gmtnow = gmtnow.replace(tzinfo=pytz.utc)
+    utcnow = utc() if common.CTX.utcnow is None else common.CTX.utcnow
 
     # Make sure we have a trailing $$, if not report error and slap one on
     if buf.find("$$") == -1:
@@ -63,7 +61,7 @@ def really_process_data(buf):
 
     # Create our TextProduct instance
     text_product = vtecparser(
-        buf, utcnow=gmtnow, ugc_provider=ugc_dict, nwsli_provider=nwsli_dict
+        buf, utcnow=utcnow, ugc_provider=ugc_dict, nwsli_provider=nwsli_dict
     )
     # Don't parse these as they contain duplicated information
     if text_product.source == "KNHC" and text_product.afos[:3] == "TCV":
@@ -72,6 +70,7 @@ def really_process_data(buf):
     if text_product.source == "TJSJ" and text_product.afos[3:] == "SPN":
         return
 
+    # TODO can't disable the database write yet.
     df = PGCONN.runInteraction(text_product.sql)
     df.addCallback(step2, text_product)
     df.addErrback(common.email_error, text_product.unixtext)

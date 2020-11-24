@@ -80,7 +80,8 @@ def real_processor(txn, text):
             lsr.duplicate = True
             continue
         LSRDB[uniquekey] = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
-        lsr.sql(txn)
+        if not common.CTX.disable_dbwrite:
+            lsr.sql(txn)
 
     j = prod.get_jabbers(common.SETTINGS.get("pywwa_lsr_url", "pywwa_lsr_url"))
     for i, (p, h, x) in enumerate(j):

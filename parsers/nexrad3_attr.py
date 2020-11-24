@@ -161,7 +161,8 @@ def really_process(txn, ctx):
                 %(poh)s, %(max_size)s, %(vil)s, %(max_dbz)s,
                 %(max_dbz_height)s, %(top)s, %(drct)s, %(sknt)s, %(valid)s)
             """
-            txn.execute(sql, d)
+            if not common.CTX.disable_dbwrite:
+                txn.execute(sql, d)
 
     if co > 0:
         log.msg(

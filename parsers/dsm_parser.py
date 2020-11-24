@@ -17,10 +17,8 @@ STATIONS = dict()
 def load_stations(txn):
     """load station metadata to build a xref."""
     txn.execute(
-        """
-        SELECT id, tzname from stations
-        where network ~* 'ASOS' or network = 'AWOS'
-    """
+        "SELECT id, tzname from stations "
+        "where network ~* 'ASOS' or network = 'AWOS'"
     )
     for row in txn:
         # we need four char station IDs
@@ -58,7 +56,8 @@ def real_parser(txn, data):
     """Please process some data"""
     prod = parser(data)
     prod.tzlocalize(STATIONS)
-    prod.sql(txn)
+    if not common.CTX.disable_dbwrite:
+        prod.sql(txn)
     if prod.warnings:
         common.email_error("\n".join(prod.warnings), data)
 

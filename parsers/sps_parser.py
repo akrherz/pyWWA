@@ -61,7 +61,8 @@ def real_process(txn, raw):
         log.msg("$$ was missing from this product")
         raw += "\r\r\n$$\r\r\n"
     prod = parser(raw, ugc_provider=ugc_provider)
-    prod.sql(txn)
+    if not common.CTX.disable_dbwrite:
+        prod.sql(txn)
     jmsgs = prod.get_jabbers(PYWWA_PRODUCT_URL)
     for (mess, htmlmess, xtra) in jmsgs:
         jabber.send_message(mess, htmlmess, xtra)

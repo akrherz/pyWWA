@@ -1,5 +1,4 @@
-"""Split RR7 products, for some reason!
-"""
+"""Split RR7 products, for some reason!"""
 import sys
 import re
 import datetime

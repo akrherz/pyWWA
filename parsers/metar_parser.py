@@ -5,7 +5,6 @@ So let us document it here for my own sanity.
 
 18 Jul 2017: `snowdepth` branch of my python-metar fork installed with pip
 """
-import sys
 
 # Twisted Python imports
 from twisted.python import log
@@ -18,7 +17,6 @@ import common  # @UnresolvedImport
 IEMDB = common.get_database("iem")
 ASOSDB = common.get_database("asos")
 
-MANUAL = "manual" in [x.lower() for x in sys.argv]
 NWSLI_PROVIDER = {}
 # Manual list of sites that are sent to jabber :/
 metarcollect.JABBER_SITES = {
@@ -109,22 +107,21 @@ def real_processor(text):
     jmsgs = collect.get_jabbers(
         "https://mesonet.agron.iastate.edu/ASOS/current.phtml?network="
     )
-    if not MANUAL:
-        for jmsg in jmsgs:
-            if jmsg[0] in JABBER_MESSAGES:
-                continue
-            # Hacky here, but get the METAR.XXXX channel to find which site
-            # this is.
-            skip = False
-            channels = jmsg[2].get("channels", [])
-            for channel in channels.split(","):
-                if channel.startswith("METAR."):
-                    if channel.split(".")[1] in IGNORELIST:
-                        log.msg(f"IGNORELIST Jabber relay of {jmsg[0]}")
-                        skip = True
-            JABBER_MESSAGES.append(jmsg[0])
-            if not skip:
-                JABBER.send_message(*jmsg)
+    for jmsg in jmsgs:
+        if jmsg[0] in JABBER_MESSAGES:
+            continue
+        # Hacky here, but get the METAR.XXXX channel to find which site
+        # this is.
+        skip = False
+        channels = jmsg[2].get("channels", [])
+        for channel in channels.split(","):
+            if channel.startswith("METAR."):
+                if channel.split(".")[1] in IGNORELIST:
+                    log.msg(f"IGNORELIST Jabber relay of {jmsg[0]}")
+                    skip = True
+        JABBER_MESSAGES.append(jmsg[0])
+        if not skip:
+            JABBER.send_message(*jmsg)
     for mtr in collect.metars:
         if mtr.network is None:
             log.msg("station: '{mtr.station_id}' is unknown to metadata table")
@@ -133,17 +130,16 @@ def real_processor(text):
             )
             deffer.addErrback(common.email_error, text)
             continue
-        deffer = IEMDB.runInteraction(do_db, mtr)
-        deffer.addErrback(common.email_error, collect.unixtext)
+        if not common.CTX.disable_dbwrite:
+            deffer = IEMDB.runInteraction(do_db, mtr)
+            deffer.addErrback(common.email_error, collect.unixtext)
 
 
 def do_db(txn, mtr):
     """Do database transaction"""
     # We always want data to at least go to current_log incase we are getting
     # data out of order :/
-    iem, res = mtr.to_iemaccess(
-        txn, force_current_log=True, skip_current=MANUAL
-    )
+    iem, res = mtr.to_iemaccess(txn, force_current_log=True)
     if not res:
         log.msg(
             ("INFO: IEMAccess update of %s returned false: %s")

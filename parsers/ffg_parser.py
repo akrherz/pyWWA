@@ -21,6 +21,8 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
 
     def process_data(self, data):
         """Process the product"""
+        if common.CTX.disable_dbwrite:
+            return
         df = DBPOOL.runInteraction(real_parser, data)
         df.addErrback(common.email_error, data)
 

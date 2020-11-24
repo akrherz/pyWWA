@@ -50,7 +50,40 @@ CONFIG = json.load(
 def parse_cmdline():
     """Parse command line for context settings."""
     parser = argparse.ArgumentParser(description="pyWWA Parser.")
-    parser.add_argument("-l", action="store_true", help="Also log to stdout.")
+    parser.add_argument(
+        "-d",
+        "--disable-dbwrite",
+        action="store_true",
+        help=(
+            "Disable any writing to databases, still may need read access "
+            "to initialize metadata tables."
+        ),
+    )
+    parser.add_argument(
+        "-l",
+        "--stdout-logging",
+        action="store_true",
+        help="Also log to stdout.",
+    )
+
+    def _parsevalid(val):
+        """Convert to datetime."""
+        v = datetime.datetime.strptime(val[:16], "%Y-%m-%dT%H:%M")
+        return v.replace(tzinfo=datetime.timezone.utc)
+
+    parser.add_argument(
+        "-u",
+        "--utcnow",
+        type=_parsevalid,
+        metavar="YYYY-MM-DDTHH:MI",
+        help="Provide the current UTC Timestamp (defaults to realtime.).",
+    )
+    parser.add_argument(
+        "-x",
+        "--disable-xmpp",
+        action="store_true",
+        help="Disable all XMPP functionality.",
+    )
     return parser.parse_args(sys.argv[1:])
 
 
@@ -61,13 +94,15 @@ def setup_syslog():
     module = inspect.getmodule(frame[0])
     filename = os.path.basename(module.__file__)
     syslog.startLogging(
-        prefix=f"pyWWA/{filename}", facility=LOG_LOCAL2, setStdout=not CTX.l
+        prefix=f"pyWWA/{filename}",
+        facility=LOG_LOCAL2,
+        setStdout=not CTX.stdout_logging,
     )
     # pyIEM does logging via python stdlib logging, so we need to patch those
     # messages into twisted's logger.
     LOG.addHandler(logging.StreamHandler(stream=log.logfile))
     # Log stuff to stdout if we are running from command line.
-    if CTX.l:
+    if CTX.stdout_logging:
         log.addObserver(lambda x: print(formatEvent(x)))
         log.msg("Copying logging to stdout.")
     # Allow for more verbosity when we are running this manually.
@@ -209,6 +244,9 @@ Message:
 
 def make_jabber_client(resource_prefix):
     """ Generate a jabber client, please """
+    if CTX.disable_xmpp:
+        LOG.info("XMPP disabled via command line.")
+        return NOOPXMPP()
 
     myjid = jid.JID(
         "%s@%s/%s_%s"
@@ -279,6 +317,16 @@ def raw_data_out(data):
     if data == " ":
         return
     log.msg("SEND %s" % (data,))
+
+
+class NOOPXMPP:
+    """A no-operation Jabber client."""
+
+    def keepalive(self):
+        """Do Nothing."""
+
+    def send_message(self, *args):
+        """Do Nothing."""
 
 
 class JabberClient(object):

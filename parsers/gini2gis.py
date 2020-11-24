@@ -3,7 +3,6 @@
 I convert raw GINI noaaport imagery into geo-referenced PNG files both in the
 'native' projection and 4326.
 """
-from __future__ import print_function
 from io import BytesIO
 import sys
 import datetime
