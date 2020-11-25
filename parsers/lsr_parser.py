@@ -1,15 +1,19 @@
 """ LSR product ingestor """
+# Stdlib
 import pickle
 import os
 import datetime
 
+# 3rd Party
 import pytz
 from twisted.internet import reactor
 from pyiem import reference
 from pyiem.nws.products.lsr import parser as lsrparser
 from pyiem.util import LOG
 from pyldm import ldmbridge
-import common
+
+# Local
+from pywwa import common
 
 DBPOOL = common.get_database(common.CONFIG["databaserw"]["postgis"])
 

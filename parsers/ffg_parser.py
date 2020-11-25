@@ -1,10 +1,13 @@
 """ FFG """
 
+# 3rd Party
 from twisted.internet import reactor
 from pyldm import ldmbridge
 from pyiem.util import LOG
 from pyiem.nws.products.ffg import parser
-import common  # @UnresolvedImport
+
+# Local
+from pywwa import common
 
 DBPOOL = common.get_database("postgis", cp_max=1)
 

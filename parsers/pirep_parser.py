@@ -1,12 +1,16 @@
 """ PIREP parser! """
+# stdlib
 import datetime
 import os
 
+# 3rd Party
 from twisted.internet import reactor
 from pyldm import ldmbridge
 from pyiem.util import LOG
 from pyiem.nws.products.pirep import parser as pirepparser
-import common
+
+# Local
+from pywwa import common
 
 TABLESDIR = os.path.join(os.path.dirname(__file__), "../tables")
 

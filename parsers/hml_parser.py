@@ -1,11 +1,13 @@
 """ HML parser! """
 
+# 3rd Party
 from twisted.internet import reactor
 from pyldm import ldmbridge
 from pyiem.util import LOG
 from pyiem.nws.products.hml import parser as hmlparser
 
-import common  # @UnresolvedImport
+# Local
+from pywwa import common
 
 DBPOOL = common.get_database("hml")
 

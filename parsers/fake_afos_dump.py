@@ -1,10 +1,13 @@
 """Dump some stuff without AFOS PILs"""
 
+# 3rd Party
 from twisted.internet import reactor
 from pyiem.util import LOG
 from pyiem.nws.product import TextProduct
 from pyldm import ldmbridge
-import common
+
+# Local
+from pywwa import common
 
 
 def compute_afos(textprod):

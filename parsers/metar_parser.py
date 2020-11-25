@@ -6,12 +6,14 @@ So let us document it here for my own sanity.
 18 Jul 2017: `snowdepth` branch of my python-metar fork installed with pip
 """
 
-# Twisted Python imports
+# 3rd Party
 from twisted.internet import reactor
 from pyiem.nws.products import metarcollect
 from pyiem.util import get_properties, LOG
 from pyldm import ldmbridge
-import common  # @UnresolvedImport
+
+# Local
+from pywwa import common
 
 IEMDB = common.get_database("iem")
 ASOSDB = common.get_database("asos")

@@ -1,11 +1,15 @@
 """ Aviation Product Parser! """
+# stdlib
 import os
 
+# 3rd Party
 from twisted.internet import reactor
 from pyldm import ldmbridge
 from pyiem.util import LOG
 from pyiem.nws.products.sigmet import parser
-import common
+
+# Local
+from pywwa import common
 
 DBPOOL = common.get_database("postgis")
 

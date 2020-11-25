@@ -1,12 +1,16 @@
 """
 Chunk the MOS text data into easier to search values.
 """
+# stdlib
 import re
 
+# 3rd Party
 from twisted.internet import reactor
 from pyldm import ldmbridge
 from pyiem.nws import product
-import common  # @UnresolvedImport
+
+# Local
+from pywwa import common
 
 DBPOOL = common.get_database("afos")
 

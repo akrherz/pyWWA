@@ -1,11 +1,14 @@
 """ Twisted Way to dump data to the database """
 
+# 3rd Party
 from twisted.internet import reactor
 from txyam.client import YamClient
 from pyldm import ldmbridge
 from pyiem.util import LOG
 from pyiem.nws import product
-import common  # @UnresolvedImport
+
+# Local
+from pywwa import common
 
 DBPOOL = common.get_database("afos")
 MEMCACHE_EXCLUDE = [

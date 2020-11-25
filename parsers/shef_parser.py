@@ -1,25 +1,27 @@
 """SHEF product ingestor."""
-# System Imports
+# stdlib
 import os
 import re
 from collections import namedtuple
 import datetime
 from io import BytesIO
 
+# 3rd Party
 import pytz
 from twisted.internet import task
 from twisted.internet.defer import DeferredQueue, Deferred
 from twisted.internet.task import cooperate
 from twisted.internet import reactor, protocol
 from twisted.internet.task import LoopingCall
-
 from pyiem.reference import TRACE_VALUE
 from pyiem.observation import Observation
 from pyiem.nws import product
 from pyiem.util import LOG
 from pyiem import reference
 from pyldm import ldmbridge
-import common  # @UnresolvedImport
+
+# Local
+from pywwa import common
 
 # from pympler import tracker, summary, muppy
 

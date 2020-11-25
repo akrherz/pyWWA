@@ -1,0 +1,1 @@
+"""pyWWA local module."""

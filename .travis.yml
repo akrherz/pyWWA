@@ -38,6 +38,7 @@ env:
     - MPLLOCALFREETYPE=1
   matrix:
     - PYTHON_VERSION=3.8
+    - PYTHON_VERSION=3.9
 language: python
 
 before_install:
@@ -48,6 +49,8 @@ before_install:
 
 install:
   - . .ci_tooling/miniconda.sh
+  - pip install codecov
+  - python -m pip install . --upgrade
 
 before_script:
   # https://travis-ci.community/t/t/712/12
@@ -60,3 +63,7 @@ before_script:
 script:
   - cp settings.json-template settings.json
   - sh util/run_examples.sh
+  - coverage run --source=pywwa setup.py test
+  - if [[ $PYTHON_VERSION == "3.8" ]]; then
+    codecov -e TRAVIS_PYTHON_VERSION;
+    fi

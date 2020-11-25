@@ -42,7 +42,7 @@ SETTINGS = {}
 EMAIL_TIMESTAMPS = []
 # Careful modifying this, be sure to test from LDM account
 CONFIG = json.load(
-    open(os.path.join(os.path.dirname(__file__), "../settings.json"))
+    open(os.path.join(os.path.dirname(__file__), "../../settings.json"))
 )
 
 

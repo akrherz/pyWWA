@@ -1,13 +1,17 @@
 """Process and Archive the NEXRAD Level III NCR Attribute Table"""
+# stdlib
 from io import BytesIO
 import math
 
+# 3rd Party
 import pytz
 from twisted.internet import reactor
 from metpy.io.nexrad import Level3File
 from pyldm import ldmbridge
 from pyiem.util import LOG
-import common
+
+# Local
+from pywwa import common
 
 # Setup Database Links
 PGCONN = common.get_database("radar")
