@@ -19,3 +19,6 @@ parsers/last.nts
 util/ridge_processor.pid
 /.vscode
 /goes/*.nc
+.coverage
+.eggs/
+parsers/pywwa.egg-info/
