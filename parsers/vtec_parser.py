@@ -180,9 +180,7 @@ if __name__ == "__main__":
     nwsli_dict = {}
 
     # Fire up!
-    PGCONN = common.get_database(
-        common.CONFIG["databaserw"]["postgis"], cp_max=1
-    )
+    PGCONN = common.get_database(common.CONFIG["databaserw"]["postgis"])
     bootstrap()
 
     reactor.run()

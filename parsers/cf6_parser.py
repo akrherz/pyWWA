@@ -8,7 +8,7 @@ from pyiem.nws.products.cf6 import parser
 # Local
 from pywwa import common
 
-DBPOOL = common.get_database("iem", cp_max=1)
+DBPOOL = common.get_database("iem")
 
 
 # LDM Ingestor

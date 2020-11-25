@@ -93,6 +93,6 @@ def really_process_data(txn, data):
 
 
 if __name__ == "__main__":
-    PGCONN = common.get_database("afos", cp_max=1)
+    PGCONN = common.get_database("afos")
     ldmbridge.LDMProductFactory(MyProductIngestor())
     reactor.run()

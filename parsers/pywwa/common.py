@@ -78,7 +78,7 @@ def setup_syslog():
     LOG.setLevel(logging.DEBUG if sys.stdout.isatty() else logging.INFO)
 
 
-def get_database(dbname, cp_max=5, module_name="pyiem.twistedpg"):
+def get_database(dbname, cp_max=1, module_name="pyiem.twistedpg"):
     """Get a twisted database connection
 
     Args:

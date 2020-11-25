@@ -9,7 +9,7 @@ from pyiem.nws.products.ffg import parser
 # Local
 from pywwa import common
 
-DBPOOL = common.get_database("postgis", cp_max=1)
+DBPOOL = common.get_database("postgis")
 
 
 # LDM Ingestor
