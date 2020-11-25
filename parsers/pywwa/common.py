@@ -86,27 +86,29 @@ def get_database(dbname, cp_max=1, module_name="pyiem.twistedpg"):
       cp_max (int): The maximum number of connections to make to the database
       module_name (str): The python module to use for the ConnectionPool
     """
-    host = "iemdb-%s.local" % (dbname,)
+    # Check to see if we have a `settings.json` override
+    opts = CONFIG.get(dbname, {})
     return adbapi.ConnectionPool(
         module_name,
-        database=dbname,
+        database=opts.get("database", dbname),
         cp_reconnect=True,
         cp_max=cp_max,
-        host=host,
-        user=CONFIG.get("databaserw").get("user"),
-        gssencmode="disable",
+        host=opts.get("host", f"iemdb-{dbname}.local"),
+        user=opts.get("user", "ldm"),
+        port=opts.get("port", 5432),
+        gssencmode="disable",  # NOTE: this is problematic with older postgres
     )
 
 
 def load_settings():
-    """Load settings immediately, so we don't have to worry about the settings
-    not being loaded for subsequent usage"""
-
+    """Load database properties."""
+    opts = CONFIG.get("mesosite", {})
     dbconn = psycopg2.connect(
-        database=CONFIG.get("databasero").get("openfire"),
-        host=CONFIG.get("databasero").get("host"),
-        password=CONFIG.get("databasero").get("password"),
-        user=CONFIG.get("databasero").get("user"),
+        database=opts.get("database", "mesosite"),
+        host=opts.get("host", "iemdb-mesosite.local"),
+        user=opts.get("user", "ldm"),
+        port=opts.get("port", 5432),
+        gssencmode="disable",
     )
     cursor = dbconn.cursor()
     cursor.execute("SELECT propname, propvalue from properties")

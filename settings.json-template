@@ -1,14 +1,14 @@
 {
-  "databaserw": {
-	 "openfire": "mesosite",
-	 "postgis": "postgis",
+  "postgis": {
+	 "database": "postgis",
 	 "host": "iemdb-postgis.local",
+     "port": 5432,
 	 "user": "ldm"
-   }, 
-  "databasero": {
-	 "openfire": "mesosite",
-	 "postgis": "postgis",
-	 "host": "iemdb-postgis.local",
+   },
+  "mesosite": {
+	 "database": "mesosite",
+	 "host": "iemdb-mesosite.local",
+     "port": 5432,
 	 "user": "ldm"
-  }
+   }
 }

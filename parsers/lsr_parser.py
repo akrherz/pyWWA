@@ -16,7 +16,7 @@ from pyldm import ldmbridge
 from pywwa import common
 from pywwa.xmpp import make_jabber_client
 
-DBPOOL = common.get_database(common.CONFIG["databaserw"]["postgis"])
+DBPOOL = common.get_database("postgis")
 JABBER = make_jabber_client()
 # Cheap datastore for LSRs to avoid Dups!
 LSRDB = {}
