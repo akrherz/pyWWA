@@ -25,14 +25,15 @@ Short Flag | Long Flag | Description
 Constants Used
 --------------
 
-key | value
-------------- | -------------
-pywwa_email_limit | Number of debug emails an individual ingestor is permitted to send within 60 minutes of time
-pywwa_lsr_url | URL Base for the LSR App
-pywwa_product_url | URL Base for simple text product viewer
-pywwa_river_url | URL Base for the River App
-pywwa_vtec_url | URL Base for the VTEC App
-pywwa_watch_url | URL Base for the Watch App
+key | default | description
+--- | ---- | ---
+pywwa_dedup | false | Set to `true` for pyWWA/pyLDM to dedup products.
+pywwa_email_limit | 10 | Number of debug emails an individual ingestor is permitted to send within 60 minutes of time
+pywwa_lsr_url | - | URL Base for the LSR App
+pywwa_product_url | - | URL Base for simple text product viewer
+pywwa_river_url | - | URL Base for the River App
+pywwa_vtec_url | - | URL Base for the VTEC App
+pywwa_watch_url | - | URL Base for the Watch App
 
 Database Information
 --------------------

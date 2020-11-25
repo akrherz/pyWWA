@@ -5,7 +5,7 @@ from pyiem.util import LOG
 from pyldm import ldmbridge
 
 # Local
-from pywwa.common import shutdown, email_error
+from pywwa.common import shutdown, email_error, SETTINGS
 
 
 class MyProductIngestor(ldmbridge.LDMProductReceiver):
@@ -13,8 +13,8 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
 
     def __init__(self, callback, isbinary=False):
         """ Constructor."""
-        # TODO: support dedup setting
-        super().__init__(isbinary=isbinary)
+        dedup = SETTINGS.get("pywwa_dedup", "false").lower() == "true"
+        super().__init__(isbinary=isbinary, dedup=dedup)
         self.local_callback = callback
 
     def connectionLost(self, reason):
