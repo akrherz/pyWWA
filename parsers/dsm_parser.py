@@ -3,12 +3,12 @@
 # 3rd Party
 import pytz
 from twisted.internet import reactor
-from pyldm import ldmbridge
 from pyiem.nws.products.dsm import parser
 from pyiem.util import get_dbconn, LOG
 
 # Local
 from pywwa import common
+from pywwa.ldm import bridge
 
 DBPOOL = common.get_database("iem")
 # database timezones to pytz cache
@@ -35,19 +35,6 @@ def load_stations(txn):
         STATIONS[station] = TIMEZONES[tzname]
 
 
-class MyProductIngestor(ldmbridge.LDMProductReceiver):
-    """ I receive products from ldmbridge and process them 1 by 1 :) """
-
-    def connectionLost(self, reason):
-        """sys.stdin was closed"""
-        common.shutdown()
-
-    def process_data(self, data):
-        """ Process the product """
-        df = DBPOOL.runInteraction(real_parser, data)
-        df.addErrback(common.email_error, data)
-
-
 def real_parser(txn, data):
     """Please process some data"""
     prod = parser(data)
@@ -66,7 +53,7 @@ def bootstrap():
     load_stations(cursor)
     pgconn.close()
 
-    ldmbridge.LDMProductFactory(MyProductIngestor())
+    bridge(real_parser, dbpool=DBPOOL)
     reactor.run()
 
 

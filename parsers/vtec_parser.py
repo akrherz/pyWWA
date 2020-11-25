@@ -18,7 +18,6 @@ from bs4 import BeautifulSoup
 import treq
 from twisted.internet import reactor
 from twisted.mail.smtp import SMTPSenderFactory
-from pyldm import ldmbridge
 from pyiem.util import LOG
 from pyiem.nws.products.vtec import parser as vtecparser
 from pyiem.nws import ugc
@@ -27,24 +26,17 @@ from pyiem.nws import nwsli
 # Local
 from pywwa import common
 from pywwa.xmpp import make_jabber_client
+from pywwa.ldm import bridge
 
 JABBER = make_jabber_client()
 
 
-# LDM Ingestor
-class MyProductIngestor(ldmbridge.LDMProductReceiver):
-    """ I receive products from ldmbridge and process them 1 by 1 :) """
-
-    def connectionLost(self, reason):
-        """ callback when the stdin reader connection is closed """
-        common.shutdown(7)
-
-    def process_data(self, data):
-        """ Process the product """
-        try:
-            really_process_data(data)
-        except Exception as myexp:  # pylint: disable=W0703
-            common.email_error(myexp, data)
+def process_data(data):
+    """ Process the product """
+    try:
+        really_process_data(data)
+    except Exception as myexp:  # pylint: disable=W0703
+        common.email_error(myexp, data)
 
 
 def really_process_data(buf):
@@ -164,7 +156,7 @@ def load_ugc(txn):
 
 def ready(_dummy):
     """ cb when our database work is done """
-    ldmbridge.LDMProductFactory(MyProductIngestor(dedup=True))
+    bridge(process_data)
 
 
 def bootstrap():

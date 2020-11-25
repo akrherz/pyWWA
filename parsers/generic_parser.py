@@ -5,7 +5,6 @@ import re
 # 3rd Party
 from twisted.internet import reactor
 from shapely.geometry import MultiPolygon
-from pyldm import ldmbridge
 from pyiem.util import LOG
 from pyiem.nws.products import parser as productparser
 from pyiem.nws import ugc
@@ -14,6 +13,7 @@ from pyiem.nws import nwsli
 # Local
 from pywwa import common
 from pywwa.xmpp import make_jabber_client
+from pywwa.ldm import bridge
 
 ugc_dict = {}
 nwsli_dict = {}
@@ -28,19 +28,11 @@ def error_wrapper(exp, buf):
         common.email_error(exp, buf)
 
 
-# LDM Ingestor
-class MyProductIngestor(ldmbridge.LDMProductReceiver):
-    """ I receive products from ldmbridge and process them 1 by 1 :) """
-
-    def connectionLost(self, reason):
-        """ callback when the stdin reader connection is closed """
-        common.shutdown()
-
-    def process_data(self, data):
-        """ Process the product """
-        defer = PGCONN.runInteraction(really_process_data, data)
-        defer.addErrback(error_wrapper, data)
-        defer.addErrback(LOG.error)
+def process_data(data):
+    """ Process the product """
+    defer = PGCONN.runInteraction(really_process_data, data)
+    defer.addErrback(error_wrapper, data)
+    defer.addErrback(LOG.error)
 
 
 def really_process_data(txn, buf):
@@ -107,7 +99,7 @@ def load_ugc(txn):
 
 def ready(_):
     """ cb when our database work is done """
-    ldmbridge.LDMProductFactory(MyProductIngestor())
+    bridge(process_data)
 
 
 def errback(err):

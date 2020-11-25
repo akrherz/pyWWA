@@ -7,11 +7,11 @@ from twisted.internet import reactor
 from pyiem.util import LOG
 from pyiem.nws.products.sps import parser
 from pyiem.nws.ugc import UGC
-from pyldm import ldmbridge
 
 # Local
 from pywwa import common
 from pywwa.xmpp import make_jabber_client
+from pywwa.ldm import bridge
 
 POSTGIS = common.get_database("postgis")
 PYWWA_PRODUCT_URL = common.SETTINGS.get(
@@ -41,19 +41,6 @@ def load_ugc(txn):
     LOG.info("ugc_dict is loaded...")
 
 
-class myProductIngestor(ldmbridge.LDMProductReceiver):
-    """My ingestor"""
-
-    def process_data(self, data):
-        """Got data"""
-        deffer = POSTGIS.runInteraction(real_process, data)
-        deffer.addErrback(common.email_error, data)
-
-    def connectionLost(self, reason):
-        """stdin was closed"""
-        common.shutdown()
-
-
 def real_process(txn, raw):
     """ Really process! """
     if raw.find("$$") == -1:
@@ -69,7 +56,7 @@ def real_process(txn, raw):
 
 def ready(_bogus):
     """we are ready to go"""
-    ldmbridge.LDMProductFactory(myProductIngestor())
+    bridge(real_process, dbpool=POSTGIS)
 
 
 def killer(err):

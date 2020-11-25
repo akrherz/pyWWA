@@ -2,29 +2,11 @@
 
 # 3rd Party
 from twisted.internet import reactor
-from pyldm import ldmbridge
-from pyiem.util import LOG
 from pyiem.nws.products.hml import parser as hmlparser
 
 # Local
 from pywwa import common
-
-DBPOOL = common.get_database("hml")
-
-
-# LDM Ingestor
-class MyProductIngestor(ldmbridge.LDMProductReceiver):
-    """ I receive products from ldmbridge and process them 1 by 1 :) """
-
-    def connectionLost(self, reason):
-        """Connection was lost"""
-        common.shutdown()
-
-    def process_data(self, data):
-        """ Process the product """
-        defer = DBPOOL.runInteraction(real_parser, data)
-        defer.addErrback(common.email_error, data)
-        defer.addErrback(LOG.error)
+from pywwa.ldm import bridge
 
 
 def real_parser(txn, buf):
@@ -37,6 +19,6 @@ def real_parser(txn, buf):
 
 
 if __name__ == "__main__":
-    ldmbridge.LDMProductFactory(MyProductIngestor())
+    bridge(real_parser, dbpool=common.get_database("hml"))
 
     reactor.run()  # @UndefinedVariable

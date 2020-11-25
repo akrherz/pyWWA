@@ -3,12 +3,12 @@
 # 3rd Party
 from twisted.internet import reactor
 from txyam.client import YamClient
-from pyldm import ldmbridge
 from pyiem.util import LOG
 from pyiem.nws import product
 
 # Local
 from pywwa import common
+from pywwa.ldm import bridge
 
 DBPOOL = common.get_database("afos", cp_max=5)
 MEMCACHE_EXCLUDE = [
@@ -28,20 +28,13 @@ MEMCACHE_CLIENT = YamClient(reactor, ["tcp:iem-memcached3:11211"])
 MEMCACHE_CLIENT.connect()
 
 
-# LDM Ingestor
-class MyProductIngestor(ldmbridge.LDMProductReceiver):
-    """ I receive products from ldmbridge and process them 1 by 1 :) """
-
-    def connectionLost(self, reason):
-        """ called when the connection is lost """
-        common.shutdown()
-
-    def process_data(self, data):
-        """ Process the product """
-        defer = DBPOOL.runInteraction(real_parser, data)
-        defer.addCallback(write_memcache)
-        defer.addErrback(common.email_error, data)
-        defer.addErrback(LOG.error)
+def process_data(data):
+    """ Process the product """
+    LOG.info("process_data called...")
+    defer = DBPOOL.runInteraction(real_parser, data)
+    defer.addCallback(write_memcache)
+    defer.addErrback(common.email_error, data)
+    defer.addErrback(LOG.error)
 
 
 def write_memcache(nws):
@@ -89,5 +82,5 @@ def real_parser(txn, buf):
 
 if __name__ == "__main__":
     # Go
-    ldmbridge.LDMProductFactory(MyProductIngestor())
+    bridge(process_data)
     reactor.run()  # @UndefinedVariable

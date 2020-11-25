@@ -7,11 +7,11 @@ import math
 import pytz
 from twisted.internet import reactor
 from metpy.io.nexrad import Level3File
-from pyldm import ldmbridge
 from pyiem.util import LOG
 
 # Local
 from pywwa import common
+from pywwa.ldm import bridge
 
 # Setup Database Links
 PGCONN = common.get_database("radar", cp_max=5)
@@ -31,19 +31,12 @@ def load_station_table(txn):
     LOG.info("Station Table size %s", len(ST.keys()))
 
 
-class MyProductIngestor(ldmbridge.LDMProductReceiver):
-    """My ingest protocol"""
-
-    def connectionLost(self, reason):
-        """Called when stdin is closed"""
-        common.shutdown(15)
-
-    def process_data(self, data):
-        """I am called from the ldmbridge when data is ahoy"""
-        bio = BytesIO()
-        bio.write(data)
-        bio.seek(0)
-        process(bio)
+def process_data(data):
+    """I am called when data is ahoy"""
+    bio = BytesIO()
+    bio.write(data)
+    bio.seek(0)
+    process(bio)
 
 
 def process(bio):
@@ -179,8 +172,7 @@ def on_ready(_unused, mesosite):
     """ready to fire things up"""
     LOG.info("on_ready() has fired...")
     mesosite.close()
-    ingest = MyProductIngestor(isbinary=True)
-    ldmbridge.LDMProductFactory(ingest)
+    bridge(process_data, isbinary=True)
 
 
 def errback(res):

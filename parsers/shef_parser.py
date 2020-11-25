@@ -18,10 +18,10 @@ from pyiem.observation import Observation
 from pyiem.nws import product
 from pyiem.util import LOG
 from pyiem import reference
-from pyldm import ldmbridge
 
 # Local
 from pywwa import common
+from pywwa.ldm import bridge
 
 # from pympler import tracker, summary, muppy
 
@@ -49,6 +49,7 @@ U1980 = datetime.datetime.utcnow()
 U1980 = U1980.replace(day=1, year=1980, tzinfo=pytz.utc)
 
 TEXTPRODUCT = namedtuple("TextProduct", ["product_id", "afos", "text"])
+JOBS = DeferredQueue()
 
 
 def load_stations(txn):
@@ -230,24 +231,15 @@ def clnstr(buf):
     )
 
 
-class MyProductIngestor(ldmbridge.LDMProductReceiver):
-    """My actual ingestor"""
+def process_data(data):
+    """callback when a full data product is ready for processing
 
-    jobs = []
+    This string is cleaned and placed into the job queue for processing
 
-    def connectionLost(self, reason):
-        """stdin was closed"""
-        common.shutdown(15)
-
-    def process_data(self, data):
-        """callback when a full data product is ready for processing
-
-        This string is cleaned and placed into the job queue for processing
-
-        Args:
-          data (str)
-        """
-        self.jobs.put(clnstr(data))
+    Args:
+        data (str)
+    """
+    JOBS.put(clnstr(data))
 
 
 def async_func(data):
@@ -269,10 +261,10 @@ def async_func(data):
     return proc.deferred
 
 
-def worker(jobs):
+def worker():
     """Our long running worker"""
     while True:
-        yield jobs.get().addCallback(async_func).addErrback(
+        yield JOBS.get().addCallback(async_func).addErrback(
             common.email_error, "Unhandled Error"
         ).addErrback(LOG.error)
 
@@ -639,7 +631,7 @@ def got_results(res, product_id, sid, network, localts):
     enter_unknown(sid, product_id, network)
 
 
-def service_guard(jobs):
+def service_guard():
     """Make sure things are not getting sideways
 
     When we call shutdown, this closes the inbound STDIN pipe, which termintes
@@ -654,13 +646,13 @@ def service_guard(jobs):
     LOG.info(
         "service_guard jobs[waiting: %s, pending: %s] "
         "dbpool queuesz[hads:%s, access:%s]",
-        len(jobs.waiting),
-        len(jobs.pending),
+        len(JOBS.waiting),
+        len(JOBS.pending),
         # pylint: disable=protected-access
         HADSDB.threadpool._queue.qsize(),
         ACCESSDB.threadpool._queue.qsize(),
     )
-    if len(jobs.pending) > 1000:
+    if len(JOBS.pending) > 1000:
         LOG.info("Starting shutdown due to more than 1000 jobs in queue")
         common.shutdown()
 
@@ -670,17 +662,14 @@ def main(_res):
     Go main Go!
     """
     LOG.info("main() fired!")
-    jobs = DeferredQueue()
-    ingest = MyProductIngestor()
-    ingest.jobs = jobs
-    ldmbridge.LDMProductFactory(ingest)
+    bridge(process_data)
 
     for _ in range(6):
-        cooperate(worker(jobs))
+        cooperate(worker())
 
     lc = LoopingCall(save_current)
     lc.start(373, now=False)
-    lc2 = LoopingCall(service_guard, jobs)
+    lc2 = LoopingCall(service_guard)
     lc2.start(61, now=False)
 
 

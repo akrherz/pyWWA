@@ -4,28 +4,14 @@
 from twisted.internet import reactor
 from pyiem.util import LOG
 from pyiem.nws.products.saw import parser as sawparser
-from pyldm import ldmbridge
 
 # Local
 from pywwa import common
 from pywwa.xmpp import make_jabber_client
+from pywwa.ldm import bridge
 
-DBPOOL = common.get_database("postgis")
 IEM_URL = common.SETTINGS.get("pywwa_watch_url", "pywwa_watch_url")
 JABBER = make_jabber_client()
-
-
-class MyProductIngestor(ldmbridge.LDMProductReceiver):
-    """ I receive products from ldmbridge and process them 1 by 1 :) """
-
-    def connectionLost(self, reason):
-        """STDIN is shut, so lets shutdown"""
-        common.shutdown()
-
-    def process_data(self, data):
-        """Process the product!"""
-        df = DBPOOL.runInteraction(real_process, data)
-        df.addErrback(common.email_error, data)
 
 
 def real_process(txn, raw):
@@ -43,7 +29,7 @@ def real_process(txn, raw):
 
 def main():
     """Go Main Go"""
-    ldmbridge.LDMProductFactory(MyProductIngestor())
+    bridge(real_process, dbpool=common.get_database("postgis"))
     reactor.run()  # @UndefinedVariable
 
 

@@ -10,13 +10,12 @@ from twisted.internet import reactor
 from pyiem import reference
 from pyiem.nws.products.lsr import parser as lsrparser
 from pyiem.util import LOG
-from pyldm import ldmbridge
 
 # Local
 from pywwa import common
 from pywwa.xmpp import make_jabber_client
+from pywwa.ldm import bridge
 
-DBPOOL = common.get_database("postgis")
 JABBER = make_jabber_client()
 # Cheap datastore for LSRs to avoid Dups!
 LSRDB = {}
@@ -56,19 +55,6 @@ def pickledb():
     pickle.dump(LSRDB, open("lsrdb.p", "wb"))
 
 
-class MyProductIngestor(ldmbridge.LDMProductReceiver):
-    """ I process products handed off to me from faithful LDM """
-
-    def process_data(self, data):
-        """ @buf: String that is a Text Product """
-        defer = DBPOOL.runInteraction(real_processor, data)
-        defer.addErrback(common.email_error, data)
-
-    def connectionLost(self, reason):
-        """ the connection was lost! """
-        common.shutdown()
-
-
 def real_processor(txn, text):
     """ Lets actually process! """
     prod = lsrparser(text)
@@ -98,6 +84,6 @@ def real_processor(txn, text):
 
 
 reactor.callLater(0, loaddb)
-LDM = ldmbridge.LDMProductFactory(MyProductIngestor())
+bridge(real_processor, dbpool=common.get_database("postgis"))
 reactor.callLater(20, cleandb)
 reactor.run()

@@ -7,7 +7,6 @@ storage of what we got from the automated observations
 
 # 3rd Party
 from twisted.internet import reactor
-from pyldm import ldmbridge
 from pyiem.nws.products import parser
 from pyiem.util import LOG
 from pyiem.network import Table as NetworkTable
@@ -15,25 +14,12 @@ from pyiem.network import Table as NetworkTable
 # Local
 from pywwa import common
 from pywwa.xmpp import make_jabber_client
+from pywwa.ldm import bridge
 
 DBPOOL = common.get_database("iem")
 NT = NetworkTable("NWSCLI")
 HARDCODED = {"PKTN": "PAKT"}
 JABBER = make_jabber_client()
-
-
-# LDM Ingestor
-class MyProductIngestor(ldmbridge.LDMProductReceiver):
-    """ I receive products from ldmbridge and process them 1 by 1 :) """
-
-    def connectionLost(self, reason):
-        """ Connection was lost! """
-        common.shutdown()
-
-    def process_data(self, data):
-        """ Process the product """
-        deffer = DBPOOL.runInteraction(preprocessor, data)
-        deffer.addErrback(common.email_error, data)
 
 
 def send_tweet(prod):
@@ -153,6 +139,6 @@ def realprocessor(txn, prod, data):
 
 if __name__ == "__main__":
     # Do Stuff
-    ldmbridge.LDMProductFactory(MyProductIngestor())
+    bridge(preprocessor, dbpool=DBPOOL)
 
     reactor.run()
