@@ -1,8 +1,8 @@
 """ FFG """
 
-from twisted.python import log
 from twisted.internet import reactor
 from pyldm import ldmbridge
+from pyiem.util import LOG
 from pyiem.nws.products.ffg import parser
 import common  # @UnresolvedImport
 
@@ -39,7 +39,7 @@ def real_parser(txn, buf):
     if ffg.warnings and ffg.warnings[0].find("termination") == -1:
         common.email_error("\n".join(ffg.warnings), buf)
     sz = 0 if ffg.data is None else len(ffg.data.index)
-    log.msg("FFG found %s entries for product %s" % (sz, ffg.get_product_id()))
+    LOG.info("FFG found %s entries for product %s", sz, ffg.get_product_id())
 
 
 def main():

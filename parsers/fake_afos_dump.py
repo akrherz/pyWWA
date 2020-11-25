@@ -1,7 +1,7 @@
 """Dump some stuff without AFOS PILs"""
 
-from twisted.python import log
 from twisted.internet import reactor
+from pyiem.util import LOG
 from pyiem.nws.product import TextProduct
 from pyldm import ldmbridge
 import common
@@ -53,7 +53,7 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
         """ Process the product """
         defer = PGCONN.runInteraction(really_process_data, data)
         defer.addErrback(common.email_error, data)
-        defer.addErrback(log.err)
+        defer.addErrback(LOG.error)
 
 
 def really_process_data(txn, data):

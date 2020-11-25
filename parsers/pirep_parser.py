@@ -3,8 +3,8 @@ import datetime
 import os
 
 from twisted.internet import reactor
-from twisted.python import log
 from pyldm import ldmbridge
+from pyiem.util import LOG
 from pyiem.nws.products.pirep import parser as pirepparser
 import common
 
@@ -28,7 +28,7 @@ def cleandb():
             del PIREPS[key]
 
     fin_size = len(PIREPS.keys())
-    log.msg("cleandb() init_size: %s final_size: %s" % (init_size, fin_size))
+    LOG.info("cleandb() init_size: %s final_size: %s", init_size, fin_size)
 
     # Call Again in 30 minutes
     reactor.callLater(60 * 30, cleandb)  # @UndefinedVariable
@@ -36,7 +36,7 @@ def cleandb():
 
 def load_locs(txn):
     """Build locations table"""
-    log.msg("load_locs() called...")
+    LOG.info("load_locs() called...")
     txn.execute(
         """
         SELECT id, name, st_x(geom) as lon, st_y(geom) as lat
@@ -81,7 +81,7 @@ def load_locs(txn):
         if sid not in LOCS:
             LOCS[sid] = {"lat": lat, "lon": lon}
 
-    log.msg("... %s locations loaded" % (len(LOCS),))
+    LOG.info("... %s locations loaded", len(LOCS))
 
 
 # LDM Ingestor
@@ -96,7 +96,7 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
         """ Process the product """
         defer = DBPOOL.runInteraction(real_parser, data)
         defer.addErrback(common.email_error, data)
-        defer.addErrback(log.err)
+        defer.addErrback(LOG.error)
 
 
 def real_parser(txn, buf):
@@ -125,15 +125,9 @@ def ready(_bogus):
     ldmbridge.LDMProductFactory(MyProductIngestor())
 
 
-def shutdown(err):
-    """a shutown method"""
-    log.msg(err)
-    reactor.stop()  # @UndefinedVariable
-
-
 if __name__ == "__main__":
     df = DBPOOL.runInteraction(load_locs)
     df.addCallback(ready)
-    df.addErrback(shutdown)
+    df.addErrback(common.shutdown)
 
     reactor.run()  # @UndefinedVariable

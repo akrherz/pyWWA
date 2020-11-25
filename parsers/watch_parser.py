@@ -1,7 +1,7 @@
 """ SPC Watch Ingestor """
 
-from twisted.python import log
 from twisted.internet import reactor
+from pyiem.util import LOG
 from pyiem.nws.products.saw import parser as sawparser
 from pyldm import ldmbridge
 import common  # @UnresolvedImport
@@ -28,7 +28,7 @@ def real_process(txn, raw):
     """Process the product, please"""
     prod = sawparser(raw)
     if prod.is_test():
-        log.msg("TEST watch found, skipping")
+        LOG.info("TEST watch found, skipping")
         return
     if common.dbwrite_enabled():
         prod.sql(txn)

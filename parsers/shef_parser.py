@@ -7,7 +7,6 @@ import datetime
 from io import BytesIO
 
 import pytz
-from twisted.python import log
 from twisted.internet import task
 from twisted.internet.defer import DeferredQueue, Deferred
 from twisted.internet.task import cooperate
@@ -17,6 +16,7 @@ from twisted.internet.task import LoopingCall
 from pyiem.reference import TRACE_VALUE
 from pyiem.observation import Observation
 from pyiem.nws import product
+from pyiem.util import LOG
 from pyiem import reference
 from pyldm import ldmbridge
 import common  # @UnresolvedImport
@@ -59,7 +59,7 @@ def load_stations(txn):
     Args:
       txn: a database transaction
     """
-    log.msg("load_stations called...")
+    LOG.info("load_stations called...")
     txn.execute(
         """
         SELECT id, network, tzname from stations
@@ -72,10 +72,10 @@ def load_stations(txn):
     LOCS.clear()  # clear out our current cache
     for (stid, network, tzname) in txn.fetchall():
         if stid in UNKNOWN:
-            log.msg("  station: %s is no longer unknown!" % (stid,))
+            LOG.info("  station: %s is no longer unknown!", stid)
             UNKNOWN.pop(stid)
         if tzname is None or tzname == "":
-            log.msg("  station: %s has tzname: %s" % (stid, tzname))
+            LOG.info("  station: %s has tzname: %s", stid, tzname)
         metadata = LOCS.setdefault(stid, dict())
         if network not in metadata:
             metadata[network] = dict(valid=U1980, tzname=tzname)
@@ -83,10 +83,10 @@ def load_stations(txn):
             try:
                 TIMEZONES[tzname] = pytz.timezone(tzname)
             except Exception:
-                log.msg("pytz does not like tzname: %s" % (tzname,))
+                LOG.info("pytz does not like tzname: %s", tzname)
                 TIMEZONES[tzname] = pytz.utc
 
-    log.msg("loaded %s stations" % (len(LOCS),))
+    LOG.info("loaded %s stations", len(LOCS))
     # Reload every 12 hours
     reactor.callLater(12 * 60 * 60, HADSDB.runInteraction, load_stations)
 
@@ -154,7 +154,7 @@ class MyDict(dict):
         if pei in DIRECTMAP:
             self.__setitem__(key, DIRECTMAP[pei])
             return DIRECTMAP[pei]
-        log.msg("Can not map var %s" % (key,))
+        LOG.info("Can not map var %s", key)
         self.__setitem__(key, "")
         return ""
 
@@ -194,8 +194,8 @@ class SHEFIT(protocol.ProcessProtocol):
         """
         In case something comes to stderr
         """
-        log.msg("errReceived! with %d bytes!" % len(data))
-        log.msg(data)
+        LOG.info("errReceived! with %d bytes!", len(data))
+        LOG.info(data)
         self.deferred.errback(data)
 
     #    def processEnded(self, status):
@@ -261,7 +261,7 @@ def async_func(data):
     )
     proc = SHEFIT(prod)
     proc.deferred = defer
-    proc.deferred.addErrback(log.err)
+    proc.deferred.addErrback(LOG.error)
 
     reactor.spawnProcess(proc, "./shefit", ["shefit"], {})
     return proc.deferred
@@ -272,7 +272,7 @@ def worker(jobs):
     while True:
         yield jobs.get().addCallback(async_func).addErrback(
             common.email_error, "Unhandled Error"
-        ).addErrback(log.err)
+        ).addErrback(LOG.error)
 
 
 def make_datetime(dpart, tpart):
@@ -289,7 +289,7 @@ def really_process(prod, data):
     This processes the output we get from the SHEFIT program
     """
     # Now we loop over the data we got :)
-    # log.msg("\n"+data)
+    # LOG.info("\n"+data)
     mydata = {}
     for line in data.split("\n"):
         # Skip blank output lines or short lines
@@ -298,7 +298,7 @@ def really_process(prod, data):
         # data is fixed, so we should parse it
         sid = line[:8].strip()
         if len(sid) > 8:
-            log.msg("SiteID Len Error: [%s] %s" % (sid, prod.product_id))
+            LOG.info("SiteID Len Error: [%s] %s", sid, prod.product_id)
             continue
         if sid not in mydata:
             mydata[sid] = {}
@@ -312,7 +312,7 @@ def really_process(prod, data):
         if tstamp > (utcnow + datetime.timedelta(hours=1)):
             continue
         if tstamp < (utcnow - datetime.timedelta(days=60)):
-            log.msg("Rejecting old data %s %s" % (sid, tstamp))
+            LOG.info("Rejecting old data %s %s", sid, tstamp)
             continue
         s_data = mydata.setdefault(sid, dict())
         st_data = s_data.setdefault(tstamp, dict())
@@ -320,7 +320,7 @@ def really_process(prod, data):
         varname = line[52:59].strip()
         value = line[60:73].strip()
         if value.find("****") > -1:
-            log.msg("Bad Data from %s\n%s" % (prod.product_id, data))
+            LOG.info("Bad Data from %s\n%s", prod.product_id, data)
             value = -9999.0
         else:
             value = float(value)
@@ -361,9 +361,11 @@ def really_process(prod, data):
             varname = "%s.%02i" % (varname, depth)
             if len(varname) > 10:
                 if depth > 999:
-                    log.msg(
-                        ("Ignoring sid: %s varname: %s value: %s")
-                        % (sid, varname, value)
+                    LOG.info(
+                        "Ignoring sid: %s varname: %s value: %s",
+                        sid,
+                        varname,
+                        value,
                     )
                     continue
                 common.email_error(
@@ -461,7 +463,7 @@ def save_current():
         d2.addErrback(common.email_error, "")
         mydict["dirty"] = False
 
-    log.msg("save_current() processed %s entries, %s skipped" % (cnt, skipped))
+    LOG.info("save_current() processed %s entries, %s skipped", cnt, skipped)
 
 
 def get_localtime(sid, ts):
@@ -485,9 +487,7 @@ def get_network(prod, sid, _ts, data):
     if prod.afos[:3] == "RR3":
         is_coop = True
     elif prod.afos[:3] in ["RR1", "RR2"] and checkvars(list(data.keys())):
-        log.msg(
-            "Guessing COOP? %s %s %s" % (sid, prod.product_id, data.keys())
-        )
+        LOG.info("Guessing COOP? %s %s %s", sid, prod.product_id, data.keys())
         is_coop = True
     pnetwork = "COOP" if is_coop else "DCP"
     # filter networks now
@@ -509,8 +509,8 @@ def get_network(prod, sid, _ts, data):
 
     if sid not in UNKNOWN:
         UNKNOWN[sid] = True
-        log.msg(
-            ("get_network failure for sid: %s tp: %s") % (sid, prod.product_id)
+        LOG.info(
+            "get_network failure for sid: %s tp: %s", sid, prod.product_id
         )
     return None
 
@@ -531,7 +531,7 @@ def process_site(prod, sid, ts, data):
             (sid, ts.strftime("%Y-%m-%d %H:%M+00"), varname, value),
         )
         deffer.addErrback(common.email_error, prod.text)
-        deffer.addErrback(log.err)
+        deffer.addErrback(LOG.error)
 
         key = "%s|%s" % (sid, varname)
         cur = CURRENT_QUEUE.setdefault(
@@ -565,7 +565,7 @@ def process_site(prod, sid, ts, data):
     # Okay, time for a hack, if our observation is at midnight!
     if localts.hour == 0 and localts.minute == 0:
         localts -= datetime.timedelta(minutes=1)
-        # log.msg("Shifting %s [%s] back one minute: %s" % (sid, network,
+        # LOG.info("Shifting %s [%s] back one minute: %s" % (sid, network,
         #                                                  localts))
 
     iemob = Observation(sid, network, localts)
@@ -612,7 +612,7 @@ def process_site(prod, sid, ts, data):
         deffer = ACCESSDB.runInteraction(iemob.save)
         deffer.addCallback(got_results, prod.product_id, sid, network, localts)
         deffer.addErrback(common.email_error, prod.text)
-        deffer.addErrback(log.err)
+        deffer.addErrback(LOG.error)
     # else:
     #    print 'NODATA?', sid, network, localts, data
 
@@ -647,23 +647,19 @@ def service_guard(jobs):
     # all_objects = muppy.get_objects()
     # sum1 = summary.summarize(all_objects)
     # summary.print_(sum1)
-    # log.msg("DIFF--------------")
+    # LOG.info("DIFF--------------")
     # TR.print_diff()
-    log.msg(
-        (
-            "service_guard jobs[waiting: %s, pending: %s] "
-            "dbpool queuesz[hads:%s, access:%s]"
-        )
-        % (
-            len(jobs.waiting),
-            len(jobs.pending),
-            # pylint: disable=protected-access
-            HADSDB.threadpool._queue.qsize(),
-            ACCESSDB.threadpool._queue.qsize(),
-        )
+    LOG.info(
+        "service_guard jobs[waiting: %s, pending: %s] "
+        "dbpool queuesz[hads:%s, access:%s]",
+        len(jobs.waiting),
+        len(jobs.pending),
+        # pylint: disable=protected-access
+        HADSDB.threadpool._queue.qsize(),
+        ACCESSDB.threadpool._queue.qsize(),
     )
     if len(jobs.pending) > 1000:
-        log.msg("Starting shutdown due to more than 1000 jobs in queue")
+        LOG.info("Starting shutdown due to more than 1000 jobs in queue")
         common.shutdown()
 
 
@@ -671,7 +667,7 @@ def main(_res):
     """
     Go main Go!
     """
-    log.msg("main() fired!")
+    LOG.info("main() fired!")
     jobs = DeferredQueue()
     ingest = MyProductIngestor()
     ingest.jobs = jobs
@@ -688,8 +684,8 @@ def main(_res):
 
 def fullstop(err):
     """more forcable stop."""
-    log.msg("fullstop() called...")
-    log.err(err)
+    LOG.info("fullstop() called...")
+    LOG.error(err)
     reactor.stop()
 
 
@@ -698,7 +694,7 @@ def bootstrap():
     # Necessary for the shefit program to run A-OK
     mydir = os.path.dirname(os.path.abspath(__file__))
     path = os.path.normpath(os.path.join(mydir, "..", "shef_workspace"))
-    log.msg("Changing cwd to %s" % (path,))
+    LOG.info("Changing cwd to %s", path)
     os.chdir(path)
 
     # Load the station metadata before we fire up the ingesting

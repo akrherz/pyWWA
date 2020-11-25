@@ -1,10 +1,10 @@
 """ Generic NWS Product Parser """
 import re
 
-from twisted.python import log
 from twisted.internet import reactor
 from shapely.geometry import MultiPolygon
 from pyldm import ldmbridge
+from pyiem.util import LOG
 from pyiem.nws.products import parser as productparser
 from pyiem.nws import ugc
 from pyiem.nws import nwsli
@@ -15,16 +15,10 @@ ugc_dict = {}
 nwsli_dict = {}
 
 
-def shutdown():
-    """ Stop this app """
-    log.msg("Shutting down...")
-    reactor.callWhenRunning(reactor.stop)
-
-
 def error_wrapper(exp, buf):
     """Don't whine about known invalid products"""
     if buf.find("HWOBYZ") > -1:
-        log.msg("Skipping Error for HWOBYZ")
+        LOG.info("Skipping Error for HWOBYZ")
     else:
         common.email_error(exp, buf)
 
@@ -41,7 +35,7 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
         """ Process the product """
         defer = PGCONN.runInteraction(really_process_data, data)
         defer.addErrback(error_wrapper, data)
-        defer.addErrback(log.err)
+        defer.addErrback(LOG.error)
 
 
 def really_process_data(txn, buf):
@@ -93,7 +87,7 @@ def load_ugc(txn):
             row["ugc"][:2], row["ugc"][2], row["ugc"][3:], name=nm, wfos=wfos
         )
 
-    log.msg("ugc_dict loaded %s entries" % (len(ugc_dict),))
+    LOG.info("ugc_dict loaded %s entries", len(ugc_dict))
 
     txn.execute(
         "SELECT nwsli, river_name || ' ' || proximity || ' ' || name || "
@@ -103,7 +97,7 @@ def load_ugc(txn):
         nm = row["rname"].replace("&", " and ")
         nwsli_dict[row["nwsli"]] = nwsli.NWSLI(row["nwsli"], name=nm)
 
-    log.msg("nwsli_dict loaded %s entries" % (len(nwsli_dict),))
+    LOG.info("nwsli_dict loaded %s entries", len(nwsli_dict))
 
 
 def ready(_):
@@ -113,7 +107,7 @@ def ready(_):
 
 def errback(err):
     """Called back when initial load fails."""
-    log.err(err)
+    LOG.info(err)
     common.shutdown()
 
 

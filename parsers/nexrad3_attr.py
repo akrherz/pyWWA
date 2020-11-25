@@ -3,10 +3,10 @@ from io import BytesIO
 import math
 
 import pytz
-from twisted.python import log
 from twisted.internet import reactor
 from metpy.io.nexrad import Level3File
 from pyldm import ldmbridge
+from pyiem.util import LOG
 import common
 
 # Setup Database Links
@@ -17,14 +17,14 @@ ST = {}
 
 def load_station_table(txn):
     """ Load the station table of NEXRAD sites """
-    log.msg("load_station_table called() ...")
+    LOG.info("load_station_table called() ...")
     txn.execute(
         "SELECT id, ST_x(geom) as lon, ST_y(geom) as lat from stations "
         "where network in ('NEXRAD','TWDR')"
     )
     for row in txn.fetchall():
         ST[row["id"]] = {"lat": row["lat"], "lon": row["lon"]}
-    log.msg("Station Table size %s" % (len(ST.keys())))
+    LOG.info("Station Table size %s", len(ST.keys()))
 
 
 class MyProductIngestor(ldmbridge.LDMProductReceiver):
@@ -51,7 +51,7 @@ def process(bio):
     ctx["ts"] = l3.metadata["vol_time"].replace(tzinfo=pytz.UTC)
     ctx["lines"] = []
     if not hasattr(l3, "graph_pages"):
-        log.msg("%s %s has no graph_pages" % (ctx["nexrad"], ctx["ts"]))
+        LOG.info("%s %s has no graph_pages", ctx["nexrad"], ctx["ts"])
         return
     for page in l3.graph_pages:
         for line in page:
@@ -105,14 +105,14 @@ def really_process(txn, ctx):
             tokens.insert(5, 0)
             tokens.insert(5, 0)
         if len(tokens) < 13:
-            log.msg("Incomplete Line ||%s||" % (line,))
+            LOG.info("Incomplete Line ||%s||", line)
             continue
         d = {}
         co += 1
         d["storm_id"] = tokens[0]
         d["azimuth"] = float(tokens[1])
         if tokens[2] == "***":
-            log.msg("skipping bad line |%s|" % (line,))
+            LOG.info("skipping bad line |%s|", line)
             continue
         d["range"] = float(tokens[2]) * 1.852
         d["tvs"] = tokens[3]
@@ -163,15 +163,17 @@ def really_process(txn, ctx):
                 txn.execute(sql, d)
 
     if co > 0:
-        log.msg(
-            ("%s %s Processed %s entries")
-            % (ctx["nexrad"], ctx["ts"].strftime("%Y-%m-%d %H:%M UTC"), co)
+        LOG.info(
+            "%s %s Processed %s entries",
+            ctx["nexrad"],
+            ctx["ts"].strftime("%Y-%m-%d %H:%M UTC"),
+            co,
         )
 
 
 def on_ready(_unused, mesosite):
     """ready to fire things up"""
-    log.msg("on_ready() has fired...")
+    LOG.info("on_ready() has fired...")
     mesosite.close()
     ingest = MyProductIngestor(isbinary=True)
     ldmbridge.LDMProductFactory(ingest)
@@ -179,7 +181,7 @@ def on_ready(_unused, mesosite):
 
 def errback(res):
     """ ERRORBACK """
-    log.err(res)
+    LOG.error(res)
     reactor.stop()
 
 

@@ -1,8 +1,8 @@
 """ HML parser! """
 
 from twisted.internet import reactor
-from twisted.python import log
 from pyldm import ldmbridge
+from pyiem.util import LOG
 from pyiem.nws.products.hml import parser as hmlparser
 
 import common  # @UnresolvedImport
@@ -22,7 +22,7 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
         """ Process the product """
         defer = DBPOOL.runInteraction(real_parser, data)
         defer.addErrback(common.email_error, data)
-        defer.addErrback(log.err)
+        defer.addErrback(LOG.error)
 
 
 def real_parser(txn, buf):

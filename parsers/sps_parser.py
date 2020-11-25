@@ -1,8 +1,8 @@
 """SPS product ingestor"""
 import re
 
-from twisted.python import log
 from twisted.internet import reactor
+from pyiem.util import LOG
 from pyiem.nws.products.sps import parser
 from pyiem.nws.ugc import UGC
 from pyldm import ldmbridge
@@ -33,7 +33,7 @@ def load_ugc(txn):
             row["ugc"][:2], row["ugc"][2], row["ugc"][3:], name=nm, wfos=wfos
         )
 
-    log.msg("ugc_dict is loaded...")
+    LOG.info("ugc_dict is loaded...")
 
 
 class myProductIngestor(ldmbridge.LDMProductReceiver):
@@ -52,7 +52,7 @@ class myProductIngestor(ldmbridge.LDMProductReceiver):
 def real_process(txn, raw):
     """ Really process! """
     if raw.find("$$") == -1:
-        log.msg("$$ was missing from this product")
+        LOG.info("$$ was missing from this product")
         raw += "\r\r\n$$\r\r\n"
     prod = parser(raw, ugc_provider=ugc_provider)
     if common.dbwrite_enabled():
@@ -72,7 +72,7 @@ def ready(_bogus):
 
 def killer(err):
     """hard stop"""
-    log.err(err)
+    LOG.error(err)
     reactor.stop()
 
 

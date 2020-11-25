@@ -14,10 +14,10 @@ import re
 
 from bs4 import BeautifulSoup
 import treq
-from twisted.python import log
 from twisted.internet import reactor
 from twisted.mail.smtp import SMTPSenderFactory
 from pyldm import ldmbridge
+from pyiem.util import LOG
 from pyiem.nws.products.vtec import parser as vtecparser
 from pyiem.nws import ugc
 from pyiem.nws import nwsli
@@ -65,7 +65,7 @@ def really_process_data(buf):
     df = PGCONN.runInteraction(text_product.sql)
     df.addCallback(step2, text_product)
     df.addErrback(common.email_error, text_product.unixtext)
-    df.addErrback(log.err)
+    df.addErrback(LOG.error)
 
 
 def step2(_dummy, text_product):
@@ -138,7 +138,7 @@ def load_ugc(txn):
             row["ugc"][:2], row["ugc"][2], row["ugc"][3:], name=nm, wfos=wfos
         )
 
-    log.msg("ugc_dict loaded %s entries" % (len(ugc_dict),))
+    LOG.info("ugc_dict loaded %s entries", len(ugc_dict))
 
     sql = """
      SELECT nwsli,
@@ -150,7 +150,7 @@ def load_ugc(txn):
         nm = row["rname"].replace("&", " and ")
         nwsli_dict[row["nwsli"]] = nwsli.NWSLI(row["nwsli"], name=nm)
 
-    log.msg("nwsli_dict loaded %s entries" % (len(nwsli_dict),))
+    LOG.info("nwsli_dict loaded %s entries", len(nwsli_dict))
 
     return None
 
