@@ -1,5 +1,4 @@
 """Support lib for the parser scripts found in this directory"""
-import argparse
 import json
 import os
 import inspect
@@ -25,7 +24,8 @@ from twisted.enterprise import adbapi
 import pyiem
 from pyiem.util import LOG, utc, CustomFormatter
 
-# NB: Can't do local imports here, #circleref
+# Local Be careful of circeref here
+from pywwa.cmdline import parse_cmdline
 
 # http://bugs.python.org/issue7980
 datetime.datetime.strptime("2013", "%Y")
@@ -53,65 +53,6 @@ def utcnow():
 def dbwrite_enabled():
     """Is database writing not-disabled as per command line."""
     return not CTX.disable_dbwrite
-
-
-def parse_cmdline():
-    """Parse command line for context settings."""
-    parser = argparse.ArgumentParser(description="pyWWA Parser.")
-    parser.add_argument(
-        "-d",
-        "--disable-dbwrite",
-        action="store_true",
-        help=(
-            "Disable any writing to databases, still may need read access "
-            "to initialize metadata tables."
-        ),
-    )
-    parser.add_argument(
-        "-e",
-        "--disable-email",
-        action="store_true",
-        help="Disable sending any emails.",
-    )
-    parser.add_argument(
-        "-l",
-        "--stdout-logging",
-        action="store_true",
-        help="Also log to stdout.",
-    )
-    parser.add_argument(
-        "-s",
-        "--shutdown-delay",
-        type=int,
-        help=(
-            "Number of seconds to wait before shutting down process when "
-            "STDIN is closed to the process.  0 is immediate."
-        ),
-    )
-
-    def _parsevalid(val):
-        """Convert to datetime."""
-        v = datetime.datetime.strptime(val[:16], "%Y-%m-%dT%H:%M")
-        return v.replace(tzinfo=datetime.timezone.utc)
-
-    parser.add_argument(
-        "-u",
-        "--utcnow",
-        type=_parsevalid,
-        metavar="YYYY-MM-DDTHH:MI",
-        help="Provide the current UTC Timestamp (defaults to realtime.).",
-    )
-    parser.add_argument(
-        "-x",
-        "--disable-xmpp",
-        action="store_true",
-        help="Disable all XMPP functionality.",
-    )
-    # HACK not to do things during testing.
-    args = sys.argv[1:]
-    if os.path.basename(sys.argv[0]) == "pytest":
-        args = []
-    return parser.parse_args(args)
 
 
 def setup_syslog():
@@ -271,6 +212,6 @@ Message:
 
 # This is blocking, but necessary to make sure settings are loaded before
 # we go on our merry way
-CTX = parse_cmdline()
+CTX = parse_cmdline(sys.argv)
 setup_syslog()
 load_settings()
