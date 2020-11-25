@@ -1,9 +1,9 @@
 """SPENES product ingestor"""
 import re
 
-from twisted.python import log
 from twisted.internet import reactor
 from pyldm import ldmbridge
+from pyiem.util import LOG
 from pyiem.nws import product
 import common
 
@@ -24,7 +24,7 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
         """ Process the product """
         df = POSTGIS.runInteraction(real_process, data)
         df.addErrback(common.email_error, data)
-        df.addErrback(log.err)
+        df.addErrback(LOG.error)
 
 
 def real_process(txn, raw):

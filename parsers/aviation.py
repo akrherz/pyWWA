@@ -2,8 +2,8 @@
 import os
 
 from twisted.internet import reactor
-from twisted.python import log
 from pyldm import ldmbridge
+from pyiem.util import LOG
 from pyiem.nws.products.sigmet import parser
 import common
 
@@ -82,7 +82,7 @@ jabber = common.make_jabber_client("aviation")
 
 def onready(_res):
     """Database has loaded"""
-    log.msg("onready() called...")
+    LOG.info("onready() called...")
     ldmbridge.LDMProductFactory(MyProductIngestor())
     MESOSITE.close()
 
@@ -92,7 +92,7 @@ def bootstrap():
     df = MESOSITE.runInteraction(load_database)
     df.addCallback(onready)
     df.addErrback(common.email_error, "ERROR on load_database")
-    df.addErrback(log.err)
+    df.addErrback(LOG.error)
 
     reactor.run()
 

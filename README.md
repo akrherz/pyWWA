@@ -33,3 +33,9 @@ pywwa_product_url | URL Base for simple text product viewer
 pywwa_river_url | URL Base for the River App
 pywwa_vtec_url | URL Base for the VTEC App
 pywwa_watch_url | URL Base for the Watch App
+
+Logging
+-------
+
+These parsers emit logs to the syslog `LOCAL2` facility via a wild mixture of
+Twisted Python and Stdlib Python log statements.

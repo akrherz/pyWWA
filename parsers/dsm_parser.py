@@ -2,10 +2,9 @@
 
 import pytz
 from twisted.internet import reactor
-from twisted.python import log
 from pyldm import ldmbridge
 from pyiem.nws.products.dsm import parser
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, LOG
 import common
 
 DBPOOL = common.get_database("iem", cp_max=1)
@@ -28,7 +27,7 @@ def load_stations(txn):
             try:
                 TIMEZONES[tzname] = pytz.timezone(tzname)
             except Exception as exp:
-                log.msg("pytz does not like tzname: %s %s" % (tzname, exp))
+                LOG.info("pytz does not like tzname: %s %s", tzname, exp)
                 TIMEZONES[tzname] = pytz.UTC
         STATIONS[station] = TIMEZONES[tzname]
 

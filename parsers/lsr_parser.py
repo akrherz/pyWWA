@@ -4,10 +4,10 @@ import os
 import datetime
 
 import pytz
-from twisted.python import log
 from twisted.internet import reactor
 from pyiem import reference
 from pyiem.nws.products.lsr import parser as lsrparser
+from pyiem.util import LOG
 from pyldm import ldmbridge
 import common
 
@@ -38,7 +38,7 @@ def cleandb():
             del LSRDB[key]
 
     fin_size = len(LSRDB)
-    log.msg("cleandb() init_size: %s final_size: %s" % (init_size, fin_size))
+    LOG.info("cleandb() init_size: %s final_size: %s", init_size, fin_size)
     # Non blocking hackery
     reactor.callInThread(pickledb)
 

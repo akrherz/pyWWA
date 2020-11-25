@@ -6,9 +6,9 @@ storage of what we got from the automated observations
 """
 
 from twisted.internet import reactor
-from twisted.python import log
 from pyldm import ldmbridge
 from pyiem.nws.products import parser
+from pyiem.util import LOG
 from pyiem.network import Table as NetworkTable
 import common
 
@@ -137,14 +137,12 @@ def realprocessor(txn, prod, data):
          and t.network ~* 'ASOS' """,
             (data["cli_valid"], station),
         )
-        log.msg(
-            ("%s rows for %s (%s) %s")
-            % (
-                txn.rowcount,
-                station,
-                data["cli_valid"].strftime("%y%m%d"),
-                ",".join(logmsg),
-            )
+        LOG.info(
+            "%s rows for %s (%s) %s",
+            txn.rowcount,
+            station,
+            data["cli_valid"].strftime("%y%m%d"),
+            ",".join(logmsg),
         )
 
 

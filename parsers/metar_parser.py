@@ -7,10 +7,9 @@ So let us document it here for my own sanity.
 """
 
 # Twisted Python imports
-from twisted.python import log
 from twisted.internet import reactor
 from pyiem.nws.products import metarcollect
-from pyiem.util import get_properties
+from pyiem.util import get_properties, LOG
 from pyldm import ldmbridge
 import common  # @UnresolvedImport
 
@@ -46,12 +45,12 @@ def load_ignorelist():
             if sid == "":
                 continue
             if len(sid) != 4:
-                log.msg(f"Not adding {sid} to IGNORELIST as not 4 char id")
+                LOG.msg("Not adding %s to IGNORELIST as not 4 char id", sid)
                 continue
             IGNORELIST.append(sid)
     except Exception as exp:
-        log.err(exp)
-    log.msg(f"Updated ignorelist is now {len(IGNORELIST)} long")
+        LOG.error(exp)
+    LOG.info("Updated ignorelist is now %s long", len(IGNORELIST))
 
     # Call every 15 minutes
     reactor.callLater(15 * 60, load_ignorelist)
@@ -70,16 +69,11 @@ def load_stations(txn):
             news += 1
             NWSLI_PROVIDER[row["id"]] = row
 
-    log.msg(f"Loaded {news} new stations")
+    LOG.info("Loaded %s new stations", news)
     # Reload every 12 hours
     reactor.callLater(
         12 * 60 * 60, IEMDB.runInteraction, load_stations  # @UndefinedVariable
     )
-
-
-def shutdown():
-    """Shut this down, gracefully"""
-    reactor.callWhenRunning(reactor.stop)  # @UndefinedVariable
 
 
 class MyProductIngestor(ldmbridge.LDMProductReceiver):
@@ -115,14 +109,16 @@ def real_processor(text):
         for channel in channels.split(","):
             if channel.startswith("METAR."):
                 if channel.split(".")[1] in IGNORELIST:
-                    log.msg(f"IGNORELIST Jabber relay of {jmsg[0]}")
+                    LOG.info("IGNORELIST Jabber relay of %s", jmsg[0])
                     skip = True
         JABBER_MESSAGES.append(jmsg[0])
         if not skip:
             JABBER.send_message(*jmsg)
     for mtr in collect.metars:
         if mtr.network is None:
-            log.msg("station: '{mtr.station_id}' is unknown to metadata table")
+            LOG.info(
+                "station: '%s' is unknown to metadata table", mtr.station_id
+            )
             deffer = ASOSDB.runOperation(
                 "INSERT into unknown(id) values (%s)", (mtr.station_id,)
             )
@@ -139,9 +135,10 @@ def do_db(txn, mtr):
     # data out of order :/
     iem, res = mtr.to_iemaccess(txn, force_current_log=True)
     if not res:
-        log.msg(
-            ("INFO: IEMAccess update of %s returned false: %s")
-            % (iem.data["station"], mtr.code)
+        LOG.info(
+            "INFO: IEMAccess update of %s returned false: %s",
+            iem.data["station"],
+            mtr.code,
         )
         df = ASOSDB.runOperation(
             "INSERT into unknown(id, valid) values (%s, %s)",
@@ -152,7 +149,7 @@ def do_db(txn, mtr):
 
 def cleandb():
     """Reset the JABBER_MESSAGES."""
-    log.msg("cleandb() called...")
+    LOG.info("cleandb() called...")
     JABBER_MESSAGES.clear()
     # Call Again in 1440 minutes
     reactor.callLater(1440, cleandb)

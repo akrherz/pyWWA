@@ -1,8 +1,8 @@
 """SPC Geo Products Parser!"""
 
-from twisted.python import log
 from twisted.internet import reactor
 from pyldm import ldmbridge
+from pyiem.util import LOG
 from pyiem.nws.products.spcpts import parser
 import common  # @UnresolvedImport
 
@@ -35,8 +35,8 @@ def real_parser(txn, buf):
     jmsgs = spc.get_jabbers("")
     for (txt, html, xtra) in jmsgs:
         JABBER.send_message(txt, html, xtra)
-    log.msg(
-        "Sent %s messages for product %s" % (len(jmsgs), spc.get_product_id())
+    LOG.info(
+        "Sent %s messages for product %s", len(jmsgs), spc.get_product_id()
     )
 
 

@@ -1,5 +1,4 @@
 """Support lib for the parser scripts found in this directory"""
-from __future__ import print_function
 import argparse
 import json
 import os
@@ -19,7 +18,7 @@ from syslog import LOG_LOCAL2
 import psycopg2
 
 # twisted
-from twisted.python import log
+from twisted.python import log as tplog
 from twisted.logger import formatEvent
 from twisted.python import syslog
 from twisted.python import failure
@@ -32,7 +31,7 @@ from twisted.words.xish import domish, xpath
 from twisted.mail import smtp
 from twisted.enterprise import adbapi
 import pyiem
-from pyiem.util import LOG, utc
+from pyiem.util import LOG, utc, CustomFormatter
 
 # http://bugs.python.org/issue7980
 datetime.datetime.strptime("2013", "%Y")
@@ -50,7 +49,7 @@ CONFIG = json.load(
 def shutdown(default=5):
     """Shutdown method in given number of seconds."""
     delay = CTX.shutdown_delay if CTX.shutdown_delay is not None else default
-    log.msg(f"Shutting down in {delay} seconds...")
+    LOG.info("Shutting down in %s seconds...", delay)
     reactor.callLater(delay, reactor.callFromThread, reactor.stop)
 
 
@@ -132,11 +131,12 @@ def setup_syslog():
     )
     # pyIEM does logging via python stdlib logging, so we need to patch those
     # messages into twisted's logger.
-    LOG.addHandler(logging.StreamHandler(stream=log.logfile))
+    sh = logging.StreamHandler(stream=tplog.logfile)
+    sh.setFormatter(CustomFormatter())
+    LOG.addHandler(sh)
     # Log stuff to stdout if we are running from command line.
     if CTX.stdout_logging:
-        log.addObserver(lambda x: print(formatEvent(x)))
-        log.msg("Copying logging to stdout.")
+        tplog.addObserver(lambda x: print(formatEvent(x)))
     # Allow for more verbosity when we are running this manually.
     LOG.setLevel(logging.DEBUG if sys.stdout.isatty() else logging.INFO)
 
@@ -175,9 +175,7 @@ def load_settings():
     cursor.execute("SELECT propname, propvalue from properties")
     for row in cursor:
         SETTINGS[row[0]] = row[1]
-    log.msg(
-        f"common.load_settings loaded {len(SETTINGS)} settings from database"
-    )
+    LOG.info("Loaded %s settings from database", len(SETTINGS))
     cursor.close()
     dbconn.close()
 
@@ -213,23 +211,23 @@ def email_error(exp, message, trimstr=100):
     cstr = StringIO()
     if isinstance(exp, failure.Failure):
         exp.printTraceback(file=cstr)
-        log.err(exp)
+        LOG.error(exp)
     elif isinstance(exp, Exception):
         traceback.print_exc(file=cstr)
-        log.err(exp)
+        LOG.error(exp)
     else:
-        log.msg(exp)
+        LOG.info(exp)
     cstr.seek(0)
     if isinstance(message, str):
-        log.msg(message[:trimstr])
+        LOG.info(message[:trimstr])
     else:
-        log.msg(message)
+        LOG.info(message)
 
     # Logic to prevent email bombs
     if not should_email():
-        log.msg(
-            ("Email threshold of %s exceeded, so no email sent!")
-            % (SETTINGS.get("pywwa_email_limit", 10))
+        LOG.info(
+            "Email threshold of %s exceeded, so no email sent!",
+            SETTINGS.get("pywwa_email_limit", 10),
         )
         return False
 
@@ -269,9 +267,9 @@ Message:
         df = smtp.sendmail(
             SETTINGS.get("pywwa_smtp", "smtp"), msg["From"], msg["To"], msg
         )
-        df.addErrback(log.err)
+        df.addErrback(LOG.error)
     else:
-        log.msg("Sending email disabled by command line `-e` flag.")
+        LOG.info("Sending email disabled by command line `-e` flag.")
     return True
 
 
@@ -314,11 +312,11 @@ def make_jabber_client(resource_prefix):
 def message_processor(stanza):
     """ Process a message stanza """
     body = xpath.queryForString("/message/body", stanza)
-    log.msg("Message from %s Body: %s" % (stanza["from"], body))
+    LOG.info("Message from %s Body: %s", stanza["from"], body)
     if body is None:
         return
     if body.lower().strip() == "shutdown":
-        log.msg("I got shutdown message, shutting down...")
+        LOG.info("I got shutdown message, shutting down...")
         reactor.callWhenRunning(reactor.stop)  # @UndefinedVariable
 
 
@@ -329,7 +327,7 @@ def raw_data_in(data):
     """
     if isinstance(data, bytes):
         data = data.decode("utf-8", errors="ignore")
-    log.msg("RECV %s" % (data,))
+    LOG.info("RECV %s", data)
 
 
 def debug(elem):
@@ -337,7 +335,7 @@ def debug(elem):
     Debug method
     @param elem twisted.works.xish
     """
-    log.msg(elem.toXml().encode("utf-8"))
+    LOG.info(elem.toXml().encode("utf-8"))
 
 
 def raw_data_out(data):
@@ -349,7 +347,7 @@ def raw_data_out(data):
         data = data.decode("utf-8", errors="ignore")
     if data == " ":
         return
-    log.msg("SEND %s" % (data,))
+    LOG.info("SEND %s", data)
 
 
 class NOOPXMPP:
@@ -388,7 +386,7 @@ class JabberClient(object):
         Callbacked once authentication succeeds
         @param xs twisted.words.xish.xmlstream
         """
-        log.msg("Logged in as %s" % (self.myjid,))
+        LOG.info("Logged in as %s", self.myjid)
         self.authenticated = True
 
         self.xmlstream = xstream
@@ -418,7 +416,7 @@ class JabberClient(object):
         """
         Called when we are disconnected from the server, I guess
         """
-        log.msg("SETTING authenticated to false!")
+        LOG.info("SETTING authenticated to false!")
         self.authenticated = False
 
     def send_message(self, body, html, xtra):
@@ -429,7 +427,7 @@ class JabberClient(object):
         @param xtra dictionary of stuff that tags along
         """
         if not self.authenticated:
-            log.msg("No Connection, Lets wait and try later...")
+            LOG.info("No Connection, Lets wait and try later...")
             reactor.callLater(
                 3, self.send_message, body, html, xtra  # @UndefinedVariable
             )

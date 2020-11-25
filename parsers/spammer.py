@@ -4,9 +4,9 @@ Handle things that need emailed to me for my situational awareness.
 from email.mime.text import MIMEText
 
 from twisted.internet import reactor
-from twisted.python import log
 from twisted.mail import smtp
 from pyldm import ldmbridge
+from pyiem.util import LOG
 from pyiem.nws import product
 import common  # @UnresolvedImport
 
@@ -32,7 +32,7 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
         """
         Called when ldm closes the pipe
         """
-        log.msg("processed %s prods" % (self.prods,))
+        LOG.info("processed %s prods", self.prods)
         common.shutdown()
 
 
@@ -40,7 +40,7 @@ def real_process(data):
     """Go!"""
     prod = product.TextProduct(data)
     if prod.afos == "ADMNES":
-        log.msg("Dumping %s on the floor" % (prod.get_product_id(),))
+        LOG.info("Dumping %s on the floor", prod.get_product_id())
         return
 
     # Strip off stuff at the top
@@ -61,7 +61,7 @@ def real_process(data):
     df = smtp.sendmail(
         common.SETTINGS.get("pywwa_smtp", "smtp"), msg["From"], msg["To"], msg
     )
-    df.addErrback(log.err)
+    df.addErrback(LOG.error)
 
 
 if __name__ == "__main__":

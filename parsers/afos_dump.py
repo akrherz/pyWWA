@@ -1,9 +1,9 @@
 """ Twisted Way to dump data to the database """
 
-from twisted.python import log
 from twisted.internet import reactor
 from txyam.client import YamClient
 from pyldm import ldmbridge
+from pyiem.util import LOG
 from pyiem.nws import product
 import common  # @UnresolvedImport
 
@@ -38,7 +38,7 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
         defer = DBPOOL.runInteraction(real_parser, data)
         defer.addCallback(write_memcache)
         defer.addErrback(common.email_error, data)
-        defer.addErrback(log.err)
+        defer.addErrback(LOG.error)
 
 
 def write_memcache(nws):
@@ -46,13 +46,13 @@ def write_memcache(nws):
     if nws is None:
         return
     # 10 minutes should be enough time
-    # log.msg("writing %s to memcache" % (nws.get_product_id(), ))
+    LOG.debug("writing %s to memcache", nws.get_product_id())
     df = MEMCACHE_CLIENT.set(
         nws.get_product_id().encode("utf-8"),
         nws.unixtext.replace("\001\n", "").encode("utf-8"),
         expireTime=600,
     )
-    df.addErrback(log.err)
+    df.addErrback(LOG.error)
 
 
 def real_parser(txn, buf):
