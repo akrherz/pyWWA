@@ -19,6 +19,7 @@ from pywwa.xmpp import make_jabber_client
 DBPOOL = common.get_database("iem", cp_max=1)
 NT = NetworkTable("NWSCLI")
 HARDCODED = {"PKTN": "PAKT"}
+JABBER = make_jabber_client()
 
 
 # LDM Ingestor
@@ -42,7 +43,7 @@ def send_tweet(prod):
         common.SETTINGS.get("pywwa_product_url", "pywwa_product_url")
     )
     for j in jres:
-        jabber.send_message(j[0], j[1], j[2])
+        JABBER.send_message(j[0], j[1], j[2])
 
 
 def preprocessor(txn, text):
@@ -152,7 +153,6 @@ def realprocessor(txn, prod, data):
 
 if __name__ == "__main__":
     # Do Stuff
-    jabber = make_jabber_client()
     ldmbridge.LDMProductFactory(MyProductIngestor())
 
     reactor.run()

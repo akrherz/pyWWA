@@ -16,7 +16,8 @@ DBPOOL = common.get_database("postgis")
 
 # Load LOCS table
 LOCS = {}
-
+MESOSITE = common.get_database("mesosite")
+JABBER = make_jabber_client()
 _MYDIR = os.path.dirname(os.path.abspath(__file__))
 TABLE_PATH = os.path.normpath(os.path.join(_MYDIR, "..", "tables"))
 
@@ -78,11 +79,7 @@ def final_step(_, prod):
     for j in prod.get_jabbers(
         common.SETTINGS.get("pywwa_product_url", "pywwa_product_url"), ""
     ):
-        jabber.send_message(j[0], j[1], j[2])
-
-
-MESOSITE = common.get_database("mesosite")
-jabber = make_jabber_client()
+        JABBER.send_message(j[0], j[1], j[2])
 
 
 def onready(_res):

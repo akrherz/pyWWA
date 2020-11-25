@@ -13,6 +13,7 @@ from pywwa import common
 from pywwa.xmpp import make_jabber_client
 
 DBPOOL = common.get_database(common.CONFIG["databaserw"]["postgis"], cp_max=2)
+JABBER = make_jabber_client()
 
 
 # LDM Ingestor
@@ -70,6 +71,5 @@ def real_process(txn, raw):
 
 
 ldmbridge.LDMProductFactory(MyProductIngestor())
-JABBER = make_jabber_client()
 
 reactor.run()

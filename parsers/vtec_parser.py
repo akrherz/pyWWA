@@ -28,6 +28,8 @@ from pyiem.nws import nwsli
 from pywwa import common
 from pywwa.xmpp import make_jabber_client
 
+JABBER = make_jabber_client()
+
 
 # LDM Ingestor
 class MyProductIngestor(ldmbridge.LDMProductReceiver):
@@ -95,7 +97,7 @@ def send_jabber_message(plain, html, extra):
 
     def _send(*_args, **_kwargs):
         """Just send it already :("""
-        jabber.send_message(plain, html, extra)
+        JABBER.send_message(plain, html, extra)
 
     def _cbBody(body):
         """Finally got the HTML"""
@@ -182,6 +184,5 @@ if __name__ == "__main__":
         common.CONFIG["databaserw"]["postgis"], cp_max=1
     )
     bootstrap()
-    jabber = make_jabber_client()
 
     reactor.run()

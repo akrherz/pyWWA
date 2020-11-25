@@ -17,7 +17,7 @@ from pywwa import common
 from pywwa.xmpp import make_jabber_client
 
 DBPOOL = common.get_database(common.CONFIG["databaserw"]["postgis"])
-
+JABBER = make_jabber_client()
 # Cheap datastore for LSRs to avoid Dups!
 LSRDB = {}
 
@@ -98,7 +98,6 @@ def real_processor(txn, text):
 
 
 reactor.callLater(0, loaddb)
-JABBER = make_jabber_client()
 LDM = ldmbridge.LDMProductFactory(MyProductIngestor())
 reactor.callLater(20, cleandb)
 reactor.run()

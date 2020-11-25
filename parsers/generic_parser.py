@@ -17,6 +17,7 @@ from pywwa.xmpp import make_jabber_client
 
 ugc_dict = {}
 nwsli_dict = {}
+JABBER = make_jabber_client()
 
 
 def error_wrapper(exp, buf):
@@ -59,7 +60,7 @@ def really_process_data(txn, buf):
     ):
         if xtra.get("channels", "") == "":
             common.email_error("xtra[channels] is empty!", buf)
-        jabber.send_message(plain, html, xtra)
+        JABBER.send_message(plain, html, xtra)
 
     if not common.dbwrite_enabled():
         return
@@ -126,6 +127,5 @@ if __name__ == "__main__":
     # Fire up!
     PGCONN = common.get_database("postgis", cp_max=1)
     dbload()
-    jabber = make_jabber_client()
 
     reactor.run()
