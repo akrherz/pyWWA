@@ -126,6 +126,6 @@ if __name__ == "__main__":
     # Fire up!
     PGCONN = common.get_database("postgis", cp_max=1)
     dbload()
-    jabber = make_jabber_client("generic_parser")
+    jabber = make_jabber_client()
 
     reactor.run()

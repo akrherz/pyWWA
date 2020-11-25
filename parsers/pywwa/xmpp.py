@@ -1,9 +1,11 @@
 """XMPP/Jabber Client Interface and Support."""
 # stdlib
+import inspect
+import os
 import re
 
 # Third Party
-from pyiem.util import utc
+from pyiem.util import utc, LOG
 from twisted.internet import reactor
 from twisted.words.xish import domish, xpath
 from twisted.words.xish.xmlstream import STREAM_END_EVENT
@@ -12,17 +14,22 @@ from twisted.words.protocols.jabber import client as jclient
 from twisted.words.protocols.jabber import xmlstream, jid
 
 # Local
-from pywwa.common import SETTINGS, LOG, CTX
+from pywwa.common import SETTINGS, CTX
 
 MYREGEX = "[\x00-\x08\x0b\x0c\x0e-\x1F\uD800-\uDFFF\uFFFE\uFFFF]"
 ILLEGAL_XML_CHARS_RE = re.compile(MYREGEX)
 
 
-def make_jabber_client(resource_prefix):
+def make_jabber_client(resource_prefix=None):
     """ Generate a jabber client, please """
     if CTX.disable_xmpp:
         LOG.info("XMPP disabled via command line.")
         return NOOPXMPP()
+
+    if resource_prefix is None:
+        # Build based on the calling script's name
+        frameinfo = inspect.stack()[-1]
+        resource_prefix = os.path.basename(frameinfo.filename)[:-3]
 
     myjid = jid.JID(
         "%s@%s/%s_%s"

@@ -74,6 +74,6 @@ def killer():
 
 
 if __name__ == "__main__":
-    jabber = make_jabber_client("spe_parser")
+    jabber = make_jabber_client()
     ldmbridge.LDMProductFactory(MyProductIngestor(dedup=True))
     reactor.run()

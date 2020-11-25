@@ -182,6 +182,6 @@ if __name__ == "__main__":
         common.CONFIG["databaserw"]["postgis"], cp_max=1
     )
     bootstrap()
-    jabber = make_jabber_client("vtec_parser")
+    jabber = make_jabber_client()
 
     reactor.run()

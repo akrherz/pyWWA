@@ -17,7 +17,7 @@ TABLESDIR = os.path.join(os.path.dirname(__file__), "../tables")
 
 PIREPS = {}
 DBPOOL = common.get_database("postgis")
-JABBER = make_jabber_client("pirep")
+JABBER = make_jabber_client()
 # Load LOCS table
 LOCS = {}
 

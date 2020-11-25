@@ -98,7 +98,7 @@ def real_processor(txn, text):
 
 
 reactor.callLater(0, loaddb)
-JABBER = make_jabber_client("lsr_parser")
+JABBER = make_jabber_client()
 LDM = ldmbridge.LDMProductFactory(MyProductIngestor())
 reactor.callLater(20, cleandb)
 reactor.run()

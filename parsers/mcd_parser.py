@@ -70,6 +70,6 @@ def real_process(txn, raw):
 
 
 ldmbridge.LDMProductFactory(MyProductIngestor())
-JABBER = make_jabber_client("mcd_parser")
+JABBER = make_jabber_client()
 
 reactor.run()

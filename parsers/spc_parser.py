@@ -12,7 +12,7 @@ from pywwa.xmpp import make_jabber_client
 
 DBPOOL = common.get_database("postgis")
 WAITFOR = 20
-JABBER = make_jabber_client("spc_parser")
+JABBER = make_jabber_client()
 
 
 # LDM Ingestor

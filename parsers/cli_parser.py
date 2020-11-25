@@ -152,7 +152,7 @@ def realprocessor(txn, prod, data):
 
 if __name__ == "__main__":
     # Do Stuff
-    jabber = make_jabber_client("cli_parser")
+    jabber = make_jabber_client()
     ldmbridge.LDMProductFactory(MyProductIngestor())
 
     reactor.run()

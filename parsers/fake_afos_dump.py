@@ -92,6 +92,6 @@ def really_process_data(txn, data):
 
 if __name__ == "__main__":
     PGCONN = common.get_database("afos", cp_max=1)
-    JABBER = make_jabber_client("fake_afos_dump")
+    JABBER = make_jabber_client()
     ldmbridge.LDMProductFactory(MyProductIngestor())
     reactor.run()

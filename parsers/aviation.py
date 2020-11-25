@@ -82,7 +82,7 @@ def final_step(_, prod):
 
 
 MESOSITE = common.get_database("mesosite")
-jabber = make_jabber_client("aviation")
+jabber = make_jabber_client()
 
 
 def onready(_res):

@@ -174,5 +174,5 @@ def run():
 
 
 if __name__ == "__main__":
-    JABBER = make_jabber_client("metar_parser")
+    JABBER = make_jabber_client()
     run()

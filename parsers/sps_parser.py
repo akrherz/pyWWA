@@ -67,7 +67,7 @@ def real_process(txn, raw):
         jabber.send_message(mess, htmlmess, xtra)
 
 
-jabber = make_jabber_client("sps_parser")
+jabber = make_jabber_client()
 
 
 def ready(_bogus):

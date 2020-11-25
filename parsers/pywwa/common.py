@@ -107,7 +107,11 @@ def parse_cmdline():
         action="store_true",
         help="Disable all XMPP functionality.",
     )
-    return parser.parse_args(sys.argv[1:])
+    # HACK not to do things during testing.
+    args = sys.argv[1:]
+    if os.path.basename(sys.argv[0]) == "pytest":
+        args = []
+    return parser.parse_args(args)
 
 
 def setup_syslog():
