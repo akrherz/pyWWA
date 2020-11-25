@@ -6,7 +6,6 @@ import inspect
 import logging
 import pwd
 import datetime
-import re
 from io import StringIO
 import socket
 import sys
@@ -16,27 +15,20 @@ from syslog import LOG_LOCAL2
 
 # 3rd party
 import psycopg2
-
-# twisted
 from twisted.python import log as tplog
 from twisted.logger import formatEvent
 from twisted.python import syslog
 from twisted.python import failure
-from twisted.words.xish.xmlstream import STREAM_END_EVENT
-from twisted.words.protocols.jabber import client as jclient
-from twisted.words.protocols.jabber import xmlstream, jid
-from twisted.internet.task import LoopingCall
 from twisted.internet import reactor
-from twisted.words.xish import domish, xpath
 from twisted.mail import smtp
 from twisted.enterprise import adbapi
 import pyiem
 from pyiem.util import LOG, utc, CustomFormatter
 
+# NB: Can't do local imports here, #circleref
+
 # http://bugs.python.org/issue7980
 datetime.datetime.strptime("2013", "%Y")
-MYREGEX = "[\x00-\x08\x0b\x0c\x0e-\x1F\uD800-\uDFFF\uFFFE\uFFFF]"
-ILLEGAL_XML_CHARS_RE = re.compile(MYREGEX)
 
 SETTINGS = {}
 EMAIL_TIMESTAMPS = []
@@ -271,194 +263,6 @@ Message:
     else:
         LOG.info("Sending email disabled by command line `-e` flag.")
     return True
-
-
-def make_jabber_client(resource_prefix):
-    """ Generate a jabber client, please """
-    if CTX.disable_xmpp:
-        LOG.info("XMPP disabled via command line.")
-        return NOOPXMPP()
-
-    myjid = jid.JID(
-        "%s@%s/%s_%s"
-        % (
-            SETTINGS.get("pywwa_jabber_username", "nwsbot_ingest"),
-            SETTINGS.get("pywwa_jabber_domain", "nwschat.weather.gov"),
-            resource_prefix,
-            utc().strftime("%Y%m%d%H%M%S"),
-        )
-    )
-    factory = jclient.XMPPClientFactory(
-        myjid, SETTINGS.get("pywwa_jabber_password", "secret")
-    )
-
-    jabber = JabberClient(myjid)
-
-    factory.addBootstrap("//event/stream/authd", jabber.authd)
-    factory.addBootstrap("//event/client/basicauth/invaliduser", debug)
-    factory.addBootstrap("//event/client/basicauth/authfailed", debug)
-    factory.addBootstrap("//event/stream/error", debug)
-    factory.addBootstrap(xmlstream.STREAM_END_EVENT, jabber.disconnect)
-
-    reactor.connectTCP(
-        SETTINGS.get("pywwa_jabber_host", "localhost"),  # @UndefinedVariable
-        5222,
-        factory,
-    )
-
-    return jabber
-
-
-def message_processor(stanza):
-    """ Process a message stanza """
-    body = xpath.queryForString("/message/body", stanza)
-    LOG.info("Message from %s Body: %s", stanza["from"], body)
-    if body is None:
-        return
-    if body.lower().strip() == "shutdown":
-        LOG.info("I got shutdown message, shutting down...")
-        reactor.callWhenRunning(reactor.stop)  # @UndefinedVariable
-
-
-def raw_data_in(data):
-    """
-    Debug method
-    @param data string of what was received from the server
-    """
-    if isinstance(data, bytes):
-        data = data.decode("utf-8", errors="ignore")
-    LOG.info("RECV %s", data)
-
-
-def debug(elem):
-    """
-    Debug method
-    @param elem twisted.works.xish
-    """
-    LOG.info(elem.toXml().encode("utf-8"))
-
-
-def raw_data_out(data):
-    """
-    Debug method
-    @param data string of what data was sent
-    """
-    if isinstance(data, bytes):
-        data = data.decode("utf-8", errors="ignore")
-    if data == " ":
-        return
-    LOG.info("SEND %s", data)
-
-
-class NOOPXMPP:
-    """A no-operation Jabber client."""
-
-    def keepalive(self):
-        """Do Nothing."""
-
-    def send_message(self, *args):
-        """Do Nothing."""
-
-
-class JabberClient(object):
-    """
-    I am an important class of a jabber client against the chat server,
-    used by pretty much every ingestor as that is how messages are routed
-    to nwsbot
-    """
-
-    def __init__(self, myjid):
-        """
-        Constructor
-
-        @param jid twisted.words.jid object
-        """
-        self.myjid = myjid
-        self.xmlstream = None
-        self.authenticated = False
-        self.routerjid = "%s@%s" % (
-            SETTINGS.get("bot.username", "nwsbot"),
-            SETTINGS.get("pywwa_jabber_domain", "nwschat.weather.gov"),
-        )
-
-    def authd(self, xstream):
-        """
-        Callbacked once authentication succeeds
-        @param xs twisted.words.xish.xmlstream
-        """
-        LOG.info("Logged in as %s", self.myjid)
-        self.authenticated = True
-
-        self.xmlstream = xstream
-        self.xmlstream.rawDataInFn = raw_data_in
-        self.xmlstream.rawDataOutFn = raw_data_out
-
-        # Process Messages
-        self.xmlstream.addObserver("/message/body", message_processor)
-
-        # Send initial presence
-        presence = domish.Element(("jabber:client", "presence"))
-        presence.addElement("status").addContent("Online")
-        self.xmlstream.send(presence)
-
-        # Whitespace ping to keep our connection happy
-        lc = LoopingCall(self.keepalive)
-        lc.start(60)
-        self.xmlstream.addObserver(STREAM_END_EVENT, lambda _: lc.stop())
-
-    def keepalive(self):
-        """
-        Send whitespace ping to the server every so often
-        """
-        self.xmlstream.send(" ")
-
-    def disconnect(self, _xs):
-        """
-        Called when we are disconnected from the server, I guess
-        """
-        LOG.info("SETTING authenticated to false!")
-        self.authenticated = False
-
-    def send_message(self, body, html, xtra):
-        """
-        Send a message to nwsbot.  This message should have
-        @param body plain text variant
-        @param html html version of the message
-        @param xtra dictionary of stuff that tags along
-        """
-        if not self.authenticated:
-            LOG.info("No Connection, Lets wait and try later...")
-            reactor.callLater(
-                3, self.send_message, body, html, xtra  # @UndefinedVariable
-            )
-            return
-        message = domish.Element(("jabber:client", "message"))
-        message["to"] = self.routerjid
-        message["type"] = "chat"
-
-        # message.addElement('subject',None,subject)
-        body = ILLEGAL_XML_CHARS_RE.sub("", body)
-        if html:
-            html = ILLEGAL_XML_CHARS_RE.sub("", html)
-        message.addElement("body", None, body)
-        helem = message.addElement(
-            "html", "http://jabber.org/protocol/xhtml-im"
-        )
-        belem = helem.addElement("body", "http://www.w3.org/1999/xhtml")
-        belem.addRawXml(html or body)
-        # channels is of most important
-        xelem = message.addElement("x", "nwschat:nwsbot")
-        for key in xtra.keys():
-            if isinstance(xtra[key], list):
-                xelem[key] = ",".join(xtra[key])
-            else:
-                xelem[key] = xtra[key]
-        # So send_message may be getting called from 'threads' and the writing
-        # of data to the transport is not thread safe, so we must ensure that
-        # this gets called from the main thread
-        reactor.callFromThread(
-            self.xmlstream.send, message  # @UndefinedVariable
-        )
 
 
 # This is blocking, but necessary to make sure settings are loaded before

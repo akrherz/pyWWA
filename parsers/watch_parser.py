@@ -8,10 +8,11 @@ from pyldm import ldmbridge
 
 # Local
 from pywwa import common
+from pywwa.xmpp import make_jabber_client
 
 DBPOOL = common.get_database("postgis", cp_max=1)
 IEM_URL = common.SETTINGS.get("pywwa_watch_url", "pywwa_watch_url")
-JABBER = common.make_jabber_client("new_watch")
+JABBER = make_jabber_client("new_watch")
 
 
 class MyProductIngestor(ldmbridge.LDMProductReceiver):

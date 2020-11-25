@@ -14,6 +14,7 @@ from pyldm import ldmbridge
 
 # Local
 from pywwa import common
+from pywwa.xmpp import make_jabber_client
 
 DBPOOL = common.get_database(common.CONFIG["databaserw"]["postgis"])
 
@@ -97,7 +98,7 @@ def real_processor(txn, text):
 
 
 reactor.callLater(0, loaddb)
-JABBER = common.make_jabber_client("lsr_parser")
+JABBER = make_jabber_client("lsr_parser")
 LDM = ldmbridge.LDMProductFactory(MyProductIngestor())
 reactor.callLater(20, cleandb)
 reactor.run()

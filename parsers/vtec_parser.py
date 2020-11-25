@@ -26,6 +26,7 @@ from pyiem.nws import nwsli
 
 # Local
 from pywwa import common
+from pywwa.xmpp import make_jabber_client
 
 
 # LDM Ingestor
@@ -181,6 +182,6 @@ if __name__ == "__main__":
         common.CONFIG["databaserw"]["postgis"], cp_max=1
     )
     bootstrap()
-    jabber = common.make_jabber_client("vtec_parser")
+    jabber = make_jabber_client("vtec_parser")
 
     reactor.run()

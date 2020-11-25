@@ -10,6 +10,7 @@ from pyiem.nws import product
 
 # Local
 from pywwa import common
+from pywwa.xmpp import make_jabber_client
 
 POSTGIS = common.get_database("postgis", cp_max=1)
 PYWWA_PRODUCT_URL = common.SETTINGS.get(
@@ -73,6 +74,6 @@ def killer():
 
 
 if __name__ == "__main__":
-    jabber = common.make_jabber_client("spe_parser")
+    jabber = make_jabber_client("spe_parser")
     ldmbridge.LDMProductFactory(MyProductIngestor(dedup=True))
     reactor.run()

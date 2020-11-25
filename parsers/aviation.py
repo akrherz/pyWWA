@@ -10,6 +10,7 @@ from pyiem.nws.products.sigmet import parser
 
 # Local
 from pywwa import common
+from pywwa.xmpp import make_jabber_client
 
 DBPOOL = common.get_database("postgis")
 
@@ -81,7 +82,7 @@ def final_step(_, prod):
 
 
 MESOSITE = common.get_database("mesosite")
-jabber = common.make_jabber_client("aviation")
+jabber = make_jabber_client("aviation")
 
 
 def onready(_res):

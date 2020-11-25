@@ -13,6 +13,7 @@ from pyiem.nws import nwsli
 
 # Local
 from pywwa import common
+from pywwa.xmpp import make_jabber_client
 
 ugc_dict = {}
 nwsli_dict = {}
@@ -125,6 +126,6 @@ if __name__ == "__main__":
     # Fire up!
     PGCONN = common.get_database("postgis", cp_max=1)
     dbload()
-    jabber = common.make_jabber_client("generic_parser")
+    jabber = make_jabber_client("generic_parser")
 
     reactor.run()

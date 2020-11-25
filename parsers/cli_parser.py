@@ -14,6 +14,7 @@ from pyiem.network import Table as NetworkTable
 
 # Local
 from pywwa import common
+from pywwa.xmpp import make_jabber_client
 
 DBPOOL = common.get_database("iem", cp_max=1)
 NT = NetworkTable("NWSCLI")
@@ -151,7 +152,7 @@ def realprocessor(txn, prod, data):
 
 if __name__ == "__main__":
     # Do Stuff
-    jabber = common.make_jabber_client("cli_parser")
+    jabber = make_jabber_client("cli_parser")
     ldmbridge.LDMProductFactory(MyProductIngestor())
 
     reactor.run()
