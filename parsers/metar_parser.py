@@ -10,11 +10,11 @@ So let us document it here for my own sanity.
 from twisted.internet import reactor
 from pyiem.nws.products import metarcollect
 from pyiem.util import get_properties, LOG
-from pyldm import ldmbridge
 
 # Local
 from pywwa import common
 from pywwa.xmpp import make_jabber_client
+from pywwa.ldm import bridge
 
 IEMDB = common.get_database("iem")
 ASOSDB = common.get_database("asos")
@@ -80,19 +80,12 @@ def load_stations(txn):
     )
 
 
-class MyProductIngestor(ldmbridge.LDMProductReceiver):
-    """Our LDM pqact product receiver"""
-
-    def connectionLost(self, reason):
-        """The connection was lost for some reason"""
-        common.shutdown(30)
-
-    def process_data(self, data):
-        """Callback when we have data to process"""
-        try:
-            real_processor(data)
-        except Exception as exp:
-            common.email_error(exp, data, -1)
+def process_data(data):
+    """Callback when we have data to process"""
+    try:
+        real_processor(data)
+    except Exception as exp:
+        common.email_error(exp, data, -1)
 
 
 def real_processor(text):
@@ -161,8 +154,7 @@ def cleandb():
 
 def ready(_):
     """callback once our database load is done"""
-    ingest = MyProductIngestor()
-    ldmbridge.LDMProductFactory(ingest)
+    bridge(process_data)
     cleandb()
     load_ignorelist()
 

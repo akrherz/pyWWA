@@ -5,13 +5,13 @@ import os
 
 # 3rd Party
 from twisted.internet import reactor
-from pyldm import ldmbridge
 from pyiem.util import LOG
 from pyiem.nws.products.pirep import parser as pirepparser
 
 # Local
 from pywwa import common
 from pywwa.xmpp import make_jabber_client
+from pywwa.ldm import bridge
 
 TABLESDIR = os.path.join(os.path.dirname(__file__), "../tables")
 
@@ -89,21 +89,6 @@ def load_locs(txn):
     LOG.info("... %s locations loaded", len(LOCS))
 
 
-# LDM Ingestor
-class MyProductIngestor(ldmbridge.LDMProductReceiver):
-    """ I receive products from ldmbridge and process them 1 by 1 :) """
-
-    def connectionLost(self, reason):
-        """Connection was lost for some reason"""
-        common.shutdown()
-
-    def process_data(self, data):
-        """ Process the product """
-        defer = DBPOOL.runInteraction(real_parser, data)
-        defer.addErrback(common.email_error, data)
-        defer.addErrback(LOG.error)
-
-
 def real_parser(txn, buf):
     """
     I'm gonna do the heavy lifting here
@@ -127,7 +112,7 @@ def real_parser(txn, buf):
 def ready(_bogus):
     """We are ready to ingest"""
     reactor.callLater(20, cleandb)  # @UndefinedVariable
-    ldmbridge.LDMProductFactory(MyProductIngestor())
+    bridge(real_parser, dbpool=DBPOOL)
 
 
 if __name__ == "__main__":

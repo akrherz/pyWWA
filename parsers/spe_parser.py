@@ -4,33 +4,17 @@ import re
 
 # 3rd Party
 from twisted.internet import reactor
-from pyldm import ldmbridge
-from pyiem.util import LOG
 from pyiem.nws import product
 
 # Local
 from pywwa import common
 from pywwa.xmpp import make_jabber_client
+from pywwa.ldm import bridge
 
-POSTGIS = common.get_database("postgis")
 PYWWA_PRODUCT_URL = common.SETTINGS.get(
     "pywwa_product_url", "pywwa_product_url"
 )
 JABBER = make_jabber_client()
-
-
-class MyProductIngestor(ldmbridge.LDMProductReceiver):
-    """ I receive products from ldmbridge and process them 1 by 1 :) """
-
-    def connectionLost(self, reason):
-        """ callback when the stdin reader connection is closed """
-        common.shutdown()
-
-    def process_data(self, data):
-        """ Process the product """
-        df = POSTGIS.runInteraction(real_process, data)
-        df.addErrback(common.email_error, data)
-        df.addErrback(LOG.error)
 
 
 def real_process(txn, raw):
@@ -75,5 +59,5 @@ def killer():
 
 
 if __name__ == "__main__":
-    ldmbridge.LDMProductFactory(MyProductIngestor(dedup=True))
+    bridge(real_process, dbpool=common.get_database("postgis"))
     reactor.run()

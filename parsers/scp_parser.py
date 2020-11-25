@@ -3,30 +3,10 @@
 # 3rd Party
 from twisted.internet import reactor
 from pyiem.nws.products.scp import parser
-from pyldm import ldmbridge
 
 # Local
 from pywwa import common
-
-DBPOOL = common.get_database("asos")
-
-
-def shutdown():
-    """Shut things down, please"""
-    reactor.callWhenRunning(reactor.stop)  # @UndefinedVariable
-
-
-class MyProductIngestor(ldmbridge.LDMProductReceiver):
-    """ I receive products from ldmbridge and process them 1 by 1 :) """
-
-    def connectionLost(self, reason):
-        """STDIN is shut, so lets shutdown"""
-        common.shutdown()
-
-    def process_data(self, data):
-        """Process the product!"""
-        df = DBPOOL.runInteraction(real_process, data)
-        df.addErrback(common.email_error, data)
+from pywwa.ldm import bridge
 
 
 def real_process(txn, raw):
@@ -38,7 +18,7 @@ def real_process(txn, raw):
 
 def main():
     """Go Main Go"""
-    ldmbridge.LDMProductFactory(MyProductIngestor())
+    bridge(real_process, dbpool=common.get_database("asos"))
     reactor.run()  # @UndefinedVariable
 
 

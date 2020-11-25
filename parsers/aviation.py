@@ -4,13 +4,13 @@ import os
 
 # 3rd Party
 from twisted.internet import reactor
-from pyldm import ldmbridge
 from pyiem.util import LOG
 from pyiem.nws.products.sigmet import parser
 
 # Local
 from pywwa import common
 from pywwa.xmpp import make_jabber_client
+from pywwa.ldm import bridge
 
 DBPOOL = common.get_database("postgis")
 
@@ -53,25 +53,17 @@ def load_database(txn):
         LOCS[sid] = {"lat": lat, "lon": lon}
 
 
-# LDM Ingestor
-class MyProductIngestor(ldmbridge.LDMProductReceiver):
-    """ I receive products from ldmbridge and process them 1 by 1 :) """
-
-    def connectionLost(self, reason):
-        """Stdin was closed"""
-        common.shutdown()
-
-    def process_data(self, data):
-        """ Process the product """
-        try:
-            prod = parser(data, nwsli_provider=LOCS)
-            # prod.draw()
-        except Exception as myexp:
-            common.email_error(myexp, data)
-            return
-        defer = DBPOOL.runInteraction(prod.sql)
-        defer.addCallback(final_step, prod)
-        defer.addErrback(common.email_error, data)
+def process_data(data):
+    """ Process the product """
+    try:
+        prod = parser(data, nwsli_provider=LOCS)
+        # prod.draw()
+    except Exception as myexp:
+        common.email_error(myexp, data)
+        return
+    defer = DBPOOL.runInteraction(prod.sql)
+    defer.addCallback(final_step, prod)
+    defer.addErrback(common.email_error, data)
 
 
 def final_step(_, prod):
@@ -85,7 +77,7 @@ def final_step(_, prod):
 def onready(_res):
     """Database has loaded"""
     LOG.info("onready() called...")
-    ldmbridge.LDMProductFactory(MyProductIngestor())
+    bridge(process_data)
     MESOSITE.close()
 
 

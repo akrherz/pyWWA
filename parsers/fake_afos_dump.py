@@ -2,13 +2,12 @@
 
 # 3rd Party
 from twisted.internet import reactor
-from pyiem.util import LOG
 from pyiem.nws.product import TextProduct
-from pyldm import ldmbridge
 
 # Local
 from pywwa import common
 from pywwa.xmpp import make_jabber_client
+from pywwa.ldm import bridge
 
 JABBER = make_jabber_client()
 
@@ -48,20 +47,6 @@ def compute_afos(textprod):
     textprod.afos = afos
 
 
-class MyProductIngestor(ldmbridge.LDMProductReceiver):
-    """ I receive products from ldmbridge and process them 1 by 1 :) """
-
-    def connectionLost(self, reason):
-        """ callback when the stdin reader connection is closed """
-        common.shutdown()
-
-    def process_data(self, data):
-        """ Process the product """
-        defer = PGCONN.runInteraction(really_process_data, data)
-        defer.addErrback(common.email_error, data)
-        defer.addErrback(LOG.error)
-
-
 def really_process_data(txn, data):
     """ We are called with a hard coded AFOS PIL """
     tp = TextProduct(data)
@@ -93,6 +78,5 @@ def really_process_data(txn, data):
 
 
 if __name__ == "__main__":
-    PGCONN = common.get_database("afos")
-    ldmbridge.LDMProductFactory(MyProductIngestor())
+    bridge(really_process_data, dbpool=common.get_database("afos"))
     reactor.run()

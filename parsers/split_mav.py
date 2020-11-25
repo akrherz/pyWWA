@@ -6,33 +6,11 @@ import re
 
 # 3rd Party
 from twisted.internet import reactor
-from pyldm import ldmbridge
 from pyiem.nws import product
 
 # Local
 from pywwa import common
-
-DBPOOL = common.get_database("afos")
-
-
-class MyProductIngestor(ldmbridge.LDMProductReceiver):
-    """Do what we do!"""
-
-    prods = 0
-
-    def process_data(self, data):
-        """
-        Actual ingestor
-        """
-        self.prods += 1
-        defer = DBPOOL.runInteraction(real_process, data)
-        defer.addErrback(common.email_error, data)
-
-    def connectionLost(self, reason):
-        """
-        Called when ldm closes the pipe
-        """
-        common.shutdown()
+from pywwa.ldm import bridge
 
 
 def real_process(txn, data):
@@ -78,5 +56,5 @@ def real_process(txn, data):
 
 
 if __name__ == "__main__":
-    ldmbridge.LDMProductFactory(MyProductIngestor())
+    bridge(real_process, dbpool=common.get_database("afos"))
     reactor.run()

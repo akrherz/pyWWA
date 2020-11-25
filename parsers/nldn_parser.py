@@ -4,35 +4,24 @@ from io import BytesIO
 
 # 3rd Party
 from twisted.internet import reactor
-from pyldm import ldmbridge
 from pyiem.nws.products.nldn import parser
 
 # Local
 from pywwa import common
+from pywwa.ldm import bridge
 
 DBPOOL = common.get_database("nldn")
 
 
-class myProductIngestor(ldmbridge.LDMProductReceiver):
-    """My hacky ingest"""
-
-    product_end = b"NLDN"
-
-    def process_data(self, data):
-        """Actual ingestor"""
-        if data == b"":
-            return
+def process_data(data):
+    """Actual ingestor"""
+    if data == b"":
+        return
+    real_process(data)
+    try:
         real_process(data)
-        try:
-            real_process(data)
-        except Exception as myexp:
-            common.email_error(myexp, data)
-
-    def connectionLost(self, reason):
-        """
-        Called when ldm closes the pipe
-        """
-        common.shutdown()
+    except Exception as myexp:
+        common.email_error(myexp, data)
 
 
 def real_process(buf):
@@ -44,7 +33,7 @@ def real_process(buf):
 
 def main():
     """Go Main"""
-    ldmbridge.LDMProductFactory(myProductIngestor(isbinary=True))
+    bridge(process_data, isbinary=True, product_end=b"NLDN")
     reactor.run()  # @UndefinedVariable
 
 

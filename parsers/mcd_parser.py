@@ -6,30 +6,22 @@
 # 3rd Party
 from twisted.internet import reactor
 from pyiem.nws.products.mcd import parser as mcdparser
-from pyldm import ldmbridge
 
 # Local
 from pywwa import common
 from pywwa.xmpp import make_jabber_client
+from pywwa.ldm import bridge
 
 DBPOOL = common.get_database("postgis")
 JABBER = make_jabber_client()
 
 
-# LDM Ingestor
-class MyProductIngestor(ldmbridge.LDMProductReceiver):
-    """ I receive products from ldmbridge and process them 1 by 1 :) """
-
-    def connectionLost(self, reason):
-        """ Called when the STDIN connection is lost """
-        common.shutdown()
-
-    def process_data(self, data):
-        """ Process a chunk of data """
-        # BUG
-        data = data.upper()
-        df = DBPOOL.runInteraction(real_process, data)
-        df.addErrback(common.email_error, data)
+def process_data(data):
+    """ Process a chunk of data """
+    # BUG
+    data = data.upper()
+    df = DBPOOL.runInteraction(real_process, data)
+    df.addErrback(common.email_error, data)
 
 
 def find_cwsus(txn, prod):
@@ -70,6 +62,6 @@ def real_process(txn, raw):
         prod.database_save(txn)
 
 
-ldmbridge.LDMProductFactory(MyProductIngestor())
+bridge(process_data)
 
 reactor.run()

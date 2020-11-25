@@ -7,37 +7,24 @@ from email.mime.text import MIMEText
 # 3rd Party
 from twisted.internet import reactor
 from twisted.mail import smtp
-from pyldm import ldmbridge
 from pyiem.util import LOG
 from pyiem.nws import product
 
 # Local
 from pywwa import common
+from pywwa.ldm import bridge
 
 IOWA_WFOS = ["KDMX", "KDVN", "KARX", "KFSD", "KOAX"]
 
 
-class MyProductIngestor(ldmbridge.LDMProductReceiver):
-    """Do what we do!"""
-
-    prods = 0
-
-    def process_data(self, data):
-        """
-        Actual ingestor
-        """
-        self.prods += 1
-        try:
-            real_process(data)
-        except Exception as exp:
-            common.email_error(exp, data)
-
-    def connectionLost(self, reason):
-        """
-        Called when ldm closes the pipe
-        """
-        LOG.info("processed %s prods", self.prods)
-        common.shutdown()
+def process_data(data):
+    """
+    Actual ingestor
+    """
+    try:
+        real_process(data)
+    except Exception as exp:
+        common.email_error(exp, data)
 
 
 def real_process(data):
@@ -69,5 +56,5 @@ def real_process(data):
 
 
 if __name__ == "__main__":
-    ldmbridge.LDMProductFactory(MyProductIngestor())
+    bridge(process_data)
     reactor.run()
