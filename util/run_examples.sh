@@ -6,6 +6,8 @@ cat examples/ESF.txt | python parsers/afos_dump.py $OPTS || exit 2
 
 cat examples/SIGC.txt | python parsers/aviation.py $OPTS || exit 2
 
+cat examples/CF6.txt | python parsers/cf6_parser.py $OPTS || exit 2
+
 cat examples/CLIANN.txt | python parsers/cli_parser.py $OPTS || exit 2
 
 cat examples/DSM.txt | python parsers/dsm2afos.py DSM || exit 2
