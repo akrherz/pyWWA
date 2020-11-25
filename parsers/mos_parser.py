@@ -1,9 +1,12 @@
 """ MOS Data Ingestor, why not? """
 
+# 3rd Party
 from twisted.internet import reactor
 from pyldm import ldmbridge
 from pyiem.nws.products.mos import parser
-import common  # @UnresolvedImport
+
+# Local
+from pywwa import common
 
 DBPOOL = common.get_database("mos")
 MEMORY = {"ingested": 0}

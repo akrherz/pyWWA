@@ -1,12 +1,16 @@
 """SPS product ingestor"""
+# stdlib
 import re
 
+# 3rd Party
 from twisted.internet import reactor
 from pyiem.util import LOG
 from pyiem.nws.products.sps import parser
 from pyiem.nws.ugc import UGC
 from pyldm import ldmbridge
-import common
+
+# Local
+from pywwa import common
 
 POSTGIS = common.get_database("postgis")
 PYWWA_PRODUCT_URL = common.SETTINGS.get(

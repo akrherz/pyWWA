@@ -5,12 +5,15 @@ so we take what data we find in this product and overwrite the database
 storage of what we got from the automated observations
 """
 
+# 3rd Party
 from twisted.internet import reactor
 from pyldm import ldmbridge
 from pyiem.nws.products import parser
 from pyiem.util import LOG
 from pyiem.network import Table as NetworkTable
-import common
+
+# Local
+from pywwa import common
 
 DBPOOL = common.get_database("iem", cp_max=1)
 NT = NetworkTable("NWSCLI")

@@ -1,8 +1,10 @@
 """Split RR7 products, for some reason!"""
+# stdlib
 import sys
 import re
 import datetime
 
+# 3rd Party
 import pytz
 from pyiem.util import get_dbconn
 

@@ -1,9 +1,12 @@
 """Parse CF6 text products."""
 
+# 3rd Party
 from twisted.internet import reactor
 from pyldm import ldmbridge
 from pyiem.nws.products.cf6 import parser
-import common
+
+# Local
+from pywwa import common
 
 DBPOOL = common.get_database("iem", cp_max=1)
 

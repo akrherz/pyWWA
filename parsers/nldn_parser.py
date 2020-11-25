@@ -1,10 +1,14 @@
 """ NLDN """
+# stdlib
 from io import BytesIO
 
+# 3rd Party
 from twisted.internet import reactor
 from pyldm import ldmbridge
 from pyiem.nws.products.nldn import parser
-import common
+
+# Local
+from pywwa import common
 
 DBPOOL = common.get_database("nldn")
 

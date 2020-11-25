@@ -1,11 +1,14 @@
 """ ASOS Daily Summary Message Parser ingestor """
 
+# 3rd Party
 import pytz
 from twisted.internet import reactor
 from pyldm import ldmbridge
 from pyiem.nws.products.dsm import parser
 from pyiem.util import get_dbconn, LOG
-import common
+
+# Local
+from pywwa import common
 
 DBPOOL = common.get_database("iem", cp_max=1)
 # database timezones to pytz cache

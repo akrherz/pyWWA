@@ -10,8 +10,10 @@ with watches.  Lets try to explain
     init_expire <- When did this product initially expire
     product_issue <- When was this product issued by the NWS
 """
+# stdlib
 import re
 
+# 3rd Party
 from bs4 import BeautifulSoup
 import treq
 from twisted.internet import reactor
@@ -21,7 +23,9 @@ from pyiem.util import LOG
 from pyiem.nws.products.vtec import parser as vtecparser
 from pyiem.nws import ugc
 from pyiem.nws import nwsli
-import common
+
+# Local
+from pywwa import common
 
 
 # LDM Ingestor

@@ -1,10 +1,13 @@
 """ SPC Watch Ingestor """
 
+# 3rd Party
 from twisted.internet import reactor
 from pyiem.util import LOG
 from pyiem.nws.products.saw import parser as sawparser
 from pyldm import ldmbridge
-import common  # @UnresolvedImport
+
+# Local
+from pywwa import common
 
 DBPOOL = common.get_database("postgis", cp_max=1)
 IEM_URL = common.SETTINGS.get("pywwa_watch_url", "pywwa_watch_url")

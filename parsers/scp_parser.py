@@ -1,9 +1,12 @@
 """ NESDIS SCP Ingestor """
 
+# 3rd Party
 from twisted.internet import reactor
 from pyiem.nws.products.scp import parser
 from pyldm import ldmbridge
-import common  # @UnresolvedImport
+
+# Local
+from pywwa import common
 
 DBPOOL = common.get_database("asos", cp_max=1)
 

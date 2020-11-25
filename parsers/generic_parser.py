@@ -1,6 +1,8 @@
 """ Generic NWS Product Parser """
+# Local
 import re
 
+# 3rd Party
 from twisted.internet import reactor
 from shapely.geometry import MultiPolygon
 from pyldm import ldmbridge
@@ -9,7 +11,8 @@ from pyiem.nws.products import parser as productparser
 from pyiem.nws import ugc
 from pyiem.nws import nwsli
 
-import common
+# Local
+from pywwa import common
 
 ugc_dict = {}
 nwsli_dict = {}

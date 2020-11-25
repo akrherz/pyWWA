@@ -1,11 +1,15 @@
 """SPENES product ingestor"""
+# stdlib
 import re
 
+# 3rd Party
 from twisted.internet import reactor
 from pyldm import ldmbridge
 from pyiem.util import LOG
 from pyiem.nws import product
-import common
+
+# Local
+from pywwa import common
 
 POSTGIS = common.get_database("postgis", cp_max=1)
 PYWWA_PRODUCT_URL = common.SETTINGS.get(

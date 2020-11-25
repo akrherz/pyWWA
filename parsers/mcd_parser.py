@@ -3,10 +3,13 @@
  Support WPC's FFG product
 """
 
+# 3rd Party
 from twisted.internet import reactor
 from pyiem.nws.products.mcd import parser as mcdparser
 from pyldm import ldmbridge
-import common
+
+# Local
+from pywwa import common
 
 DBPOOL = common.get_database(common.CONFIG["databaserw"]["postgis"], cp_max=2)
 

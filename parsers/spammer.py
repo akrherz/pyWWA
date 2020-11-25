@@ -1,14 +1,18 @@
 """
 Handle things that need emailed to me for my situational awareness.
 """
+# stdlib
 from email.mime.text import MIMEText
 
+# 3rd Party
 from twisted.internet import reactor
 from twisted.mail import smtp
 from pyldm import ldmbridge
 from pyiem.util import LOG
 from pyiem.nws import product
-import common  # @UnresolvedImport
+
+# Local
+from pywwa import common
 
 IOWA_WFOS = ["KDMX", "KDVN", "KARX", "KFSD", "KOAX"]
 
