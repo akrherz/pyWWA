@@ -8,10 +8,11 @@ from pyiem.nws.products.spcpts import parser
 
 # Local
 from pywwa import common
+from pywwa.xmpp import make_jabber_client
 
 DBPOOL = common.get_database("postgis")
 WAITFOR = 20
-JABBER = common.make_jabber_client("spc_parser")
+JABBER = make_jabber_client()
 
 
 # LDM Ingestor

@@ -14,6 +14,7 @@ from pyldm import ldmbridge
 
 # Local
 from pywwa import common
+from pywwa.xmpp import make_jabber_client
 
 IEMDB = common.get_database("iem")
 ASOSDB = common.get_database("asos")
@@ -33,6 +34,7 @@ metarcollect.JABBER_SITES = {
 }
 # Try to prevent Jabber message dups
 JABBER_MESSAGES = []
+JABBER = make_jabber_client()
 # List of sites to IGNORE and not send Jabber Messages for.
 # iem property `pywwa_metar_ignorelist` should be a comma delimited 4 char ids
 IGNORELIST = []
@@ -173,5 +175,4 @@ def run():
 
 
 if __name__ == "__main__":
-    JABBER = common.make_jabber_client("metar_parser")
     run()

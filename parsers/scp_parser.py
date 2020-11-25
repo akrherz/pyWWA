@@ -8,7 +8,7 @@ from pyldm import ldmbridge
 # Local
 from pywwa import common
 
-DBPOOL = common.get_database("asos", cp_max=1)
+DBPOOL = common.get_database("asos")
 
 
 def shutdown():

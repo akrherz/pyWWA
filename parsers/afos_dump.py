@@ -10,7 +10,7 @@ from pyiem.nws import product
 # Local
 from pywwa import common
 
-DBPOOL = common.get_database("afos")
+DBPOOL = common.get_database("afos", cp_max=5)
 MEMCACHE_EXCLUDE = [
     "RR1",
     "RR2",

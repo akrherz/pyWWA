@@ -26,6 +26,9 @@ from pyiem.nws import nwsli
 
 # Local
 from pywwa import common
+from pywwa.xmpp import make_jabber_client
+
+JABBER = make_jabber_client()
 
 
 # LDM Ingestor
@@ -94,7 +97,7 @@ def send_jabber_message(plain, html, extra):
 
     def _send(*_args, **_kwargs):
         """Just send it already :("""
-        jabber.send_message(plain, html, extra)
+        JABBER.send_message(plain, html, extra)
 
     def _cbBody(body):
         """Finally got the HTML"""
@@ -177,10 +180,7 @@ if __name__ == "__main__":
     nwsli_dict = {}
 
     # Fire up!
-    PGCONN = common.get_database(
-        common.CONFIG["databaserw"]["postgis"], cp_max=1
-    )
+    PGCONN = common.get_database("postgis")
     bootstrap()
-    jabber = common.make_jabber_client("vtec_parser")
 
     reactor.run()

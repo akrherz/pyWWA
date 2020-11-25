@@ -13,9 +13,11 @@ from pyiem.nws import nwsli
 
 # Local
 from pywwa import common
+from pywwa.xmpp import make_jabber_client
 
 ugc_dict = {}
 nwsli_dict = {}
+JABBER = make_jabber_client()
 
 
 def error_wrapper(exp, buf):
@@ -58,7 +60,7 @@ def really_process_data(txn, buf):
     ):
         if xtra.get("channels", "") == "":
             common.email_error("xtra[channels] is empty!", buf)
-        jabber.send_message(plain, html, xtra)
+        JABBER.send_message(plain, html, xtra)
 
     if not common.dbwrite_enabled():
         return
@@ -123,8 +125,7 @@ def dbload():
 
 if __name__ == "__main__":
     # Fire up!
-    PGCONN = common.get_database("postgis", cp_max=1)
+    PGCONN = common.get_database("postgis")
     dbload()
-    jabber = common.make_jabber_client("generic_parser")
 
     reactor.run()

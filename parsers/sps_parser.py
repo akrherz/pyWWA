@@ -11,12 +11,13 @@ from pyldm import ldmbridge
 
 # Local
 from pywwa import common
+from pywwa.xmpp import make_jabber_client
 
 POSTGIS = common.get_database("postgis")
 PYWWA_PRODUCT_URL = common.SETTINGS.get(
     "pywwa_product_url", "pywwa_product_url"
 )
-
+JABBER = make_jabber_client()
 ugc_provider = {}
 
 
@@ -63,10 +64,7 @@ def real_process(txn, raw):
         prod.sql(txn)
     jmsgs = prod.get_jabbers(PYWWA_PRODUCT_URL)
     for (mess, htmlmess, xtra) in jmsgs:
-        jabber.send_message(mess, htmlmess, xtra)
-
-
-jabber = common.make_jabber_client("sps_parser")
+        JABBER.send_message(mess, htmlmess, xtra)
 
 
 def ready(_bogus):

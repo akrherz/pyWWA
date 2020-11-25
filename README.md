@@ -34,6 +34,22 @@ pywwa_river_url | URL Base for the River App
 pywwa_vtec_url | URL Base for the VTEC App
 pywwa_watch_url | URL Base for the Watch App
 
+Database Information
+--------------------
+
+This repository assumes a backend database schema and nomeclature as provided by the [iem-database repo](https://github.com/akrherz/iem-database).  The default logic is for when a database connection is requested by a given name, the library attempts to connect to a database by the same `name` on a hostname called `iemdb-name.local`.  Passwords should be set by the standard `~/.pgpass` file.
+
+The `settings.json` file provides a means to override this behaviour.  For example, if your "postgis" database is actually called "henry" and on a server named "pgserv", you would set the following in the `settings.json` file:
+
+```json
+{
+    "postgis": {
+        "database": "henry",
+        "host": "pgserv"
+    }
+}
+```
+
 Logging
 -------
 

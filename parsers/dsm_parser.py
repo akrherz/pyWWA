@@ -10,7 +10,7 @@ from pyiem.util import get_dbconn, LOG
 # Local
 from pywwa import common
 
-DBPOOL = common.get_database("iem", cp_max=1)
+DBPOOL = common.get_database("iem")
 # database timezones to pytz cache
 TIMEZONES = dict()
 STATIONS = dict()
