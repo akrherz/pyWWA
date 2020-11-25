@@ -1,9 +1,9 @@
 """Dump some stuff without AFOS PILs"""
 
 from twisted.internet import reactor
+from pyiem.util import LOG
 from pyiem.nws.product import TextProduct
 from pyldm import ldmbridge
-from pyiem.util import LOG
 import common
 
 
