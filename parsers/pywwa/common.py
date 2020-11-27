@@ -40,7 +40,14 @@ CONFIG = json.load(
 
 def shutdown(default=5):
     """Shutdown method in given number of seconds."""
-    delay = CTX.shutdown_delay if CTX.shutdown_delay is not None else default
+    # Careful, default could have been passed in as an error
+    if not isinstance(default, int):
+        LOG.error(default)
+        delay = 5
+    else:
+        delay = (
+            CTX.shutdown_delay if CTX.shutdown_delay is not None else default
+        )
     LOG.info("Shutting down in %s seconds...", delay)
     reactor.callLater(delay, reactor.callFromThread, reactor.stop)
 
