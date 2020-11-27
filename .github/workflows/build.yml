@@ -1,0 +1,22 @@
+name: Install and Test
+on: [push]
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Python 3.8
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8
+
+    - name: Install dependencies
+      run: |
+        $CONDA/bin/conda create -n prod --file conda_requirements.txt
+        $CONDA/bin/conda activate prod
+        python -m pip install --upgrade -r pip_requirements.txt
+
+    - name: pytest
+      run: |
+        $CONDA/bin/pytest
