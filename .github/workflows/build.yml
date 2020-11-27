@@ -13,6 +13,9 @@ jobs:
 
     - name: Install dependencies
       run: |
+        $CONDA/bin/conda config --set quiet True --set always_yes yes --set changeps1 no
+        $CONDA/bin/conda config --prepend channels conda-forge
+        $CONDA/bin/conda config --set channel_priority strict
         $CONDA/bin/conda create -n prod --file conda_requirements.txt
         $CONDA/bin/conda activate prod
         python -m pip install --upgrade -r pip_requirements.txt
