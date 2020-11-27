@@ -14,7 +14,7 @@ jobs:
       run: |
         git clone --depth 1 https://github.com/akrherz/iem-database.git database
         git clone --depth 1 https://github.com/akrherz/ci_tooling.git .ci_tooling
-        cd ci_tooling
+        cd .ci_tooling
         . postgres.sh
         . memcached.sh
         . miniconda.sh
