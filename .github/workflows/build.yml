@@ -24,7 +24,6 @@ jobs:
         pip install codecov
         python -m pip install . --upgrade
         export PATH="/usr/lib/postgresql/11/bin:$PATH"
-        psql -c 'CREATE ROLE travis SUPERUSER LOGIN CREATEDB;' -U postgres || true
         cd database; sh bootstrap.sh
         python schema_manager.py
         cd ..
