@@ -10,21 +10,26 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: Set up Python/Conda
-      uses: conda-incubator/setup-miniconda@v2
-      with:
-        activate-environment: prod
-        channels: conda-forge
-        python-version: ${{ matrix.python-version }}
-
-    - name: Install dependencies
+    - name: Setup CI from ci-tooling
       run: |
-        $CONDA/bin/conda env update -n prod --file conda_requirements.txt
-        $CONDA/bin/python -m pip install --upgrade -r pip_requirements.txt
-        $CONDA/bin/python -m pip install . --upgrade
-
-    - name: pytest
-      run: |
-        $CONDA/bin/pytest
-
-    - uses: codecov/codecov-action@v1
+        git clone --depth 1 https://github.com/akrherz/iem-database.git database
+        git clone --depth 1 https://github.com/akrherz/ci_tooling.git .ci_tooling
+        . .ci_tooling/postgres.sh
+        . .ci_tooling/memcached.sh
+        . .ci_tooling/miniconda.sh
+        pip install codecov
+        python -m pip install . --upgrade
+        export PATH="/usr/lib/postgresql/11/bin:$PATH"
+        psql -c 'CREATE ROLE travis SUPERUSER LOGIN CREATEDB;' -U postgres || true
+        cd database; sh bootstrap.sh
+        python schema_manager.py
+        cd ..
+        cp settings.json-template settings.json
+        # This is a bit brittle, but loads some data
+        python util/ugcs_update.py fz10nv20 2020 11 10
+        python util/merge_hvtec_nwsli.py hvtec_list_10132020.csv
+        sh util/run_examples.sh
+        coverage run --source=pywwa setup.py test
+        if [[ ${{ matrix.python-version }} == "3.8" ]]; then
+          codecov -e TRAVIS_PYTHON_VERSION;
+        fi
