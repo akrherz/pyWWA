@@ -10,6 +10,10 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
+    - name: Add /etc/hosts entries
+      run: |
+        cat .github/workflows/etchosts.txt | sudo tee -a /etc/hosts
+
     - name: Setup CI from ci-tooling
       run: |
         git clone --depth 1 https://github.com/akrherz/iem-database.git database
