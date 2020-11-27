@@ -62,6 +62,9 @@ before_script:
 
 script:
   - cp settings.json-template settings.json
+  # This is a bit brittle, but loads some data
+  - python util/ugcs_update.py fz10nv20 2020 11 10
+  - python util/merge_hvtec_nwsli.py hvtec_list_10132020.csv
   - sh util/run_examples.sh
   - coverage run --source=pywwa setup.py test
   - if [[ $PYTHON_VERSION == "3.8" ]]; then

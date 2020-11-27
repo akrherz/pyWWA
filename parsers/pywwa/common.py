@@ -1,5 +1,4 @@
 """Support lib for the parser scripts found in this directory"""
-import json
 import os
 import inspect
 import logging
@@ -24,18 +23,14 @@ import pyiem
 from pyiem.util import LOG, utc, CustomFormatter
 
 # Local Be careful of circeref here
+from pywwa import SETTINGS
 from pywwa.cmdline import parse_cmdline
 from pywwa.database import get_sync_dbconn
 
 # http://bugs.python.org/issue7980
 datetime.datetime.strptime("2013", "%Y")
 
-SETTINGS = {}
 EMAIL_TIMESTAMPS = []
-# Careful modifying this, be sure to test from LDM account
-CONFIG = json.load(
-    open(os.path.join(os.path.dirname(__file__), "../../settings.json"))
-)
 
 
 def shutdown(default=5):

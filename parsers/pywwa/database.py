@@ -9,6 +9,9 @@ from pyiem.nws import nwsli
 import psycopg2
 from twisted.enterprise import adbapi
 
+# Local
+from pywwa import CONFIG
+
 
 def get_database(dbname, cp_max=1, module_name="pyiem.twistedpg"):
     """Get a twisted database connection
@@ -18,9 +21,6 @@ def get_database(dbname, cp_max=1, module_name="pyiem.twistedpg"):
       cp_max (int): The maximum number of connections to make to the database
       module_name (str): The python module to use for the ConnectionPool
     """
-    # workaround circleref
-    from pywwa.common import CONFIG
-
     # Check to see if we have a `settings.json` override
     opts = CONFIG.get(dbname, {})
     return adbapi.ConnectionPool(
@@ -37,8 +37,6 @@ def get_database(dbname, cp_max=1, module_name="pyiem.twistedpg"):
 
 def get_sync_dbconn(dbname):
     """Get the synchronous database connection."""
-    from pywwa.common import CONFIG
-
     opts = CONFIG.get(dbname, {})
     return psycopg2.connect(
         database=opts.get("database", dbname),
