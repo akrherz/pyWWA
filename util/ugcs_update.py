@@ -58,14 +58,14 @@ def do_download(zipfn):
             fh.write(req.content)
 
     LOG.info("Unzipping")
-    zipfp = zipfile.ZipFile(zipfn, "r")
     shpfn = None
-    for name in zipfp.namelist():
-        LOG.info("Extracting %s", name)
-        with open(name, "wb") as fh:
-            fh.write(zipfp.read(name))
-        if name[-3:] == "shp":
-            shpfn = name
+    with zipfile.ZipFile(zipfn, "r") as zipfp:
+        for name in zipfp.namelist():
+            LOG.info("Extracting %s", name)
+            with open(name, "wb") as fh:
+                fh.write(zipfp.read(name))
+            if name[-3:] == "shp":
+                shpfn = name
     return shpfn
 
 
