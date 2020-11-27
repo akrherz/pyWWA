@@ -3,7 +3,6 @@ pyWWA
 
 This repository is an integration of [pyIEM backed](https://github.com/akrherz/pyIEM) NWS product parsers.  These are intended to be run from [Unidata LDM](https://github.com/Unidata/LDM)'s `pqact` process.
 
-[![Build Status](https://api.travis-ci.com/akrherz/pyWWA.svg)](https://travis-ci.com/github/akrherz/pyWWA)
 
 Python 3.6+ is required to use this code.
 

@@ -3,8 +3,12 @@
 import json
 import os
 
-# Shared configuration?
-CONFIG = json.load(
-    open(os.path.join(os.path.dirname(__file__), "../../settings.json"))
-)
+# Shared configuration
 SETTINGS = {}
+
+try:
+    CONFIG = json.load(
+        open(os.path.join(os.path.dirname(__file__), "../../settings.json"))
+    )
+except FileNotFoundError:
+    CONFIG = {}
