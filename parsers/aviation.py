@@ -11,12 +11,13 @@ from pyiem.nws.products.sigmet import parser
 from pywwa import common
 from pywwa.xmpp import make_jabber_client
 from pywwa.ldm import bridge
+from pywwa.database import get_database
 
-DBPOOL = common.get_database("postgis")
+DBPOOL = get_database("postgis")
 
 # Load LOCS table
 LOCS = {}
-MESOSITE = common.get_database("mesosite")
+MESOSITE = get_database("mesosite")
 JABBER = make_jabber_client()
 _MYDIR = os.path.dirname(os.path.abspath(__file__))
 TABLE_PATH = os.path.normpath(os.path.join(_MYDIR, "..", "tables"))

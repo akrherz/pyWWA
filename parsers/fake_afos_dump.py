@@ -8,6 +8,7 @@ from pyiem.nws.product import TextProduct
 from pywwa import common
 from pywwa.xmpp import make_jabber_client
 from pywwa.ldm import bridge
+from pywwa.database import get_database
 
 JABBER = make_jabber_client()
 
@@ -78,5 +79,5 @@ def really_process_data(txn, data):
 
 
 if __name__ == "__main__":
-    bridge(really_process_data, dbpool=common.get_database("afos"))
+    bridge(really_process_data, dbpool=get_database("afos"))
     reactor.run()

@@ -10,6 +10,7 @@ from pyiem.nws import product
 from pywwa import common
 from pywwa.xmpp import make_jabber_client
 from pywwa.ldm import bridge
+from pywwa.database import get_database
 
 PYWWA_PRODUCT_URL = common.SETTINGS.get(
     "pywwa_product_url", "pywwa_product_url"
@@ -59,5 +60,5 @@ def killer():
 
 
 if __name__ == "__main__":
-    bridge(real_process, dbpool=common.get_database("postgis"))
+    bridge(real_process, dbpool=get_database("postgis"))
     reactor.run()

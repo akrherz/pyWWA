@@ -9,8 +9,8 @@ from twisted.internet import reactor
 from pyiem.nws import product
 
 # Local
-from pywwa import common
 from pywwa.ldm import bridge
+from pywwa.database import get_database
 
 
 def real_process(txn, data):
@@ -56,5 +56,5 @@ def real_process(txn, data):
 
 
 if __name__ == "__main__":
-    bridge(real_process, dbpool=common.get_database("afos"))
+    bridge(real_process, dbpool=get_database("afos"))
     reactor.run()

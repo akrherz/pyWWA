@@ -7,8 +7,9 @@ from pyiem.nws.products.mos import parser
 # Local
 from pywwa import common
 from pywwa.ldm import bridge
+from pywwa.database import get_database
 
-DBPOOL = common.get_database("mos")
+DBPOOL = get_database("mos")
 MEMORY = {"ingested": 0}
 
 

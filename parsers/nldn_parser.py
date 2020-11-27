@@ -9,8 +9,9 @@ from pyiem.nws.products.nldn import parser
 # Local
 from pywwa import common
 from pywwa.ldm import bridge
+from pywwa.database import get_database
 
-DBPOOL = common.get_database("nldn")
+DBPOOL = get_database("nldn")
 
 
 def process_data(data):

@@ -2,7 +2,7 @@
 Script that merges the upstream HVTEC NWSLI information into the database. We
 are called like so
 
-python merge_hvtec_nwsli.py hvtec_list_07092019.csv
+python merge_hvtec_nwsli.py hvtec_list_10132020.csv
 
 Whereby the argument to the script is the filename stored here:
 
@@ -16,29 +16,40 @@ hvtec_nwsli table:
  state      | character(2)           |
  geom       | geometry               |
 """
-from __future__ import print_function
+# stdlib
+import os
 import sys
 
+# 3rd Party
 import requests
-from pyiem.util import get_dbconn, logger
+from pyiem.util import logger
+
+# Put the pywwa library into sys.path
+sys.path.insert(0, os.path.join(os.path.abspath(__file__), "../parsers"))
+# pylint: disable=wrong-import-position
+from pywwa.database import get_sync_dbconn  # noqa: E402
+
+LOG = logger()
 
 
 def main(argv):
     """Go Main"""
-    log = logger()
     if len(argv) < 2:
         print("USAGE: python merge_hvtec_nwsli.py FILENAME")
         return
 
-    dbconn = get_dbconn("postgis", user="mesonet")
+    dbconn = get_sync_dbconn("postgis")
     cursor = dbconn.cursor()
-    log.info(" - Connected to database: postgis")
+    LOG.info(" - Connected to database: postgis")
 
     fn = argv[1]
     uri = "https://www.weather.gov/media/vtec/%s" % (fn,)
 
-    log.info(" - Fetching file: %s", uri)
+    LOG.info(" - Fetching file: %s", uri)
     req = requests.get(uri)
+    if req.status_code != 200:
+        LOG.info("Got status_code %s for %s", req.status_code, uri)
+        return
     updated = 0
     new = 0
     bad = 0
@@ -47,7 +58,7 @@ def main(argv):
             continue
         tokens = line.strip().split(",")
         if len(tokens) != 7:
-            log.info(
+            LOG.info(
                 " + Linenum %s had %s tokens, instead of 7\n%s",
                 linenum + 1,
                 len(tokens),
@@ -57,7 +68,7 @@ def main(argv):
             continue
         (nwsli, river_name, proximity, name, state, lat, lon) = tokens
         if len(nwsli) != 5:
-            log.info(
+            LOG.info(
                 ' + Linenum %s had a NWSLI "%s" not of 5 character length\n%s',
                 linenum + 1,
                 nwsli,
@@ -93,7 +104,7 @@ def main(argv):
 
     cursor.close()
     dbconn.commit()
-    log.info(" - DONE! %s updated %s new, %s bad entries", updated, new, bad)
+    LOG.info(" - DONE! %s updated %s new, %s bad entries", updated, new, bad)
 
 
 if __name__ == "__main__":

@@ -7,6 +7,7 @@ from pyiem.nws.products.scp import parser
 # Local
 from pywwa import common
 from pywwa.ldm import bridge
+from pywwa.database import get_database
 
 
 def real_process(txn, raw):
@@ -18,7 +19,7 @@ def real_process(txn, raw):
 
 def main():
     """Go Main Go"""
-    bridge(real_process, dbpool=common.get_database("asos"))
+    bridge(real_process, dbpool=get_database("asos"))
     reactor.run()  # @UndefinedVariable
 
 

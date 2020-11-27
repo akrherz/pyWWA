@@ -15,8 +15,9 @@ from pyiem.network import Table as NetworkTable
 from pywwa import common
 from pywwa.xmpp import make_jabber_client
 from pywwa.ldm import bridge
+from pywwa.database import get_database
 
-DBPOOL = common.get_database("iem")
+DBPOOL = get_database("iem")
 NT = NetworkTable("NWSCLI")
 HARDCODED = {"PKTN": "PAKT"}
 JABBER = make_jabber_client()

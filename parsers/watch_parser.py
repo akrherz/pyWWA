@@ -9,6 +9,7 @@ from pyiem.nws.products.saw import parser as sawparser
 from pywwa import common
 from pywwa.xmpp import make_jabber_client
 from pywwa.ldm import bridge
+from pywwa.database import get_database
 
 IEM_URL = common.SETTINGS.get("pywwa_watch_url", "pywwa_watch_url")
 JABBER = make_jabber_client()
@@ -29,7 +30,7 @@ def real_process(txn, raw):
 
 def main():
     """Go Main Go"""
-    bridge(real_process, dbpool=common.get_database("postgis"))
+    bridge(real_process, dbpool=get_database("postgis"))
     reactor.run()  # @UndefinedVariable
 
 

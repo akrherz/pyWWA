@@ -7,6 +7,7 @@ from pyiem.nws.products.hml import parser as hmlparser
 # Local
 from pywwa import common
 from pywwa.ldm import bridge
+from pywwa.database import get_database
 
 
 def real_parser(txn, buf):
@@ -19,6 +20,6 @@ def real_parser(txn, buf):
 
 
 if __name__ == "__main__":
-    bridge(real_parser, dbpool=common.get_database("hml"))
+    bridge(real_parser, dbpool=get_database("hml"))
 
     reactor.run()  # @UndefinedVariable

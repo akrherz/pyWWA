@@ -1,23 +1,20 @@
 """ Generic NWS Product Parser """
-# Local
-import re
-
 # 3rd Party
 from twisted.internet import reactor
 from shapely.geometry import MultiPolygon
 from pyiem.util import LOG
 from pyiem.nws.products import parser as productparser
-from pyiem.nws import ugc
-from pyiem.nws import nwsli
 
 # Local
 from pywwa import common
 from pywwa.xmpp import make_jabber_client
 from pywwa.ldm import bridge
+from pywwa.database import load_ugcs_nwsli, get_database
 
-ugc_dict = {}
-nwsli_dict = {}
+UGC_DICT = {}
+NWSLI_DICT = {}
 JABBER = make_jabber_client()
+PGCONN = get_database("postgis")
 
 
 def error_wrapper(exp, buf):
@@ -42,8 +39,8 @@ def really_process_data(txn, buf):
     prod = productparser(
         buf,
         utcnow=common.utcnow(),
-        ugc_provider=ugc_dict,
-        nwsli_provider=nwsli_dict,
+        ugc_provider=UGC_DICT,
+        nwsli_provider=NWSLI_DICT,
     )
 
     # Do the Jabber work necessary after the database stuff has completed
@@ -70,54 +67,13 @@ def really_process_data(txn, buf):
     txn.execute(sql, myargs)
 
 
-def load_ugc(txn):
-    """ load ugc"""
-    # Careful here not to load things from the future
-    txn.execute(
-        "SELECT name, ugc, wfo from ugcs WHERE name IS NOT null and "
-        "begin_ts < now() and (end_ts is null or end_ts > now())"
-    )
-    for row in txn.fetchall():
-        nm = (row["name"]).replace("\x92", " ").replace("\xc2", " ")
-        wfos = re.findall(r"([A-Z][A-Z][A-Z])", row["wfo"])
-        ugc_dict[row["ugc"]] = ugc.UGC(
-            row["ugc"][:2], row["ugc"][2], row["ugc"][3:], name=nm, wfos=wfos
-        )
-
-    LOG.info("ugc_dict loaded %s entries", len(ugc_dict))
-
-    txn.execute(
-        "SELECT nwsli, river_name || ' ' || proximity || ' ' || name || "
-        "' ['||state||']' as rname from hvtec_nwsli"
-    )
-    for row in txn.fetchall():
-        nm = row["rname"].replace("&", " and ")
-        nwsli_dict[row["nwsli"]] = nwsli.NWSLI(row["nwsli"], name=nm)
-
-    LOG.info("nwsli_dict loaded %s entries", len(nwsli_dict))
-
-
-def ready(_):
-    """ cb when our database work is done """
+def main():
+    """Go Main Go."""
+    load_ugcs_nwsli(UGC_DICT, NWSLI_DICT)
     bridge(process_data)
 
-
-def errback(err):
-    """Called back when initial load fails."""
-    LOG.info(err)
-    common.shutdown()
-
-
-def dbload():
-    """ Load up database stuff """
-    df = PGCONN.runInteraction(load_ugc)
-    df.addCallback(ready)
-    df.addErrback(errback)
+    reactor.run()
 
 
 if __name__ == "__main__":
-    # Fire up!
-    PGCONN = common.get_database("postgis")
-    dbload()
-
-    reactor.run()
+    main()

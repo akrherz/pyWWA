@@ -15,9 +15,10 @@ from pyiem.util import get_properties, LOG
 from pywwa import common
 from pywwa.xmpp import make_jabber_client
 from pywwa.ldm import bridge
+from pywwa.database import get_database
 
-IEMDB = common.get_database("iem")
-ASOSDB = common.get_database("asos")
+IEMDB = get_database("iem")
+ASOSDB = get_database("asos")
 
 NWSLI_PROVIDER = {}
 # Manual list of sites that are sent to jabber :/

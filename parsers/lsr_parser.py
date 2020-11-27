@@ -15,6 +15,7 @@ from pyiem.util import LOG
 from pywwa import common
 from pywwa.xmpp import make_jabber_client
 from pywwa.ldm import bridge
+from pywwa.database import get_database
 
 JABBER = make_jabber_client()
 # Cheap datastore for LSRs to avoid Dups!
@@ -84,6 +85,6 @@ def real_processor(txn, text):
 
 
 reactor.callLater(0, loaddb)
-bridge(real_processor, dbpool=common.get_database("postgis"))
+bridge(real_processor, dbpool=get_database("postgis"))
 reactor.callLater(20, cleandb)
 reactor.run()

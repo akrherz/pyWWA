@@ -11,8 +11,9 @@ from pyiem.nws.products.mcd import parser as mcdparser
 from pywwa import common
 from pywwa.xmpp import make_jabber_client
 from pywwa.ldm import bridge
+from pywwa.database import get_database
 
-DBPOOL = common.get_database("postgis")
+DBPOOL = get_database("postgis")
 JABBER = make_jabber_client()
 
 

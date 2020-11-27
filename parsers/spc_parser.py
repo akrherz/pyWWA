@@ -9,6 +9,7 @@ from pyiem.nws.products.spcpts import parser
 from pywwa import common
 from pywwa.xmpp import make_jabber_client
 from pywwa.ldm import bridge
+from pywwa.database import get_database
 
 WAITFOR = 20
 JABBER = make_jabber_client()
@@ -30,5 +31,5 @@ def real_parser(txn, buf):
 
 
 if __name__ == "__main__":
-    bridge(real_parser, dbpool=common.get_database("postgis"))
+    bridge(real_parser, dbpool=get_database("postgis"))
     reactor.run()  # @UndefinedVariable

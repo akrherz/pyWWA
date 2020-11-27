@@ -7,8 +7,9 @@ from pyiem.nws.products.cf6 import parser
 # Local
 from pywwa import common
 from pywwa.ldm import bridge
+from pywwa.database import get_database
 
-DBPOOL = common.get_database("iem")
+DBPOOL = get_database("iem")
 
 
 def processor(txn, text):

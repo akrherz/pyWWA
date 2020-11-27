@@ -10,9 +10,6 @@ with watches.  Lets try to explain
     init_expire <- When did this product initially expire
     product_issue <- When was this product issued by the NWS
 """
-# stdlib
-import re
-
 # 3rd Party
 from bs4 import BeautifulSoup
 import treq
@@ -20,38 +17,34 @@ from twisted.internet import reactor
 from twisted.mail.smtp import SMTPSenderFactory
 from pyiem.util import LOG
 from pyiem.nws.products.vtec import parser as vtecparser
-from pyiem.nws import ugc
-from pyiem.nws import nwsli
 
 # Local
 from pywwa import common
 from pywwa.xmpp import make_jabber_client
 from pywwa.ldm import bridge
+from pywwa.database import load_ugcs_nwsli
+from pywwa.database import get_database
 
+SMTPSenderFactory.noisy = False
 JABBER = make_jabber_client()
+PGCONN = get_database("postgis")
+UGC_DICT = {}
+NWSLI_DICT = {}
 
 
 def process_data(data):
     """ Process the product """
-    try:
-        really_process_data(data)
-    except Exception as myexp:  # pylint: disable=W0703
-        common.email_error(myexp, data)
-
-
-def really_process_data(buf):
-    """ Actually do some processing """
     # Make sure we have a trailing $$, if not report error and slap one on
-    if buf.find("$$") == -1:
-        common.email_error("No $$ Found!", buf)
-        buf += "\n\n$$\n\n"
+    if data.find("$$") == -1:
+        common.email_error("No $$ Found!", data)
+        data += "\n\n$$\n\n"
 
     # Create our TextProduct instance
     text_product = vtecparser(
-        buf,
+        data,
         utcnow=common.utcnow(),
-        ugc_provider=ugc_dict,
-        nwsli_provider=nwsli_dict,
+        ugc_provider=UGC_DICT,
+        nwsli_provider=NWSLI_DICT,
     )
     # Don't parse these as they contain duplicated information
     if text_product.source == "KNHC" and text_product.afos[:3] == "TCV":
@@ -60,15 +53,19 @@ def really_process_data(buf):
     if text_product.source == "TJSJ" and text_product.afos[3:] == "SPN":
         return
 
-    # TODO can't disable the database write yet.
-    df = PGCONN.runInteraction(text_product.sql)
-    df.addCallback(step2, text_product)
-    df.addErrback(common.email_error, text_product.unixtext)
-    df.addErrback(LOG.error)
+    # This is sort of ambiguous as to what is best to be done when database
+    # writing is disabled.  The web workflow will likely fail as well.
+    if common.dbwrite_enabled():
+        df = PGCONN.runInteraction(text_product.sql)
+        df.addCallback(step2, text_product)
+        df.addErrback(common.email_error, text_product.unixtext)
+        df.addErrback(LOG.error)
+    else:
+        step2(None, text_product)
 
 
 def step2(_dummy, text_product):
-    """After the SQL is done, lets do other things"""
+    """Callback after hopeful database work."""
     if text_product.warnings:
         common.email_error(
             "\n\n".join(text_product.warnings), text_product.text
@@ -120,59 +117,12 @@ def send_jabber_message(plain, html, extra):
         _send()
 
 
-def load_ugc(txn):
-    """ load ugc"""
-    # Careful here not to load things from the future
-    txn.execute(
-        """
-        SELECT name, ugc, wfo from ugcs WHERE
-        name IS NOT Null and begin_ts < now() and
-        (end_ts is null or end_ts > now())
-    """
-    )
-    for row in txn.fetchall():
-        nm = (row["name"]).replace("\x92", " ").replace("\xc2", " ")
-        wfos = re.findall(r"([A-Z][A-Z][A-Z])", row["wfo"])
-        ugc_dict[row["ugc"]] = ugc.UGC(
-            row["ugc"][:2], row["ugc"][2], row["ugc"][3:], name=nm, wfos=wfos
-        )
-
-    LOG.info("ugc_dict loaded %s entries", len(ugc_dict))
-
-    sql = """
-     SELECT nwsli,
-     river_name || ' ' || proximity || ' ' || name || ' ['||state||']' as rname
-     from hvtec_nwsli
-    """
-    txn.execute(sql)
-    for row in txn.fetchall():
-        nm = row["rname"].replace("&", " and ")
-        nwsli_dict[row["nwsli"]] = nwsli.NWSLI(row["nwsli"], name=nm)
-
-    LOG.info("nwsli_dict loaded %s entries", len(nwsli_dict))
-
-    return None
-
-
-def ready(_dummy):
-    """ cb when our database work is done """
+def main():
+    """Go Main Go."""
+    load_ugcs_nwsli(UGC_DICT, NWSLI_DICT)
     bridge(process_data)
-
-
-def bootstrap():
-    """Things to do at startup"""
-    df = PGCONN.runInteraction(load_ugc)
-    df.addCallback(ready)
-    df.addErrback(common.shutdown)
+    reactor.run()
 
 
 if __name__ == "__main__":
-    SMTPSenderFactory.noisy = False
-    ugc_dict = {}
-    nwsli_dict = {}
-
-    # Fire up!
-    PGCONN = common.get_database("postgis")
-    bootstrap()
-
-    reactor.run()
+    main()
