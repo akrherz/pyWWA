@@ -13,19 +13,19 @@ from email.mime.text import MIMEText
 from syslog import LOG_LOCAL2
 
 # 3rd party
-import psycopg2
 from twisted.python import log as tplog
 from twisted.logger import formatEvent
 from twisted.python import syslog
 from twisted.python import failure
 from twisted.internet import reactor
 from twisted.mail import smtp
-from twisted.enterprise import adbapi
+
 import pyiem
 from pyiem.util import LOG, utc, CustomFormatter
 
 # Local Be careful of circeref here
 from pywwa.cmdline import parse_cmdline
+from pywwa.database import get_sync_dbconn
 
 # http://bugs.python.org/issue7980
 datetime.datetime.strptime("2013", "%Y")
@@ -83,40 +83,6 @@ def setup_syslog():
         tplog.addObserver(lambda x: print(formatEvent(x)))
     # Allow for more verbosity when we are running this manually.
     LOG.setLevel(logging.DEBUG if sys.stdout.isatty() else logging.INFO)
-
-
-def get_database(dbname, cp_max=1, module_name="pyiem.twistedpg"):
-    """Get a twisted database connection
-
-    Args:
-      dbname (str): The string name of the database to connect to
-      cp_max (int): The maximum number of connections to make to the database
-      module_name (str): The python module to use for the ConnectionPool
-    """
-    # Check to see if we have a `settings.json` override
-    opts = CONFIG.get(dbname, {})
-    return adbapi.ConnectionPool(
-        module_name,
-        database=opts.get("database", dbname),
-        cp_reconnect=True,
-        cp_max=cp_max,
-        host=opts.get("host", f"iemdb-{dbname}.local"),
-        user=opts.get("user", "ldm"),
-        port=opts.get("port", 5432),
-        gssencmode="disable",  # NOTE: this is problematic with older postgres
-    )
-
-
-def get_sync_dbconn(dbname):
-    """Get the synchronous database connection."""
-    opts = CONFIG.get(dbname, {})
-    return psycopg2.connect(
-        database=opts.get("database", dbname),
-        host=opts.get("host", f"iemdb-{dbname}.local"),
-        user=opts.get("user", "ldm"),
-        port=opts.get("port", 5432),
-        gssencmode="disable",
-    )
 
 
 def load_settings():

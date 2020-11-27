@@ -9,12 +9,12 @@ from pyiem.nws.products import parser as productparser
 from pywwa import common
 from pywwa.xmpp import make_jabber_client
 from pywwa.ldm import bridge
-from pywwa.database import load_ugcs_nwsli
+from pywwa.database import load_ugcs_nwsli, get_database
 
 UGC_DICT = {}
 NWSLI_DICT = {}
 JABBER = make_jabber_client()
-PGCONN = common.get_database("postgis")
+PGCONN = get_database("postgis")
 
 
 def error_wrapper(exp, buf):

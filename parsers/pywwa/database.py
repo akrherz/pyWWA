@@ -6,9 +6,47 @@ import re
 from pyiem.util import LOG
 from pyiem.nws import ugc
 from pyiem.nws import nwsli
+import psycopg2
+from twisted.enterprise import adbapi
 
-# Local
-from pywwa.common import get_sync_dbconn
+
+def get_database(dbname, cp_max=1, module_name="pyiem.twistedpg"):
+    """Get a twisted database connection
+
+    Args:
+      dbname (str): The string name of the database to connect to
+      cp_max (int): The maximum number of connections to make to the database
+      module_name (str): The python module to use for the ConnectionPool
+    """
+    # workaround circleref
+    from pywwa.common import CONFIG
+
+    # Check to see if we have a `settings.json` override
+    opts = CONFIG.get(dbname, {})
+    return adbapi.ConnectionPool(
+        module_name,
+        database=opts.get("database", dbname),
+        cp_reconnect=True,
+        cp_max=cp_max,
+        host=opts.get("host", f"iemdb-{dbname}.local"),
+        user=opts.get("user", "ldm"),
+        port=opts.get("port", 5432),
+        gssencmode="disable",  # NOTE: this is problematic with older postgres
+    )
+
+
+def get_sync_dbconn(dbname):
+    """Get the synchronous database connection."""
+    from pywwa.common import CONFIG
+
+    opts = CONFIG.get(dbname, {})
+    return psycopg2.connect(
+        database=opts.get("database", dbname),
+        host=opts.get("host", f"iemdb-{dbname}.local"),
+        user=opts.get("user", "ldm"),
+        port=opts.get("port", 5432),
+        gssencmode="disable",
+    )
 
 
 def load_ugcs_nwsli(ugc_dict, nwsli_dict):

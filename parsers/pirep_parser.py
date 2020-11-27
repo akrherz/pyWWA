@@ -12,11 +12,12 @@ from pyiem.nws.products.pirep import parser as pirepparser
 from pywwa import common
 from pywwa.xmpp import make_jabber_client
 from pywwa.ldm import bridge
+from pywwa.database import get_database
 
 TABLESDIR = os.path.join(os.path.dirname(__file__), "../tables")
 
 PIREPS = {}
-DBPOOL = common.get_database("postgis")
+DBPOOL = get_database("postgis")
 JABBER = make_jabber_client()
 # Load LOCS table
 LOCS = {}

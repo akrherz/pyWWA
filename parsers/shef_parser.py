@@ -22,6 +22,7 @@ from pyiem import reference
 # Local
 from pywwa import common
 from pywwa.ldm import bridge
+from pywwa.database import get_database
 
 # from pympler import tracker, summary, muppy
 
@@ -31,8 +32,8 @@ from pywwa.ldm import bridge
 # Setup Database Links
 # the current_shef table is not very safe when two processes attempt to update
 # it at the same time, use a single process for this connection
-ACCESSDB = common.get_database("iem", module_name="psycopg2", cp_max=20)
-HADSDB = common.get_database("hads", module_name="psycopg2", cp_max=20)
+ACCESSDB = get_database("iem", module_name="psycopg2", cp_max=20)
+HADSDB = get_database("hads", module_name="psycopg2", cp_max=20)
 
 # a form for IDs we will log as unknown
 NWSLIRE = re.compile("[A-Z]{4}[0-9]")

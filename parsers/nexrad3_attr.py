@@ -12,9 +12,10 @@ from pyiem.util import LOG
 # Local
 from pywwa import common
 from pywwa.ldm import bridge
+from pywwa.database import get_database
 
 # Setup Database Links
-PGCONN = common.get_database("radar", cp_max=5)
+PGCONN = get_database("radar", cp_max=5)
 
 ST = {}
 
@@ -183,7 +184,7 @@ def errback(res):
 
 def main():
     """Go Main Go"""
-    mesosite = common.get_database("mesosite")
+    mesosite = get_database("mesosite")
     df = mesosite.runInteraction(load_station_table)
     df.addCallback(on_ready, mesosite)
     df.addErrback(errback)

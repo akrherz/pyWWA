@@ -9,8 +9,9 @@ from pyiem.nws import product
 # Local
 from pywwa import common
 from pywwa.ldm import bridge
+from pywwa.database import get_database
 
-DBPOOL = common.get_database("afos", cp_max=5)
+DBPOOL = get_database("afos", cp_max=5)
 MEMCACHE_EXCLUDE = [
     "RR1",
     "RR2",

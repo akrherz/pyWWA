@@ -9,8 +9,9 @@ from pywwa import common
 from pywwa.xmpp import make_jabber_client
 from pywwa.ldm import bridge
 from pywwa.database import load_ugcs_nwsli
+from pywwa.database import get_database
 
-POSTGIS = common.get_database("postgis")
+POSTGIS = get_database("postgis")
 PYWWA_PRODUCT_URL = common.SETTINGS.get(
     "pywwa_product_url", "pywwa_product_url"
 )

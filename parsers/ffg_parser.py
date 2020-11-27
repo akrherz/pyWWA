@@ -8,6 +8,7 @@ from pyiem.nws.products.ffg import parser
 # Local
 from pywwa import common
 from pywwa.ldm import bridge
+from pywwa.database import get_database
 
 
 def real_parser(txn, buf):
@@ -25,7 +26,7 @@ def real_parser(txn, buf):
 
 def main():
     """Our main method"""
-    bridge(real_parser, dbpool=common.get_database("postgis"))
+    bridge(real_parser, dbpool=get_database("postgis"))
     reactor.run()  # @UndefinedVariable
 
 

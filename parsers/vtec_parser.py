@@ -23,10 +23,11 @@ from pywwa import common
 from pywwa.xmpp import make_jabber_client
 from pywwa.ldm import bridge
 from pywwa.database import load_ugcs_nwsli
+from pywwa.database import get_database
 
 SMTPSenderFactory.noisy = False
 JABBER = make_jabber_client()
-PGCONN = common.get_database("postgis")
+PGCONN = get_database("postgis")
 UGC_DICT = {}
 NWSLI_DICT = {}
 
