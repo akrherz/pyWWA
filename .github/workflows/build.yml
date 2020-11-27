@@ -16,10 +16,12 @@ jobs:
         $CONDA/bin/conda config --set quiet True --set always_yes yes --set changeps1 no
         $CONDA/bin/conda config --prepend channels conda-forge
         $CONDA/bin/conda config --set channel_priority strict
-        $CONDA/bin/conda create -n prod --file conda_requirements.txt
-        $CONDA/bin/conda activate prod
+        $CONDA/bin/conda env update -n base --file conda_requirements.txt
         python -m pip install --upgrade -r pip_requirements.txt
+        python -m pip install . --upgrade
 
     - name: pytest
       run: |
         $CONDA/bin/pytest
+
+    - uses: codecov/codecov-action@v1
