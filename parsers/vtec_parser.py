@@ -10,9 +10,6 @@ with watches.  Lets try to explain
     init_expire <- When did this product initially expire
     product_issue <- When was this product issued by the NWS
 """
-# stdlib
-import re
-
 # 3rd Party
 from bs4 import BeautifulSoup
 import treq
@@ -20,13 +17,12 @@ from twisted.internet import reactor
 from twisted.mail.smtp import SMTPSenderFactory
 from pyiem.util import LOG
 from pyiem.nws.products.vtec import parser as vtecparser
-from pyiem.nws import ugc
-from pyiem.nws import nwsli
 
 # Local
 from pywwa import common
 from pywwa.xmpp import make_jabber_client
 from pywwa.ldm import bridge
+from pywwa.database import load_ugcs_nwsli
 
 SMTPSenderFactory.noisy = False
 JABBER = make_jabber_client()
@@ -120,45 +116,10 @@ def send_jabber_message(plain, html, extra):
         _send()
 
 
-def load_ugc(txn):
-    """ load ugc"""
-    # Careful here not to load things from the future
-    txn.execute(
-        "SELECT name, ugc, wfo from ugcs WHERE name IS NOT null and "
-        "begin_ts < now() and (end_ts is null or end_ts > now())"
-    )
-    for row in txn.fetchall():
-        nm = (row["name"]).replace("\x92", " ").replace("\xc2", " ")
-        wfos = re.findall(r"([A-Z][A-Z][A-Z])", row["wfo"])
-        UGC_DICT[row["ugc"]] = ugc.UGC(
-            row["ugc"][:2], row["ugc"][2], row["ugc"][3:], name=nm, wfos=wfos
-        )
-
-    LOG.info("ugc_dict loaded %s entries", len(UGC_DICT))
-
-    txn.execute(
-        "SELECT nwsli, river_name || ' ' || proximity || ' ' || "
-        "name || ' ['||state||']' as rname from hvtec_nwsli"
-    )
-    for row in txn.fetchall():
-        nm = row["rname"].replace("&", " and ")
-        NWSLI_DICT[row["nwsli"]] = nwsli.NWSLI(row["nwsli"], name=nm)
-
-    LOG.info("nwsli_dict loaded %s entries", len(NWSLI_DICT))
-
-
-def ready(_dummy):
-    """ cb when our database work is done """
-    bridge(process_data)
-
-
 def main():
     """Go Main Go."""
-    # Fire up!
-    df = PGCONN.runInteraction(load_ugc)
-    df.addCallback(ready)
-    df.addErrback(common.shutdown)
-
+    load_ugcs_nwsli(UGC_DICT, NWSLI_DICT)
+    bridge(process_data)
     reactor.run()
 
 

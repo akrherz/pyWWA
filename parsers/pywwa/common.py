@@ -107,23 +107,27 @@ def get_database(dbname, cp_max=1, module_name="pyiem.twistedpg"):
     )
 
 
-def load_settings():
-    """Load database properties."""
-    opts = CONFIG.get("mesosite", {})
-    dbconn = psycopg2.connect(
-        database=opts.get("database", "mesosite"),
-        host=opts.get("host", "iemdb-mesosite.local"),
+def get_sync_dbconn(dbname):
+    """Get the synchronous database connection."""
+    opts = CONFIG.get(dbname, {})
+    return psycopg2.connect(
+        database=opts.get("database", dbname),
+        host=opts.get("host", f"iemdb-{dbname}.local"),
         user=opts.get("user", "ldm"),
         port=opts.get("port", 5432),
         gssencmode="disable",
     )
-    cursor = dbconn.cursor()
-    cursor.execute("SELECT propname, propvalue from properties")
-    for row in cursor:
-        SETTINGS[row[0]] = row[1]
-    LOG.info("Loaded %s settings from database", len(SETTINGS))
-    cursor.close()
-    dbconn.close()
+
+
+def load_settings():
+    """Load database properties."""
+    with get_sync_dbconn("mesosite") as dbconn:
+        cursor = dbconn.cursor()
+        cursor.execute("SELECT propname, propvalue from properties")
+        for row in cursor:
+            SETTINGS[row[0]] = row[1]
+        LOG.info("Loaded %s settings from database", len(SETTINGS))
+        cursor.close()
 
 
 def should_email():
