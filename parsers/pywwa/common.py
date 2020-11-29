@@ -62,7 +62,7 @@ def setup_syslog():
     # https://stackoverflow.com/questions/13699283
     frame = inspect.stack()[-1]
     module = inspect.getmodule(frame[0])
-    filename = os.path.basename(module.__file__)
+    filename = "None" if module is None else os.path.basename(module.__file__)
     syslog.startLogging(
         prefix=f"pyWWA/{filename}",
         facility=LOG_LOCAL2,
