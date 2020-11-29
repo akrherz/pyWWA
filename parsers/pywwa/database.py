@@ -73,3 +73,20 @@ def load_ugcs_nwsli(ugc_dict, nwsli_dict):
             nwsli_dict[row[0]] = nwsli.NWSLI(row[0], name=nm)
 
         LOG.info("nwsli_dict loaded %s entries", len(nwsli_dict))
+
+
+def load_metar_stations(txn, nwsli_provider):
+    """load station metadata to build a xref of stations to networks"""
+    txn.execute(
+        "SELECT id, network, tzname, wfo, state, name, "
+        "ST_X(geom) as lon, ST_Y(geom) as lat from stations "
+        "where network ~* 'ASOS' or network = 'AWOS'"
+    )
+    news = 0
+    # Need the fetchall due to non-async here
+    for row in txn.fetchall():
+        if row["id"] not in nwsli_provider:
+            news += 1
+            nwsli_provider[row["id"]] = row
+
+    LOG.info("Loaded %s new stations", news)
