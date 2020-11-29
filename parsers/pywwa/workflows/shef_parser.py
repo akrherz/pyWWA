@@ -250,7 +250,7 @@ def async_func(data):
         tp = product.TextProduct(data, parse_segments=False)
     except Exception as exp:
         common.email_error(exp, data)
-        return
+        return None
     prod = TEXTPRODUCT(
         product_id=tp.get_product_id(), afos=tp.afos, text=tp.text
     )
@@ -320,12 +320,17 @@ def really_process(prod, data):
         else:
             value = float(value)
             # shefit generates 0.001 for trace, IEM uses something else
-            if (
-                value > 0.0009
-                and value < 0.0011
-                and varname[:2]
-                in ["PC", "PP", "QA", "QD", "QR", "QT", "SD", "SF", "SW"]
-            ):
+            if 0.0009 < value < 0.0011 and varname[:2] in [
+                "PC",
+                "PP",
+                "QA",
+                "QD",
+                "QR",
+                "QT",
+                "SD",
+                "SF",
+                "SW",
+            ]:
                 value = TRACE_VALUE
         # Handle variable time length data
         if varname[2] == "V":
