@@ -5,6 +5,18 @@ This repository is an integration of [pyIEM backed](https://github.com/akrherz/p
 
 Python 3.6+ is required to use this code.
 
+Installation
+------------
+
+An opinionated installation is to clone this repo in the LDM user's `$HOME` directory and then update LDM's pqact.datadir-path setting (found in the `registry.xml`) to point to LDM's home directory.  It is then suggested that you create sym links from the LDM user's `etc/` directory to the `pqact.d` files found within this repo.  For example:
+
+```bash
+cd ~/etc
+ln -s ../pyWWA/pqact.d/pqact_iemingest.conf
+```
+
+This suggestion allows LDM's pqact state files to reside in a directory outside the pyWWA repo tree.  The `pyWWA` pqact files assume that the above has been done, such that `pqact` searches the LDM `$HOME` directory for the `pyWWA` folder.
+
 Command Line Options
 --------------------
 
@@ -55,3 +67,16 @@ Logging
 
 These parsers emit logs to the syslog `LOCAL2` facility via a wild mixture of
 Twisted Python and Stdlib Python log statements.
+
+Locating the settings.json file
+-------------------------------
+
+This is a bit of a hack yet within the codebase, but some crude logic is used attempting to figure out where the `pyWWA/settings.json` file resides.  Since the various scripts could be getting executed from various current working directories, the code checks the following locations.
+
+1. The file `pyWWA/settings.json` exists from the `cwd`
+
+2. The `cwd` of the process.
+
+3. One directory up from the calling script.
+
+4. Two directories up from the calling script.
