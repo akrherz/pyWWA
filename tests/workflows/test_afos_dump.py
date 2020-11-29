@@ -11,4 +11,5 @@ from pywwa.testing import get_example_file, cursor
 def test_processor(cursor):
     """Test basic parsing."""
     data = get_example_file("AFD.txt")
-    afos_dump.real_parser(cursor, data)
+    with pytest.raises(Exception):
+        afos_dump.real_parser(cursor, data)
