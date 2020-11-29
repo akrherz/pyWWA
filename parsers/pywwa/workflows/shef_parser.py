@@ -20,7 +20,7 @@ from pyiem.util import LOG
 from pyiem import reference
 
 # Local
-from pywwa import common
+from pywwa import common, get_search_paths
 from pywwa.ldm import bridge
 from pywwa.database import get_database
 
@@ -683,9 +683,12 @@ def fullstop(err):
 
 def main():
     """We startup."""
-    # Necessary for the shefit program to run A-OK
-    mydir = os.path.dirname(os.path.abspath(__file__))
-    path = os.path.normpath(os.path.join(mydir, "..", "shef_workspace"))
+    # Need to find the shef_workspace folder
+    path = None
+    for path in get_search_paths():
+        if os.path.isdir(os.path.join(path, "shef_workspace")):
+            break
+    path = os.path.join(path, "shef_workspace")
     LOG.info("Changing cwd to %s", path)
     os.chdir(path)
 

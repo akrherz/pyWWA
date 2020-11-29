@@ -1,7 +1,6 @@
 """ PIREP parser! """
 # stdlib
 import datetime
-import os
 
 # 3rd Party
 from twisted.internet import reactor
@@ -9,12 +8,10 @@ from pyiem.util import LOG
 from pyiem.nws.products.pirep import parser as pirepparser
 
 # Local
-from pywwa import common
+from pywwa import common, get_table_file
 from pywwa.xmpp import make_jabber_client
 from pywwa.ldm import bridge
 from pywwa.database import get_database
-
-TABLESDIR = os.path.join(os.path.dirname(__file__), "../tables")
 
 PIREPS = {}
 DBPOOL = get_database("postgis")
@@ -57,7 +54,7 @@ def load_locs(txn):
             "lat": row["lat"],
         }
 
-    for line in open(TABLESDIR + "/faa_apt.tbl"):
+    for line in get_table_file("faa_apt.tbl"):
         if len(line) < 70 or line[0] == "!":
             continue
         sid = line[:4].strip()
@@ -67,7 +64,7 @@ def load_locs(txn):
         if sid not in LOCS:
             LOCS[sid] = {"lat": lat, "lon": lon, "name": name}
 
-    for line in open(TABLESDIR + "/vors.tbl"):
+    for line in get_table_file("vors.tbl"):
         if len(line) < 70 or line[0] == "!":
             continue
         sid = line[:3]
@@ -78,7 +75,7 @@ def load_locs(txn):
             LOCS[sid] = {"lat": lat, "lon": lon, "name": name}
 
     # Finally, GEMPAK!
-    for line in open(TABLESDIR + "/pirep_navaids.tbl"):
+    for line in get_table_file("pirep_navaids.tbl"):
         if len(line) < 60 or line[0] in ["!", "#"]:
             continue
         sid = line[:4].strip()

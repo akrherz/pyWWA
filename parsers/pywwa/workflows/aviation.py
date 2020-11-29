@@ -1,14 +1,11 @@
 """ Aviation Product Parser! """
-# stdlib
-import os
-
 # 3rd Party
 from twisted.internet import reactor
 from pyiem.util import LOG
 from pyiem.nws.products.sigmet import parser
 
 # Local
-from pywwa import common
+from pywwa import common, get_table_file
 from pywwa.xmpp import make_jabber_client
 from pywwa.ldm import bridge
 from pywwa.database import get_database
@@ -19,8 +16,6 @@ DBPOOL = get_database("postgis")
 LOCS = {}
 MESOSITE = get_database("mesosite")
 JABBER = make_jabber_client()
-_MYDIR = os.path.dirname(os.path.abspath(__file__))
-TABLE_PATH = os.path.normpath(os.path.join(_MYDIR, "..", "tables"))
 
 
 def load_database(txn):
@@ -35,7 +30,7 @@ def load_database(txn):
     for row in txn.fetchall():
         LOCS[row["id"]] = row
 
-    for line in open(TABLE_PATH + "/vors.tbl"):
+    for line in get_table_file("vors.tbl"):
         if len(line) < 70 or line[0] == "!":
             continue
         sid = line[:3]
@@ -45,7 +40,7 @@ def load_database(txn):
         LOCS[sid] = {"lat": lat, "lon": lon, "name": name}
 
     # Finally, GEMPAK!
-    for line in open(TABLE_PATH + "/pirep_navaids.tbl"):
+    for line in get_table_file("pirep_navaids.tbl"):
         if len(line) < 70 or line[0] in ["!", "#"]:
             continue
         sid = line[:3]
@@ -86,9 +81,7 @@ def main():
     """Fire things up."""
     df = MESOSITE.runInteraction(load_database)
     df.addCallback(onready)
-    df.addErrback(common.email_error, "ERROR on load_database")
-    df.addErrback(LOG.error)
-
+    df.addErrback(common.shutdown)
     reactor.run()
 
 
