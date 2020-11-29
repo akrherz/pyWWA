@@ -16,14 +16,12 @@ def load_config():
     # 4. scriptloc/../../settings.json
     for relpath in ["pyWWA", ""]:
         testfn = os.path.join(os.getcwd(), relpath, "settings.json")
-        print(testfn)
         if not os.path.isfile(testfn):
             continue
         return json.load(open(testfn))
     scriptpath = os.path.dirname(os.path.abspath(inspect.stack()[-1].filename))
     for relpath in ["..", "../.."]:
         testfn = os.path.join(scriptpath, relpath, "settings.json")
-        print(testfn)
         if not os.path.isfile(testfn):
             continue
         return json.load(open(testfn))
