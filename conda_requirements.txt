@@ -35,6 +35,8 @@ pytest
 pytest-mpl
 pytest-runner
 rasterstats
+# util scripts
+requests
 # interpolation
 scipy
 shapely

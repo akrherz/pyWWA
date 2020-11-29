@@ -7,15 +7,16 @@ So let us document it here for my own sanity.
 """
 
 # 3rd Party
+from twisted.internet.task import LoopingCall
 from twisted.internet import reactor
 from pyiem.nws.products import metarcollect
 from pyiem.util import get_properties, LOG
 
 # Local
-from pywwa import common
+from pywwa import common, SETTINGS
 from pywwa.xmpp import make_jabber_client
 from pywwa.ldm import bridge
-from pywwa.database import get_database
+from pywwa.database import get_database, load_metar_stations
 
 IEMDB = get_database("iem")
 ASOSDB = get_database("asos")
@@ -61,26 +62,6 @@ def load_ignorelist():
     reactor.callLater(15 * 60, load_ignorelist)
 
 
-def load_stations(txn):
-    """load station metadata to build a xref of stations to networks"""
-    txn.execute(
-        "SELECT *, ST_X(geom) as lon, ST_Y(geom) as lat from stations "
-        "where network ~* 'ASOS' or network = 'AWOS'"
-    )
-    news = 0
-    # Need the fetchall due to non-async here
-    for row in txn.fetchall():
-        if row["id"] not in NWSLI_PROVIDER:
-            news += 1
-            NWSLI_PROVIDER[row["id"]] = row
-
-    LOG.info("Loaded %s new stations", news)
-    # Reload every 12 hours
-    reactor.callLater(
-        12 * 60 * 60, IEMDB.runInteraction, load_stations  # @UndefinedVariable
-    )
-
-
 def process_data(data):
     """Callback when we have data to process"""
     try:
@@ -95,7 +76,7 @@ def real_processor(text):
     if collect.warnings:
         common.email_error("\n".join(collect.warnings), collect.unixtext)
     jmsgs = collect.get_jabbers(
-        "https://mesonet.agron.iastate.edu/ASOS/current.phtml?network="
+        SETTINGS.get("pywwa_metar_url", "pywwa_metar_url")
     )
     for jmsg in jmsgs:
         if jmsg[0] in JABBER_MESSAGES:
@@ -112,6 +93,8 @@ def real_processor(text):
         JABBER_MESSAGES.append(jmsg[0])
         if not skip:
             JABBER.send_message(*jmsg)
+    if not common.dbwrite_enabled():
+        return
     for mtr in collect.metars:
         if mtr.network is None:
             LOG.info(
@@ -122,9 +105,8 @@ def real_processor(text):
             )
             deffer.addErrback(common.email_error, text)
             continue
-        if common.dbwrite_enabled():
-            deffer = IEMDB.runInteraction(do_db, mtr)
-            deffer.addErrback(common.email_error, collect.unixtext)
+        deffer = IEMDB.runInteraction(do_db, mtr)
+        deffer.addErrback(common.email_error, collect.unixtext)
 
 
 def do_db(txn, mtr):
@@ -158,12 +140,15 @@ def ready(_):
     bridge(process_data)
     cleandb()
     load_ignorelist()
+    lc = LoopingCall(IEMDB.runInteraction, load_metar_stations, NWSLI_PROVIDER)
+    lc.start(720)
 
 
 def run():
     """Run once at startup"""
-    df = IEMDB.runInteraction(load_stations)
+    df = IEMDB.runInteraction(load_metar_stations, NWSLI_PROVIDER)
     df.addCallback(ready)
+    df.addErrback(LOG.error)
     reactor.run()  # @UndefinedVariable
 
 

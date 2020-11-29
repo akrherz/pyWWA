@@ -3,7 +3,6 @@ pyWWA
 
 This repository is an integration of [pyIEM backed](https://github.com/akrherz/pyIEM) NWS product parsers.  These are intended to be run from [Unidata LDM](https://github.com/Unidata/LDM)'s `pqact` process.
 
-
 Python 3.6+ is required to use this code.
 
 Command Line Options
@@ -29,6 +28,7 @@ key | default | description
 pywwa_dedup | false | Set to `true` for pyWWA/pyLDM to dedup products.
 pywwa_email_limit | 10 | Number of debug emails an individual ingestor is permitted to send within 60 minutes of time
 pywwa_lsr_url | - | URL Base for the LSR App
+pywwa_metar_url | - | URL Base for METAR reports.
 pywwa_product_url | - | URL Base for simple text product viewer
 pywwa_river_url | - | URL Base for the River App
 pywwa_vtec_url | - | URL Base for the VTEC App
