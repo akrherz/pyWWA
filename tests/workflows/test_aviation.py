@@ -9,7 +9,7 @@ from pywwa.workflows import aviation
 from pywwa.testing import get_example_file
 
 
-@pytest.mark.parametrize("database", ["postgis"])
+@pytest.mark.parametrize("database", ["mesosite"])
 def test_processor(cursor):
     """Test basic parsing."""
     data = get_example_file("SIGC.txt")
@@ -22,3 +22,10 @@ def test_processor(cursor):
     aviation.final_step(None, prod)
     # 3. call onready
     aviation.onready(None)
+
+
+@pytest.mark.parametrize("database", ["mesosite"])
+def test_load_database(cursor):
+    """Test our load_database function."""
+    aviation.load_database(cursor)
+    assert isinstance(aviation.LOCS, dict)
