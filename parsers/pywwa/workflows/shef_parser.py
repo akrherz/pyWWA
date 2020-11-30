@@ -679,13 +679,6 @@ def main2(_res):
     lc2.start(61, now=False)
 
 
-def fullstop(err):
-    """more forcable stop."""
-    LOG.info("fullstop() called...")
-    LOG.error(err)
-    reactor.stop()
-
-
 def main():
     """We startup."""
     # Need to find the shef_workspace folder
@@ -701,7 +694,7 @@ def main():
     # Load the station metadata before we fire up the ingesting
     df = HADSDB.runInteraction(load_stations)
     df.addCallback(main2)
-    df.addErrback(fullstop)
+    df.addErrback(common.shutdown)
     reactor.run()
     # For testing purposes
     os.chdir(origcwd)

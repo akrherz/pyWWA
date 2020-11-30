@@ -18,6 +18,11 @@ MESOSITE = get_database("mesosite")
 JABBER = make_jabber_client()
 
 
+def goodline(line):
+    """Is this line any good?"""
+    return len(line) > 69 and line[0] not in ["!", "#"]
+
+
 def load_database(txn):
     """Load database stations."""
 
@@ -28,9 +33,7 @@ def load_database(txn):
     for row in txn.fetchall():
         LOCS[row["id"]] = row
 
-    for line in get_table_file("vors.tbl"):
-        if len(line) < 70 or line[0] == "!":
-            continue
+    for line in filter(goodline, get_table_file("vors.tbl")):
         sid = line[:3]
         lat = float(line[56:60]) / 100.0
         lon = float(line[61:67]) / 100.0
@@ -38,9 +41,7 @@ def load_database(txn):
         LOCS[sid] = {"lat": lat, "lon": lon, "name": name}
 
     # Finally, GEMPAK!
-    for line in get_table_file("pirep_navaids.tbl"):
-        if len(line) < 70 or line[0] in ["!", "#"]:
-            continue
+    for line in filter(goodline, get_table_file("pirep_navaids.tbl")):
         sid = line[:3]
         lat = float(line[56:60]) / 100.0
         lon = float(line[61:67]) / 100.0
