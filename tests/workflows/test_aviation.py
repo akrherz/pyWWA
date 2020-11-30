@@ -6,7 +6,7 @@ import pytest
 # Local
 from pywwa import common
 from pywwa.workflows import aviation
-from pywwa.testing import get_example_file, cursor
+from pywwa.testing import get_example_file
 
 
 @pytest.mark.parametrize("database", ["postgis"])
