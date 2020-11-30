@@ -45,7 +45,7 @@ cat examples/SHEF.txt | python parsers/shef_parser.py $OPTS || exit 2
 
 cat examples/PTS.txt | python parsers/spc_parser.py $OPTS || exit 2
 
-cat examples/SPE.txt | python parsers/spe_parser.py $OPTS || exit 2
+cat examples/SPE.txt | python parsers/spe_parser.py $OPTS -u 2011-10-31T01:16 || exit 2
 
 cat examples/METNC1.txt | python parsers/split_mav.py $OPTS || exit 2
 
