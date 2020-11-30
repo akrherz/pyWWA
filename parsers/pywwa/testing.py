@@ -3,13 +3,6 @@
 import inspect
 import os
 
-# 3rd Party
-import pytest
-from psycopg2.extras import RealDictCursor
-
-# Locals
-from pywwa.common import get_sync_dbconn
-
 
 def get_example_file(filename):
     """Return the contents of an example file."""
@@ -20,11 +13,3 @@ def get_example_file(filename):
     )
     # Need to ensure that CRCRLF remain intact
     return open(fullpath, "rb").read().decode("utf-8")
-
-
-@pytest.fixture(scope="function")
-def cursor(database):
-    """Return a disposable database cursor."""
-    pgconn = get_sync_dbconn(database)
-    yield pgconn.cursor(cursor_factory=RealDictCursor)
-    pgconn.close()

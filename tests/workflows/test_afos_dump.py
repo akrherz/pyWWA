@@ -5,7 +5,7 @@ from pyiem.util import utc
 
 # Local
 from pywwa.workflows import afos_dump
-from pywwa.testing import get_example_file, cursor
+from pywwa.testing import get_example_file
 
 
 @pytest.mark.parametrize("database", ["afos"])
