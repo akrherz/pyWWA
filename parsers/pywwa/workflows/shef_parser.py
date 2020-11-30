@@ -689,6 +689,7 @@ def fullstop(err):
 def main():
     """We startup."""
     # Need to find the shef_workspace folder
+    origcwd = os.getcwd()
     path = None
     for path in get_search_paths():
         if os.path.isdir(os.path.join(path, "shef_workspace")):
@@ -702,6 +703,8 @@ def main():
     df.addCallback(main2)
     df.addErrback(fullstop)
     reactor.run()
+    # For testing purposes
+    os.chdir(origcwd)
 
 
 if __name__ == "__main__":

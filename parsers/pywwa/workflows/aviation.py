@@ -22,10 +22,8 @@ def load_database(txn):
     """Load database stations."""
 
     txn.execute(
-        """
-        SELECT id, name, ST_x(geom) as lon, ST_y(geom) as lat from stations
-        WHERE network ~* 'ASOS' or network ~* 'AWOS'
-        """
+        "SELECT id, name, ST_x(geom) as lon, ST_y(geom) as lat from stations "
+        "WHERE network ~* 'ASOS' or network ~* 'AWOS'"
     )
     for row in txn.fetchall():
         LOCS[row["id"]] = row
@@ -52,14 +50,14 @@ def load_database(txn):
 def process_data(data):
     """ Process the product """
     try:
-        prod = parser(data, nwsli_provider=LOCS)
-        # prod.draw()
+        prod = parser(data, nwsli_provider=LOCS, utcnow=common.utcnow())
     except Exception as myexp:
         common.email_error(myexp, data)
-        return
+        return None
     defer = DBPOOL.runInteraction(prod.sql)
     defer.addCallback(final_step, prod)
     defer.addErrback(common.email_error, data)
+    return prod
 
 
 def final_step(_, prod):
