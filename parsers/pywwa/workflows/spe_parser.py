@@ -21,15 +21,14 @@ JABBER = make_jabber_client()
 def real_process(txn, raw):
     """Do work please"""
     sqlraw = raw.replace("\015\015\012", "\n")
-    prod = product.TextProduct(raw)
+    prod = product.TextProduct(raw, utcnow=common.utcnow())
 
     product_id = prod.get_product_id()
     if common.dbwrite_enabled():
-        sql = """
-            INSERT into text_products(product, product_id) values (%s,%s)
-        """
-        myargs = (sqlraw, product_id)
-        txn.execute(sql, myargs)
+        txn.execute(
+            "INSERT into text_products(product, product_id) values (%s,%s)",
+            (sqlraw, product_id),
+        )
 
     tokens = re.findall("ATTN (WFOS|RFCS)(.*)", raw)
     channels = []
@@ -52,11 +51,6 @@ def real_process(txn, raw):
         "</p>"
     ) % (PYWWA_PRODUCT_URL, product_id)
     JABBER.send_message(body, htmlbody, xtra)
-
-
-def killer():
-    """Stop Right Now!"""
-    reactor.stop()
 
 
 def main():

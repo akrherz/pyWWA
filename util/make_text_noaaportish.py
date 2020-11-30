@@ -8,9 +8,8 @@ def main(argv):
     """Do Main Things"""
     fn = argv[1]
     data = noaaport_text(open(fn).read())
-    output = open(fn, "w")
-    output.write(data)
-    output.close()
+    with open(fn, "w") as fh:
+        fh.write(data)
 
 
 if __name__ == "__main__":
