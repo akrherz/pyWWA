@@ -18,7 +18,8 @@ def get_example_file(filename):
     fullpath = os.path.join(
         os.path.dirname(callingfn), "..", "..", "examples", filename
     )
-    return open(fullpath).read()
+    # Need to ensure that CRCRLF remain intact
+    return open(fullpath, "rb").read().decode("utf-8")
 
 
 @pytest.fixture(scope="function")
