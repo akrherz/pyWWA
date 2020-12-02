@@ -6,7 +6,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.6", "3.8", "3.9"]
+        PYTHON_VERSION: ["3.6", "3.8", "3.9"]
     steps:
     - uses: actions/checkout@v2
 
@@ -35,6 +35,8 @@ jobs:
         python util/copy_iem_network.py NY_COOP
         sh util/run_examples.sh
         coverage run --source=pywwa setup.py test
-        if [[ ${{ matrix.python-version }} == "3.8" ]]; then
-          codecov -e TRAVIS_PYTHON_VERSION;
-        fi
+
+    - name: Upload Coverage
+      if: ${{ matrix.PYTHON_VERSION == '3.8' }}
+      run: |
+        codecov
