@@ -220,6 +220,7 @@ CFD4            Foremost                         -- CA  4948 -11149     0  0
 CFD5            Grimshaw                         -- CA  5620 -11763     0  0
 CFE7            Kananaskis Village               -- CA  5092 -11514     0  0
 CFF2            Christina Basin                  -- CA  5559 -11182     0  0
+CFF3            Jean Lake                        -- CA  5748 -11388     0  0
 CFF7            Wainwright                       -- CA  5283 -11090     0  0
 CFG3            Consort                          -- CA  5202 -11075     0  0
 CFG5            John DOr Prairie                 -- CA  5849 -11514     0  0
@@ -235,6 +236,7 @@ CFM7            Boyle                            -- CA  5457 -11282     0  0
 CFN5            La Crete                         -- CA  5817 -11633     0  0
 # CFN6
 CFN7            Sundre                           -- CA  5177 -11468     0  0
+CFR7            Red Deer Forestry                -- CA  5165 -11524     0  0
 CFS3            Fort Selkirk                     -- CA  6277 -13738     0  0
 CFS5            Spirit River                     -- CA  5578 -11884     0  0
 CFS6            Loon River                       -- CA  5714 -11508     0  0
@@ -625,6 +627,7 @@ CYSW            Sparkwood Elk Valley             -- CA  4983 -11488     0  0
 CYSZ            Sainte Anne des Monts            QC CA  4912  -6653     0  0
 CYTB            Tillsonburg                      -- CA  4293  -8075     0  0
 CYTF            Alma                             QC CA  4851  -7164     0  0
+CYTN            Trenton                          -- CA  4561  -6262     0  0
 # CYTW
 CYVB            Bonaventure                      -- CA  4807  -6546     0  0
 CYVD            Virden                           MB CA  4988 -10092     0  0
