@@ -14,9 +14,10 @@ DBPOOL = get_database("iem")
 
 def processor(txn, text):
     """ Protect the realprocessor """
-    prod = parser(text)
+    prod = parser(text, utcnow=common.utcnow())
     if common.dbwrite_enabled():
         prod.sql(txn)
+    return prod
 
 
 def main():
