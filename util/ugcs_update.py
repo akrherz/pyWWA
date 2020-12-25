@@ -196,8 +196,9 @@ def workflow(argv, pgconn, cursor):
     )
 
     # Compute the area and then sort to order duplicated UGCs :/
-    df["area"] = df["geometry"].area
-    df.sort_values(by="area", ascending=False, inplace=True)
+    # Database stores as sq km
+    df["area2163"] = df["geometry"].to_crs(2163).area / 1e6
+    df.sort_values(by="area2163", ascending=False, inplace=True)
     gdf = df.groupby("ugc").nth(0)
     LOG.info(
         "Loaded %s/%s unique entries from %s",
@@ -211,8 +212,17 @@ def workflow(argv, pgconn, cursor):
         if ugc in postgis.index:
             # Some very small number, good enough
             current = postgis.loc[ugc]
+            if isinstance(current, pd.GeoDataFrame):
+                LOG.info("abort, more than one %s found in postgis", ugc)
+                sys.exit()
+            # LOG.debug(
+            #    "new: %s current: %s diff: %s",
+            #    row["area2163"],
+            #    current["area2163"],
+            #    abs(row["area2163"] - current["area2163"]),
+            # )
             if (
-                abs(row["area"] - current["geom"].area) < 0.00000001
+                abs(row["area2163"] - current["area2163"]) < 0.01
                 and row["NAME"] == current["name"]
                 and row[wfocol] == current["wfo"]
             ):
