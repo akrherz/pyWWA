@@ -37,7 +37,9 @@ from shapely.geometry import MultiPolygon
 from pyiem.util import utc, logger
 
 # Put the pywwa library into sys.path
-sys.path.insert(0, os.path.join(os.path.abspath(__file__), "../parsers"))
+sys.path.insert(
+    0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "../parsers")
+)
 # pylint: disable=wrong-import-position
 from pywwa.database import get_sync_dbconn  # noqa: E402
 
