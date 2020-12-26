@@ -1,16 +1,16 @@
 """Utility script to generate the HTML used for IEMBot Channel Documentation
 """
 import re
-import sys
 
 import psycopg2.extras
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, logger
 from pyiem.reference import prodDefinitions
 from pyiem.nws.ugc import UGC
 from pyiem.nws.nwsli import NWSLI
 from pyiem.nws.products.vtec import parser as vtec_parser
 from pyiem.nws.products import parser as productparser
 
+LOG = logger()
 ugc_dict = {}
 nwsli_dict = {}
 
@@ -27,20 +27,20 @@ C7 = "&lt;afos_pil&gt;.&lt;wfo&gt;"
 C8 = "&lt;wmo_source&gt;.&lt;aaa&gt;"
 C9 = "&lt;afos_pil&gt;.&lt;ugc&gt;"
 D = {
-    "10-313": "http://www.nws.noaa.gov/directives/sym/pd01003013curr.pdf",
-    "10-314": "http://www.nws.noaa.gov/directives/sym/pd01003014curr.pdf",
-    "10-315": "http://www.nws.noaa.gov/directives/sym/pd01003015curr.pdf",
-    "10-320": "http://www.nws.noaa.gov/directives/sym/pd01003020curr.pdf",
-    "10-330": "http://www.nws.noaa.gov/directives/sym/pd01003030curr.pdf",
-    "10-401": "http://www.nws.noaa.gov/directives/sym/pd01004001curr.pdf",
-    "10-511": "http://www.nws.noaa.gov/directives/sym/pd01005011curr.pdf",
-    "10-513": "http://www.nws.noaa.gov/directives/sym/pd01005013curr.pdf",
-    "10-515": "http://www.nws.noaa.gov/directives/sym/pd01005015curr.pdf",
-    "10-517": "http://www.nws.noaa.gov/directives/sym/pd01005017curr.pdf",
-    "10-601": "http://www.nws.noaa.gov/directives/sym/pd01006001curr.pdf",
-    "10-912": "http://www.nws.noaa.gov/directives/sym/pd01009012curr.pdf",
-    "10-922": "http://www.nws.noaa.gov/directives/sym/pd01009022curr.pdf",
-    "10-1701": "http://www.nws.noaa.gov/directives/sym/pd01017001curr.pdf",
+    "10-313": "https://www.nws.noaa.gov/directives/sym/pd01003013curr.pdf",
+    "10-314": "https://www.nws.noaa.gov/directives/sym/pd01003014curr.pdf",
+    "10-315": "https://www.nws.noaa.gov/directives/sym/pd01003015curr.pdf",
+    "10-320": "https://www.nws.noaa.gov/directives/sym/pd01003020curr.pdf",
+    "10-330": "https://www.nws.noaa.gov/directives/sym/pd01003030curr.pdf",
+    "10-401": "https://www.nws.noaa.gov/directives/sym/pd01004001curr.pdf",
+    "10-511": "https://www.nws.noaa.gov/directives/sym/pd01005011curr.pdf",
+    "10-513": "https://www.nws.noaa.gov/directives/sym/pd01005013curr.pdf",
+    "10-515": "https://www.nws.noaa.gov/directives/sym/pd01005015curr.pdf",
+    "10-517": "https://www.nws.noaa.gov/directives/sym/pd01005017curr.pdf",
+    "10-601": "https://www.nws.noaa.gov/directives/sym/pd01006001curr.pdf",
+    "10-912": "https://www.nws.noaa.gov/directives/sym/pd01009012curr.pdf",
+    "10-922": "https://www.nws.noaa.gov/directives/sym/pd01009022curr.pdf",
+    "10-1701": "https://www.nws.noaa.gov/directives/sym/pd01017001curr.pdf",
 }
 
 # TODO: TCV TSU ADR CDW DSA EQW HMW HPA LEw NUW RHW VOW PQS CWA
@@ -112,7 +112,16 @@ GEN_PRODUCTS = [
     dict(afos="ICE", directive="10-330", channels=S2),
     dict(afos="LAE", directive="10-1701", channels=S2),
     dict(afos="LCO", directive="10-1701", channels=S2),
-    dict(afos="LSR", directive="10-517", channels=S2),
+    dict(
+        afos="LSR",
+        directive="10-517",
+        channels=[
+            "LSR.ALL",
+            "LSR.&lt;typetext&gt;",
+            "LSR.&lt;state&gt;",
+            "LSR.&lt;state&gt;.&lt;typetext&gt;",
+        ],
+    ),
     dict(
         afos="MCD",
         directive="10-517",
@@ -226,8 +235,8 @@ def do_generic():
             )
             assert v.afos is not None
         except Exception as exp:
-            sys.stderr.write(str(exp))
-            sys.stderr.write(afos + "\n")
+            LOG.info("productparser %s failed", afos)
+            LOG.exception(exp)
             continue
         j = v.get_jabbers("https://mesonet.agron.iastate.edu/p.php")
         jmsg = ""
