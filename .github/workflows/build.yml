@@ -35,6 +35,7 @@ jobs:
         python util/merge_hvtec_nwsli.py hvtec_list_10132020.csv
         python util/copy_iem_network.py MN_ASOS
         python util/copy_iem_network.py NY_COOP
+        python util/copy_iem_network.py NWSCLI
         sh util/run_examples.sh
         coverage run --source=pywwa setup.py test
         if [[ ${{ matrix.PYTHON_VERSION }} == "3.8" ]]; then

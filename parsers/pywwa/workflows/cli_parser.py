@@ -18,7 +18,7 @@ from pywwa.ldm import bridge
 from pywwa.database import get_database
 
 DBPOOL = get_database("iem")
-NT = NetworkTable("NWSCLI")
+NT = NetworkTable("NWSCLI", only_online=False)
 HARDCODED["PKTN"] = "PAKT"
 JABBER = make_jabber_client()
 
