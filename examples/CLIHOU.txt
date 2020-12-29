@@ -1,0 +1,180 @@
+314 
+CDUS44 KHGX 011455
+CLIHOU
+
+CLIMATE REPORT
+NATIONAL WEATHER SERVICE HOUSTON/GALVESTON TX                        
+845 AM CST MON DEC 1 2014
+
+
+...MORNING CLIMATE DATA...
+     
+                            MORNING LOW    PRECIP SINCE MIDNIGHT
+
+HOUSTON INTERCONTINENTAL         58                0.00
+GALVESTON SCHOLES FIELD          65                0.20
+BRYAN/COLLEGE STATION            62                0.00
+HOUSTON HOBBY                    64                0.00
+     
+................................... 
+
+...THE HOUSTON INTERCONTINENTAL CLIMATE SUMMARY FOR NOVEMBER 30 2014...
+
+CLIMATE NORMAL PERIOD 1981 TO 2010
+CLIMATE RECORD PERIOD 1892 TO 2014
+
+
+WEATHER ITEM   OBSERVED TIME   RECORD YEAR NORMAL DEPARTURE LAST     
+                VALUE   (LST)  VALUE       VALUE  FROM      YEAR     
+                                                  NORMAL             
+..................................................................
+TEMPERATURE (F)                                                     
+ YESTERDAY                                                           
+  MAXIMUM         80    233 PM  82    1967  68     12       70       
+                                      1917                          
+  MINIMUM         61   1158 PM  19    1976  48     13       39       
+  AVERAGE         71                        58     13       55      
+                                                                     
+PRECIPITATION (IN)                                                   
+  YESTERDAY        0.00          1.41 1968   0.15  -0.15     0.00    
+  MONTH TO DATE    3.40                      4.34  -0.94     3.81    
+  SINCE SEP 1     10.23                     14.16  -3.93    15.98    
+  SINCE JAN 1     38.12                     46.03  -7.91    37.18    
+                                                                     
+SNOWFALL (IN)                                                        
+  YESTERDAY        0.0           0.0  2002                           
+                                      2001                          
+  MONTH TO DATE    0.0                                               
+  SINCE SEP 1      0.0                                               
+  SINCE JUL 1      0.0                                               
+                                                                     
+DEGREE DAYS                                                          
+ HEATING                                                             
+  YESTERDAY        0                         9     -9       10       
+  MONTH TO DATE  248                       155     93      241       
+  SINCE SEP 1    248                       185     63      249       
+  SINCE JUL 1    248                       185     63      249       
+..................................................................
+
+
+WIND (MPH)                                                           
+  HIGHEST WIND SPEED    18   HIGHEST WIND DIRECTION     S (160)      
+  HIGHEST GUST SPEED    23   HIGHEST GUST DIRECTION     S (160)      
+
+                                                                     
+RELATIVE HUMIDITY (PERCENT)                                          
+ HIGHEST    93                                                       
+ LOWEST     54                                                       
+ AVERAGE    74                                                       
+
+..........................................................
+
+                                                                     
+THE HOUSTON INTERCONTINENTAL CLIMATE NORMALS FOR TODAY
+                         NORMAL    RECORD    YEAR                    
+ MAXIMUM TEMPERATURE (F)   67        83      2012                    
+ MINIMUM TEMPERATURE (F)   47        26      1979                    
+
+                                                                     
+SUNRISE AND SUNSET                                                   
+DECEMBER  1 2014......SUNRISE   700 AM CST   SUNSET   521 PM CST   
+DECEMBER  2 2014......SUNRISE   700 AM CST   SUNSET   521 PM CST   
+
+                                                                    
+-  INDICATES NEGATIVE NUMBERS.                                      
+R  INDICATES RECORD WAS SET OR TIED.                                
+MM INDICATES DATA IS MISSING.                                       
+T  INDICATES TRACE AMOUNT.                                          
+
+
+&&
+
+................................... 
+
+...THE HOUSTON/HOBBY AIRPORT CLIMATE SUMMARY FOR NOVEMBER 30 2014...
+
+CLIMATE NORMAL PERIOD 1981 TO 2010
+CLIMATE RECORD PERIOD 1930 TO 2014
+
+
+WEATHER ITEM   OBSERVED TIME   RECORD YEAR NORMAL DEPARTURE LAST     
+                VALUE   (LST)  VALUE       VALUE  FROM      YEAR     
+                                                  NORMAL             
+..................................................................
+TEMPERATURE (F)                                                     
+ YESTERDAY                                                           
+  MAXIMUM         79    200 PM  82    1950  68     11       69       
+  MINIMUM         62    730 AM  25    1976  50     12       42       
+  AVERAGE         71                        59     12       56      
+                                                                     
+PRECIPITATION (IN)                                                   
+  YESTERDAY        0.00          1.05 1982   0.14  -0.14     0.00    
+  MONTH TO DATE    4.44                      4.32   0.12     3.58    
+  SINCE SEP 1     11.99                     15.52  -3.53    19.32    
+  SINCE JAN 1     36.52                     50.62 -14.10    42.19    
+                                                                     
+SNOWFALL (IN)                                                        
+  YESTERDAY        0.0          MM      MM                           
+  MONTH TO DATE    0.0                                               
+  SINCE SEP 1      0.0                                               
+  SINCE JUL 1      0.0                                               
+                                                                     
+DEGREE DAYS                                                          
+ HEATING                                                             
+  YESTERDAY        0                         8     -8        9       
+  MONTH TO DATE  214                       135     79      214       
+  SINCE SEP 1    214                       156     58      217       
+  SINCE JUL 1    214                       156     58      217       
+..................................................................
+
+
+WIND (MPH)                                                           
+  HIGHEST WIND SPEED    20   HIGHEST WIND DIRECTION     S (170)      
+  HIGHEST GUST SPEED    26   HIGHEST GUST DIRECTION     S (200)      
+
+                                                                     
+RELATIVE HUMIDITY (PERCENT)                                          
+ HIGHEST   100                                                       
+ LOWEST     58                                                       
+ AVERAGE    79                                                       
+
+..........................................................
+
+                                                                     
+THE HOUSTON/HOBBY AIRPORT CLIMATE NORMALS FOR TODAY
+                         NORMAL    RECORD    YEAR                    
+ MAXIMUM TEMPERATURE (F)   68        83      2012                    
+ MINIMUM TEMPERATURE (F)   49        30      1979                    
+
+                                                                     
+SUNRISE AND SUNSET                                                   
+DECEMBER  1 2014......SUNRISE   659 AM CST   SUNSET   522 PM CST   
+DECEMBER  2 2014......SUNRISE   659 AM CST   SUNSET   522 PM CST   
+
+                                                                    
+-  INDICATES NEGATIVE NUMBERS.                                      
+R  INDICATES RECORD WAS SET OR TIED.                                
+MM INDICATES DATA IS MISSING.                                       
+T  INDICATES TRACE AMOUNT.                                          
+
+..........................................................
+
+...MISCELLANEOUS CLIMATE DATA FOR YESTERDAY...
+     
+LOCATION                        HIGH    LOW     PRECIP
+
+PEARLAND                         79      63      0.00
+SUGAR LAND                       80      61      0.00
+TOMBALL                          80      65      0.00
+CONROE                           77      62      0.00
+HUNTSVILLE                       79      65      0.00
+ANGLETON/LAKE JACKSON            78      61      0.00
+PALACIOS                         76      63      0.00
+LEAGUE CITY (NWS)                78      62      0.00
+     
+     
+THIS PRODUCT...ALONG WITH OTHER WEATHER...HYDROLOGIC...AND CLIMATE
+PRODUCTS...IS AVAILABLE ON THE WEB AT HTTP://WWW.SRH.NOAA.GOV/HGX
+OR AT HTTP://WEATHER.GOV
+     
+$$
