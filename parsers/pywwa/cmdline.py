@@ -9,6 +9,13 @@ def parse_cmdline(argv):
     """Parse command line for context settings."""
     parser = argparse.ArgumentParser(description="pyWWA Parser.")
     parser.add_argument(
+        "-c",
+        "--custom-args",
+        type=str,
+        nargs="+",
+        help="Pass custom arguments to this parser.",
+    )
+    parser.add_argument(
         "-d",
         "--disable-dbwrite",
         action="store_true",
