@@ -20,6 +20,9 @@ from pywwa.database import get_database
 DBPOOL = get_database("iem")
 NT = NetworkTable("NWSCLI", only_online=False)
 HARDCODED["PKTN"] = "PAKT"
+HARDCODED["POGG"] = "PHOG"
+HARDCODED["PITO"] = "PHTO"
+HARDCODED["PLIH"] = "PHLI"
 JABBER = make_jabber_client()
 
 
