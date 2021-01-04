@@ -19,21 +19,13 @@ from pywwa.database import get_database
 
 DBPOOL = get_database("iem")
 NT = NetworkTable("NWSCLI", only_online=False)
+JABBER = make_jabber_client()
+# These are site ids computed by the NWSCLI network table that then need
+# translated into ASOS FAA IDs for IEMAccess Updating.
 HARDCODED["PKTN"] = "PAKT"
 HARDCODED["POGG"] = "PHOG"
 HARDCODED["PITO"] = "PHTO"
 HARDCODED["PLIH"] = "PHLI"
-JABBER = make_jabber_client()
-
-
-def send_tweet(prod):
-    """ Send the tweet for this prod """
-
-    jres = prod.get_jabbers(
-        common.SETTINGS.get("pywwa_product_url", "pywwa_product_url")
-    )
-    for j in jres:
-        JABBER.send_message(j[0], j[1], j[2])
 
 
 def processor(txn, text):
@@ -41,7 +33,13 @@ def processor(txn, text):
     prod = parser(text, nwsli_provider=NT.sts, utcnow=common.utcnow())
     # Run through database save now
     prod.sql(txn)
-    send_tweet(prod)
+    jres = prod.get_jabbers(
+        common.SETTINGS.get("pywwa_product_url", "pywwa_product_url")
+    )
+    for j in jres:
+        JABBER.send_message(j[0], j[1], j[2])
+    if prod.warnings:
+        common.email_error("\n".join(prod.warnings), text)
     return prod
 
 
