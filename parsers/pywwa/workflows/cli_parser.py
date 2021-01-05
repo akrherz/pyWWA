@@ -8,7 +8,6 @@ storage of what we got from the automated observations
 # 3rd Party
 from twisted.internet import reactor
 from pyiem.nws.products import parser
-from pyiem.nws.products.cli import HARDCODED
 from pyiem.network import Table as NetworkTable
 
 # Local
@@ -20,12 +19,6 @@ from pywwa.database import get_database
 DBPOOL = get_database("iem")
 NT = NetworkTable("NWSCLI", only_online=False)
 JABBER = make_jabber_client()
-# These are site ids computed by the NWSCLI network table that then need
-# translated into ASOS FAA IDs for IEMAccess Updating.
-HARDCODED["PKTN"] = "PAKT"
-HARDCODED["POGG"] = "PHOG"
-HARDCODED["PITO"] = "PHTO"
-HARDCODED["PLIH"] = "PHLI"
 
 
 def processor(txn, text):
