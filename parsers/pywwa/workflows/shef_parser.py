@@ -16,7 +16,7 @@ from twisted.internet.task import LoopingCall
 from pyiem.reference import TRACE_VALUE
 from pyiem.observation import Observation
 from pyiem.nws import product
-from pyiem.util import LOG
+from pyiem.util import LOG, utc
 from pyiem import reference
 
 # Local
@@ -46,8 +46,7 @@ LOCS = dict()
 TIMEZONES = dict()
 # a queue for saving database IO
 CURRENT_QUEUE = {}
-U1980 = datetime.datetime.utcnow()
-U1980 = U1980.replace(day=1, year=1980, tzinfo=pytz.utc)
+U1980 = utc(1980)
 
 TEXTPRODUCT = namedtuple("TextProduct", ["product_id", "afos", "text"])
 JOBS = DeferredQueue()
@@ -65,12 +64,8 @@ def load_stations(txn):
     """
     LOG.info("load_stations called...")
     txn.execute(
-        """
-        SELECT id, network, tzname from stations
-        WHERE network ~* 'COOP' or network ~* 'DCP' or
-        network in ('KCCI','KIMT','KELO', 'ISUSM')
-        ORDER by network ASC
-        """
+        "SELECT id, network, tzname from stations WHERE network ~* 'COOP' "
+        "or network ~* 'DCP' or network = 'ISUSM' ORDER by network ASC"
     )
 
     LOCS.clear()  # clear out our current cache
@@ -202,10 +197,6 @@ class SHEFIT(protocol.ProcessProtocol):
         LOG.info(data)
         self.deferred.errback(data)
 
-    #    def processEnded(self, status):
-    #        print "debug: type(status): %s" % type(status.value)
-    #        print "error: exitCode: %s" % status.value.exitCode
-
     def outConnectionLost(self):
         """
         Once the program is done, we need to do something with the data
@@ -225,11 +216,7 @@ def clnstr(buf):
     """
     Get rid of cruft we don't wish to work with
     """
-    return (
-        buf.replace("\015\015\012", "\n")
-        .replace("\003", "")
-        .replace("\001", "")
-    )
+    return buf.replace("\r", "").replace("\003", "").replace("\001", "")
 
 
 def process_data(data):
@@ -247,7 +234,9 @@ def async_func(data):
     """spawn a process with a deferred given the inbound data product"""
     defer = Deferred()
     try:
-        tp = product.TextProduct(data, parse_segments=False)
+        tp = product.TextProduct(
+            data, utcnow=common.utcnow(), parse_segments=False
+        )
     except Exception as exp:
         common.email_error(exp, data)
         return None
@@ -303,7 +292,7 @@ def really_process(prod, data):
             continue
         tstamp = make_datetime(line[10:20], line[21:29])
         # We don't care about data in the future!
-        utcnow = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
+        utcnow = utc()
         if tstamp > (utcnow + datetime.timedelta(hours=1)):
             continue
         if tstamp < (utcnow - datetime.timedelta(days=60)):
@@ -394,11 +383,8 @@ def enter_unknown(sid, product_id, network):
     if NWSLIRE.match(sid) is None:
         return
     HADSDB.runOperation(
-        """
-            INSERT into unknown(nwsli, product, network)
-            values ('%s', '%s', '%s')
-        """
-        % (sid, product_id, network)
+        "INSERT into unknown(nwsli, product, network) " "values (%s, %s, %s)",
+        (sid, product_id, network),
     )
 
 
@@ -423,8 +409,7 @@ def var2dbcols(var):
         parts = var.split(".")
         var = parts[0]
         return [var[:2], var[2], var[3:5], var[5], var[-1], parts[1]]
-    else:
-        return [var[:2], var[2], var[3:5], var[5], var[-1], None]
+    return [var[:2], var[2], var[3:5], var[5], var[-1], None]
 
 
 def save_current():
@@ -443,11 +428,9 @@ def save_current():
         (sid, varname) = k.split("|")
         (pe, d, s, e, p, depth) = var2dbcols(varname)
         d2 = ACCESSDB.runOperation(
-            """
-        INSERT into current_shef(station, valid, physical_code, duration,
-        source, extremum, probability, value, depth)
-        values (%s,%s,%s,%s,%s,%s,%s,%s,%s)
-        """,
+            "INSERT into current_shef(station, valid, physical_code, "
+            "duration, source, extremum, probability, value, depth) "
+            "values (%s,%s,%s,%s,%s,%s,%s,%s,%s)",
             (
                 sid,
                 mydict["valid"].strftime("%Y-%m-%d %H:%M+00"),
@@ -503,7 +486,7 @@ def get_network(prod, sid, _ts, data):
             country = reference.nwsli2country.get(sid[3:])
             if country in ["CA", "MX"]:
                 return "%s_%s_%s" % (country, state, pnetwork)
-            elif country == "US":
+            if country == "US":
                 return "%s_%s" % (state, pnetwork)
             return "%s__%s" % (country, pnetwork)
 
@@ -524,10 +507,8 @@ def process_site(prod, sid, ts, data):
     for varname in data:
         value = data[varname]
         deffer = HADSDB.runOperation(
-            """INSERT into raw_inbound
-                (station, valid, key, value)
-                VALUES(%s,%s, %s, %s)
-                """,
+            "INSERT into raw_inbound (station, valid, key, value) "
+            "VALUES(%s,%s, %s, %s)",
             (sid, ts.strftime("%Y-%m-%d %H:%M+00"), varname, value),
         )
         deffer.addErrback(common.email_error, prod.text)
@@ -549,7 +530,7 @@ def process_site(prod, sid, ts, data):
     if sid in UNKNOWN:
         return
     network = get_network(prod, sid, ts, data)
-    if network in ["KCCI", "KIMT", "KELO", "ISUSM", None]:
+    if network in ["ISUSM", None]:
         return
 
     # Do not send DCP sites with old data to IEMAccess
@@ -613,8 +594,6 @@ def process_site(prod, sid, ts, data):
         deffer.addCallback(got_results, prod.product_id, sid, network, localts)
         deffer.addErrback(common.email_error, prod.text)
         deffer.addErrback(LOG.error)
-    # else:
-    #    print 'NODATA?', sid, network, localts, data
 
 
 def got_results(res, product_id, sid, network, localts):
@@ -628,7 +607,7 @@ def got_results(res, product_id, sid, network, localts):
     """
     if res:
         return
-    basets = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
+    basets = utc()
     basets -= datetime.timedelta(hours=48)
     # If this is old data, we likely recently added this station and are
     # simply missing a database entry for it?
@@ -664,9 +643,7 @@ def service_guard():
 
 
 def main2(_res):
-    """
-    Go main Go!
-    """
+    """Go main Go!"""
     LOG.info("main() fired!")
     bridge(process_data)
 
