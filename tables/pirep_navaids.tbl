@@ -4,15 +4,15 @@ CAA2            Saint Andre Avellin              -- CA  4574  -7507     0  0
 CAA4            Saint Apollinaire                -- CA  4659  -7156     0  0
 CAA8            Invermere                        -- CA  5052 -11600     0  0
 CAB3            Bedwell Harbour                  -- CA  4875 -12323     0  0            
-# CAB4
+CAB4            Tofino Harbour Seaplane          BC CA  4915 -12591     0  0
 CAB7            Kelowna Heliport                 -- CA  4986 -11957     0  0
 CAC8            Nanaimo                          -- CA  4918 -12395     0  0            
 CAD4            Trail                            -- CA  4906 -11761     0  0
 CAD5            Merritt                          -- CA  5012 -12074     0  0
 CAE3            Campbell River Seaplane          -- CA  5005 -12525     0  0
-# CAE5
-# CAE7
-# CAE9
+CAE5            Whistler/Green Lake              BC CA  5014 -12295     0  0
+CAE7            Harrison Hot Springs             BC CA  4930 -12179     0  0
+CAE9            Bamfield                         BC CA  4883 -12513     0  0
 CAF4            Tsuniah                          -- CA  5153 -12417     0  0
 CAF6            Big Bay                          -- CA  5040 -12513     0  0
 CAF8            Nimpo Lake                       -- CA  5233 -12515     0  0
@@ -539,6 +539,7 @@ CYAC            Cat Lake                         ON CA  5172  -9182     0  0
 CYAG            Fort Frances                     ON CA  4865  -9344     0  0
 CYAL            Alert Bay                        BC CA  5058 -12692     0  0
 CYAQ            Kasabonika                       -- CA  5352  -8864     0  0
+CYAT            Attawapiskat                     -- CA  5293  -8243     0  0
 CYAV            Winnipeg St Andrews              -- CA  5006  -9703     0  0
 CYAX            Lac du Bonnet                    MB CA  5029  -9601     0  0
 CYBA            Banff                            -- CA  5121 -11554     0  0
