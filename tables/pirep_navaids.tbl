@@ -1,4 +1,5 @@
 LVR             Big River Lake                   AK US  6081 -15229     0  0
+PHDH            Dillingham                       HI US  2158 -15820     0  0
 # Sites found while parsing real data
 CAA2            Saint Andre Avellin              -- CA  4574  -7507     0  0 
 CAA4            Saint Apollinaire                -- CA  4659  -7156     0  0
@@ -25,20 +26,20 @@ CAJ3            Sutcliffe Field                  -- CA  4904 -11650     0  0
 CAJ7            Cayley A J Flying Ranch          -- CA  5045 -11375     0  0
 CAJ8            Pitt Meadows Seaplane            -- CA  4921 -12271     0  0
 CAJ9            Fort Ware                        -- CA  5743 -12565     0  0
-# CAK2            
+## CAK2            
 CAK3            Delta Heritage                   -- CA  4908 -12294     0  0
 CAL3            Douglas Lake                     -- CA  5017 -12017     0  0
 CAL4            Fort MacKay                      -- CA  5722 -11142     0  0
-# CAL6
+CAL6            Prince Albert                    -- CA  5323 -10576     0  0
 CAL8            Ste-anne-du-lac                  -- CA  4688  -7533     0  0
 CAM3            Duncan                           -- CA  4875 -12371     0  0
 CAM5            Houston                          -- CA  5444 -12678     0  0
-# CAM9
+CAM9            Vancouver Seaplane               BC CA  4918 -12316     0  0
 CAN3            Ucluelet Seaplane                -- CA  4895 -12555     0  0
-# CAN6            
+CAN6            Prince Rupert                    BC CA  5432 -13040     0  0            
 CAP3            Sechelt                          -- CA  4946 -12372     0  0
 CAP5            Victoria                         -- CA  4865 -12345     0  0
-# CAP8
+## CAP8
 CAQ4            Springhouse                      -- CA  5196 -12214     0  0
 CAQ5            Nakusp                           -- CA  5027 -11781     0  0
 # CAQ6
