@@ -255,15 +255,16 @@ CFX6            Vulcan                           -- CA  5040 -11328     0  0
 CFX8            Chestermere                      -- CA  5104 -11375     0  0
 CFY4            Indus/Winters Aire Park          -- CA  5090 -11378     0  0
 CGB2            Carstairs                        -- CA  5158 -11405     0  0
-# CGC2
+CGC2            Galore Creek                     BC CA  5712 -13145     0  0
 CGC3            Grande Cache                     -- CA  5389 -11912     0  0
 CGK2            Gahcho                           -- CA  6344 -10915     0  0
 CGM2            Smoky Lake                       -- CA  5412 -11247     0  0
 CGP4            Nanaimo Gabriola                 -- CA  4918 -12384     0  0
-# CHB3
+## CGYL
+CHB3            Hope Bay                         -- CA  6816 -10662     0  0
 CHC5            Hayes Camp Aerodome              -- CA  6665  -9154     0  0
-# CHL6
-# CHT3
+CHL6            Huntsville North Seaplane        ON CA  4533  -7926     0  0
+CHT3            Mont-Tremblant                   -- CA  4611  -7454     0  0
 CJA3            Morden                           -- CA  4912  -9806     0  0
 CJA5            Nestor Falls                     -- CA  4914  -9392     0  0
 CJB3            Stienbach                        -- CA  4955  -9668     0  0
