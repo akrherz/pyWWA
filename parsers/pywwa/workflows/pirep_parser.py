@@ -41,10 +41,8 @@ def load_locs(txn):
     """Build locations table"""
     LOG.info("load_locs() called...")
     txn.execute(
-        """
-        SELECT id, name, st_x(geom) as lon, st_y(geom) as lat
-        from stations WHERE network ~* 'ASOS' or network ~* 'AWOS'
-    """
+        "SELECT id, name, st_x(geom) as lon, st_y(geom) as lat "
+        "from stations WHERE network ~* 'ASOS' or network ~* 'AWOS'"
     )
     for row in txn.fetchall():
         LOCS[row["id"]] = {
