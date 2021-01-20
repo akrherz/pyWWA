@@ -30,7 +30,6 @@ MEMCACHE_CLIENT.connect()
 
 def process_data(data):
     """ Process the product """
-    LOG.info("process_data called...")
     defer = DBPOOL.runInteraction(real_parser, data)
     defer.addCallback(write_memcache)
     defer.addErrback(common.email_error, data)
