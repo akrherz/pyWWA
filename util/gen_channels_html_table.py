@@ -40,6 +40,7 @@ D = {
     "10-601": "https://www.nws.noaa.gov/directives/sym/pd01006001curr.pdf",
     "10-912": "https://www.nws.noaa.gov/directives/sym/pd01009012curr.pdf",
     "10-922": "https://www.nws.noaa.gov/directives/sym/pd01009022curr.pdf",
+    "10-1004": "https://www.nws.noaa.gov/directives/sym/pd01010004curr.pdf",
     "10-1701": "https://www.nws.noaa.gov/directives/sym/pd01017001curr.pdf",
 }
 
@@ -89,8 +90,9 @@ GEN_PRODUCTS = [
     dict(afos="BLU", directive="10-1701", channels=S2),
     dict(afos="CAE", directive="10-1701", channels=S2),
     dict(afos="CEM", directive="10-1701", channels=S2),
+    dict(afos="CF6", directive="10-1004", channels=S2),
     dict(afos="CGR", directive="10-1701", channels=S2),
-    dict(afos="CLI", directive="10-1701", channels=S2),
+    dict(afos="CLI", directive="10-1004", channels=S2),
     dict(afos="CRF", directive="10-912", channels=S2),
     dict(afos="CWF", directive="10-1701", channels=S2),
     dict(afos="DGT", directive="10-1701", channels=S2),
@@ -152,7 +154,7 @@ GEN_PRODUCTS = [
     dict(afos="PNS", directive="10-1701", channels=S2),
     dict(afos="PSH", directive="10-1701", channels=S2),
     dict(afos="REC", directive="10-1701", channels=S2),
-    dict(afos="RER", directive="10-1701", channels=S2),
+    dict(afos="RER", directive="10-1004", channels=S2),
     dict(afos="RRM", directive="10-1701", channels=S2),
     dict(afos="RFD", directive="10-1701", channels=S2),
     dict(afos="RTP", directive="10-1701", channels=S2),
