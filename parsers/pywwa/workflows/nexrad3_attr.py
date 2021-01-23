@@ -50,7 +50,7 @@ def process(bio):
     ctx["lines"] = []
     if not hasattr(l3, "graph_pages"):
         LOG.info("%s %s has no graph_pages", ctx["nexrad"], ctx["ts"])
-        return
+        return ctx
     for page in l3.graph_pages:
         for line in page:
             if "text" in line:
