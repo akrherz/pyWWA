@@ -57,6 +57,7 @@ def process(bio):
                 ctx["lines"].append(line["text"])
     df = PGCONN.runInteraction(really_process, ctx)
     df.addErrback(common.email_error, ctx)
+    return ctx
 
 
 def delete_prev_attrs(txn, nexrad):
@@ -167,6 +168,7 @@ def really_process(txn, ctx):
             ctx["ts"].strftime("%Y-%m-%d %H:%M UTC"),
             co,
         )
+    return co
 
 
 def on_ready(_unused, mesosite):
