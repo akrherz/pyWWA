@@ -68,22 +68,34 @@ def load_stations(txn):
         "or network ~* 'DCP' or network = 'ISUSM' ORDER by network ASC"
     )
 
-    LOCS.clear()  # clear out our current cache
+    # A sentinel to know if we later need to remove things in the case of a
+    # station that got dropped from a network
+    epoc = utc().microsecond
     for (stid, network, tzname) in txn.fetchall():
         if stid in UNKNOWN:
             LOG.info("  station: %s is no longer unknown!", stid)
             UNKNOWN.pop(stid)
-        if tzname is None or tzname == "":
-            LOG.info("  station: %s has tzname: %s", stid, tzname)
         metadata = LOCS.setdefault(stid, dict())
         if network not in metadata:
-            metadata[network] = dict(valid=U1980, tzname=tzname)
+            metadata[network] = dict(valid=U1980, tzname=tzname, epoc=epoc)
+        else:
+            metadata[network]["epoc"] = epoc
         if tzname not in TIMEZONES:
             try:
                 TIMEZONES[tzname] = pytz.timezone(tzname)
             except Exception:
                 LOG.info("pytz does not like tzname: %s", tzname)
                 TIMEZONES[tzname] = pytz.utc
+
+    # Now we find things that are outdated
+    for stid in list(LOCS):
+        for network in list(LOCS[stid]):
+            if LOCS[stid][network]["epoc"] != epoc:
+                LOG.info("LOCS remove station: %s network: %s", stid, network)
+                LOCS[stid].pop(network)
+        if not LOCS[stid]:
+            LOG.info("LOCS does not know station: %s at all", stid)
+            LOCS.pop(stid)
 
     LOG.info("loaded %s stations", len(LOCS))
     # Reload every 12 hours
@@ -453,7 +465,7 @@ def get_localtime(sid, ts):
     """Compute the local timestamp for this location"""
     if sid not in LOCS:
         return ts
-    _network = list(LOCS[sid].keys())[0]
+    _network = list(LOCS[sid])[0]
     return ts.astimezone(
         TIMEZONES.get(LOCS[sid][_network]["tzname"], pytz.utc)
     )
@@ -539,7 +551,7 @@ def process_site(prod, sid, ts, data):
     ):
         return
     metadata = LOCS.setdefault(
-        sid, {network: dict(valid=localts, tzname=None)}
+        sid, {network: dict(valid=localts, tzname=None, epoc=-1)}
     )
     metadata[network]["valid"] = localts
 
