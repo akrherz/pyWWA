@@ -72,6 +72,12 @@ def test_load_stations(cursor):
     )
     shef_parser.load_stations(cursor)
     assert isinstance(shef_parser.LOCS, dict)
+    # Remove station from database
+    cursor.execute(
+        "DELETE from stations where id = '_X_X_' and network = 'XX_DCP'"
+    )
+    shef_parser.load_stations(cursor)
+    assert "_X_X_" not in shef_parser.LOCS
 
 
 def test_main2():
