@@ -393,22 +393,23 @@ CNL2            Fort McMurray                    -- CA  5714 -11329     0  0
 CNL3            Brockville                       -- CA  4464  -7575     0  0
 CNL4            Port Elgin                       -- CA  4441  -8141     0  0
 CNM5            Kingfisher Lake                  -- CA  5301  -8985     0  0
-# CNM6
+CNM6            Naramata                         BC CA  4960 -11958     0  0
 CNN3            Shelburne                        -- CA  4403  -8021     0  0
 CNN8            Gananoque                        -- CA  4440  -7624     0  0
 CNP3            Arnprior                         -- CA  4541  -7637     0  0
 CNQ3            Welland / Niagara Central        -- CA  4298  -7932     0  0
-# CNQ4
-# CNQ7            
-# CNR2
+## CNQ4
+CNQ7            Port Loring Seaplane             ON CA  4588  -8010     0  0
+CNR2            Innerkip                         ON CA  4323  -8069     0  0
 CNR4            Tobermory                        -- CA  4522  -8163     0  0
+CNR5            Norland/Trotter                  ON CA  4473  -7875     0  0
 CNS8            Morrisburg                       -- CA  4495  -7508     0  0
 CNT7            Picton                           -- CA  4399  -7714     0  0
 CNW3            Bancroft                         -- CA  4507  -7788     0  0
 CNS4            Alexandria                       -- CA  4533  -7463     0  0
 CNU4            Belleville                       -- CA  4419  -7731     0  0
 CNU8            Markham                          -- CA  4394  -7962     0  0
-# CNV4            
+CNV4            Hawkesbury                       ON CA  4562  -7465     0  0
 CNV8            Edenvale                         -- CA  4444  -7997     0  0
 CNV9            Neuville                         -- CA  4672  -7158     0  0
 CNW9            Vancouver/New Westminister       -- CA  4923 -12289     0  0
@@ -416,8 +417,8 @@ CNY3            Collingwood                      -- CA  4445  -8016     0  0
 CNY4            Alliston                         -- CA  4418  -7983     0  0
 CNZ4            Barrys Bay                       -- CA  4550  -7764     0  0
 CNZ8            Grimsby                          -- CA  4316  -7960     0  0
-# COB4
-# COL2
+COB4            Orangeville                      ON CA  4388  -8018     0  0
+COL2            Orangeville/Laurel               ON CA  4392  -8021     0  0
 COL4            Sicamous                         -- CA  5081 -11897     0  0
 # COYW
 CPA2            Mount Forest                     -- CA  4397  -8074     0  0
