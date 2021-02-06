@@ -26,9 +26,10 @@ def cleandb():
     """
     thres = datetime.datetime.utcnow() - datetime.timedelta(hours=24 * 1)
     init_size = len(PIREPS.keys())
-    for key in PIREPS:
+    # loop safety
+    for key in list(PIREPS):
         if PIREPS[key] < thres:
-            del PIREPS[key]
+            PIREPS.pop(key)
 
     fin_size = len(PIREPS.keys())
     LOG.info("cleandb() init_size: %s final_size: %s", init_size, fin_size)
