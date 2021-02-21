@@ -465,7 +465,7 @@ CRJ2            Stoney Point                     -- CA  4229  -8260     0  0
 CRL2            Westport                         -- CA  4467  -7640     0  0
 CRL4            Kirby Lake                       -- CA  5536 -11064     0  0
 CRL7            Reindeer Lake                    -- CA  5729 -10253     0  0
-# CRS2
+CRS2            Parry Sound                      ON CA  4534  -8002     0  0
 CSA2            Lac Agile Mascouche              -- CA  4579  -7364     0  0
 CSB2            Sable Island                     -- CA  4393  -5996     0  0
 CSB3            St Mathieu De Beloeil            -- CA  4559  -7324     0  0
@@ -473,7 +473,7 @@ CSC3            Drummondville                    -- CA  4585  -7239     0  0
 CSC5            Lake Etchemin                    -- CA  4641  -7050     0  0
 CSD3            Valleyfield                      -- CA  4521  -7414     0  0
 CSD4            Mont Laurier                     -- CA  4656  -7557     0  0
-# CSD5
+CSD5            Fermont Heliport                 QB CA  5281  -6710     0  0
 CSE3            Lourdes De Joliette              -- CA  4611  -7345     0  0
 CSE4            Lachute                          -- CA  4564  -7437     0  0
 CSE5            Montmagny                        -- CA  4700  -7052     0  0
@@ -500,7 +500,7 @@ CSP5            St Mathias                       -- CA  4550  -7324     0  0
 CSQ2            Shuswap                          -- CA  5088 -11959     0  0
 CSQ3            Valcourt                         -- CA  4548  -7231     0  0
 CSR3            Victoriaville                    -- CA  4611  -7193     0  0
-# CSR6
+CSR6            Sonora                           BC CA  5038 -12516     0  0
 CSR8            La Sarre                         -- CA  4892  -7918     0  0
 CSS3            Montreal                         -- CA  4535  -7408     0  0
 CSS4            St Dominique                     -- CA  4563  -7282     0  0
@@ -509,10 +509,11 @@ CST3            Montreal                         -- CA  4539  -7413     0  0
 CST7            St Lambert                       -- CA  4656  -7118     0  0
 CSU2            Chisasibi                        -- CA  5381  -7892     0  0
 CSU3            St Hyacinthe                     -- CA  4561  -7301     0  0
-# CSU7
-# CSV2            
+CSU7            Lac a la Tortue                  QB CA  4662  -7263     0  0
+CSV2            Ste-Agathe                       QB CA  4612  -7430     0  0
 CSW5            Montreal Bell                    -- CA  4569  -7393     0  0
 CSW6            Hastings                         -- CA  4435  -7793     0  0
+CSX7            Sexsmith / Exeter                ON CA  4337  -8150     0  0
 CSY3            Sorel                            -- CA  4598  -7304     0  0
 CSY4            St Donat                         -- CA  4631  -7418     0  0
 CSZ3            St Jovite                        -- CA  4615  -7458     0  0
