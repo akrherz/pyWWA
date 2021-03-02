@@ -1,6 +1,7 @@
 """ Unidata LDM pqact bridge."""
 
 # 3rd Party
+from twisted.internet import task, reactor
 from pyiem.util import LOG
 from pyldm import ldmbridge
 
@@ -36,14 +37,20 @@ def bridge(callback, dbpool=None, isbinary=False, product_end=None):
       product_end (bytes): A custom product delimiter.
     """
 
-    def proxy(data):
+    def dbproxy(data):
         """standardized transaction callback."""
         defer = dbpool.runInteraction(callback, data)
         defer.addErrback(email_error, data)
         defer.addErrback(LOG.error)
 
+    def nodbproxy(data):
+        """Just do a deferred."""
+        defer = task.deferLater(reactor, 0, callback, data)
+        defer.addErrback(email_error, data)
+        defer.addErrback(LOG.error)
+
     proto = MyProductIngestor(
-        callback if dbpool is None else proxy, isbinary=isbinary
+        nodbproxy if dbpool is None else dbproxy, isbinary=isbinary
     )
     if product_end is not None:
         proto.product_end = product_end
