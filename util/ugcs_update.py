@@ -32,7 +32,7 @@ import os
 import zipfile
 
 import requests
-import geopandas as pd
+import geopandas as gpd
 from shapely.geometry import MultiPolygon
 from pyiem.util import utc, logger
 
@@ -157,15 +157,31 @@ def db_fixes(cursor, valid):
             )
 
 
+def truncate(cursor, valid, ugc, source):
+    """Stop the bleeding."""
+    cursor.execute(
+        "UPDATE ugcs SET end_ts = %s WHERE ugc = %s and end_ts is null "
+        "and source = %s",
+        (valid, ugc, source),
+    )
+    return cursor.rowcount
+
+
 def workflow(argv, pgconn, cursor):
     """Go Main Go"""
     valid = utc(int(argv[2]), int(argv[3]), int(argv[4]))
     zipfn = "%s.zip" % (argv[1],)
     shpfn = do_download(zipfn)
+    # track domain
+    source = zipfn[:2].replace("_", "")
+    LOG.info("Processing, using '%s' as the database source", source)
 
-    LOG.info("Processing")
-
-    df = pd.read_file(shpfn)
+    df = gpd.read_file(shpfn)
+    # Ensure CRS is set
+    df["geometry"] = df["geometry"].set_crs("EPSG:4326", allow_override=True)
+    if df.empty:
+        LOG.info("Abort, empty dataframe from shapefile read.")
+        sys.exit()
     # make all columns upper
     df.columns = [x.upper() if x != "geometry" else x for x in df.columns]
     # Compute the ugc column
@@ -183,18 +199,23 @@ def workflow(argv, pgconn, cursor):
         geo_type = "Z"
         df["ugc"] = df["STATE"] + geo_type + df["ZONE"]
         wfocol = "CWA"
+    # Check that UGCs are not all null
+    if df["ugc"].isna().all():
+        LOG.info("Abort as all ugcs are null")
+        sys.exit()
 
-    postgis = pd.read_postgis(
-        "SELECT * from ugcs where end_ts is null and substr(ugc, 3, 1) = %s",
+    postgis = gpd.read_postgis(
+        "SELECT * from ugcs where end_ts is null and source = %s",
         pgconn,
-        params=(geo_type,),
+        params=(source,),
         geom_col="geom",
         index_col="ugc",
     )
+    postgis["covered"] = False
     LOG.info(
         "Loaded %s '%s' type rows from the database",
         len(postgis.index),
-        geo_type,
+        source,
     )
 
     # Compute the area and then sort to order duplicated UGCs :/
@@ -212,36 +233,54 @@ def workflow(argv, pgconn, cursor):
     countdups = 0
     for ugc, row in gdf.iterrows():
         if ugc in postgis.index:
+            postgis.at[ugc, "covered"] = True
             # Some very small number, good enough
             current = postgis.loc[ugc]
-            if isinstance(current, pd.GeoDataFrame):
+            if isinstance(current, gpd.GeoDataFrame):
                 LOG.info("abort, more than one %s found in postgis", ugc)
                 sys.exit()
-            # LOG.debug(
-            #    "new: %s current: %s diff: %s",
-            #    row["area2163"],
-            #    current["area2163"],
-            #    abs(row["area2163"] - current["area2163"]),
-            # )
-            if (
-                abs(row["area2163"] - current["area2163"]) < 0.01
-                and row["NAME"] == current["name"]
-                and row[wfocol] == current["wfo"]
-            ):
+            dirty = False
+            # arb size decision
+            if abs(row["area2163"] - current["area2163"]) > 0.2:
+                dirty = True
+                LOG.debug(
+                    "%s updating sz diff %.2d -> %.2d",
+                    ugc,
+                    current["area2163"],
+                    row["area2163"],
+                )
+            elif row["NAME"] != current["name"]:
+                dirty = True
+                LOG.debug(
+                    "%s updating due to name change %s -> %s",
+                    ugc,
+                    current["name"],
+                    row["NAME"],
+                )
+            elif row[wfocol] != current["wfo"]:
+                dirty = True
+                LOG.debug(
+                    "%s updating due to wfo change %s -> %s",
+                    ugc,
+                    current["wfo"],
+                    row[wfocol],
+                )
+            if not dirty:
                 countdups += 1
                 continue
 
-        # Go find the previous geom and truncate the time
-        cursor.execute(
-            "UPDATE ugcs SET end_ts = %s WHERE ugc = %s and end_ts is null",
-            (valid, ugc),
+        res = truncate(cursor, valid, ugc, source)
+        LOG.info(
+            "%s creating new entry for %s",
+            "Truncating old" if res > 0 else "",
+            ugc,
         )
 
         # Finally, insert the new geometry
         cursor.execute(
-            "INSERT into ugcs (ugc, name, state, begin_ts, wfo, geom) "
-            "VALUES (%s, %s, %s, %s, %s, "
-            "ST_Multi(ST_SetSRID(ST_GeomFromEWKT(%s),4326)))",
+            "INSERT into ugcs (ugc, name, state, begin_ts, wfo, geom, "
+            "source) VALUES (%s, %s, %s, %s, %s, "
+            "ST_Multi(ST_SetSRID(ST_GeomFromEWKT(%s),4326)), %s)",
             (
                 ugc,
                 row["NAME"],
@@ -249,9 +288,14 @@ def workflow(argv, pgconn, cursor):
                 valid,
                 row[wfocol],
                 new_poly(row["geometry"]).wkt,
+                source,
             ),
         )
         countnew += 1
+
+    for ugc, _row in postgis[~postgis["covered"]].iterrows():
+        LOG.info("%s not found in update, truncating.")
+        truncate(cursor, valid, ugc, source)
 
     LOG.info("NEW: %s Dups: %s", countnew, countdups)
 
