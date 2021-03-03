@@ -283,9 +283,9 @@ def workflow(argv, pgconn, cursor):
             "ST_Multi(ST_SetSRID(ST_GeomFromEWKT(%s),4326)), %s)",
             (
                 ugc,
-                row["NAME"],
+                row["NAME"].strip(),
                 row["STATE"],
-                valid,
+                "1980-01-01" if res == 0 else valid,
                 row[wfocol],
                 new_poly(row["geometry"]).wkt,
                 source,
