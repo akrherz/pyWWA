@@ -31,6 +31,8 @@ def real_process(txn, raw):
     jmsgs = prod.get_jabbers(PYWWA_PRODUCT_URL)
     for (mess, htmlmess, xtra) in jmsgs:
         JABBER.send_message(mess, htmlmess, xtra)
+    if prod.warnings:
+        common.email_error("\n\n".join(prod.warnings), prod.text)
 
 
 def main():
