@@ -24,7 +24,20 @@ def run(date):
             yyyymmdd,
         )
         LOG.debug(cmd)
-        subprocess.call(cmd, shell=True)
+        proc = subprocess.Popen(
+            cmd,
+            shell=True,
+            stderr=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+        )
+        (stdout, stderr) = proc.communicate()
+        if stdout != b"" or stderr != b"":
+            LOG.info(
+                "%s resulted in\nstdout: %s\nstderr: %s",
+                cmd,
+                stdout.decode("ascii", "ignore"),
+                stderr.decode("ascii", "ignore"),
+            )
 
     rpath = "/stage/IowaNexrad3/%s" % (date.strftime("%Y/%m"),)
     cmd = (
