@@ -91,10 +91,9 @@ def send_jabber_message(plain, html, extra):
     if url is None:
         _send()
         return
-    print(f"fetching {url}")
-    d = treq.get(url)
-    d.addCallback(_send)
+    d = treq.get(url, timeout=15)
     d.addErrback(_send)
+    d.addCallback(_send)
 
 
 def main():
