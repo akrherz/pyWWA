@@ -11,7 +11,6 @@ with watches.  Lets try to explain
     product_issue <- When was this product issued by the NWS
 """
 # 3rd Party
-from bs4 import BeautifulSoup
 import treq
 from twisted.internet import reactor
 from twisted.mail.smtp import SMTPSenderFactory
@@ -82,39 +81,20 @@ def step2(_dummy, text_product):
 
 
 def send_jabber_message(plain, html, extra):
-    """Some hacky logic to get ahead of web crawlers."""
+    """Request the twitter_media image first, so to populate memcache."""
 
     def _send(*_args, **_kwargs):
         """Just send it already :("""
         JABBER.send_message(plain, html, extra)
 
-    def _cbBody(body):
-        """Finally got the HTML"""
-        soup = BeautifulSoup(body, "html.parser")
-        url = soup.find("meta", property="og:image")["content"]
-        url = url.replace("https", "http").replace(
-            "mesonet.agron.iastate.edu", "iem.local"
-        )
-        d = treq.get(url)
-        d.addCallback(_send)
-        d.addErrback(_send)
-
-    def _cb(response):
-        """Got a response."""
-        d = treq.text_content(response)
-        d.addCallback(_cbBody)
-        d.addErrback(_send)
-
-    url = plain.split()[-1]
-    if url.find("/f/") > 0:
-        url = url.replace("https", "http").replace(
-            "mesonet.agron.iastate.edu", "iem.local"
-        )
-        d = treq.get(url)
-        d.addCallback(_cb)
-        d.addErrback(_send)
-    else:
+    url = extra.get("twitter_media")
+    if url is None:
         _send()
+        return
+    print(f"fetching {url}")
+    d = treq.get(url)
+    d.addCallback(_send)
+    d.addErrback(_send)
 
 
 def main():
