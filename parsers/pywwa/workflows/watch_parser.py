@@ -26,6 +26,8 @@ def real_process(txn, raw):
     prod.compute_wfos(txn)
     for (txt, html, xtra) in prod.get_jabbers(IEM_URL):
         JABBER.send_message(txt, html, xtra)
+    if prod.warnings:
+        common.email_error("\n".join(prod.warnings), raw)
 
 
 def main():

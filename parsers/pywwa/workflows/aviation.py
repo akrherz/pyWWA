@@ -55,6 +55,8 @@ def process_data(data):
     except Exception as myexp:
         common.email_error(myexp, data)
         return None
+    if prod.warnings:
+        common.email_error("\n".join(prod.warnings), data)
     defer = DBPOOL.runInteraction(prod.sql)
     defer.addCallback(final_step, prod)
     defer.addErrback(common.email_error, data)
