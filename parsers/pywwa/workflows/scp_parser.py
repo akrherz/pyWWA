@@ -15,6 +15,8 @@ def real_process(txn, raw):
     prod = parser(raw)
     if common.dbwrite_enabled():
         prod.sql(txn)
+    if prod.warnings:
+        common.email_error("\n".join(prod.warnings), raw)
 
 
 def main():

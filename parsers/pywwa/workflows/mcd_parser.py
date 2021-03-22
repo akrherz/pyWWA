@@ -61,6 +61,8 @@ def real_process(txn, raw):
         JABBER.send_message(j[0][0], j[0][1], j[0][2])
     if common.dbwrite_enabled():
         prod.database_save(txn)
+    if prod.warnings:
+        common.email_error("\n".join(prod.warnings), raw)
 
 
 def main():

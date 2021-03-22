@@ -17,6 +17,8 @@ def processor(txn, text):
     prod = parser(text, utcnow=common.utcnow())
     if common.dbwrite_enabled():
         prod.sql(txn)
+    if prod.warnings:
+        common.email_error("\n".join(prod.warnings), text)
     return prod
 
 

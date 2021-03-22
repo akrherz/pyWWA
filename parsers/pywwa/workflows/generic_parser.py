@@ -65,6 +65,8 @@ def really_process_data(txn, buf):
     """
     myargs = (sqlraw, product_id, giswkt)
     txn.execute(sql, myargs)
+    if prod.warnings:
+        common.email_error("\n".join(prod.warnings), buf)
 
 
 def main():

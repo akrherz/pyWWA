@@ -62,7 +62,8 @@ def real_parser(txn, buf):
     # when a WFO fails to update the date in their MND
     if (utcnow - nws.valid).days > 180 or (utcnow - nws.valid).days < -180:
         raise Exception(f"Very Latent Product! {nws.valid}")
-
+    if nws.warnings:
+        common.email_error("\n".join(nws.warnings), buf)
     if nws.afos is None:
         if nws.source[0] not in ["K", "P"]:
             return None

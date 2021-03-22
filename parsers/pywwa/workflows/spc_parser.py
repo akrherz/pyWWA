@@ -22,6 +22,8 @@ def real_parser(txn, buf):
     spc.compute_wfos(txn)
     if common.dbwrite_enabled():
         spc.sql(txn)
+    if spc.warnings:
+        common.email_error("\n".join(spc.warnings), buf)
     jmsgs = spc.get_jabbers("")
     for (txt, html, xtra) in jmsgs:
         JABBER.send_message(txt, html, xtra)

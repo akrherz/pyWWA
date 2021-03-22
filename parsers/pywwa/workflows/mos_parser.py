@@ -33,6 +33,8 @@ def real_process(text):
     prod = parser(text)
     if not common.dbwrite_enabled():
         return
+    if prod.warnings:
+        common.email_error("\n".join(prod.warnings), text)
     df = DBPOOL.runInteraction(prod.sql)
     df.addCallback(got_data)
     df.addErrback(common.email_error, text)
