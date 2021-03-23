@@ -57,3 +57,5 @@ for fn in $gp; do
 done
 
 cat examples/SAW.txt | python parsers/watch_parser.py $OPTS || exit 2
+
+cat examples/TAF.txt | python parsers/taf_parser.py $OPTS || exit 2
