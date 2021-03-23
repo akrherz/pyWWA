@@ -1,5 +1,5 @@
-# Get from pypi
-pyIEM
+# dev build for now
+git+https://github.com/akrherz/pyIEM.git
 # LDM bridge
 git+https://github.com/akrherz/pyLDM.git
 # memcached
