@@ -5,6 +5,8 @@ import os
 import re
 
 # Third Party
+import treq
+from twisted.web import client as webclient
 from pyiem.util import utc, LOG
 from twisted.internet import reactor
 from twisted.words.xish import domish, xpath
@@ -16,6 +18,8 @@ from twisted.words.protocols.jabber import xmlstream, jid
 # Local
 from pywwa.common import SETTINGS, CTX
 
+# http://stackoverflow.com/questions/7016602
+webclient._HTTP11ClientFactory.noisy = False
 MYREGEX = "[\x00-\x08\x0b\x0c\x0e-\x1F\uD800-\uDFFF\uFFFE\uFFFF]"
 ILLEGAL_XML_CHARS_RE = re.compile(MYREGEX)
 
@@ -205,9 +209,23 @@ class JabberClient:
                 xelem[key] = ",".join(xtra[key])
             else:
                 xelem[key] = xtra[key]
-        # So send_message may be getting called from 'threads' and the writing
-        # of data to the transport is not thread safe, so we must ensure that
-        # this gets called from the main thread
-        reactor.callFromThread(
-            self.xmlstream.send, message  # @UndefinedVariable
-        )
+
+        def _reallysend(*_args, **_kwargs):
+            """Do it!"""
+            # So send_message may be getting called from 'threads' and the
+            # writing of data to the transport is not thread safe, so we must
+            # ensure that this gets called from the main thread
+            reactor.callFromThread(
+                self.xmlstream.send, message  # @UndefinedVariable
+            )
+
+        # If we have twitter_media, we want to attempt to get the content
+        # cached before iembot asks for it a million times
+        url = xtra.get("twitter_media")
+        if url is None:
+            _reallysend()
+            return
+        # LOG.debug("Twitter Media Fetch %s", url)
+        d = treq.get(url, timeout=15)
+        d.addErrback(_reallysend)
+        d.addCallback(_reallysend)
