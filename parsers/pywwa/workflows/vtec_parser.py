@@ -11,7 +11,6 @@ with watches.  Lets try to explain
     product_issue <- When was this product issued by the NWS
 """
 # 3rd Party
-import treq
 from twisted.internet import reactor
 from twisted.mail.smtp import SMTPSenderFactory
 from pyiem.util import LOG
@@ -77,23 +76,7 @@ def step2(_dummy, text_product):
     ):
         if xtra.get("channels", "") == "":
             common.email_error("xtra[channels] is empty!", text_product.text)
-        send_jabber_message(plain, html, xtra)
-
-
-def send_jabber_message(plain, html, extra):
-    """Request the twitter_media image first, so to populate memcache."""
-
-    def _send(*_args, **_kwargs):
-        """Just send it already :("""
-        JABBER.send_message(plain, html, extra)
-
-    url = extra.get("twitter_media")
-    if url is None:
-        _send()
-        return
-    d = treq.get(url, timeout=15)
-    d.addErrback(_send)
-    d.addCallback(_send)
+        JABBER.send_message(plain, html, xtra)
 
 
 def main():
