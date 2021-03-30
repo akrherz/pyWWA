@@ -38,19 +38,20 @@ def real_process(txn, data):
         # Only take 4 char IDs :/
         if len(sect[:100].split()[0]) != 4:
             continue
-        # print("%s%s %s %s %s" % (prod.afos[:3], sect[1:4], prod.source,
-        #                          prod.valid, prod.wmo))
+        # The NWS cut some corners and ended up not using proper TTAAII values
+        # for non US data.
+        ttaaii = prod.wmo
+        if sect[0] != "K" and ttaaii[2:4] == "US":
+            ttaaii = "%s%s%s%s" % (ttaaii[:2], sect[0], sect[0], ttaaii[4:6])
         txn.execute(
-            """
-            INSERT into products
-            (pil, data, source, entered, wmo) values (%s, %s, %s, %s, %s)
-        """,
+            "INSERT into products (pil, data, source, entered, wmo) "
+            "values (%s, %s, %s, %s, %s)",
             (
                 prod.afos[:3] + sect[1:4],
                 header + sect.replace(";;;", "\n"),
                 prod.source,
                 prod.valid,
-                prod.wmo,
+                ttaaii,
             ),
         )
 
