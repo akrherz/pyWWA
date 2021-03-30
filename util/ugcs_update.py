@@ -169,7 +169,9 @@ def truncate(cursor, valid, ugc, source):
 
 def workflow(argv, pgconn, cursor):
     """Go Main Go"""
-    valid = utc(int(argv[2]), int(argv[3]), int(argv[4]))
+    # NWS correspondence indicates the date on the website is assumed to be
+    # an implementation time at 18 z of that date.
+    valid = utc(int(argv[2]), int(argv[3]), int(argv[4]), 18)
     zipfn = "%s.zip" % (argv[1],)
     shpfn = do_download(zipfn)
     # track domain
