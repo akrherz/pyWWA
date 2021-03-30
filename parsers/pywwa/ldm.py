@@ -27,7 +27,7 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
         self.local_callback(data)
 
 
-def bridge(callback, dbpool=None, isbinary=False, product_end=None):
+def bridge(callback, dbpool=None, isbinary=False, product_end=None, cb2=None):
     """Build a pqact bridge.
 
     Params:
@@ -40,12 +40,16 @@ def bridge(callback, dbpool=None, isbinary=False, product_end=None):
     def dbproxy(data):
         """standardized transaction callback."""
         defer = dbpool.runInteraction(callback, data)
+        if cb2:
+            defer.addCallback(cb2)
         defer.addErrback(email_error, data)
         defer.addErrback(LOG.error)
 
     def nodbproxy(data):
         """Just do a deferred."""
         defer = task.deferLater(reactor, 0, callback, data)
+        if cb2:
+            defer.addCallback(cb2)
         defer.addErrback(email_error, data)
         defer.addErrback(LOG.error)
 
