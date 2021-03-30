@@ -17,24 +17,29 @@ JABBER = make_jabber_client()
 
 def real_parser(txn, buf):
     """Actually process"""
-    spc = parser(buf)
+    prod = parser(buf)
     # spc.draw_outlooks()
-    spc.compute_wfos(txn)
+    prod.compute_wfos(txn)
     if common.dbwrite_enabled():
-        spc.sql(txn)
-    if spc.warnings:
-        common.email_error("\n".join(spc.warnings), buf)
-    jmsgs = spc.get_jabbers("")
+        prod.sql(txn)
+    if prod.warnings:
+        common.email_error("\n".join(prod.warnings), buf)
+    return prod
+
+
+def do_jabber(prod):
+    """Callback after database work is done."""
+    jmsgs = prod.get_jabbers("")
     for (txt, html, xtra) in jmsgs:
         JABBER.send_message(txt, html, xtra)
     LOG.info(
-        "Sent %s messages for product %s", len(jmsgs), spc.get_product_id()
+        "Sent %s messages for product %s", len(jmsgs), prod.get_product_id()
     )
 
 
 def main():
     """Go Main Go."""
-    bridge(real_parser, dbpool=get_database("postgis"))
+    bridge(real_parser, dbpool=get_database("postgis"), cb2=do_jabber)
     reactor.run()  # @UndefinedVariable
 
 
