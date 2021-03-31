@@ -19,7 +19,6 @@ def real_parser(txn, buf):
     """Actually process"""
     prod = parser(buf)
     # spc.draw_outlooks()
-    prod.compute_wfos(txn)
     if common.dbwrite_enabled():
         prod.sql(txn)
     if prod.warnings:
