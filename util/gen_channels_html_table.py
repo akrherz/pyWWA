@@ -10,6 +10,7 @@ from pyiem.nws.nwsli import NWSLI
 from pyiem.nws.products.vtec import parser as vtec_parser
 from pyiem.nws.products import parser as productparser
 
+CHANNELSFN = "/home/akrherz/projects/iem/htdocs/projects/iembot/channels.html"
 LOG = logger()
 ugc_dict = {}
 nwsli_dict = {}
@@ -34,6 +35,7 @@ D = {
     "10-330": "https://www.nws.noaa.gov/directives/sym/pd01003030curr.pdf",
     "10-401": "https://www.nws.noaa.gov/directives/sym/pd01004001curr.pdf",
     "10-511": "https://www.nws.noaa.gov/directives/sym/pd01005011curr.pdf",
+    "10-512": "https://www.nws.noaa.gov/directives/sym/pd01005012curr.pdf",
     "10-513": "https://www.nws.noaa.gov/directives/sym/pd01005013curr.pdf",
     "10-515": "https://www.nws.noaa.gov/directives/sym/pd01005015curr.pdf",
     "10-517": "https://www.nws.noaa.gov/directives/sym/pd01005017curr.pdf",
@@ -42,6 +44,12 @@ D = {
     "10-922": "https://www.nws.noaa.gov/directives/sym/pd01009022curr.pdf",
     "10-1004": "https://www.nws.noaa.gov/directives/sym/pd01010004curr.pdf",
     "10-1701": "https://www.nws.noaa.gov/directives/sym/pd01017001curr.pdf",
+}
+SPECIAL = {
+    "PTSDY1": "Storm Prediction Center Day 1 Convective Outlook",
+    "PTSDY2": "Storm Prediction Center Day 2 Convective Outlook",
+    "PFWFD1": "Storm Prediction Center Day 1 Fire Weather Outlook",
+    "PFWFD2": "Storm Prediction Center Day 2 Fire Weather Outlook",
 }
 
 # TODO: TCV TSU ADR CDW DSA EQW HMW HPA LEw NUW RHW VOW PQS CWA
@@ -153,6 +161,46 @@ GEN_PRODUCTS = [
     dict(afos="PFM", directive="10-1701", channels=S2),
     dict(afos="PNS", directive="10-1701", channels=S2),
     dict(afos="PSH", directive="10-1701", channels=S2),
+    dict(
+        afos="PFWFD1",
+        directive="10-512",
+        channels=[
+            C1,
+            "&lt;wfo&gt;.SPCFD1",
+            "&lt;wfo&gt;.SPCFD1.&lt;threshold&gt;",
+        ],
+        notes=("There is no present means for county/zone based channels."),
+    ),
+    dict(
+        afos="PFWFD2",
+        directive="10-512",
+        channels=[
+            C1,
+            "&lt;wfo&gt;.SPCFD2",
+            "&lt;wfo&gt;.SPCFD2.&lt;threshold&gt;",
+        ],
+        notes=("There is no present means for county/zone based channels."),
+    ),
+    dict(
+        afos="PTSDY1",
+        directive="10-512",
+        channels=[
+            C1,
+            "&lt;wfo&gt;.SPCDY1",
+            "&lt;wfo&gt;.SPCDY1.&lt;threshold&gt;",
+        ],
+        notes=("There is no present means for county/zone based channels."),
+    ),
+    dict(
+        afos="PTSDY2",
+        directive="10-512",
+        channels=[
+            C1,
+            "&lt;wfo&gt;.SPCDY2",
+            "&lt;wfo&gt;.SPCDY2.&lt;threshold&gt;",
+        ],
+        notes=("There is no present means for county/zone based channels."),
+    ),
     dict(afos="REC", directive="10-1701", channels=S2),
     dict(afos="RER", directive="10-1004", channels=S2),
     dict(afos="RRM", directive="10-1701", channels=S2),
@@ -185,7 +233,13 @@ GEN_PRODUCTS = [
 
 def get_data(afos):
     """Return the text data for a given afos identifier"""
-    return open(("../examples/%s.txt") % (afos,)).read()
+    return (
+        open(f"../examples/{afos}.txt", "rb")
+        .read()
+        .decode("ascii")
+        .replace("\r", "")
+        .replace("\001\n", "")
+    )
 
 
 def load_dicts():
@@ -213,9 +267,9 @@ def load_dicts():
         nwsli_dict[row["nwsli"]] = NWSLI(row["nwsli"], name=nm)
 
 
-def do_generic():
+def do_generic(fh):
     """Handle the generic case."""
-    print(
+    fh.write(
         """
     <h3>NWS Local Office / National Products</h3>
     <table class="table table-bordered table-condensed">
@@ -241,21 +295,19 @@ def do_generic():
             LOG.exception(exp)
             continue
         j = v.get_jabbers("https://mesonet.agron.iastate.edu/p.php")
-        jmsg = ""
-        tweet = ""
         channels = []
-        for (_, html, xtra) in j:
-            tweet += xtra["twitter"] + "<br />"
-            jmsg += html
-            if isinstance(xtra["channels"], list):
-                xtra["channels"] = ",".join(xtra["channels"])
-            for channel in xtra["channels"].split(","):
-                if channel not in channels:
-                    channels.append(channel)
+        _, html, xtra = j[0]
+        tweet = xtra["twitter"] + "<br />"
+        jmsg = html
+        if isinstance(xtra["channels"], list):
+            xtra["channels"] = ",".join(xtra["channels"])
+        for channel in xtra["channels"].split(","):
+            if channel not in channels:
+                channels.append(channel)
         channels.sort()
-        print(
-            """<tr><td><a name="channel_%s"/>
-<a id="%s_btn" class="btn btn-small" role="button"
+        fh.write(
+            """<tr><td>
+<a id="channel_%s" class="btn btn-small" role="button"
  href="javascript: revdiv('%s');"><i class="fa fa-plus"></i></a>
         </td><td>%s (%s)</td><td><a href="%s">%s</a></td><td>%s</td></tr>
         <tr><td colspan="4"><div id="%s" style="display:none;">
@@ -274,8 +326,7 @@ def do_generic():
             % (
                 afos,
                 afos,
-                afos,
-                prodDefinitions.get(afos, afos),
+                SPECIAL.get(afos, prodDefinitions.get(afos, afos)),
                 afos,
                 D[entry["directive"]],
                 entry["directive"],
@@ -298,12 +349,12 @@ def do_generic():
             )
         )
 
-    print("""</table>""")
+    fh.write("""</table>""")
 
 
-def do_vtec():
+def do_vtec(fh):
     """Do VTEC"""
-    print(
+    fh.write(
         """
     <h3>NWS Products with P-VTEC and/or H-VTEC Included</h3>
     <table class="table table-bordered table-condensed">
@@ -315,11 +366,12 @@ def do_vtec():
     )
     for entry in VTEC_PRODUCTS:
         afos = entry["afos"]
-        if afos == "":
-            continue
         v = vtec_parser(
             get_data(afos), ugc_provider=ugc_dict, nwsli_provider=nwsli_dict
         )
+        if v.afos is None:
+            LOG.info("afos was None for %s", entry)
+            continue
         j = v.get_jabbers(
             "https://mesonet.agron.iastate.edu/vtec/",
             "https://mesonet.agron.iastate.edu/vtec/",
@@ -334,9 +386,9 @@ def do_vtec():
                 if channel not in channels:
                     channels.append(channel)
         channels.sort()
-        print(
-            """<tr><td><a name="channel_%s"/>
-        <a id="%s_btn" class="btn btn-small" role="button"
+        fh.write(
+            """<tr><td>
+        <a id="channel_%s" class="btn btn-small" role="button"
  href="javascript: revdiv('%s');"><i class="fa fa-plus"></i></a>
         </td><td>%s (%s)</td><td><a href="%s">%s</a></td><td>%s</td></tr>
         <tr><td colspan="4"><div id="%s" style="display:none;">
@@ -353,7 +405,6 @@ def do_vtec():
         </tr>
         """
             % (
-                afos,
                 afos,
                 afos,
                 prodDefinitions.get(afos, afos),
@@ -379,47 +430,48 @@ def do_vtec():
             )
         )
 
-    print("""</table>""")
+    fh.write("""</table>""")
 
 
 def main():
     """Do Something Fun"""
     load_dicts()
-    print(
+    with open(CHANNELSFN, "w") as fh:
+        fh.write(
+            """
+        <style>
+        .badge {
+            background-color: #EEEEEE;
+            color: #000;
+        }
+        .dl-horizontal dt {
+            white-space: normal;
+            padding-bottom: 10px;
+        }
+        </style>
         """
-    <style>
-    .badge {
-        background-color: #EEEEEE;
-        color: #000;
-    }
-    .dl-horizontal dt {
-        white-space: normal;
-        padding-bottom: 10px;
-    }
-    </style>
-    """
-    )
-    do_vtec()
-    do_generic()
+        )
+        do_vtec(fh)
+        do_generic(fh)
 
-    print(
+        fh.write(
+            """
+        <script>
+        function revdiv(myid){
+        var $a = $('#'+myid);
+        if ($a.css('display') == 'block'){
+            $a.css('display', 'none');
+            $("#channel_"+myid).html('<i class="fa fa-plus"></i>');
+        } else {
+            window.location.hash = '#channel_'+myid;
+            $("#channel_"+myid).parent().parent().addClass('info');
+            $a.css('display', 'block');
+            $("#channel_"+myid).html('<i class="fa fa-minus"></i>');
+        }
+        }
+        </script>
         """
-    <script>
-    function revdiv(myid){
-      var $a = $('#'+myid);
-      if ($a.css('display') == 'block'){
-        $a.css('display', 'none');
-        $("#"+myid+"_btn").html('<i class="fa fa-plus"></i>');
-      } else {
-        window.location.hash = '#channel_'+myid;
-        $("#"+myid+"_btn").parent().parent().addClass('info');
-        $a.css('display', 'block');
-        $("#"+myid+"_btn").html('<i class="fa fa-minus"></i>');
-      }
-    }
-    </script>
-    """
-    )
+        )
 
 
 if __name__ == "__main__":
