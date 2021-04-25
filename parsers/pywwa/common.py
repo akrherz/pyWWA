@@ -24,14 +24,13 @@ from pyiem.util import LOG, utc, CustomFormatter
 
 # Local Be careful of circeref here
 import pywwa
-from pywwa import SETTINGS
 from pywwa.cmdline import parse_cmdline
 from pywwa.database import get_sync_dbconn
 from pywwa.xmpp import make_jabber_client
 
 # http://bugs.python.org/issue7980
 datetime.datetime.strptime("2013", "%Y")
-
+SETTINGS = pywwa.SETTINGS
 EMAIL_TIMESTAMPS = []
 
 

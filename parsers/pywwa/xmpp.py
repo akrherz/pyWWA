@@ -17,12 +17,12 @@ from twisted.words.protocols.jabber import xmlstream, jid
 
 # Local
 import pywwa
-from pywwa import SETTINGS
 
 # http://stackoverflow.com/questions/7016602
 webclient._HTTP11ClientFactory.noisy = False
 MYREGEX = "[\x00-\x08\x0b\x0c\x0e-\x1F\uD800-\uDFFF\uFFFE\uFFFF]"
 ILLEGAL_XML_CHARS_RE = re.compile(MYREGEX)
+SETTINGS = pywwa.SETTINGS
 
 
 def make_jabber_client(resource_prefix=None):

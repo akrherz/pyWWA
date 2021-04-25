@@ -63,7 +63,7 @@ def load_ignorelist():
 def process_data(data):
     """Callback when we have data to process"""
     try:
-        real_processor(data)
+        return real_processor(data)
     except Exception as exp:
         common.email_error(exp, data, -1)
 
@@ -105,6 +105,7 @@ def real_processor(text):
             continue
         deffer = IEMDB.runInteraction(do_db, mtr)
         deffer.addErrback(common.email_error, collect.unixtext)
+    return collect
 
 
 def do_db(txn, mtr):
