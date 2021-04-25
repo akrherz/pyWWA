@@ -671,6 +671,7 @@ def main2(_res):
 def main():
     """We startup."""
     # Need to find the shef_workspace folder
+    common.main(with_jabber=False)
     origcwd = os.getcwd()
     path = None
     for path in get_search_paths():

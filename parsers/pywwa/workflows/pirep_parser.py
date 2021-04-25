@@ -9,13 +9,11 @@ from pyiem.nws.products.pirep import parser as pirepparser
 
 # Local
 from pywwa import common, get_table_file
-from pywwa.xmpp import make_jabber_client
 from pywwa.ldm import bridge
 from pywwa.database import get_database
 
 PIREPS = {}
 DBPOOL = get_database("postgis")
-JABBER = make_jabber_client()
 # Load LOCS table
 LOCS = {}
 
@@ -101,7 +99,7 @@ def real_parser(txn, buf):
     if prod.warnings:
         common.email_error("\n".join(prod.warnings), buf)
     for msg in j:
-        JABBER.send_message(msg[0], msg[1], msg[2])
+        common.send_message(msg[0], msg[1], msg[2])
     if common.dbwrite_enabled():
         prod.sql(txn)
 
@@ -114,6 +112,7 @@ def ready(_bogus):
 
 def main():
     """GO Main Go."""
+    common.main()
     df = DBPOOL.runInteraction(load_locs)
     df.addCallback(ready)
     df.addErrback(common.shutdown)

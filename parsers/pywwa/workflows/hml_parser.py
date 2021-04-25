@@ -21,6 +21,7 @@ def real_parser(txn, buf):
 
 def main():
     """Go Main Go."""
+    common.main(with_jabber=False)
     bridge(real_parser, dbpool=get_database("hml"))
     reactor.run()  # @UndefinedVariable
 

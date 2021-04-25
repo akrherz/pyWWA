@@ -12,13 +12,11 @@ from pyiem.network import Table as NetworkTable
 
 # Local
 from pywwa import common
-from pywwa.xmpp import make_jabber_client
 from pywwa.ldm import bridge
 from pywwa.database import get_database
 
 DBPOOL = get_database("iem")
 NT = NetworkTable("NWSCLI", only_online=False)
-JABBER = make_jabber_client()
 
 
 def processor(txn, text):
@@ -30,7 +28,7 @@ def processor(txn, text):
         common.SETTINGS.get("pywwa_product_url", "pywwa_product_url")
     )
     for j in jres:
-        JABBER.send_message(j[0], j[1], j[2])
+        common.send_message(j[0], j[1], j[2])
     if prod.warnings:
         common.email_error("\n".join(prod.warnings), text)
     return prod
@@ -38,6 +36,7 @@ def processor(txn, text):
 
 def main():
     """Go Main Go."""
+    common.main()
     bridge(processor, dbpool=DBPOOL)
     reactor.run()
 

@@ -82,6 +82,7 @@ def real_parser(txn, buf):
 
 def main():
     """Fire up our workflow."""
+    common.main(with_jabber=False)
     bridge(process_data)
     reactor.run()  # @UndefinedVariable
 

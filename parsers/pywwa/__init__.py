@@ -4,8 +4,15 @@ import inspect
 import json
 import os
 
+# Local
+from .cmdline import parse_cmdline
+
 # Shared configuration
 SETTINGS = {}
+# Eventually updated by command line parsing
+CTX = parse_cmdline([])
+# Eventually updated to be a JABBER instance
+JABBER = None
 
 
 def get_table_file(filename):

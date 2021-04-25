@@ -2,7 +2,6 @@
 # stdlib
 import argparse
 from datetime import datetime, timezone
-import os
 
 
 def parse_cmdline(argv):
@@ -64,8 +63,6 @@ def parse_cmdline(argv):
         action="store_true",
         help="Disable all XMPP functionality.",
     )
-    # HACK not to do things during testing.
-    args = argv[1:]
-    if os.path.basename(argv[0]) == "pytest":
-        args = []
-    return parser.parse_args(args)
+    if argv:
+        argv = argv[1:]
+    return parser.parse_args(argv)

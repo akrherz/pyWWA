@@ -14,7 +14,6 @@ from pyiem.util import get_properties, LOG
 
 # Local
 from pywwa import common, SETTINGS
-from pywwa.xmpp import make_jabber_client
 from pywwa.ldm import bridge
 from pywwa.database import get_database, load_metar_stations
 
@@ -36,7 +35,6 @@ metarcollect.JABBER_SITES = {
 }
 # Try to prevent Jabber message dups
 JABBER_MESSAGES = []
-JABBER = make_jabber_client()
 # List of sites to IGNORE and not send Jabber Messages for.
 # iem property `pywwa_metar_ignorelist` should be a comma delimited 4 char ids
 IGNORELIST = []
@@ -92,7 +90,7 @@ def real_processor(text):
                     skip = True
         JABBER_MESSAGES.append(jmsg[0])
         if not skip:
-            JABBER.send_message(*jmsg)
+            common.send_message(*jmsg)
     if not common.dbwrite_enabled():
         return
     for mtr in collect.metars:
@@ -146,6 +144,7 @@ def ready(_):
 
 def main():
     """Run once at startup"""
+    common.main()
     df = IEMDB.runInteraction(load_metar_stations, NWSLI_PROVIDER)
     df.addCallback(ready)
     df.addErrback(LOG.error)

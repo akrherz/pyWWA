@@ -6,7 +6,6 @@ from pyiem.nws.products.sps import parser
 
 # Local
 from pywwa import common
-from pywwa.xmpp import make_jabber_client
 from pywwa.ldm import bridge
 from pywwa.database import load_ugcs_nwsli
 from pywwa.database import get_database
@@ -15,7 +14,6 @@ POSTGIS = get_database("postgis")
 PYWWA_PRODUCT_URL = common.SETTINGS.get(
     "pywwa_product_url", "pywwa_product_url"
 )
-JABBER = make_jabber_client()
 UGC_DICT = {}
 NWSLI_DICT = {}
 
@@ -30,13 +28,14 @@ def real_process(txn, raw):
         prod.sql(txn)
     jmsgs = prod.get_jabbers(PYWWA_PRODUCT_URL)
     for (mess, htmlmess, xtra) in jmsgs:
-        JABBER.send_message(mess, htmlmess, xtra)
+        common.send_message(mess, htmlmess, xtra)
     if prod.warnings:
         common.email_error("\n\n".join(prod.warnings), prod.text)
 
 
 def main():
     """Go Main Go."""
+    common.main()
     load_ugcs_nwsli(UGC_DICT, NWSLI_DICT)
     bridge(real_process, dbpool=POSTGIS)
     reactor.run()

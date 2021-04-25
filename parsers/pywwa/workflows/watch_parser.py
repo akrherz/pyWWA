@@ -7,12 +7,10 @@ from pyiem.nws.products.saw import parser as sawparser
 
 # Local
 from pywwa import common
-from pywwa.xmpp import make_jabber_client
 from pywwa.ldm import bridge
 from pywwa.database import get_database
 
 IEM_URL = common.SETTINGS.get("pywwa_watch_url", "pywwa_watch_url")
-JABBER = make_jabber_client()
 
 
 def real_process(txn, raw):
@@ -25,13 +23,14 @@ def real_process(txn, raw):
         prod.sql(txn)
     prod.compute_wfos(txn)
     for (txt, html, xtra) in prod.get_jabbers(IEM_URL):
-        JABBER.send_message(txt, html, xtra)
+        common.send_message(txt, html, xtra)
     if prod.warnings:
         common.email_error("\n".join(prod.warnings), raw)
 
 
 def main():
     """Go Main Go"""
+    common.main()
     bridge(real_process, dbpool=get_database("postgis"))
     reactor.run()  # @UndefinedVariable
 

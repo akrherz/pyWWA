@@ -7,12 +7,10 @@ from pyiem.nws.products.spcpts import parser
 
 # Local
 from pywwa import common
-from pywwa.xmpp import make_jabber_client
 from pywwa.ldm import bridge
 from pywwa.database import get_database
 
 WAITFOR = 20
-JABBER = make_jabber_client()
 
 
 def real_parser(txn, buf):
@@ -30,7 +28,7 @@ def do_jabber(prod):
     """Callback after database work is done."""
     jmsgs = prod.get_jabbers("")
     for (txt, html, xtra) in jmsgs:
-        JABBER.send_message(txt, html, xtra)
+        common.send_message(txt, html, xtra)
     LOG.info(
         "Sent %s messages for product %s", len(jmsgs), prod.get_product_id()
     )
@@ -38,6 +36,7 @@ def do_jabber(prod):
 
 def main():
     """Go Main Go."""
+    common.main()
     bridge(real_parser, dbpool=get_database("postgis"), cb2=do_jabber)
     reactor.run()  # @UndefinedVariable
 

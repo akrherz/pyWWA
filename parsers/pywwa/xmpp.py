@@ -16,7 +16,8 @@ from twisted.words.protocols.jabber import client as jclient
 from twisted.words.protocols.jabber import xmlstream, jid
 
 # Local
-from pywwa.common import SETTINGS, CTX
+import pywwa
+from pywwa import SETTINGS
 
 # http://stackoverflow.com/questions/7016602
 webclient._HTTP11ClientFactory.noisy = False
@@ -26,13 +27,17 @@ ILLEGAL_XML_CHARS_RE = re.compile(MYREGEX)
 
 def make_jabber_client(resource_prefix=None):
     """ Generate a jabber client, please """
-    if CTX.disable_xmpp:
+    if pywwa.CTX.disable_xmpp:
         LOG.info("XMPP disabled via command line.")
-        return NOOPXMPP()
+        pywwa.JABBER = NOOPXMPP()
+        return pywwa.JABBER
 
     if resource_prefix is None:
         # Build based on the calling script's name
-        frameinfo = inspect.stack()[-1]
+        frames = inspect.stack()
+        frameinfo = frames[-1]
+        if frameinfo.filename == "xmpp.py":
+            frameinfo = frames[-2]
         resource_prefix = os.path.basename(frameinfo.filename)[:-3]
 
     myjid = jid.JID(
@@ -48,21 +53,20 @@ def make_jabber_client(resource_prefix=None):
         myjid, SETTINGS.get("pywwa_jabber_password", "secret")
     )
 
-    jabber = JabberClient(myjid)
+    pywwa.JABBER = JabberClient(myjid)
 
-    factory.addBootstrap("//event/stream/authd", jabber.authd)
+    factory.addBootstrap("//event/stream/authd", pywwa.JABBER.authd)
     factory.addBootstrap("//event/client/basicauth/invaliduser", debug)
     factory.addBootstrap("//event/client/basicauth/authfailed", debug)
     factory.addBootstrap("//event/stream/error", debug)
-    factory.addBootstrap(xmlstream.STREAM_END_EVENT, jabber.disconnect)
+    factory.addBootstrap(xmlstream.STREAM_END_EVENT, pywwa.JABBER.disconnect)
 
     reactor.connectTCP(
         SETTINGS.get("pywwa_jabber_host", "localhost"),  # @UndefinedVariable
         5222,
         factory,
     )
-
-    return jabber
+    return pywwa.JABBER
 
 
 def message_processor(stanza):

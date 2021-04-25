@@ -6,11 +6,8 @@ from pyiem.nws.product import TextProduct
 
 # Local
 from pywwa import common
-from pywwa.xmpp import make_jabber_client
 from pywwa.ldm import bridge
 from pywwa.database import get_database
-
-JABBER = make_jabber_client()
 
 
 def compute_afos(textprod):
@@ -75,11 +72,12 @@ def really_process_data(txn, data):
         common.SETTINGS.get("pywwa_product_url", "pywwa_product_url")
     )
     for jmsg in jmsgs:
-        JABBER.send_message(*jmsg)
+        common.send_message(*jmsg)
 
 
 def main():
     """Go Main Go."""
+    common.main()
     bridge(really_process_data, dbpool=get_database("afos"))
     reactor.run()
 

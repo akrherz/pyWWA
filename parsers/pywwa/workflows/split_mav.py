@@ -9,6 +9,7 @@ from twisted.internet import reactor
 from pyiem.nws import product
 
 # Local
+from pywwa import common
 from pywwa.ldm import bridge
 from pywwa.database import get_database
 
@@ -58,6 +59,7 @@ def real_process(txn, data):
 
 def main():
     """Go Main Go."""
+    common.main(with_jabber=False)
     bridge(real_process, dbpool=get_database("afos"))
     reactor.run()
 
