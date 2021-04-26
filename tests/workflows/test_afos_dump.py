@@ -4,6 +4,7 @@ import pytest
 from pyiem.util import utc
 
 # Local
+import pywwa
 from pywwa.workflows import afos_dump
 from pywwa.testing import get_example_file
 
@@ -15,7 +16,7 @@ def test_processor(cursor):
     # 0. Very latent product
     with pytest.raises(Exception):
         afos_dump.real_parser(cursor, data)
-    afos_dump.common.CTX.utcnow = utc(2015, 6, 9, 11, 56)
+    pywwa.CTX.utcnow = utc(2015, 6, 9, 11, 56)
     # 1. straight through
     prod = afos_dump.real_parser(cursor, data)
     assert prod.afos == "AFDDMX"

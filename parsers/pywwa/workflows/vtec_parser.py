@@ -18,13 +18,11 @@ from pyiem.nws.products.vtec import parser as vtecparser
 
 # Local
 from pywwa import common
-from pywwa.xmpp import make_jabber_client
 from pywwa.ldm import bridge
 from pywwa.database import load_ugcs_nwsli
 from pywwa.database import get_database
 
 SMTPSenderFactory.noisy = False
-JABBER = make_jabber_client()
 PGCONN = get_database("postgis")
 UGC_DICT = {}
 NWSLI_DICT = {}
@@ -76,11 +74,12 @@ def step2(_dummy, text_product):
     ):
         if xtra.get("channels", "") == "":
             common.email_error("xtra[channels] is empty!", text_product.text)
-        JABBER.send_message(plain, html, xtra)
+        common.send_message(plain, html, xtra)
 
 
 def main():
     """Go Main Go."""
+    common.main()
     load_ugcs_nwsli(UGC_DICT, NWSLI_DICT)
     bridge(process_data)
     reactor.run()

@@ -186,6 +186,7 @@ def errback(res):
 
 def main():
     """Go Main Go"""
+    common.main(with_jabber=False)
     mesosite = get_database("mesosite")
     df = mesosite.runInteraction(load_station_table)
     df.addCallback(on_ready, mesosite)

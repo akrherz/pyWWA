@@ -188,7 +188,6 @@ def workflow(argv, pgconn, cursor):
     df.columns = [x.upper() if x != "geometry" else x for x in df.columns]
     # Compute the ugc column
     if zipfn[:2] in ("mz", "oz", "hz"):
-        geo_type = "Z"
         df["STATE"] = ""
         df["ugc"] = df["ID"]
         wfocol = "WFO"

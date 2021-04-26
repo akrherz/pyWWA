@@ -7,13 +7,11 @@ from pyiem.nws.products import parser as productparser
 
 # Local
 from pywwa import common
-from pywwa.xmpp import make_jabber_client
 from pywwa.ldm import bridge
 from pywwa.database import load_ugcs_nwsli, get_database
 
 UGC_DICT = {}
 NWSLI_DICT = {}
-JABBER = make_jabber_client()
 PGCONN = get_database("postgis")
 
 
@@ -49,7 +47,7 @@ def really_process_data(txn, buf):
     ):
         if xtra.get("channels", "") == "":
             common.email_error("xtra[channels] is empty!", buf)
-        JABBER.send_message(plain, html, xtra)
+        common.send_message(plain, html, xtra)
 
     if not common.dbwrite_enabled():
         return
@@ -71,6 +69,7 @@ def really_process_data(txn, buf):
 
 def main():
     """Go Main Go."""
+    common.main()
     load_ugcs_nwsli(UGC_DICT, NWSLI_DICT)
     bridge(process_data)
 

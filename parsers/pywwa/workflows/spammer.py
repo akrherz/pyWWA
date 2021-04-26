@@ -57,6 +57,7 @@ def real_process(data):
 
 def main():
     """Go Main Go."""
+    common.main(with_jabber=False)
     bridge(process_data)
     reactor.run()
 

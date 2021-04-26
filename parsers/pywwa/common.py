@@ -23,13 +23,14 @@ import pyiem
 from pyiem.util import LOG, utc, CustomFormatter
 
 # Local Be careful of circeref here
-from pywwa import SETTINGS
+import pywwa
 from pywwa.cmdline import parse_cmdline
 from pywwa.database import get_sync_dbconn
+from pywwa.xmpp import make_jabber_client
 
 # http://bugs.python.org/issue7980
 datetime.datetime.strptime("2013", "%Y")
-
+SETTINGS = pywwa.SETTINGS
 EMAIL_TIMESTAMPS = []
 
 
@@ -41,7 +42,9 @@ def shutdown(default=5):
         delay = 5
     else:
         delay = (
-            CTX.shutdown_delay if CTX.shutdown_delay is not None else default
+            pywwa.CTX.shutdown_delay
+            if pywwa.CTX.shutdown_delay is not None
+            else default
         )
     LOG.info("Shutting down in %s seconds...", delay)
     reactor.callLater(delay, reactor.callFromThread, reactor.stop)
@@ -49,12 +52,12 @@ def shutdown(default=5):
 
 def utcnow():
     """Return what utcnow is based on command line."""
-    return utc() if CTX.utcnow is None else CTX.utcnow
+    return utc() if pywwa.CTX.utcnow is None else pywwa.CTX.utcnow
 
 
 def dbwrite_enabled():
     """Is database writing not-disabled as per command line."""
-    return not CTX.disable_dbwrite
+    return not pywwa.CTX.disable_dbwrite
 
 
 def setup_syslog():
@@ -66,7 +69,7 @@ def setup_syslog():
     syslog.startLogging(
         prefix=f"pyWWA/{filename}",
         facility=LOG_LOCAL2,
-        setStdout=not CTX.stdout_logging,
+        setStdout=not pywwa.CTX.stdout_logging,
     )
     # pyIEM does logging via python stdlib logging, so we need to patch those
     # messages into twisted's logger.
@@ -74,7 +77,7 @@ def setup_syslog():
     sh.setFormatter(CustomFormatter())
     LOG.addHandler(sh)
     # Log stuff to stdout if we are running from command line.
-    if CTX.stdout_logging:
+    if pywwa.CTX.stdout_logging:
         tplog.addObserver(lambda x: print(formatEvent(x)))
     # Allow for more verbosity when we are running this manually.
     LOG.setLevel(logging.DEBUG if sys.stdout.isatty() else logging.INFO)
@@ -174,7 +177,7 @@ Message:
     )
     msg["From"] = SETTINGS.get("pywwa_errors_from", "ldm@localhost")
     msg["To"] = SETTINGS.get("pywwa_errors_to", "ldm@localhost")
-    if not CTX.disable_email:
+    if not pywwa.CTX.disable_email:
         df = smtp.sendmail(
             SETTINGS.get("pywwa_smtp", "smtp"), msg["From"], msg["To"], msg
         )
@@ -184,8 +187,24 @@ Message:
     return True
 
 
-# This is blocking, but necessary to make sure settings are loaded before
-# we go on our merry way
-CTX = parse_cmdline(sys.argv)
-setup_syslog()
-load_settings()
+def send_message(plain, text, extra):
+    """Helper to connect with running JABBER instance."""
+    if pywwa.JABBER is None:
+        LOG.info("failed to send as pywwa.JABBER is None, not setup?")
+        return
+    pywwa.JABBER.send_message(plain, text, extra)
+
+
+def main(with_jabber=True):
+    """Standard workflow from our parsers.
+
+    Args:
+      with_jabber(bool): Should we setup a jabber instance?
+    """
+    # This is blocking, but necessary to make sure settings are loaded before
+    # we go on our merry way
+    pywwa.CTX = parse_cmdline(sys.argv)
+    setup_syslog()
+    load_settings()
+    if with_jabber:
+        make_jabber_client()

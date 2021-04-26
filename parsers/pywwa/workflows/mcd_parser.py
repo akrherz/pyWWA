@@ -9,12 +9,10 @@ from pyiem.nws.products.mcd import parser as mcdparser
 
 # Local
 from pywwa import common
-from pywwa.xmpp import make_jabber_client
 from pywwa.ldm import bridge
 from pywwa.database import get_database
 
 DBPOOL = get_database("postgis")
-JABBER = make_jabber_client()
 
 
 def process_data(data):
@@ -58,7 +56,7 @@ def real_process(txn, raw):
         common.SETTINGS.get("pywwa_product_url", "pywwa_product_url")
     )
     if len(j) == 1:
-        JABBER.send_message(j[0][0], j[0][1], j[0][2])
+        common.send_message(j[0][0], j[0][1], j[0][2])
     if common.dbwrite_enabled():
         prod.database_save(txn)
     if prod.warnings:
@@ -67,6 +65,7 @@ def real_process(txn, raw):
 
 def main():
     """Go Main Go."""
+    common.main()
     bridge(process_data)
     reactor.run()
 

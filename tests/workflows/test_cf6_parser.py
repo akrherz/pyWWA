@@ -4,7 +4,7 @@ from pyiem.util import utc
 import pytest
 
 # Local
-from pywwa import common
+import pywwa
 from pywwa.workflows import cf6_parser
 from pywwa.testing import get_example_file
 
@@ -13,6 +13,6 @@ from pywwa.testing import get_example_file
 def test_processor(cursor):
     """Test basic parsing."""
     data = get_example_file("CF6.txt")
-    common.CTX.utcnow = utc(2020, 11, 25, 9, 20)
+    pywwa.CTX.utcnow = utc(2020, 11, 25, 9, 20)
     prod = cf6_parser.processor(cursor, data)
-    assert prod.valid == common.CTX.utcnow
+    assert prod.valid == pywwa.CTX.utcnow

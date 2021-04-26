@@ -34,6 +34,7 @@ def real_process(buf):
 
 def main():
     """Go Main"""
+    common.main(with_jabber=False)
     bridge(process_data, isbinary=True, product_end=b"NLDN")
     reactor.run()  # @UndefinedVariable
 

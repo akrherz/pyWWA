@@ -24,6 +24,7 @@ def processor(txn, text):
 
 def main():
     """Go Main Go."""
+    common.main(with_jabber=False)
     bridge(processor, dbpool=DBPOOL)
     reactor.run()
 

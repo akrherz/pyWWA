@@ -48,6 +48,7 @@ def real_parser(txn, data):
 
 def main():
     """build things up."""
+    common.main(with_jabber=False)
     # sync
     pgconn = get_dbconn("mesosite")
     cursor = pgconn.cursor()

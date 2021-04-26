@@ -13,11 +13,9 @@ from pyiem.util import LOG
 
 # Local
 from pywwa import common
-from pywwa.xmpp import make_jabber_client
 from pywwa.ldm import bridge
 from pywwa.database import get_database
 
-JABBER = make_jabber_client()
 # Cheap datastore for LSRs to avoid Dups!
 LSRDB = {}
 
@@ -76,7 +74,7 @@ def real_processor(txn, text):
     j = prod.get_jabbers(common.SETTINGS.get("pywwa_lsr_url", "pywwa_lsr_url"))
     for i, (p, h, x) in enumerate(j):
         # delay some to perhaps stop triggering SPAM lock outs at twitter
-        reactor.callLater(i, JABBER.send_message, p, h, x)
+        reactor.callLater(i, common.send_message, p, h, x)
 
     if prod.warnings:
         common.email_error("\n\n".join(prod.warnings), text)
@@ -86,6 +84,7 @@ def real_processor(txn, text):
 
 def main():
     """Go Main Go."""
+    common.main()
     reactor.callLater(0, loaddb)
     bridge(real_processor, dbpool=get_database("postgis"))
     reactor.callLater(20, cleandb)

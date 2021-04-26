@@ -1,6 +1,5 @@
 """Hackery."""
 import matplotlib.colors as mpcolors
-import numpy as np
 
 colors = [
     (0, 0, 0),

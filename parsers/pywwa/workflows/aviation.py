@@ -6,7 +6,6 @@ from pyiem.nws.products.sigmet import parser
 
 # Local
 from pywwa import common, get_table_file
-from pywwa.xmpp import make_jabber_client
 from pywwa.ldm import bridge
 from pywwa.database import get_database
 
@@ -15,7 +14,6 @@ DBPOOL = get_database("postgis")
 # Load LOCS table
 LOCS = {}
 MESOSITE = get_database("mesosite")
-JABBER = make_jabber_client()
 
 
 def goodline(line):
@@ -68,7 +66,7 @@ def final_step(_, prod):
     for j in prod.get_jabbers(
         common.SETTINGS.get("pywwa_product_url", "pywwa_product_url"), ""
     ):
-        JABBER.send_message(j[0], j[1], j[2])
+        common.send_message(j[0], j[1], j[2])
 
 
 def onready(_res):
@@ -80,6 +78,7 @@ def onready(_res):
 
 def main():
     """Fire things up."""
+    common.main()
     df = MESOSITE.runInteraction(load_database)
     df.addCallback(onready)
     df.addErrback(common.shutdown)
