@@ -92,7 +92,7 @@ def real_processor(text):
         if not skip:
             common.send_message(*jmsg)
     if not common.dbwrite_enabled():
-        return
+        return collect
     for mtr in collect.metars:
         if mtr.network is None:
             LOG.info(
