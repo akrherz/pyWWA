@@ -109,7 +109,6 @@ def process(ncfn):
         lon_0 = nc.satellite_longitude
         h = nc.variables["fixedgrid_projection"].perspective_point_height
         swa = nc.variables["fixedgrid_projection"].sweep_angle_axis
-        x0 = nc.variables["x"][0]
         dx = nc.variables["x"].scale_factor / 1e6 * h
         y0 = nc.variables["y"][0] / 1e6 * h
         x0 = nc.variables["x"][0] / 1e6 * h

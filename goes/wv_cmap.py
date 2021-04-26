@@ -1,8 +1,8 @@
 """Hackery."""
 import matplotlib.colors as mpcolors
-import numpy as np
 
-# Make colormap (based off of http://cimss.ssec.wisc.edu/goes/visit/water_vapor_enhancement.html):
+# Make colormap (based off of
+# http://cimss.ssec.wisc.edu/goes/visit/water_vapor_enhancement.html):
 colors = [
     "#000000",
     "#00FFFF",
