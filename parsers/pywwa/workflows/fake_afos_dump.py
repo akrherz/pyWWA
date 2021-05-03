@@ -67,7 +67,7 @@ def really_process_data(txn, data):
         txn.execute(sql, sqlargs)
 
     if tp.afos[:3] == "FRH":
-        return
+        return tp
     jmsgs = tp.get_jabbers(
         common.SETTINGS.get("pywwa_product_url", "pywwa_product_url")
     )
