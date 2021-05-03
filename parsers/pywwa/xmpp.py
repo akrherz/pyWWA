@@ -229,7 +229,6 @@ class JabberClient:
         if url is None:
             _reallysend()
             return
-        # LOG.debug("Twitter Media Fetch %s", url)
-        d = treq.get(url, timeout=15)
-        d.addErrback(_reallysend)
-        d.addCallback(_reallysend)
+        # Careful here to not reallysend twice!
+        d = treq.get(url, timeout=120)
+        d.addBoth(_reallysend)
