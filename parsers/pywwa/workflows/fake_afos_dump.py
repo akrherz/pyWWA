@@ -47,7 +47,7 @@ def compute_afos(textprod):
 
 def really_process_data(txn, data):
     """ We are called with a hard coded AFOS PIL """
-    tp = TextProduct(data)
+    tp = TextProduct(data, utcnow=common.utcnow())
     if tp.afos is None:
         compute_afos(tp)
 
@@ -67,12 +67,13 @@ def really_process_data(txn, data):
         txn.execute(sql, sqlargs)
 
     if tp.afos[:3] == "FRH":
-        return
+        return tp
     jmsgs = tp.get_jabbers(
         common.SETTINGS.get("pywwa_product_url", "pywwa_product_url")
     )
     for jmsg in jmsgs:
         common.send_message(*jmsg)
+    return tp
 
 
 def main():

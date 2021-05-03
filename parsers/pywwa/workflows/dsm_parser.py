@@ -11,7 +11,6 @@ from pywwa import common
 from pywwa.ldm import bridge
 from pywwa.database import get_database
 
-DBPOOL = get_database("iem")
 # database timezones to pytz cache
 TIMEZONES = dict()
 STATIONS = dict()
@@ -38,7 +37,7 @@ def load_stations(txn):
 
 def real_parser(txn, data):
     """Please process some data"""
-    prod = parser(data)
+    prod = parser(data, utcnow=common.utcnow())
     prod.tzlocalize(STATIONS)
     if common.dbwrite_enabled():
         prod.sql(txn)
@@ -54,8 +53,7 @@ def main():
     cursor = pgconn.cursor()
     load_stations(cursor)
     pgconn.close()
-
-    bridge(real_parser, dbpool=DBPOOL)
+    bridge(real_parser, dbpool=get_database("iem"))
     reactor.run()
 
 
