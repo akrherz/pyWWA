@@ -1,9 +1,3 @@
-/pqact_filer.conf.state
-/pqact_iemvs.conf.state
-/pqact-afos.conf.state
-/pqact-gini.conf.state
-/pqact-shef.conf.state
-/pqact.conf.state
 /.project
 /.pydevproject
 /pqact-new.conf.state
