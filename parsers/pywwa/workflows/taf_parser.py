@@ -9,15 +9,14 @@ from pywwa import common
 from pywwa.ldm import bridge
 from pywwa.database import get_database
 
-PROD_URL = common.SETTINGS.get("pywwa_product_url", "pywwa_product_url")
-
 
 def real_process(txn, raw):
     """Process the product, please"""
     prod = parser(raw)
     if common.dbwrite_enabled():
         prod.sql(txn)
-    jmsgs = prod.get_jabbers(PROD_URL)
+    baseurl = common.SETTINGS.get("pywwa_product_url", "pywwa_product_url")
+    jmsgs = prod.get_jabbers(baseurl)
     for (mess, htmlmess, xtra) in jmsgs:
         common.send_message(mess, htmlmess, xtra)
     if prod.warnings:

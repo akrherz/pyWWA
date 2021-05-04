@@ -11,10 +11,6 @@ from pywwa import common
 from pywwa.ldm import bridge
 from pywwa.database import get_database
 
-PYWWA_PRODUCT_URL = common.SETTINGS.get(
-    "pywwa_product_url", "pywwa_product_url"
-)
-
 
 def real_process(txn, raw):
     """Do work please"""
@@ -33,21 +29,22 @@ def real_process(txn, raw):
     for tpair in tokens:
         for center in re.findall(r"([A-Z]+)\.\.\.", tpair[1]):
             channels.append("SPENES.%s" % (center,))
+    baseurl = common.SETTINGS.get("pywwa_product_url", "pywwa_product_url")
     xtra = {"product_id": product_id}
     xtra["channels"] = ",".join(channels)
     xtra["twitter"] = (
         "NESDIS issues Satellite Precipitation " "Estimates %s?pid=%s"
-    ) % (PYWWA_PRODUCT_URL, product_id)
+    ) % (baseurl, product_id)
 
     body = ("NESDIS issues Satellite Precipitation Estimates %s?pid=%s") % (
-        PYWWA_PRODUCT_URL,
+        baseurl,
         product_id,
     )
     htmlbody = (
         "<p>NESDIS issues "
         "<a href='%s?pid=%s'>Satellite Precipitation Estimates</a>"
         "</p>"
-    ) % (PYWWA_PRODUCT_URL, product_id)
+    ) % (baseurl, product_id)
     common.send_message(body, htmlbody, xtra)
 
 

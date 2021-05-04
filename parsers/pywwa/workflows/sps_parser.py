@@ -11,9 +11,6 @@ from pywwa.database import load_ugcs_nwsli
 from pywwa.database import get_database
 
 POSTGIS = get_database("postgis")
-PYWWA_PRODUCT_URL = common.SETTINGS.get(
-    "pywwa_product_url", "pywwa_product_url"
-)
 UGC_DICT = {}
 NWSLI_DICT = {}
 
@@ -26,7 +23,8 @@ def real_process(txn, raw):
     prod = parser(raw, ugc_provider=UGC_DICT, nwsli_provider=NWSLI_DICT)
     if common.dbwrite_enabled():
         prod.sql(txn)
-    jmsgs = prod.get_jabbers(PYWWA_PRODUCT_URL)
+    baseurl = common.SETTINGS.get("pywwa_product_url", "pywwa_product_url")
+    jmsgs = prod.get_jabbers(baseurl)
     for (mess, htmlmess, xtra) in jmsgs:
         common.send_message(mess, htmlmess, xtra)
     if prod.warnings:
