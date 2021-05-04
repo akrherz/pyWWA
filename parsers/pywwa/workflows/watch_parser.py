@@ -10,8 +10,6 @@ from pywwa import common
 from pywwa.ldm import bridge
 from pywwa.database import get_database
 
-IEM_URL = common.SETTINGS.get("pywwa_watch_url", "pywwa_watch_url")
-
 
 def real_process(txn, raw):
     """Process the product, please"""
@@ -22,7 +20,8 @@ def real_process(txn, raw):
     if common.dbwrite_enabled():
         prod.sql(txn)
     prod.compute_wfos(txn)
-    for (txt, html, xtra) in prod.get_jabbers(IEM_URL):
+    baseurl = common.SETTINGS.get("pywwa_watch_url", "pywwa_watch_url")
+    for (txt, html, xtra) in prod.get_jabbers(baseurl):
         common.send_message(txt, html, xtra)
     if prod.warnings:
         common.email_error("\n".join(prod.warnings), raw)
