@@ -9,7 +9,7 @@ from pywwa import database
 
 def test_database():
     """Test that we can call the API."""
-    database.load_ugcs_nwsli({}, {})
+    database.load_nwsli({})
 
 
 def test_load_metar_stations():

@@ -3,14 +3,15 @@
 from twisted.internet import reactor
 from shapely.geometry import MultiPolygon
 from pyiem.util import LOG
+from pyiem.nws.ugc import UGCProvider
 from pyiem.nws.products import parser as productparser
 
 # Local
 from pywwa import common
 from pywwa.ldm import bridge
-from pywwa.database import load_ugcs_nwsli, get_database
+from pywwa.database import load_nwsli, get_database
 
-UGC_DICT = {}
+UGC_DICT = UGCProvider()
 NWSLI_DICT = {}
 PGCONN = get_database("postgis")
 
@@ -70,7 +71,7 @@ def really_process_data(txn, buf):
 def main():
     """Go Main Go."""
     common.main()
-    load_ugcs_nwsli(UGC_DICT, NWSLI_DICT)
+    load_nwsli(NWSLI_DICT)
     bridge(process_data)
 
     reactor.run()
