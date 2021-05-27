@@ -416,7 +416,7 @@ def checkvars(myvars):
 
 
 def var2dbcols(var):
-    """ Convert a SHEF var into split values """
+    """Convert a SHEF var into split values"""
     if var.find(".") > -1:
         parts = var.split(".")
         var = parts[0]

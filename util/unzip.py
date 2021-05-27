@@ -21,7 +21,7 @@ def ranstr():
 
 
 def main(argv):
-    """ Read the zipfile from stdin and do important things """
+    """Read the zipfile from stdin and do important things"""
     data = BytesIO(sys.stdin.buffer.read())
     zf = zipfile.ZipFile(data)
     filename = argv[1]

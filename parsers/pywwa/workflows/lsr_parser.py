@@ -21,7 +21,7 @@ LSRDB = {}
 
 
 def loaddb():
-    """ load memory """
+    """load memory"""
     if os.path.isfile("lsrdb.p"):
         mydict = pickle.load(open("lsrdb.p", "rb"))
         for key in mydict:
@@ -50,12 +50,12 @@ def cleandb():
 
 
 def pickledb():
-    """ Dump our database to a flat file """
+    """Dump our database to a flat file"""
     pickle.dump(LSRDB, open("lsrdb.p", "wb"))
 
 
 def real_processor(txn, text):
-    """ Lets actually process! """
+    """Lets actually process!"""
     prod = lsrparser(text)
 
     for lsr in prod.lsrs:

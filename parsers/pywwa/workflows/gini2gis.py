@@ -45,7 +45,7 @@ def process_input():
 
 
 def do_legacy_ir(sat, tmpfn):
-    """ since some are unable to process non-grayscale """
+    """since some are unable to process non-grayscale"""
     logger.info("Doing legacy IR junk...")
     png = Image.fromarray(np.array(sat.data[:-1, :], np.uint8))
     png.save("%s.png" % (tmpfn,))

@@ -16,7 +16,7 @@ DBPOOL = get_database("postgis")
 
 
 def process_data(data):
-    """ Process a chunk of data """
+    """Process a chunk of data"""
     # BUG
     data = data.upper()
     df = DBPOOL.runInteraction(real_process, data)
@@ -31,14 +31,11 @@ def find_cwsus(txn, prod):
     ST_Covers does polygon exist inside CWSU
     """
     wkt = "SRID=4326;%s" % (prod.geometry.wkt,)
-    sql = """
-        select distinct id from cwsu WHERE st_overlaps('%s', geom) or
-        st_covers(geom, '%s') ORDER by id ASC
-    """ % (
-        wkt,
-        wkt,
+    txn.execute(
+        "select distinct id from cwsu WHERE st_overlaps(%s, geom) or "
+        "st_covers(geom, %s) ORDER by id ASC",
+        (wkt, wkt),
     )
-    txn.execute(sql)
     cwsus = []
     for row in txn.fetchall():
         cwsus.append(row["id"])

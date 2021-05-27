@@ -14,22 +14,23 @@ with watches.  Lets try to explain
 from twisted.internet import reactor
 from twisted.mail.smtp import SMTPSenderFactory
 from pyiem.util import LOG
+from pyiem.nws.ugc import UGCProvider
 from pyiem.nws.products.vtec import parser as vtecparser
 
 # Local
 from pywwa import common
 from pywwa.ldm import bridge
-from pywwa.database import load_ugcs_nwsli
+from pywwa.database import load_nwsli
 from pywwa.database import get_database
 
 SMTPSenderFactory.noisy = False
 PGCONN = get_database("postgis")
-UGC_DICT = {}
+UGC_DICT = UGCProvider()
 NWSLI_DICT = {}
 
 
 def process_data(data):
-    """ Process the product """
+    """Process the product"""
     # Make sure we have a trailing $$, if not report error and slap one on
     if data.find("$$") == -1:
         common.email_error("No $$ Found!", data)
@@ -80,7 +81,7 @@ def step2(_dummy, text_product):
 def main():
     """Go Main Go."""
     common.main()
-    load_ugcs_nwsli(UGC_DICT, NWSLI_DICT)
+    load_nwsli(NWSLI_DICT)
     bridge(process_data)
     reactor.run()
 

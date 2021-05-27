@@ -29,7 +29,7 @@ MEMCACHE_CLIENT.connect()
 
 
 def process_data(data):
-    """ Process the product """
+    """Process the product"""
     defer = DBPOOL.runInteraction(real_parser, data)
     defer.addCallback(write_memcache)
     defer.addErrback(common.email_error, data)
@@ -51,7 +51,7 @@ def write_memcache(nws):
 
 
 def real_parser(txn, buf):
-    """ Actually do something with the buffer, please """
+    """Actually do something with the buffer, please"""
     if buf.strip() == "":
         return None
     utcnow = common.utcnow()

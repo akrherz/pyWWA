@@ -47,7 +47,7 @@ def load_database(txn):
 
 
 def process_data(data):
-    """ Process the product """
+    """Process the product"""
     try:
         prod = parser(data, nwsli_provider=LOCS, utcnow=common.utcnow())
     except Exception as myexp:

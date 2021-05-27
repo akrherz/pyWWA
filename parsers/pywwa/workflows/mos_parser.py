@@ -29,7 +29,7 @@ def got_data(res):
 
 
 def real_process(text):
-    """ The real processor of the raw data, fun! """
+    """The real processor of the raw data, fun!"""
     prod = parser(text)
     if not common.dbwrite_enabled():
         return

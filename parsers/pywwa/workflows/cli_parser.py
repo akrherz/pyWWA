@@ -20,7 +20,7 @@ NT = NetworkTable("NWSCLI", only_online=False)
 
 
 def processor(txn, text):
-    """ Protect the realprocessor """
+    """Protect the realprocessor"""
     prod = parser(text, nwsli_provider=NT.sts, utcnow=common.utcnow())
     # Run through database save now
     prod.sql(txn)
