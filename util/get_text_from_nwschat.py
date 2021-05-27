@@ -1,6 +1,6 @@
 """Hit the NWSChat quasi web service to get the text IEM may have missed :("""
-from __future__ import print_function
 import sys
+import tempfile
 
 import requests
 
@@ -17,12 +17,11 @@ def process(j):
         print("ERROR: No results found!")
         return
 
-    out = open("/tmp/vtec_data.txt", "w")
-    out.write(wrap(j["data"][0]["report"]))
-    for svs in j["data"][0]["svs"]:
-        out.write(wrap(svs))
-
-    out.close()
+    with tempfile.NamedTemporaryFile(mode="w", delete=False) as tmpfd:
+        tmpfd.write(wrap(j["data"][0]["report"]))
+        for svs in j["data"][0]["svs"]:
+            tmpfd.write(wrap(svs))
+        print(f"Created {tmpfd.name}")
 
 
 def main(argv):
