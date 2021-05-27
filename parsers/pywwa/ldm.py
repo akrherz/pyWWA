@@ -10,20 +10,20 @@ from pywwa.common import shutdown, email_error, SETTINGS
 
 
 class MyProductIngestor(ldmbridge.LDMProductReceiver):
-    """ I receive products from ldmbridge and process them 1 by 1 :) """
+    """I receive products from ldmbridge and process them 1 by 1 :)"""
 
     def __init__(self, callback, isbinary=False):
-        """ Constructor."""
+        """Constructor."""
         dedup = SETTINGS.get("pywwa_dedup", "false").lower() == "true"
         super().__init__(isbinary=isbinary, dedup=dedup)
         self.local_callback = callback
 
     def connectionLost(self, reason):
-        """ called when the connection is lost """
+        """called when the connection is lost"""
         shutdown()
 
     def process_data(self, data):
-        """ Override below."""
+        """Override below."""
         self.local_callback(data)
 
 

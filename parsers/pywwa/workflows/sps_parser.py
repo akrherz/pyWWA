@@ -16,7 +16,7 @@ NWSLI_DICT = {}
 
 
 def real_process(txn, raw):
-    """ Really process! """
+    """Really process!"""
     if raw.find("$$") == -1:
         LOG.info("$$ was missing from this product")
         raw += "\r\r\n$$\r\r\n"

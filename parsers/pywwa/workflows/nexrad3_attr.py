@@ -21,7 +21,7 @@ ST = {}
 
 
 def load_station_table(txn):
-    """ Load the station table of NEXRAD sites """
+    """Load the station table of NEXRAD sites"""
     LOG.info("load_station_table called() ...")
     txn.execute(
         "SELECT id, ST_x(geom) as lon, ST_y(geom) as lat from stations "
@@ -179,7 +179,7 @@ def on_ready(_unused, mesosite):
 
 
 def errback(res):
-    """ ERRORBACK """
+    """ERRORBACK"""
     LOG.error(res)
     reactor.stop()
 

@@ -16,7 +16,7 @@ DBPOOL = get_database("postgis")
 
 
 def process_data(data):
-    """ Process a chunk of data """
+    """Process a chunk of data"""
     # BUG
     data = data.upper()
     df = DBPOOL.runInteraction(real_process, data)

@@ -6,13 +6,13 @@ import requests
 
 
 def wrap(data):
-    """ convert data into more noaaportish """
+    """convert data into more noaaportish"""
     data = data.replace("&gt;", ">").replace("&lt;", "<")
     return "\001" + data.replace("&amp;", "&").replace("\n", "\r\r\n") + "\003"
 
 
 def process(j):
-    """ Process the json data j """
+    """Process the json data j"""
     if not j["data"]:
         print("ERROR: No results found!")
         return

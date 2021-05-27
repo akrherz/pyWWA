@@ -24,14 +24,14 @@ def error_wrapper(exp, buf):
 
 
 def process_data(data):
-    """ Process the product """
+    """Process the product"""
     defer = PGCONN.runInteraction(really_process_data, data)
     defer.addErrback(error_wrapper, data)
     defer.addErrback(LOG.error)
 
 
 def really_process_data(txn, buf):
-    """ Actually do some processing """
+    """Actually do some processing"""
 
     # Create our TextProduct instance
     prod = productparser(

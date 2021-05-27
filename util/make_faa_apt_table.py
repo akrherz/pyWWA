@@ -4,7 +4,7 @@ import sys
 
 
 def convert_geo(val):
-    """Convert 36-00-36.3550N to decimal """
+    """Convert 36-00-36.3550N to decimal"""
     tokens = val.strip()[:-1].split("-")
     number = ((float(tokens[2]) / 60.0) + float(tokens[1])) / 60.0 + float(
         tokens[0]

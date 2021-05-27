@@ -29,7 +29,7 @@ NWSLI_DICT = {}
 
 
 def process_data(data):
-    """ Process the product """
+    """Process the product"""
     # Make sure we have a trailing $$, if not report error and slap one on
     if data.find("$$") == -1:
         common.email_error("No $$ Found!", data)

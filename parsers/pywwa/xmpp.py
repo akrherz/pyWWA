@@ -26,7 +26,7 @@ SETTINGS = pywwa.SETTINGS
 
 
 def make_jabber_client(resource_prefix=None):
-    """ Generate a jabber client, please """
+    """Generate a jabber client, please"""
     if pywwa.CTX.disable_xmpp:
         LOG.info("XMPP disabled via command line.")
         pywwa.JABBER = NOOPXMPP()
@@ -70,7 +70,7 @@ def make_jabber_client(resource_prefix=None):
 
 
 def message_processor(stanza):
-    """ Process a message stanza """
+    """Process a message stanza"""
     body = xpath.queryForString("/message/body", stanza)
     LOG.info("Message from %s Body: %s", stanza["from"], body)
     if body is None:
