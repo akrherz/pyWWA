@@ -20,7 +20,7 @@ from twisted.internet import reactor
 from twisted.mail import smtp
 
 import pyiem
-from pyiem.util import LOG, utc, CustomFormatter
+from pyiem.util import LOG, utc
 
 # Local Be careful of circeref here
 import pywwa
@@ -32,6 +32,19 @@ from pywwa.xmpp import make_jabber_client
 datetime.datetime.strptime("2013", "%Y")
 SETTINGS = pywwa.SETTINGS
 EMAIL_TIMESTAMPS = []
+
+
+class CustomFormatter(logging.Formatter):
+    """A custom log formatter class."""
+
+    def format(self, record):
+        """Return a string!"""
+        return "[%s:%s %s] %s" % (
+            record.filename,
+            record.lineno,
+            record.funcName,
+            record.getMessage(),
+        )
 
 
 def shutdown(default=5):
