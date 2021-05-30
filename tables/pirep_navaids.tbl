@@ -337,9 +337,9 @@ CKL2            Selkirk                          -- CA  5017  -9687     0  0
 CKL3            Wunnumin Lake                    -- CA  5289  -8929     0  0
 CKL5            Shoal Lake                       -- CA  5046 -10061     0  0
 CKM4            Jan Lake                         -- CA  5483 -10279     0  0
-# CKM7
+CKM7            Thompson                         MB CA  5571  -9789     0  0
 CKM8            Opapimiskan Lake                 -- CA  5261  -9038     0  0
-# CKN7
+## CKN7
 CKQ3            North Spirit Lake                -- CA  5249  -9297     0  0
 CKQ6            Erickson                         -- CA  5049  -9990     0  0
 CKQ7            Vermillion Bay                   -- CA  4988  -9344     0  0
@@ -347,13 +347,14 @@ CKQ9            Pine Dock                        -- CA  5162  -9681     0  0
 CKR4            Lundar                           -- CA  5070  -9806     0  0
 CKR9            Outlook                          -- CA  5148 -10704     0  0
 CKS8            Cree Lake                        -- CA  5746 -10675     0  0
-# CKT8
+CKT8            Pine Dock                        MB CA  5161  -9682     0  0
 CKU7            Watrous                          -- CA  5169 -10537     0  0
-# CKW7
+CKW7            Kirkfield                        ON CA  4454  -7889     0  0
 CKY2            Whitewood                        -- CA  5033 -10227     0  0
+CKY6            Cochrane                         AB CA  5135 -11477     0  0
 CKZ3            Elk Island                       -- CA  5467  -9415     0  0
 CKZ7            Winkler                          -- CA  4917  -9792     0  0
-# CLA4
+CLA4            Holland Landing                  ON CA  4409  -7950     0  0
 CLA6            Lancaster Airpark                -- CA  4520  -7436     0  0
 # CLD3
 CLG7            Fort McMurray                    -- CA  5720 -11290     0  0
