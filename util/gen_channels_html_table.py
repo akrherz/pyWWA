@@ -20,6 +20,7 @@ C2 = "&lt;vtec_phenomena&gt;.&lt;vtec_significance&gt;"
 C3 = "&lt;afos_pil&gt;"
 C3p = "&lt;afos_pil_prefix&gt;..."
 C35 = "&lt;afos_pil_first5&gt;..."
+C3S = "&lt;afos_pil_first3&gt;.&lt;state&gt;"
 C4 = "&lt;vtec_phenomena&gt;.&lt;vtec_significance&gt;.&lt;wfo&gt;"
 C5 = "&lt;vtec_phenomena&gt;.&lt;vtec_significance&gt;.&lt;ugc&gt;"
 C5s = "&lt;vtec_phenomena&gt;.&lt;vtec_significance&gt;.&lt;state&gt;"
@@ -212,7 +213,7 @@ GEN_PRODUCTS = [
     dict(afos="RWS", directive="10-1701", channels=S2),
     dict(afos="RVS", directive="10-1701", channels=S2),
     dict(afos="STF", directive="10-1701", channels=S2),
-    dict(afos="SPS", directive="10-517", channels=[C3, C3p, C6, C9]),
+    dict(afos="SPS", directive="10-517", channels=[C3, C3p, C3S, C6, C9]),
     dict(afos="SRF", directive="10-1701", channels=S2),
     dict(afos="SPW", directive="10-1701", channels=S2),
     dict(afos="TAF", directive="10-1701", channels=[C3, C3p, C8]),
