@@ -541,7 +541,7 @@ CTU2            Fontanges                        -- CA  5455  -7117     0  0
 CVB2            Voiseys Bay                      -- CA  5634  -6209     0  0
 # CVM2
 # CXYT            
-# CXYU
+## CXYU
 CYAC            Cat Lake                         ON CA  5172  -9182     0  0
 CYAG            Fort Frances                     ON CA  4865  -9344     0  0
 CYAL            Alert Bay                        BC CA  5058 -12692     0  0
@@ -568,7 +568,7 @@ CYCW            Chilliwack                       -- CA  4915 -12194     0  0
 CYCZ            Fairmont Hot Springs             -- CA  5033 -11587     0  0
 CYDO            Dolbeau St Methode               QC CA  4878  -7238     0  0
 CYEA            Empress                          AB CA  5093 -11001     0  0
-# CYEC
+## CYEC
 CYEE            MIDLAND                          -- CA  4468  -7993     0  0
 CYEM            Manitowaning                     ON CA  4584  -8186     0  0
 CYES            Edmundston                       NB CA  4749  -6848     0  0
@@ -576,11 +576,12 @@ CYEU            Eureka Man                       -- CA  7999  -8581     0  0
 CYFA            Fort Albany                      ON CA  5220  -8170     0  0
 CYFD            Brantford                        -- CA  4313  -8034     0  0
 CYFE            Forestville                      QC CA  4875  -6910     0  0
+## CYFG
 CYFH            Fort Hope                        ON CA  5156  -8791     0  0
 CYFI            Firt MacKay                      -- CA  5728 -11098     0  0
 CYFJ            Riviere Rouge                    -- CA  4641  -7478     0  0
-# CYFM
-# CYFN
+## CYFM
+## CYFN
 CYGB            Texada                           -- CA  4969 -12452     0  0
 CYGD            Goderich                         -- CA  4377  -8171     0  0
 CYGO            Gods Lake Narrows                MB CA  5456  -9449     0  0
@@ -611,7 +612,7 @@ CYNL            Points North Landing             SK CA  5828 -10408     0  0
 CYNJ            Langley Tower                    -- CA  4910 -12263     0  0
 CYNN            Nejanilini Lake                  MB CA  5949  -9778     0  0
 CYNR            Fort MacKay                      -- CA  5738 -11170     0  0
-# CYNW
+## CYNW
 CYOG            Old Glory Mountain               BC CA  4915 -11791     0  0
 CYOH            Oxford House                     MB CA  5493  -9528     0  0
 CYOP            Rainbow Lake                     AB CA  5849 -11941     0  0
@@ -627,7 +628,7 @@ CYQQ            Comox                            BC CA  4971 -12489     0  0
 CYRC            Chicoutimi St Honore             -- CA  4852  -7105     0  0
 CYRM            Alta                             -- CA  5243 -11490     0  0
 CYRS            Red Sucker Lake                  -- CA  5417  -9356     0  0
-# CYRU            
+## CYRU
 CYSA            Stratford                        -- CA  4342  -8093     0  0
 CYSE            Squamish                         -- CA  4978 -12316     0  0
 CYST            St Theresa Point                 -- CA  5385  -9485     0  0
