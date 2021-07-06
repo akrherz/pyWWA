@@ -412,6 +412,7 @@ CNS4            Alexandria                       -- CA  4533  -7463     0  0
 CNU4            Belleville                       -- CA  4419  -7731     0  0
 CNU8            Markham                          -- CA  4394  -7962     0  0
 CNV4            Hawkesbury                       ON CA  4562  -7465     0  0
+CNV6            Orillia/Lake St John             ON CA  4468  -7932     0  0
 CNV8            Edenvale                         -- CA  4444  -7997     0  0
 CNV9            Neuville                         -- CA  4672  -7158     0  0
 CNW9            Vancouver/New Westminister       -- CA  4923 -12289     0  0
@@ -422,11 +423,11 @@ CNZ8            Grimsby                          -- CA  4316  -7960     0  0
 COB4            Orangeville                      ON CA  4388  -8018     0  0
 COL2            Orangeville/Laurel               ON CA  4392  -8021     0  0
 COL4            Sicamous                         -- CA  5081 -11897     0  0
-# COYW
+## COYW
 CPA2            Mount Forest                     -- CA  4397  -8074     0  0
-# CPC9
+CPC9            Huntsville                       ON CA  4534  -7921     0  0
 CPE6            Sunridge                         -- CA  4582  -7932     0  0
-# CPF3
+CPF3            Dunrobin                         ON CA  4543  -7607     0  0
 CPF4            Bruce McPhail                    -- CA  4560  -7683     0  0
 # CPF5
 # CPF7
