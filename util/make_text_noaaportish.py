@@ -7,7 +7,7 @@ from pyiem.util import noaaport_text
 def main(argv):
     """Do Main Things"""
     fn = argv[1]
-    data = noaaport_text(open(fn).read())
+    data = noaaport_text(open(fn, 'rb').read().decode('ascii'))
     with open(fn, "w") as fh:
         fh.write(data)
 
