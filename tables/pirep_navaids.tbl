@@ -42,20 +42,21 @@ CAP5            Victoria                         -- CA  4865 -12345     0  0
 ## CAP8
 CAQ4            Springhouse                      -- CA  5196 -12214     0  0
 CAQ5            Nakusp                           -- CA  5027 -11781     0  0
-# CAQ6
-# CAR5
+CAQ6            Queen Charlotte City             BC CA  5325 -13207     0  0
+CAR5            Arhur South                      ON CA  4378  -8043     0  0
 CAT4            Qualicum Beach                   -- CA  4934 -12440     0  0
 CAT5            Port Mcneill                     -- CA  5057 -12702     0  0
-# CAT7
+CAT7            Lasqueti Island                  BC CA  4950 -12435     0  0
 CAU3            Oliver                           -- CA  4917 -11955     0  0
 CAU4            Vanderhoof                       -- CA  5405 -12401     0  0
-# CAU6
+CAU6            Gold River                       BC CA  4968 -12612     0  0
 CAU8            Rivers Inlet Seaplane            -- CA  5168 -12725     0  0            
 CAV3            One Hundred Mile House           -- CA  5164 -12131     0  0
 CAV4            McBride                          -- CA  5332 -12017     0  0
 CAV5            Sullivan Bay                     -- CA  5089 -12683     0  0
+CAV6            Beausejour                       MB CA  5004  -9659     0  0
 CAV8            Shawnigan Lake                   -- CA  4863 -12363     0  0
-# CAW5
+CAW5            Port Hardy                       BC CA  5072 -12748     0  0
 CAW6            Fort Ware Seaplane               -- CA  5742 -12565     0  0
 CAW8            Bella Bella                      -- CA  5215 -12808     0  0            
 CAX5            Likely                           -- CA  5262 -12150     0  0
