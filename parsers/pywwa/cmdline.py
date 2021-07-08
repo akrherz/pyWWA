@@ -36,6 +36,12 @@ def parse_cmdline(argv):
         help="Also log to stdout.",
     )
     parser.add_argument(
+        "-r",
+        "--replace",
+        action="store_true",
+        help="Remove any previous entries found for this product.",
+    )
+    parser.add_argument(
         "-s",
         "--shutdown-delay",
         type=int,

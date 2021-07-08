@@ -73,6 +73,11 @@ def dbwrite_enabled():
     return not pywwa.CTX.disable_dbwrite
 
 
+def replace_enabled():
+    """Is -r --replace enabled."""
+    return pywwa.CTX.replace
+
+
 def setup_syslog():
     """Setup how we want syslogging to work"""
     # https://stackoverflow.com/questions/13699283

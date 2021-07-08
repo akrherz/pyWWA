@@ -69,6 +69,14 @@ def real_parser(txn, buf):
             return None
         raise Exception("TextProduct.afos is null")
 
+    if common.replace_enabled():
+        txn.execute(
+            "DELETE from products where pil = %s and source = %s and "
+            "entered = %s",
+            (nws.afos.strip(), nws.source, nws.valid)
+        )
+        LOG.info("Removed %s rows for %s", txn.rowcount, nws.get_product_id())
+
     txn.execute(
         "INSERT into products (pil, data, entered, "
         "source, wmo) VALUES(%s, %s, %s, %s, %s)",
