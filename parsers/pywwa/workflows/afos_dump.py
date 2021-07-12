@@ -60,7 +60,9 @@ def real_parser(txn, buf):
 
     # When we are in realtime processing, do not consider old data, typically
     # when a WFO fails to update the date in their MND
-    if (utcnow - nws.valid).days > 180 or (utcnow - nws.valid).days < -180:
+    if not common.replace_enabled() and (
+        (utcnow - nws.valid).days > 180 or (utcnow - nws.valid).days < -180
+    ):
         raise Exception(f"Very Latent Product! {nws.valid}")
     if nws.warnings:
         common.email_error("\n".join(nws.warnings), buf)
@@ -73,7 +75,7 @@ def real_parser(txn, buf):
         txn.execute(
             "DELETE from products where pil = %s and source = %s and "
             "entered = %s",
-            (nws.afos.strip(), nws.source, nws.valid)
+            (nws.afos.strip(), nws.source, nws.valid),
         )
         LOG.info("Removed %s rows for %s", txn.rowcount, nws.get_product_id())
 
