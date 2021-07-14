@@ -60,4 +60,4 @@ cat examples/SAW.txt | python parsers/watch_parser.py $OPTS || exit 2
 
 cat examples/TAF.txt | python parsers/taf_parser.py $OPTS || exit 2
 
-cat examples/PBG94E.txt | python parsers/ero_parser.py $OPTS || exit 2
+cat examples/RBG | python parsers/ero_parser.py $OPTS || exit 2

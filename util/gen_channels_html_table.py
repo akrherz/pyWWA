@@ -43,6 +43,7 @@ D = {
     "10-601": "https://www.nws.noaa.gov/directives/sym/pd01006001curr.pdf",
     "10-912": "https://www.nws.noaa.gov/directives/sym/pd01009012curr.pdf",
     "10-922": "https://www.nws.noaa.gov/directives/sym/pd01009022curr.pdf",
+    "10-930": "https://www.nws.noaa.gov/directives/sym/pd01009030curr.pdf",
     "10-1004": "https://www.nws.noaa.gov/directives/sym/pd01010004curr.pdf",
     "10-1701": "https://www.nws.noaa.gov/directives/sym/pd01017001curr.pdf",
 }
@@ -51,6 +52,9 @@ SPECIAL = {
     "PTSDY2": "Storm Prediction Center Day 2 Convective Outlook",
     "PFWFD1": "Storm Prediction Center Day 1 Fire Weather Outlook",
     "PFWFD2": "Storm Prediction Center Day 2 Fire Weather Outlook",
+    "RBG94E": "Weather Prediction Center Day 1 Excessive Rainfall Outlook",
+    "RBG98E": "Weather Prediction Center Day 2 Excessive Rainfall Outlook",
+    "RBG99E": "Weather Prediction Center Day 3 Excessive Rainfall Outlook",
 }
 
 # TODO: TCV TSU ADR CDW DSA EQW HMW HPA LEw NUW RHW VOW PQS CWA
@@ -204,6 +208,36 @@ GEN_PRODUCTS = [
     ),
     dict(afos="REC", directive="10-1701", channels=S2),
     dict(afos="RER", directive="10-1004", channels=S2),
+    dict(
+        afos="RBG94E",
+        directive="10-930",
+        channels=[
+            C1,
+            "&lt;wfo&gt;.ERODY1",
+            "&lt;wfo&gt;.ERODY1.&lt;threshold&gt;",
+        ],
+        notes=("There is no present means for county/zone based channels."),
+    ),
+    dict(
+        afos="RBG98E",
+        directive="10-930",
+        channels=[
+            C1,
+            "&lt;wfo&gt;.ERODY2",
+            "&lt;wfo&gt;.ERODY2.&lt;threshold&gt;",
+        ],
+        notes=("There is no present means for county/zone based channels."),
+    ),
+    dict(
+        afos="RBG99E",
+        directive="10-930",
+        channels=[
+            C1,
+            "&lt;wfo&gt;.ERODY3",
+            "&lt;wfo&gt;.ERODY3.&lt;threshold&gt;",
+        ],
+        notes=("There is no present means for county/zone based channels."),
+    ),
     dict(afos="RRM", directive="10-1701", channels=S2),
     dict(afos="RFD", directive="10-1701", channels=S2),
     dict(afos="RTP", directive="10-1701", channels=S2),
