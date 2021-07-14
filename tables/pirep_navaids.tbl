@@ -353,17 +353,18 @@ CKU7            Watrous                          -- CA  5169 -10537     0  0
 CKW7            Kirkfield                        ON CA  4454  -7889     0  0
 CKY2            Whitewood                        -- CA  5033 -10227     0  0
 CKY6            Cochrane                         AB CA  5135 -11477     0  0
+CKY8            Cochrane/Arkayla Springs         AB CA  5120 -11477     0  0
 CKZ3            Elk Island                       -- CA  5467  -9415     0  0
 CKZ7            Winkler                          -- CA  4917  -9792     0  0
 CLA4            Holland Landing                  ON CA  4409  -7950     0  0
 CLA6            Lancaster Airpark                -- CA  4520  -7436     0  0
-# CLD3
+CLD3            Burns Lake                       BC CA  5421 -11576     0  0
 CLG7            Fort McMurray                    -- CA  5720 -11290     0  0
-# CLH4
-# CLJ2
+CLH4            Lethbridge                       AB CA  4969 -11282     0  0
+CLJ2            Port Carling                     ON CA  4511  -7962     0  0
 CLM2            Leamington                       -- CA  4203  -8253     0  0
 CLM5            Lake Muskoka                     -- CA  4496  -7943     0  0
-# CLT2
+## CLT2
 CMB2            Meadowbank                       -- CA  6503  -9607     0  0
 CMB7            Maxville                         -- CA  4525  -7481     0  0
 CMB9            Port Renfrew Mill Bay            -- CA  4856 -12441     0  0
