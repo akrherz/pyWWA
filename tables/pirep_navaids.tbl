@@ -436,30 +436,31 @@ CPF4            Bruce McPhail                    -- CA  4560  -7683     0  0
 # CPF9            
 CPG5            Hawkesbury                       -- CA  4558  -7455     0  0
 CPH9            Fordwich                         -- CA  4389  -8100     0  0
-# CPJ5 
+CPJ5            Stirling                         ON CA  4424  -7756     0  0
 CPK2            Strathroy                        -- CA  4297  -8159     0  0
 CPL4            Grand Bend                       -- CA  4329  -8171     0  0
 CPL6            Parkland                         -- CA  5347 -11383     0  0
 CPM3            Pourvoririe Mirage               -- CA  5380  -7284     0  0
 CPN5            Listowel                         -- CA  4374  -8099     0  0
-# CPP8
-# CPQ3            
+CPP8            Montreal Passport Helico         QB CA  4572  -7359     0  0
+CPQ3            Niagra Falls Heliport            ON CA  4312  -7908     0  0
 CPR3            Palmerston                       -- CA  4385  -8078     0  0
 CPR5            Woodstock                        -- CA  4311  -8082     0  0
 CPR7            Wingham                          -- CA  4387  -8129     0  0
-# CPS1
+CPS1            Parry Sound Harbour              ON CA  4534  -8003     0  0
 CPS2            Elmhirst Resort                  -- CA  4425  -7811     0  0
 CPS4            Lucan                            -- CA  4316  -8141     0  0
 CPT2            Killarney                        -- CA  4598  -8150     0  0
 CPT3            Rockton                          -- CA  4332  -8018     0  0
+CPT9            Pintendre                        QB CA  4676  -7111     0  0
 CPU6            Tyendinaga Mohawk                -- CA  4419  -7711     0  0
 CPV7            Poplar Hill                      -- CA  5211  -9426     0  0
 CPV8            Keewaywin                        -- CA  5299  -9284     0  0
 CPW9            Port Alberni Seaplane            -- CA  4924 -12482     0  0
-# CPZO
+## CPZO
 CRB4            Riviere Bonnard                  -- CA  5070  -7116     0  0
 CRC3            Ross Creek                       -- CA  5097 -11923     0  0
-# CRD3            
+CRD3            Red Deer Regional                AB CA  5226 -11382     0  0
 CRD5            Red Deer                         -- CA  5269 -11392     0  0
 CRE2            Edzo                             -- CA  6277 -11608     0  0
 # CRF2
