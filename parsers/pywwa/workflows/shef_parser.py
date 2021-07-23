@@ -572,11 +572,13 @@ def process_site(prod, sid, ts, data):
     iemob = Observation(sid, network, localts)
     iscoop = network.find("COOP") > 0
     hasdata = False
+    # Special rstage logic in case PEDTS is defined
+    pedts = metadata[network]["pedts"]
     for var in data:
         # shefit uses -9999 as a missing sentinel
         val = None if data[var] < -9998 else data[var]
         iemvar = MAPPING[var]
-        if iemvar == "":
+        if iemvar == "" or (iemvar == "rstage" and pedts is not None):
             continue
         if val is None:
             # Behold, glorious hack here to force nulls into the summary
@@ -607,8 +609,6 @@ def process_site(prod, sid, ts, data):
                 "snowd",
             ]:
                 iemob.data["coop_valid"] = iemob.data["valid"]
-    # Special rstage logic in case PEDTS is defined
-    pedts = metadata[network]["pedts"]
     if pedts is not None and f"{pedts}Z" in data:
         val = None if data[f"{pedts}Z"] < -9998 else data[f"{pedts}Z"]
         iemob.data["rstage"] = val
