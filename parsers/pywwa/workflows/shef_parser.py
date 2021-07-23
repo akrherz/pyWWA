@@ -34,6 +34,7 @@ from pywwa.database import get_database
 # it at the same time, use a single process for this connection
 ACCESSDB = get_database("iem", module_name="psycopg2", cp_max=20)
 HADSDB = get_database("hads", module_name="psycopg2", cp_max=20)
+MESOSITEDB = get_database("mesosite", cp_max=1)
 
 # a form for IDs we will log as unknown
 NWSLIRE = re.compile("[A-Z]{4}[0-9]")
@@ -64,20 +65,27 @@ def load_stations(txn):
     """
     LOG.info("load_stations called...")
     txn.execute(
-        "SELECT id, network, tzname from stations WHERE network ~* 'COOP' "
+        "SELECT id, network, tzname, a.value as pedts from stations s "
+        "LEFT JOIN station_attributes a on (s.iemid = a.iemid and "
+        "a.attr = 'PEDTS') WHERE network ~* 'COOP' "
         "or network ~* 'DCP' or network = 'ISUSM' ORDER by network ASC"
     )
 
     # A sentinel to know if we later need to remove things in the case of a
     # station that got dropped from a network
     epoc = utc().microsecond
-    for (stid, network, tzname) in txn.fetchall():
+    for (stid, network, tzname, pedts) in txn.fetchall():
         if stid in UNKNOWN:
             LOG.info("  station: %s is no longer unknown!", stid)
             UNKNOWN.pop(stid)
         metadata = LOCS.setdefault(stid, dict())
         if network not in metadata:
-            metadata[network] = dict(valid=U1980, tzname=tzname, epoc=epoc)
+            metadata[network] = dict(
+                valid=U1980,
+                tzname=tzname,
+                epoc=epoc,
+                pedts=pedts,
+            )
         else:
             metadata[network]["epoc"] = epoc
         if tzname not in TIMEZONES:
@@ -99,7 +107,7 @@ def load_stations(txn):
 
     LOG.info("loaded %s stations", len(LOCS))
     # Reload every 12 hours
-    reactor.callLater(12 * 60 * 60, HADSDB.runInteraction, load_stations)
+    reactor.callLater(12 * 60 * 60, MESOSITEDB.runInteraction, load_stations)
 
 
 MULTIPLIER = {
@@ -304,7 +312,7 @@ def really_process(prod, data):
             continue
         tstamp = make_datetime(line[10:20], line[21:29])
         # We don't care about data in the future!
-        utcnow = utc()
+        utcnow = common.utcnow()
         if tstamp > (utcnow + datetime.timedelta(hours=1)):
             continue
         if tstamp < (utcnow - datetime.timedelta(days=60)):
@@ -551,7 +559,7 @@ def process_site(prod, sid, ts, data):
     ):
         return
     metadata = LOCS.setdefault(
-        sid, {network: dict(valid=localts, tzname=None, epoc=-1)}
+        sid, {network: dict(valid=localts, tzname=None, epoc=-1, pedts=None)}
     )
     metadata[network]["valid"] = localts
 
@@ -599,6 +607,12 @@ def process_site(prod, sid, ts, data):
                 "snowd",
             ]:
                 iemob.data["coop_valid"] = iemob.data["valid"]
+    # Special rstage logic in case PEDTS is defined
+    pedts = metadata[network]["pedts"]
+    if pedts is not None and f"{pedts}Z" in data:
+        val = None if data[f"{pedts}Z"] < -9998 else data[f"{pedts}Z"]
+        iemob.data["rstage"] = val
+
     if hasdata:
         iemob.data["raw"] = prod.product_id
 
@@ -682,7 +696,7 @@ def main():
     os.chdir(path)
 
     # Load the station metadata before we fire up the ingesting
-    df = HADSDB.runInteraction(load_stations)
+    df = MESOSITEDB.runInteraction(load_stations)
     df.addCallback(main2)
     df.addErrback(common.shutdown)
     reactor.run()
