@@ -540,11 +540,11 @@ CTQ6            St Anselme                       -- CA  4662  -7096     0  0
 # CTSJ                   
 CTT5            La Romaine                       -- CA  5026  -6068     0  0
 CTU2            Fontanges                        -- CA  5455  -7117     0  0
-# CUOH
-# CUQR
+## CUOH
+## CUQR
 CVB2            Voiseys Bay                      -- CA  5634  -6209     0  0
-# CVM2
-# CXYT            
+CVM2            Victor Mine                      ON CA  5283  -8392     0  0
+## CXYT
 ## CXYU
 CYAC            Cat Lake                         ON CA  5172  -9182     0  0
 CYAG            Fort Frances                     ON CA  4865  -9344     0  0
@@ -562,7 +562,7 @@ CYBT            Brochet                          -- CA  5789 -10168     0  0
 CYCC            Cornwall                         ON CA  4509  -7456     0  0
 CYCD            Nanaimo                          -- CA  4905 -12387     0  0
 CYCE            Centralia                        -- CA  4329  -8151     0  0
-# CYCF
+## CYCF
 CYCH            Miramichi                        -- CA  4701  -6546     0  0
 CYCL            Charlo                           -- CA  4799  -6633     0  0
 CYCN            Cochrane                         -- CA  4911  -8101     0  0
@@ -588,6 +588,7 @@ CYFJ            Riviere Rouge                    -- CA  4641  -7478     0  0
 ## CYFN
 CYGB            Texada                           -- CA  4969 -12452     0  0
 CYGD            Goderich                         -- CA  4377  -8171     0  0
+CYGM            Gimli                            MB CA  5063  -9704     0  0
 CYGO            Gods Lake Narrows                MB CA  5456  -9449     0  0
 CYGZ            Grise Fiord                      NU CA  7643  -8291     0  0
 CYHC            Vancouver Habour                 -- CA  4939 -12311     0  0
