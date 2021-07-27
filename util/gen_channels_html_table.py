@@ -82,6 +82,7 @@ VTEC_PRODUCTS = [
     dict(afos="NPW", directive="10-515", channels=S1),
     dict(afos="RFW", directive="10-401", channels=S1),
     dict(afos="SMW", directive="10-313", channels=S1),
+    dict(afos="SQW", directive="10-511", channels=S1),
     dict(afos="SVR", directive="10-511", channels=S1),
     dict(afos="SVS", directive="10-511", channels=S1),
     dict(afos="TOR", directive="10-511", channels=S1),

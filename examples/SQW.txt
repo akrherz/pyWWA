@@ -1,0 +1,60 @@
+244 
+WWUS53 KDMX 191711
+SQWDMX
+
+Snow Squall Warning
+National Weather Service Des Moines IA
+1209 PM CDT Mon Oct 19 2020
+
+IAC049-099-153-191745-
+/O.CON.KDMX.SQ.W.0001.000000T0000Z-201019T1745Z/
+Polk IA-Jasper IA-Dallas IA-
+1209 PM CDT Mon Oct 19 2020
+
+...A SNOW SQUALL WARNING REMAINS IN EFFECT UNTIL 1245 PM CDT FOR
+POLK...JASPER AND DALLAS COUNTIES...
+
+At 1209 PM CDT, a dangerous snow squall was located near Ankeny,
+moving east at 40 mph.
+
+HAZARD...Extremely poor visibility in heavy snow. Visibilities below 
+         one quarter of a mile expected along with rapid 
+         accumulations. Overpasses and elevated roads are likely to 
+         be very icy.  Locations along Interstate 35 near Ankeny are 
+         particularly poor.  
+
+SOURCE...Public reported poor visibilities and rapid snow 
+         accumulations. 
+
+IMPACT...Dangerous life-threatening travel.
+
+This includes the following highways...
+ Interstate 35 between mile markers 67 and 72, and between mile
+markers 87 and 100.
+ Interstate 80 between mile markers 100 and 179.
+ Interstate 235 between mile markers 1 and 14.
+
+Locations impacted include...
+Des Moines, West Des Moines, Ankeny, Urbandale, Johnston, Clive,
+Newton, Altoona, Waukee, Norwalk, Pleasant Hill, Grimes, Perry, Adel,
+Windsor Heights, Carlisle, Bondurant, Polk City, Saylorville and
+Mitchellville.
+
+PRECAUTIONARY/PREPAREDNESS ACTIONS...
+
+Serious injuries and deaths may result from people exiting their
+vehicles during a snow squall. Drivers may not be able to see you or
+to stop! If stopped on the roadway or involved in an accident,
+quickly exit your vehicle move as far away from the roadway as
+possible ONLY when it is safe to do so. Do not stand along or near
+the roadway, since approaching vehicles may be unable to maintain
+control.
+
+&&
+
+LAT...LON 4151 9421 4184 9416 4186 9278 4151 9278
+TIME...MOT...LOC 1709Z 262DEG 33KT 4176 9352 
+
+$$
+
+Cogil
