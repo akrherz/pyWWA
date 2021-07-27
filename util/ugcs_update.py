@@ -295,7 +295,7 @@ def workflow(argv, pgconn, cursor):
         countnew += 1
 
     for ugc, _row in postgis[~postgis["covered"]].iterrows():
-        LOG.info("%s not found in update, truncating.")
+        LOG.info("%s not found in update, truncating.", ugc)
         truncate(cursor, valid, ugc, source)
 
     LOG.info("NEW: %s Dups: %s", countnew, countdups)
