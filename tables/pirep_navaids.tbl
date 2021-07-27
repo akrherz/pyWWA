@@ -64,6 +64,7 @@ CAX6            Ganges Seaplane                  -- CA  4885 -12350     0  0
 CAY2            Gang Ranch                       BC CA  5155 -12233     0  0
 CAY4            Hartley Bay                      -- CA  5342 -12925     0  0
 CAZ5            Cache Creek                      -- CA  5078 -12132     0  0
+CBA9            Ospika                           BC CA  5627 -12406     0  0
 CBB7            Tipella                          -- CA  4974 -12216     0  0
 CBB9            Osoyoos                          -- CA  4904 -11949     0  0
 CBC7            Vancouver Heliport               -- CA  4949 -12311     0  0
@@ -328,9 +329,9 @@ CKC7            Rockglen                         -- CA  4917 -10593     0  0
 CKD2            Porcupine Plain                  -- CA  5262 -10325     0  0
 CKD5            Kipling                          -- CA  5010 -10261     0  0
 CKD9            Slate Falls                      -- CA  5113  -9167     0  0
-# CKE9            
+CKE9            Nipigon                          ON CA  4902  -8828     0  0
 CKF4            Goodsoil                         -- CA  5442 -10923     0  0
-# CKJ2
+CKJ2            Rosenort                         MB CA  4945  -9742     0  0
 CKJ7            Starbuck                         -- CA  4971  -9768     0  0
 CKJ8            Molson Lake                      -- CA  5426  -9702     0  0
 CKK7            Steinbach (South)                -- CA  4949  -9670     0  0
@@ -376,7 +377,7 @@ CMX2            Maxville                         -- CA  4530  -7485     0  0
 CNA3            Springwater Barrie               -- CA  4441  -7973     0  0
 CNA4            Emsdale                          -- CA  4555  -7935     0  0
 CNA9            Tomvale                          -- CA  4492  -7694     0  0
-# CNB2
+CNB2            Bolton                           ON CA  4385  -7969     0  0
 CNC3            Brampton                         -- CA  4376  -7988     0  0
 CNC4            Guelph                           -- CA  4356  -8020     0  0
 CNC9            Perth                            -- CA  4491  -7625     0  0
@@ -385,7 +386,7 @@ CNE3            Bearskin Lake                    -- CA  5397  -9103     0  0
 CNE4            Iroquois Falls                   -- CA  4874  -8079     0  0
 CNF3            Pendleton                        -- CA  4549  -7510     0  0
 CNF4            Lindsay                          -- CA  4436  -7878     0  0
-# CNG6
+CNG6            Walkerton                        ON CA  4412  -8115     0  0
 CNH2            Natuashish                       -- CA  5591  -6118     0  0
 # CNH3            
 # CNH4
