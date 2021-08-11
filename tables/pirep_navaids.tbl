@@ -276,6 +276,7 @@ CJB8            Kyle                             -- CA  5083 -10807     0  0
 CJC2            Craik                            -- CA  5106 -10584     0  0
 CJC3            Davidson                         -- CA  5125 -10598     0  0
 CJC5            Shaunavon                        -- CA  4966 -10841     0  0
+CJD3            Birch Hills                      SK CA  5299 -10544     0  0
 CJD5            Leader                           -- CA  5087 -10950     0  0
 CJE3            Weyburn                          -- CA  4970 -10380     0  0
 CJE4            Snow Lake                        -- CA  5490  -9982     0  0
@@ -388,9 +389,9 @@ CNF3            Pendleton                        -- CA  4549  -7510     0  0
 CNF4            Lindsay                          -- CA  4436  -7878     0  0
 CNG6            Walkerton                        ON CA  4412  -8115     0  0
 CNH2            Natuashish                       -- CA  5591  -6118     0  0
-# CNH3            
-# CNH4
-# CNH9
+## CNH3
+CNH4            St Catharines                    ON CA  4315  -7928     0  0
+CNH9            Nanaimo WC Heliport              BC CA  4919 -12398     0  0
 CNJ4            Orillia                          -- CA  4468  -7931     0  0
 CNK4            Parry Sound                      -- CA  4526  -7983     0  0
 CNK7            Kananaskis                       -- CA  5110 -11501     0  0
@@ -432,9 +433,9 @@ CPC9            Huntsville                       ON CA  4534  -7921     0  0
 CPE6            Sunridge                         -- CA  4582  -7932     0  0
 CPF3            Dunrobin                         ON CA  4543  -7607     0  0
 CPF4            Bruce McPhail                    -- CA  4560  -7683     0  0
-# CPF5
-# CPF7
-# CPF9            
+## CPF5
+CPF7            Southampton                      ON CA  4449  -8134     0  0
+CPF9            Lake Rosseau                     ON CA  4511  -7955     0  0
 CPG5            Hawkesbury                       -- CA  4558  -7455     0  0
 CPH9            Fordwich                         -- CA  4389  -8100     0  0
 CPJ5            Stirling                         ON CA  4424  -7756     0  0
