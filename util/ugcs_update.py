@@ -123,6 +123,7 @@ def db_fixes(cursor, valid):
             """
             SELECT end_ts from ugcs
             where begin_ts = %s and (
+                simple_geom is null or
                 ST_IsEmpty(simple_geom) or
                 ST_Area(simple_geom) / ST_Area(geom) < 0.9
             )
@@ -143,6 +144,7 @@ def db_fixes(cursor, valid):
                 ST_Buffer(ST_SnapToGrid(geom, 0.0001), 0)
             )
             WHERE begin_ts = %s and (
+                simple_geom is null or
                 ST_IsEmpty(simple_geom) or
                 ST_Area(simple_geom) / ST_Area(geom) < 0.9
             )
