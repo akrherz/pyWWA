@@ -6,8 +6,13 @@ import os
 import requests
 from pyiem.nws.product import TextProduct
 from pyiem.util import (
-    logger, get_dbconn, utc, exponential_backoff, noaaport_text
+    logger,
+    get_dbconn,
+    utc,
+    exponential_backoff,
+    noaaport_text,
 )
+
 LOG = logger()
 BASEURL = "https://www.wpc.ncep.noaa.gov/qpf/"
 QUEUE = {
@@ -24,7 +29,7 @@ def run(cursor, fn, ttaaii, awipsid):
         "select entered from products where pil = %s and "
         "entered > now() - '2 days'::interval and entered < now() "
         "ORDER by entered DESC",
-        (awipsid, ),
+        (awipsid,),
     )
     current = utc(1980)
     if cursor.rowcount > 0:
