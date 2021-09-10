@@ -108,7 +108,7 @@ def db_fixes(cursor, valid):
         ),
         centroid = ST_Centroid(geom),
         area2163 = ST_area( ST_transform(geom, 2163) ) / 1000000.0
-        WHERE begin_ts = %s
+        WHERE begin_ts = %s or area2163 is null
     """,
         (valid,),
     )
