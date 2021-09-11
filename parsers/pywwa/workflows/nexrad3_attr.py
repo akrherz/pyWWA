@@ -122,7 +122,7 @@ def really_process(txn, ctx):
             tokens[7] = 0.01
         d["max_size"] = tokens[7]
 
-        if tokens[8] == "UNKNOWN":
+        if tokens[8] in ["UNKNOWN", "***"]:
             d["vil"] = 0
         else:
             d["vil"] = tokens[8]
