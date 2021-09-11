@@ -22,3 +22,14 @@ def test_process(cursor):
     assert ctx["nexrad"] == "JAX"
     processed = nexrad3_attr.really_process(cursor, ctx)
     assert processed == 3
+
+
+@pytest.mark.parametrize("database", ["radar"])
+def test_210910_badvil(cursor):
+    """Test that a missing VIL does not cause issues."""
+    ctx = nexrad3_attr.process(
+        get_example_file("NCR_20210911_0023", justfp=True)
+    )
+    assert ctx["nexrad"] == "LAS"
+    processed = nexrad3_attr.really_process(cursor, ctx)
+    assert processed == 2
