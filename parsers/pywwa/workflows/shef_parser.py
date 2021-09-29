@@ -30,11 +30,11 @@ MESOSITEDB = get_database("mesosite", cp_max=1)
 NWSLIRE = re.compile("[A-Z]{4}[0-9]")
 
 # stations we don't know about
-UNKNOWN = dict()
+UNKNOWN = {}
 # station metadata
-LOCS = dict()
+LOCS = {}
 # database timezones to pytz cache
-TIMEZONES = dict()
+TIMEZONES = {}
 # a queue for saving database IO
 CURRENT_QUEUE = {}
 U1980 = utc(1980)
@@ -124,7 +124,7 @@ def load_stations(txn):
         if stid in UNKNOWN:
             LOG.info("  station: %s is no longer unknown!", stid)
             UNKNOWN.pop(stid)
-        metadata = LOCS.setdefault(stid, dict())
+        metadata = LOCS.setdefault(stid, {})
         if network not in metadata:
             metadata[network] = dict(
                 valid=U1980,
@@ -276,7 +276,7 @@ def get_localtime(sid, ts):
 
 def get_network(prod, sid, data: List[SHEFElement]):
     """Figure out which network this belongs to"""
-    networks = list(LOCS.get(sid, dict()).keys())
+    networks = list(LOCS.get(sid, {}).keys())
     # This is the best we can hope for
     if len(networks) == 1:
         return networks[0]
