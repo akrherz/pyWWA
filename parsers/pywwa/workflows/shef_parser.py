@@ -1,33 +1,23 @@
 """SHEF product ingestor."""
 # stdlib
-import os
-import re
-from collections import namedtuple
 import datetime
-from io import BytesIO
+import re
+from typing import List
 
 # 3rd Party
 import pytz
-from twisted.internet import task
-from twisted.internet.defer import DeferredQueue, Deferred
-from twisted.internet.task import cooperate
-from twisted.internet import reactor, protocol
+from twisted.internet import reactor
 from twisted.internet.task import LoopingCall
-from pyiem.reference import TRACE_VALUE
 from pyiem.observation import Observation
-from pyiem.nws import product
-from pyiem.util import LOG, utc
+from pyiem.models.shef import SHEFElement
+from pyiem.nws.products.shef import parser
+from pyiem.util import LOG, utc, convert_value
 from pyiem import reference
 
 # Local
-from pywwa import common, get_search_paths
+from pywwa import common
 from pywwa.ldm import bridge
 from pywwa.database import get_database
-
-# from pympler import tracker, summary, muppy
-
-
-# TR = tracker.SummaryTracker()
 
 # Setup Database Links
 # the current_shef table is not very safe when two processes attempt to update
@@ -49,8 +39,64 @@ TIMEZONES = dict()
 CURRENT_QUEUE = {}
 U1980 = utc(1980)
 
-TEXTPRODUCT = namedtuple("TextProduct", ["product_id", "afos", "text"])
-JOBS = DeferredQueue()
+
+DIRECTMAP = {
+    "HGIZ": "rstage",
+    "HPIZ": "rstage",
+    "HTIZ": "rstage",
+    "PAIZ": "pres",
+    "PPHZ": "phour",
+    "PPDZ": "pday",
+    "PPPZ": "pday",
+    "PCIZ": "pcounter",
+    "QRIZ": "discharge",
+    "QTIZ": "discharge",
+    "RWIZ": "srad",
+    "SDIZ": "snowd",
+    "SFDZ": "snow",
+    "SWIZ": "snoww",
+    "TDIZ": "dwpf",
+    "TAIZ": "tmpf",
+    "TAIN": "min_tmpf",
+    "TAIX": "max_tmpf",
+    "TWIZ": "water_tmpf",
+    "UDIZ": "drct",
+    "UGIZ": "gust",
+    "UPIZ": "gust",
+    "UPHZ": "gust",
+    "URHZ": "max_drct",
+    "URIZ": "max_drct",
+    "USIZ": "sknt",
+    "VBIZ": "battery",
+    "XRIZ": "relh",
+    "XVIZ": "vsby",
+}
+
+
+class MyDict(dict):
+    """
+    Customized dictionary class
+    """
+
+    def __getitem__(self, key):
+        """
+        Over-ride getitem so that the sql generated is proper
+        """
+        val = self.get(key)
+        if val is not None:
+            return val
+        # Logic to convert this key into something the iem can handle
+        # Our key is always at least 6 chars!
+        pei = f"{key[:3]}{key[5]}"
+        if pei in DIRECTMAP:
+            self.__setitem__(key, DIRECTMAP[pei])
+            return DIRECTMAP[pei]
+        LOG.info("Can not map var %s", key)
+        self.__setitem__(key, "")
+        return ""
+
+
+MAPPING = MyDict()
 
 
 def load_stations(txn):
@@ -110,286 +156,35 @@ def load_stations(txn):
     reactor.callLater(12 * 60 * 60, MESOSITEDB.runInteraction, load_stations)
 
 
-MULTIPLIER = {
-    "US": 0.87,  # Convert MPH to KNT
-    "UG": 0.87,
-    "UP": 0.87,
-    "UR": 10,
-}
-
-"""
-Some notes on the SHEF codes translated to something IEM Access can handle
-First two chars are physical extent code
-
-"""
-DIRECTMAP = {
-    "HGIZ": "rstage",
-    "HPIZ": "rstage",
-    "HTIZ": "rstage",
-    "PAIZ": "pres",
-    "PPHZ": "phour",
-    "PPDZ": "pday",
-    "PPPZ": "pday",
-    "PCIZ": "pcounter",
-    "QRIZ": "discharge",
-    "QTIZ": "discharge",
-    "RWIZ": "srad",
-    "SDIZ": "snowd",
-    "SFDZ": "snow",
-    "SWIZ": "snoww",
-    "TDIZ": "dwpf",
-    "TAIZ": "tmpf",
-    "TAIN": "min_tmpf",
-    "TAIX": "max_tmpf",
-    "TWIZ": "water_tmpf",
-    "UDIZ": "drct",
-    "UGIZ": "gust",
-    "UPIZ": "gust",
-    "UPHZ": "gust",
-    "URHZ": "max_drct",
-    "URIZ": "max_drct",
-    "USIZ": "sknt",  # note above that we apply a multipler
-    "VBIZ": "battery",
-    "XRIZ": "relh",
-    "XVIZ": "vsby",
-}
-
-
-class MyDict(dict):
-    """
-    Customized dictionary class
-    """
-
-    def __getitem__(self, key):
-        """
-        Over-ride getitem so that the sql generated is proper
-        """
-        val = self.get(key)
-        if val is not None:
-            return val
-        # Logic to convert this key into something the iem can handle
-        # Our key is always at least 6 chars!
-        pei = "%s%s" % (key[:3], key[5])
-        if pei in DIRECTMAP:
-            self.__setitem__(key, DIRECTMAP[pei])
-            return DIRECTMAP[pei]
-        LOG.info("Can not map var %s", key)
-        self.__setitem__(key, "")
-        return ""
-
-
-MAPPING = MyDict()
-
-
-class SHEFIT(protocol.ProcessProtocol):
-    """
-    My process protocol for dealing with the SHEFIT program from the NWS
-    """
-
-    def __init__(self, prod):
-        """
-        Constructor
-        """
-        self.deferred = None
-        self.prod = prod
-        self.data = BytesIO()
-
-    def connectionMade(self):
-        """
-        Fired when the program starts up and wants stdin
-        """
-        # prod.text is <str> need to write bytes
-        self.transport.write(self.prod.text.encode("utf-8"))
-        self.transport.closeStdin()
-
-    def outReceived(self, data):
-        """
-        Save the stdout we get from the program for later processing
-        """
-        # data should come to us as <bytes>
-        self.data.write(data)
-
-    def errReceived(self, data):
-        """
-        In case something comes to stderr
-        """
-        LOG.info("errReceived! with %d bytes!", len(data))
-        LOG.info(data)
-        self.deferred.errback(data)
-
-    def outConnectionLost(self):
-        """
-        Once the program is done, we need to do something with the data
-        """
-        df = task.deferLater(
-            reactor,
-            0,
-            really_process,
-            self.prod,
-            self.data.getvalue().decode("utf-8"),
-        )
-        df.addErrback(common.email_error, self.prod.text)
-        self.deferred.callback("")
-
-
-def clnstr(buf):
-    """
-    Get rid of cruft we don't wish to work with
-    """
-    return buf.replace("\r", "").replace("\003", "").replace("\001", "")
-
-
-def process_data(data):
-    """callback when a full data product is ready for processing
-
-    This string is cleaned and placed into the job queue for processing
-
-    Args:
-        data (str)
-    """
-    JOBS.put(clnstr(data))
-
-
-def async_func(data):
-    """spawn a process with a deferred given the inbound data product"""
-    defer = Deferred()
-    try:
-        tp = product.TextProduct(
-            data, utcnow=common.utcnow(), parse_segments=False
-        )
-    except Exception as exp:
-        common.email_error(exp, data)
-        return None
-    prod = TEXTPRODUCT(
-        product_id=tp.get_product_id(), afos=tp.afos, text=tp.text
-    )
-    proc = SHEFIT(prod)
-    proc.deferred = defer
-    proc.deferred.addErrback(LOG.error)
-
-    reactor.spawnProcess(proc, "./shefit", ["shefit"], {})
-    return proc.deferred
-
-
-def worker():
-    """Our long running worker"""
-    while True:
-        yield JOBS.get().addCallback(async_func).addErrback(
-            common.email_error, "Unhandled Error"
-        ).addErrback(LOG.error)
-
-
-def make_datetime(dpart, tpart):
-    """Create a datatime instance from these two strings"""
-    if dpart == "0000-00-00":
-        return None
-    dstr = "%s %s" % (dpart, tpart)
-    tstamp = datetime.datetime.strptime(dstr, "%Y-%m-%d %H:%M:%S")
-    return tstamp.replace(tzinfo=pytz.utc)
-
-
-def really_process(prod, data):
-    """
-    This processes the output we get from the SHEFIT program
-    """
-    # Now we loop over the data we got :)
-    # LOG.info("\n"+data)
+def restructure_data(prod):
+    """Create a nicer data structure for future processing."""
     mydata = {}
-    for line in data.split("\n"):
-        # Skip blank output lines or short lines
-        if line.strip() == "" or len(line) < 90:
+    # Step 1: Restructure and do some cleaning
+    # se == SHEFElement
+    old = []
+    for se in prod.data:
+        if len(se.station) > 8:
+            LOG.info("sid len>8: [%s] %s", se.station, prod.get_product_id())
             continue
-        # data is fixed, so we should parse it
-        sid = line[:8].strip()
-        if len(sid) > 8:
-            LOG.info("SiteID Len Error: [%s] %s", sid, prod.product_id)
+        # We don't want any non-report / forecast data, missing data
+        if se.type != "R" or se.valid is None:
             continue
-        if sid not in mydata:
-            mydata[sid] = {}
-        modelruntime = make_datetime(line[31:41], line[42:50])
-        if modelruntime is not None:
-            # print("Skipping forecast data for %s" % (sid, ))
-            continue
-        tstamp = make_datetime(line[10:20], line[21:29])
         # We don't care about data in the future!
         utcnow = common.utcnow()
-        if tstamp > (utcnow + datetime.timedelta(hours=1)):
+        if se.valid > (utcnow + datetime.timedelta(hours=1)):
             continue
-        if tstamp < (utcnow - datetime.timedelta(days=60)):
-            LOG.info("Rejecting old data %s %s", sid, tstamp)
+        if se.valid < (utcnow - datetime.timedelta(days=60)):
+            if se.station in old:
+                continue
+            LOG.info("Rejecting old data %s %s", se.station, se.valid)
+            old.append(se.station)
             continue
-        s_data = mydata.setdefault(sid, dict())
-        st_data = s_data.setdefault(tstamp, dict())
+        s_data = mydata.setdefault(se.station, {})
+        st_data = s_data.setdefault(se.valid, [])
 
-        varname = line[52:59].strip()
-        value = line[60:73].strip()
-        if value.find("****") > -1:
-            LOG.info("Bad Data from %s\n%s", prod.product_id, data)
-            value = -9999.0
-        else:
-            value = float(value)
-            # shefit generates 0.001 for trace, IEM uses something else
-            if 0.0009 < value < 0.0011 and varname[:2] in [
-                "PC",
-                "PP",
-                "QA",
-                "QD",
-                "QR",
-                "QT",
-                "SD",
-                "SF",
-                "SW",
-            ]:
-                value = TRACE_VALUE
-        # Handle variable time length data
-        if varname[2] == "V":
-            itime = line[87:91]
-            if itime[0] == "2":
-                varname = "%sDVD%s" % (varname, itime[-2:])
-        # Handle 7.4.6 Paired Value ("Vector") Physical Elements
-        if varname[:2] in [
-            "HQ",
-            "MD",
-            "MN",
-            "MS",
-            "MV",
-            "NO",
-            "ST",
-            "TB",
-            "TE",
-            "TV",
-        ]:
-            depth = int(value)
-            if depth == 0:
-                value = abs(value * 1000)
-            else:
-                value = abs((value * 1000) % (depth * 1000))
-            if depth < 0:
-                value = 0 - value
-                depth = abs(depth)
-            varname = "%s.%02i" % (varname, depth)
-            if len(varname) > 10:
-                if depth > 999:
-                    LOG.info(
-                        "Ignoring sid: %s varname: %s value: %s",
-                        sid,
-                        varname,
-                        value,
-                    )
-                    continue
-                common.email_error(
-                    ("sid: %s varname: %s value: %s " "is too large")
-                    % (sid, varname, value),
-                    "%s\n%s" % (data, prod.text),
-                )
-            continue
-        st_data[varname] = value
-    # Now we process each station we found in the report! :)
-    for sid in mydata:
-        times = list(mydata[sid].keys())
-        times.sort()
-        for tstamp in times:
-            process_site(prod, sid, tstamp, mydata[sid][tstamp])
+        # TODO handling of DV properly
+        st_data.append(se)
+    return mydata
 
 
 def enter_unknown(sid, product_id, network):
@@ -403,7 +198,7 @@ def enter_unknown(sid, product_id, network):
     if NWSLIRE.match(sid) is None:
         return
     HADSDB.runOperation(
-        "INSERT into unknown(nwsli, product, network) " "values (%s, %s, %s)",
+        "INSERT into unknown(nwsli, product, network) values (%s, %s, %s)",
         (sid, product_id, network),
     )
 
@@ -423,15 +218,6 @@ def checkvars(myvars):
     return False
 
 
-def var2dbcols(var):
-    """Convert a SHEF var into split values"""
-    if var.find(".") > -1:
-        parts = var.split(".")
-        var = parts[0]
-        return [var[:2], var[2], var[3:5], var[5], var[-1], parts[1]]
-    return [var[:2], var[2], var[3:5], var[5], var[-1], None]
-
-
 def save_current():
     """update the database current_shef table
 
@@ -445,28 +231,37 @@ def save_current():
             skipped += 1
             continue
         cnt += 1
-        (sid, varname) = k.split("|")
-        (pe, d, s, e, p, depth) = var2dbcols(varname)
+        (sid, varname, _depth) = k.split("|")
+        if len(varname) != 7:
+            LOG.info("Got varname of '%s' somehow? %s", varname, mydict)
+            continue
+
         d2 = ACCESSDB.runOperation(
             "INSERT into current_shef(station, valid, physical_code, "
-            "duration, source, extremum, probability, value, depth) "
-            "values (%s,%s,%s,%s,%s,%s,%s,%s,%s)",
+            "duration, source, type, extremum, probability, value, depth, "
+            "dv_interval, unit_convention, qualifier, product_id) "
+            "values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
             (
                 sid,
-                mydict["valid"].strftime("%Y-%m-%d %H:%M+00"),
-                pe,
-                d,
-                s,
-                e,
-                p,
+                mydict["valid"],
+                varname[:2],
+                varname[2],
+                varname[3],
+                varname[4],
+                varname[5],
+                varname[6],
                 mydict["value"],
-                depth,
+                mydict["depth"],
+                mydict["dv_interval"],
+                mydict["unit_convention"],
+                mydict["qualifier"],
+                mydict["product_id"],
             ),
         )
         d2.addErrback(common.email_error, "")
         mydict["dirty"] = False
 
-    LOG.info("save_current() processed %s entries, %s skipped", cnt, skipped)
+    LOG.info("processed %s entries, %s skipped", cnt, skipped)
 
 
 def get_localtime(sid, ts):
@@ -479,7 +274,7 @@ def get_localtime(sid, ts):
     )
 
 
-def get_network(prod, sid, _ts, data):
+def get_network(prod, sid, data: List[SHEFElement]):
     """Figure out which network this belongs to"""
     networks = list(LOCS.get(sid, dict()).keys())
     # This is the best we can hope for
@@ -487,10 +282,13 @@ def get_network(prod, sid, _ts, data):
         return networks[0]
     # Our simple determination if the site is a COOP site
     is_coop = False
+    varnames = [se.varname() for se in data]
     if prod.afos[:3] == "RR3":
         is_coop = True
-    elif prod.afos[:3] in ["RR1", "RR2"] and checkvars(list(data.keys())):
-        LOG.info("Guessing COOP? %s %s %s", sid, prod.product_id, data.keys())
+    elif prod.afos[:3] in ["RR1", "RR2"] and checkvars(varnames):
+        LOG.info(
+            "Guessing COOP? %s %s %s", sid, prod.get_product_id(), varnames
+        )
         is_coop = True
     pnetwork = "COOP" if is_coop else "DCP"
     # filter networks now
@@ -500,61 +298,83 @@ def get_network(prod, sid, _ts, data):
 
     # If networks is zero length, then we have to try some things
     if not networks:
-        enter_unknown(sid, prod.product_id, "")
+        enter_unknown(sid, prod.get_product_id(), "")
         if len(sid) == 5:
             state = reference.nwsli2state.get(sid[3:])
             country = reference.nwsli2country.get(sid[3:])
             if country in ["CA", "MX"]:
-                return "%s_%s_%s" % (country, state, pnetwork)
+                return f"{country}_{state}_{pnetwork}"
             if country == "US":
-                return "%s_%s" % (state, pnetwork)
-            return "%s__%s" % (country, pnetwork)
+                return f"{state}_{pnetwork}"
+            return f"{country}__{pnetwork}"
 
     if sid not in UNKNOWN:
         UNKNOWN[sid] = True
-        LOG.info(
-            "get_network failure for sid: %s tp: %s", sid, prod.product_id
-        )
+        LOG.info("failure for sid: %s tp: %s", sid, prod.get_product_id())
     return None
 
 
-def process_site(prod, sid, ts, data):
-    """
-    I process a dictionary of data for a particular site
-    """
-    localts = get_localtime(sid, ts)
-    # Insert data into database regardless
-    for varname in data:
-        value = data[varname]
-        deffer = HADSDB.runOperation(
-            "INSERT into raw_inbound (station, valid, key, value) "
-            "VALUES(%s,%s, %s, %s)",
-            (sid, ts.strftime("%Y-%m-%d %H:%M+00"), varname, value),
-        )
-        deffer.addErrback(common.email_error, prod.text)
-        deffer.addErrback(LOG.error)
+def process_site(accesstxn, prod, sid, data):
+    """Consumption of rectified data."""
+    # Order the timestamps so that we process the newest data last, so that
+    # all obs are potentially processed through iemaccess
+    times = list(data.keys())
+    times.sort()
+    for tstamp in times:
+        if sid in UNKNOWN:
+            continue
+        process_site_time(accesstxn, prod, sid, tstamp, data[tstamp])
 
-        key = "%s|%s" % (sid, varname)
-        cur = CURRENT_QUEUE.setdefault(
-            key, dict(valid=ts, value=value, dirty=True)
-        )
-        if ts > cur["valid"]:
-            cur["valid"] = ts
-            cur["value"] = value
-            cur["dirty"] = True
 
-    # Don't bother with stranger locations
-    if len(sid) == 8 and sid[0] == "X":
+def update_current_queue(element: SHEFElement, product_id: str):
+    """Update CURRENT_QUEUE with new data."""
+    # We only want observations
+    if element.type != "R":
         return
-    # Don't bother with unknown sites
-    if sid in UNKNOWN:
+    varname = element.varname()
+    deffer = HADSDB.runOperation(
+        "INSERT into raw_inbound (station, valid, key, value, depth, "
+        "unit_convention, dv_interval, qualifier) "
+        "VALUES(%s, %s, %s, %s, %s, %s, %s, %s)",
+        (
+            element.station,
+            element.valid,
+            varname,
+            element.num_value,
+            element.depth,
+            element.unit_convention,
+            element.dv_interval,
+            element.qualifier,
+        ),
+    )
+    deffer.addErrback(common.email_error, product_id)
+    deffer.addErrback(LOG.error)
+
+    key = f"{element.station}|{varname}|{element.depth}"
+    cur = CURRENT_QUEUE.setdefault(
+        key, dict(valid=element.valid, value=element.num_value, dirty=True)
+    )
+    if element.valid < cur["valid"]:
         return
-    network = get_network(prod, sid, ts, data)
+    cur["valid"] = element.valid
+    cur["depth"] = element.depth
+    cur["value"] = element.num_value
+    cur["dv_interval"] = element.dv_interval
+    cur["qualifier"] = element.qualifier
+    cur["unit_convention"] = element.unit_convention
+    cur["product_id"] = product_id
+    cur["dirty"] = True
+
+
+def process_site_time(accesstxn, prod, sid, ts, elements: List[SHEFElement]):
+    """Ingest for IEMAccess."""
+    network = get_network(prod, sid, elements)
     if network in ["ISUSM", None]:
         return
 
+    localts = get_localtime(sid, ts)
     # Do not send DCP sites with old data to IEMAccess
-    if network.find("_DCP") > 0 and localts < LOCS.get(sid, dict()).get(
+    if network.find("_DCP") > 0 and localts < LOCS.get(sid, {}).get(
         "valid", localts
     ):
         return
@@ -572,29 +392,37 @@ def process_site(prod, sid, ts, data):
     iemob = Observation(sid, network, localts)
     iscoop = network.find("COOP") > 0
     hasdata = False
-    # Special rstage logic in case PEDTS is defined
-    pedts = metadata[network]["pedts"]
-    for var in data:
-        # shefit uses -9999 as a missing sentinel
-        val = None if data[var] < -9998 else data[var]
-        iemvar = MAPPING[var]
-        if iemvar == "" or (iemvar == "rstage" and pedts is not None):
+    # TODO Special rstage logic in case PEDTS is defined
+    # pedts = metadata[network]["pedts"]
+    report = None
+    for se in elements:
+        if se.type != "R":
             continue
+        if se.narrative:
+            report = se.narrative
+        varname = se.varname()
+        iemvar = MAPPING[varname]
+        if iemvar == "":  # or (iemvar == "rstage" and pedts is not None):
+            continue
+        # We generally are in english units
+        val = se.to_english()
+        # TODO it is not clear if we can hit this code or not
         if val is None:
             # Behold, glorious hack here to force nulls into the summary
             # database that uses coerce
-            iemob.data["null_%s" % (iemvar,)] = None
-        else:
-            val *= MULTIPLIER.get(var[:2], 1.0)
+            iemob.data[f"null_{iemvar}"] = None
         hasdata = True
         iemob.data[iemvar] = val
-        if MAPPING[var] in ["pday", "snow", "snowd"]:
-            # Convert 0.001 to 0.0001 for Trace values
-            if val is not None and val == 0.001:
-                iemob.data[iemvar] = TRACE_VALUE
+        if iemvar in ["pday", "snow", "snowd"]:
             # Prevent negative numbers
-            elif val is not None and val < 0:
+            if val is not None and val < 0:
                 iemob.data[iemvar] = 0
+        if iemvar in ["sknt", "gust"] and val is not None:
+            # mph to knots :/
+            val = convert_value(val, "mile / hour", "knot")
+        if iemvar == "max_drct" and val is not None:
+            # divide by 10
+            val /= 10.0
         if iscoop:
             # Save COOP 'at-ob' temperature into summary table
             if iemvar == "tmpf":
@@ -609,63 +437,47 @@ def process_site(prod, sid, ts, data):
                 "snowd",
             ]:
                 iemob.data["coop_valid"] = iemob.data["valid"]
-    if pedts is not None and f"{pedts}Z" in data:
-        val = None if data[f"{pedts}Z"] < -9998 else data[f"{pedts}Z"]
-        iemob.data["rstage"] = val
+    # if pedts is not None and f"{pedts}Z" in data:
+    #    val = None if data[f"{pedts}Z"] < -9998 else data[f"{pedts}Z"]
+    #    iemob.data["rstage"] = val
 
-    if hasdata:
-        iemob.data["raw"] = prod.product_id
-
-        deffer = ACCESSDB.runInteraction(iemob.save)
-        deffer.addCallback(got_results, prod.product_id, sid, network, localts)
-        deffer.addErrback(common.email_error, prod.text)
-        deffer.addErrback(LOG.error)
-
-
-def got_results(res, product_id, sid, network, localts):
-    """
-    Callback after our iemdb work
-    @param res response
-    @param product_id product_id
-    @param sid stationID
-    @param network string network
-    @param localts timestamptz of the observation
-    """
-    if res:
+    if not hasdata:
         return
-    basets = utc()
-    basets -= datetime.timedelta(hours=48)
-    # If this is old data, we likely recently added this station and are
-    # simply missing a database entry for it?
-    if localts < basets:
-        return
-    enter_unknown(sid, product_id, network)
+    iemob.data["raw"] = prod.get_product_id()
+    iemob.data["report"] = report
+    if not iemob.save(accesstxn):
+        enter_unknown(sid, prod.get_product_id(), network)
 
 
-def service_guard():
-    """Make sure things are not getting sideways
-
-    When we call shutdown, this closes the inbound STDIN pipe, which termintes
-    the LDM pqact process and starts up a new one.  This process then sits and
-    spins as it works off its database queue.  This all is not ideal!
-    """
-    # all_objects = muppy.get_objects()
-    # sum1 = summary.summarize(all_objects)
-    # summary.print_(sum1)
-    # LOG.info("DIFF--------------")
-    # TR.print_diff()
+def log_database_queue_size():
+    """Log how much backlog has accumulated."""
     LOG.info(
-        "service_guard jobs[waiting: %s, pending: %s] "
         "dbpool queuesz[hads:%s, access:%s]",
-        len(JOBS.waiting),
-        len(JOBS.pending),
         # pylint: disable=protected-access
         HADSDB.threadpool._queue.qsize(),
         ACCESSDB.threadpool._queue.qsize(),
     )
-    if len(JOBS.pending) > 1000:
-        LOG.info("Starting shutdown due to more than 1000 jobs in queue")
-        common.shutdown()
+
+
+def process_data(text):
+    """Callback when text is received."""
+    prod = parser(text, utcnow=common.utcnow())
+    if prod.warnings:
+        common.email_error("\n".join(prod.warnings), prod.unixtext)
+    if not prod.data:
+        return prod
+    product_id = prod.get_product_id()
+    # Update CURRENT_QUEUE
+    for element in prod.data:
+        update_current_queue(element, product_id)
+    # Create a nicer data structure
+    mydata = restructure_data(prod)
+    # Chunk thru each of the sites found and do work.
+    for sid, data in mydata.items():
+        df = ACCESSDB.runInteraction(process_site, prod, sid, data)
+        df.addErrback(common.email_error, prod.unixtext)
+        df.addErrback(LOG.error)
+    return prod
 
 
 def main2(_res):
@@ -673,35 +485,25 @@ def main2(_res):
     LOG.info("main() fired!")
     bridge(process_data)
 
-    for _ in range(6):
-        cooperate(worker())
-
+    # Write out cached obs every couple of minutes
     lc = LoopingCall(save_current)
-    lc.start(373, now=False)
-    lc2 = LoopingCall(service_guard)
-    lc2.start(61, now=False)
+    df = lc.start(131, now=False)
+    df.addErrback(common.email_error)
+    # Log a diagnostic on how things are processing.
+    lc2 = LoopingCall(log_database_queue_size)
+    df2 = lc2.start(61, now=False)
+    df2.addErrback(common.email_error)
 
 
 def main():
     """We startup."""
-    # Need to find the shef_workspace folder
     common.main(with_jabber=False)
-    origcwd = os.getcwd()
-    path = None
-    for path in get_search_paths():
-        if os.path.isdir(os.path.join(path, "shef_workspace")):
-            break
-    path = os.path.join(path, "shef_workspace")
-    LOG.info("Changing cwd to %s", path)
-    os.chdir(path)
 
     # Load the station metadata before we fire up the ingesting
     df = MESOSITEDB.runInteraction(load_stations)
     df.addCallback(main2)
     df.addErrback(common.shutdown)
     reactor.run()
-    # For testing purposes
-    os.chdir(origcwd)
 
 
 if __name__ == "__main__":
