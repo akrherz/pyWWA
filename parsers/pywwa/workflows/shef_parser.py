@@ -404,7 +404,8 @@ def process_site_time(accesstxn, prod, sid, ts, elements: List[SHEFElement]):
         iemvar = MAPPING[varname]
         if iemvar == "":  # or (iemvar == "rstage" and pedts is not None):
             continue
-        # We generally are in english units
+        # We generally are in english units, this also converts the wind
+        # direction to the full degrees
         val = se.to_english()
         # TODO it is not clear if we can hit this code or not
         if val is None:
@@ -420,9 +421,6 @@ def process_site_time(accesstxn, prod, sid, ts, elements: List[SHEFElement]):
         if iemvar in ["sknt", "gust"] and val is not None:
             # mph to knots :/
             val = convert_value(val, "mile / hour", "knot")
-        if iemvar == "max_drct" and val is not None:
-            # divide by 10
-            val /= 10.0
         if iscoop:
             # Save COOP 'at-ob' temperature into summary table
             if iemvar == "tmpf":
