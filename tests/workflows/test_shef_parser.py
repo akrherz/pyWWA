@@ -5,14 +5,14 @@ import pytest
 from pyiem.util import utc
 
 # Local
-from pywwa import CTX
+import pywwa
 from pywwa.workflows import shef_parser
 from pywwa.testing import get_example_file
 
 
 def test_process_data():
     """Test that we can really_process a product!"""
-    CTX.utcnow = utc(2020, 9, 15)
+    pywwa.CTX.utcnow = utc(2020, 9, 15)
     prod = shef_parser.process_data(get_example_file("RR7.txt"))
     assert prod.get_product_id() == "202009151244-KWOH-SRUS27-RRSKRF"
 
