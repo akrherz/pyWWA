@@ -1,51 +1,20 @@
 """Test shef_parser."""
-# stdlib
-import mock
 
 # 3rd Party
 import pytest
-from pyiem.nws.product import TextProduct
 from pyiem.util import utc
 
 # Local
+import pywwa
 from pywwa.workflows import shef_parser
 from pywwa.testing import get_example_file
 
 
-def test_really_process():
+def test_process_data():
     """Test that we can really_process a product!"""
-    prod = TextProduct(get_example_file("RR7.txt"))
-    # second argument here is what we get from shefit...
-    shef_parser.really_process(prod, "")
-
-
-def test_make_datetime():
-    """Test that we can construct datetimes."""
-    answer = utc(2021, 1, 18, 12, 43)
-    assert shef_parser.make_datetime("2021-01-18", "12:43:00") == answer
-    assert shef_parser.make_datetime("0000-00-00", "") is None
-
-
-def test_exercise_shefit():
-    """Call the API, but not actually test too much of it :("""
-    text = get_example_file("RR7.txt")
-    shefit = shef_parser.SHEFIT(TextProduct(text))
-    shefit.transport = mock.Mock()
-    shefit.deferred = mock.Mock()
-    shefit.connectionMade()
-    shefit.outReceived(b"Hi")
-    shefit.errReceived("hi")
-    shefit.outConnectionLost()
-
-    shef_parser.async_func(text)
-    shef_parser.async_func(None)
-
-    shef_parser.process_data(text)
-
-
-def test_clnstr():
-    """Test that we clean a string!"""
-    assert shef_parser.clnstr("HI") == "HI"
+    pywwa.CTX.utcnow = utc(2020, 9, 15)
+    prod = shef_parser.process_data(get_example_file("RR7.txt"))
+    assert prod.get_product_id() == "202009151244-KWOH-SRUS27-RRSKRF"
 
 
 def test_mydict():
@@ -85,7 +54,6 @@ def test_main2():
     shef_parser.main2(None)
 
 
-def test_servicegaurd():
+def test_api():
     """Exercise the API."""
-    shef_parser.JOBS.pending = list(range(1001))
-    shef_parser.service_guard()
+    shef_parser.log_database_queue_size()

@@ -12,8 +12,8 @@ from pywwa.ldm import bridge
 from pywwa.database import get_database
 
 # database timezones to pytz cache
-TIMEZONES = dict()
-STATIONS = dict()
+TIMEZONES = {}
+STATIONS = {}
 
 
 def load_stations(txn):
