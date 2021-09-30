@@ -17,6 +17,12 @@ PATH = "/home/meteor_ldm/data/gis/images/GOES/conus"
 LOOKUP = {2: "vis", 9: "wv", 13: "ir"}
 
 
+def filtermsg(buf):
+    """Less is more"""
+    text = buf.decode('ascii')
+    return 'Point outside of projection' in text
+
+
 def call(cmd):
     """Wrapper around subprocess."""
     LOG.debug(cmd)
@@ -26,11 +32,13 @@ def call(cmd):
     stdout = proc.stdout.read()
     stderr = proc.stderr.read()
     if stdout != b"":
-        LOG.info(cmd)
-        LOG.info(stdout)
+        if not filtermsg(stdout):
+            LOG.info(cmd)
+            LOG.info(stdout)
     if stderr != b"":
-        LOG.info(cmd)
-        LOG.info(stderr)
+        if not filtermsg(stderr):
+            LOG.info(cmd)
+            LOG.info(stderr)
 
 
 def run(valid, channel, tmpname):
