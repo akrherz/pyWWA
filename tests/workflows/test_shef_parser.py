@@ -10,6 +10,17 @@ from pywwa.workflows import shef_parser
 from pywwa.testing import get_example_file
 
 
+def test_restructure_data_future():
+    """Ensure that data from the future stays out!"""
+    pywwa.CTX.utcnow = utc(2017, 8, 16)
+    prod = shef_parser.process_data(get_example_file("RR7.txt"))
+    res = shef_parser.restructure_data(prod)
+    assert res
+    pywwa.CTX.utcnow = utc()
+    res = shef_parser.restructure_data(prod)
+    assert not res
+
+
 def test_process_data():
     """Test that we can really_process a product!"""
     pywwa.CTX.utcnow = utc(2020, 9, 15)

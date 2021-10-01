@@ -162,6 +162,7 @@ def restructure_data(prod):
     # Step 1: Restructure and do some cleaning
     # se == SHEFElement
     old = []
+    utcnow = common.utcnow()
     for se in prod.data:
         if len(se.station) > 8:
             LOG.info("sid len>8: [%s] %s", se.station, prod.get_product_id())
@@ -170,7 +171,6 @@ def restructure_data(prod):
         if se.type != "R" or se.valid is None:
             continue
         # We don't care about data in the future!
-        utcnow = common.utcnow()
         if se.valid > (utcnow + datetime.timedelta(hours=1)):
             continue
         if se.valid < (utcnow - datetime.timedelta(days=60)):
@@ -466,7 +466,10 @@ def process_data(text):
         return prod
     product_id = prod.get_product_id()
     # Update CURRENT_QUEUE
+    utcnow = common.utcnow()
     for element in prod.data:
+        if element.valid > (utcnow + datetime.timedelta(hours=1)):
+            continue
         update_current_queue(element, product_id)
     # Create a nicer data structure
     mydata = restructure_data(prod)
