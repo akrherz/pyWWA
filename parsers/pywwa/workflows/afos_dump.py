@@ -72,17 +72,22 @@ def real_parser(txn, buf):
         raise Exception("TextProduct.afos is null")
 
     if common.replace_enabled():
+        args = [nws.afos.strip(), nws.source, nws.valid]
+        bbb = ""
+        if nws.bbb:
+            bbb = " and bbb = %s "
+            args.append(nws.bbb)
         txn.execute(
             "DELETE from products where pil = %s and source = %s and "
-            "entered = %s",
-            (nws.afos.strip(), nws.source, nws.valid),
+            f"entered = %s {bbb}",
+            args,
         )
         LOG.info("Removed %s rows for %s", txn.rowcount, nws.get_product_id())
 
     txn.execute(
         "INSERT into products (pil, data, entered, "
-        "source, wmo) VALUES(%s, %s, %s, %s, %s)",
-        (nws.afos.strip(), nws.text, nws.valid, nws.source, nws.wmo),
+        "source, wmo, bbb) VALUES(%s, %s, %s, %s, %s, %s)",
+        (nws.afos.strip(), nws.text, nws.valid, nws.source, nws.wmo, nws.bbb),
     )
     if nws.afos[:3] in MEMCACHE_EXCLUDE:
         return None
