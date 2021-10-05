@@ -35,6 +35,9 @@ def test_processor(cursor):
     # 5. Test write_memcache
     afos_dump.write_memcache(prod)
     afos_dump.write_memcache(None)
+    # 6. Replace on
+    pywwa.CTX.replace = True
+    afos_dump.real_parser(cursor, data)
 
 
 def test_empty():
