@@ -516,6 +516,7 @@ CST3            Montreal                         -- CA  4539  -7413     0  0
 CST7            St Lambert                       -- CA  4656  -7118     0  0
 CSU2            Chisasibi                        -- CA  5381  -7892     0  0
 CSU3            St Hyacinthe                     -- CA  4561  -7301     0  0
+CSU5            Weymontachie                     -- CA  4794  -7382     0  0
 CSU7            Lac a la Tortue                  QB CA  4662  -7263     0  0
 CSV2            Ste-Agathe                       QB CA  4612  -7430     0  0
 CSW5            Montreal Bell                    -- CA  4569  -7393     0  0
@@ -527,13 +528,13 @@ CSZ3            St Jovite                        -- CA  4615  -7458     0  0
 CSZ4            St Frederic                      -- CA  4633  -7096     0  0
 CTA3            Ile aux Coudres                  -- CA  4739  -7038     0  0
 CTB6            Tete a la Baleine                -- CA  5067  -5938     0  0
-# CTBL
-# CTDF
-# CTD4
+## CTBL
+## CTDF
+CTD4            Baie St Paul                     QB CA  4744  -7052     0  0
 CTE3            Havre St Pierre                  -- CA  5026  -6355     0  0
 CTG3            Du Rocher Perce                  -- CA  4338  -6456     0  0
 CTH3            Grandes Bergeronnes              -- CA  4823  -6954     0  0            
-# CTH7
+CTH7            Riviere aux Saumons              QB CA  4940  -6230     0  0
 CTK6            Kegaska                          -- CA  5020  -6127     0  0
 CTP9            Kattiniq                         -- CA  6166  -7332     0  0
 CTQ6            St Anselme                       -- CA  4662  -7096     0  0
