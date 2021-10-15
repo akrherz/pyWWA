@@ -457,6 +457,12 @@ def log_database_queue_size():
     )
 
 
+def process_site_eb(err, product_id, sid, data):
+    """Errorback from process_site transaction."""
+    msg = f"process_site({product_id}, {sid}, {data}) got {err}"
+    common.email_error(err, msg)
+
+
 def process_data(text):
     """Callback when text is received."""
     prod = parser(text, utcnow=common.utcnow())
@@ -476,6 +482,7 @@ def process_data(text):
     # Chunk thru each of the sites found and do work.
     for sid, data in mydata.items():
         df = ACCESSDB.runInteraction(process_site, prod, sid, data)
+        df.addErrback(process_site_eb, product_id, sid, data)
         df.addErrback(common.email_error, prod.unixtext)
         df.addErrback(LOG.error)
     return prod

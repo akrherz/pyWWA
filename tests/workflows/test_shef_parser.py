@@ -10,6 +10,11 @@ from pywwa.workflows import shef_parser
 from pywwa.testing import get_example_file
 
 
+def test_process_site_eb():
+    """Test that the errorback works without any side effects."""
+    shef_parser.process_site_eb(Exception("Hi Daryl"), "", "", {})
+
+
 def test_restructure_data_future():
     """Ensure that data from the future stays out!"""
     pywwa.CTX.utcnow = utc(2017, 8, 16)
