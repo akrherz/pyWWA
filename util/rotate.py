@@ -3,7 +3,7 @@ import sys
 import os
 import gzip
 
-BASE = "/home/ldm/data/"
+BASE = "/mesonet/ldmdata/"
 
 
 def main(argv):

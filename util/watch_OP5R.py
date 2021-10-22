@@ -1,5 +1,4 @@
 """Monitor a directory for new files and then do the level II dance"""
-from __future__ import print_function
 import re
 import os
 import subprocess
@@ -24,11 +23,7 @@ def main():
                 if not FNPATTERN.match(fn):
                     print("invalid filename: %s" % (fn,))
                     continue
-                cmd = ("/home/ldm/bin/pqinsert -f NEXRAD2 -p '%s' %s/%s") % (
-                    fn,
-                    watch_path,
-                    fn,
-                )
+                cmd = f"pqinsert -f NEXRAD2 -p '{fn}' {watch_path}/{fn}"
                 subprocess.call(cmd, shell=True)
                 os.unlink("%s/%s" % (watch_path, fn))
 

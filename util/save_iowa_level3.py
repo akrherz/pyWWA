@@ -13,7 +13,7 @@ def run(date):
     """Process this date please"""
     yyyymmdd = date.strftime("%Y%m%d")
     for nexrad in NEXRADS:
-        mydir = "/mnt/nexrad3/nexrad/NIDS/%s" % (nexrad,)
+        mydir = f"/mnt/nexrad3/nexrad/NIDS/{nexrad}"
         if not os.path.isdir(mydir):
             LOG.info("creating %s", mydir)
             os.makedirs(mydir)
@@ -39,7 +39,7 @@ def run(date):
                 stderr.decode("ascii", "ignore"),
             )
 
-    rpath = "/stage/IowaNexrad3/%s" % (date.strftime("%Y/%m"),)
+    rpath = f"/stage/IowaNexrad3/{date:%Y/%m}"
     cmd = (
         'rsync --remove-source-files -a --rsync-path "mkdir -p %s && rsync" '
         "/mesonet/tmp/???_%s.tgz meteor_ldm@metl60.agron.iastate.edu:%s"

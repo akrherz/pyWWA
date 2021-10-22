@@ -28,8 +28,6 @@ handler.setFormatter(
 )
 logger.addHandler(handler)
 
-PQINSERT = "/home/ldm/bin/pqinsert"
-
 
 def process_input():
     """
@@ -62,10 +60,9 @@ def do_legacy_ir(sat, tmpfn):
     out.close()
 
     cmd = (
-        "%s -i -p 'gis c %s gis/images/awips%s/%s GIS/sat/awips%s/%s png' "
+        "pqinsert -i -p 'gis c %s gis/images/awips%s/%s GIS/sat/awips%s/%s png' "
         "%s.png"
     ) % (
-        PQINSERT,
         sat.metadata["valid"].strftime("%Y%m%d%H%M"),
         sat.awips_grid(),
         sat.current_filename().replace(".png", "_gray.png"),
@@ -76,10 +73,9 @@ def do_legacy_ir(sat, tmpfn):
     subprocess.call(cmd, shell=True)
 
     cmd = (
-        "%s -i -p 'gis c %s gis/images/awips%s/%s GIS/sat/awips%s/%s wld' "
+        "pqinsert -i -p 'gis c %s gis/images/awips%s/%s GIS/sat/awips%s/%s wld' "
         "%s.wld"
     ) % (
-        PQINSERT,
         sat.metadata["valid"].strftime("%Y%m%d%H%M"),
         sat.awips_grid(),
         sat.current_filename().replace(".png", "_gray.wld"),
@@ -116,10 +112,9 @@ def write_gispng(sat, tmpfn):
     out.close()
 
     cmd = (
-        "%s -i -p 'gis %s %s gis/images/awips%s/%s GIS/sat/awips%s/%s png' "
+        "pqinsert -i -p 'gis %s %s gis/images/awips%s/%s GIS/sat/awips%s/%s png' "
         "%s.png"
     ) % (
-        PQINSERT,
         get_ldm_routes(sat),
         sat.metadata["valid"].strftime("%Y%m%d%H%M"),
         sat.awips_grid(),
@@ -131,10 +126,9 @@ def write_gispng(sat, tmpfn):
     subprocess.call(cmd, shell=True)
 
     cmd = (
-        "%s -i -p 'gis %s %s gis/images/awips%s/%s GIS/sat/awips%s/%s wld' "
+        "pqinsert -i -p 'gis %s %s gis/images/awips%s/%s GIS/sat/awips%s/%s wld' "
         "%s.wld"
     ) % (
-        PQINSERT,
         get_ldm_routes(sat),
         sat.metadata["valid"].strftime("%Y%m%d%H%M"),
         sat.awips_grid(),
@@ -162,9 +156,8 @@ def write_metadata(sat, tmpfn):
     out.close()
 
     cmd = (
-        "%s -i -p 'gis c %s gis/images/awips%s/%s GIS/sat/%s json' %s.json"
+        "pqinsert -i -p 'gis c %s gis/images/awips%s/%s GIS/sat/%s json' %s.json"
     ) % (
-        PQINSERT,
         sat.metadata["valid"].strftime("%Y%m%d%H%M"),
         sat.awips_grid(),
         sat.current_filename().replace("png", "json"),
@@ -196,8 +189,7 @@ def write_mapserver_metadata(sat, tmpfn, epsg):
         )
     )
     out.close()
-    cmd = ("%s -i -p 'gis c %s gis/images/%s/goes/%s bogus msinc' %s") % (
-        PQINSERT,
+    cmd = ("pqinsert -i -p 'gis c %s gis/images/%s/goes/%s bogus msinc' %s") % (
         sat.metadata["valid"].strftime("%Y%m%d%H%M"),
         epsg,
         sat.current_filename().replace("png", "msinc"),
@@ -223,9 +215,8 @@ def write_metadata_epsg(sat, tmpfn, epsg):
     out.close()
 
     cmd = (
-        "%s -i -p 'gis c %s gis/images/%s/goes/%s bogus json' " "%s_%s.json"
+        "pqinsert -i -p 'gis c %s gis/images/%s/goes/%s bogus json' " "%s_%s.json"
     ) % (
-        PQINSERT,
         sat.metadata["valid"].strftime("%Y%m%d%H%M"),
         epsg,
         sat.current_filename().replace("png", "json"),
@@ -270,9 +261,8 @@ def gdalwarp(sat, tmpfn, epsg):
     os.unlink("%s_%s.tif" % (tmpfn, epsg))
 
     cmd = (
-        "%s -i -p 'gis c %s gis/images/%s/goes/%s bogus wld' " "%s_%s.tfw"
+        "pqinsert -i -p 'gis c %s gis/images/%s/goes/%s bogus wld' " "%s_%s.tfw"
     ) % (
-        PQINSERT,
         sat.metadata["valid"].strftime("%Y%m%d%H%M"),
         epsg,
         sat.current_filename().replace("png", "wld"),
@@ -282,9 +272,8 @@ def gdalwarp(sat, tmpfn, epsg):
     subprocess.call(cmd, shell=True)
 
     cmd = (
-        "%s -i -p 'gis c %s gis/images/%s/goes/%s bogus png' " "%s_%s.png"
+        "pqinsert -i -p 'gis c %s gis/images/%s/goes/%s bogus png' " "%s_%s.png"
     ) % (
-        PQINSERT,
         sat.metadata["valid"].strftime("%Y%m%d%H%M"),
         epsg,
         sat.current_filename(),

@@ -9,7 +9,7 @@ from io import BytesIO
 import random
 import string
 
-BASE = "/home/ldm/data"
+BASE = "/mesonet/ldmdata"
 
 
 def ranstr():

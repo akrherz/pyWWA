@@ -13,7 +13,7 @@ import subprocess
 from pyiem.util import logger, utc
 
 LOG = logger()
-PATH = "/home/meteor_ldm/data/gis/images/GOES/conus"
+PATH = "/mesonet/ldmdata/gis/images/GOES/conus"
 LOOKUP = {2: "vis", 9: "wv", 13: "ir"}
 
 
@@ -50,7 +50,7 @@ def run(valid, channel, tmpname):
             bird,
             channel,
         )
-        info = json.load(open(fnbase + ".json"))
+        info = json.load(open(fnbase + ".json", encoding="utf8"))
         # step 1
         cmd = (
             "gdalwarp -q -s_srs '%s' -t_srs 'EPSG:4326' -te %s %s %s %s "
@@ -99,7 +99,7 @@ def main(argv):
                 LOG.exception(exp)
             finally:
                 for part in ["", "_16", "_17"]:
-                    fn = "%s%s.tif" % (tmpfd.name, part)
+                    fn = f"{tmpfd.name}{part}.tif"
                     if not os.path.isfile(fn):
                         continue
                     os.unlink(fn)

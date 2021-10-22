@@ -137,7 +137,7 @@ def process(ncfn):
         "pqinsert -i -p '%s' %s" % (pqstr.replace("png", "wld"), tmpfd.name),
         shell=True,
     )
-    with open(tmpfd.name, "w") as fh:
+    with open(tmpfd.name, "w", encoding="utf8") as fh:
         fh.write(
             (
                 "PROJECTION\n"
@@ -163,7 +163,7 @@ def process(ncfn):
             % (h, lon_0, swa),
         },
     }
-    with open(tmpfd.name, "w") as fh:
+    with open(tmpfd.name, "w", encoding="utf8") as fh:
         fh.write(json.dumps(meta))
     subprocess.call(
         "pqinsert -i -p '%s' %s" % (pqstr.replace("png", "json"), tmpfd.name),
@@ -176,7 +176,7 @@ def process(ncfn):
 def main(argv):
     """Go Main Go."""
     # Shard by bird, either G16 or G17
-    bird = "_%s_" % (argv[1],)
+    bird = f"_{argv[1]}_"
     inotif = inotify.adapters.Inotify()
     inotif.add_watch(DIRPATH)
     try:
@@ -198,7 +198,7 @@ def main(argv):
                 if os.path.isfile(ncfn):
                     os.unlink(ncfn)
             except Exception as exp:
-                with open("%s.error" % (ncfn,), "w") as fp:
+                with open(f"{ncfn}.error", "w", encoding="utf8") as fp:
                     fp.write(str(exp) + "\n")
                     traceback.print_exc(file=fp)
     finally:
