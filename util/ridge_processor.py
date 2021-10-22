@@ -1,5 +1,4 @@
 """I process activemq messages 10,000 at a time!"""
-from __future__ import print_function
 import os
 import subprocess
 import datetime
@@ -73,7 +72,7 @@ def generate_image(_ch, _method, properties, body):
 
     # Use -i to allow for duplicate file content as the product id *should*
     # always be unique
-    pqstr = "/home/ldm/bin/pqinsert -i -p '%s' %s" % (pqstr, pngfn)
+    pqstr = f"pqinsert -i -p '{pqstr}' {pngfn}"
     subprocess.call(pqstr, shell=True)
     subprocess.call(pqstr.replace("png", "wld"), shell=True)
     metapq = pqstr.replace("png", "json").replace(" ac ", " c ")

@@ -1,7 +1,6 @@
 """
   Compare our PIREPs data against what is at aviation wx JSON service
 """
-from __future__ import print_function
 import datetime
 
 import requests
@@ -63,10 +62,10 @@ def main():
                 )
             del mine[key]
 
-    for key in mine:
-        if mine[key][0] < floor:
+    for key, item in mine.items():
+        if item[0] < floor:
             continue
-        log.info("AVWX MISS %s %s", mine[key][0], mine[key][3])
+        log.info("AVWX MISS %s %s", item[0], item[3])
 
 
 if __name__ == "__main__":
