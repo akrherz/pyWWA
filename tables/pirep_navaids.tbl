@@ -110,6 +110,7 @@ CCB3            Amherst                          -- CA  4581  -6422     0  0
 CCD2            Springdale                       -- CA  4948  -5618     0  0
 CCD3            Woodstock                        -- CA  4615  -6755     0  0
 CCD4            Postville                        -- CA  5491  -5979     0  0
+CCF6            Edmonton Morinville Currie       AB CA  5382 -11376     0  0
 CCH3            Canmore Heliport                 -- CA  5109 -11535     0  0
 CCH4            Charlottetown                    -- CA  5277  -5611     0  0
 CCI9            Cortes Island                    -- CA  5002 -12498     0  0
@@ -539,9 +540,9 @@ CTH7            Riviere aux Saumons              QB CA  4940  -6230     0  0
 CTK6            Kegaska                          -- CA  5020  -6127     0  0
 CTP9            Kattiniq                         -- CA  6166  -7332     0  0
 CTQ6            St Anselme                       -- CA  4662  -7096     0  0
-# CTR4
-# CTSF
-# CTSJ                   
+CTR4            Granby                           QB CA  4539  -7276     0  0 
+## CTSF
+## CTSJ
 CTT5            La Romaine                       -- CA  5026  -6068     0  0
 CTU2            Fontanges                        -- CA  5455  -7117     0  0
 ## CUOH
@@ -646,7 +647,7 @@ CYSZ            Sainte Anne des Monts            QC CA  4912  -6653     0  0
 CYTB            Tillsonburg                      -- CA  4293  -8075     0  0
 CYTF            Alma                             QC CA  4851  -7164     0  0
 CYTN            Trenton                          -- CA  4561  -6262     0  0
-# CYTW
+## CYTW
 CYVB            Bonaventure                      -- CA  4807  -6546     0  0
 CYVD            Virden                           MB CA  4988 -10092     0  0
 CYVG            Vermilion                        AB CA  5336 -11082     0  0
@@ -656,7 +657,7 @@ CYWM            Athabasca                        AB CA  5474 -11321     0  0
 CYWP            Webequie                         ON CA  5296  -8738     0  0
 CYWV            Wainwright                       -- CA  5280 -11088     0  0
 CYXK            Rimouski                         QC CA  4848  -6850     0  0
-# CYXV
+## CYXV
 CYYM            Cowley                           AB CA  4964 -11409     0  0
 CYYO            Wynward                          SK CA  5181 -10417     0  0
 # CYYV
@@ -668,7 +669,7 @@ CZAM            Salmon                           BC CA  5068 -11923     0  0
 CZBA            Burlington                       ON CA  4344  -7985     0  0
 CZBD            Ilford                           MB CA  5606  -9561     0  0
 CZBM            Bromont                          -- CA  4529  -7274     0  0
-# CZE3
+## CZE3
 CZEE            Kelsey                           MB CA  5604  -9651     0  0
 CZEG            Edmonton Centre ACC              AB CA  5331 -11358     0  0
 CZFD            Fond-du-Lac                      -- CA  5933 -10718     0  0
