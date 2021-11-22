@@ -474,6 +474,7 @@ CRJ2            Stoney Point                     -- CA  4229  -8260     0  0
 CRL2            Westport                         -- CA  4467  -7640     0  0
 CRL4            Kirby Lake                       -- CA  5536 -11064     0  0
 CRL7            Reindeer Lake                    -- CA  5729 -10253     0  0
+CRP3            Redwater Pembina Heliport        AB CA  5382 -11313     0  0
 CRS2            Parry Sound                      ON CA  4534  -8002     0  0
 CSA2            Lac Agile Mascouche              -- CA  4579  -7364     0  0
 CSB2            Sable Island                     -- CA  4393  -5996     0  0
@@ -660,8 +661,8 @@ CYXK            Rimouski                         QC CA  4848  -6850     0  0
 ## CYXV
 CYYM            Cowley                           AB CA  4964 -11409     0  0
 CYYO            Wynward                          SK CA  5181 -10417     0  0
-# CYYV
-# CYYX
+## CYYV
+## CYYX
 CYZC            Beatton River                    BC CA  5738 -12138     0  0
 CYZD            Toronto Downsview                ON CA  4374  -7947     0  0
 CZAC            York Landing                     MB CA  5609  -9609     0  0
@@ -680,7 +681,7 @@ CZGR            Little Grand Rapids              -- CA  5205  -9547     0  0
 CZHP            High Prairie                     AB CA  5539 -11648     0  0
 CZJN            Swan River                       MB CA  5212 -10124     0  0
 CZML            108 Mile                         BC CA  5174 -12133     0  0
-# CZND
+## CZND
 CZNG            Poplar River                     MB CA  5300  -9727     0  0
 CZNL            Nelson                           BC CA  4949 -11730     0  0
 CZJG            Jenpeg                           -- CA  5452  -9805     0  0
@@ -693,11 +694,11 @@ CZSN            South Indian Lake                MB CA  5679  -9891     0  0
 CZSW            Prince Rupert Seal Cove          -- CA  5433 -13028     0  0
 CZTA            Bloodvein River                  -- CA  5178  -9669     0  0
 CZTM            Shamattawa                       -- CA  5587  -9208     0  0
-# CZUC
+CZUC            Ignace                           ON CA  4943  -9172     0  0
 CZWG            Winnipeg Centre                  MB CA  4990  -9726     0  0
 CZWH            Lac Brochet                      -- CA  5861 -10147     0  0
 CZWL            Wollaston                        SK CA  5811 -10317     0  0
-# CZYF
+## CZYF
 MYBC            Chub Cay                            BH  2542  -7788     0  0
 # 
 AAA           0 ABRAHAM                          -- --  4016  -8934     0  0                    
