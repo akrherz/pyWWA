@@ -13,7 +13,6 @@ import tempfile
 
 from pandas.io.sql import read_sql
 import pandas as pd
-from pandas.api.types import is_datetime64_any_dtype as isdt
 import geopandas as gpd
 import xmpp
 from pyiem.nws.products import ero
@@ -69,7 +68,8 @@ def compute_cycle(day, valid):
 def fetch_ero(day) -> gpd.GeoDataFrame:
     """Get the ERO from the WPC website."""
     gdf = gpd.read_file(f"{BASEURI}EROday{day}.geojson")
-    for col in ["ISSUE_TIME", "START_TIME", "END_TIME"]:
+    cols = ["ISSUE_TIME", "START_TIME", "END_TIME"]
+    for col in cols:
         gdf[col] = (
             pd
             .to_datetime(gdf[col], format="%Y-%m-%d %H:%M:%S")
@@ -85,7 +85,7 @@ def fetch_ero(day) -> gpd.GeoDataFrame:
     gdf["day"] = day
     gdf["threshold"] = ""
     # Save metdata for first row
-    meta = gdf.iloc[0].copy()
+    meta = gdf.iloc[0][cols].copy()
     gdf = gdf[gdf["OUTLOOK"] != "None Expected"]
     return gdf, meta
 
@@ -96,8 +96,10 @@ def send_to_ldm(gdf, meta, maxissue, day, cycle):
         LOG.debug("Skipping LDM as this is non-regular cycle (-1)")
         return
     for column in gdf.columns:
-        if isdt(gdf[column]):
+        try:
             gdf[column] = gdf[column].dt.strftime("%Y-%m-%dT%H:%M:%SZ")
+        except Exception:
+            pass
 
     with tempfile.NamedTemporaryFile(delete=False) as tmpfn:
         if gdf.empty:
@@ -109,9 +111,11 @@ def send_to_ldm(gdf, meta, maxissue, day, cycle):
         jdict = json.load(tmpfh)
     jdict["iem_properties"] = meta.to_dict()
     for key, value in jdict["iem_properties"].items():
-        if not isdt(value):
-            continue
-        jdict["iem_primary_key"][key] = value.strftime("%Y-%m-%dT%H:%M:%SZ")
+        try:
+            jdict["iem_properties"][key] = value.strftime("%Y-%m-%dT%H:%M:%SZ")
+        except Exception:
+            pass
+
     # Write back out
     with open(tmpfn.name, "w", encoding="utf-8") as tmpfh:
         json.dump(jdict, tmpfh)
