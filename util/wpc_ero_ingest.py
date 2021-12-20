@@ -1,4 +1,8 @@
-"""Fake a NOAAPort product for WPC ERO."""
+"""Fake a NOAAPort product for WPC ERO.
+
+This is no longer used for ingest of geometries, but the text file is still
+processed for archival.
+"""
 import tempfile
 import subprocess
 import os
