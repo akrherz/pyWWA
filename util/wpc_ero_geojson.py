@@ -108,7 +108,7 @@ def send_to_ldm(gdf, meta, maxissue, day, cycle):
     with open(tmpfn.name, "r", encoding="utf-8") as tmpfh:
         jdict = json.load(tmpfh)
     jdict["iem_properties"] = meta.to_dict()
-    for key, value in jdict["iem_primary_key"].items():
+    for key, value in jdict["iem_properties"].items():
         if not isdt(value):
             continue
         jdict["iem_primary_key"][key] = value.strftime("%Y-%m-%dT%H:%M:%SZ")
