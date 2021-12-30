@@ -51,11 +51,15 @@ os.chdir("/tmp")
 def do_download(zipfn):
     """Do the download steps"""
     if not os.path.isfile(zipfn):
-        req = requests.get(
-            ("https://www.weather.gov/source/gis/Shapefiles/%s/%s")
-            % ("County" if zipfn.startswith("c_") else "WSOM", zipfn)
+        url = (
+            "https://www.weather.gov/source/gis/Shapefiles/"
+            f"{'County' if zipfn.startswith('c_') else 'WSOM'}/{zipfn}"
         )
-        LOG.info("Downloading %s ...", zipfn)
+        req = requests.get(url, timeout=60)
+        LOG.info("Downloading %s ...", url)
+        if req.status_code != 200:
+            LOG.info("Failed to download %s, got %s", zipfn, req.status_code)
+            sys.exit(1)
         with open(zipfn, "wb") as fh:
             fh.write(req.content)
 

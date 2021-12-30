@@ -189,7 +189,9 @@ def write_mapserver_metadata(sat, tmpfn, epsg):
         )
     )
     out.close()
-    cmd = ("pqinsert -i -p 'gis c %s gis/images/%s/goes/%s bogus msinc' %s") % (
+    cmd = (
+        "pqinsert -i -p 'gis c %s gis/images/%s/goes/%s bogus msinc' %s"
+    ) % (
         sat.metadata["valid"].strftime("%Y%m%d%H%M"),
         epsg,
         sat.current_filename().replace("png", "msinc"),
@@ -215,7 +217,8 @@ def write_metadata_epsg(sat, tmpfn, epsg):
     out.close()
 
     cmd = (
-        "pqinsert -i -p 'gis c %s gis/images/%s/goes/%s bogus json' " "%s_%s.json"
+        "pqinsert -i -p 'gis c %s gis/images/%s/goes/%s bogus json' "
+        "%s_%s.json"
     ) % (
         sat.metadata["valid"].strftime("%Y%m%d%H%M"),
         epsg,
@@ -261,7 +264,8 @@ def gdalwarp(sat, tmpfn, epsg):
     os.unlink("%s_%s.tif" % (tmpfn, epsg))
 
     cmd = (
-        "pqinsert -i -p 'gis c %s gis/images/%s/goes/%s bogus wld' " "%s_%s.tfw"
+        "pqinsert -i -p 'gis c %s gis/images/%s/goes/%s bogus wld' "
+        "%s_%s.tfw"
     ) % (
         sat.metadata["valid"].strftime("%Y%m%d%H%M"),
         epsg,
@@ -272,7 +276,8 @@ def gdalwarp(sat, tmpfn, epsg):
     subprocess.call(cmd, shell=True)
 
     cmd = (
-        "pqinsert -i -p 'gis c %s gis/images/%s/goes/%s bogus png' " "%s_%s.png"
+        "pqinsert -i -p 'gis c %s gis/images/%s/goes/%s bogus png' "
+        "%s_%s.png"
     ) % (
         sat.metadata["valid"].strftime("%Y%m%d%H%M"),
         epsg,
