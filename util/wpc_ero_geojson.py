@@ -71,12 +71,9 @@ def fetch_ero(day) -> gpd.GeoDataFrame:
     gdf = gpd.read_file(f"{BASEURI}EROday{day}.geojson")
     cols = ["ISSUE_TIME", "START_TIME", "END_TIME"]
     for col in cols:
-        gdf[col] = (
-            pd
-            .to_datetime(gdf[col], format="%Y-%m-%d %H:%M:%S")
-            .dt
-            .tz_localize(timezone.utc)
-        )
+        gdf[col] = pd.to_datetime(
+            gdf[col], format="%Y-%m-%d %H:%M:%S"
+        ).dt.tz_localize(timezone.utc)
     # Instead of having an empty geojson, they have a bogus polygon with
     # the properties
     if gdf.empty:
@@ -160,7 +157,7 @@ def save_df(cursor, gdf, meta, day, cycle):
             "GEOJSON",
             day,
             cycle,
-        )
+        ),
     )
     oid = cursor.fetchone()[0]
     for idx, row in gdf.iterrows():
@@ -181,7 +178,7 @@ def save_df(cursor, gdf, meta, day, cycle):
                 oid,
                 threshold,
                 row["geometry"].wkt,
-            )
+            ),
         )
 
 
@@ -216,20 +213,25 @@ def send_jabber(gdf, issue, day):
             body=txt,
         )
         xhtml = xmpp.Node(
-            'html', {'xmlns': 'http://jabber.org/protocol/xhtml-im'})
+            "html", {"xmlns": "http://jabber.org/protocol/xhtml-im"}
+        )
         xhtml.addChild(
             node=xmpp.simplexml.XML2Node(
                 "<body xmlns='http://www.w3.org/1999/xhtml'>"
-                + html + "</body>")
+                + html
+                + "</body>"
+            )
         )
         msg.addChild(node=xhtml)
         xbot = xmpp.Node(
-            'x', {
-                'xmlns': 'nwschat:nwsbot',
-                'channels': ",".join(xtra["channels"]),
-                'twitter_media': xtra["twitter_media"],
-                'twitter': xtra["twitter"],
-            })
+            "x",
+            {
+                "xmlns": "nwschat:nwsbot",
+                "channels": ",".join(xtra["channels"]),
+                "twitter_media": xtra["twitter_media"],
+                "twitter": xtra["twitter"],
+            },
+        )
         msg.addChild(node=xbot)
         conn.send(msg)
 
@@ -251,7 +253,7 @@ def main():
         last_issue = utc(1980)  # default ancient
         if day in current.index:
             # Naive, convert to aware
-            last_issue = current.at[day, 'last_product_issue'].replace(
+            last_issue = current.at[day, "last_product_issue"].replace(
                 tzinfo=timezone.utc
             )
         # Fetch ERO

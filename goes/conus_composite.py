@@ -19,8 +19,8 @@ LOOKUP = {2: "vis", 9: "wv", 13: "ir"}
 
 def filtermsg(buf):
     """Less is more"""
-    text = buf.decode('ascii')
-    return 'Point outside of projection' in text
+    text = buf.decode("ascii")
+    return "Point outside of projection" in text
 
 
 def call(cmd):
