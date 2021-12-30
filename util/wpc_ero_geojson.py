@@ -38,7 +38,8 @@ def get_jabberconn():
         "ero_ingest"
     )
     JABBER["connection"] = xmpp.Client(
-        props.get("pywwa_jabber_host", "localhost")
+        props.get("pywwa_jabber_host", "localhost"),
+        debug=[],
     )
     JABBER["connection"].connect()
     JABBER["connection"].auth(
