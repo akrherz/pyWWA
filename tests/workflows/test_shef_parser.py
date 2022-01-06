@@ -1,8 +1,11 @@
 """Test shef_parser."""
 
 # 3rd Party
+# pylint: disable=no-member-in-module
+from psycopg2.errors import DeadlockDetected
 import pytest
 from pyiem.util import utc
+from twisted.python.failure import Failure
 
 # Local
 import pywwa
@@ -12,7 +15,9 @@ from pywwa.testing import get_example_file
 
 def test_process_site_eb():
     """Test that the errorback works without any side effects."""
-    shef_parser.process_site_eb(Exception("Hi Daryl"), "", "", {})
+    prod = shef_parser.process_data(get_example_file("RR7.txt"))
+    shef_parser.process_site_eb(Failure(Exception("Hi Daryl")), prod, "", {})
+    shef_parser.process_site_eb(Failure(DeadlockDetected()), prod, "", {})
 
 
 def test_restructure_data_future():

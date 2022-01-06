@@ -1,10 +1,13 @@
 """SHEF product ingestor."""
 # stdlib
 import datetime
+import random
 import re
 from typing import List
 
 # 3rd Party
+# pylint: disable=no-name-in-module
+from psycopg2.errors import DeadlockDetected
 import pytz
 from twisted.internet import reactor
 from twisted.internet.task import LoopingCall
@@ -314,6 +317,14 @@ def get_network(prod, sid, data: List[SHEFElement]):
     return None
 
 
+def process_site_frontend(prod, sid, data):
+    """Frontdoor for process_site()"""
+    df = ACCESSDB.runInteraction(process_site, prod, sid, data)
+    df.addErrback(process_site_eb, prod, sid, data)
+    df.addErrback(common.email_error, prod.unixtext)
+    df.addErrback(LOG.error)
+
+
 def process_site(accesstxn, prod, sid, data):
     """Consumption of rectified data."""
     # Order the timestamps so that we process the newest data last, so that
@@ -457,9 +468,19 @@ def log_database_queue_size():
     )
 
 
-def process_site_eb(err, product_id, sid, data):
+def process_site_eb(err, prod, sid, data):
     """Errorback from process_site transaction."""
-    msg = f"process_site({product_id}, {sid}, {data}) got {err}"
+    if isinstance(err.value, DeadlockDetected):
+        jitter = random.randint(0, 30)
+        LOG.info(
+            "Database Deadlock: prod:%s sid:%s, retrying in %s seconds",
+            prod.get_product_id(),
+            sid,
+            jitter,
+        )
+        reactor.callLater(jitter, process_site_frontend, prod, sid, data)
+        return
+    msg = f"process_site({prod.get_product_id()}, {sid}, {data}) got {err}"
     common.email_error(err, msg)
 
 
@@ -481,10 +502,7 @@ def process_data(text):
     mydata = restructure_data(prod)
     # Chunk thru each of the sites found and do work.
     for sid, data in mydata.items():
-        df = ACCESSDB.runInteraction(process_site, prod, sid, data)
-        df.addErrback(process_site_eb, product_id, sid, data)
-        df.addErrback(common.email_error, prod.unixtext)
-        df.addErrback(LOG.error)
+        process_site_frontend(prod, sid, data)
     return prod
 
 
