@@ -70,7 +70,11 @@ def process_data(data):
 
 def real_processor(text):
     """Process this product, please"""
-    collect = metarcollect.parser(text, nwsli_provider=NWSLI_PROVIDER)
+    collect = metarcollect.parser(
+        text,
+        utcnow=common.utcnow(),
+        nwsli_provider=NWSLI_PROVIDER,
+    )
     if collect.warnings:
         common.email_error("\n".join(collect.warnings), collect.unixtext)
     jmsgs = collect.get_jabbers(
