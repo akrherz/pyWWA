@@ -34,7 +34,7 @@ import zipfile
 import requests
 import geopandas as gpd
 from shapely.geometry import MultiPolygon
-from pyiem.util import utc, logger
+from pyiem.util import utc, logger, get_dbconnstr
 
 # Put the pywwa library into sys.path
 sys.path.insert(
@@ -213,7 +213,7 @@ def workflow(argv, pgconn, cursor):
 
     postgis = gpd.read_postgis(
         "SELECT * from ugcs where end_ts is null and source = %s",
-        pgconn,
+        get_dbconnstr("postgis"),
         params=(source,),
         geom_col="geom",
         index_col="ugc",

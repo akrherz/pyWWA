@@ -11,12 +11,11 @@ import os
 import subprocess
 import tempfile
 
-from pandas.io.sql import read_sql
 import pandas as pd
 import geopandas as gpd
 import xmpp
 from pyiem.nws.products import ero
-from pyiem.util import get_dbconn, utc, logger, get_properties
+from pyiem.util import get_dbconn, get_dbconnstr, utc, logger, get_properties
 
 LOG = logger()
 # No akami
@@ -239,13 +238,13 @@ def send_jabber(gdf, issue, day):
 def main():
     """Go Main Go."""
     # Load up the most recently processed data.
-    current = read_sql(
+    current = pd.read_sql(
         "SELECT day, "
         "max(product_issue at time zone 'UTC') as last_product_issue from "
         "spc_outlook where outlook_type = 'E' "
         "and product_issue > now() - '7 days'::interval "
         "GROUP by day ORDER by day ASC",
-        get_dbconn("postgis"),
+        get_dbconnstr("postgis"),
         index_col="day",
     )
     # Loop over Days 1-3, eventually 4 and 5
