@@ -38,6 +38,8 @@ requests
 # interpolation
 scipy
 shapely
+# pandas 1.4.0 fun
+sqlalchemy
 tqdm
 # vtec_parser
 treq
