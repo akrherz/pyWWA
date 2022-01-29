@@ -98,6 +98,17 @@ def new_poly(geo):
 
 def db_fixes(cursor, valid):
     """Fix some issues in the database"""
+    for year in [2000, 2005, 2010, 2015, 2020]:
+        cursor.execute(
+            "with pops as (select gid, coalesce(sum(population), 0) as pop "
+            f"from ugcs u LEFT JOIN gpw{year} g on "
+            "st_contains(u.geom, g.geom) where "
+            f"u.gpw_population_{year} is null GROUP by gid) "
+            f"update ugcs u SET gpw_population_{year} = pop FROM pops p "
+            "WHERE u.gid = p.gid"
+        )
+        LOG.info("Set %s rows for gpw_population_%s", cursor.rowcount, year)
+
     cursor.execute(
         "update ugcs SET geom = st_makevalid(geom) where end_ts is null "
         "and not st_isvalid(geom) and begin_ts = %s",
@@ -173,12 +184,12 @@ def truncate(cursor, valid, ugc, source):
     return cursor.rowcount
 
 
-def workflow(argv, pgconn, cursor):
+def workflow(argv, cursor):
     """Go Main Go"""
     # NWS correspondence indicates the date on the website is assumed to be
     # an implementation time at 18 z of that date.
     valid = utc(int(argv[2]), int(argv[3]), int(argv[4]), 18)
-    zipfn = "%s.zip" % (argv[1],)
+    zipfn = f"{argv[1]}.zip"
     shpfn = do_download(zipfn)
     # track domain
     source = zipfn[:2].replace("_", "")
@@ -318,7 +329,7 @@ def main(argv):
 
     pgconn = get_sync_dbconn("postgis")
     cursor = pgconn.cursor()
-    workflow(argv, pgconn, cursor)
+    workflow(argv, cursor)
     cursor.close()
     pgconn.commit()
     pgconn.close()
