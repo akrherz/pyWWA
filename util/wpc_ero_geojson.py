@@ -76,7 +76,7 @@ def fetch_ero(day) -> gpd.GeoDataFrame:
     # Instead of having an empty geojson, they have a bogus polygon with
     # the properties
     if gdf.empty:
-        LOG.debug("Empty GeoJSON for day %s", day)
+        LOG.info("Empty GeoJSON for day %s", day)
         return None, None
     # Some value add properties that are useful for downstream processing
     gdf["day"] = day
@@ -90,7 +90,7 @@ def fetch_ero(day) -> gpd.GeoDataFrame:
 def send_to_ldm(gdf, meta, maxissue, day, cycle):
     """Insert for archival and triggering."""
     if cycle < 0:
-        LOG.debug("Skipping LDM as this is non-regular cycle (-1)")
+        LOG.info("Skipping LDM as this is non-regular cycle (-1)")
         return
     for column in gdf.columns:
         try:
@@ -122,7 +122,7 @@ def send_to_ldm(gdf, meta, maxissue, day, cycle):
         f"eroday{day}.geojson GIS/wpc_ero/eroday{day}_{cycle}z.geojson "
         f"geojson' {tmpfn.name}"
     )
-    LOG.debug(cmd)
+    LOG.info(cmd)
     subprocess.call(cmd, shell=True)
     os.unlink(tmpfn.name)
 
@@ -162,7 +162,7 @@ def save_df(cursor, gdf, meta, day, cycle):
     for idx, row in gdf.iterrows():
         threshold = get_threshold(row["OUTLOOK"])
         gdf.at[idx, "threshold"] = threshold
-        LOG.debug(
+        LOG.info(
             "Adding %s[%s] %s size: %.4f",
             day,
             cycle,
@@ -262,7 +262,7 @@ def main():
         # Compare with what we have, abort if same or older
         maxissue = meta["ISSUE_TIME"]
         if last_issue >= maxissue:
-            LOG.debug("%s is old %s >= %s", day, last_issue, maxissue)
+            LOG.info("%s is old %s >= %s", day, last_issue, maxissue)
             continue
         cycle = compute_cycle(day, maxissue)
         # Save to Database
