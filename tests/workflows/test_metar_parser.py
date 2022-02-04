@@ -20,6 +20,6 @@ def test_api():
 def test_processor(cursor):
     """Test basic parsing."""
     data = get_example_file("METAR.txt")
-    pywwa.CTX.utcnow = utc(2011, 11, 5, 14)
+    pywwa.CTX.utcnow = utc(2011, 11, 25, 14)
     for mtr in metar_parser.process_data(data).metars:
         metar_parser.do_db(cursor, mtr)

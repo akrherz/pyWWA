@@ -5,6 +5,8 @@ So let us document it here for my own sanity.
 
 18 Jul 2017: `snowdepth` branch of my python-metar fork installed with pip
 """
+# stdlib
+from datetime import timezone
 
 # 3rd Party
 from twisted.internet.task import LoopingCall
@@ -103,7 +105,8 @@ def real_processor(text):
                 "station: '%s' is unknown to metadata table", mtr.station_id
             )
             deffer = ASOSDB.runOperation(
-                "INSERT into unknown(id) values (%s)", (mtr.station_id,)
+                "INSERT into unknown(id, valid) values (%s, %s)",
+                (mtr.station_id, mtr.time.replace(tzinfo=timezone.utc)),
             )
             deffer.addErrback(common.email_error, text)
             continue
