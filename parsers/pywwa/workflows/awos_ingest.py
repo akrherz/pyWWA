@@ -21,7 +21,8 @@ class AWOSProtocol(LineReceiver):
 
     def lineReceived(self, line: bytes):
         """Do what we need to do."""
-        reactor.callLater(0, process_line, line.decode("ascii", "ignore"))
+        line = line.decode("ascii", "ignore").replace("METAR ", "")
+        reactor.callLater(0, process_line, line)
 
 
 class AWOSFactory(Factory):
