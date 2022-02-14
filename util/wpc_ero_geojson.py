@@ -68,6 +68,8 @@ def compute_cycle(day, valid):
 def fetch_ero(day) -> gpd.GeoDataFrame:
     """Get the ERO from the WPC website."""
     gdf = gpd.read_file(f"{BASEURI}EROday{day}.geojson")
+    # Uppercase all the column names
+    gdf.columns = [x.upper() for x in gdf.columns]
     cols = ["ISSUE_TIME", "START_TIME", "END_TIME"]
     for col in cols:
         gdf[col] = pd.to_datetime(
@@ -167,7 +169,7 @@ def save_df(cursor, gdf, meta, day, cycle):
             day,
             cycle,
             threshold,
-            row["geometry"].area,
+            row["GEOMETRY"].area,
         )
         cursor.execute(
             "INSERT into spc_outlook_geometries (spc_outlook_id, threshold, "
@@ -176,7 +178,7 @@ def save_df(cursor, gdf, meta, day, cycle):
             (
                 oid,
                 threshold,
-                row["geometry"].wkt,
+                row["GEOMETRY"].wkt,
             ),
         )
 
@@ -195,7 +197,7 @@ def send_jabber(gdf, issue, day):
         outlook = ero.Outlook(
             "CATEGORICAL",
             row["threshold"],
-            row["geometry"],
+            row["GEOMETRY"],
         )
         outlook_collections[day].outlooks.append(outlook)
 
