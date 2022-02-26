@@ -25,7 +25,7 @@ def main():
     )
     for token in tokens:
         sqlargs = (
-            "%s%s" % (sys.argv[1], token[1:4]),
+            f"{sys.argv[1]}{token[1:4]}",
             token.replace("z", "\n"),
             nws.source,
             nws.wmo,

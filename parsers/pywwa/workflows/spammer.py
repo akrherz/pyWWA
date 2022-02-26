@@ -41,9 +41,9 @@ def real_process(data):
     if prod.afos is not None:
         subject = prod.afos
         if prod.afos[:3] == "ADM":
-            subject = "ADMIN NOTICE %s" % (prod.afos[3:],)
+            subject = f"ADMIN NOTICE {prod.afos[3:]}"
         elif prod.afos[:3] == "RER":
-            subject = "[RER] %s %s" % (prod.source, prod.afos[3:])
+            subject = f"[RER] {prod.source} {prod.afos[3:]}"
             if prod.source in IOWA_WFOS:
                 msg["Cc"] = "Justin.Glisan@iowaagriculture.gov"
     msg["subject"] = subject

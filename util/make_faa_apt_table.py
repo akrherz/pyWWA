@@ -16,7 +16,7 @@ def convert_geo(val):
 
 def main(argv):
     """Go Main Go."""
-    for line in open(argv[1]):
+    for line in open(argv[1], encoding="utf-8"):
         if line[:3] != "APT":
             continue
         sid = line[27:31].strip()

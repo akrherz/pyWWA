@@ -23,7 +23,7 @@ def main():
     """Go Main Go"""
     common.main(with_jabber=False)
     bridge(real_process, dbpool=get_database("asos"))
-    reactor.run()  # @UndefinedVariable
+    reactor.run()
 
 
 if __name__ == "__main__":

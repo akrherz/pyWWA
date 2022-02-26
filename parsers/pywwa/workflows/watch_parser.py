@@ -31,7 +31,7 @@ def main():
     """Go Main Go"""
     common.main()
     bridge(real_process, dbpool=get_database("postgis"))
-    reactor.run()  # @UndefinedVariable
+    reactor.run()
 
 
 if __name__ == "__main__":

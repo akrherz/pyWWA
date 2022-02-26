@@ -28,23 +28,19 @@ def real_process(txn, raw):
     channels = []
     for tpair in tokens:
         for center in re.findall(r"([A-Z]+)\.\.\.", tpair[1]):
-            channels.append("SPENES.%s" % (center,))
+            channels.append(f"SPENES.{center}")
     baseurl = common.SETTINGS.get("pywwa_product_url", "pywwa_product_url")
     xtra = {"product_id": product_id}
     xtra["channels"] = ",".join(channels)
-    xtra["twitter"] = (
-        "NESDIS issues Satellite Precipitation " "Estimates %s?pid=%s"
-    ) % (baseurl, product_id)
-
-    body = ("NESDIS issues Satellite Precipitation Estimates %s?pid=%s") % (
-        baseurl,
-        product_id,
+    body = (
+        "NESDIS issues Satellite Precipitation Estimates "
+        f"{baseurl}?pid={product_id}"
     )
+    xtra["twitter"] = body
     htmlbody = (
-        "<p>NESDIS issues "
-        "<a href='%s?pid=%s'>Satellite Precipitation Estimates</a>"
-        "</p>"
-    ) % (baseurl, product_id)
+        f"<p>NESDIS issues <a href='{baseurl}?pid={product_id}'>"
+        "Satellite Precipitation Estimates</a></p>"
+    )
     common.send_message(body, htmlbody, xtra)
 
 

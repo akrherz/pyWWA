@@ -28,7 +28,7 @@ def main():
     """Our main method"""
     common.main(with_jabber=False)
     bridge(real_parser, dbpool=get_database("postgis"))
-    reactor.run()  # @UndefinedVariable
+    reactor.run()
 
 
 if __name__ == "__main__":
