@@ -38,7 +38,7 @@ def main():
     """Go Main Go."""
     common.main()
     bridge(real_parser, dbpool=get_database("postgis"), cb2=do_jabber)
-    reactor.run()  # @UndefinedVariable
+    reactor.run()
 
 
 if __name__ == "__main__":

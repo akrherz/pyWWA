@@ -43,7 +43,7 @@ def main(argv):
     LOG.info(" - Connected to database: postgis")
 
     fn = argv[1]
-    uri = "https://www.weather.gov/media/vtec/%s" % (fn,)
+    uri = f"https://www.weather.gov/media/vtec/{fn}"
 
     LOG.info(" - Fetching file: %s", uri)
     req = requests.get(uri)
@@ -76,12 +76,7 @@ def main(argv):
             )
             bad += 1
             continue
-        cursor.execute(
-            """
-            DELETE from hvtec_nwsli WHERE nwsli = %s
-        """,
-            (nwsli,),
-        )
+        cursor.execute("DELETE from hvtec_nwsli WHERE nwsli = %s", (nwsli,))
         if cursor.rowcount == 1:
             updated += 1
         else:

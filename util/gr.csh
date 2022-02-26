@@ -1,4 +1,5 @@
 #!/bin/csh -f
+# unsure of +x bit
 set nexrad=$1
 
 cd /mnt/level2/raw/$1

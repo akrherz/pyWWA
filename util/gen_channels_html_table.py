@@ -472,7 +472,7 @@ def do_vtec(fh):
 def main():
     """Do Something Fun"""
     load_dicts()
-    with open(CHANNELSFN, "w") as fh:
+    with open(CHANNELSFN, "w", encoding="utf-8") as fh:
         fh.write(
             """
         <style>

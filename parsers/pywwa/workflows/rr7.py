@@ -2,11 +2,9 @@
 # stdlib
 import sys
 import re
-import datetime
 
 # 3rd Party
-import pytz
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconn, utc
 
 
 def main():
@@ -21,14 +19,12 @@ def main():
 
     tokens = re.findall(r"(\.A [A-Z0-9]{3} .*?=)", data)
 
-    utcnow = datetime.datetime.utcnow()
-    gmt = utcnow.replace(tzinfo=pytz.utc)
-    gmt = gmt.replace(second=0)
+    utcnow = utc().replace(second=0, microsecond=0)
 
     for token in tokens:
         # print(tokens)
         sql = "INSERT into products (pil, data, entered) values(%s,%s,%s)"
-        sqlargs = (f"RR7{token[3:6]}", token.replace("z", "\n"), gmt)
+        sqlargs = (f"RR7{token[3:6]}", token.replace("z", "\n"), utcnow)
         acursor.execute(sql, sqlargs)
 
     acursor.close()

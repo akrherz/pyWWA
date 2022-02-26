@@ -1,6 +1,6 @@
 # Cron script to tar up saved raw text data and place on the website for 
 # others to download here
-# http://mesonet.agron.iastate.edu/archive/raw/noaaport/
+# https://mesonet.agron.iastate.edu/archive/raw/noaaport/
 
 dd=$(date --date "$1 day ago" +'%d')
 yyyymmdd=$(date --date "$1 day ago" +'%Y%m%d')

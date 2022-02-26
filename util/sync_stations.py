@@ -22,6 +22,7 @@ def main():
     for site in jdata["stations"]:
         if site["network"].find("ASOS") == -1 and site["network"] != "AWOS":
             continue
+        # Hmmm
         if site["wfo"] is None:
             site["wfo"] = ""
         cursor.execute(

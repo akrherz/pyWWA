@@ -7,7 +7,7 @@ def main():
     """Infinite loop here"""
     while True:
         print("ridge_runner.py is execing ridge_processor.py now...")
-        subprocess.call("python ridge_processor.py", shell=True)
+        subprocess.call(["python", "ridge_processor.py"])
         time.sleep(3)
 
 

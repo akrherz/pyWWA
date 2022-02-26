@@ -18,11 +18,10 @@ def real_process(txn, data):
     """Go!"""
     prod = product.TextProduct(data)
     # replicate functionality in pyiem/nws/products/mos.py
-    header = "000 \n%s %s %s\n%s\n" % (
-        prod.wmo,
-        prod.source,
-        prod.valid.strftime("%d%H%M"),
-        prod.afos,
+    header = (
+        "000 \n"
+        f"{prod.wmo} {prod.source} {prod.valid:%d%H%M}\n"
+        f"{prod.afos}\n"
     )
     raw = prod.unixtext + "\n"
     # Since we only do realtime processing, this is OK, I hope
@@ -43,7 +42,7 @@ def real_process(txn, data):
         # for non US data.
         ttaaii = prod.wmo
         if sect[0] != "K" and ttaaii[2:4] == "US":
-            ttaaii = "%s%s%s%s" % (ttaaii[:2], sect[0], sect[0], ttaaii[4:6])
+            ttaaii = f"{ttaaii[:2]}{sect[0]}{sect[0]}{ttaaii[4:6]}"
         txn.execute(
             "INSERT into products (pil, data, source, entered, wmo) "
             "values (%s, %s, %s, %s, %s)",

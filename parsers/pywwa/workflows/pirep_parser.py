@@ -106,7 +106,7 @@ def real_parser(txn, buf):
 
 def ready(_bogus):
     """We are ready to ingest"""
-    reactor.callLater(20, cleandb)  # @UndefinedVariable
+    reactor.callLater(20, cleandb)
     bridge(real_parser, dbpool=DBPOOL)
 
 
@@ -117,7 +117,7 @@ def main():
     df.addCallback(ready)
     df.addErrback(common.shutdown)
 
-    reactor.run()  # @UndefinedVariable
+    reactor.run()
 
 
 if __name__ == "__main__":
