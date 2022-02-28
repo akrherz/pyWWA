@@ -8,6 +8,7 @@ import re
 import treq
 from pyiem.util import utc, LOG
 from twisted.internet import reactor
+from twisted.web import client as webclient
 from twisted.words.xish import domish, xpath
 from twisted.words.xish.xmlstream import STREAM_END_EVENT
 from twisted.internet.task import LoopingCall
@@ -17,6 +18,8 @@ from twisted.words.protocols.jabber import xmlstream, jid
 # Local
 import pywwa
 
+# http://stackoverflow.com/questions/7016602
+webclient._HTTP11ClientFactory.noisy = False
 MYREGEX = "[\x00-\x08\x0b\x0c\x0e-\x1F\uD800-\uDFFF\uFFFE\uFFFF]"
 ILLEGAL_XML_CHARS_RE = re.compile(MYREGEX)
 SETTINGS = pywwa.SETTINGS
