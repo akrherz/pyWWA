@@ -38,13 +38,9 @@ def make_jabber_client(resource_prefix=None):
         resource_prefix = os.path.basename(frameinfo.filename)[:-3]
 
     myjid = jid.JID(
-        "%s@%s/%s_%s"
-        % (
-            SETTINGS.get("pywwa_jabber_username", "nwsbot_ingest"),
-            SETTINGS.get("pywwa_jabber_domain", "nwschat.weather.gov"),
-            resource_prefix,
-            utc().strftime("%Y%m%d%H%M%S"),
-        )
+        f"{SETTINGS.get('pywwa_jabber_username', 'iembot_ingest')}@"
+        f"{SETTINGS.get('pywwa_jabber_domain', 'localhost')}/"
+        f"{resource_prefix}_{utc():%Y%m%d%H%M%S}"
     )
     factory = jclient.XMPPClientFactory(
         myjid, SETTINGS.get("pywwa_jabber_password", "secret")
@@ -133,9 +129,9 @@ class JabberClient:
         self.myjid = myjid
         self.xmlstream = None
         self.authenticated = False
-        self.routerjid = "%s@%s" % (
-            SETTINGS.get("bot.username", "nwsbot"),
-            SETTINGS.get("pywwa_jabber_domain", "nwschat.weather.gov"),
+        self.routerjid = (
+            f"{SETTINGS.get('bot.username', 'iembot')}@"
+            f"{SETTINGS.get('pywwa_jabber_domain', 'localhost')}"
         )
 
     def authd(self, xstream):
