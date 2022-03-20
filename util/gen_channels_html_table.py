@@ -283,6 +283,7 @@ def get_data(afos):
         .decode("ascii")
         .replace("\r", "")
         .replace("\001\n", "")
+        .replace("\003", "")
     )
 
 
