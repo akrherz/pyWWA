@@ -1,4 +1,6 @@
 """Dump some stuff without AFOS PILs"""
+# Stdlib
+import re
 
 # 3rd Party
 from twisted.internet import reactor
@@ -9,6 +11,7 @@ from pywwa import common
 from pywwa.ldm import bridge
 from pywwa.database import get_database
 
+CWA = re.compile("^FA(AK|HI|US)2([1-6])$")
 GMET = {
     "LWGE86": "GMTIFR",
     "LWHE00": "GMTTRB",
@@ -25,14 +28,7 @@ def compute_afos(textprod):
         afos = GMET[ttaaii]
     elif ttaaii == "FAUS20":
         afos = f"MIS{textprod.source[1:]}"
-    elif ttaaii in [
-        "FAUS21",
-        "FAUS22",
-        "FAUS23",
-        "FAUS24",
-        "FAUS25",
-        "FAUS26",
-    ]:
+    elif CWA.match(ttaaii):
         afos = f"CWA{textprod.source[1:]}"
     elif ttaaii[:4] == "FOUS":
         afos = f"FRH{ttaaii[4:]}"
@@ -75,7 +71,8 @@ def really_process_data(txn, data):
     if common.dbwrite_enabled():
         txn.execute(sql, sqlargs)
 
-    if tp.afos[:3] == "FRH":
+    # CWA is handled by cwa_parser.py
+    if tp.afos[:3] in ["FRH", "CWA"]:
         return tp
     jmsgs = tp.get_jabbers(
         common.SETTINGS.get("pywwa_product_url", "pywwa_product_url")

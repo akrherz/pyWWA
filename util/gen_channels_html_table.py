@@ -1,6 +1,7 @@
 """Utility script to generate the HTML used for IEMBot Channel Documentation
 """
 import re
+import sys
 
 import psycopg2.extras
 from pyiem.util import get_dbconn, logger
@@ -9,7 +10,11 @@ from pyiem.nws.ugc import UGC
 from pyiem.nws.nwsli import NWSLI
 from pyiem.nws.products.vtec import parser as vtec_parser
 from pyiem.nws.products import parser as productparser
+from pyiem.nws.products.cwa import parser as cwaparser
 
+PARSERS = {
+    "CWA": cwaparser,
+}
 CHANNELSFN = "/home/akrherz/projects/iem/htdocs/projects/iembot/channels.html"
 LOG = logger()
 ugc_dict = {}
@@ -41,6 +46,7 @@ D = {
     "10-515": "https://www.nws.noaa.gov/directives/sym/pd01005015curr.pdf",
     "10-517": "https://www.nws.noaa.gov/directives/sym/pd01005017curr.pdf",
     "10-601": "https://www.nws.noaa.gov/directives/sym/pd01006001curr.pdf",
+    "10-803": "https://www.nws.noaa.gov/directives/sym/pd01008003curr.pdf",
     "10-912": "https://www.nws.noaa.gov/directives/sym/pd01009012curr.pdf",
     "10-922": "https://www.nws.noaa.gov/directives/sym/pd01009022curr.pdf",
     "10-930": "https://www.nws.noaa.gov/directives/sym/pd01009030curr.pdf",
@@ -57,7 +63,7 @@ SPECIAL = {
     "RBG99E": "Weather Prediction Center Day 3 Excessive Rainfall Outlook",
 }
 
-# TODO: TCV TSU ADR CDW DSA EQW HMW HPA LEw NUW RHW VOW PQS CWA
+# TODO: TCV TSU ADR CDW DSA EQW HMW HPA LEw NUW RHW VOW PQS
 # Our dictionary of products!
 S1 = [C1, C2, C3, C3p, C4, C5, C5s, C6]
 VTEC_PRODUCTS = [
@@ -109,6 +115,7 @@ GEN_PRODUCTS = [
     dict(afos="CLI", directive="10-1004", channels=S2),
     dict(afos="CLM", directive="10-1004", channels=S2),
     dict(afos="CRF", directive="10-912", channels=S2),
+    dict(afos="CWA", directive="10-803", channels=C3),
     dict(afos="CWF", directive="10-1701", channels=S2),
     dict(afos="DGT", directive="10-1701", channels=S2),
     dict(afos="ESF", directive="10-1701", channels=S2),
@@ -303,6 +310,8 @@ def load_dicts():
         nm = row["rname"].replace("&", " and ")
         nwsli_dict[row["nwsli"]] = NWSLI(row["nwsli"], name=nm)
 
+    nwsli_dict["MLU"] = NWSLI("MLU", lat=32.52, lon=-92.03)
+
 
 def do_generic(fh):
     """Handle the generic case."""
@@ -321,16 +330,16 @@ def do_generic(fh):
         if afos == "":
             continue
         try:
-            v = productparser(
+            v = PARSERS.get(afos, productparser)(
                 get_data(afos),
                 ugc_provider=ugc_dict,
                 nwsli_provider=nwsli_dict,
             )
             assert v.afos is not None
         except Exception as exp:
-            LOG.info("productparser %s failed", afos)
+            LOG.info("ABORT: productparser %s failed", afos)
             LOG.exception(exp)
-            continue
+            sys.exit()
         j = v.get_jabbers("https://mesonet.agron.iastate.edu/p.php")
         channels = []
         _, html, xtra = j[0]
