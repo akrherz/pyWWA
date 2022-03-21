@@ -12,6 +12,7 @@ from pywwa.ldm import bridge
 from pywwa.database import get_database
 
 CWA = re.compile("^FA(AK|HI|US)2([1-6])$")
+MIS = re.compile("^FA(AK|HI|US)20$")
 GMET = {
     "LWGE86": "GMTIFR",
     "LWHE00": "GMTTRB",
@@ -26,7 +27,7 @@ def compute_afos(textprod):
         afos = f"ADM{textprod.source[1:]}"
     elif ttaaii in GMET:
         afos = GMET[ttaaii]
-    elif ttaaii == "FAUS20":
+    elif MIS.match(ttaaii):
         afos = f"MIS{textprod.source[1:]}"
     elif CWA.match(ttaaii):
         afos = f"CWA{textprod.source[1:]}"
