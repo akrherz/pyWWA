@@ -163,7 +163,7 @@ def email_error(exp, message, trimstr=100):
 
     hn = socket.gethostname()
     hh = f"{pwd.getpwuid(os.getuid())[0]}@{hn}"
-    la = " ".join(["{a:.2f}" for a in os.getloadavg()])
+    la = " ".join([f"{a:.2f}" for a in os.getloadavg()])
     txt = (
         f"System          : {hh} [CWD: {os.getcwd()}]\n"
         f"pyiem.version   : {pyiem.__version__}\n"
