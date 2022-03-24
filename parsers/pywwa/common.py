@@ -39,11 +39,9 @@ class CustomFormatter(logging.Formatter):
 
     def format(self, record):
         """Return a string!"""
-        return "[%s:%s %s] %s" % (
-            record.filename,
-            record.lineno,
-            record.funcName,
-            record.getMessage(),
+        return (
+            f"[{record.filename}:{record.lineno} {record.funcName}] "
+            f"{record.getMessage()}"
         )
 
 
@@ -163,35 +161,24 @@ def email_error(exp, message, trimstr=100):
         )
         return False
 
-    txt = """
-System          : %s@%s [CWD: %s]
-pyiem.version   : %s
-System UTC date : %s
-process id      : %s
-system load     : %s
-Exception       :
-%s
-%s
-
-Message:
-%s""" % (
-        pwd.getpwuid(os.getuid())[0],
-        socket.gethostname(),
-        os.getcwd(),
-        pyiem.__version__,
-        utc(),
-        os.getpid(),
-        " ".join(["%.2f" % (_,) for _ in os.getloadavg()]),
-        cstr.read(),
-        exp,
-        message,
+    hn = socket.gethostname()
+    hh = f"{pwd.getpwuid(os.getuid())[0]}@{hn}"
+    la = " ".join(["{a:.2f}" for a in os.getloadavg()])
+    txt = (
+        f"System          : {hh} [CWD: {os.getcwd()}]\n"
+        f"pyiem.version   : {pyiem.__version__}\n"
+        f"System UTC date : {utc()}\n"
+        f"pyWWA UTC date  : {utcnow()}\n"
+        f"process id      : {os.getpid()}\n"
+        f"system load     : {la}\n"
+        f"Exception       : {exp}\n"
+        f"Message:\n{message}\n"
     )
     # prevent any noaaport text from making ugly emails
     msg = MIMEText(txt.replace("\r\r\n", "\n"), "plain", "utf-8")
     # Send the email already!
-    msg["subject"] = ("[pyWWA] %s Traceback -- %s") % (
-        sys.argv[0].split("/")[-1],
-        socket.gethostname(),
+    msg["subject"] = (
+        f"[pyWWA] {sys.argv[0].split('/')[-1]} Traceback -- {hn}"
     )
     msg["From"] = SETTINGS.get("pywwa_errors_from", "ldm@localhost")
     msg["To"] = SETTINGS.get("pywwa_errors_to", "ldm@localhost")
