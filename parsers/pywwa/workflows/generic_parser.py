@@ -52,17 +52,23 @@ def really_process_data(txn, buf):
 
     if not common.dbwrite_enabled():
         return
-    # Insert into database
+    # Insert into database only if there is a polygon!
+    if not prod.segments or prod.segments[0].sbw is None:
+        return
+
     product_id = prod.get_product_id()
-    sqlraw = buf.replace("\015\015\012", "\n").replace("\000", "").strip()
-    giswkt = None
-    if prod.segments and prod.segments[0].sbw:
-        giswkt = ("SRID=4326;%s") % (MultiPolygon([prod.segments[0].sbw]).wkt,)
-    sql = """
-        INSERT into text_products(product, product_id, geom)
-        values (%s,%s,%s)
-    """
-    myargs = (sqlraw, product_id, giswkt)
+    giswkt = f"SRID=4326;{MultiPolygon([prod.segments[0].sbw]).wkt}"
+    sql = (
+        "INSERT into text_products(product_id, geom, issue, expire, pil) "
+        "values (%s,%s,%s,%s,%s)"
+    )
+    myargs = (
+        product_id,
+        giswkt,
+        prod.valid,
+        prod.segments[0].ugcexpire,
+        prod.afos,
+    )
     txn.execute(sql, myargs)
     if prod.warnings:
         common.email_error("\n".join(prod.warnings), buf)
