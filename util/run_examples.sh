@@ -60,7 +60,7 @@ for fn in $gp; do
 	cat examples/${fn}.txt | python parsers/vtec_parser.py $OPTS || exit 2
 done
 
-cat examples/SAW.txt | python parsers/watch_parser.py $OPTS || exit 2
+cat examples/SAW.txt examples/WWP9.txt | python parsers/watch_parser.py $OPTS || exit 2
 
 cat examples/TAF.txt | python parsers/taf_parser.py $OPTS || exit 2
 
