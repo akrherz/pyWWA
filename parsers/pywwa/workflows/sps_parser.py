@@ -21,7 +21,12 @@ def real_process(txn, raw):
     if raw.find("$$") == -1:
         LOG.info("$$ was missing from this product")
         raw += "\r\r\n$$\r\r\n"
-    prod = parser(raw, ugc_provider=UGC_DICT, nwsli_provider=NWSLI_DICT)
+    prod = parser(
+        raw,
+        utcnow=common.utcnow(),
+        ugc_provider=UGC_DICT,
+        nwsli_provider=NWSLI_DICT,
+    )
     if common.dbwrite_enabled():
         prod.sql(txn)
     baseurl = common.SETTINGS.get("pywwa_product_url", "pywwa_product_url")

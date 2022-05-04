@@ -30,7 +30,7 @@ def got_data(res):
 
 def real_process(text):
     """The real processor of the raw data, fun!"""
-    prod = parser(text)
+    prod = parser(text, utcnow=common.utcnow())
     if not common.dbwrite_enabled():
         return
     if prod.warnings:
