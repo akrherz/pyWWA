@@ -48,7 +48,7 @@ def process_queue():
 
 def real_process(txn, raw):
     """Process the product, please"""
-    prod = parser(raw)
+    prod = parser(raw, utcnow=common.utcnow())
     LOG.info("Watch %s received", prod.get_product_id())
     # NOTE: insure parsers are implmenting the same interface
     if prod.is_test():

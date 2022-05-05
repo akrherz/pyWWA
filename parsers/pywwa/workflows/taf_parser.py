@@ -12,7 +12,7 @@ from pywwa.database import get_database
 
 def real_process(txn, raw):
     """Process the product, please"""
-    prod = parser(raw)
+    prod = parser(raw, utcnow=common.utcnow())
     if common.dbwrite_enabled():
         prod.sql(txn)
     baseurl = common.SETTINGS.get("pywwa_product_url", "pywwa_product_url")
