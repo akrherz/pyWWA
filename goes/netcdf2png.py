@@ -117,40 +117,37 @@ def process(ncfn):
 
     tmpfd = tempfile.NamedTemporaryFile(delete=False)
     png.save(tmpfd, format="PNG")
+    # close/destroy the PIL object to hopefully stop memory leaks
+    png.close()
+    del png
     tmpfd.close()
 
-    pqstr = ("gis c %s gis/images/GOES/%s/channel%02i/%s_C%02i.png %s png") % (
-        valid.strftime("%Y%m%d%H%M"),
-        sector.lower(),
-        channel,
-        bird,
-        channel,
-        valid.strftime("%Y%m%d%H%M%S"),
+    pqstr = (
+        f"gis c {valid:%Y%m%d%H%M} gis/images/GOES/{sector.lower()}/"
+        f"channel{channel:02.0f}/{bird}_C{channel:02.0f}.png "
+        f"{valid:%Y%m%d%H%M%S} png"
     )
-    subprocess.call("pqinsert -i -p '%s' %s" % (pqstr, tmpfd.name), shell=True)
+    subprocess.call(f"pqinsert -i -p '{pqstr}' {tmpfd.name}", shell=True)
     os.unlink(tmpfd.name)
     tmpfd = tempfile.NamedTemporaryFile(mode="w", delete=False)
     args = [dx, 0, 0, dy, x0, y0]
     tmpfd.write("\n".join([str(s) for s in args]))
     tmpfd.close()
     subprocess.call(
-        "pqinsert -i -p '%s' %s" % (pqstr.replace("png", "wld"), tmpfd.name),
+        f"pqinsert -i -p '{pqstr.replace('png', 'wld')}' {tmpfd.name}",
         shell=True,
     )
     with open(tmpfd.name, "w", encoding="utf8") as fh:
         fh.write(
-            (
-                "PROJECTION\n"
-                "proj=geos\n"
-                "h=%s\n"
-                "lon_0=%s\n"
-                "sweep=%s\n"
-                "END\n"
-            )
-            % (h, lon_0, swa)
+            "PROJECTION\n"
+            "proj=geos\n"
+            f"h={h}\n"
+            f"lon_0={lon_0}\n"
+            f"sweep={swa}\n"
+            "END\n"
         )
     subprocess.call(
-        "pqinsert -i -p '%s' %s" % (pqstr.replace("png", "msinc"), tmpfd.name),
+        f"pqinsert -i -p '{pqstr.replace('png', 'msinc')}' {tmpfd.name}",
         shell=True,
     )
 
@@ -159,14 +156,13 @@ def process(ncfn):
         "generated_at": utc().strftime(ISO),
         "meta": {
             "valid": valid.strftime(ISO),
-            "proj4str": "+proj=geos +h=%s +lon_0=%s +sweep=%s"
-            % (h, lon_0, swa),
+            "proj4str": f"+proj=geos +h={h} +lon_0={lon_0} +sweep={swa}",
         },
     }
     with open(tmpfd.name, "w", encoding="utf8") as fh:
         fh.write(json.dumps(meta))
     subprocess.call(
-        "pqinsert -i -p '%s' %s" % (pqstr.replace("png", "json"), tmpfd.name),
+        f"pqinsert -i -p '{pqstr.replace('png', 'json')}' {tmpfd.name}",
         shell=True,
     )
 
@@ -191,7 +187,7 @@ def main(argv):
             # LOG.debug("fn: %s type_names: %s", fn, type_names)
             if not fn.endswith(".nc") or fn.find(bird) == -1:
                 continue
-            ncfn = "%s/%s" % (watch_path, fn)
+            ncfn = f"{watch_path}/{fn}"
             try:
                 # LOG.debug("Processing %s", ncfn)
                 process(ncfn)
