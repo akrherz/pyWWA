@@ -454,7 +454,8 @@ def process_site_time(accesstxn, prod, sid, ts, elements: List[SHEFElement]):
         return
     iemob.data["raw"] = prod.get_product_id()
     iemob.data["report"] = report
-    if not iemob.save(accesstxn):
+    # Only force COOP data into current_log even if we have newer obs
+    if not iemob.save(accesstxn, force_current_log=iscoop):
         enter_unknown(sid, prod.get_product_id(), network)
 
 
