@@ -81,3 +81,9 @@ This is a bit of a hack yet within the codebase, but some crude logic is used at
 3. One directory up from the calling script.
 
 4. Two directories up from the calling script.
+
+Development Notes
+-----------------
+
+The LDM pqact files need to use `<tabs>`, so if you are using vscode, ensure
+that the editorconfig extension is installed.
