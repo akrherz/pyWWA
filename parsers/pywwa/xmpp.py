@@ -6,6 +6,7 @@ import re
 
 # Third Party
 import treq
+from treq.response import _Response
 from pyiem.util import utc, LOG
 from twisted.internet import reactor
 from twisted.web import client as webclient
@@ -219,12 +220,29 @@ class JabberClient:
                 self.xmlstream.send, message  # @UndefinedVariable
             )
 
+        def _ensure200(res):
+            """Ensure that we got a HTTP 200 from this request."""
+            if isinstance(res, _Response):
+                # belt and suspenders
+                try:
+                    if res.original.code == 200:
+                        # All good
+                        reactor.callFromThread(self.xmlstream.send, message)
+                        return
+                except Exception:
+                    pass
+            LOG.info("HTTP request failed %s, stripping twitter_media", res)
+            # Nervous
+            del xelem["twitter_media"]
+            reactor.callFromThread(self.xmlstream.send, message)
+
         # If we have twitter_media, we want to attempt to get the content
         # cached before iembot asks for it a million times
         url = xtra.get("twitter_media")
         if url is None:
             _reallysend()
             return
-        # Careful here to not reallysend twice!
+        # Careful here
         d = treq.get(url, timeout=120)
-        d.addBoth(_reallysend)
+        d.addBoth(_ensure200)
+        d.addErrback(LOG.error)
