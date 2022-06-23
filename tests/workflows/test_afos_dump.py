@@ -10,6 +10,15 @@ from pywwa.testing import get_example_file
 
 
 @pytest.mark.parametrize("database", ["afos"])
+def test_future_product(cursor):
+    """Test exception for product from the future."""
+    data = get_example_file("AFD.txt")
+    pywwa.CTX.utcnow = utc(2015, 6, 8, 11, 56)
+    with pytest.raises(Exception):
+        afos_dump.real_parser(cursor, data)
+
+
+@pytest.mark.parametrize("database", ["afos"])
 def test_processor(cursor):
     """Test basic parsing."""
     data = get_example_file("AFD.txt")

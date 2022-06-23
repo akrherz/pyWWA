@@ -60,10 +60,12 @@ def real_parser(txn, buf):
 
     # When we are in realtime processing, do not consider old data, typically
     # when a WFO fails to update the date in their MND
-    if not common.replace_enabled() and (
-        (utcnow - nws.valid).days > 180 or (utcnow - nws.valid).days < -180
-    ):
-        raise Exception(f"Very Latent Product! {nws.valid}")
+    if not common.replace_enabled():
+        delta = (nws.valid - utcnow).total_seconds()
+        if delta < (-180 * 86400):  # 180 days
+            raise Exception(f"Very Latent Product! {nws.valid}")
+        if delta > (6 * 3600):  # Six Hours
+            raise Exception(f"Product from the future! {nws.valid}")
     if nws.warnings:
         common.email_error("\n".join(nws.warnings), buf)
     if nws.afos is None:
