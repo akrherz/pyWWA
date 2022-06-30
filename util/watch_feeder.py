@@ -5,7 +5,7 @@ import sys
 
 def main():
     """Go Main Go."""
-    for prod in ['SEL', 'SAW', 'WWP']:
+    for prod in ["SEL", "SAW", "WWP"]:
         sys.stderr.write(f"Writing {prod}\n")
         with open(f"examples/{prod}.txt", "rb") as fh:
             sys.stdout.buffer.write(fh.read())
