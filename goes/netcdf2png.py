@@ -160,7 +160,7 @@ def process(ncfn):
         },
     }
     with open(tmpfd.name, "w", encoding="utf8") as fh:
-        fh.write(json.dumps(meta))
+        json.dump(meta, fh)
     subprocess.call(
         f"pqinsert -i -p '{pqstr.replace('png', 'json')}' {tmpfd.name}",
         shell=True,
