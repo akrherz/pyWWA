@@ -6,6 +6,7 @@ from twisted.internet import reactor
 from twisted.internet.endpoints import TCP4ServerEndpoint
 from twisted.internet.protocol import Factory
 from twisted.protocols.basic import LineReceiver
+
 # local
 from pywwa.workflows import metar_parser
 from ..database import get_database, load_metar_stations

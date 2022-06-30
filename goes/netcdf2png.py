@@ -71,7 +71,7 @@ def make_image(nc):
         imgdata = np.where(data > 1, 1, data) * 255
     elif channel in [3, 4, 5, 6]:
         # guidance is to take square root of data and apply grayscale
-        imgdata = data ** 0.5 * 255
+        imgdata = data**0.5 * 255
     elif channel in [7]:
         imgdata = np.where(data < 242, (418.0 - data), ((330.0 - data) * 2.0))
     elif channel in [8, 9, 10]:
