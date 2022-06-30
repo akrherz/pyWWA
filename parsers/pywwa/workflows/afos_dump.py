@@ -24,7 +24,7 @@ MEMCACHE_EXCLUDE = [
     "ROB",
     "HML",
 ]
-MEMCACHE_CLIENT = YamClient(reactor, ["tcp:iem-memcached3:11211"])
+MEMCACHE_CLIENT = YamClient(reactor, ["tcp:iem-memcached:11211"])
 MEMCACHE_CLIENT.connect()
 
 
