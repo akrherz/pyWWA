@@ -43,6 +43,8 @@ def run(cursor, fn, ttaaii, awipsid):
         LOG.info("failed to fetch %s", fn)
         return
     data = "\n".join(["000 ", f"{ttaaii} KWNH 010000", awipsid, ""]) + req.text
+    # Sometimes we get a NUL character somehow, so we remove it!
+    data = data.replace("\000", "")
     tp = TextProduct(data, parse_segments=False)
     LOG.debug("For %s current: %s, tp.valid: %s", awipsid, current, tp.valid)
     if tp.valid <= current:
