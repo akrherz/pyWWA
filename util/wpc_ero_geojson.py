@@ -13,6 +13,7 @@ import tempfile
 
 import pandas as pd
 import geopandas as gpd
+import requests
 import xmpp
 from pyiem.nws.products import ero
 from pyiem.util import get_dbconn, get_dbconnstr, utc, logger, get_properties
@@ -233,6 +234,13 @@ def send_jabber(gdf, issue, day):
                 "twitter": xtra["twitter"],
             },
         )
+        # To prevent a bomb against iembot, we need to seed the cache by
+        # requesting these twitter_media URLs
+        try:
+            LOG.info("Fetching %s", xtra["twitter_media"])
+            _req = requests.get(xtra["twitter_media"], timeout=30)
+        except Exception as exp:
+            print(exp)
         msg.addChild(node=xbot)
         conn.send(msg)
 
