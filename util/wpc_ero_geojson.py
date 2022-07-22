@@ -238,7 +238,8 @@ def send_jabber(gdf, issue, day):
         # requesting these twitter_media URLs
         try:
             LOG.info("Fetching %s", xtra["twitter_media"])
-            _req = requests.get(xtra["twitter_media"], timeout=30)
+            # 30 seconds found to be not quite enough
+            requests.get(xtra["twitter_media"], timeout=45)
         except Exception as exp:
             print(exp)
         msg.addChild(node=xbot)
