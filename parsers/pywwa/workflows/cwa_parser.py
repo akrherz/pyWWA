@@ -26,7 +26,7 @@ def load_database(txn):
 
     txn.execute(
         "SELECT id, name, ST_x(geom) as lon, ST_y(geom) as lat from stations "
-        "WHERE network ~* 'ASOS' or network ~* 'AWOS'"
+        "WHERE network ~* 'ASOS'"
     )
     for row in txn.fetchall():
         LOCS[row["id"]] = row

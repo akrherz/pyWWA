@@ -19,8 +19,7 @@ STATIONS = {}
 def load_stations(txn):
     """load station metadata to build a xref."""
     txn.execute(
-        "SELECT id, tzname from stations "
-        "where network ~* 'ASOS' or network = 'AWOS'"
+        "SELECT id, tzname from stations where network ~* 'ASOS'"
     )
     for row in txn:
         # we need four char station IDs

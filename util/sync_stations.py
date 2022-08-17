@@ -20,7 +20,7 @@ def main():
     req = requests.get("http://mesonet.agron.iastate.edu/json/stations.php")
     jdata = req.json()
     for site in jdata["stations"]:
-        if site["network"].find("ASOS") == -1 and site["network"] != "AWOS":
+        if site["network"].find("ASOS") == -1:
             continue
         # Hmmm
         if site["wfo"] is None:
