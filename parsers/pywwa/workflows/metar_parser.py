@@ -21,6 +21,7 @@ from pywwa.database import get_database, load_metar_stations
 
 IEMDB = get_database("iem")
 ASOSDB = get_database("asos")
+MESOSITEDB = get_database("mesosite")
 
 NWSLI_PROVIDER = {}
 # Manual list of sites that are sent to jabber :/
@@ -68,6 +69,7 @@ def process_data(data):
         return real_processor(data)
     except Exception as exp:
         common.email_error(exp, data, -1)
+    return None
 
 
 def real_processor(text):
@@ -100,37 +102,43 @@ def real_processor(text):
     if not common.dbwrite_enabled():
         return collect
     for mtr in collect.metars:
-        if mtr.network is None:
-            LOG.info(
-                "station: '%s' is unknown to metadata table", mtr.station_id
-            )
+        key = metarcollect.normid(mtr.station_id)
+        entry = NWSLI_PROVIDER.get(key)
+        if entry is None:
+            LOG.info("station: '%s' is unknown to metadata table", key)
             deffer = ASOSDB.runOperation(
                 "INSERT into unknown(id, valid) values (%s, %s)",
                 (mtr.station_id, mtr.time.replace(tzinfo=timezone.utc)),
             )
             deffer.addErrback(common.email_error, text)
             continue
-        deffer = IEMDB.runInteraction(do_db, mtr)
+        deffer = IEMDB.runInteraction(do_db, mtr, entry)
         deffer.addErrback(common.email_error, collect.unixtext)
     return collect
 
 
-def do_db(txn, mtr):
+def do_db(txn, mtr, metadata: dict):
     """Do database transaction"""
     # We always want data to at least go to current_log incase we are getting
     # data out of order :/
-    iem, res = mtr.to_iemaccess(txn, force_current_log=True)
+    iem, res = metarcollect.to_iemaccess(
+        txn,
+        mtr,
+        iemid=metadata["iemid"],
+        tzname=metadata["tzname"],
+        force_current_log=True,
+    )
     if not res:
         LOG.info(
             "INFO: IEMAccess update of %s returned false: %s",
-            iem.data["station"],
+            metadata["id"],
             mtr.code,
         )
         df = ASOSDB.runOperation(
             "INSERT into unknown(id, valid) values (%s, %s)",
-            (iem.data["station"], iem.data["valid"]),
+            (mtr.station_id, iem.data["valid"]),
         )
-        df.addErrback(common.email_error, iem.data["station"])
+        df.addErrback(common.email_error, mtr.station_id)
 
 
 def cleandb():
@@ -146,14 +154,16 @@ def ready(_):
     bridge(process_data)
     cleandb()
     load_ignorelist()
-    lc = LoopingCall(IEMDB.runInteraction, load_metar_stations, NWSLI_PROVIDER)
+    lc = LoopingCall(
+        MESOSITEDB.runInteraction, load_metar_stations, NWSLI_PROVIDER
+    )
     lc.start(720)
 
 
 def main():
     """Run once at startup"""
     common.main()
-    df = IEMDB.runInteraction(load_metar_stations, NWSLI_PROVIDER)
+    df = MESOSITEDB.runInteraction(load_metar_stations, NWSLI_PROVIDER)
     df.addCallback(ready)
     df.addErrback(LOG.error)
     reactor.run()  # @UndefinedVariable

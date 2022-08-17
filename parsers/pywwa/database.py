@@ -62,9 +62,9 @@ def load_nwsli(nwsli_dict):
 def load_metar_stations(txn, nwsli_provider):
     """load station metadata to build a xref of stations to networks"""
     txn.execute(
-        "SELECT id, network, tzname, wfo, state, name, "
+        "SELECT id, iemid, network, tzname, wfo, state, name, "
         "ST_X(geom) as lon, ST_Y(geom) as lat from stations "
-        "where network ~* 'ASOS' or network = 'AWOS'"
+        "where network ~* 'ASOS'"
     )
     news = 0
     # Need the fetchall due to non-async here
@@ -72,5 +72,15 @@ def load_metar_stations(txn, nwsli_provider):
         if row["id"] not in nwsli_provider:
             news += 1
             nwsli_provider[row["id"]] = row
+    # Load up aliases for stations that changed IDs over the years
+    txn.execute(
+        "SELECT id, value from stations t JOIN station_attributes a "
+        "on (t.iemid = a.iemid) WHERE attr = 'WAS'"
+    )
+    for row in txn.fetchall():  # Force sync
+        if row["id"] not in nwsli_provider:
+            LOG.info("Can't remap unknown %s", row["id"])
+            continue
+        nwsli_provider[row["value"]] = nwsli_provider[row["id"]]
 
     LOG.info("Loaded %s new stations", news)
