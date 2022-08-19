@@ -31,7 +31,7 @@ jobs:
         cd ..
         cp settings.json-template settings.json
         # This is a bit brittle, but loads some data
-        python util/ugcs_update.py fz26jl21 2021 7 26
+        python util/ugcs_update.py fz13se22 2022 9 13
         python util/merge_hvtec_nwsli.py hvtec_list_05202021.csv
         python util/copy_iem_network.py MN_ASOS
         python util/copy_iem_network.py NY_COOP
