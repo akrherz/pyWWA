@@ -114,27 +114,30 @@ def load_stations(txn):
     """
     LOG.info("load_stations called...")
     txn.execute(
-        "SELECT id, network, tzname, a.value as pedts from stations s "
-        "LEFT JOIN station_attributes a on (s.iemid = a.iemid and "
-        "a.attr = 'PEDTS') WHERE network ~* 'COOP' "
-        "or network ~* 'DCP' or network = 'ISUSM' ORDER by network ASC"
+        """
+        SELECT id, s.iemid, network, tzname, a.value as pedts from stations s
+        LEFT JOIN station_attributes a on (s.iemid = a.iemid and
+        a.attr = 'PEDTS') WHERE network ~* 'COOP'
+        or network ~* 'DCP' or network = 'ISUSM' ORDER by network ASC
+        """
     )
 
     # A sentinel to know if we later need to remove things in the case of a
     # station that got dropped from a network
     epoc = utc().microsecond
-    for (stid, network, tzname, pedts) in txn.fetchall():
+    for (stid, iemid, network, tzname, pedts) in txn.fetchall():
         if stid in UNKNOWN:
             LOG.info("  station: %s is no longer unknown!", stid)
             UNKNOWN.pop(stid)
         metadata = LOCS.setdefault(stid, {})
         if network not in metadata:
-            metadata[network] = dict(
-                valid=U1980,
-                tzname=tzname,
-                epoc=epoc,
-                pedts=pedts,
-            )
+            metadata[network] = {
+                "valid": U1980,
+                "iemid": iemid,
+                "tzname": tzname,
+                "epoc": epoc,
+                "pedts": pedts,
+            }
         else:
             metadata[network]["epoc"] = epoc
         if tzname not in TIMEZONES:
@@ -390,7 +393,12 @@ def process_site_time(accesstxn, prod, sid, ts, elements: List[SHEFElement]):
     ):
         return
     metadata = LOCS.setdefault(
-        sid, {network: dict(valid=localts, tzname=None, epoc=-1, pedts=None)}
+        sid,
+        {
+            network: dict(
+                valid=localts, iemid=-1, tzname=None, epoc=-1, pedts=None
+            )
+        },
     )
     metadata[network]["valid"] = localts
 
@@ -400,7 +408,11 @@ def process_site_time(accesstxn, prod, sid, ts, elements: List[SHEFElement]):
         # LOG.info("Shifting %s [%s] back one minute: %s" % (sid, network,
         #                                                  localts))
 
-    iemob = Observation(sid, network, localts)
+    iemob = Observation(
+        iemid=metadata[network]["iemid"],
+        valid=localts,
+        tzname=metadata[network]["tzname"],
+    )
     iscoop = network.find("COOP") > 0
     hasdata = False
     # TODO Special rstage logic in case PEDTS is defined
