@@ -27,7 +27,7 @@ jobs:
         python -m pip install . --upgrade
         export PATH="/usr/lib/postgresql/11/bin:$PATH"
         cd database; sh bootstrap.sh
-        python schema_manager.py
+        python schema_manager.py || echo 'Huh?'
         cd ..
         cp settings.json-template settings.json
         # This is a bit brittle, but loads some data
