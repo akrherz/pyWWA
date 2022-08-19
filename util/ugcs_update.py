@@ -58,7 +58,7 @@ def do_download(zipfn):
         req = requests.get(url, timeout=60)
         LOG.info("Downloading %s ...", url)
         if req.status_code != 200:
-            LOG.info("Failed to download %s, got %s", zipfn, req.status_code)
+            LOG.warning("Download %s failed, got %s", zipfn, req.status_code)
             sys.exit(1)
         with open(zipfn, "wb") as fh:
             fh.write(req.content)
