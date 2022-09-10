@@ -1,9 +1,13 @@
 """ Generic NWS Product Parser """
+# stdlib
+from datetime import timedelta
+
 # 3rd Party
 from twisted.internet import reactor
 from shapely.geometry import MultiPolygon
 from pyiem.util import LOG
 from pyiem.nws.ugc import UGCProvider
+from pyiem.nws.product import TextProduct
 from pyiem.nws.products import parser as productparser
 
 # Local
@@ -31,7 +35,7 @@ def process_data(data):
     defer.addErrback(LOG.error)
 
 
-def really_process_data(txn, buf):
+def really_process_data(txn, buf) -> TextProduct:
     """Actually do some processing"""
 
     # Create our TextProduct instance
@@ -51,11 +55,15 @@ def really_process_data(txn, buf):
         common.send_message(plain, html, xtra)
 
     if not common.dbwrite_enabled():
-        return
+        return None
     # Insert into database only if there is a polygon!
     if not prod.segments or prod.segments[0].sbw is None:
-        return
+        return None
 
+    expire = prod.segments[0].ugcexpire
+    if expire is None:
+        prod.warnings.append("ugcexpire is none, defaulting to 90 minutes.")
+        expire = prod.valid + timedelta(minutes=90)
     product_id = prod.get_product_id()
     giswkt = f"SRID=4326;{MultiPolygon([prod.segments[0].sbw]).wkt}"
     sql = (
@@ -66,12 +74,13 @@ def really_process_data(txn, buf):
         product_id,
         giswkt,
         prod.valid,
-        prod.segments[0].ugcexpire,
+        expire,
         prod.afos,
     )
     txn.execute(sql, myargs)
     if prod.warnings:
         common.email_error("\n".join(prod.warnings), buf)
+    return prod
 
 
 def main():
