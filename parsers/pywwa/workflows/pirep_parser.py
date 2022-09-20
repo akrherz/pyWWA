@@ -88,7 +88,7 @@ def real_parser(txn, buf):
     """
     I'm gonna do the heavy lifting here
     """
-    prod = pirepparser(buf, nwsli_provider=LOCS)
+    prod = pirepparser(buf, utcnow=common.utcnow(), nwsli_provider=LOCS)
     prod.assign_cwsu(txn)
     for report in prod.reports:
         if report.text in PIREPS:
