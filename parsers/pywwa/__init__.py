@@ -1,6 +1,5 @@
 """pyWWA local module."""
 # stdlib
-import inspect
 import json
 import os
 
@@ -17,34 +16,27 @@ JABBER = None
 
 def get_table_file(filename):
     """Return file pointer for a given table file."""
-    for path in get_search_paths():
-        testfn = os.path.join(path, "tables", filename)
-        if os.path.isfile(testfn):
-            return open(testfn)
-    raise FileNotFoundError(f"could not locate table file {filename}")
+    testfn = os.path.join(get_basedir(), "tables", filename)
+    if os.path.isfile(testfn):
+        return open(testfn, encoding='utf-8')
+    raise FileNotFoundError(f"could not locate table file {testfn}")
 
 
-def get_search_paths():
-    """Return a list of places to look for auxillary files."""
-    # 1. `cwd`/pyWWA
-    # 2. `cwd`
-    res = ["pyWWA", "."]
-    # 3. scriptloc/..
-    # 4. scriptloc/../..
-    scriptpath = os.path.dirname(os.path.abspath(inspect.stack()[-1].filename))
-    for relpath in ["..", "../.."]:
-        res.append(os.path.join(scriptpath, relpath))
-    return res
+def get_basedir() -> str:
+    """Since I am a hack, we need to compute the base folder of this repo."""
+    thisdir = os.path.dirname(__file__)
+    # up two folders
+    return os.path.abspath(os.path.join(thisdir, "../.."))
 
 
-def load_config():
+def load_config() -> dict:
     """Attempt to locate our configuration file."""
-    for path in get_search_paths():
-        testfn = os.path.join(path, "settings.json")
-        if not os.path.isfile(testfn):
-            continue
-        return json.load(open(testfn))
-    return {}
+    testfn = os.path.join(get_basedir(), "settings.json")
+    if not os.path.isfile(testfn):
+        return {}
+    with open(testfn, encoding='utf-8') as fh:
+        res = json.load(fh)
+    return res
 
 
 CONFIG = load_config()
