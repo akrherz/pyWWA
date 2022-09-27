@@ -158,8 +158,6 @@ def load_stations(txn):
             LOCS.pop(stid)
 
     LOG.info("loaded %s stations", len(LOCS))
-    # Reload every 12 hours
-    reactor.callLater(12 * 60 * 60, MESOSITEDB.runInteraction, load_stations)
 
 
 def restructure_data(prod):
@@ -532,6 +530,10 @@ def main2(_res):
     lc2 = LoopingCall(log_database_queue_size)
     df2 = lc2.start(61, now=False)
     df2.addErrback(common.email_error)
+    # Reload stations every 12 hours
+    lc3 = LoopingCall(MESOSITEDB.runInteraction, load_stations)
+    df3 = lc3.start(60 * 60 * 12, now=False)
+    df3.addErrback(common.email_error)
 
 
 def main():
