@@ -13,24 +13,23 @@ def run(date):
     """Process this date please"""
     yyyymmdd = date.strftime("%Y%m%d")
     for nexrad in NEXRADS:
-        mydir = f"/mnt/nexrad3/nexrad/NIDS/{nexrad}"
+        mydir = f"/data/gempak/nexrad/NIDS/{nexrad}"
         if not os.path.isdir(mydir):
             LOG.info("creating %s", mydir)
             os.makedirs(mydir)
         os.chdir(mydir)
-        cmd = ("tar -czf /mesonet/tmp/%s_%s.tgz ???/???_%s_*") % (
-            nexrad,
-            yyyymmdd,
-            yyyymmdd,
+        cmd = (
+            f"tar -czf /mesonet/tmp/{nexrad}_{yyyymmdd}.tgz "
+            f"???/???_{yyyymmdd}_*"
         )
         LOG.debug(cmd)
-        proc = subprocess.Popen(
+        with subprocess.Popen(
             cmd,
             shell=True,
             stderr=subprocess.PIPE,
             stdout=subprocess.PIPE,
-        )
-        (stdout, stderr) = proc.communicate()
+        ) as proc:
+            (stdout, stderr) = proc.communicate()
         if stdout != b"" or stderr != b"":
             LOG.info(
                 "%s resulted in\nstdout: %s\nstderr: %s",
@@ -41,9 +40,11 @@ def run(date):
 
     rpath = f"/stage/IowaNexrad3/{date:%Y/%m}"
     cmd = (
-        'rsync --remove-source-files -a --rsync-path "mkdir -p %s && rsync" '
-        "/mesonet/tmp/???_%s.tgz meteor_ldm@metl60.agron.iastate.edu:%s"
-    ) % (rpath, yyyymmdd, rpath)
+        'rsync --remove-source-files -a --rsync-path '
+        f'"mkdir -p {rpath} && rsync" '
+        f"/mesonet/tmp/???_{yyyymmdd}.tgz "
+        f"meteor_ldm@metl60.agron.iastate.edu:{rpath}"
+    )
     LOG.debug(cmd)
     subprocess.call(cmd, shell=True)
 
