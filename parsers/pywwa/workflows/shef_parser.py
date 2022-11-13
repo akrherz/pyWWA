@@ -147,14 +147,13 @@ def load_stations(txn):
                 LOG.info("pytz does not like tzname: %s", tzname)
                 TIMEZONES[tzname] = pytz.utc
 
-    # Now we find things that are outdated
+    # Now we find things that are outdated, note that other code can add
+    # placeholders that can get zapped here.
     for stid in list(LOCS):
         for network in list(LOCS[stid]):
             if LOCS[stid][network]["epoc"] != epoc:
-                LOG.info("LOCS remove station: %s network: %s", stid, network)
                 LOCS[stid].pop(network)
         if not LOCS[stid]:
-            LOG.info("LOCS does not know station: %s at all", stid)
             LOCS.pop(stid)
 
     LOG.info("loaded %s stations", len(LOCS))
