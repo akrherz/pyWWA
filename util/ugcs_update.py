@@ -85,7 +85,7 @@ def new_poly(geo):
     # later as we will only consider the first polygon
     maxarea = 0
     polys = []
-    for poly in geo:
+    for poly in geo.geoms:
         area = poly.area
         if area > maxarea:
             maxarea = area
