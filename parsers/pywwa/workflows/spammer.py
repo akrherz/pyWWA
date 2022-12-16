@@ -27,12 +27,12 @@ def process_data(data):
         common.email_error(exp, data)
 
 
-def real_process(data):
+def real_process(data) -> product.TextProduct:
     """Go!"""
     prod = product.TextProduct(data)
     if prod.afos == "ADMNES":
-        LOG.info("Dumping %s on the floor", prod.get_product_id())
-        return
+        LOG.warning("Dumping %s on the floor", prod.get_product_id())
+        return None
 
     # Strip off stuff at the top
     msg = MIMEText(prod.unixtext[2:], "plain", "utf-8")
@@ -42,6 +42,11 @@ def real_process(data):
         subject = prod.afos
         if prod.afos[:3] == "ADM":
             subject = f"ADMIN NOTICE {prod.afos[3:]}"
+        elif prod.afos[:3] == "PNS":
+            if prod.unixtext.upper().find("DAMAGE SURVEY") == -1:
+                return None
+            subject = f"Damage Survey PNS from {prod.source}"
+            msg["Cc"] = "aaron.treadway@noaa.gov"
         elif prod.afos[:3] == "RER":
             subject = f"[RER] {prod.source} {prod.afos[3:]}"
             if prod.source in IOWA_WFOS:
@@ -53,6 +58,7 @@ def real_process(data):
         common.SETTINGS.get("pywwa_smtp", "smtp"), msg["From"], msg["To"], msg
     )
     df.addErrback(LOG.error)
+    return prod
 
 
 def main():
