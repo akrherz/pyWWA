@@ -17,5 +17,6 @@ def test_aww(cursor):
     prod = generic_parser.really_process_data(cursor, data)
     assert not prod.warnings
     prod = generic_parser.really_process_data(
-        cursor, data.replace("092245", "0z0z0z"))
+        cursor, data.replace("092245", "0z0z0z")
+    )
     assert prod.warnings

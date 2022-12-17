@@ -18,7 +18,7 @@ def get_table_file(filename):
     """Return file pointer for a given table file."""
     testfn = os.path.join(get_basedir(), "tables", filename)
     if os.path.isfile(testfn):
-        return open(testfn, encoding='utf-8')
+        return open(testfn, encoding="utf-8")
     raise FileNotFoundError(f"could not locate table file {testfn}")
 
 
@@ -34,7 +34,7 @@ def load_config() -> dict:
     testfn = os.path.join(get_basedir(), "settings.json")
     if not os.path.isfile(testfn):
         return {}
-    with open(testfn, encoding='utf-8') as fh:
+    with open(testfn, encoding="utf-8") as fh:
         res = json.load(fh)
     return res
 

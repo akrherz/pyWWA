@@ -38,6 +38,8 @@ def real_process(data) -> product.TextProduct:
     msg = MIMEText(prod.unixtext[2:], "plain", "utf-8")
     # some products have no AWIPS ID, sigh
     subject = prod.wmo
+    msg["To"] = "akrherz@iastate.edu"
+    cc = None
     if prod.afos is not None:
         subject = prod.afos
         if prod.afos[:3] == "ADM":
@@ -46,16 +48,21 @@ def real_process(data) -> product.TextProduct:
             if prod.unixtext.upper().find("DAMAGE SURVEY") == -1:
                 return None
             subject = f"Damage Survey PNS from {prod.source}"
-            msg["Cc"] = "aaron.treadway@noaa.gov"
+            cc = "aaron.treadway@noaa.gov"
         elif prod.afos[:3] == "RER":
             subject = f"[RER] {prod.source} {prod.afos[3:]}"
             if prod.source in IOWA_WFOS:
-                msg["Cc"] = "Justin.Glisan@iowaagriculture.gov"
+                cc = "Justin.Glisan@iowaagriculture.gov"
+    addrs = [
+        msg["To"],
+    ]
+    if cc is not None:
+        msg["Cc"] = cc
+        addrs.append(cc)
     msg["subject"] = subject
     msg["From"] = common.SETTINGS.get("pywwa_errors_from", "ldm@localhost")
-    msg["To"] = "akrherz@iastate.edu"
     df = smtp.sendmail(
-        common.SETTINGS.get("pywwa_smtp", "smtp"), msg["From"], msg["To"], msg
+        common.SETTINGS.get("pywwa_smtp", "smtp"), msg["From"], addrs, msg
     )
     df.addErrback(LOG.error)
     return prod
