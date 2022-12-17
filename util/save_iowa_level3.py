@@ -40,7 +40,7 @@ def run(date):
 
     rpath = f"/stage/IowaNexrad3/{date:%Y/%m}"
     cmd = (
-        'rsync --remove-source-files -a --rsync-path '
+        "rsync --remove-source-files -a --rsync-path "
         f'"mkdir -p {rpath} && rsync" '
         f"/mesonet/tmp/???_{yyyymmdd}.tgz "
         f"meteor_ldm@metl60.agron.iastate.edu:{rpath}"

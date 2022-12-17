@@ -23,7 +23,11 @@ class Client:
         f.addBootstrap(xmlstream.STREAM_CONNECTED_EVENT, self.connected)
         f.addBootstrap(xmlstream.STREAM_AUTHD_EVENT, self.authd)
         connector = SRVConnector(
-            reactor, "xmpp-client", jid.host, f, defaultPort=5222,
+            reactor,
+            "xmpp-client",
+            jid.host,
+            f,
+            defaultPort=5222,
         )
         connector.connect()
 
@@ -115,7 +119,7 @@ def main():
     props = get_properties()
     Client(
         JID(f"{props['nwws-oi.username']}@nwws-oi.weather.gov"),
-        props['nwws-oi.password'],
+        props["nwws-oi.password"],
     )
     reactor.run()
 

@@ -10,7 +10,7 @@ from pyiem.nws.product import TextProduct
 def main(argv):
     """Go Main Go."""
     fn = argv[1]
-    with open(fn, 'rb') as fh:
+    with open(fn, "rb") as fh:
         for token in fh.read().decode("ascii", "ignore").split("\003"):
             if len(token) < 10:
                 continue

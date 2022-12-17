@@ -53,7 +53,9 @@ def real_process(data) -> product.TextProduct:
             subject = f"[RER] {prod.source} {prod.afos[3:]}"
             if prod.source in IOWA_WFOS:
                 cc = "Justin.Glisan@iowaagriculture.gov"
-    addrs = [msg["To"], ]
+    addrs = [
+        msg["To"],
+    ]
     if cc is not None:
         msg["Cc"] = cc
         addrs.append(cc)
