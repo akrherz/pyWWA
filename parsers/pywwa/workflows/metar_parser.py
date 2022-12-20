@@ -36,6 +36,8 @@ metarcollect.JABBER_SITES = {
     "KRIC": None,
     "KPHL": None,
 }
+# Sites with higher thresholds, hardcoded here for now :/
+metarcollect.WIND_ALERT_THRESHOLD_KTS_BY_ICAO["KMWN"] = 80
 # Try to prevent Jabber message dups
 JABBER_MESSAGES = []
 # List of sites to IGNORE and not send Jabber Messages for.
