@@ -2,6 +2,8 @@
 set -x
 OPTS="-l -x -s 1 -e"
 
+cat examples/XTEUS.txt | python parsers/xteus_parser.py $OPTS || exit 2
+
 cat examples/ESF.txt | python parsers/afos_dump.py $OPTS || exit 2
 
 cat examples/SIGC.txt | python parsers/aviation.py $OPTS || exit 2
