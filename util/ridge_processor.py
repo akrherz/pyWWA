@@ -1,4 +1,4 @@
-"""I process activemq messages 10,000 at a time!"""
+"""Process ridge exchange messages that contain imagery."""
 import os
 import subprocess
 import datetime
@@ -6,6 +6,23 @@ import json
 
 import pytz
 import pika
+
+
+def get_rabbitmqconn():
+    """Load the configuration."""
+    fn = os.sep.join([os.path.dirname(__file__), "rabbitmq.json"])
+    with open(fn, "r", encoding="utf-8") as fh:
+        config = json.load(fh)
+    return pika.BlockingConnection(
+        pika.ConnectionParameters(
+            host=config["host"],
+            port=config["port"],
+            virtual_host=config["vhost"],
+            credentials=pika.credentials.PlainCredentials(
+                config["user"], config["password"]
+            ),
+        )
+    )
 
 
 def generate_image(_ch, _method, properties, body):
@@ -37,38 +54,30 @@ def generate_image(_ch, _method, properties, body):
     metadata["meta"]["site"] = siteID
     metadata["meta"]["vcp"] = vcp
     pqstr = (
-        "gis %s %s gis/images/4326/ridge/%s/%s_0.png "
-        "GIS/ridge/%s/%s/%s_%s_%s.png png"
-    ) % (
-        routes,
-        gts.strftime("%Y%m%d%H%M"),
-        siteID,
-        productID,
-        siteID,
-        productID,
-        siteID,
-        productID,
-        gts.strftime("%Y%m%d%H%M"),
+        f"gis {routes} {gts:%Y%m%d%H%M} "
+        f"gis/images/4326/ridge/{siteID}/{productID}_0.png "
+        f"GIS/ridge/{siteID}/{productID}/{siteID}_{productID}_"
+        f"{gts:%Y%m%d%H%M}.png png"
     )
 
-    pngfn = "/tmp/%s_%s_%s.png" % (siteID, productID, gts.strftime("%H%M"))
+    pngfn = f"/tmp/{siteID}_{productID}_{gts:%H%M}.png"
     with open(pngfn, "wb") as fh:
         fh.write(body)
 
-    metafn = "/tmp/%s_%s_%s.json" % (siteID, productID, gts.strftime("%H%M"))
-    with open(metafn, "w") as fh:
+    metafn = f"/tmp/{siteID}_{productID}_{gts:%H%M}.json"
+    with open(metafn, "w", encoding="ascii") as fh:
         json.dump(metadata, fh)
 
-    wldfn = "/tmp/%s_%s_%s.wld" % (siteID, productID, gts.strftime("%H%M"))
-    with open(wldfn, "w") as fh:
-        fh.write("%.6f\n" % ((lowerRightLon - upperLeftLon) / 1000.0,))  # dx
+    wldfn = f"/tmp/{siteID}_{productID}_{gts:%H%M}.wld"
+    with open(wldfn, "w", encoding="ascii") as fh:
+        _val = (lowerRightLon - upperLeftLon) / 1000.0
+        fh.write(f"{_val:.6f}\n")  # dx
         fh.write("0.0\n")
         fh.write("0.0\n")
-        fh.write(
-            "%.6f\n" % (0 - (upperLeftLat - lowerRightLat) / 1000.0,)
-        )  # dy
-        fh.write("%.6f\n" % (upperLeftLon,))  # UL Lon
-        fh.write("%.6f\n" % (upperLeftLat,))  # UL Lat
+        _val = 0 - (upperLeftLat - lowerRightLat) / 1000.0
+        fh.write(f"{_val:.6f}\n")  # dy
+        fh.write(f"{upperLeftLon:.6f}\n")  # UL Lon
+        fh.write(f"{upperLeftLat:.6f}\n")  # UL Lat
 
     # Use -i to allow for duplicate file content as the product id *should*
     # always be unique
@@ -82,19 +91,15 @@ def generate_image(_ch, _method, properties, body):
         if os.path.isfile(fn):
             os.unlink(fn)
         else:
-            print(
-                "Strange file: %s was missing, but should be deleted" % (fn,)
-            )
+            print(f"Strange file: {fn} was missing, but should be deleted")
 
 
 def run():
     """Go run Go."""
-    with open("ridge_processor.pid", "w") as fh:
-        fh.write("%s" % (os.getpid(),))
+    with open("ridge_processor.pid", "w", encoding="ascii") as fh:
+        fh.write(f"{os.getpid()}")
 
-    connection = pika.BlockingConnection(
-        pika.ConnectionParameters(host="iem-rabbitmq.local")
-    )
+    connection = get_rabbitmqconn()
     channel = connection.channel()
 
     channel.exchange_declare(

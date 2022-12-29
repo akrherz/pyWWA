@@ -10,7 +10,8 @@
 /settings.json
 parsers/gemglb.nts
 parsers/last.nts
-util/ridge_processor.pid
+util/rabbitmq.json
+**/ridge_processor.pid
 /goes/*.nc
 .coverage
 .eggs/
