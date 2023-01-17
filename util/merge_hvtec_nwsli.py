@@ -32,11 +32,11 @@ from pywwa.database import get_sync_dbconn  # noqa: E402
 LOG = logger()
 
 
-def main(argv):
+def main(argv) -> int:
     """Go Main"""
     if len(argv) < 2:
         print("USAGE: python merge_hvtec_nwsli.py FILENAME")
-        return
+        return 1
 
     dbconn = get_sync_dbconn("postgis")
     cursor = dbconn.cursor()
@@ -46,10 +46,10 @@ def main(argv):
     uri = f"https://www.weather.gov/media/vtec/{fn}"
 
     LOG.info(" - Fetching file: %s", uri)
-    req = requests.get(uri)
+    req = requests.get(uri, timeout=30)
     if req.status_code != 200:
         LOG.info("Got status_code %s for %s", req.status_code, uri)
-        return
+        return 1
     updated = 0
     new = 0
     bad = 0
@@ -100,7 +100,8 @@ def main(argv):
     cursor.close()
     dbconn.commit()
     LOG.info(" - DONE! %s updated %s new, %s bad entries", updated, new, bad)
+    return 0
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    sys.exit(main(sys.argv))
