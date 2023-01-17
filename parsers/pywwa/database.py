@@ -4,13 +4,14 @@
 from pyiem.util import LOG
 from pyiem.nws import nwsli
 import psycopg2
+from psycopg2.extras import DictCursor
 from twisted.enterprise import adbapi
 
 # Local
 from pywwa import CONFIG
 
 
-def get_database(dbname, cp_max=1, module_name="pyiem.twistedpg"):
+def get_database(dbname, cp_max=1, module_name="psycopg2"):
     """Get a twisted database connection
 
     Args:
@@ -29,6 +30,7 @@ def get_database(dbname, cp_max=1, module_name="pyiem.twistedpg"):
         user=opts.get("user", "ldm"),
         port=opts.get("port", 5432),
         gssencmode="disable",  # NOTE: this is problematic with older postgres
+        cursor_factory=DictCursor,
     )
 
 
