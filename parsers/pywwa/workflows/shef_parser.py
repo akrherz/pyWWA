@@ -125,7 +125,7 @@ def load_stations(txn):
     # A sentinel to know if we later need to remove things in the case of a
     # station that got dropped from a network
     epoc = utc().microsecond
-    for (stid, iemid, network, tzname, pedts) in txn.fetchall():
+    for stid, iemid, network, tzname, pedts in txn.fetchall():
         if stid in UNKNOWN:
             LOG.info("  station: %s is no longer unknown!", stid)
             UNKNOWN.pop(stid)

@@ -69,7 +69,7 @@ def step2(_dummy, text_product):
         )
 
     # Do the Jabber work necessary after the database stuff has completed
-    for (plain, html, xtra) in text_product.get_jabbers(
+    for plain, html, xtra in text_product.get_jabbers(
         common.SETTINGS.get("pywwa_vtec_url", "pywwa_vtec_url"),
         common.SETTINGS.get("pywwa_river_url", "pywwa_river_url"),
     ):

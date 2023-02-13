@@ -25,7 +25,7 @@ def do_jabber(entry):
         wwpprod=entry["WWP"],
         selprod=entry["SEL"],
     )
-    for (txt, html, xtra) in jmsgs:
+    for txt, html, xtra in jmsgs:
         common.send_message(txt, html, xtra)
 
 

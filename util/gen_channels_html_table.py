@@ -428,7 +428,7 @@ def do_vtec(fh):
         jmsg = ""
         tweet = ""
         channels = []
-        for (_, html, xtra) in j:
+        for _, html, xtra in j:
             tweet += xtra["twitter"] + "<br />"
             jmsg += html
             for channel in xtra["channels"].split(","):

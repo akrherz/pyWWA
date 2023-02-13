@@ -17,7 +17,7 @@ def real_process(txn, raw):
         prod.sql(txn)
     baseurl = common.SETTINGS.get("pywwa_product_url", "pywwa_product_url")
     jmsgs = prod.get_jabbers(baseurl)
-    for (mess, htmlmess, xtra) in jmsgs:
+    for mess, htmlmess, xtra in jmsgs:
         common.send_message(mess, htmlmess, xtra)
     if prod.warnings:
         common.email_error("\n\n".join(prod.warnings), prod.text)
