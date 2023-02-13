@@ -1,5 +1,6 @@
 """Utility script to generate the HTML used for IEMBot Channel Documentation
 """
+import os
 import re
 import sys
 
@@ -277,9 +278,13 @@ GEN_PRODUCTS = [
 
 def get_data(afos):
     """Return the text data for a given afos identifier"""
+    fn = f"../examples/{afos}.txt"
+    if not os.path.isfile(fn):
+        print(f"File {fn} is missing")
+    with open(fn, "rb") as fh:
+        data = fh.read()
     return (
-        open(f"../examples/{afos}.txt", "rb")
-        .read()
+        data
         .decode("ascii")
         .replace("\r", "")
         .replace("\001\n", "")

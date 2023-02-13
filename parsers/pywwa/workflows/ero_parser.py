@@ -16,7 +16,6 @@ WAITFOR = 20
 def real_parser(txn, buf):
     """Actually process"""
     prod = parser(buf)
-    # spc.draw_outlooks()
     if common.dbwrite_enabled():
         prod.sql(txn)
     if prod.warnings:
