@@ -30,7 +30,7 @@ HADSDB = get_database("hads", module_name="psycopg2", cp_max=20)
 MESOSITEDB = get_database("mesosite", cp_max=1)
 
 # a form for IDs we will log as unknown
-NWSLIRE = re.compile("[A-Z]{4}[0-9]")
+NWSLIRE = re.compile("^[A-Z]{4}[0-9]$")
 
 # stations we don't know about
 UNKNOWN = {}
