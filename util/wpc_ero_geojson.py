@@ -208,7 +208,7 @@ def send_jabber(gdf, issue, day):
         outlook_collections,
     )
     LOG.info("Sending %d jabber messages", len(jmsgs))
-    for (txt, html, xtra) in jmsgs:
+    for txt, html, xtra in jmsgs:
         conn = get_jabberconn()
         msg = xmpp.protocol.Message(
             to=JABBER["to"],

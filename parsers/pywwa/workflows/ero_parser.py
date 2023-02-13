@@ -16,7 +16,6 @@ WAITFOR = 20
 def real_parser(txn, buf):
     """Actually process"""
     prod = parser(buf)
-    # spc.draw_outlooks()
     if common.dbwrite_enabled():
         prod.sql(txn)
     if prod.warnings:
@@ -27,7 +26,7 @@ def real_parser(txn, buf):
 def do_jabber(prod):
     """Callback after database work is done."""
     jmsgs = prod.get_jabbers("")
-    for (txt, html, xtra) in jmsgs:
+    for txt, html, xtra in jmsgs:
         common.send_message(txt, html, xtra)
     LOG.info(
         "Sent %s messages for product %s", len(jmsgs), prod.get_product_id()

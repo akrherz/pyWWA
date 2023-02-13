@@ -47,7 +47,7 @@ def really_process_data(txn, buf) -> TextProduct:
     )
 
     # Do the Jabber work necessary after the database stuff has completed
-    for (plain, html, xtra) in prod.get_jabbers(
+    for plain, html, xtra in prod.get_jabbers(
         common.SETTINGS.get("pywwa_product_url", "pywwa_product_url")
     ):
         if xtra.get("channels", "") == "":
