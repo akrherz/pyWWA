@@ -177,7 +177,9 @@ def email_error(exp, message="", trimstr=100):
     # prevent any noaaport text from making ugly emails
     msg = MIMEText(txt.replace("\r\r\n", "\n"), "plain", "utf-8")
     # Send the email already!
-    msg["subject"] = f"[pyWWA] {sys.argv[0].split('/')[-1]} Traceback -- {hn}"
+    msg["subject"] = (
+        f"[pyWWA] {sys.argv[0].rsplit('/', maxsplit=1)[-1]} Traceback -- {hn}"
+    )
     msg["From"] = SETTINGS.get("pywwa_errors_from", "ldm@localhost")
     msg["To"] = SETTINGS.get("pywwa_errors_to", "ldm@localhost")
     if not pywwa.CTX.disable_email:
