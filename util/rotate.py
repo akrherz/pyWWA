@@ -12,33 +12,32 @@ def main(argv):
     fnbase = argv[1]
     fmt = argv[2]
 
-    dirname = "%s/%s" % (BASE, os.path.dirname(fnbase))
+    dirname = f"{BASE}/{os.path.dirname(fnbase)}"
     if not os.path.isdir(dirname):
         os.makedirs(dirname)
 
     if fmt == "tif.Z":
-        for i in range(9, -1, -1):
-            oldfp = "%s/%s%s.%s" % (BASE, fnbase, i, fmt)
-            newfp = "%s/%s%s.%s" % (BASE, fnbase, i + 1, fmt)
+        for i in range(10, -1, -1):
+            oldfp = f"{BASE}/{fnbase}{i}.{fmt}"
+            newfp = f"{BASE}/{fnbase}{i + 1}.{fmt}"
             if os.path.isfile(oldfp):
                 os.rename(oldfp, newfp)
 
-        output = open("%s/%s%s.%s" % (BASE, fnbase, 0, fmt), "wb")
-        output.write(data)
-        output.close()
+        with open(f"{BASE}/{fnbase}0.{fmt}", "wb") as fh:
+            fh.write(data)
 
-        data = gzip.open("%s/%s%s.%s" % (BASE, fnbase, 0, fmt), "rb").read()
+        with gzip.open(f"{BASE}/{fnbase}0.{fmt}", "rb") as fh:
+            data = fh.read()
         fmt = "tif"
 
-    for i in range(9, -1, -1):
-        oldfp = "%s/%s%s.%s" % (BASE, fnbase, i, fmt)
-        newfp = "%s/%s%s.%s" % (BASE, fnbase, i + 1, fmt)
+    for i in range(10, -1, -1):
+        oldfp = f"{BASE}/{fnbase}{i}.{fmt}"
+        newfp = f"{BASE}/{fnbase}{i + 1}.{fmt}"
         if os.path.isfile(oldfp):
             os.rename(oldfp, newfp)
 
-    output = open("%s/%s%s.%s" % (BASE, fnbase, 0, fmt), "wb")
-    output.write(data)
-    output.close()
+    with open(f"{BASE}/{fnbase}0.{fmt}", "wb") as fh:
+        fh.write(data)
 
 
 if __name__ == "__main__":
