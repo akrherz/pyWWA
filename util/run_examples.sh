@@ -2,6 +2,8 @@
 set -x
 OPTS="-l -x -s 1 -e"
 
+cat examples/FD1US1.txt | python parsers/fd_parser.py $OPTS -u 2023-03-09T12:00 || exit 2
+
 cat examples/XTEUS.txt | python parsers/xteus_parser.py $OPTS || exit 2
 
 cat examples/ESF.txt | python parsers/afos_dump.py $OPTS || exit 2
