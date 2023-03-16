@@ -43,7 +43,7 @@ def call(cmd):
 
 def run(valid, channel, tmpname):
     """Do work."""
-    for bird in [16, 17]:
+    for bird in [16, 18]:
         fnbase = "%s/channel%02i/GOES-%s_C%02i" % (
             PATH,
             channel,
