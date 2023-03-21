@@ -79,7 +79,7 @@ def real_process(data) -> product.TextProduct:
     msg = MIMEMultipart("alternative")
     msgtext = MIMEText(prod.unixtext[2:], "plain", "utf-8")
     msghtml = MIMEText(
-        "<p><pre>{prod.unixtext[2:]}</pre></p>", "html", "utf-8")
+        f"<p><pre>{prod.unixtext[2:]}</pre></p>", "html", "utf-8")
     # some products have no AWIPS ID, sigh
     subject = prod.wmo
     msg["To"] = "akrherz@iastate.edu"
