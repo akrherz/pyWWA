@@ -20,7 +20,8 @@ mock
 ncurses
 netCDF4
 numpy
-pandas
+# pin down for now
+pandas<2
 # geoplot usage
 pillow
 pint
