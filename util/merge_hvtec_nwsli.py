@@ -67,6 +67,15 @@ def main(argv) -> int:
             bad += 1
             continue
         (nwsli, river_name, proximity, name, state, lat, lon) = tokens
+        if '\\N' in [lat, lon]:
+            LOG.info(
+                ' + Linenum %s [%s] had a null lat/lon\n%s',
+                linenum + 1,
+                nwsli,
+                line,
+            )
+            bad += 1
+            continue
         if len(nwsli) != 5:
             LOG.info(
                 ' + Linenum %s had a NWSLI "%s" not of 5 character length\n%s',
