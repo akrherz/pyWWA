@@ -1,4 +1,5 @@
 """Test spammer."""
+import base64
 
 from pyiem.nws.product import TextProduct
 
@@ -9,9 +10,15 @@ from pywwa.testing import get_example_file
 
 def test_tornado_multi():
     """Test the parsing of EF scale."""
-    prod = TextProduct(get_example_file("PNS_damage_multi.txt"))
+    prod = TextProduct(get_example_file("PNS_damage_multi2.txt"))
     res = spammer.damage_survey_pns(prod)
-    assert "EF1" in res[0]
+    pos = 0
+    # Ensure order
+    msg = base64.b64decode(res[2].get_payload()).decode("utf-8")
+    for ef in range(3):
+        thispos = msg.find(f"EF-{ef}")
+        assert thispos > pos
+        pos = thispos
 
 
 def test_tornado_damage():

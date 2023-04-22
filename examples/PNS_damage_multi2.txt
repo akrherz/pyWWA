@@ -1,0 +1,200 @@
+933 
+NOUS43 KICT 212302
+PNSICT
+KSZ032-033-047>053-067>072-082-083-091>096-098>100-221100-
+
+Public Information Statement
+National Weather Service Wichita KS
+602 PM CDT Fri Apr 21 2023
+
+.Update...Corrected date
+
+...NWS Damage Survey for 04/19/2023 Chase County Tornado Event...
+
+The following are tornado tracks we could find from the cyclic 
+supercell that tracked across Chase County on April 19th 2023. 
+This is data is preliminary and could be changed at a later date
+as we continue to gather information. 
+
+.Chase County tornado #1...
+
+Rating:                 EF-1
+Estimated Peak Wind:    99 mph
+Path Length /statute/:  0.06 miles
+Path Width /maximum/:   100 yards
+Fatalities:             0
+Injuries:               0
+
+Start Date:             04/19/2023
+Start Time:             8:13 pm CDT
+Start Location:         6.01 miles southwest of Elmdale
+
+End Date:               04/19/2023
+End Time:               8:15 pm CDT
+End Location:           5 miles southwest of Elmdale
+
+
+
+.Chase County Tornado #2...
+
+Rating:                 EF-0
+Estimated Peak Wind:    75 mph
+Path Length /statute/:  1.3 miles
+Path Width /maximum/:   100 yards
+Fatalities:             0
+Injuries:               1
+
+Start Date:             04/19/2023
+Start Time:             8:15 pm CDT
+Start Location:         1 mile southwest of Elmdale
+
+
+End Date:               04/19/2023
+End Time:               8:19 pm CDT
+End Location:           Elmdale
+
+
+Injury was from a semi that was rolled near the intersection of 
+Highway 50 and Highway 150
+
+
+.Chase County tornado #3...
+
+Rating:                 EF-2
+Estimated Peak Wind:    125 mph
+Path Length /statute/:  11.7 miles
+Path Width /maximum/:   0.5 miles (880 yards)
+Fatalities:             0
+Injuries:               0
+
+Start Date:             04/19/2023
+Start Time:             8:22 pm CDT
+Start Location:         0.5 miles southeast of Elmdale
+
+End Date:               04/19/2023
+End Time:               8:52 pm CDT
+End Location:           6 miles northeast of Strong City
+
+EF-2 damage was to a metal building 1 mile east of Elmdale and
+to farm outbuildings 3 miles southwest of Strong City.
+
+
+.Chase County Tornado #4...
+
+Rating:                 EF-1
+Estimated Peak Wind:    94 mph
+Path Length /statute/:  1.3 miles
+Path Width /maximum/:   200 yards
+Fatalities:             0
+Injuries:               0
+
+Start Date:             04/19/2023
+Start Time:             8:31 pm CDT
+Start Location:         2.5 miles east of Elmdale
+
+End Date:               04/19/2023
+End Time:               8:33 pm CDT
+End Location:           1 mile south/southeast of Strong City
+
+Damage was north of Chase County Fishing Lake. Most of it was tree
+damage with some damage to a small outbuilding. 
+
+
+.Chase County tornado #5...
+
+Rating:                 EF-0
+Estimated Peak Wind:    74 mph
+Path Length /statute/:  2.7 miles
+Path Width /maximum/:   175 yards
+Fatalities:             0
+Injuries:               0
+
+Start Date:             04/19/2023
+Start Time:             8:38 pm CDT
+Start Location:         2.3 miles southwest of Strong City
+
+End Date:               04/19/2023
+End Time:               8:40 pm CDT
+End Location:           0.2 miles north of Strong City
+
+
+
+.Chase County Tornado #6...
+
+Rating:                 EF-1
+Estimated Peak Wind:    94 mph
+Path Length /statute/:  1.1 miles
+Path Width /maximum/:   50 yards
+Fatalities:             0
+Injuries:               0
+
+Start Date:             04/19/2023
+Start Time:             8:35pm pm CDT
+Start Location:         East Cottonwood Falls
+
+End Date:               04/19/2023
+End Time:               8:39 pm CDT
+End Location:           0.7 miles northeast of Cottonwood Falls
+
+
+.Chase County Tornado #7...
+
+Rating:                 EF-0
+Estimated Peak Wind:    85 mph
+Path Length /statute/:  3.2 miles
+Path Width /maximum/:   150 yards
+Fatalities:             0
+Injuries:               1
+
+Start Date:             04/19/2023
+Start Time:             8:47 pm CDT
+Start Location:         4 miles east/northeast of Cottonwood Falls
+
+
+End Date:               04/19/2023
+End Time:               8:57 pm CDT
+End Location:           7 miles northeast of Cottonwood Falls
+
+
+Injury was from a car that was picked up with glass breaking and 
+causing injury.
+
+.Chase County Tornado #8...
+
+Rating:                 EF-2
+Estimated Peak Wind:    118 mph
+Path Length /statute/:  5.5 miles
+Path Width /maximum/:   100 yards
+Fatalities:             0
+Injuries:               0
+
+Start Date:             04/19/2023
+Start Time:             8:55 pm CDT
+Start Location:         8 miles northeast of Strong City
+
+End Date:               04/19/2023
+End Time:               9:07 pm CDT
+End Location:           3.7 miles south of Dunlap
+
+EF-2 damage was to transmission power structure around 3.5 miles
+south of Dunlap very close to the Chase/Morris county line. 
+
+
+&&
+
+EF Scale: The Enhanced Fujita Scale classifies tornadoes into the
+following categories:
+
+EF0...Weak......65 to 85 mph
+EF1...Weak......86 to 110 mph
+EF2...Strong....111 to 135 mph
+EF3...Strong....136 to 165 mph
+EF4...Violent...166 to 200 mph
+EF5...Violent...>200 mph
+
+NOTE:
+The information in this statement is preliminary and subject to
+change pending final review of the events and publication in NWS
+Storm Data.
+
+$$
