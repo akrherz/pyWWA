@@ -48,8 +48,10 @@ def damage_survey_pns(prod):
     if ffs:
         maxf = max(ffs.keys())
         table = ""
-        for key, item in ffs.items():
-            table += f"EF-{key} ⇒ {len(item)}<br />\n"
+        for ef in range(6):
+            if ef not in ffs:
+                continue
+            table += f"EF-{ef} ⇒ {len(ffs[ef])}<br />\n"
         subject = f"Damage Survey PNS (Max: EF{maxf}) from {prod.source}"
         maxtext += (
             f"<p>Max EF Rating Below: <strong>(EF{maxf})</strong></p>"
