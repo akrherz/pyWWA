@@ -38,8 +38,7 @@ requests
 # interpolation
 scipy
 shapely
-# pandas not compat
-sqlalchemy<2
+sqlalchemy
 tqdm
 # vtec_parser
 treq
