@@ -43,6 +43,12 @@ sys.path.insert(
 # pylint: disable=wrong-import-position
 from pywwa.database import get_sync_dbconn  # noqa: E402
 
+# Some strangely encoded WFOs need to be rectified
+WFO_XREF = {
+    "PQW": "GUM",
+    "PQE": "GUM",
+}
+
 LOG = logger()
 # Change Directory to /tmp, so that we can rw
 os.chdir("/tmp")
@@ -235,12 +241,14 @@ def workflow(argv, cursor):
         len(postgis.index),
         source,
     )
+    # Rectify WFO
+    df[wfocol] = df[wfocol].apply(lambda x: WFO_XREF.get(x, x))
 
     # Compute the area and then sort to order duplicated UGCs :/
     # Database stores as sq km
     df["area2163"] = df["geometry"].to_crs(2163).area / 1e6
     df.sort_values(by="area2163", ascending=False, inplace=True)
-    gdf = df.groupby("ugc").nth(0)
+    gdf = df.groupby("ugc").nth(0).set_index("ugc")
     LOG.info(
         "Loaded %s/%s unique entries from %s",
         len(gdf.index),
