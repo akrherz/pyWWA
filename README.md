@@ -3,7 +3,7 @@ pyWWA
 
 This repository is an integration of [pyIEM backed](https://github.com/akrherz/pyIEM) NWS product parsers.  These are intended to be run from [Unidata LDM](https://github.com/Unidata/LDM)'s `pqact` process.
 
-Python 3.8+ is supported by this library.
+Python 3.9+ is supported by this library.
 
 Installation
 ------------
