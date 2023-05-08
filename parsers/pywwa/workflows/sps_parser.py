@@ -1,15 +1,14 @@
 """SPS product ingestor"""
 # 3rd Party
-from twisted.internet import reactor
-from pyiem.util import LOG
-from pyiem.nws.ugc import UGCProvider
 from pyiem.nws.products.sps import parser
+from pyiem.nws.ugc import UGCProvider
+from pyiem.util import LOG
+from twisted.internet import reactor
 
 # Local
 from pywwa import common
+from pywwa.database import get_database, load_nwsli
 from pywwa.ldm import bridge
-from pywwa.database import load_nwsli
-from pywwa.database import get_database
 
 POSTGIS = get_database("postgis")
 UGC_DICT = UGCProvider()

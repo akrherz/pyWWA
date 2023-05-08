@@ -1,10 +1,10 @@
 """Database utilities."""
 
 # 3rd Party
-from pyiem.util import LOG
-from pyiem.nws import nwsli
 import psycopg2
 from psycopg2.extras import DictCursor
+from pyiem.nws import nwsli
+from pyiem.util import LOG
 from twisted.enterprise import adbapi
 
 # Local

@@ -8,16 +8,17 @@ So let us document it here for my own sanity.
 # stdlib
 from datetime import timezone
 
+from pyiem.nws.products import metarcollect
+from pyiem.util import LOG, get_properties
+from twisted.internet import reactor
+
 # 3rd Party
 from twisted.internet.task import LoopingCall
-from twisted.internet import reactor
-from pyiem.nws.products import metarcollect
-from pyiem.util import get_properties, LOG
 
 # Local
-from pywwa import common, SETTINGS
-from pywwa.ldm import bridge
+from pywwa import SETTINGS, common
 from pywwa.database import get_database, load_metar_stations
+from pywwa.ldm import bridge
 
 IEMDB = get_database("iem")
 ASOSDB = get_database("asos")

@@ -1,12 +1,12 @@
 """ Unidata LDM pqact bridge."""
 
 # 3rd Party
-from twisted.internet import task, reactor
 from pyiem.util import LOG
 from pyldm import ldmbridge
+from twisted.internet import reactor, task
 
 # Local
-from pywwa.common import shutdown, email_error, SETTINGS
+from pywwa.common import SETTINGS, email_error, shutdown
 
 
 class MyProductIngestor(ldmbridge.LDMProductReceiver):

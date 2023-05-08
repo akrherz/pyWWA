@@ -1,14 +1,14 @@
 """AFOS Database Workflow."""
 # 3rd Party
+from pyiem.nws import product
+from pyiem.util import LOG
 from twisted.internet import reactor
 from txyam.client import YamClient
-from pyiem.util import LOG
-from pyiem.nws import product
 
 # Local
 from pywwa import common
-from pywwa.ldm import bridge
 from pywwa.database import get_database
+from pywwa.ldm import bridge
 
 DBPOOL = get_database("afos", cp_max=5)
 MEMCACHE_EXCLUDE = [

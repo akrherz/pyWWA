@@ -1,13 +1,13 @@
 """ CWA Product Parser! """
 # 3rd Party
-from twisted.internet import reactor
-from pyiem.util import LOG
 from pyiem.nws.products.cwa import parser
+from pyiem.util import LOG
+from twisted.internet import reactor
 
 # Local
 from pywwa import common, get_table_file
-from pywwa.ldm import bridge
 from pywwa.database import get_database
+from pywwa.ldm import bridge
 
 DBPOOL = get_database("postgis")
 

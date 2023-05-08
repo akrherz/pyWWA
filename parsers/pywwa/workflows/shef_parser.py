@@ -5,22 +5,23 @@ import random
 import re
 from typing import List
 
+import pytz
+
 # 3rd Party
 # pylint: disable=no-name-in-module
 from psycopg2.errors import DeadlockDetected
-import pytz
-from twisted.internet import reactor
-from twisted.internet.task import LoopingCall
-from pyiem.observation import Observation
+from pyiem import reference
 from pyiem.models.shef import SHEFElement
 from pyiem.nws.products.shef import parser
-from pyiem.util import LOG, utc, convert_value
-from pyiem import reference
+from pyiem.observation import Observation
+from pyiem.util import LOG, convert_value, utc
+from twisted.internet import reactor
+from twisted.internet.task import LoopingCall
 
 # Local
 from pywwa import common
-from pywwa.ldm import bridge
 from pywwa.database import get_database
+from pywwa.ldm import bridge
 
 # Setup Database Links
 # the current_shef table is not very safe when two processes attempt to update

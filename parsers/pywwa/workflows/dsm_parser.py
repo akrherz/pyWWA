@@ -2,14 +2,14 @@
 
 # 3rd Party
 import pytz
-from twisted.internet import reactor
 from pyiem.nws.products.dsm import parser
-from pyiem.util import get_dbconn, LOG
+from pyiem.util import LOG, get_dbconn
+from twisted.internet import reactor
 
 # Local
 from pywwa import common
-from pywwa.ldm import bridge
 from pywwa.database import get_database
+from pywwa.ldm import bridge
 
 # database timezones to pytz cache
 TIMEZONES = {}

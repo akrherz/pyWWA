@@ -2,18 +2,19 @@
 # stdlib
 from datetime import timedelta
 
-# 3rd Party
-from twisted.internet import reactor
-from shapely.geometry import MultiPolygon
-from pyiem.util import LOG
-from pyiem.nws.ugc import UGCProvider
 from pyiem.nws.product import TextProduct
 from pyiem.nws.products import parser as productparser
+from pyiem.nws.ugc import UGCProvider
+from pyiem.util import LOG
+from shapely.geometry import MultiPolygon
+
+# 3rd Party
+from twisted.internet import reactor
 
 # Local
 from pywwa import common
+from pywwa.database import get_database, load_nwsli
 from pywwa.ldm import bridge
-from pywwa.database import load_nwsli, get_database
 
 UGC_DICT = UGCProvider()
 NWSLI_DICT = {}

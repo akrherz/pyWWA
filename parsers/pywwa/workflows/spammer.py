@@ -2,15 +2,16 @@
 Handle things that need emailed to me for my situational awareness.
 """
 # stdlib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
 import re
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+
+from pyiem.nws import product
+from pyiem.util import LOG
 
 # 3rd Party
 from twisted.internet import reactor
 from twisted.mail import smtp
-from pyiem.util import LOG
-from pyiem.nws import product
 
 # Local
 from pywwa import common

@@ -1,10 +1,10 @@
 """Test nexrad3_attr."""
 # 3rd Party
 import pytest
+from pywwa.testing import get_example_file
 
 # Local
 from pywwa.workflows import nexrad3_attr
-from pywwa.testing import get_example_file
 
 
 @pytest.mark.parametrize("database", ["mesosite"])

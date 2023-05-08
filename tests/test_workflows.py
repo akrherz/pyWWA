@@ -1,6 +1,7 @@
 """Test pywwa.workflows."""
 # stdlib
 import importlib
+
 import mock
 
 # 3rd Party

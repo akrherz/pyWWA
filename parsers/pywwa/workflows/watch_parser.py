@@ -1,15 +1,15 @@
 """ SPC Watch (SAW, SEL, WWP) Ingestor """
 
 # 3rd Party
+from pyiem.nws.products import parser
+from pyiem.util import LOG
 from twisted.internet import reactor
 from twisted.internet.task import LoopingCall
-from pyiem.util import LOG
-from pyiem.nws.products import parser
 
 # Local
 from pywwa import common
-from pywwa.ldm import bridge
 from pywwa.database import get_database
+from pywwa.ldm import bridge
 
 # Create a running queue of watch products, so that once we get the
 # collective, we can generate the jabbers and send them out.

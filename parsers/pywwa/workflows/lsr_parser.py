@@ -1,20 +1,20 @@
 """ LSR product ingestor """
 # Stdlib
-import pickle
-import os
 import datetime
+import os
+import pickle
 
 # 3rd Party
 import pytz
-from twisted.internet import reactor
 from pyiem import reference
 from pyiem.nws.products.lsr import parser as lsrparser
 from pyiem.util import LOG
+from twisted.internet import reactor
 
 # Local
 from pywwa import common
-from pywwa.ldm import bridge
 from pywwa.database import get_database
+from pywwa.ldm import bridge
 
 # Cheap datastore for LSRs to avoid Dups!
 LSRDB = {}

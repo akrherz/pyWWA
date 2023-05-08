@@ -27,14 +27,14 @@ python ugcs_update.py z_03de13a 2013 12 03
 python ugcs_update.py z_05fe14a 2014 02 05
 
 """
-import sys
 import os
+import sys
 import zipfile
 
-import requests
 import geopandas as gpd
+import requests
+from pyiem.util import get_dbconnstr, logger, utc
 from shapely.geometry import MultiPolygon
-from pyiem.util import utc, logger, get_dbconnstr
 
 # Put the pywwa library into sys.path
 sys.path.insert(

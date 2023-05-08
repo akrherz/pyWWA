@@ -1,11 +1,12 @@
 """Move DSM messages into the text database with the proper PIL."""
 # Local
-import sys
 import re
+import sys
+
+from pyiem.nws import product
 
 # 3rd Party
 from pyiem.util import get_dbconn
-from pyiem.nws import product
 
 
 def main():

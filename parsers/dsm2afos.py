@@ -2,6 +2,5 @@
 # Local
 from pywwa.workflows.dsm2afos import main
 
-
 if __name__ == "__main__":
     main()

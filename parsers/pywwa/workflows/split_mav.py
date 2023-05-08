@@ -4,14 +4,15 @@ Chunk the MOS text data into easier to search values.
 # stdlib
 import re
 
+from pyiem.nws import product
+
 # 3rd Party
 from twisted.internet import reactor
-from pyiem.nws import product
 
 # Local
 from pywwa import common
-from pywwa.ldm import bridge
 from pywwa.database import get_database
+from pywwa.ldm import bridge
 
 
 def real_process(txn, data):

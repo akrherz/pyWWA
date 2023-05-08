@@ -1,14 +1,14 @@
 """ FFG """
 
 # 3rd Party
-from twisted.internet import reactor
-from pyiem.util import LOG
 from pyiem.nws.products.ffg import parser
+from pyiem.util import LOG
+from twisted.internet import reactor
 
 # Local
 from pywwa import common
-from pywwa.ldm import bridge
 from pywwa.database import get_database
+from pywwa.ldm import bridge
 
 
 def real_parser(txn, buf):

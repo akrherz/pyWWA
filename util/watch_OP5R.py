@@ -1,6 +1,6 @@
 """Monitor a directory for new files and then do the level II dance"""
-import re
 import os
+import re
 import subprocess
 
 import inotify.adapters

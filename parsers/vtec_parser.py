@@ -13,6 +13,5 @@ with watches.  Lets try to explain
 # Local
 from pywwa.workflows.vtec_parser import main
 
-
 if __name__ == "__main__":
     main()

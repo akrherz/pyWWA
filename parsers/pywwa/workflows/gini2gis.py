@@ -4,20 +4,21 @@ I convert raw GINI noaaport imagery into geo-referenced PNG files both in the
 'native' projection and 4326.
 """
 # Stdlib
-from io import BytesIO
-import sys
 import datetime
-import logging
-from logging.handlers import SysLogHandler
-import os
-import tempfile
 import json
+import logging
+import os
 import subprocess
+import sys
+import tempfile
+from io import BytesIO
+from logging.handlers import SysLogHandler
+
+import numpy as np
 
 # 3rd Party
 import pytz
 from PIL import Image
-import numpy as np
 from pyiem.nws import gini
 
 logger = logging.getLogger("gini2gis")

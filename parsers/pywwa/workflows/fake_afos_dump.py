@@ -2,14 +2,15 @@
 # Stdlib
 import re
 
+from pyiem.nws.product import TextProduct
+
 # 3rd Party
 from twisted.internet import reactor
-from pyiem.nws.product import TextProduct
 
 # Local
 from pywwa import common
-from pywwa.ldm import bridge
 from pywwa.database import get_database
+from pywwa.ldm import bridge
 
 CWA = re.compile("^FA(AK|HI|US)2([1-6])$")
 MIS = re.compile("^FA(AK|HI|US)20$")

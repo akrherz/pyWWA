@@ -1,6 +1,6 @@
 """Some magic to feed the SEL, SAW, and WWP products into the LDM bridge."""
-import time
 import sys
+import time
 
 
 def main():

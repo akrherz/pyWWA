@@ -1,8 +1,8 @@
 """XTEUS."""
 
 # Local
-from pywwa.workflows import xteus_parser
 from pywwa.testing import get_example_file
+from pywwa.workflows import xteus_parser
 
 
 def test_xteus():

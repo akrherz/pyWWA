@@ -4,17 +4,17 @@ The devil is in the details here :)
 
 """
 import datetime
-import subprocess
-import traceback
-import tempfile
 import json
 import os
+import subprocess
 import sys
+import tempfile
+import traceback
 
 import inotify.adapters
-from PIL import Image
 import numpy as np
 from netCDF4 import Dataset
+from PIL import Image
 from pyiem.util import logger, utc
 
 LOG = logger()

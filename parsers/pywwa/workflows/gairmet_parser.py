@@ -1,13 +1,13 @@
 """ G-AIRMET parser! """
 
 # 3rd Party
-from twisted.internet import reactor
 from pyiem.nws.products.gairmet import parser
+from twisted.internet import reactor
 
 # Local
 from pywwa import common
-from pywwa.ldm import bridge
 from pywwa.database import get_database
+from pywwa.ldm import bridge
 
 
 def real_parser(txn, buf):

@@ -3,12 +3,12 @@
  python util/feed_archived_ncr.py NEXRAD YYYY MM
    | YYYY=2009 MM=01 python nexrad3_attr.py
 """
-import subprocess
 import datetime
-import sys
-import os
-import time
 import glob
+import os
+import subprocess
+import sys
+import time
 
 
 def main(argv):
