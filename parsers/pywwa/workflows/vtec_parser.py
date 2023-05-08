@@ -11,17 +11,16 @@ with watches.  Lets try to explain
     product_issue <- When was this product issued by the NWS
 """
 # 3rd Party
+from pyiem.nws.products.vtec import parser as vtecparser
+from pyiem.nws.ugc import UGCProvider
+from pyiem.util import LOG
 from twisted.internet import reactor
 from twisted.mail.smtp import SMTPSenderFactory
-from pyiem.util import LOG
-from pyiem.nws.ugc import UGCProvider
-from pyiem.nws.products.vtec import parser as vtecparser
 
 # Local
 from pywwa import common
+from pywwa.database import get_database, load_nwsli
 from pywwa.ldm import bridge
-from pywwa.database import load_nwsli
-from pywwa.database import get_database
 
 SMTPSenderFactory.noisy = False
 PGCONN = get_database("postgis")

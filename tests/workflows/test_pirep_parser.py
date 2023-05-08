@@ -1,10 +1,10 @@
 """Test pirep_parser."""
 # 3rd Party
 import pytest
+from pywwa.testing import get_example_file
 
 # Local
 from pywwa.workflows import pirep_parser
-from pywwa.testing import get_example_file
 
 
 @pytest.mark.parametrize("database", ["postgis"])

@@ -2,14 +2,15 @@
 # stdlib
 from io import BytesIO
 
+from pyiem.nws.products.nldn import parser
+
 # 3rd Party
 from twisted.internet import reactor
-from pyiem.nws.products.nldn import parser
 
 # Local
 from pywwa import common
-from pywwa.ldm import bridge
 from pywwa.database import get_database
+from pywwa.ldm import bridge
 
 DBPOOL = get_database("nldn")
 

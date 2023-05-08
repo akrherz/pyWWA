@@ -2,12 +2,12 @@
 
 called from pqact_iemvs.conf
 """
-import sys
 import os
-import zipfile
-from io import BytesIO
 import random
 import string
+import sys
+import zipfile
+from io import BytesIO
 
 BASE = "/mesonet/ldmdata"
 

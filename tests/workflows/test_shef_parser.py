@@ -2,15 +2,15 @@
 
 # 3rd Party
 # pylint: disable=no-member-in-module
-from psycopg2.errors import DeadlockDetected
 import pytest
-from pyiem.util import utc
-from twisted.python.failure import Failure
 
 # Local
 import pywwa
-from pywwa.workflows import shef_parser
+from psycopg2.errors import DeadlockDetected
+from pyiem.util import utc
 from pywwa.testing import get_example_file
+from pywwa.workflows import shef_parser
+from twisted.python.failure import Failure
 
 
 def test_process_site_eb():

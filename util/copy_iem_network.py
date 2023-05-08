@@ -1,7 +1,7 @@
 """For testing purposes, copy IEM network into mesosite."""
 # stdlib
-import sys
 import os
+import sys
 
 # Third Party
 import requests

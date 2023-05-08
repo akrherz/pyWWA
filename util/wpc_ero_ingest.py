@@ -3,18 +3,18 @@
 This is no longer used for ingest of geometries, but the text file is still
 processed for archival.
 """
-import tempfile
-import subprocess
 import os
+import subprocess
+import tempfile
 
 import requests
 from pyiem.nws.product import TextProduct
 from pyiem.util import (
-    logger,
-    get_dbconn,
-    utc,
     exponential_backoff,
+    get_dbconn,
+    logger,
     noaaport_text,
+    utc,
 )
 
 LOG = logger()

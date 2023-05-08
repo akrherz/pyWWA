@@ -2,10 +2,10 @@
 import base64
 
 from pyiem.nws.product import TextProduct
+from pywwa.testing import get_example_file
 
 # Local
 from pywwa.workflows import spammer
-from pywwa.testing import get_example_file
 
 
 def test_tornado_multi():

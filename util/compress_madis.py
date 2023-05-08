@@ -1,8 +1,8 @@
 """Archive MADIS files."""
-from datetime import date, timedelta
 import glob
 import os
 import subprocess
+from datetime import date, timedelta
 
 from pyiem.util import logger
 

@@ -4,13 +4,13 @@
 """
 
 # 3rd Party
-from twisted.internet import reactor
 from pyiem.nws.products.mcd import parser as mcdparser
+from twisted.internet import reactor
 
 # Local
 from pywwa import common
-from pywwa.ldm import bridge
 from pywwa.database import get_database
+from pywwa.ldm import bridge
 
 DBPOOL = get_database("postgis")
 

@@ -1,7 +1,7 @@
 """Split RR7 products, for some reason!"""
 # stdlib
-import sys
 import re
+import sys
 
 # 3rd Party
 from pyiem.util import get_dbconn, utc

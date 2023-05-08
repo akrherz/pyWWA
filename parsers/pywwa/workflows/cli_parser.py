@@ -6,14 +6,14 @@ storage of what we got from the automated observations
 """
 
 # 3rd Party
-from twisted.internet import reactor
-from pyiem.nws.products import parser
 from pyiem.network import Table as NetworkTable
+from pyiem.nws.products import parser
+from twisted.internet import reactor
 
 # Local
 from pywwa import common
-from pywwa.ldm import bridge
 from pywwa.database import get_database
+from pywwa.ldm import bridge
 
 DBPOOL = get_database("iem")
 NT = NetworkTable("NWSCLI", only_online=False)

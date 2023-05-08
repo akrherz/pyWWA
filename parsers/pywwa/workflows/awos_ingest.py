@@ -9,8 +9,9 @@ from twisted.protocols.basic import LineReceiver
 
 # local
 from pywwa.workflows import metar_parser
-from ..database import get_database, load_metar_stations
+
 from .. import common
+from ..database import get_database, load_metar_stations
 
 IEMDB = get_database("iem")
 ASOSDB = get_database("asos")

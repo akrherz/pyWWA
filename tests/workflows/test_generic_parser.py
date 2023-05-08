@@ -1,12 +1,12 @@
 """Test generic_parser."""
 # 3rd Party
 import pytest
-from pyiem.util import utc
 
 # Local
 import pywwa
-from pywwa.workflows import generic_parser
+from pyiem.util import utc
 from pywwa.testing import get_example_file
+from pywwa.workflows import generic_parser
 
 
 @pytest.mark.parametrize("database", ["postgis"])

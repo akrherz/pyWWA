@@ -1,26 +1,25 @@
 """Support lib for the parser scripts found in this directory"""
-import os
+import datetime
 import inspect
 import logging
+import os
 import pwd
-import datetime
-from io import StringIO
 import socket
 import sys
 import traceback
 from email.mime.text import MIMEText
+from io import StringIO
 from syslog import LOG_LOCAL2
-
-# 3rd party
-from twisted.python import log as tplog
-from twisted.logger import formatEvent
-from twisted.python import syslog
-from twisted.python import failure
-from twisted.internet import reactor
-from twisted.mail import smtp
 
 import pyiem
 from pyiem.util import LOG, utc
+from twisted.internet import reactor
+from twisted.logger import formatEvent
+from twisted.mail import smtp
+from twisted.python import failure, syslog
+
+# 3rd party
+from twisted.python import log as tplog
 
 # Local Be careful of circeref here
 import pywwa

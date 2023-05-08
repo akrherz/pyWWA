@@ -1,12 +1,12 @@
 """Test cf6_parser."""
 # 3rd Party
-from pyiem.util import utc
 import pytest
 
 # Local
 import pywwa
-from pywwa.workflows import cf6_parser
+from pyiem.util import utc
 from pywwa.testing import get_example_file
+from pywwa.workflows import cf6_parser
 
 
 @pytest.mark.parametrize("database", ["iem"])

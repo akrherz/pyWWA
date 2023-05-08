@@ -6,9 +6,9 @@
 """
 import json
 import os
+import subprocess
 import sys
 import tempfile
-import subprocess
 
 from pyiem.util import logger, utc
 

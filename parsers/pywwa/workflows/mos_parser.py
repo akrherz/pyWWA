@@ -1,13 +1,13 @@
 """ MOS Data Ingestor, why not? """
 
 # 3rd Party
-from twisted.internet import reactor
 from pyiem.nws.products.mos import parser
+from twisted.internet import reactor
 
 # Local
 from pywwa import common
-from pywwa.ldm import bridge
 from pywwa.database import get_database
+from pywwa.ldm import bridge
 
 DBPOOL = get_database("mos")
 MEMORY = {"ingested": 0}

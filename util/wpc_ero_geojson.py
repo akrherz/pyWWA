@@ -5,18 +5,18 @@
 
 https://origin.wpc.ncep.noaa.gov/exper/eromap/geojson/
 """
-from datetime import timezone
 import json
 import os
 import subprocess
 import tempfile
+from datetime import timezone
 
-import pandas as pd
 import geopandas as gpd
+import pandas as pd
 import requests
 import xmpp
 from pyiem.nws.products import ero
-from pyiem.util import get_dbconn, get_dbconnstr, utc, logger, get_properties
+from pyiem.util import get_dbconn, get_dbconnstr, get_properties, logger, utc
 
 LOG = logger()
 # No akami

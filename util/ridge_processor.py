@@ -1,11 +1,11 @@
 """Process ridge exchange messages that contain imagery."""
-import os
-import subprocess
 import datetime
 import json
+import os
+import subprocess
 
-import pytz
 import pika
+import pytz
 
 
 def get_rabbitmqconn():

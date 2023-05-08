@@ -5,13 +5,13 @@ import re
 import sys
 
 import psycopg2.extras
-from pyiem.util import get_dbconn, logger
-from pyiem.reference import prodDefinitions
-from pyiem.nws.ugc import UGC
 from pyiem.nws.nwsli import NWSLI
-from pyiem.nws.products.vtec import parser as vtec_parser
 from pyiem.nws.products import parser as productparser
 from pyiem.nws.products.cwa import parser as cwaparser
+from pyiem.nws.products.vtec import parser as vtec_parser
+from pyiem.nws.ugc import UGC
+from pyiem.reference import prodDefinitions
+from pyiem.util import get_dbconn, logger
 
 PARSERS = {
     "CWA": cwaparser,

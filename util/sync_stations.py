@@ -1,7 +1,7 @@
 """Get station updates from IEM Webservice."""
 # stdlib
-import sys
 import os
+import sys
 
 # Third Party
 import requests

@@ -1,12 +1,12 @@
 """Test fake_afos_dump."""
 # 3rd Party
 import pytest
-from pyiem.util import utc
 
 # Local
 import pywwa
-from pywwa.workflows import fake_afos_dump
+from pyiem.util import utc
 from pywwa.testing import get_example_file
+from pywwa.workflows import fake_afos_dump
 
 
 @pytest.mark.parametrize("database", ["afos"])
