@@ -8,7 +8,7 @@ import pickle
 import pytz
 from pyiem import reference
 from pyiem.nws.products.lsr import parser as lsrparser
-from pyiem.util import LOG
+from pyiem.util import LOG, utc
 from twisted.internet import reactor
 
 # Local
@@ -51,7 +51,8 @@ def cleandb():
 
 def pickledb():
     """Dump our database to a flat file"""
-    pickle.dump(LSRDB, open("lsrdb.p", "wb"))
+    with open("lsrdb.p", "wb") as fh:
+        pickle.dump(LSRDB, fh)
 
 
 def real_processor(txn, text):
@@ -60,14 +61,14 @@ def real_processor(txn, text):
 
     for lsr in prod.lsrs:
         if lsr.typetext.upper() not in reference.lsr_events:
-            errmsg = "Unknown LSR typecode '%s'" % (lsr.typetext,)
+            errmsg = f"Unknown LSR typecode '{lsr.typetext}'"
             common.email_error(errmsg, text)
         uniquekey = hash(lsr.text)
         if uniquekey in LSRDB:
             prod.duplicates += 1
+            # akrherz/pyWWA#150, This will modify database write below
             lsr.duplicate = True
-            continue
-        LSRDB[uniquekey] = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
+        LSRDB[uniquekey] = utc()
         if common.dbwrite_enabled():
             lsr.sql(txn)
 
