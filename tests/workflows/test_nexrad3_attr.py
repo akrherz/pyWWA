@@ -1,7 +1,7 @@
 """Test nexrad3_attr."""
 # 3rd Party
 import pytest
-from pywwa.testing import get_example_file
+from pywwa.testing import get_example_filepath
 
 # Local
 from pywwa.workflows import nexrad3_attr
@@ -16,9 +16,8 @@ def test_load_station_table(cursor):
 @pytest.mark.parametrize("database", ["radar"])
 def test_process(cursor):
     """Test the processing of a level III file."""
-    ctx = nexrad3_attr.process(
-        get_example_file("NCR_20121127_1413", justfp=True)
-    )
+    with open(get_example_filepath("NCR_20121127_1413"), 'rb') as fh:
+        ctx = nexrad3_attr.process(fh)
     assert ctx["nexrad"] == "JAX"
     processed = nexrad3_attr.really_process(cursor, ctx)
     assert processed == 3
@@ -27,9 +26,8 @@ def test_process(cursor):
 @pytest.mark.parametrize("database", ["radar"])
 def test_210910_badvil(cursor):
     """Test that a missing VIL does not cause issues."""
-    ctx = nexrad3_attr.process(
-        get_example_file("NCR_20210911_0023", justfp=True)
-    )
+    with open(get_example_filepath("NCR_20210911_0023"), 'rb') as fh:
+        ctx = nexrad3_attr.process(fh)
     assert ctx["nexrad"] == "LAS"
     processed = nexrad3_attr.really_process(cursor, ctx)
     assert processed == 2
