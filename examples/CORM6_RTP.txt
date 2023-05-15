@@ -1,0 +1,9 @@
+ASUS64 KMEG 121534
+RTPMEG
+Max/Min Temperature and Precipitation Table for the MidSouth
+National Weather Service Memphis TN
+1034 AM CDT Fri May 12 2023
+
+.BR MEG 0512 C DH07/TAIRZX/TAIRZN/TAIRZZ/PPDRZZ
+CORM6 : Corinth City       :  84 /  65 /  66 /  1.13
+.END
