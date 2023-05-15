@@ -416,11 +416,14 @@ def process_site_time(accesstxn, prod, sid, ts, elements: List[SHEFElement]):
     # TODO Special rstage logic in case PEDTS is defined
     # pedts = metadata[network]["pedts"]
     report = None
+    afos = prod.afos
     for se in elements:
         if se.type != "R":
             continue
         if se.narrative:
             report = se.narrative
+        if report is None and afos is not None and not afos.startswith("RTP"):
+            report = se.raw
         varname = se.varname()
         iemvar = MAPPING[varname]
         if iemvar == "":  # or (iemvar == "rstage" and pedts is not None):
