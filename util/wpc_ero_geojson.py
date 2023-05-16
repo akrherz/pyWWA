@@ -68,7 +68,7 @@ def compute_cycle(day, valid):
 
 def fetch_ero(day) -> gpd.GeoDataFrame:
     """Get the ERO from the WPC website."""
-    gdf = gpd.read_file(f"{BASEURI}EROday{day}.geojson")
+    gdf = gpd.read_file(f"{BASEURI}Day{day}_Latest.geojson")
     # Uppercase all the column names
     gdf.columns = [x.upper() if x != "geometry" else x for x in gdf.columns]
     cols = ["ISSUE_TIME", "START_TIME", "END_TIME"]
@@ -258,8 +258,7 @@ def main():
         get_dbconnstr("postgis"),
         index_col="day",
     )
-    # Loop over Days 1-3, eventually 4 and 5
-    for day in range(1, 4):
+    for day in range(1, 6):
         last_issue = utc(1980)  # default ancient
         if day in current.index:
             # Naive, convert to aware
