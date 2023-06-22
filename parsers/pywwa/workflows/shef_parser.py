@@ -33,6 +33,9 @@ MESOSITEDB = get_database("mesosite", cp_max=1)
 # a form for IDs we will log as unknown
 NWSLIRE = re.compile("^[A-Z]{4}[0-9]$")
 
+# AFOS IDs for which we do not save the raw report for
+SKIP4REPORT = re.compile("^(HYD|RTP)")
+
 # stations we don't know about
 UNKNOWN = {}
 # station metadata
@@ -422,7 +425,11 @@ def process_site_time(accesstxn, prod, sid, ts, elements: List[SHEFElement]):
             continue
         if se.narrative:
             report = se.narrative
-        if report is None and afos is not None and not afos.startswith("RTP"):
+        if (
+            report is None
+            and afos is not None
+            and SKIP4REPORT.match(afos[:3]) is None
+        ):
             report = se.raw
         varname = se.varname()
         iemvar = MAPPING[varname]
