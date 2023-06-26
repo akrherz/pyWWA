@@ -36,11 +36,20 @@ def process_queue():
         QUEUE[wnum]["loops"] += 1
         # 15 seconds, we await 4 minutes
         if QUEUE[wnum]["loops"] > 16:
-            do_jabber(entry)
+            if entry["SAW"] is not None:
+                do_jabber(entry)
+            else:
+                common.email_error(f"SAW Missing for {wnum}", repr(entry))
             QUEUE.pop(wnum)
             continue
         if None in [entry["SAW"], entry["SEL"], entry["WWP"]]:
-            LOG.warning("Watch %s is not complete, waiting", wnum)
+            LOG.warning(
+                "Watch %s[SAW:%s,SEL:%s,WWP:%s] is not complete, waiting",
+                wnum,
+                "miss" if entry["SAW"] is None else "X",
+                "miss" if entry["SEL"] is None else "X",
+                "miss" if entry["WWP"] is None else "X",
+            )
             continue
         do_jabber(entry)
         QUEUE.pop(wnum)
