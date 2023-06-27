@@ -127,7 +127,7 @@ def process(ncfn):
         f"channel{channel:02.0f}/{bird}_C{channel:02.0f}.png "
         f"{valid:%Y%m%d%H%M%S} png"
     )
-    subprocess.call(f"pqinsert -i -p '{pqstr}' {tmpfd.name}", shell=True)
+    subprocess.call(["pqinsert", "-i", "-p", pqstr, tmpfd.name])
     os.unlink(tmpfd.name)
     tmpfd = tempfile.NamedTemporaryFile(mode="w", delete=False)
     args = [dx, 0, 0, dy, x0, y0]
@@ -191,12 +191,19 @@ def main(argv):
             try:
                 # LOG.debug("Processing %s", ncfn)
                 process(ncfn)
+            except Exception as exp:
+                # Full disk will cause grief
+                try:
+                    with open(f"{ncfn}.error", "w", encoding="utf8") as fp:
+                        fp.write(str(exp) + "\n")
+                        traceback.print_exc(file=fp)
+                except Exception as exp2:
+                    LOG.exception(exp2)
+            try:
                 if os.path.isfile(ncfn):
                     os.unlink(ncfn)
             except Exception as exp:
-                with open(f"{ncfn}.error", "w", encoding="utf8") as fp:
-                    fp.write(str(exp) + "\n")
-                    traceback.print_exc(file=fp)
+                LOG.exception(exp)
     finally:
         inotif.remove_watch(DIRPATH)
 
