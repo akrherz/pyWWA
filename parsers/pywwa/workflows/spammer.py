@@ -61,9 +61,7 @@ def damage_survey_pns(prod):
             f"{table}"
             "</pre></p>"
         )
-    html = (
-        f"{maxtext}<hr><p><pre>{plain}</pre></p>"
-    )
+    html = f"{maxtext}<hr><p><pre>{plain}</pre></p>"
     return (
         subject,
         MIMEText(plain, "plain", "utf-8"),
@@ -82,7 +80,8 @@ def real_process(data) -> product.TextProduct:
     msg = MIMEMultipart("alternative")
     msgtext = MIMEText(prod.unixtext[2:], "plain", "utf-8")
     msghtml = MIMEText(
-        f"<p><pre>{prod.unixtext[2:]}</pre></p>", "html", "utf-8")
+        f"<p><pre>{prod.unixtext[2:]}</pre></p>", "html", "utf-8"
+    )
     # some products have no AWIPS ID, sigh
     subject = prod.wmo
     msg["To"] = "akrherz@iastate.edu"

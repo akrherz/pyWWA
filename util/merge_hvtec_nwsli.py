@@ -67,9 +67,9 @@ def main(argv) -> int:
             bad += 1
             continue
         (nwsli, river_name, proximity, name, state, lat, lon) = tokens
-        if '\\N' in [lat, lon]:
+        if "\\N" in [lat, lon]:
             LOG.info(
-                ' + Linenum %s [%s] had a null lat/lon\n%s',
+                " + Linenum %s [%s] had a null lat/lon\n%s",
                 linenum + 1,
                 nwsli,
                 line,

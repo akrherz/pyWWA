@@ -284,8 +284,7 @@ def get_data(afos):
     with open(fn, "rb") as fh:
         data = fh.read()
     return (
-        data
-        .decode("ascii")
+        data.decode("ascii")
         .replace("\r", "")
         .replace("\001\n", "")
         .replace("\003", "")

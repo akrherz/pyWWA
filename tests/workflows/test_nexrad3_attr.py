@@ -16,7 +16,7 @@ def test_load_station_table(cursor):
 @pytest.mark.parametrize("database", ["radar"])
 def test_process(cursor):
     """Test the processing of a level III file."""
-    with open(get_example_filepath("NCR_20121127_1413"), 'rb') as fh:
+    with open(get_example_filepath("NCR_20121127_1413"), "rb") as fh:
         ctx = nexrad3_attr.process(fh)
     assert ctx["nexrad"] == "JAX"
     processed = nexrad3_attr.really_process(cursor, ctx)
@@ -26,7 +26,7 @@ def test_process(cursor):
 @pytest.mark.parametrize("database", ["radar"])
 def test_210910_badvil(cursor):
     """Test that a missing VIL does not cause issues."""
-    with open(get_example_filepath("NCR_20210911_0023"), 'rb') as fh:
+    with open(get_example_filepath("NCR_20210911_0023"), "rb") as fh:
         ctx = nexrad3_attr.process(fh)
     assert ctx["nexrad"] == "LAS"
     processed = nexrad3_attr.really_process(cursor, ctx)
