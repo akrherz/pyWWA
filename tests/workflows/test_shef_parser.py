@@ -23,7 +23,8 @@ def sync_workflow(prod, cursor):
         for tstamp in times:
             print(tstamp)
             shef_parser.process_site_time(
-                cursor, prod, sid, tstamp, data[tstamp])
+                cursor, prod, sid, tstamp, data[tstamp]
+            )
 
 
 @pytest.mark.parametrize("database", ["iem"])
@@ -35,13 +36,15 @@ def test_omit_report(cursor):
         "('CORM6', 'MS_DCP', 'America/Chicago', -99)"
     )
 
-    shef_parser.LOCS["CORM6"] = {"MS_COOP": {
-        "valid": shef_parser.U1980,
-        "iemid": -99,
-        "tzname": "America/Chicago",
-        "epoc": 1,
-        "pedts": 1,
-    }}
+    shef_parser.LOCS["CORM6"] = {
+        "MS_COOP": {
+            "valid": shef_parser.U1980,
+            "iemid": -99,
+            "tzname": "America/Chicago",
+            "epoc": 1,
+            "pedts": 1,
+        }
+    }
     prod = shef_parser.process_data(get_example_file("CORM6.txt"))
     sync_workflow(prod, cursor)
     cursor.execute(
