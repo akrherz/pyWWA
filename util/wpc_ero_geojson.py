@@ -9,6 +9,7 @@ import json
 import os
 import subprocess
 import tempfile
+from copy import deepcopy
 from datetime import timezone
 
 import geopandas as gpd
@@ -25,6 +26,7 @@ JABBER = {
     "connection": None,
     "to": None,
 }
+THRESHOLDS = ["MRGL", "SLGT", "MOD", "HIGH"]
 
 
 def get_jabberconn():
@@ -84,6 +86,7 @@ def fetch_ero(day) -> gpd.GeoDataFrame:
     # Some value add properties that are useful for downstream processing
     gdf["day"] = day
     gdf["threshold"] = ""
+    gdf["level"] = -1
     # Save metdata for first row
     meta = gdf.iloc[0][cols].copy()
     gdf = gdf[gdf["OUTLOOK"] != "None Expected"]
@@ -162,24 +165,52 @@ def save_df(cursor, gdf, meta, day, cycle):
         ),
     )
     oid = cursor.fetchone()[0]
+    # Compute thresholds and levels
     for idx, row in gdf.iterrows():
         threshold = get_threshold(row["OUTLOOK"])
+        if threshold is None:
+            continue
+        gdf.at[idx, "level"] = THRESHOLDS.index(threshold)
         gdf.at[idx, "threshold"] = threshold
+
+    for level, threshold in enumerate(THRESHOLDS):
+        larger = gdf[gdf["level"] == level]
+        if larger.empty:
+            LOG.info("No rows found for %s[%s]", level, THRESHOLDS[level])
+            continue
+        row = larger.iloc[0]
+        smaller = gdf[gdf["level"] == (level + 1)]
+        poly = deepcopy(row["geometry"])
+        if not smaller.empty:
+            smaller = smaller.iloc[0]["geometry"]
+            poly = row["geometry"].union(smaller.buffer(0.01))
+            LOG.info(
+                "Differenced areas poly: %.4f larger: %.4f smaller: %.4f",
+                poly.area,
+                row["geometry"].area,
+                smaller.area,
+            )
+
         LOG.info(
-            "Adding %s[%s] %s size: %.4f",
+            "Adding %s[%s] %s lrysize: %.4f size: %.4f",
             day,
             cycle,
             threshold,
             row["geometry"].area,
+            poly.area,
         )
         cursor.execute(
-            "INSERT into spc_outlook_geometries (spc_outlook_id, threshold, "
-            "category, geom) VALUES (%s, %s, 'CATEGORICAL', "
-            "ST_SetSrid(ST_Multi(ST_GeomFromEWKT(%s)), 4326))",
+            """
+            INSERT into spc_outlook_geometries (spc_outlook_id, threshold,
+            category, geom, geom_layers) VALUES (%s, %s, 'CATEGORICAL',
+            ST_SetSrid(ST_Multi(ST_GeomFromEWKT(%s)), 4326),
+            ST_SetSrid(ST_Multi(ST_GeomFromEWKT(%s)), 4326))
+            """,
             (
                 oid,
                 threshold,
                 row["geometry"].wkt,
+                poly.wkt,
             ),
         )
 
