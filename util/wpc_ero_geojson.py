@@ -26,7 +26,7 @@ JABBER = {
     "connection": None,
     "to": None,
 }
-THRESHOLDS = ["MRGL", "SLGT", "MOD", "HIGH"]
+THRESHOLDS = ["MRGL", "SLGT", "MDT", "HIGH"]
 
 
 def get_jabberconn():
