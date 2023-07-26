@@ -39,7 +39,7 @@ def main(argv):
         cursor.execute(
             """
             UPDATE stations SET name = %s, state = %s, elevation = %s,
-            geom = 'SRID=4326;POINT(%s %s)', county = %s, wfo = %s
+            geom = 'SRID=4326;POINT(%s %s)', county = %s, wfo = %s, tzname = %s
             WHERE id = %s and network = %s
             """,
             (
@@ -50,6 +50,7 @@ def main(argv):
                 lat,
                 site["county"],
                 site["wfo"],
+                site["tzname"],
                 site["sid"],
                 network,
             ),
