@@ -21,7 +21,7 @@ def load_stations(txn):
     txn.execute("SELECT id, tzname from stations where network ~* 'ASOS'")
     for row in txn:
         # we need four char station IDs
-        station = row[0] if len(row[0]) == 4 else "K" + row[0]
+        station = row[0] if len(row[0]) == 4 else f"K{row[0]}"
         tzname = row[1]
         if tzname not in TIMEZONES:
             try:

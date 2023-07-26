@@ -63,10 +63,14 @@ def load_nwsli(nwsli_dict):
 
 def load_metar_stations(txn, nwsli_provider):
     """load station metadata to build a xref of stations to networks"""
+    # if tzname is null, this is likely some newly added station that needs
+    # more metadata established prior to full usage
     txn.execute(
-        "SELECT id, iemid, network, tzname, wfo, state, name, "
-        "ST_X(geom) as lon, ST_Y(geom) as lat from stations "
-        "where network ~* 'ASOS'"
+        """
+        SELECT id, iemid, network, tzname, wfo, state, name,
+        ST_X(geom) as lon, ST_Y(geom) as lat from stations
+        where network ~* 'ASOS' and tzname is not null
+        """
     )
     news = 0
     # Need the fetchall due to non-async here
