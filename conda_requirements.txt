@@ -25,6 +25,8 @@ pandas
 pillow
 pint
 psycopg2
+# Transient via pyIEM
+pyarrow
 # Models
 pydantic
 # gini reader
