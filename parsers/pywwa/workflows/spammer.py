@@ -85,6 +85,7 @@ def real_process(data) -> product.TextProduct:
     # some products have no AWIPS ID, sigh
     subject = prod.wmo
     msg["To"] = "akrherz@iastate.edu"
+    msg["From"] = common.SETTINGS.get("pywwa_errors_from", "ldm@localhost")
     cc = None
     if prod.afos is not None:
         subject = prod.afos
@@ -99,7 +100,10 @@ def real_process(data) -> product.TextProduct:
             except Exception as exp:
                 LOG.error(exp)
                 common.email_error(exp, prod.unixtext)
-            cc = "aaron.treadway@noaa.gov"
+            del msg["To"]
+            msg["To"] = "nws-damage-survey-pns@googlegroups.com"
+            del msg["From"]
+            msg["From"] = "akrherz@iastate.edu"
         elif prod.afos[:3] == "RER":
             subject = f"[RER] {prod.source} {prod.afos[3:]}"
             if prod.source in IOWA_WFOS:
@@ -111,7 +115,6 @@ def real_process(data) -> product.TextProduct:
         msg["Cc"] = cc
         addrs.append(cc)
     msg["subject"] = subject
-    msg["From"] = common.SETTINGS.get("pywwa_errors_from", "ldm@localhost")
     msg.attach(msgtext)
     msg.attach(msghtml)
     df = smtp.sendmail(
