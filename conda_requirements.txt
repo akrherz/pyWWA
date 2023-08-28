@@ -1,4 +1,6 @@
 affine
+# temp to test CI issue?
+aws-c-cal<0.6.2
 cartopy>=0.18
 cython
 descartes
