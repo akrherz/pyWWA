@@ -1,6 +1,4 @@
 affine
-# temp to test CI issue?
-aws-c-cal<0.6.2
 cartopy>=0.18
 cython
 descartes
@@ -49,3 +47,5 @@ treq
 twisted
 # prevent xarray 0.12.2 bug
 xarray
+# test CI transient failure
+zstd<1.5.5
