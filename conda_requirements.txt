@@ -12,6 +12,8 @@ geopandas
 google-api-python-client
 # templating
 jinja2
+# Temp pindown until cf issues fixed
+libnetcdf<4.9.2
 matplotlib>=3.3.0
 metpy
 metar>=1.7.0
