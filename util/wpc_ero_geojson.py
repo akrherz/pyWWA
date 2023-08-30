@@ -70,7 +70,7 @@ def compute_cycle(day, valid):
 
 def fetch_ero(day) -> gpd.GeoDataFrame:
     """Get the ERO from the WPC website."""
-    gdf = gpd.read_file(f"{BASEURI}Day{day}_Latest.geojson")
+    gdf = gpd.read_file(f"{BASEURI}Day{day}_Latest.geojson", engine="pyogrio")
     # Uppercase all the column names
     gdf.columns = [x.upper() if x != "geometry" else x for x in gdf.columns]
     cols = ["ISSUE_TIME", "START_TIME", "END_TIME"]
