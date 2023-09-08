@@ -2,7 +2,7 @@
 
 # 3rd Party
 import psycopg2
-from psycopg2.extras import DictCursor
+from psycopg2.extras import RealDictCursor
 from pyiem.nws import nwsli
 from pyiem.util import LOG
 from twisted.enterprise import adbapi
@@ -30,7 +30,7 @@ def get_database(dbname, cp_max=1, module_name="psycopg2"):
         user=opts.get("user", "ldm"),
         port=opts.get("port", 5432),
         gssencmode="disable",  # NOTE: this is problematic with older postgres
-        cursor_factory=DictCursor,
+        cursor_factory=RealDictCursor,
     )
 
 
@@ -49,14 +49,14 @@ def get_sync_dbconn(dbname):
 def load_nwsli(nwsli_dict):
     """Synchronous load of metadata tables."""
     with get_sync_dbconn("postgis") as pgconn:
-        cursor = pgconn.cursor()
+        cursor = pgconn.cursor(cursor_factory=RealDictCursor)
         cursor.execute(
             "SELECT nwsli, river_name || ' ' || proximity || ' ' || "
             "name || ' ['||state||']' as rname from hvtec_nwsli"
         )
         for row in cursor:
-            nm = row[1].replace("&", " and ")
-            nwsli_dict[row[0]] = nwsli.NWSLI(row[0], name=nm)
+            nm = row["rname"].replace("&", " and ")
+            nwsli_dict[row["nwsli"]] = nwsli.NWSLI(row["nwsli"], name=nm)
 
         LOG.info("nwsli_dict loaded %s entries", len(nwsli_dict))
 
