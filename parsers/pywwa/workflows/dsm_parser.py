@@ -2,6 +2,7 @@
 
 # 3rd Party
 import pytz
+from psycopg2.extras import RealDictCursor
 from pyiem.nws.products.dsm import parser
 from pyiem.util import LOG, get_dbconn
 from twisted.internet import reactor
@@ -21,8 +22,8 @@ def load_stations(txn):
     txn.execute("SELECT id, tzname from stations where network ~* 'ASOS'")
     for row in txn:
         # we need four char station IDs
-        station = row[0] if len(row[0]) == 4 else f"K{row[0]}"
-        tzname = row[1]
+        station = row["id"] if len(row["id"]) == 4 else f"K{row['id']}"
+        tzname = row["tzname"]
         if tzname not in TIMEZONES:
             try:
                 TIMEZONES[tzname] = pytz.timezone(tzname)
@@ -47,7 +48,7 @@ def main():
     common.main(with_jabber=False)
     # sync
     pgconn = get_dbconn("mesosite")
-    cursor = pgconn.cursor()
+    cursor = pgconn.cursor(cursor_factory=RealDictCursor)
     load_stations(cursor)
     pgconn.close()
     bridge(real_parser, dbpool=get_database("iem"))

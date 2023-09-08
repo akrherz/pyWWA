@@ -294,7 +294,7 @@ def get_data(afos):
 def load_dicts():
     """Load up the directionaries"""
     pgconn = get_dbconn("postgis")
-    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     sql = """
         SELECT name, ugc, wfo from ugcs WHERE
         name IS NOT Null and end_ts is null

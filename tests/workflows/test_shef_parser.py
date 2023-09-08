@@ -52,9 +52,9 @@ def test_omit_report(cursor):
         "where iemid = -99 and day = '2023-05-12'"
     )
     row = cursor.fetchone()
-    assert row[1] == 83
-    assert row[0] is not None
-    ans = row[0]
+    assert row["max_tmpf"] == 83
+    assert row["report"] is not None
+    ans = row["report"]
     prod = shef_parser.process_data(get_example_file("CORM6_RTP.txt"))
     sync_workflow(prod, cursor)
     cursor.execute(
@@ -62,8 +62,8 @@ def test_omit_report(cursor):
         "where iemid = -99 and day = '2023-05-12'"
     )
     row = cursor.fetchone()
-    assert row[1] == 84
-    assert row[0] == ans
+    assert row["max_tmpf"] == 84
+    assert row["report"] == ans
 
 
 def test_process_site_eb():
