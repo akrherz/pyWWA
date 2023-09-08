@@ -19,17 +19,25 @@ GMET = {
     "LWHE00": "GMTTRB",
     "LWIE00": "GMTICE",
 }
+# https://www.nhc.noaa.gov/archive/recon/readme.txt
 NHC = {
+    "URPA15": "AHOPA1",
     "URPN15": "AHOPN1",
     "URNT15": "AHONT1",
     "URNT10": "REPNT0",
     "URNT11": "REPNT1",
     "URNT12": "REPNT2",
     "URNT13": "REPNT3",
+    "URNT14": "REPNTS",
+    "URPA10": "REPPA0",
+    "URPA11": "REPPA1",
+    "URPA12": "REPPA2",
+    "URPA13": "REPPA3",
     "URPN10": "REPPN0",
     "URPN11": "REPPN1",
     "URPN12": "REPPN2",
     "URPN13": "REPPN3",
+    "URPN14": "REPPNS",
 }
 
 
