@@ -19,6 +19,18 @@ GMET = {
     "LWHE00": "GMTTRB",
     "LWIE00": "GMTICE",
 }
+NHC = {
+    "URPN15": "AHOPN1",
+    "URNT15": "AHONT1",
+    "URNT10": "REPNT0",
+    "URNT11": "REPNT1",
+    "URNT12": "REPNT2",
+    "URNT13": "REPNT3",
+    "URPN10": "REPPN0",
+    "URPN11": "REPPN1",
+    "URPN12": "REPPN2",
+    "URPN13": "REPPN3",
+}
 
 
 def compute_afos(textprod):
@@ -43,8 +55,8 @@ def compute_afos(textprod):
         "UW",
     ]:
         afos = f"FRHT{ttaaii[4:]}"
-    elif ttaaii == "URNT12" and textprod.source in ["KNHC", "KWBC"]:
-        afos = "REPNT2"
+    elif textprod.source in ["KNHC", "KWBC"] and ttaaii in NHC:
+        afos = NHC[ttaaii]
     else:
         raise Exception(f"Unknown TTAAII {ttaaii} conversion")
 
