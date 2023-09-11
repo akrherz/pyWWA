@@ -2,9 +2,8 @@
 
 # 3rd Party
 import pytz
-from psycopg2.extras import RealDictCursor
 from pyiem.nws.products.dsm import parser
-from pyiem.util import LOG, get_dbconn
+from pyiem.util import LOG, get_dbconnc
 from twisted.internet import reactor
 
 # Local
@@ -47,8 +46,7 @@ def main():
     """build things up."""
     common.main(with_jabber=False)
     # sync
-    pgconn = get_dbconn("mesosite")
-    cursor = pgconn.cursor(cursor_factory=RealDictCursor)
+    pgconn, cursor = get_dbconnc("mesosite")
     load_stations(cursor)
     pgconn.close()
     bridge(real_parser, dbpool=get_database("iem"))

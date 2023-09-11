@@ -6,13 +6,12 @@ import sys
 from pyiem.nws import product
 
 # 3rd Party
-from pyiem.util import get_dbconn
+from pyiem.util import get_dbconnc
 
 
 def main():
     """Go!"""
-    pgconn = get_dbconn("afos")
-    acursor = pgconn.cursor()
+    pgconn, acursor = get_dbconnc("afos")
 
     raw = sys.stdin.read()
     data = raw.replace("\r\r\n", "z")

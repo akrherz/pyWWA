@@ -4,14 +4,12 @@ import re
 import sys
 
 # 3rd Party
-from pyiem.util import get_dbconn, utc
+from pyiem.util import get_dbconnc, utc
 
 
 def main():
     """Go"""
-    pgconn = get_dbconn("afos")
-
-    acursor = pgconn.cursor()
+    pgconn, acursor = get_dbconnc("afos")
 
     payload = getattr(sys.stdin, "buffer", sys.stdin).read()
     payload = payload.decode("ascii", errors="ignore")
