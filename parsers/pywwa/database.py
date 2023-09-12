@@ -33,7 +33,6 @@ def get_database(dbname, cp_max=1, module_name="psycopg"):
     )
 
 
-
 def load_nwsli(nwsli_dict):
     """Synchronous load of metadata tables."""
     with get_dbconn("postgis") as pgconn:

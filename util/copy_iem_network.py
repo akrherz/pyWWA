@@ -6,7 +6,6 @@ import sys
 import requests
 from pyiem.database import get_dbconnc
 
-
 SERVICE = "https://mesonet.agron.iastate.edu/geojson/network.py"
 
 

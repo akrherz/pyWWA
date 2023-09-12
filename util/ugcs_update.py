@@ -36,7 +36,6 @@ import requests
 from pyiem.util import get_dbconnc, get_dbconnstr, logger, utc
 from shapely.geometry import MultiPolygon
 
-
 # Some strangely encoded WFOs need to be rectified
 WFO_XREF = {
     "PQW": "GUM",
