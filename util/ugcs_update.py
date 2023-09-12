@@ -33,15 +33,9 @@ import zipfile
 
 import geopandas as gpd
 import requests
-from pyiem.util import get_dbconnstr, logger, utc
+from pyiem.util import get_dbconnc, get_dbconnstr, logger, utc
 from shapely.geometry import MultiPolygon
 
-# Put the pywwa library into sys.path
-sys.path.insert(
-    0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "../parsers")
-)
-# pylint: disable=wrong-import-position
-from pywwa.database import get_sync_dbconn  # noqa: E402
 
 # Some strangely encoded WFOs need to be rectified
 WFO_XREF = {
@@ -335,8 +329,7 @@ def main(argv):
         LOG.info("Example:  python ugcs_update.py z_01dec10 2010 12 01")
         sys.exit(0)
 
-    pgconn = get_sync_dbconn("postgis")
-    cursor = pgconn.cursor()
+    pgconn, cursor = get_dbconnc("postgis")
     workflow(argv, cursor)
     cursor.close()
     pgconn.commit()

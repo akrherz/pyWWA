@@ -24,7 +24,7 @@ pandas
 # geoplot usage
 pillow
 pint
-psycopg2
+psycopg
 # Transient via pyIEM
 pyarrow
 # Models

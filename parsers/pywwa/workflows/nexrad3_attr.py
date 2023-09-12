@@ -109,11 +109,11 @@ def really_process(txn, ctx):
         d = {}
         co += 1
         d["storm_id"] = tokens[0]
-        d["azimuth"] = float(tokens[1])
+        d["azimuth"] = int(float(tokens[1]))
         if tokens[2] == "***":
             LOG.info("skipping bad line |%s|", line)
             continue
-        d["range"] = float(tokens[2]) * 1.852
+        d["range"] = int(float(tokens[2]) * 1.852)
         d["tvs"] = tokens[3]
         d["meso"] = tokens[4]
         d["posh"] = tokens[5] if tokens[5] != "***" else None
@@ -147,7 +147,7 @@ def really_process(txn, ctx):
 
         for table in [
             "nexrad_attributes",
-            "nexrad_attributes_%s" % (ctx["ts"].year,),
+            f"nexrad_attributes_{ctx['ts']:%Y}",
         ]:
             sql = f"""
                 INSERT into {table} (nexrad, storm_id, geom, azimuth,

@@ -1,23 +1,18 @@
 """For testing purposes, copy IEM network into mesosite."""
 # stdlib
-import os
 import sys
 
 # Third Party
 import requests
+from pyiem.database import get_dbconnc
 
-# Put the pywwa library into sys.path
-sys.path.insert(0, os.path.join(os.path.abspath(__file__), "../parsers"))
-# pylint: disable=wrong-import-position
-from pywwa.database import get_sync_dbconn  # noqa: E402
 
 SERVICE = "https://mesonet.agron.iastate.edu/geojson/network.py"
 
 
 def main(argv):
     """Go Main Go."""
-    pgconn = get_sync_dbconn("mesosite")
-    cursor = pgconn.cursor()
+    pgconn, cursor = get_dbconnc("mesosite")
     network = argv[1]
 
     req = requests.get(f"{SERVICE}?network={network}")

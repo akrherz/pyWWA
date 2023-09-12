@@ -17,17 +17,11 @@ hvtec_nwsli table:
  geom       | geometry               |
 """
 # stdlib
-import os
 import sys
 
 # 3rd Party
 import requests
-from pyiem.util import logger
-
-# Put the pywwa library into sys.path
-sys.path.insert(0, os.path.join(os.path.abspath(__file__), "../parsers"))
-# pylint: disable=wrong-import-position
-from pywwa.database import get_sync_dbconn  # noqa: E402
+from pyiem.util import get_dbconnc, logger
 
 LOG = logger()
 
@@ -38,8 +32,7 @@ def main(argv) -> int:
         print("USAGE: python merge_hvtec_nwsli.py FILENAME")
         return 1
 
-    dbconn = get_sync_dbconn("postgis")
-    cursor = dbconn.cursor()
+    dbconn, cursor = get_dbconnc("postgis")
     LOG.info(" - Connected to database: postgis")
 
     fn = argv[1]

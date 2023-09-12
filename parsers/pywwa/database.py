@@ -1,17 +1,16 @@
 """Database utilities."""
 
 # 3rd Party
-import psycopg2
-from psycopg2.extras import RealDictCursor
+from psycopg.rows import dict_row
 from pyiem.nws import nwsli
-from pyiem.util import LOG
+from pyiem.util import LOG, get_dbconn
 from twisted.enterprise import adbapi
 
 # Local
 from pywwa import CONFIG
 
 
-def get_database(dbname, cp_max=1, module_name="psycopg2"):
+def get_database(dbname, cp_max=1, module_name="psycopg"):
     """Get a twisted database connection
 
     Args:
@@ -23,33 +22,22 @@ def get_database(dbname, cp_max=1, module_name="psycopg2"):
     opts = CONFIG.get(dbname, {})
     return adbapi.ConnectionPool(
         module_name,
-        database=opts.get("database", dbname),
+        dbname=opts.get("database", dbname),
         cp_reconnect=True,
         cp_max=cp_max,
         host=opts.get("host", f"iemdb-{dbname}.local"),
         user=opts.get("user", "ldm"),
         port=opts.get("port", 5432),
         gssencmode="disable",  # NOTE: this is problematic with older postgres
-        cursor_factory=RealDictCursor,
+        row_factory=dict_row,
     )
 
-
-def get_sync_dbconn(dbname):
-    """Get the synchronous database connection."""
-    opts = CONFIG.get(dbname, {})
-    return psycopg2.connect(
-        database=opts.get("database", dbname),
-        host=opts.get("host", f"iemdb-{dbname}.local"),
-        user=opts.get("user", "ldm"),
-        port=opts.get("port", 5432),
-        gssencmode="disable",
-    )
 
 
 def load_nwsli(nwsli_dict):
     """Synchronous load of metadata tables."""
-    with get_sync_dbconn("postgis") as pgconn:
-        cursor = pgconn.cursor(cursor_factory=RealDictCursor)
+    with get_dbconn("postgis") as pgconn:
+        cursor = pgconn.cursor(row_factory=dict_row)
         cursor.execute(
             "SELECT nwsli, river_name || ' ' || proximity || ' ' || "
             "name || ' ['||state||']' as rname from hvtec_nwsli"

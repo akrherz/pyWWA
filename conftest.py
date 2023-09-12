@@ -1,15 +1,12 @@
 """For testing."""
 # 3rd party
 import pytest
-from psycopg2.extras import RealDictCursor
-
-# Local
-from pywwa.database import get_sync_dbconn
+from pyiem.util import get_dbconnc
 
 
 @pytest.fixture(scope="function")
 def cursor(database):
     """Return a disposable database cursor."""
-    pgconn = get_sync_dbconn(database)
-    yield pgconn.cursor(cursor_factory=RealDictCursor)
+    pgconn, cursor = get_dbconnc(database)
+    yield cursor
     pgconn.close()

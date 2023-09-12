@@ -6,7 +6,7 @@ import pytest
 
 # Local
 import pywwa
-from psycopg2.errors import DeadlockDetected
+from psycopg.errors import DeadlockDetected
 from pyiem.util import utc
 from pywwa.testing import get_example_file
 from pywwa.workflows import shef_parser

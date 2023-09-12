@@ -12,7 +12,7 @@ from io import StringIO
 from syslog import LOG_LOCAL2
 
 import pyiem
-from pyiem.util import LOG, utc
+from pyiem.util import LOG, get_dbconn, utc
 from twisted.internet import reactor
 from twisted.logger import formatEvent
 from twisted.mail import smtp
@@ -24,7 +24,6 @@ from twisted.python import log as tplog
 # Local Be careful of circeref here
 import pywwa
 from pywwa.cmdline import parse_cmdline
-from pywwa.database import get_sync_dbconn
 from pywwa.xmpp import make_jabber_client
 
 # http://bugs.python.org/issue7980
@@ -100,7 +99,7 @@ def setup_syslog():
 
 def load_settings():
     """Load database properties."""
-    with get_sync_dbconn("mesosite") as dbconn:
+    with get_dbconn("mesosite") as dbconn:
         cursor = dbconn.cursor()
         cursor.execute("SELECT propname, propvalue from properties")
         for row in cursor:
