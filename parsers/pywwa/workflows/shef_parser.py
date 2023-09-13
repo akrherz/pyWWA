@@ -9,7 +9,7 @@ import pytz
 
 # 3rd Party
 # pylint: disable=no-name-in-module
-from psycopg2.errors import DeadlockDetected
+from psycopg.errors import DeadlockDetected
 from pyiem import reference
 from pyiem.models.shef import SHEFElement
 from pyiem.nws.products.shef import parser
@@ -26,8 +26,8 @@ from pywwa.ldm import bridge
 # Setup Database Links
 # the current_shef table is not very safe when two processes attempt to update
 # it at the same time, use a single process for this connection
-ACCESSDB = get_database("iem", module_name="psycopg2", cp_max=20)
-HADSDB = get_database("hads", module_name="psycopg2", cp_max=20)
+ACCESSDB = get_database("iem", module_name="psycopg", cp_max=20)
+HADSDB = get_database("hads", module_name="psycopg", cp_max=20)
 MESOSITEDB = get_database("mesosite", cp_max=1)
 
 # a form for IDs we will log as unknown

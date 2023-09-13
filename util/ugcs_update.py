@@ -33,15 +33,8 @@ import zipfile
 
 import geopandas as gpd
 import requests
-from pyiem.util import get_dbconnstr, logger, utc
+from pyiem.util import get_dbconnc, get_sqlalchemy_conn, logger, utc
 from shapely.geometry import MultiPolygon
-
-# Put the pywwa library into sys.path
-sys.path.insert(
-    0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "../parsers")
-)
-# pylint: disable=wrong-import-position
-from pywwa.database import get_sync_dbconn  # noqa: E402
 
 # Some strangely encoded WFOs need to be rectified
 WFO_XREF = {
@@ -227,14 +220,14 @@ def workflow(argv, cursor):
     if df["ugc"].isna().all():
         LOG.info("Abort as all ugcs are null")
         sys.exit()
-
-    postgis = gpd.read_postgis(
-        "SELECT * from ugcs where end_ts is null and source = %s",
-        get_dbconnstr("postgis"),
-        params=(source,),
-        geom_col="geom",
-        index_col="ugc",
-    )
+    with get_sqlalchemy_conn("postgis") as pgconn:
+        postgis = gpd.read_postgis(
+            "SELECT * from ugcs where end_ts is null and source = %s",
+            pgconn,
+            params=(source,),
+            geom_col="geom",
+            index_col="ugc",
+        )
     postgis["covered"] = False
     LOG.info(
         "Loaded %s '%s' type rows from the database",
@@ -335,8 +328,7 @@ def main(argv):
         LOG.info("Example:  python ugcs_update.py z_01dec10 2010 12 01")
         sys.exit(0)
 
-    pgconn = get_sync_dbconn("postgis")
-    cursor = pgconn.cursor()
+    pgconn, cursor = get_dbconnc("postgis")
     workflow(argv, cursor)
     cursor.close()
     pgconn.commit()

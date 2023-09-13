@@ -1,7 +1,8 @@
 """Test Database Functionality."""
 
 # Third Party
-from psycopg2.extras import RealDictCursor
+from psycopg.rows import dict_row
+from pyiem.util import get_dbconn
 
 # Local
 from pywwa import database
@@ -14,7 +15,7 @@ def test_database():
 
 def test_load_metar_stations():
     """Test loading of METAR stations."""
-    pgconn = database.get_sync_dbconn("mesosite")
-    cursor = pgconn.cursor(cursor_factory=RealDictCursor)
+    pgconn = get_dbconn("mesosite")
+    cursor = pgconn.cursor(row_factory=dict_row)
     database.load_metar_stations(cursor, {})
     pgconn.close()

@@ -17,17 +17,11 @@ hvtec_nwsli table:
  geom       | geometry               |
 """
 # stdlib
-import os
 import sys
 
 # 3rd Party
 import requests
-from pyiem.util import logger
-
-# Put the pywwa library into sys.path
-sys.path.insert(0, os.path.join(os.path.abspath(__file__), "../parsers"))
-# pylint: disable=wrong-import-position
-from pywwa.database import get_sync_dbconn  # noqa: E402
+from pyiem.util import get_dbconnc, logger
 
 LOG = logger()
 
@@ -38,8 +32,7 @@ def main(argv) -> int:
         print("USAGE: python merge_hvtec_nwsli.py FILENAME")
         return 1
 
-    dbconn = get_sync_dbconn("postgis")
-    cursor = dbconn.cursor()
+    dbconn, cursor = get_dbconnc("postgis")
     LOG.info(" - Connected to database: postgis")
 
     fn = argv[1]
@@ -90,10 +83,10 @@ def main(argv) -> int:
             updated += 1
         else:
             new += 1
+        giswkt = f"SRID=4326;POINT({0 - float(lon)} {float(lat)})"
         sql = """
             INSERT into hvtec_nwsli (nwsli, river_name, proximity, name,
-             state, geom) values (%s, %s, %s, %s, %s,
-             'SRID=4326;POINT(%s %s)')
+             state, geom) values (%s, %s, %s, %s, %s, %s)
              """
         args = (
             nwsli,
@@ -101,8 +94,7 @@ def main(argv) -> int:
             proximity,
             name,
             state,
-            0 - float(lon),
-            float(lat),
+            giswkt,
         )
         cursor.execute(sql, args)
 

@@ -4,14 +4,13 @@ import os
 import re
 import sys
 
-import psycopg2.extras
 from pyiem.nws.nwsli import NWSLI
 from pyiem.nws.products import parser as productparser
 from pyiem.nws.products.cwa import parser as cwaparser
 from pyiem.nws.products.vtec import parser as vtec_parser
 from pyiem.nws.ugc import UGC
 from pyiem.reference import prodDefinitions
-from pyiem.util import get_dbconn, logger
+from pyiem.util import get_dbconnc, logger
 
 PARSERS = {
     "CWA": cwaparser,
@@ -293,8 +292,7 @@ def get_data(afos):
 
 def load_dicts():
     """Load up the directionaries"""
-    pgconn = get_dbconn("postgis")
-    cursor = pgconn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    pgconn, cursor = get_dbconnc("postgis")
     sql = """
         SELECT name, ugc, wfo from ugcs WHERE
         name IS NOT Null and end_ts is null
