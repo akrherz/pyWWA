@@ -83,10 +83,10 @@ def main(argv) -> int:
             updated += 1
         else:
             new += 1
+        giswkt = f"SRID=4326;POINT({0 - float(lon)} {float(lat)})"
         sql = """
             INSERT into hvtec_nwsli (nwsli, river_name, proximity, name,
-             state, geom) values (%s, %s, %s, %s, %s,
-             'SRID=4326;POINT(%s %s)')
+             state, geom) values (%s, %s, %s, %s, %s, %s)
              """
         args = (
             nwsli,
@@ -94,8 +94,7 @@ def main(argv) -> int:
             proximity,
             name,
             state,
-            0 - float(lon),
-            float(lat),
+            giswkt,
         )
         cursor.execute(sql, args)
 

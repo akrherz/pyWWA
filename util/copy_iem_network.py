@@ -30,18 +30,18 @@ def main(argv):
                 "INSERT into stations(id, network) values (%s, %s)",
                 (site["sid"], network),
             )
+        giswkt = f"SRID=4326;POINT({lon} {lat})"
         cursor.execute(
             """
             UPDATE stations SET name = %s, state = %s, elevation = %s,
-            geom = 'SRID=4326;POINT(%s %s)', county = %s, wfo = %s, tzname = %s
+            geom = %s, county = %s, wfo = %s, tzname = %s
             WHERE id = %s and network = %s
             """,
             (
                 site["sname"],
                 site["state"],
                 site["elevation"],
-                lon,
-                lat,
+                giswkt,
                 site["county"],
                 site["wfo"],
                 site["tzname"],
