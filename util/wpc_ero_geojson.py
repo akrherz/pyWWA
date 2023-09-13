@@ -17,7 +17,13 @@ import pandas as pd
 import requests
 import xmpp
 from pyiem.nws.products import ero
-from pyiem.util import get_dbconn, get_dbconnstr, get_properties, logger, utc
+from pyiem.util import (
+    get_dbconn,
+    get_properties,
+    get_sqlalchemy_conn,
+    logger,
+    utc,
+)
 
 LOG = logger()
 # No akami
@@ -280,15 +286,16 @@ def send_jabber(gdf, issue, day):
 def main():
     """Go Main Go."""
     # Load up the most recently processed data.
-    current = pd.read_sql(
-        "SELECT day, "
-        "max(product_issue at time zone 'UTC') as last_product_issue from "
-        "spc_outlook where outlook_type = 'E' "
-        "and product_issue > now() - '7 days'::interval "
-        "GROUP by day ORDER by day ASC",
-        get_dbconnstr("postgis"),
-        index_col="day",
-    )
+    with get_sqlalchemy_conn("postgis") as pgconn:
+        current = pd.read_sql(
+            "SELECT day, "
+            "max(product_issue at time zone 'UTC') as last_product_issue from "
+            "spc_outlook where outlook_type = 'E' "
+            "and product_issue > now() - '7 days'::interval "
+            "GROUP by day ORDER by day ASC",
+            pgconn,
+            index_col="day",
+        )
     for day in range(1, 6):
         last_issue = utc(1980)  # default ancient
         if day in current.index:

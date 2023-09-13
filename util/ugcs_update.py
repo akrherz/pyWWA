@@ -33,7 +33,7 @@ import zipfile
 
 import geopandas as gpd
 import requests
-from pyiem.util import get_dbconnc, get_dbconnstr, logger, utc
+from pyiem.util import get_dbconnc, get_sqlalchemy_conn, logger, utc
 from shapely.geometry import MultiPolygon
 
 # Some strangely encoded WFOs need to be rectified
@@ -220,14 +220,14 @@ def workflow(argv, cursor):
     if df["ugc"].isna().all():
         LOG.info("Abort as all ugcs are null")
         sys.exit()
-
-    postgis = gpd.read_postgis(
-        "SELECT * from ugcs where end_ts is null and source = %s",
-        get_dbconnstr("postgis"),
-        params=(source,),
-        geom_col="geom",
-        index_col="ugc",
-    )
+    with get_sqlalchemy_conn("postgis") as pgconn:
+        postgis = gpd.read_postgis(
+            "SELECT * from ugcs where end_ts is null and source = %s",
+            pgconn,
+            params=(source,),
+            geom_col="geom",
+            index_col="ugc",
+        )
     postgis["covered"] = False
     LOG.info(
         "Loaded %s '%s' type rows from the database",
