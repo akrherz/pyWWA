@@ -2,9 +2,9 @@
 # stdlib
 import math
 from io import BytesIO
+from zoneinfo import ZoneInfo
 
 # 3rd Party
-import pytz
 from metpy.io.nexrad import Level3File
 from pyiem.util import LOG
 from twisted.internet import reactor
@@ -46,7 +46,7 @@ def process(bio):
     del bio
     ctx = {}
     ctx["nexrad"] = l3.siteID
-    ctx["ts"] = l3.metadata["vol_time"].replace(tzinfo=pytz.UTC)
+    ctx["ts"] = l3.metadata["vol_time"].replace(tzinfo=ZoneInfo("UTC"))
     ctx["lines"] = []
     if not hasattr(l3, "graph_pages"):
         LOG.info("%s %s has no graph_pages", ctx["nexrad"], ctx["ts"])

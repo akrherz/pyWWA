@@ -3,9 +3,9 @@
 import datetime
 import os
 import pickle
+from zoneinfo import ZoneInfo
 
 # 3rd Party
-import pytz
 from pyiem import reference
 from pyiem.nws.products.lsr import parser as lsrparser
 from pyiem.util import LOG, utc
@@ -32,7 +32,7 @@ def cleandb():
     """To keep LSRDB from growing too big, we clean it out
     Lets hold 7 days of data!
     """
-    utc = datetime.datetime.utcnow().replace(tzinfo=pytz.utc)
+    utc = datetime.datetime.utcnow().replace(tzinfo=ZoneInfo("UTC"))
     thres = utc - datetime.timedelta(hours=24 * 7)
     init_size = len(LSRDB)
     # loop safety here
