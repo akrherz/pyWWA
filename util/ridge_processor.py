@@ -3,9 +3,9 @@ import datetime
 import json
 import os
 import subprocess
+from zoneinfo import ZoneInfo
 
 import pika
-import pytz
 
 
 def get_rabbitmqconn():
@@ -42,8 +42,8 @@ def generate_image(_ch, _method, properties, body):
     gts = datetime.datetime(1970, 1, 1) + datetime.timedelta(
         seconds=(ticks / 1000)
     )
-    gts = gts.replace(tzinfo=pytz.utc)
-    utcnow = datetime.datetime.utcnow().replace(tzinfo=pytz.UTC)
+    gts = gts.replace(tzinfo=ZoneInfo("UTC"))
+    utcnow = datetime.datetime.utcnow().replace(tzinfo=ZoneInfo("UTC"))
     routes = "ac"
     if (utcnow - gts).seconds > 3600:
         routes = "a"

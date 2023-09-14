@@ -4,8 +4,7 @@ import datetime
 import random
 import re
 from typing import List
-
-import pytz
+from zoneinfo import ZoneInfo
 
 # 3rd Party
 # pylint: disable=no-name-in-module
@@ -40,7 +39,7 @@ SKIP4REPORT = re.compile("^(HYD|RTP)")
 UNKNOWN = {}
 # station metadata
 LOCS = {}
-# database timezones to pytz cache
+# database timezones to cache
 TIMEZONES = {}
 # a queue for saving database IO
 CURRENT_QUEUE = {}
@@ -146,10 +145,10 @@ def load_stations(txn):
             metadata[network]["epoc"] = epoc
         if tzname not in TIMEZONES:
             try:
-                TIMEZONES[tzname] = pytz.timezone(tzname)
+                TIMEZONES[tzname] = ZoneInfo(tzname)
             except Exception:
-                LOG.info("pytz does not like tzname: %s", tzname)
-                TIMEZONES[tzname] = pytz.utc
+                LOG.info("ZoneInfo does not like tzname: %s", tzname)
+                TIMEZONES[tzname] = ZoneInfo("UTC")
 
     # Now we find things that are outdated, note that other code can add
     # placeholders that can get zapped here.
@@ -277,7 +276,7 @@ def get_localtime(sid, ts):
         return ts
     _network = list(LOCS[sid])[0]
     return ts.astimezone(
-        TIMEZONES.get(LOCS[sid][_network]["tzname"], pytz.utc)
+        TIMEZONES.get(LOCS[sid][_network]["tzname"], ZoneInfo("UTC"))
     )
 
 

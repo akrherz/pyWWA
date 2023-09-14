@@ -13,11 +13,11 @@ import sys
 import tempfile
 from io import BytesIO
 from logging.handlers import SysLogHandler
+from zoneinfo import ZoneInfo
 
 import numpy as np
 
 # 3rd Party
-import pytz
 from PIL import Image
 from pyiem.nws import gini
 
@@ -235,7 +235,7 @@ def get_ldm_routes(sat):
     """
     Figure out if this product should be routed to current or archived folders
     """
-    utcnow = datetime.datetime.utcnow().replace(tzinfo=pytz.timezone("UTC"))
+    utcnow = datetime.datetime.utcnow().replace(tzinfo=ZoneInfo("UTC"))
     minutes = (utcnow - sat.metadata["valid"]).seconds / 60.0
     if minutes > 120:
         return "a"

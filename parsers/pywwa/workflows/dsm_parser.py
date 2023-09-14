@@ -1,7 +1,7 @@
 """ ASOS Daily Summary Message Parser ingestor """
+from zoneinfo import ZoneInfo
 
 # 3rd Party
-import pytz
 from pyiem.nws.products.dsm import parser
 from pyiem.util import LOG, get_dbconnc
 from twisted.internet import reactor
@@ -11,7 +11,7 @@ from pywwa import common
 from pywwa.database import get_database
 from pywwa.ldm import bridge
 
-# database timezones to pytz cache
+# database timezones to cache
 TIMEZONES = {}
 STATIONS = {}
 
@@ -25,10 +25,10 @@ def load_stations(txn):
         tzname = row["tzname"]
         if tzname not in TIMEZONES:
             try:
-                TIMEZONES[tzname] = pytz.timezone(tzname)
+                TIMEZONES[tzname] = ZoneInfo(tzname)
             except Exception as exp:
-                LOG.info("pytz does not like tzname: %s %s", tzname, exp)
-                TIMEZONES[tzname] = pytz.UTC
+                LOG.info("ZoneInfo does not like tzname: %s %s", tzname, exp)
+                TIMEZONES[tzname] = ZoneInfo("UTC")
         STATIONS[station] = TIMEZONES[tzname]
 
 
