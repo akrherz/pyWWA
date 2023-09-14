@@ -23,8 +23,6 @@ from pywwa.database import get_database
 from pywwa.ldm import bridge
 
 # Setup Database Links
-# the current_shef table is not very safe when two processes attempt to update
-# it at the same time, use a single process for this connection
 ACCESSDB = get_database("iem", module_name="psycopg", cp_max=20)
 HADSDB = get_database("hads", module_name="psycopg", cp_max=20)
 MESOSITEDB = get_database("mesosite", cp_max=1)
@@ -128,7 +126,12 @@ def load_stations(txn):
     # A sentinel to know if we later need to remove things in the case of a
     # station that got dropped from a network
     epoc = utc().microsecond
-    for stid, iemid, network, tzname, pedts in txn.fetchall():
+    for row in txn.fetchall():
+        stid = row["id"]
+        iemid = row["iemid"]
+        network = row["network"]
+        tzname = row["tzname"]
+        pedts = row["pedts"]
         if stid in UNKNOWN:
             LOG.info("  station: %s is no longer unknown!", stid)
             UNKNOWN.pop(stid)
@@ -155,8 +158,10 @@ def load_stations(txn):
     for stid in list(LOCS):
         for network in list(LOCS[stid]):
             if LOCS[stid][network]["epoc"] != epoc:
+                LOG.info(" sid: %s no longer in network: %s", stid, network)
                 LOCS[stid].pop(network)
         if not LOCS[stid]:
+            LOG.info(" sid: %s removed completely", stid)
             LOCS.pop(stid)
 
     LOG.info("loaded %s stations", len(LOCS))
@@ -335,8 +340,6 @@ def process_site(accesstxn, prod, sid, data):
     times = list(data.keys())
     times.sort()
     for tstamp in times:
-        if sid in UNKNOWN:
-            continue
         process_site_time(accesstxn, prod, sid, tstamp, data[tstamp])
 
 
@@ -392,15 +395,11 @@ def process_site_time(accesstxn, prod, sid, ts, elements: List[SHEFElement]):
         "valid", localts
     ):
         return
-    metadata = LOCS.setdefault(
-        sid,
-        {
-            network: dict(
-                valid=localts, iemid=-1, tzname=None, epoc=-1, pedts=None
-            )
-        },
-    )
-    metadata[network]["valid"] = localts
+    metadata = LOCS.get(sid, {}).get(network)
+    if metadata is None:
+        LOG.info("Unknown station: %s %s", sid, network)
+        return
+    metadata["valid"] = localts
 
     # Okay, time for a hack, if our observation is at midnight!
     if localts.hour == 0 and localts.minute == 0:
@@ -409,9 +408,9 @@ def process_site_time(accesstxn, prod, sid, ts, elements: List[SHEFElement]):
         #                                                  localts))
 
     iemob = Observation(
-        iemid=metadata[network]["iemid"],
+        iemid=metadata["iemid"],
         valid=localts,
-        tzname=metadata[network]["tzname"],
+        tzname=metadata["tzname"],
     )
     iscoop = network.find("COOP") > 0
     hasdata = False
@@ -475,6 +474,7 @@ def process_site_time(accesstxn, prod, sid, ts, elements: List[SHEFElement]):
     iemob.data["report"] = report
     # Only force COOP data into current_log even if we have newer obs
     if not iemob.save(accesstxn, force_current_log=iscoop):
+        LOG.info("Failed to save %s %s", sid, iemob)
         enter_unknown(sid, prod.get_product_id(), network)
 
 
@@ -522,6 +522,9 @@ def process_data(text):
     mydata = restructure_data(prod)
     # Chunk thru each of the sites found and do work.
     for sid, data in mydata.items():
+        # Can't send unknown sites to iemaccess
+        if sid in UNKNOWN or sid not in LOCS:
+            continue
         process_site_frontend(prod, sid, data)
     return prod
 
