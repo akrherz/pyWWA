@@ -35,9 +35,8 @@ def main(argv):
         fn = info.filename
         tmpfn = "%s/%s_%s" % (dirname, ranstr(), fn)
         newfn = "%s/%s" % (dirname, fn)
-        output = open(tmpfn, "wb")
-        output.write(zf.read(fn))
-        output.close()
+        with open(tmpfn, "wb") as fp:
+            fp.write(zf.read(fn))
         work.append([tmpfn, newfn])
 
     for [tmpfn, fn] in work:
@@ -46,9 +45,8 @@ def main(argv):
 
     # Write the file
     data.seek(0)
-    output = open("%s/%s" % (BASE, filename), "wb")
-    output.write(data.read())
-    output.close()
+    with open("%s/%s" % (BASE, filename), "wb") as fp:
+        fp.write(data.read())
 
 
 if __name__ == "__main__":
