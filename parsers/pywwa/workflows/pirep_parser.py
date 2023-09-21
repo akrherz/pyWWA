@@ -9,7 +9,7 @@ from pyiem.util import LOG
 from twisted.internet import reactor
 
 # Local
-from pywwa import common, get_table_file
+from pywwa import common, get_table_filepath
 from pywwa.database import get_database
 from pywwa.ldm import bridge
 
@@ -52,35 +52,41 @@ def load_locs(txn):
             "lat": row["lat"],
         }
 
-    for line in get_table_file("faa_apt.tbl"):
-        if len(line) < 70 or line[0] == "!":
-            continue
-        sid = line[:4].strip()
-        lat = float(line[56:60]) / 100.0
-        lon = float(line[61:67]) / 100.0
-        name = line[16:47].strip()
-        if sid not in LOCS:
-            LOCS[sid] = {"lat": lat, "lon": lon, "name": name}
+    fn = get_table_filepath("faa_apt.tbl")
+    with open(fn, encoding="utf-8") as fh:
+        for line in fh:
+            if len(line) < 70 or line[0] == "!":
+                continue
+            sid = line[:4].strip()
+            lat = float(line[56:60]) / 100.0
+            lon = float(line[61:67]) / 100.0
+            name = line[16:47].strip()
+            if sid not in LOCS:
+                LOCS[sid] = {"lat": lat, "lon": lon, "name": name}
 
-    for line in get_table_file("vors.tbl"):
-        if len(line) < 70 or line[0] == "!":
-            continue
-        sid = line[:3]
-        lat = float(line[56:60]) / 100.0
-        lon = float(line[61:67]) / 100.0
-        name = line[16:47].strip()
-        if sid not in LOCS:
-            LOCS[sid] = {"lat": lat, "lon": lon, "name": name}
+    fn = get_table_filepath("vors.tbl")
+    with open(fn, encoding="utf-8") as fh:
+        for line in fh:
+            if len(line) < 70 or line[0] == "!":
+                continue
+            sid = line[:3]
+            lat = float(line[56:60]) / 100.0
+            lon = float(line[61:67]) / 100.0
+            name = line[16:47].strip()
+            if sid not in LOCS:
+                LOCS[sid] = {"lat": lat, "lon": lon, "name": name}
 
     # Finally, GEMPAK!
-    for line in get_table_file("pirep_navaids.tbl"):
-        if len(line) < 60 or line[0] in ["!", "#"]:
-            continue
-        sid = line[:4].strip()
-        lat = float(line[56:60]) / 100.0
-        lon = float(line[61:67]) / 100.0
-        if sid not in LOCS:
-            LOCS[sid] = {"lat": lat, "lon": lon}
+    fn = get_table_filepath("pirep_navaids.tbl")
+    with open(fn, encoding="utf-8") as fh:
+        for line in fh:
+            if len(line) < 60 or line[0] in ["!", "#"]:
+                continue
+            sid = line[:4].strip()
+            lat = float(line[56:60]) / 100.0
+            lon = float(line[61:67]) / 100.0
+            if sid not in LOCS:
+                LOCS[sid] = {"lat": lat, "lon": lon}
 
     LOG.info("... %s locations loaded", len(LOCS))
 

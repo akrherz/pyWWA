@@ -1,7 +1,20 @@
 """Test pywwa.xmpp"""
 
-# Local
 from pywwa import xmpp
+from twisted.words.xish import xmlstream
+
+
+def test_illegal_xml():
+    """Test that we can remove illegal XML characters."""
+    assert xmpp.ILLEGAL_XML_CHARS_RE.sub("", "\003hello") == "hello"
+
+
+def test_send_message():
+    """Test the sending of messages."""
+    client = xmpp.JabberClient("root@localhost")
+    client.authenticated = True
+    client.xmlstream = xmlstream.XmlStream()
+    client.send_message("hello", "hello", {"channels": ["XX", "YY"], "t": "x"})
 
 
 def test_client():

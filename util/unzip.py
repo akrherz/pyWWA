@@ -26,29 +26,26 @@ def main(argv):
     zf = zipfile.ZipFile(data)
     filename = argv[1]
     # Makedir if it does not exist
-    dirname = "%s/%s" % (BASE, os.path.dirname(filename))
+    dirname = f"{BASE}/{os.path.dirname(filename)}"
     if not os.path.isdir(dirname):
         os.makedirs(dirname)
 
     work = []
     for info in zf.infolist():
         fn = info.filename
-        tmpfn = "%s/%s_%s" % (dirname, ranstr(), fn)
-        newfn = "%s/%s" % (dirname, fn)
-        output = open(tmpfn, "wb")
-        output.write(zf.read(fn))
-        output.close()
+        tmpfn = f"{dirname}/{ranstr()}_{fn}"
+        newfn = f"{dirname}/{fn}"
+        with open(tmpfn, "wb") as fp:
+            fp.write(zf.read(fn))
         work.append([tmpfn, newfn])
 
     for [tmpfn, fn] in work:
-        # print '%s -> %s' % (tmpfn, fn)
         os.rename(tmpfn, fn)
 
     # Write the file
     data.seek(0)
-    output = open("%s/%s" % (BASE, filename), "wb")
-    output.write(data.read())
-    output.close()
+    with open(f"{BASE}/{filename}", "wb") as fp:
+        fp.write(data.read())
 
 
 if __name__ == "__main__":

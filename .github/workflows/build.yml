@@ -2,6 +2,10 @@ name: Install and Test
 on: [push]
 jobs:
   build-linux:
+    defaults:
+      run:
+        # Ensures environment gets sourced right
+        shell: bash -l {0}  
     name: Python (${{ matrix.PYTHON_VERSION }})
     runs-on: ubuntu-latest
     strategy:
@@ -16,18 +20,38 @@ jobs:
       run: |
         cat .github/workflows/etchosts.txt | sudo tee -a /etc/hosts
 
-    - name: Setup CI from ci-tooling
+    # setup conda-forge with micromamba
+    - name: Setup Python 
+      uses: mamba-org/setup-micromamba@v1
+      with:
+        environment-file: environment.yml
+        condarc: |
+          channels:
+            - conda-forge
+            - defaults
+        create-args: >-
+          python=${{ env.PYTHON_VERSION }}
+        environment-name: prod
+        cache-environment: true
+
+    - name: Setup Postgres
       run: |
         git clone --depth 1 https://github.com/akrherz/iem-database.git database
         git clone --depth 1 https://github.com/akrherz/ci_tooling.git .ci_tooling
         . .ci_tooling/postgres.sh
-        . .ci_tooling/memcached.sh
-        . .ci_tooling/miniconda.sh
-        python -m pip install codecov
-        python -m pip install . --upgrade
         cd database; sh bootstrap.sh
         python schema_manager.py
-        cd ..
+
+    - name: Setup Memcached
+      run: |
+        . .ci_tooling/memcached.sh
+
+    - name: Install and Test
+      run: |
+        # pip install from requirements.txt
+        python -m pip install -r pip_requirements.txt
+        python -m pip install codecov
+        python -m pip install . --upgrade
         cp settings.json-template settings.json
         # This is a bit brittle, but loads some data
         python util/ugcs_update.py fz08mr23 2023 3 08
@@ -39,6 +63,13 @@ jobs:
         python util/copy_iem_network.py TWDR
         sh util/run_examples.sh
         coverage run --source=pywwa setup.py test
-        if [[ ${{ matrix.PYTHON_VERSION }} == "3.10" ]]; then
-          codecov
-        fi
+        coverage xml
+
+    - name: Upload coverage to Codecov
+      if: ${{ env.PYTHON_VERSION == '3.11' }}
+      uses: codecov/codecov-action@v3
+      env:
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      with:
+        file: coverage.xml
+        fail_ci_if_error: true

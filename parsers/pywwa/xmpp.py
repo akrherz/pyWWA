@@ -21,9 +21,12 @@ import pywwa
 
 # http://stackoverflow.com/questions/7016602
 webclient._HTTP11ClientFactory.noisy = False
-MYREGEX = "[\x00-\x08\x0b\x0c\x0e-\x1F\uD800-\uDFFF\uFFFE\uFFFF]"
-ILLEGAL_XML_CHARS_RE = re.compile(MYREGEX)
 SETTINGS = pywwa.SETTINGS
+# create a regular expression that matches any illegal XML character
+# http://stackoverflow.com/questions/1707890
+ILLEGAL_XML_CHARS_RE = re.compile(
+    "[\x00-\x08\x0b\x0c\x0e-\x1F\uD800-\uDFFF\uFFFE\uFFFF]", re.UNICODE
+)
 
 
 def make_jabber_client(resource_prefix=None):
@@ -229,8 +232,8 @@ class JabberClient:
                         # All good
                         reactor.callFromThread(self.xmlstream.send, message)
                         return
-                except Exception:
-                    pass
+                except Exception as exp:
+                    LOG.info(exp)
             LOG.info("HTTP request failed %s, stripping twitter_media", res)
             # Nervous
             del xelem["twitter_media"]

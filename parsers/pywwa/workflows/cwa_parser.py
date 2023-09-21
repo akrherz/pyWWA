@@ -5,7 +5,7 @@ from pyiem.util import LOG
 from twisted.internet import reactor
 
 # Local
-from pywwa import common, get_table_file
+from pywwa import common, get_table_filepath
 from pywwa.database import get_database
 from pywwa.ldm import bridge
 
@@ -31,26 +31,32 @@ def load_database(txn):
     for row in txn.fetchall():
         LOCS[row["id"]] = row
 
-    for line in filter(goodline, get_table_file("faa_apt.tbl")):
-        sid = line[:4].strip()
-        lat = float(line[56:60]) / 100.0
-        lon = float(line[61:67]) / 100.0
-        name = line[16:47].strip()
-        if sid not in LOCS:
+    fn = get_table_filepath("faa_apt.tbl")
+    with open(fn, encoding="utf-8") as fh:
+        for line in filter(goodline, fh):
+            sid = line[:4].strip()
+            lat = float(line[56:60]) / 100.0
+            lon = float(line[61:67]) / 100.0
+            name = line[16:47].strip()
+            if sid not in LOCS:
+                LOCS[sid] = {"lat": lat, "lon": lon, "name": name}
+
+    fn = get_table_filepath("vors.tbl")
+    with open(fn, encoding="utf-8") as fh:
+        for line in filter(goodline, fh):
+            sid = line[:3]
+            lat = float(line[56:60]) / 100.0
+            lon = float(line[61:67]) / 100.0
+            name = line[16:47].strip()
             LOCS[sid] = {"lat": lat, "lon": lon, "name": name}
 
-    for line in filter(goodline, get_table_file("vors.tbl")):
-        sid = line[:3]
-        lat = float(line[56:60]) / 100.0
-        lon = float(line[61:67]) / 100.0
-        name = line[16:47].strip()
-        LOCS[sid] = {"lat": lat, "lon": lon, "name": name}
-
-    for line in filter(goodline, get_table_file("pirep_navaids.tbl")):
-        sid = line[:3]
-        lat = float(line[56:60]) / 100.0
-        lon = float(line[61:67]) / 100.0
-        LOCS[sid] = {"lat": lat, "lon": lon}
+    fn = get_table_filepath("pirep_navaids.tbl")
+    with open(fn, encoding="utf-8") as fh:
+        for line in filter(goodline, fh):
+            sid = line[:3]
+            lat = float(line[56:60]) / 100.0
+            lon = float(line[61:67]) / 100.0
+            LOCS[sid] = {"lat": lat, "lon": lon}
 
 
 def process_data(data):

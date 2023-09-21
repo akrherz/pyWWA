@@ -107,8 +107,8 @@ def send_to_ldm(gdf, meta, maxissue, day, cycle):
     for column in gdf.columns:
         try:
             gdf[column] = gdf[column].dt.strftime("%Y-%m-%dT%H:%M:%SZ")
-        except Exception:
-            pass
+        except Exception as exp:
+            LOG.info("Failed to convert %s: %s", column, exp)
 
     with tempfile.NamedTemporaryFile(delete=False) as tmpfn:
         if gdf.empty:
@@ -123,7 +123,7 @@ def send_to_ldm(gdf, meta, maxissue, day, cycle):
         try:
             jdict["iem_properties"][key] = value.strftime("%Y-%m-%dT%H:%M:%SZ")
         except Exception:
-            pass
+            LOG.info("Failed to convert %s: %s", key, value)
 
     # Write back out
     with open(tmpfn.name, "w", encoding="utf-8") as tmpfh:
