@@ -233,8 +233,8 @@ class JabberClient:
                         # All good
                         reactor.callFromThread(self.xmlstream.send, message)
                         return
-                except Exception:
-                    pass
+                except Exception as exp:
+                    LOG.info(exp)
             LOG.info("HTTP request failed %s, stripping twitter_media", res)
             # Nervous
             del xelem["twitter_media"]
