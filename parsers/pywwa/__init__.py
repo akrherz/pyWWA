@@ -14,12 +14,12 @@ CTX = parse_cmdline([])
 JABBER = None
 
 
-def get_table_file(filename):
-    """Return file pointer for a given table file."""
+def get_table_filepath(filename):
+    """Return full path to a given filename resource."""
     testfn = os.path.join(get_basedir(), "tables", filename)
-    if os.path.isfile(testfn):
-        return open(testfn, encoding="utf-8")
-    raise FileNotFoundError(f"could not locate table file {testfn}")
+    if not os.path.isfile(testfn):
+        raise FileNotFoundError(f"could not locate table file {testfn}")
+    return testfn
 
 
 def get_basedir() -> str:
