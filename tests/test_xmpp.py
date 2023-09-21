@@ -6,7 +6,7 @@ from twisted.words.xish import xmlstream
 
 def test_illegal_xml():
     """Test that we can remove illegal XML characters."""
-    assert xmpp.ILLEGAL_XML_CHARS_RE.sub("", u"\003hello") == "hello"
+    assert xmpp.ILLEGAL_XML_CHARS_RE.sub("", "\003hello") == "hello"
 
 
 def test_send_message():
@@ -14,7 +14,7 @@ def test_send_message():
     client = xmpp.JabberClient("root@localhost")
     client.authenticated = True
     client.xmlstream = xmlstream.XmlStream()
-    client.send_message("hello", "hello", {"channels": ['XX', 'YY'], "t": "x"})
+    client.send_message("hello", "hello", {"channels": ["XX", "YY"], "t": "x"})
 
 
 def test_client():
