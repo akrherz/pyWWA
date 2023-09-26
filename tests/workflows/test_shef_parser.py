@@ -27,6 +27,15 @@ def sync_workflow(prod, cursor):
             )
 
 
+@pytest.mark.parametrize("database", ["hads"])
+def test_230926_rr8krf(cursor):
+    """Test a smallint error this found in production."""
+    pywwa.CTX.utcnow = utc(2023, 9, 26, 18)
+    prod = shef_parser.process_data(get_example_file("SHEF/RR8KRF.txt"))
+    for element in prod.data:
+        shef_parser.insert_raw_inbound(cursor, element)
+
+
 @pytest.mark.parametrize("database", ["iem"])
 def test_omit_report(cursor):
     """Test that the report is omitted..."""

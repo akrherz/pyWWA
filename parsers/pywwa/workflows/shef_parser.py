@@ -343,20 +343,16 @@ def process_site(accesstxn, prod, sid, data):
         process_site_time(accesstxn, prod, sid, tstamp, data[tstamp])
 
 
-def update_current_queue(element: SHEFElement, product_id: str):
-    """Update CURRENT_QUEUE with new data."""
-    # We only want observations
-    if element.type != "R":
-        return
-    varname = element.varname()
-    deffer = HADSDB.runOperation(
+def insert_raw_inbound(cursor, element: SHEFElement) -> int:
+    """Do the database insertion."""
+    cursor.execute(
         "INSERT into raw_inbound (station, valid, key, value, depth, "
         "unit_convention, dv_interval, qualifier) "
         "VALUES(%s, %s, %s, %s, %s, %s, %s, %s)",
         (
             element.station,
             element.valid,
-            varname,
+            element.varname(),
             element.num_value,
             element.depth,
             element.unit_convention,
@@ -364,10 +360,19 @@ def update_current_queue(element: SHEFElement, product_id: str):
             element.qualifier,
         ),
     )
-    deffer.addErrback(common.email_error, product_id)
-    deffer.addErrback(LOG.error)
+    return cursor.rowcount
 
-    key = f"{element.station}|{varname}|{element.depth}"
+
+def update_current_queue(element: SHEFElement, product_id: str):
+    """Update CURRENT_QUEUE with new data."""
+    # We only want observations
+    if element.type != "R":
+        return
+    defer = HADSDB.runInteraction(insert_raw_inbound, element)
+    defer.addErrback(common.email_error, f"prod: {product_id} {element}")
+    defer.addErrback(LOG.error)
+
+    key = f"{element.station}|{element.varname()}|{element.depth}"
     cur = CURRENT_QUEUE.setdefault(
         key, dict(valid=element.valid, value=element.num_value, dirty=True)
     )
