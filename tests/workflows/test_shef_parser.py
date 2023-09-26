@@ -27,6 +27,20 @@ def sync_workflow(prod, cursor):
             )
 
 
+def test_empty_product():
+    """Exercise the API."""
+    pywwa.CTX.utcnow = utc(2023, 9, 15, 13)
+    prod = shef_parser.process_data(get_example_file("SHEF/RR7KRF.txt"))
+    assert not prod.data and not prod.warnings
+
+
+@pytest.mark.parametrize("database", ["hads"])
+def test_enter_unknown(cursor):
+    """Insert unknown station."""
+    shef_parser.enter_unknown(cursor, "AMSI4", "XX", "XX")
+    shef_parser.enter_unknown(cursor, "XX_DCP123456", "XX", "XX")
+
+
 @pytest.mark.parametrize("database", ["hads"])
 def test_230926_rr8krf(cursor):
     """Test a smallint error this found in production."""
@@ -75,22 +89,24 @@ def test_omit_report(cursor):
     assert row["report"] == ans
 
 
-def test_process_site_eb():
+@pytest.mark.parametrize("database", ["iem"])
+def test_process_site_eb(cursor):
     """Test that the errorback works without any side effects."""
     prod = shef_parser.process_data(get_example_file("RR7.txt"))
+    sync_workflow(prod, cursor)
     shef_parser.process_site_eb(Failure(Exception("Hi Daryl")), prod, "", {})
     shef_parser.process_site_eb(Failure(DeadlockDetected()), prod, "", {})
 
 
 def test_restructure_data_future():
     """Ensure that data from the future stays out!"""
-    pywwa.CTX.utcnow = utc(2017, 8, 16)
+    pywwa.CTX.utcnow = utc(2017, 8, 14)
     prod = shef_parser.process_data(get_example_file("RR7.txt"))
     res = shef_parser.restructure_data(prod)
-    assert res
+    assert len(res.keys()) == 0
     pywwa.CTX.utcnow = utc()
     res = shef_parser.restructure_data(prod)
-    assert not res
+    assert len(res.keys()) == 0
 
 
 def test_process_data():

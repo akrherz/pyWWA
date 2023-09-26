@@ -179,7 +179,7 @@ def restructure_data(prod):
             LOG.info("sid len>8: [%s] %s", se.station, prod.get_product_id())
             continue
         # We don't want any non-report / forecast data, missing data
-        if se.type != "R" or se.valid is None:
+        if se.type != "R":
             continue
         # We don't care about data in the future!
         if se.valid > (utcnow + datetime.timedelta(hours=1)):
@@ -198,7 +198,7 @@ def restructure_data(prod):
     return mydata
 
 
-def enter_unknown(sid, product_id, network):
+def enter_unknown(cursor, sid, product_id, network):
     """
     Enter some info about a site ID we know nothing of...
     @param sid string site id
@@ -208,7 +208,7 @@ def enter_unknown(sid, product_id, network):
     # Eh, lets not care about non-5 char IDs
     if NWSLIRE.match(sid) is None:
         return
-    HADSDB.runOperation(
+    cursor.execute(
         "INSERT into unknown(nwsli, product, network) values (%s, %s, %s)",
         (sid, product_id, network),
     )
@@ -309,7 +309,7 @@ def get_network(prod, sid, data: List[SHEFElement]):
 
     # If networks is zero length, then we have to try some things
     if not networks:
-        enter_unknown(sid, prod.get_product_id(), "")
+        HADSDB.runInteraction(enter_unknown, sid, prod.get_product_id(), "")
         if len(sid) == 5:
             state = reference.nwsli2state.get(sid[3:])
             country = reference.nwsli2country.get(sid[3:])
@@ -480,7 +480,9 @@ def process_site_time(accesstxn, prod, sid, ts, elements: List[SHEFElement]):
     # Only force COOP data into current_log even if we have newer obs
     if not iemob.save(accesstxn, force_current_log=iscoop):
         LOG.info("Failed to save %s %s", sid, iemob)
-        enter_unknown(sid, prod.get_product_id(), network)
+        HADSDB.runInteraction(
+            enter_unknown, sid, prod.get_product_id(), network
+        )
 
 
 def log_database_queue_size():
