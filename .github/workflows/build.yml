@@ -48,6 +48,7 @@ jobs:
 
     - name: Install and Test
       run: |
+        set -e
         # pip install from requirements.txt
         python -m pip install -r pip_requirements.txt
         python -m pip install codecov
