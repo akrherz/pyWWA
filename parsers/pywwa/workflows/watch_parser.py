@@ -59,7 +59,7 @@ def real_process(txn, raw):
     """Process the product, please"""
     prod = parser(raw, utcnow=common.utcnow())
     LOG.info("Watch %s received", prod.get_product_id())
-    # NOTE: insure parsers are implmenting the same interface
+    # NOTE: ensure parsers are implmenting the same interface
     if prod.is_test():
         LOG.info("TEST watch found %s, skipping", prod.get_product_id())
         return
@@ -78,6 +78,7 @@ def real_process(txn, raw):
         wnum, {"SAW": None, "SEL": None, "WWP": None, "loops": 0}
     )
     res[prod.afos[:3]] = prod
+    return prod
 
 
 def main():
