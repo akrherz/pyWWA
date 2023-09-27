@@ -28,6 +28,9 @@ handler.setFormatter(
     logging.Formatter("gini2gis[" + str(os.getpid()) + "]: %(message)s")
 )
 logger.addHandler(handler)
+WORLDFILE_FORMAT = (
+    "%(dx).3f\n" "0.0\n" "0.0\n" "-%(dy).3f\n" "%(x0).3f\n" "%(y1).3f"
+)
 
 
 def process_input():
@@ -50,15 +53,9 @@ def do_legacy_ir(sat, tmpfn):
     png.save("%s.png" % (tmpfn,))
 
     # World File
-    out = open("%s.wld" % (tmpfn,), "w")
-    fmt = """%(dx).3f
-0.0
-0.0
--%(dy).3f
-%(x0).3f
-%(y1).3f"""
-    out.write(fmt % sat.metadata)
-    out.close()
+
+    with open(f"{tmpfn}.wld", "w") as fh:
+        fh.write(WORLDFILE_FORMAT % sat.metadata)
 
     cmd = (
         "pqinsert -i -p 'gis c %s gis/images/awips%s/%s GIS/sat/awips%s/%s png' "
@@ -102,15 +99,8 @@ def write_gispng(sat, tmpfn):
     png.save("%s.png" % (tmpfn,))
 
     # World File
-    out = open("%s.wld" % (tmpfn,), "w")
-    fmt = """%(dx).3f
-0.0
-0.0
--%(dy).3f
-%(x0).3f
-%(y1).3f"""
-    out.write(fmt % sat.metadata)
-    out.close()
+    with open(f"{tmpfn}.wld", "w") as fh:
+        fh.write(WORLDFILE_FORMAT % sat.metadata)
 
     cmd = (
         "pqinsert -i -p 'gis %s %s gis/images/awips%s/%s GIS/sat/awips%s/%s png' "
@@ -152,9 +142,8 @@ def write_metadata(sat, tmpfn):
     metadata["meta"]["bird"] = sat.get_bird()
     metadata["meta"]["archive_filename"] = sat.archive_filename()
     metafp = "%s.json" % (tmpfn,)
-    out = open(metafp, "w")
-    json.dump(metadata, out)
-    out.close()
+    with open(metafp, "w") as fh:
+        json.dump(metadata, fh)
 
     cmd = (
         "pqinsert -i -p 'gis c %s gis/images/awips%s/%s GIS/sat/%s json' %s.json"
@@ -172,33 +161,28 @@ def write_metadata(sat, tmpfn):
 def write_mapserver_metadata(sat, tmpfn, epsg):
     """Write out and pqinsert a metadata file that mapserver can use to
     provide WMS metadata."""
-    metafn = "%s.txt" % (tmpfn,)
-    out = open(metafn, "w")
-    out.write(
-        """
+    metafn = f"{tmpfn}.txt"
+    with open(metafn, "w") as fh:
+        fh.write(
+            f"""
   METADATA
-    "wms_title" "%s %s %s valid %s UTC"
+    "wms_title" "{sat.get_bird()} {sat.get_sector()} {sat.get_channel()} \
+ valid {sat.metadata['valid']:%Y-%m-%dT%H:%M:%SZ} UTC"
     "wms_srs"   "EPSG:4326 EPSG:26915 EPSG:900913 EPSG:3857"
     "wms_extent" "-126 24 -66 50"
   END
 """
-        % (
-            sat.get_bird(),
-            sat.get_sector(),
-            sat.get_channel(),
-            sat.metadata["valid"].strftime("%Y-%m-%dT%H:%M:%SZ"),
         )
-    )
-    out.close()
-    cmd = (
-        "pqinsert -i -p 'gis c %s gis/images/%s/goes/%s bogus msinc' %s"
-    ) % (
-        sat.metadata["valid"].strftime("%Y%m%d%H%M"),
-        epsg,
-        sat.current_filename().replace("png", "msinc"),
+    cmd = [
+        "pqinsert",
+        "-i",
+        "-p",
+        f"gis c {sat.metadata['valid']:%Y%m%d%H%M} "
+        f"gis/images/{epsg}/goes/"
+        f"{sat.current_filename().replace('png', 'msinc')} bogus msinc",
         metafn,
-    )
-    subprocess.call(cmd, shell=True)
+    ]
+    subprocess.call(cmd)
     os.unlink(metafn)
 
 
@@ -213,9 +197,8 @@ def write_metadata_epsg(sat, tmpfn, epsg):
     metadata["meta"]["bird"] = sat.get_bird()
     metadata["meta"]["archive_filename"] = sat.archive_filename()
     metafp = "%s_%s.json" % (tmpfn, epsg)
-    out = open(metafp, "w")
-    json.dump(metadata, out)
-    out.close()
+    with open(metafp, "w") as fh:
+        json.dump(metadata, fh)
 
     cmd = (
         "pqinsert -i -p 'gis c %s gis/images/%s/goes/%s bogus json' "
@@ -253,11 +236,16 @@ def gdalwarp(sat, tmpfn, epsg):
     subprocess.call(cmd, shell=True)
 
     # Convert file back to PNG for use and archival (smaller file)
-    cmd = (
-        "convert -quiet -define PNG:preserve-colormap " "%s_%s.tif %s_4326.png"
-    ) % (tmpfn, epsg, tmpfn)
+    cmd = [
+        "convert",
+        "-quiet",
+        "-define",
+        "PNG:preserve-colormap",
+        f"{tmpfn}_{epsg}.tif",
+        f"{tmpfn}_4326.png",
+    ]
     proc = subprocess.Popen(
-        cmd, shell=True, stderr=subprocess.PIPE, stdout=subprocess.PIPE
+        cmd, stderr=subprocess.PIPE, stdout=subprocess.PIPE
     )
     output = proc.stderr.read()
     if output != b"":

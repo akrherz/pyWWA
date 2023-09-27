@@ -1,6 +1,7 @@
 """ SPC Watch (SAW, SEL, WWP) Ingestor """
 
 # 3rd Party
+from pyiem.nws.product import TextProduct
 from pyiem.nws.products import parser
 from pyiem.util import LOG
 from twisted.internet import reactor
@@ -55,14 +56,14 @@ def process_queue():
         QUEUE.pop(wnum)
 
 
-def real_process(txn, raw):
+def real_process(txn, raw) -> TextProduct:
     """Process the product, please"""
     prod = parser(raw, utcnow=common.utcnow())
     LOG.info("Watch %s received", prod.get_product_id())
-    # NOTE: insure parsers are implmenting the same interface
+    # NOTE: ensure parsers are implmenting the same interface
     if prod.is_test():
         LOG.info("TEST watch found %s, skipping", prod.get_product_id())
-        return
+        return prod
     if common.dbwrite_enabled():
         prod.sql(txn)
     if prod.warnings:
@@ -78,6 +79,7 @@ def real_process(txn, raw):
         wnum, {"SAW": None, "SEL": None, "WWP": None, "loops": 0}
     )
     res[prod.afos[:3]] = prod
+    return prod
 
 
 def main():

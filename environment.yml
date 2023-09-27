@@ -11,6 +11,7 @@ dependencies:
  - geopandas
  # talk to google
  - google-api-python-client
+ - imagemagick
  # templating
  - jinja2
  - matplotlib>=3.3.0
