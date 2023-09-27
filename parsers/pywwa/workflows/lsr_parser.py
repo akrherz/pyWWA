@@ -23,7 +23,8 @@ LSRDB = {}
 def loaddb():
     """load memory"""
     if os.path.isfile("lsrdb.p"):
-        mydict = pickle.load(open("lsrdb.p", "rb"))
+        with open("lsrdb.p", "rb") as fh:
+            mydict = pickle.load(fh)
         for key in mydict:
             LSRDB[key] = mydict[key]
 
