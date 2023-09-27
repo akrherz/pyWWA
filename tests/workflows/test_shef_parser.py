@@ -1,7 +1,9 @@
 """Test shef_parser."""
+from functools import partial
 
 # 3rd Party
 # pylint: disable=no-member-in-module
+import mock
 import pytest
 
 # Local
@@ -11,6 +13,14 @@ from pyiem.util import utc
 from pywwa.testing import get_example_file
 from pywwa.workflows import shef_parser
 from twisted.python.failure import Failure
+
+
+def run_interaction(cursor, sql, args):
+    """Make runOperation go."""
+    cursor.execute(sql, args)
+    defer = mock.Mock()
+    defer.addErrback = lambda x, y: None
+    return defer
 
 
 def sync_workflow(prod, cursor):
@@ -53,6 +63,7 @@ def test_230926_rr8krf(cursor):
 @pytest.mark.parametrize("database", ["iem"])
 def test_omit_report(cursor):
     """Test that the report is omitted..."""
+    shef_parser.CURRENT_QUEUE.clear()
     pywwa.CTX.utcnow = utc(2023, 5, 12, 18)
     cursor.execute(
         "INSERT into stations(id, network, tzname, iemid) VALUES "
@@ -88,10 +99,14 @@ def test_omit_report(cursor):
     assert row["max_tmpf"] == 84
     assert row["report"] == ans
 
+    shef_parser.ACCESSDB.runOperation = partial(run_interaction, cursor)
+    assert shef_parser.save_current() == 7
+
 
 @pytest.mark.parametrize("database", ["iem"])
 def test_process_site_eb(cursor):
     """Test that the errorback works without any side effects."""
+    pywwa.CTX.utcnow = utc(2017, 8, 15, 14)
     prod = shef_parser.process_data(get_example_file("RR7.txt"))
     sync_workflow(prod, cursor)
     shef_parser.process_site_eb(Failure(Exception("Hi Daryl")), prod, "", {})

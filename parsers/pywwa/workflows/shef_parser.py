@@ -229,7 +229,7 @@ def checkvars(myvars):
     return False
 
 
-def save_current():
+def save_current() -> int:
     """update the database current_shef table
 
     It turns out that our database can't handle this fast enough in realtime,
@@ -273,6 +273,7 @@ def save_current():
         mydict["dirty"] = False
 
     LOG.info("processed %s entries, %s skipped", cnt, skipped)
+    return cnt
 
 
 def get_localtime(sid, ts):
@@ -285,7 +286,7 @@ def get_localtime(sid, ts):
     )
 
 
-def get_network(prod, sid, data: List[SHEFElement]):
+def get_network(prod, sid, data: List[SHEFElement]) -> str:
     """Figure out which network this belongs to"""
     networks = list(LOCS.get(sid, {}).keys())
     # This is the best we can hope for
