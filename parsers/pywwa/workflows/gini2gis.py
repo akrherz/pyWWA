@@ -161,32 +161,28 @@ def write_metadata(sat, tmpfn):
 def write_mapserver_metadata(sat, tmpfn, epsg):
     """Write out and pqinsert a metadata file that mapserver can use to
     provide WMS metadata."""
-    metafn = "%s.txt" % (tmpfn,)
+    metafn = f"{tmpfn}.txt"
     with open(metafn, "w") as fh:
         fh.write(
-            """
+            f"""
   METADATA
-    "wms_title" "%s %s %s valid %s UTC"
+    "wms_title" "{sat.get_bird()} {sat.get_sector()} {sat.get_channel()} \
+ valid {sat.metadata['valid']:%Y-%m-%dT%H:%M:%SZ} UTC"
     "wms_srs"   "EPSG:4326 EPSG:26915 EPSG:900913 EPSG:3857"
     "wms_extent" "-126 24 -66 50"
   END
 """
-            % (
-                sat.get_bird(),
-                sat.get_sector(),
-                sat.get_channel(),
-                sat.metadata["valid"].strftime("%Y-%m-%dT%H:%M:%SZ"),
-            )
         )
-    cmd = (
-        "pqinsert -i -p 'gis c %s gis/images/%s/goes/%s bogus msinc' %s"
-    ) % (
-        sat.metadata["valid"].strftime("%Y%m%d%H%M"),
-        epsg,
-        sat.current_filename().replace("png", "msinc"),
+    cmd = [
+        "pqinsert",
+        "-i",
+        "-p",
+        f"gis c {sat.metadata['valid']:%Y%m%d%H%M} "
+        f"gis/images/{epsg}/goes/"
+        f"{sat.current_filename().replace('png', 'msinc')} bogus msinc",
         metafn,
-    )
-    subprocess.call(cmd, shell=True)
+    ]
+    subprocess.call(cmd)
     os.unlink(metafn)
 
 
