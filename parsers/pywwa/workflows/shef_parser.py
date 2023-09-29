@@ -114,12 +114,14 @@ def load_stations(txn):
       txn: a database transaction
     """
     LOG.info("load_stations called...")
+    # When tzname is null, we likely have an incomplete entry
     txn.execute(
         """
         SELECT id, s.iemid, network, tzname, a.value as pedts from stations s
         LEFT JOIN station_attributes a on (s.iemid = a.iemid and
-        a.attr = 'PEDTS') WHERE network ~* 'COOP'
-        or network ~* 'DCP' or network = 'ISUSM' ORDER by network ASC
+        a.attr = 'PEDTS') WHERE (network ~* 'COOP'
+        or network ~* 'DCP' or network = 'ISUSM') and tzname is not null
+        ORDER by network ASC
         """
     )
 
