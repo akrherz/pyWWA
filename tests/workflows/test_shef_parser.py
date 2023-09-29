@@ -28,13 +28,7 @@ def sync_workflow(prod, cursor):
     mydata = shef_parser.restructure_data(prod)
     print(mydata)
     for sid, data in mydata.items():
-        times = list(data.keys())
-        times.sort()
-        for tstamp in times:
-            print(tstamp)
-            shef_parser.process_site_time(
-                cursor, prod, sid, tstamp, data[tstamp]
-            )
+        shef_parser.process_site(cursor, prod, sid, data)
 
 
 def test_empty_product():
@@ -113,12 +107,22 @@ def test_process_site_eb(cursor):
     shef_parser.process_site_eb(Failure(DeadlockDetected()), prod, "", {})
 
 
+@pytest.mark.parametrize("database", ["iem"])
+def test_checkvars(cursor):
+    """Excerise the checkvars logic with the RR1.txt example"""
+    payload = get_example_file("SHEF/RR1.txt")
+    pywwa.CTX.utcnow = utc(2022, 11, 10, 12)
+    for repl in ["TX", "HG", "SF", "PPH"]:
+        prod = shef_parser.process_data(payload.replace("/TX", f"/{repl}"))
+        sync_workflow(prod, cursor)
+
+
 def test_restructure_data_eightchar_id():
     """Test that we omit a greather than 8 char station ID."""
     pywwa.CTX.utcnow = utc(2017, 8, 15, 13)
     prod = shef_parser.process_data(get_example_file("RR7.txt"))
     res = shef_parser.restructure_data(prod)
-    assert all([len(x) <= 8 for x in res.keys()])
+    assert all(len(x) <= 8 for x in res.keys())
 
 
 def test_restructure_data_future():
