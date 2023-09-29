@@ -177,9 +177,6 @@ def restructure_data(prod):
     old = []
     utcnow = common.utcnow()
     for se in prod.data:
-        if len(se.station) > 8:
-            LOG.info("sid len>8: [%s] %s", se.station, prod.get_product_id())
-            continue
         # We don't want any non-report / forecast data, missing data
         if se.type != "R":
             continue

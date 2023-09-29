@@ -113,6 +113,14 @@ def test_process_site_eb(cursor):
     shef_parser.process_site_eb(Failure(DeadlockDetected()), prod, "", {})
 
 
+def test_restructure_data_eightchar_id():
+    """Test that we omit a greather than 8 char station ID."""
+    pywwa.CTX.utcnow = utc(2017, 8, 15, 13)
+    prod = shef_parser.process_data(get_example_file("RR7.txt"))
+    res = shef_parser.restructure_data(prod)
+    assert all([len(x) <= 8 for x in res.keys()])
+
+
 def test_restructure_data_future():
     """Ensure that data from the future stays out!"""
     pywwa.CTX.utcnow = utc(2017, 8, 14)
