@@ -1,6 +1,8 @@
 """test gini2gis"""
 
+import pywwa
 from pyiem.nws import gini
+from pyiem.util import utc
 from pywwa.testing import get_example_filepath
 from pywwa.workflows import gini2gis
 
@@ -14,5 +16,6 @@ def make_gini():
 
 def test_workflow():
     """Test the workflow."""
+    pywwa.CTX.utcnow = utc(2021, 9, 16, 18)
     gini2gis.process_input = make_gini
     gini2gis.main()
