@@ -38,6 +38,14 @@ def test_empty_product():
     assert not prod.data and not prod.warnings
 
 
+def test_enter_unknown_populates():
+    """Test that processing a SHEF file with an unknown actually populates."""
+    pywwa.CTX.utcnow = utc(2023, 9, 26, 18)
+    payload = get_example_file("SHEF/RR8KRF.txt").replace("PLMW4", "ZZZW4")
+    shef_parser.process_data(payload)
+    assert shef_parser.UNKNOWN["ZZZW4"]
+
+
 @pytest.mark.parametrize("database", ["hads"])
 def test_enter_unknown(cursor):
     """Insert unknown station."""

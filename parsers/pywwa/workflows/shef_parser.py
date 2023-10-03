@@ -530,9 +530,15 @@ def process_data(text):
     # Chunk thru each of the sites found and do work.
     for sid, data in mydata.items():
         # Can't send unknown sites to iemaccess
-        if sid in UNKNOWN or sid not in LOCS:
+        if sid in UNKNOWN:
             continue
-        process_site_frontend(prod, sid, data)
+        if sid in LOCS:
+            process_site_frontend(prod, sid, data)
+        else:
+            UNKNOWN[sid] = True
+            if NWSLIRE.match(sid) is not None:
+                LOG.info("Unknown NWSLIish site: %s %s", sid, product_id)
+                HADSDB.runInteraction(enter_unknown, sid, product_id, "")
     return prod
 
 
