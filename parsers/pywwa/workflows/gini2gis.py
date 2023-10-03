@@ -3,8 +3,6 @@
 I convert raw GINI noaaport imagery into geo-referenced PNG files both in the
 'native' projection and 4326.
 """
-# Stdlib
-import datetime
 import json
 import logging
 import os
@@ -13,13 +11,12 @@ import sys
 import tempfile
 from io import BytesIO
 from logging.handlers import SysLogHandler
-from zoneinfo import ZoneInfo
 
 import numpy as np
-
-# 3rd Party
 from PIL import Image
 from pyiem.nws import gini
+
+from pywwa import common
 
 logger = logging.getLogger("gini2gis")
 logger.setLevel(logging.INFO)
@@ -218,8 +215,7 @@ def get_ldm_routes(sat):
     """
     Figure out if this product should be routed to current or archived folders
     """
-    utcnow = datetime.datetime.utcnow().replace(tzinfo=ZoneInfo("UTC"))
-    minutes = (utcnow - sat.metadata["valid"]).seconds / 60.0
+    minutes = (common.utcnow() - sat.metadata["valid"]).seconds / 60.0
     if minutes > 120:
         return "a"
     return "ac"
