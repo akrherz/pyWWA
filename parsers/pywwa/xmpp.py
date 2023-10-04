@@ -37,12 +37,10 @@ def make_jabber_client(resource_prefix=None):
         return pywwa.JABBER
 
     if resource_prefix is None:
-        # Build based on the calling script's name
+        # Inspect the calling stack to determine the script name that is
+        # calling us, so we can use that as the resource prefix
         frames = inspect.stack()
-        frameinfo = frames[-1]
-        if frameinfo.filename == "xmpp.py":
-            frameinfo = frames[-2]
-        resource_prefix = os.path.basename(frameinfo.filename)[:-3]
+        resource_prefix = os.path.basename(frames[-1].filename).rstrip(".py")
 
     myjid = jid.JID(
         f"{SETTINGS.get('pywwa_jabber_username', 'iembot_ingest')}@"
@@ -73,9 +71,7 @@ def message_processor(stanza):
     """Process a message stanza"""
     body = xpath.queryForString("/message/body", stanza)
     LOG.info("Message from %s Body: %s", stanza["from"], body)
-    if body is None:
-        return
-    if body.lower().strip() == "shutdown":
+    if body is not None and body.lower().strip() == "shutdown":
         LOG.info("I got shutdown message, shutting down...")
         reactor.callWhenRunning(reactor.stop)  # @UndefinedVariable
 
