@@ -42,6 +42,8 @@ TIMEZONES = {}
 # a queue for saving database IO
 CURRENT_QUEUE = {}
 U1980 = utc(1980)
+# Networks that can come via SHEF backdoors
+DOUBLEBACKED_NETWORKS = ["ISUSM", "IA_RWIS"]
 
 
 DIRECTMAP = {
@@ -120,9 +122,10 @@ def load_stations(txn):
         SELECT id, s.iemid, network, tzname, a.value as pedts from stations s
         LEFT JOIN station_attributes a on (s.iemid = a.iemid and
         a.attr = 'PEDTS') WHERE (network ~* 'COOP'
-        or network ~* 'DCP' or network = 'ISUSM') and tzname is not null
-        ORDER by network ASC
-        """
+        or network ~* 'DCP' or network = ANY(%s))
+        and tzname is not null ORDER by network ASC
+        """,
+        (DOUBLEBACKED_NETWORKS,),
     )
 
     # A sentinel to know if we later need to remove things in the case of a
@@ -391,7 +394,7 @@ def update_current_queue(element: SHEFElement, product_id: str):
 def process_site_time(accesstxn, prod, sid, ts, elements: List[SHEFElement]):
     """Ingest for IEMAccess."""
     network = get_network(prod, sid, elements)
-    if network in ["ISUSM", None]:
+    if network is None or network in DOUBLEBACKED_NETWORKS:
         return
 
     localts = get_localtime(sid, ts)
