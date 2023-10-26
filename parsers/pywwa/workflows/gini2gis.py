@@ -55,8 +55,8 @@ def do_legacy_ir(sat, tmpfn):
         fh.write(WORLDFILE_FORMAT % sat.metadata)
 
     cmd = (
-        "pqinsert -i -p 'gis c %s gis/images/awips%s/%s GIS/sat/awips%s/%s png' "
-        "%s.png"
+        "pqinsert -i -p "
+        "'gis c %s gis/images/awips%s/%s GIS/sat/awips%s/%s png' %s.png"
     ) % (
         sat.metadata["valid"].strftime("%Y%m%d%H%M"),
         sat.awips_grid(),
@@ -68,8 +68,8 @@ def do_legacy_ir(sat, tmpfn):
     subprocess.call(cmd, shell=True)
 
     cmd = (
-        "pqinsert -i -p 'gis c %s gis/images/awips%s/%s GIS/sat/awips%s/%s wld' "
-        "%s.wld"
+        "pqinsert -i -p "
+        "'gis c %s gis/images/awips%s/%s GIS/sat/awips%s/%s wld' %s.wld"
     ) % (
         sat.metadata["valid"].strftime("%Y%m%d%H%M"),
         sat.awips_grid(),
@@ -100,8 +100,8 @@ def write_gispng(sat, tmpfn):
         fh.write(WORLDFILE_FORMAT % sat.metadata)
 
     cmd = (
-        "pqinsert -i -p 'gis %s %s gis/images/awips%s/%s GIS/sat/awips%s/%s png' "
-        "%s.png"
+        "pqinsert -i -p "
+        "'gis %s %s gis/images/awips%s/%s GIS/sat/awips%s/%s png' %s.png"
     ) % (
         get_ldm_routes(sat),
         sat.metadata["valid"].strftime("%Y%m%d%H%M"),
@@ -114,8 +114,8 @@ def write_gispng(sat, tmpfn):
     subprocess.call(cmd, shell=True)
 
     cmd = (
-        "pqinsert -i -p 'gis %s %s gis/images/awips%s/%s GIS/sat/awips%s/%s wld' "
-        "%s.wld"
+        "pqinsert -i -p "
+        "'gis %s %s gis/images/awips%s/%s GIS/sat/awips%s/%s wld' %s.wld"
     ) % (
         get_ldm_routes(sat),
         sat.metadata["valid"].strftime("%Y%m%d%H%M"),
@@ -143,7 +143,8 @@ def write_metadata(sat, tmpfn):
         json.dump(metadata, fh)
 
     cmd = (
-        "pqinsert -i -p 'gis c %s gis/images/awips%s/%s GIS/sat/%s json' %s.json"
+        "pqinsert -i -p "
+        "'gis c %s gis/images/awips%s/%s GIS/sat/%s json' %s.json"
     ) % (
         sat.metadata["valid"].strftime("%Y%m%d%H%M"),
         sat.awips_grid(),
