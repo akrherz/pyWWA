@@ -420,6 +420,8 @@ def process_site_time(accesstxn, prod, sid, ts, elements: List[SHEFElement]):
         valid=localts,
         tzname=metadata["tzname"],
     )
+    # This is likely going to kill performance, but we need to do it for now
+    iemob.load(accesstxn)
     iscoop = network.find("COOP") > 0
     hasdata = False
     # TODO Special rstage logic in case PEDTS is defined
