@@ -1,5 +1,7 @@
 """Test shef_parser."""
+import datetime
 from functools import partial
+from zoneinfo import ZoneInfo
 
 # 3rd Party
 # pylint: disable=no-member-in-module
@@ -26,9 +28,91 @@ def run_interaction(cursor, sql, args):
 def sync_workflow(prod, cursor):
     """Common workflow."""
     mydata = shef_parser.restructure_data(prod)
-    print(mydata)
     for sid, data in mydata.items():
-        shef_parser.process_site(cursor, prod, sid, data)
+        shef_parser.process_site(prod, sid, data)
+    # Just exercise the API
+    shef_parser.process_accessdb_frontend()
+
+    # Arm the entries for processing
+    ts = utc() - datetime.timedelta(days=1)
+    for iemid, entry in shef_parser.ACCESSDB_QUEUE.items():
+        for localts, record in entry.records.items():
+            record["last"] = ts
+            shef_parser.write_access_records(
+                cursor, [(localts, record)], iemid, entry
+            )
+    # Just exercise the API
+    shef_parser.process_accessdb_frontend()
+
+
+def test_accessdb_exception():
+    """Test some GIGO raises an exception."""
+    shef_parser.ACCESSDB_QUEUE[-99] = 0
+    shef_parser.process_accessdb_frontend()
+    shef_parser.ACCESSDB_QUEUE.pop(-99)
+
+
+def test_missing_value():
+    """Test that this missing value flags a database write to null_ col"""
+    shef_parser.LOCS["ALBW3"] = {
+        "WI_DCP": {
+            "valid": shef_parser.U1980,
+            "iemid": -99,
+            "tzname": "America/Chicago",
+            "epoc": 1,
+            "pedts": 1,
+        }
+    }
+    pywwa.CTX.utcnow = utc(2023, 10, 28, 3, 40)
+    shef_parser.process_data(get_example_file("SHEF/RRSNMC.txt"))
+
+
+def test_midnight():
+    """Test that a midnight report gets moved back one minute."""
+    shef_parser.LOCS["AISI4"] = {
+        "IA_DCP": {
+            "valid": shef_parser.U1980,
+            "iemid": -99,
+            "tzname": "America/Chicago",
+            "epoc": 1,
+            "pedts": 1,
+        }
+    }
+    pywwa.CTX.utcnow = utc(2022, 11, 10, 12)
+    payload = get_example_file("SHEF/RR1.txt").replace("1150", "0600")
+    shef_parser.process_data(payload)
+    assert shef_parser.ACCESSDB_QUEUE[-99].records[utc(2022, 11, 10, 5, 59)]
+
+
+def test_old_dcpdata():
+    """Test that old DCP data is not sent to the database."""
+    shef_parser.LOCS["AISI4"] = {
+        "IA_DCP": {
+            "valid": shef_parser.U1980,
+            "iemid": -99,
+            "tzname": "America/Chicago",
+            "epoc": 1,
+            "pedts": 1,
+        }
+    }
+    pywwa.CTX.utcnow = utc(2022, 11, 10, 12)
+    shef_parser.process_data(get_example_file("SHEF/RR1.txt"))
+    # rewind to 2021
+    pywwa.CTX.utcnow = utc(2021, 11, 10, 12)
+    shef_parser.process_data(get_example_file("SHEF/RR1.txt"))
+
+
+def test_get_localtime():
+    """Test when we don't know of a station."""
+    tzinfo = ZoneInfo("America/Chicago")
+    assert shef_parser.get_localtime("XX_DCP123456", tzinfo) == tzinfo
+
+
+def test_231027_rr8msr_novariable():
+    """Test this found in the wild."""
+    pywwa.CTX.utcnow = utc(2023, 10, 19, 15)
+    prod = shef_parser.process_data(get_example_file("SHEF/RR8MSR.txt"))
+    assert not prod.data
 
 
 def test_empty_product():
@@ -60,6 +144,13 @@ def test_230926_rr8krf(cursor):
     prod = shef_parser.process_data(get_example_file("SHEF/RR8KRF.txt"))
     for element in prod.data:
         shef_parser.insert_raw_inbound(cursor, element)
+
+
+def test_bad_element_in_current_queue():
+    """Test GIGO on current_queue."""
+    shef_parser.CURRENT_QUEUE.clear()
+    shef_parser.CURRENT_QUEUE["HI|BYE|HI"] = {"dirty": True}
+    shef_parser.save_current()
 
 
 @pytest.mark.parametrize("database", ["iem"])
@@ -103,26 +194,51 @@ def test_omit_report(cursor):
 
     shef_parser.ACCESSDB.runOperation = partial(run_interaction, cursor)
     assert shef_parser.save_current() == 7
+    assert shef_parser.save_current() == 0
 
 
-@pytest.mark.parametrize("database", ["iem"])
-def test_process_site_eb(cursor):
+def test_process_site_eb():
     """Test that the errorback works without any side effects."""
     pywwa.CTX.utcnow = utc(2017, 8, 15, 14)
-    prod = shef_parser.process_data(get_example_file("RR7.txt"))
-    sync_workflow(prod, cursor)
-    shef_parser.process_site_eb(Failure(Exception("Hi Daryl")), prod, "", {})
-    shef_parser.process_site_eb(Failure(DeadlockDetected()), prod, "", {})
+    shef_parser.process_data(get_example_file("RR7.txt"))
+    entry = shef_parser.ACCESSDB_ENTRY(
+        station="", network="", tzname="America/Chicago", records={}
+    )
+    record = {"data": {}, "last": utc(), "product_id": ""}
+    shef_parser.write_access_records_eb(
+        Failure(Exception("Hi Daryl")), [(utc(), record)], 0, entry
+    )
+    shef_parser.write_access_records_eb(
+        Failure(DeadlockDetected()), [(utc, record)], 0, entry
+    )
 
 
-@pytest.mark.parametrize("database", ["iem"])
-def test_checkvars(cursor):
+def test_checkvars():
     """Excerise the checkvars logic with the RR1.txt example"""
+    # Define an entry with two networks so to make life choices
+    shef_parser.LOCS["AISI4"] = {
+        "IA_COOP": {
+            "valid": shef_parser.U1980,
+            "iemid": -99,
+            "tzname": "America/Chicago",
+            "epoc": 1,
+            "pedts": 1,
+        },
+        "ISUSM": {
+            "valid": shef_parser.U1980,
+            "iemid": -99,
+            "tzname": "America/Chicago",
+            "epoc": 1,
+            "pedts": 1,
+        },
+    }
     payload = get_example_file("SHEF/RR1.txt")
     pywwa.CTX.utcnow = utc(2022, 11, 10, 12)
     for repl in ["TX", "HG", "SF", "PPH"]:
-        prod = shef_parser.process_data(payload.replace("/TX", f"/{repl}"))
-        sync_workflow(prod, cursor)
+        shef_parser.process_data(payload.replace("/TX", f"/{repl}"))
+    shef_parser.process_data(payload.replace("RR1", "RR3"))
+    shef_parser.LOCS["AISI4"].pop("IA_COOP")
+    shef_parser.process_data(payload)
 
 
 def test_restructure_data_eightchar_id():
