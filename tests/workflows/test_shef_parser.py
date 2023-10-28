@@ -45,6 +45,28 @@ def sync_workflow(prod, cursor):
     shef_parser.process_accessdb_frontend()
 
 
+def test_accessdb_exception():
+    """Test some GIGO raises an exception."""
+    shef_parser.ACCESSDB_QUEUE[-99] = 0
+    shef_parser.process_accessdb_frontend()
+    shef_parser.ACCESSDB_QUEUE.pop(-99)
+
+
+def test_missing_value():
+    """Test that this missing value flags a database write to null_ col"""
+    shef_parser.LOCS["ALBW3"] = {
+        "WI_DCP": {
+            "valid": shef_parser.U1980,
+            "iemid": -99,
+            "tzname": "America/Chicago",
+            "epoc": 1,
+            "pedts": 1,
+        }
+    }
+    pywwa.CTX.utcnow = utc(2023, 10, 28, 3, 40)
+    shef_parser.process_data(get_example_file("SHEF/RRSNMC.txt"))
+
+
 def test_midnight():
     """Test that a midnight report gets moved back one minute."""
     shef_parser.LOCS["AISI4"] = {
@@ -180,7 +202,7 @@ def test_process_site_eb():
     pywwa.CTX.utcnow = utc(2017, 8, 15, 14)
     shef_parser.process_data(get_example_file("RR7.txt"))
     entry = shef_parser.ACCESSDB_ENTRY(
-        station="", network="", tzname="", records={}
+        station="", network="", tzname="America/Chicago", records={}
     )
     record = {"data": {}, "last": utc(), "product_id": ""}
     shef_parser.write_access_records_eb(
@@ -214,6 +236,7 @@ def test_checkvars():
     pywwa.CTX.utcnow = utc(2022, 11, 10, 12)
     for repl in ["TX", "HG", "SF", "PPH"]:
         shef_parser.process_data(payload.replace("/TX", f"/{repl}"))
+    shef_parser.process_data(payload.replace("RR1", "RR3"))
     shef_parser.LOCS["AISI4"].pop("IA_COOP")
     shef_parser.process_data(payload)
 

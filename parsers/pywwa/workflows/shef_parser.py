@@ -427,8 +427,6 @@ def process_site_time(prod, sid, ts, elements: List[SHEFElement]):
     report = None
     afos = prod.afos
     for se in elements:
-        if se.type != "R":
-            continue
         if se.narrative:
             report = se.narrative
         if (
@@ -444,7 +442,6 @@ def process_site_time(prod, sid, ts, elements: List[SHEFElement]):
         # We generally are in english units, this also converts the wind
         # direction to the full degrees
         val = se.to_english()
-        # TODO it is not clear if we can hit this code or not
         if val is None:
             # Behold, glorious hack here to force nulls into the summary
             # database that uses coerce
@@ -489,14 +486,7 @@ def write_access_record(
     iemob = Observation(iemid=iemid, valid=localts, tzname=entry.tzname)
     iemob.data.update(record["data"])
     iscoop = entry.network.find("_COOP") > 0
-    if not iemob.save(accesstxn, force_current_log=iscoop):
-        LOG.info("Fail to save %s[%s] %s", entry.station, entry.network, iemob)
-        HADSDB.runInteraction(
-            enter_unknown,
-            entry.station,
-            record["product_id"],
-            entry.network,
-        )
+    iemob.save(accesstxn, force_current_log=iscoop)
 
 
 def log_database_queue_size():
