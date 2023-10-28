@@ -10,7 +10,6 @@ from zoneinfo import ZoneInfo
 # 3rd Party
 # pylint: disable=no-name-in-module
 from psycopg.errors import DeadlockDetected
-from pyiem import reference
 from pyiem.models.shef import SHEFElement
 from pyiem.nws.products.shef import parser
 from pyiem.observation import Observation
@@ -39,7 +38,10 @@ UNKNOWN = {}
 # station metadata
 LOCS = {}
 # database timezones to cache
-TIMEZONES = {}
+TIMEZONES = {
+    "UTC": ZoneInfo("UTC"),
+    "America/Chicago": ZoneInfo("America/Chicago"),
+}
 # a queue for saving database IO
 CURRENT_QUEUE = {}
 # Data structure to hold potential writes to IEMAccess
@@ -303,8 +305,12 @@ def get_localtime(sid, ts):
 
 
 def get_network(prod, sid, data: List[SHEFElement]) -> str:
-    """Figure out which network this belongs to"""
-    networks = list(LOCS.get(sid, {}).keys())
+    """Logic for figuring out network in face of ambiguity.
+
+    Note: This sid should already be in LOCS, so we are only either taking
+    the single entry or picking between DCP and COOP variants.
+    """
+    networks = list(LOCS[sid].keys())
     # This is the best we can hope for
     if len(networks) == 1:
         return networks[0]
@@ -320,26 +326,11 @@ def get_network(prod, sid, data: List[SHEFElement]) -> str:
         is_coop = True
     pnetwork = "COOP" if is_coop else "DCP"
     # filter networks now
-    networks = [s for s in networks if s.find(pnetwork) > 0]
-    if len(networks) == 1:
-        return networks[0]
-
-    # If networks is zero length, then we have to try some things
-    if not networks:
-        HADSDB.runInteraction(enter_unknown, sid, prod.get_product_id(), "")
-        if len(sid) == 5:
-            state = reference.nwsli2state.get(sid[3:])
-            country = reference.nwsli2country.get(sid[3:])
-            if country in ["CA", "MX"]:
-                return f"{country}_{state}_{pnetwork}"
-            if country == "US":
-                return f"{state}_{pnetwork}"
-            return f"{country}__{pnetwork}"
-
-    if sid not in UNKNOWN:
-        UNKNOWN[sid] = True
-        LOG.info("failure for sid: %s tp: %s", sid, prod.get_product_id())
-    return None
+    for network in networks:
+        if network.find(pnetwork) > 0:
+            return network
+    # Throw our hands up in the air
+    return networks[0]
 
 
 def process_site(prod, sid, data):
@@ -402,16 +393,11 @@ def process_site_time(prod, sid, ts, elements: List[SHEFElement]):
     network = get_network(prod, sid, elements)
     if network is None or network in DOUBLEBACKED_NETWORKS:
         return
-
     localts = get_localtime(sid, ts)
+    # This should always work!
+    metadata = LOCS[sid][network]
     # Do not send DCP sites with old data to IEMAccess
-    if network.find("_DCP") > 0 and localts < LOCS.get(sid, {}).get(
-        "valid", localts
-    ):
-        return
-    metadata = LOCS.get(sid, {}).get(network)
-    if metadata is None:
-        LOG.info("Unknown station: %s %s", sid, network)
+    if network.find("_DCP") > 0 and localts < metadata["valid"]:
         return
     metadata["valid"] = localts
 

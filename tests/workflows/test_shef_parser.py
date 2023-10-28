@@ -45,6 +45,41 @@ def sync_workflow(prod, cursor):
     shef_parser.process_accessdb_frontend()
 
 
+def test_midnight():
+    """Test that a midnight report gets moved back one minute."""
+    shef_parser.LOCS["AISI4"] = {
+        "IA_DCP": {
+            "valid": shef_parser.U1980,
+            "iemid": -99,
+            "tzname": "America/Chicago",
+            "epoc": 1,
+            "pedts": 1,
+        }
+    }
+    pywwa.CTX.utcnow = utc(2022, 11, 10, 12)
+    payload = get_example_file("SHEF/RR1.txt").replace("1150", "0600")
+    shef_parser.process_data(payload)
+    assert shef_parser.ACCESSDB_QUEUE[-99].records[utc(2022, 11, 10, 5, 59)]
+
+
+def test_old_dcpdata():
+    """Test that old DCP data is not sent to the database."""
+    shef_parser.LOCS["AISI4"] = {
+        "IA_DCP": {
+            "valid": shef_parser.U1980,
+            "iemid": -99,
+            "tzname": "America/Chicago",
+            "epoc": 1,
+            "pedts": 1,
+        }
+    }
+    pywwa.CTX.utcnow = utc(2022, 11, 10, 12)
+    shef_parser.process_data(get_example_file("SHEF/RR1.txt"))
+    # rewind to 2021
+    pywwa.CTX.utcnow = utc(2021, 11, 10, 12)
+    shef_parser.process_data(get_example_file("SHEF/RR1.txt"))
+
+
 def test_get_localtime():
     """Test when we don't know of a station."""
     tzinfo = ZoneInfo("America/Chicago")
@@ -56,29 +91,6 @@ def test_231027_rr8msr_novariable():
     pywwa.CTX.utcnow = utc(2023, 10, 19, 15)
     prod = shef_parser.process_data(get_example_file("SHEF/RR8MSR.txt"))
     assert not prod.data
-
-
-def test_get_network():
-    """Test get_network logic."""
-    prod = mock.Mock()
-    prod.afos = "RR1KRF"
-    elem = shef_parser.SHEFElement(
-        station="AZZI4",
-        basevalid=utc(),
-        valid=utc(),
-        physical_element="XX",
-        duration="I",
-        extremum="Z",
-        value=0,
-    )
-    assert (
-        shef_parser.get_network(
-            prod,
-            "AZZI4",
-            [elem],
-        )
-        == "IA_DCP"
-    )
 
 
 def test_empty_product():
@@ -181,10 +193,29 @@ def test_process_site_eb():
 
 def test_checkvars():
     """Excerise the checkvars logic with the RR1.txt example"""
+    # Define an entry with two networks so to make life choices
+    shef_parser.LOCS["AISI4"] = {
+        "IA_COOP": {
+            "valid": shef_parser.U1980,
+            "iemid": -99,
+            "tzname": "America/Chicago",
+            "epoc": 1,
+            "pedts": 1,
+        },
+        "ISUSM": {
+            "valid": shef_parser.U1980,
+            "iemid": -99,
+            "tzname": "America/Chicago",
+            "epoc": 1,
+            "pedts": 1,
+        },
+    }
     payload = get_example_file("SHEF/RR1.txt")
     pywwa.CTX.utcnow = utc(2022, 11, 10, 12)
     for repl in ["TX", "HG", "SF", "PPH"]:
         shef_parser.process_data(payload.replace("/TX", f"/{repl}"))
+    shef_parser.LOCS["AISI4"].pop("IA_COOP")
+    shef_parser.process_data(payload)
 
 
 def test_restructure_data_eightchar_id():
