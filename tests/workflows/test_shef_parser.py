@@ -58,7 +58,7 @@ def test_missing_value():
         "WI_DCP": {
             "valid": shef_parser.U1980,
             "iemid": -99,
-            "tzname": "America/Chicago",
+            "tzinfo": ZoneInfo("America/Chicago"),
             "epoc": 1,
             "pedts": 1,
         }
@@ -73,7 +73,7 @@ def test_midnight():
         "IA_DCP": {
             "valid": shef_parser.U1980,
             "iemid": -99,
-            "tzname": "America/Chicago",
+            "tzinfo": ZoneInfo("America/Chicago"),
             "epoc": 1,
             "pedts": 1,
         }
@@ -90,7 +90,7 @@ def test_old_dcpdata():
         "IA_DCP": {
             "valid": shef_parser.U1980,
             "iemid": -99,
-            "tzname": "America/Chicago",
+            "tzinfo": ZoneInfo("America/Chicago"),
             "epoc": 1,
             "pedts": 1,
         }
@@ -167,7 +167,7 @@ def test_omit_report(cursor):
         "MS_COOP": {
             "valid": shef_parser.U1980,
             "iemid": -99,
-            "tzname": "America/Chicago",
+            "tzinfo": ZoneInfo("America/Chicago"),
             "epoc": 1,
             "pedts": 1,
         }
@@ -202,7 +202,7 @@ def test_process_site_eb():
     pywwa.CTX.utcnow = utc(2017, 8, 15, 14)
     shef_parser.process_data(get_example_file("RR7.txt"))
     entry = shef_parser.ACCESSDB_ENTRY(
-        station="", network="", tzname="America/Chicago", records={}
+        station="", network="", tzinfo=ZoneInfo("America/Chicago"), records={}
     )
     record = {"data": {}, "last": utc(), "product_id": ""}
     shef_parser.write_access_records_eb(
@@ -220,14 +220,14 @@ def test_checkvars():
         "IA_COOP": {
             "valid": shef_parser.U1980,
             "iemid": -99,
-            "tzname": "America/Chicago",
+            "tzinfo": ZoneInfo("America/Chicago"),
             "epoc": 1,
             "pedts": 1,
         },
         "ISUSM": {
             "valid": shef_parser.U1980,
             "iemid": -99,
-            "tzname": "America/Chicago",
+            "tzinfo": ZoneInfo("America/Chicago"),
             "epoc": 1,
             "pedts": 1,
         },
