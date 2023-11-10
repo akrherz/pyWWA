@@ -185,7 +185,11 @@ class JabberClient:
         if not self.authenticated:
             LOG.info("No Connection, Lets wait and try later...")
             reactor.callLater(
-                3, self.send_message, body, html, xtra  # @UndefinedVariable
+                3,
+                self.send_message,
+                body,
+                html,
+                xtra,  # @UndefinedVariable
             )
             return
         message = domish.Element(("jabber:client", "message"))
@@ -216,7 +220,8 @@ class JabberClient:
             # writing of data to the transport is not thread safe, so we must
             # ensure that this gets called from the main thread
             reactor.callFromThread(
-                self.xmlstream.send, message  # @UndefinedVariable
+                self.xmlstream.send,
+                message,  # @UndefinedVariable
             )
 
         def _ensure200(res):

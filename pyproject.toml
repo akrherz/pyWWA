@@ -1,6 +1,3 @@
-[tool.black]
-line-length = 79
-
 [tool.ruff]
 select = ["E", "F", "I"]
 target-version = "py39"
