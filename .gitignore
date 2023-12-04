@@ -14,5 +14,6 @@ util/rabbitmq.json
 **/ridge_processor.pid
 /goes/*.nc
 .coverage
+coverage.xml
 .eggs/
 parsers/pywwa.egg-info/
