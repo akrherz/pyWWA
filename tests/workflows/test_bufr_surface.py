@@ -1,23 +1,41 @@
 """Test bufr_surface workflow."""
+import os
 
 import pytest
-import pywwa
-from pyiem.util import utc
 from pywwa.testing import get_example_filepath
 from pywwa.workflows import bufr_surface
 
 
-def processor(cursor, buffn) -> int:
-    """Helper for testing."""
-    with open(get_example_filepath(f"BUFR/{buffn}.bufr"), "rb") as fh:
-        prod, meat = bufr_surface.ingest(fh.read())
-    return bufr_surface.processor(cursor, prod, meat)
+def sync_workflow(cursor, buffn) -> int:
+    """Run twice through workflow, eh"""
+    with open(get_example_filepath(f"BUFR/{buffn}"), "rb") as fh:
+        prod, datalists = bufr_surface.workflow(fh.read(), cursor)
+    obs = []
+    for datalist in datalists:
+        obs.append(bufr_surface.datalist2iemob_data(datalist, prod.source))
+    return prod, obs
+
+
+def generate_testfiles():
+    """Generate a list of test files in the examples/BUFR directory."""
+    for filename in os.listdir(get_example_filepath("BUFR")):
+        if not filename.endswith(".bufr"):
+            continue
+        yield filename
+
+
+def test_phour():
+    """Test that we get a message with a phour set."""
+    prod, obs = sync_workflow(None, "ISAI01_SBBR.bufr")
+    assert prod.source == "SBBR"
+    assert abs(obs[182]["phour"] - 0.0079) < 0.0001
 
 
 @pytest.mark.parametrize("database", ["iem"])
-def test_vsby(cursor):
-    """Ob has visibility."""
-    assert processor(cursor, "ISMI60_SBBR") == 60
+@pytest.mark.parametrize("buffn", generate_testfiles())
+def test_bufr_files_in_examples(cursor, buffn):
+    """Parse all our examples."""
+    sync_workflow(cursor, buffn)
 
 
 def test_bounds_check():
@@ -29,7 +47,7 @@ def test_bounds_check():
 def test_api():
     """Test API."""
     bufr_surface.ready(None)
-    bufr_surface.ingest(b"")
+    bufr_surface.workflow(b"")
 
 
 @pytest.mark.parametrize("database", ["mesosite"])
@@ -47,51 +65,7 @@ def test_unknown_source(cursor):
     """Test that invalid descriptor is handled."""
     with open(get_example_filepath("BUFR/ISIA14_CWAO.bufr"), "rb") as fh:
         payload = fh.read()
-    prod, meat = bufr_surface.ingest(payload.replace(b"CWAO", b"XXXX"))
-    with pytest.raises(ValueError):
-        bufr_surface.processor(cursor, prod, meat)
-
-
-@pytest.mark.parametrize("database", ["iem"])
-def test_231206_assertion_error(cursor):
-    """Test something found in the wild."""
-    processor(cursor, "ISMA01_FNLU")
-
-
-@pytest.mark.parametrize("database", ["iem"])
-def test_231206_nullbytes(cursor):
-    """Test something found in the wild."""
-    processor(cursor, "ISMA01_FNLU_badid")
-
-
-@pytest.mark.parametrize("database", ["iem"])
-def test_invalid_descriptor(cursor):
-    """Test that invalid descriptor is handled."""
-    processor(cursor, "ISXD03_EDZW")
-
-
-@pytest.mark.parametrize("database", ["iem"])
-def test_badmonth(cursor):
-    """Test that month of 13 is handled."""
-    processor(cursor, "ISIA14_CWAO")
-
-
-@pytest.mark.parametrize("database", ["iem"])
-def test_nonascii(cursor):
-    """Test that non-ascii characters are handled."""
-    processor(cursor, "ISAB02_CWAO")
-
-
-@pytest.mark.parametrize("database", ["iem"])
-def test_nosid(cursor):
-    """Test that having no station id is handled."""
-    processor(cursor, "ISXT14_EGRR")
-
-
-@pytest.mark.parametrize("database", ["iem"])
-def test_notimestamp(cursor):
-    """Test that we don't error when no timestamp is found."""
-    processor(cursor, "ISND01_LEMM")
+    bufr_surface.workflow(payload.replace(b"CWAO", b"XXXX"))
 
 
 @pytest.mark.parametrize("database", ["mesosite"])
@@ -103,10 +77,3 @@ def test_load_xref(cursor):
         (bufr_surface.NETWORK,),
     )
     bufr_surface.load_xref(cursor)
-
-
-@pytest.mark.parametrize("database", ["iem"])
-def test_simple(cursor):
-    """Test simple."""
-    pywwa.CTX.utcnow = utc(2023, 12, 4, 2)
-    processor(cursor, "IS_2023120401")

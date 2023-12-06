@@ -234,9 +234,9 @@ def add_station(txn, sid, data) -> int:
     return iemid
 
 
-def process_messages(txn, prod, msgs):
+def process_datalist(txn, prod, datalist):
     """Do what we can do."""
-    data = glean_data(msgs, prod.source)
+    data = datalist2iemob_data(datalist, prod.source)
     if not data:
         return
     sid = data.get("sid")
@@ -303,16 +303,16 @@ def render_members(members, msgs):
             msgs.append(member)
 
 
-def glean_data(msgs, source):
+def datalist2iemob_data(datalist, source) -> dict:
     """see what we can do with this."""
     data = {}
     displacement = 0
-    for msg in msgs:
+    for msg in datalist:
         LOG.debug("%s %s %s", msg["id"], msg["description"], msg["value"])
         if msg["id"].startswith("001"):
             data[msg["id"]] = msg["value"]
             continue
-        if msg["id"] == "004024":  # TIME PERIOD OR DISPLACEMENT
+        if msg["id"] in ["004024", "004025"]:  # TIME PERIOD OR DISPLACEMENT
             displacement = msg["value"]
             continue
         if msg["id"] in DIRECTS:
@@ -349,6 +349,11 @@ def glean_data(msgs, source):
         if msg["id"] == "020001":
             data["vsby"] = bounds_check(
                 convert_value(msg["value"], "m", "mile"), 0, 100
+            )
+            continue
+        if msg["id"] == "013011" and displacement == -60:
+            data["phour"] = bounds_check(
+                convert_value(msg["value"], "mm", "inch"), 0, 100
             )
             continue
         if msg["id"] == "011002" and displacement >= -10:
@@ -404,14 +409,14 @@ def glean_data(msgs, source):
     return data
 
 
-def processor(txn, prod, prodbytes) -> int:
-    """Protect the realprocessor"""
+def gen_bmessages(prod, prodbytes) -> list:
+    """Generate BUFR Messages."""
     # ATTM we are sending this to the general text parser, so to set
     # various needed attributes.
+    bmsgs = []
     try:
-        msgs = []
         for bufr_message in generate_bufr_message(Decoder(), prodbytes):
-            msgs.append(bufr_message)
+            bmsgs.append(bufr_message)
     except Exception as exp:
         LOG.info(
             "%s %s %s",
@@ -419,54 +424,74 @@ def processor(txn, prod, prodbytes) -> int:
             prod.get_product_id(),
             prod.source,
         )
-        return 0
-    total = 0
-    for bufmsg in msgs:
-        jdata = NestedJsonRenderer().render(bufmsg)
-        for section in jdata:
-            for parameter in section:
-                if isinstance(parameter["value"], list):
-                    LOG.debug(
-                        "--> %s %s",
-                        parameter["name"],
-                        type(parameter["value"]),
-                    )
-                    for entry in parameter["value"]:
-                        LOG.debug("----> entry")
-                        if isinstance(entry, list):
-                            msgs = []
-                            render_members(entry, msgs)
-                            total += len(msgs)
-                            process_messages(txn, prod, msgs)
-                        else:
-                            # unexpanded_descriptors
-                            LOG.debug(entry)
-                else:
-                    LOG.debug(
-                        "--> %s %s", parameter["name"], parameter["value"]
-                    )
-    return total
+    return bmsgs
 
 
-def ingest(prodbytes):
-    """Gets called by the LDM Bridge."""
+def bmsg2datalists(bmsg) -> list:
+    """Convert BUFR Message to a list of messages."""
+    jdata = NestedJsonRenderer().render(bmsg)
+    res = []
+    for section in jdata:
+        for parameter in section:
+            if isinstance(parameter["value"], list):
+                LOG.debug(
+                    "--> %s %s",
+                    parameter["name"],
+                    type(parameter["value"]),
+                )
+                for entry in parameter["value"]:
+                    LOG.debug("----> entry")
+                    if isinstance(entry, list):
+                        msgs = []
+                        render_members(entry, msgs)
+                        res.append(msgs)
+                    else:
+                        # unexpanded_descriptors
+                        LOG.debug(entry)
+            else:
+                LOG.debug("--> %s %s", parameter["name"], parameter["value"])
+    return res
+
+
+def workflow(prodbytes, cursor=None):
+    """This processes the LDM product provided via ldmbridge.
+
+    Args:
+        prodbytes (bytes): The LDM product
+        cursor (cursor, optional): The database cursor to use.
+    """
     pos = prodbytes.find(b"BUFR")
     if pos == -1:
         if prodbytes != b"" and prodbytes.find(b"NIL") == -1:
             LOG.warning("No BUFR found in %s", prodbytes[:100])
         return None, None
+    # Gleaning some data from the LDM product can be useful downstream
     header = prodbytes[:pos].decode("ascii")
     prod = TextProduct(header, utcnow=common.utcnow(), parse_segments=False)
+    # Trim LDM product to just the BUFR content
     meat = prodbytes[pos:]
-    defer = IEMDB.runInteraction(processor, prod, meat)
-    defer.addErrback(common.email_error, prod.get_product_id())
-    defer.addErrback(LOG.warning)
-    return prod, meat
+    datalists = []
+    # Send to pybufrkit, which generates a list of BUFR messages
+    for bmsg in gen_bmessages(prod, meat):
+        # Split the BUFR message into lists of parsed data to process
+        for datalist in bmsg2datalists(bmsg):
+            if not datalist:
+                LOG.debug("Prod %s has no datalist", prod.get_product_id())
+                continue
+            datalists.append(datalist)
+            if cursor:
+                process_datalist(cursor, prod, datalist)
+                continue
+            # Queue this up for processing
+            defer = IEMDB.runInteraction(process_datalist, prod, datalist)
+            defer.addErrback(common.email_error, prod.get_product_id())
+            defer.addErrback(LOG.warning)
+    return prod, datalists
 
 
 def ready(_):
     """Callback once we are ready."""
-    bridge(ingest, isbinary=True)
+    bridge(workflow, isbinary=True)
     lc = LoopingCall(MESOSITEDB.runInteraction, load_xref)
     df = lc.start(10800, now=False)
     df.addErrback(common.email_error)
