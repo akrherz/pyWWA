@@ -12,6 +12,7 @@ from twisted.internet import reactor
 reactor.run = mock.Mock()
 _parsers = [
     "afos_dump",
+    "bufr_surface",
     "dsm_parser",
     "hml_parser",
     "mos_parser",
