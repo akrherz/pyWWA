@@ -113,6 +113,13 @@ WMO2ISO3166 = {
     "LYBM": 688,  # Montenegro
     "LYPG": 688,  # Montenegro
     "LZIB": 703,  # Slovak Republic
+    "MDAB": 214,  # Dominican Republic
+    "MDBH": 214,  # Dominican Republic
+    "MDCY": 214,  # Dominican Republic
+    "MDJB": 214,  # Dominican Republic
+    "MDLR": 214,  # Dominican Republic
+    "MDPC": 214,  # Dominican Republic
+    "MDPP": 214,  # Dominican Republic
     "MJSK": 484,  # Mexico
     "NCRG": 554,  # New Zealand
     "NFFN": 242,  # Fiji
@@ -200,20 +207,25 @@ def load_xref(txn):
     LOG.info("Loaded %s WIGOS2IEMID entries", len(WIGOS))
 
 
-def add_station(txn, sid, data) -> int:
+def add_station_cb(res, sid):
+    """Callback."""
+    WIGOS[sid] = {"iemid": res.fetchone()["iemid"], "tzname": None}
+
+
+def add_station(sid, data):
     """Add a mesosite station entry."""
     if "lon" not in data or "lat" not in data:
         LOG.info("Skipping %s as no location data", sid)
         WIGOS[sid] = {"iemid": -2}
-        return None
+        return
     sname = data.get("sname")
     if sname is None:
         LOG.info("Skipping %s as no station name %s", sid, data)
         WIGOS[sid] = {"iemid": -2}
-        return None
-    sname = sname.replace(",", " ").replace("\x00", "")
+        return
+    sname = sname.replace(",", " ")
     elev = data.get("elevation")
-    txn.execute(
+    df = MESOSITEDB.runOperation(
         """
         INSERT into stations(id, wigos, name, network, online,
         geom, elevation, metasite, plot_name, country)
@@ -231,9 +243,8 @@ def add_station(txn, sid, data) -> int:
             sname,
         ),
     )
-    iemid = txn.fetchone()["iemid"]
-    WIGOS[sid] = {"iemid": iemid, "tzname": None}
-    return iemid
+    df.addCallback(add_station_cb, sid)
+    df.addErrback(common.email_error, f"{sid} {data}")
 
 
 def process_datalist(txn, prod, datalist):
@@ -244,8 +255,6 @@ def process_datalist(txn, prod, datalist):
     sid = data.get("sid")
     if sid is None:
         return
-    # Remove null bytes
-    data["sid"] = sid.replace("\x00", "")
     valid = data["valid"]
     # Don't allow products from the future
     if valid > (common.utcnow() + timedelta(hours=2)):
@@ -262,9 +271,7 @@ def process_datalist(txn, prod, datalist):
         # prevent race condition
         WIGOS[sid] = {"iemid": -1}
         meta = WIGOS[sid]
-        df = MESOSITEDB.runInteraction(add_station, sid, data)
-        msg = f"{sid} {prod.get_product_id()}, {data}"
-        df.addErrback(common.email_error, msg)
+        add_station(sid, data)
     if meta["iemid"] < -1:
         # add station failed, so do nothing
         return
@@ -408,6 +415,10 @@ def datalist2iemob_data(datalist, source) -> dict:
         data["sid"] = f"0-{ccode}-0-{data['001002']}"
     if "001015" in data:
         data["sname"] = data["001015"].decode("ascii", "ignore").strip()
+    # Replace null bytes
+    for key in ["sname", "sid"]:
+        if key in data:
+            data[key] = data[key].replace("\x00", "")
     return data
 
 
