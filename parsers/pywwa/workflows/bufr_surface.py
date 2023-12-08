@@ -222,6 +222,10 @@ def add_station(sid, data, mcursor=None):
         LOG.info("Skipping %s as no location data", sid)
         WIGOS[sid] = {"iemid": -2}
         return
+    if data["lon"] == 0 and data["lat"] == 0:
+        LOG.info("Skipping %s as lat=lon=0", sid)
+        WIGOS[sid] = {"iemid": -2}
+        return
     sname = data.get("sname")
     if sname is None:
         LOG.info("Skipping %s as no station name %s", sid, data)
