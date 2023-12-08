@@ -2,14 +2,18 @@
 import os
 
 import pytest
+from pyiem.database import get_dbconnc
 from pywwa.testing import get_example_filepath
 from pywwa.workflows import bufr_surface
 
 
 def sync_workflow(cursor, buffn) -> int:
     """Run twice through workflow, eh"""
+    mconn, mcursor = get_dbconnc("mesosite")
+    bufr_surface.load_xref(mcursor)
     with open(get_example_filepath(f"BUFR/{buffn}"), "rb") as fh:
-        prod, datalists = bufr_surface.workflow(fh.read(), cursor)
+        prod, datalists = bufr_surface.workflow(fh.read(), cursor, mcursor)
+    mconn.close()
     obs = []
     for datalist in datalists:
         obs.append(bufr_surface.datalist2iemob_data(datalist, prod.source))
