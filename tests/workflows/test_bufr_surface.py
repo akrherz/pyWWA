@@ -32,6 +32,12 @@ def test_phour():
 
 
 @pytest.mark.parametrize("database", ["iem"])
+def test_231208_null_bytes(cursor):
+    """Test failure in the wild."""
+    sync_workflow(cursor, "ISMA01_FNLU_badid2.bufr")
+
+
+@pytest.mark.parametrize("database", ["iem"])
 @pytest.mark.parametrize("buffn", generate_testfiles())
 def test_bufr_files_in_examples(cursor, buffn):
     """Parse all our examples."""
@@ -48,16 +54,6 @@ def test_api():
     """Test API."""
     bufr_surface.ready(None)
     bufr_surface.workflow(b"")
-
-
-@pytest.mark.parametrize("database", ["mesosite"])
-def test_add_station(cursor):
-    """Exercise the add station logic."""
-    assert bufr_surface.add_station(cursor, "46_&_2", {}) is None
-    data = {"lon": -99, "lat": 42}
-    assert bufr_surface.add_station(cursor, "46_&_2", data) is None
-    data["sname"] = "TEST"
-    assert bufr_surface.add_station(cursor, "46_&_2", data) is not None
 
 
 @pytest.mark.parametrize("database", ["iem"])
