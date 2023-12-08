@@ -94,7 +94,9 @@ WMO2ISO3166 = {
     "HECA": 818,  # Egypt
     "HKNC": 404,  # Kenya
     "KNES": 840,  # United States
+    "KWBC": 840,  # United States
     "KWNB": 840,  # United States
+    "KWNO": 840,  # United States
     "LCLK": 196,  # Cyprus
     "LDZM": 705,  # Slovenia
     "LEMM": 724,  # Spain
