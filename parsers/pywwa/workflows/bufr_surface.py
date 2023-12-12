@@ -8,7 +8,6 @@ This is a work in progress yet, notes and todo as follows:
 
 """
 # stdlib
-import warnings
 from datetime import timedelta
 
 # 3rd Party
@@ -25,8 +24,6 @@ from pywwa import common
 from pywwa.database import get_database
 from pywwa.ldm import bridge
 
-# pdbufr running in flat mode
-warnings.filterwarnings("ignore", module="pdbufr")
 MESOSITEDB = get_database("mesosite", cp_max=1)
 IEMDB = get_database("iem", cp_max=1)
 # Github Copilot did 99% of the work here, hopefully it is right!
@@ -83,6 +80,7 @@ WMO2ISO3166 = {
     "GMMX": 504,  # Morocco
     "GMMZ": 504,  # Morocco
     "GMSE": 504,  # Morocco
+    "GMSM": 504,  # Morocco
     "GMTA": 504,  # Morocco
     "GMTI": 504,  # Morocco
     "GMTL": 504,  # Morocco
@@ -182,6 +180,17 @@ DIRECTS = {
     "007030": "elevation",
     "005001": "lat",
     "006001": "lon",
+}
+# life choices were made here
+DEPTHMAP = {
+    0.1: "4",
+    0.2: "8",
+    0.4: "16",
+    0.5: "20",
+    0.8: "32",
+    1.0: "40",
+    1.6: "64",
+    3.2: "128",
 }
 
 
@@ -337,10 +346,28 @@ def datalist2iemob_data(datalist, source) -> dict:
     """see what we can do with this."""
     data = {}
     displacement = 0
+    depth = 0
     for msg in datalist:
         LOG.debug("%s %s %s", msg["id"], msg["description"], msg["value"])
         if msg["id"].startswith("001"):
             data[msg["id"]] = msg["value"]
+            continue
+        if msg["id"] == "007061":  # DEPTH
+            depth = msg["value"]
+            continue
+        if msg["id"] == "014016" and displacement == -60:  # net rad
+            data["srad_1h_j"] = bounds_check(msg["value"], 0, 10)
+            continue
+        if msg["id"] == "012130" and depth is not None:  # soil temperature
+            _xref = DEPTHMAP.get(depth)
+            if _xref is None:
+                LOG.info("Unknown tsoil depth %s", depth)
+                continue
+            data[f"tsoil_{_xref}in_f"] = bounds_check(
+                convert_value(msg["value"], "degK", "degF"),
+                -100,
+                150,
+            )
             continue
         if msg["id"] in ["004024", "004025"]:  # TIME PERIOD OR DISPLACEMENT
             displacement = msg["value"]
