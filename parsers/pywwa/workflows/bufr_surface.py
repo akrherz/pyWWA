@@ -355,8 +355,13 @@ def datalist2iemob_data(datalist, source) -> dict:
         if msg["id"] == "007061":  # DEPTH
             depth = msg["value"]
             continue
-        if msg["id"] == "014016" and displacement == -60:  # net rad
-            data["srad_1h_j"] = bounds_check(msg["value"], 0, 10)
+        if msg["id"] in ["004024", "004025"]:  # TIME PERIOD OR DISPLACEMENT
+            displacement = msg["value"] * (60 if msg["id"] == "004024" else 1)
+            continue
+        # 014016 is net radiation, so sub-optimal
+        # 014028 is global solar J m-2
+        if msg["id"] == "014028" and displacement == -60:  # net rad
+            data["srad_1h_j"] = bounds_check(msg["value"], 0, 10_000_000)
             continue
         if msg["id"] == "012130" and depth is not None:  # soil temperature
             _xref = DEPTHMAP.get(depth)
@@ -368,9 +373,6 @@ def datalist2iemob_data(datalist, source) -> dict:
                 -100,
                 150,
             )
-            continue
-        if msg["id"] in ["004024", "004025"]:  # TIME PERIOD OR DISPLACEMENT
-            displacement = msg["value"]
             continue
         if msg["id"] in DIRECTS:
             data[DIRECTS[msg["id"]]] = msg["value"]
