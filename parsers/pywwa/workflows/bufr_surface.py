@@ -192,13 +192,26 @@ DEPTHMAP = {
     1.6: "64",
     3.2: "128",
 }
+OCTAS_MAP = {
+    0: "CLR",
+    1: "FEW",
+    2: "FEW",
+    3: "SCT",
+    4: "SCT",
+    5: "BKN",
+    6: "BKN",
+    7: "BKN",
+    8: "OVC",
+    9: "VV",
+    15: "NSC",
+}
 
 
-def bounds_check(val, low, high):
+def bounds_check(val, low, high, dtype=float):
     """Ensure some QC."""
     if val is None or val < low or val > high:
         return None
-    return val
+    return dtype(val)
 
 
 def load_xref(txn):
@@ -347,6 +360,8 @@ def datalist2iemob_data(datalist, source) -> dict:
     data = {}
     displacement = 0
     depth = 0
+    skyc = 1
+    skyl = 1
     for msg in datalist:
         LOG.debug("%s %s %s", msg["id"], msg["description"], msg["value"])
         if msg["id"].startswith("001"):
@@ -376,6 +391,21 @@ def datalist2iemob_data(datalist, source) -> dict:
             continue
         if msg["id"] in DIRECTS:
             data[DIRECTS[msg["id"]]] = msg["value"]
+            continue
+        # 020011 CLOUD AMOUNT
+        if msg["id"] == "020011":
+            # 0-8 oktas
+            # 9 = sky obscured
+            # 15 = sky can't be observed
+            data[f"skyc{skyc}"] = OCTAS_MAP.get(msg["value"])
+            skyc += 1
+            continue
+        # 020013 HEIGHT OF BASE OF CLOUD
+        if msg["id"] == "020013":
+            data[f"skyl{skyl}"] = bounds_check(
+                convert_value(msg["value"], "m", "foot"), 0, 100_000, dtype=int
+            )
+            skyl += 1
             continue
         if msg["id"] == "010004":
             data["pres"] = msg["value"] / 100.0
