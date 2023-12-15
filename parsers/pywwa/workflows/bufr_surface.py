@@ -82,6 +82,7 @@ WMO2ISO3166 = {
     "GMSE": 504,  # Morocco
     "GMSM": 504,  # Morocco
     "GMTA": 504,  # Morocco
+    "GMTF": 504,  # Morocco
     "GMTI": 504,  # Morocco
     "GMTL": 504,  # Morocco
     "GMTN": 504,  # Morocco
