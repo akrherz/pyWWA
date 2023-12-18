@@ -6,10 +6,10 @@ CAA2            Saint Andre Avellin              -- CA  4574  -7507     0  0
 CAA4            Saint Apollinaire                -- CA  4659  -7156     0  0
 CAA8            Invermere                        -- CA  5052 -11600     0  0
 CAA9            Port Alberni                     BC CA  4928 -12495     0  0
-CAB3            Bedwell Harbour                  -- CA  4875 -12323     0  0            
+CAB3            Bedwell Harbour                  -- CA  4875 -12323     0  0
 CAB4            Tofino Harbour Seaplane          BC CA  4915 -12591     0  0
 CAB7            Kelowna Heliport                 -- CA  4986 -11957     0  0
-CAC8            Nanaimo                          -- CA  4918 -12395     0  0            
+CAC8            Nanaimo                          -- CA  4918 -12395     0  0
 CAD4            Trail                            -- CA  4906 -11761     0  0
 CAD5            Merritt                          -- CA  5012 -12074     0  0
 CAE3            Campbell River Seaplane          -- CA  5005 -12525     0  0
@@ -20,7 +20,7 @@ CAF4            Tsuniah                          -- CA  5153 -12417     0  0
 CAF6            Big Bay                          -- CA  5040 -12513     0  0
 CAF8            Nimpo Lake                       -- CA  5233 -12515     0  0
 CAG3            Chilko Lake                      -- CA  5163 -12414     0  0
-CAG8            Pender Habour Seaplane Base      -- CA  4962 -12402     0  0            
+CAG8            Pender Habour Seaplane Base      -- CA  4962 -12402     0  0
 CAH3            Courtenay                        -- CA  4968 -12498     0  0
 CAH4            Valemount                        -- CA  5285 -11933     0  0
 CAH9            Telegraphy Creek                 BC CA  5790 -13118     0  0
@@ -40,7 +40,7 @@ CAM5            Houston                          -- CA  5444 -12678     0  0
 CAM8            Port McNeill Seaplane Base       BC CA  5058 -12710     0  0
 CAM9            Vancouver Seaplane               BC CA  4918 -12316     0  0
 CAN3            Ucluelet Seaplane                -- CA  4895 -12555     0  0
-CAN6            Prince Rupert                    BC CA  5432 -13040     0  0            
+CAN6            Prince Rupert                    BC CA  5432 -13040     0  0
 CAP3            Sechelt                          -- CA  4946 -12372     0  0
 CAP5            Victoria                         -- CA  4865 -12345     0  0
 ## CAP8
@@ -55,7 +55,7 @@ CAT7            Lasqueti Island                  BC CA  4950 -12435     0  0
 CAU3            Oliver                           -- CA  4917 -11955     0  0
 CAU4            Vanderhoof                       -- CA  5405 -12401     0  0
 CAU6            Gold River                       BC CA  4968 -12612     0  0
-CAU8            Rivers Inlet Seaplane            -- CA  5168 -12725     0  0            
+CAU8            Rivers Inlet Seaplane            -- CA  5168 -12725     0  0
 CAV3            One Hundred Mile House           -- CA  5164 -12131     0  0
 CAV4            McBride                          -- CA  5332 -12017     0  0
 CAV5            Sullivan Bay                     -- CA  5089 -12683     0  0
@@ -63,9 +63,9 @@ CAV6            Beausejour                       MB CA  5004  -9659     0  0
 CAV8            Shawnigan Lake                   -- CA  4863 -12363     0  0
 CAW5            Port Hardy                       BC CA  5072 -12748     0  0
 CAW6            Fort Ware Seaplane               -- CA  5742 -12565     0  0
-CAW8            Bella Bella                      -- CA  5215 -12808     0  0            
+CAW8            Bella Bella                      -- CA  5215 -12808     0  0
 CAX5            Likely                           -- CA  5262 -12150     0  0
-CAX6            Ganges Seaplane                  -- CA  4885 -12350     0  0            
+CAX6            Ganges Seaplane                  -- CA  4885 -12350     0  0
 CAY2            Gang Ranch                       BC CA  5155 -12233     0  0
 CAY4            Hartley Bay                      -- CA  5342 -12925     0  0
 CAZ5            Cache Creek                      -- CA  5078 -12132     0  0
@@ -598,8 +598,9 @@ CTB6            Tete a la Baleine                -- CA  5067  -5938     0  0
 ## CTDF
 CTD4            Baie St Paul                     QB CA  4744  -7052     0  0
 CTE3            Havre St Pierre                  -- CA  5026  -6355     0  0
+CTF4            Dundalk Tripp Field              ON CA  4417  -8031     0  0
 CTG3            Du Rocher Perce                  -- CA  4338  -6456     0  0
-CTH3            Grandes Bergeronnes              -- CA  4823  -6954     0  0            
+CTH3            Grandes Bergeronnes              -- CA  4823  -6954     0  0
 CTH7            Riviere aux Saumons              QB CA  4940  -6230     0  0
 CTK6            Kegaska                          -- CA  5020  -6127     0  0
 CTM9            Oakville Heliport                ON CA  4345  -7976     0  0
