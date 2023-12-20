@@ -151,6 +151,7 @@ WMO2ISO3166 = {
     "SPIM": 604,  # Peru
     "SUMU": 858,  # Uruguay
     "TBPB": 52,  # Barbados
+    "TLPC": 662,  # Saint Lucia
     "TLPL": 662,  # Saint Lucia
     "UAST": 398,  # Kazakhstan
     "UKMS": 804,  # Ukraine
@@ -158,6 +159,7 @@ WMO2ISO3166 = {
     "UMRR": 643,  # Russia
     "UTTW": 860,  # Uzbekistan
     "VBRR": 764,  # Thailand
+    "VCCC": 144,  # Sri Lanka
     "VDPP": 764,  # Thailand
     "VGDC": 826,  # United Kingdom
     "VMMC": 344,  # Hong Kong
