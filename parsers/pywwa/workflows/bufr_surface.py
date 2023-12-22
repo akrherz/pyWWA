@@ -119,6 +119,9 @@ WMO2ISO3166 = {
     "MDLR": 214,  # Dominican Republic
     "MDPC": 214,  # Dominican Republic
     "MDPP": 214,  # Dominican Republic
+    "MDSD": 214,  # Dominican Republic
+    "MDST": 214,  # Dominican Republic
+    "MDWO": 214,  # Dominican Republic
     "MJSK": 484,  # Mexico
     "NCRG": 554,  # New Zealand
     "NFFN": 242,  # Fiji
