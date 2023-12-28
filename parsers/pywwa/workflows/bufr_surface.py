@@ -166,6 +166,7 @@ WMO2ISO3166 = {
     "VDPP": 764,  # Thailand
     "VGDC": 826,  # United Kingdom
     "VMMC": 344,  # Hong Kong
+    "VNNN": 704,  # Vietnam
     "VRMM": 462,  # Maldives
     "VTBB": 764,  # Thailand
     "WIIX": 360,  # Indonesia
