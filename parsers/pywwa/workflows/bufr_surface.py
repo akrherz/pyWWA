@@ -67,6 +67,7 @@ WMO2ISO3166 = {
     "GMFI": 504,  # Morocco
     "GMFK": 504,  # Morocco
     "GMFO": 504,  # Morocco
+    "GMFZ": 504,  # Morocco
     "GMMC": 504,  # Morocco
     "GMME": 504,  # Morocco
     "GMMG": 504,  # Morocco
