@@ -36,6 +36,12 @@ def test_phour():
 
 
 @pytest.mark.parametrize("database", ["iem"])
+def test_240103_bad_date(cursor):
+    """Test failure in the wild."""
+    sync_workflow(cursor, "ISCI01_SABM.bufr")
+
+
+@pytest.mark.parametrize("database", ["iem"])
 def test_231208_null_bytes(cursor):
     """Test failure in the wild."""
     sync_workflow(cursor, "ISMA01_FNLU_badid2.bufr")
