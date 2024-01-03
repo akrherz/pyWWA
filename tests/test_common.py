@@ -1,9 +1,7 @@
 """Test pywwa.common"""
 
-# third party
+import pywwa
 from pyiem.util import utc
-
-# local
 from pywwa import common
 
 
@@ -17,6 +15,11 @@ def test_shutdown_badarg():
     common.shutdown("5")
 
 
+def test_shutdown():
+    """Test shutdown."""
+    common.shutdown()
+
+
 def test_should_email():
     """Test that our logic to prevent email bombs works."""
     common.SETTINGS["pywwa_email_limit"] = 10
@@ -24,3 +27,10 @@ def test_should_email():
         common.EMAIL_TIMESTAMPS.append(utc())
     assert not common.should_email()
     assert not common.email_error(None, None)
+
+
+def test_email_error():
+    """Test that we can email an error."""
+    common.email_error(None, None)
+    pywwa.CTX.disable_email = True
+    common.email_error(None, None)
