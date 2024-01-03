@@ -30,6 +30,7 @@ def test_should_email():
 
 def test_email_error():
     """Test that we can email an error."""
+    common.EMAIL_TIMESTAMPS = []
     common.email_error(None, None)
     CTX.disable_email = True
     common.email_error(None, None)
