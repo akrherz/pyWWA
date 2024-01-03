@@ -1,8 +1,7 @@
 """Test pywwa.common"""
 
-import pywwa
 from pyiem.util import utc
-from pywwa import common
+from pywwa import CTX, common
 
 
 def test_crawl():
@@ -32,5 +31,5 @@ def test_should_email():
 def test_email_error():
     """Test that we can email an error."""
     common.email_error(None, None)
-    pywwa.CTX.disable_email = True
+    CTX.disable_email = True
     common.email_error(None, None)
