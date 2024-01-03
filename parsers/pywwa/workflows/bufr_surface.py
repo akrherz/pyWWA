@@ -309,6 +309,16 @@ def process_datalist(txn, prod, datalist, mcursor=None):
     if sid is None:
         return
     valid = data["valid"]
+    # Don't allow products from the distant past
+    if valid < (common.utcnow() - timedelta(days=720)):
+        LOG.warning(
+            "%s %s is from the past %s < %s",
+            prod.get_product_id(),
+            sid,
+            valid,
+            common.utcnow() + timedelta(days=720),
+        )
+        return
     # Don't allow products from the future
     if valid > (common.utcnow() + timedelta(hours=2)):
         LOG.warning(
