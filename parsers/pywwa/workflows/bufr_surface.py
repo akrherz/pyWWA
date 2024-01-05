@@ -28,6 +28,7 @@ MESOSITEDB = get_database("mesosite", cp_max=1)
 IEMDB = get_database("iem", cp_max=1)
 # Github Copilot did 99% of the work here, hopefully it is right!
 WMO2ISO3166 = {
+    "AMMC": 12,  # Algeria
     "BABJ": 156,  # China
     "BIRK": 352,  # Iceland
     "CWAO": 124,  # Canada
