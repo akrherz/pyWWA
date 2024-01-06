@@ -9,7 +9,7 @@ import pywwa
 def test_invalid_filename():
     """Test that exception is raised"""
     with pytest.raises(FileNotFoundError):
-        pywwa.get_table_filepath("foo.txt")
+        pywwa.get_data_filepath("foo.txt")
 
 
 def test_load_settings():

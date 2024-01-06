@@ -8,7 +8,7 @@ from pyiem.util import LOG
 from twisted.internet import reactor
 
 # Local
-from pywwa import common, get_table_filepath
+from pywwa import common, get_data_filepath
 from pywwa.database import get_database
 from pywwa.ldm import bridge
 
@@ -51,7 +51,7 @@ def load_locs(txn):
             "lat": row["lat"],
         }
 
-    fn = get_table_filepath("faa_apt.tbl")
+    fn = get_data_filepath("faa_apt.tbl")
     with open(fn, encoding="utf-8") as fh:
         for line in fh:
             if len(line) < 70 or line[0] == "!":
@@ -63,7 +63,7 @@ def load_locs(txn):
             if sid not in LOCS:
                 LOCS[sid] = {"lat": lat, "lon": lon, "name": name}
 
-    fn = get_table_filepath("vors.tbl")
+    fn = get_data_filepath("vors.tbl")
     with open(fn, encoding="utf-8") as fh:
         for line in fh:
             if len(line) < 70 or line[0] == "!":
@@ -76,7 +76,7 @@ def load_locs(txn):
                 LOCS[sid] = {"lat": lat, "lon": lon, "name": name}
 
     # Finally, GEMPAK!
-    fn = get_table_filepath("pirep_navaids.tbl")
+    fn = get_data_filepath("pirep_navaids.tbl")
     with open(fn, encoding="utf-8") as fh:
         for line in fh:
             if len(line) < 60 or line[0] in ["!", "#"]:

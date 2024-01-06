@@ -6,7 +6,7 @@ from pyiem.util import LOG
 from twisted.internet import reactor
 
 # Local
-from pywwa import common, get_table_filepath
+from pywwa import common, get_data_filepath
 from pywwa.database import get_database
 from pywwa.ldm import bridge
 
@@ -32,7 +32,7 @@ def load_database(txn):
     for row in txn.fetchall():
         LOCS[row["id"]] = row
 
-    fn = get_table_filepath("vors.tbl")
+    fn = get_data_filepath("vors.tbl")
     with open(fn, encoding="utf-8") as fh:
         for line in filter(goodline, fh):
             sid = line[:3]
@@ -42,7 +42,7 @@ def load_database(txn):
             LOCS[sid] = {"lat": lat, "lon": lon, "name": name}
 
     # Finally, GEMPAK!
-    fn = get_table_filepath("pirep_navaids.tbl")
+    fn = get_data_filepath("pirep_navaids.tbl")
     with open(fn, encoding="utf-8") as fh:
         for line in filter(goodline, fh):
             sid = line[:3]

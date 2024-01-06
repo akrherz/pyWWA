@@ -20,24 +20,18 @@ CTX.update(CTX_DEFAULTS)
 JABBER = None
 
 
-def get_table_filepath(filename):
+def get_data_filepath(filename):
     """Return full path to a given filename resource."""
-    testfn = os.path.join(get_basedir(), "tables", filename)
+    testfn = os.path.join(os.path.dirname(__file__), "data", filename)
     if not os.path.isfile(testfn):
         raise FileNotFoundError(f"could not locate table file {testfn}")
     return testfn
 
 
-def get_basedir() -> str:
-    """Since I am a hack, we need to compute the base folder of this repo."""
-    thisdir = os.path.dirname(__file__)
-    # up two folders
-    return os.path.abspath(os.path.join(thisdir, "../.."))
-
-
 def load_config() -> dict:
     """Attempt to locate our configuration file."""
-    testfn = os.path.join(get_basedir(), "settings.json")
+    basedir = os.environ.get("PYWWA_HOME", os.getcwd())
+    testfn = os.path.join(basedir, "settings.json")
     if not os.path.isfile(testfn):
         return {}
     with open(testfn, encoding="utf-8") as fh:
