@@ -47,7 +47,7 @@ def do_legacy_ir(sat, tmpfn):
     """since some are unable to process non-grayscale"""
     logger.info("Doing legacy IR junk...")
     png = Image.fromarray(np.array(sat.data[:-1, :], np.uint8))
-    png.save("%s.png" % (tmpfn,))
+    png.save(f"{tmpfn}.png")
 
     # World File
 
@@ -179,7 +179,7 @@ def write_metadata_epsg(sat, tmpfn, epsg):
     metadata["meta"]["epsg"] = epsg
     metadata["meta"]["bird"] = sat.get_bird()
     metadata["meta"]["archive_filename"] = sat.archive_filename()
-    metafp = "%s_%s.json" % (tmpfn, epsg)
+    metafp = f"{tmpfn}_{epsg}.json"
     with open(metafp, "w") as fh:
         json.dump(metadata, fh)
 

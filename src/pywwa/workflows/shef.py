@@ -487,9 +487,8 @@ def log_database_queue_size():
     """Log how much backlog has accumulated."""
     LOG.info(
         "dbpool queuesz[hads:%s, access:%s]",
-        # pylint: disable=protected-access
-        HADSDB.threadpool._queue.qsize(),
-        ACCESSDB.threadpool._queue.qsize(),
+        HADSDB.threadpool._queue.qsize(),  # skipcq: PYL-W0212
+        ACCESSDB.threadpool._queue.qsize(),  # skipcq: PYL-W0212
     )
 
 

@@ -94,10 +94,12 @@ def real_processor(text):
         skip = False
         channels = jmsg[2].get("channels", [])
         for channel in channels.split(","):
-            if channel.startswith("METAR."):
-                if channel.split(".")[1] in IGNORELIST:
-                    LOG.info("IGNORELIST Jabber relay of %s", jmsg[0])
-                    skip = True
+            if (
+                channel.startswith("METAR.")
+                and channel.split(".")[1] in IGNORELIST
+            ):
+                LOG.info("IGNORELIST Jabber relay of %s", jmsg[0])
+                skip = True
         JABBER_MESSAGES.append(jmsg[0])
         if not skip:
             common.send_message(*jmsg)

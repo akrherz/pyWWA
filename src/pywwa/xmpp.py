@@ -20,7 +20,7 @@ from twisted.words.xish.xmlstream import STREAM_END_EVENT
 import pywwa
 
 # http://stackoverflow.com/questions/7016602
-webclient._HTTP11ClientFactory.noisy = False
+webclient._HTTP11ClientFactory.noisy = False  # skipcq: PYL-W0212
 SETTINGS = pywwa.SETTINGS
 # create a regular expression that matches any illegal XML character
 # http://stackoverflow.com/questions/1707890

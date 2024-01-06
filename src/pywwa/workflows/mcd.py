@@ -31,7 +31,7 @@ def find_cwsus(txn, prod):
     ST_Overlaps do the geometries overlap
     ST_Covers does polygon exist inside CWSU
     """
-    wkt = "SRID=4326;%s" % (prod.geometry.wkt,)
+    wkt = f"SRID=4326;{prod.geometry.wkt}"
     txn.execute(
         "select distinct id from cwsu WHERE st_overlaps(%s, geom) or "
         "st_covers(geom, %s) ORDER by id ASC",
