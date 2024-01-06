@@ -33,7 +33,6 @@ def real_process(txn, data):
             sect,
         )
         if not tokens:
-            # log.msg("Nothing found in section of len=%s" % (len(sect), ))
             continue
         # Only take 4 char IDs :/
         if len(sect[:100].split()[0]) != 4:

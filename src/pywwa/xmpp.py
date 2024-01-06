@@ -196,7 +196,6 @@ class JabberClient:
         message["to"] = self.routerjid
         message["type"] = "chat"
 
-        # message.addElement('subject',None,subject)
         body = ILLEGAL_XML_CHARS_RE.sub("", body)
         if html:
             html = ILLEGAL_XML_CHARS_RE.sub("", html)

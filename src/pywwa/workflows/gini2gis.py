@@ -153,7 +153,7 @@ def write_metadata(sat, tmpfn):
         tmpfn,
     )
     subprocess.call(cmd, shell=True)
-    os.unlink("%s.json" % (tmpfn,))
+    os.unlink(f"{tmpfn}.json")
 
 
 def write_mapserver_metadata(sat, tmpfn, epsg):
@@ -209,7 +209,7 @@ def write_metadata_epsg(sat, tmpfn, epsg):
         epsg,
     )
     subprocess.call(cmd, shell=True)
-    os.unlink("%s_%s.json" % (tmpfn, epsg))
+    os.unlink(f"{tmpfn}_{epsg}.json")
 
 
 def get_ldm_routes(sat):
@@ -247,7 +247,7 @@ def gdalwarp(sat, tmpfn, epsg):
     output = proc.stderr.read()
     if output != b"":
         logger.error("gdalwarp() convert error message: %s", output)
-    os.unlink("%s_%s.tif" % (tmpfn, epsg))
+    os.unlink(f"{tmpfn}_{epsg}.tif")
 
     cmd = (
         "pqinsert -i -p 'gis c %s gis/images/%s/goes/%s bogus wld' "
@@ -273,8 +273,8 @@ def gdalwarp(sat, tmpfn, epsg):
     )
     subprocess.call(cmd, shell=True)
 
-    os.unlink("%s_%s.png" % (tmpfn, epsg))
-    os.unlink("%s_%s.tfw" % (tmpfn, epsg))
+    os.unlink(f"{tmpfn}_{epsg}.png")
+    os.unlink(f"{tmpfn}_{epsg}.tfw")
 
 
 def cleanup(tmpfn):
@@ -282,8 +282,8 @@ def cleanup(tmpfn):
     Pickup after ourself
     """
     for suffix in ["png", "wld", "tfw"]:
-        if os.path.isfile("%s.%s" % (tmpfn, suffix)):
-            os.unlink("%s.%s" % (tmpfn, suffix))
+        if os.path.isfile(f"{tmpfn}.{suffix}"):
+            os.unlink(f"{tmpfn}.{suffix}")
 
 
 def main():

@@ -44,7 +44,6 @@ def process_data(data):
 def process(bio):
     """Process our data, please"""
     l3 = Level3File(bio)
-    del bio
     ctx = {}
     ctx["nexrad"] = l3.siteID
     ctx["ts"] = l3.metadata["vol_time"].replace(tzinfo=ZoneInfo("UTC"))
