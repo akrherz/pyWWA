@@ -18,9 +18,9 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
         super().__init__(isbinary=isbinary, dedup=dedup)
         self.local_callback = callback
 
-    @staticmethod
-    def connectionLost(_reason):
+    def connectionLost(self, reason):
         """called when the connection is lost"""
+        LOG.info("connectionLost: %s", reason)
         shutdown()
 
     def process_data(self, data):

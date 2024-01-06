@@ -66,10 +66,7 @@ class LDMProductReceiver(basic.LineReceiver):
         """
         clean = original.replace("\x1e", "").replace("\t", "")
         if clean.find("\x17") > 0:
-            # log.msg("control-17 found, truncating...")
             clean = clean[: clean.find("\x17")]
-        # log.msg("buffer[:20] is : "+ repr(buf[:20]) )
-        # log.msg("buffer[-20:] is : "+ repr(buf[-20:]) )
         lines = clean.split("\015\015\012")
         # Trim trailing empty lines
         while lines and lines[-1].strip() == "":
@@ -81,16 +78,12 @@ class LDMProductReceiver(basic.LineReceiver):
         clean = "\015\015\012".join(lines)
         # first 11 characters should not be included in hex, like LDM does
         # hashlib works on bytes
+        # skipcq: PTC-W1003
         digest = hashlib.md5(clean[11:].encode("utf-8")).hexdigest()
-        # log.msg("Cache size is : "+ str(len(self.cache.keys())) )
-        # log.msg("digest is     : "+ str(digest) )
-        # log.msg("Product Size  : "+ str(len(product)) )
-        # log.msg("len(lines)    : "+ str(len(lines)) )
         if digest in self.cache:
-            log.msg("DUP! %s" % (",".join(lines[1:5]),))
+            log.msg(f"DUP! {','.join(lines[1:5])}")
         else:
             self.cache[digest] = datetime.datetime.utcnow()
-            # log.msg("process_data() called")
             self.process_data(clean + "\015\015\012")
 
     def rawDataReceived(self, data):
@@ -105,14 +98,11 @@ class LDMProductReceiver(basic.LineReceiver):
         # see how many products we may have
         tokens = self.productBuffer.getvalue().split(self.product_end)
         # If length tokens is 1, then we did not find the splitter
-        # print(("len(tokens) is %s, bytes_received is %s"
-        #        ) % (len(tokens), self.bytes_received))
         if len(tokens) == 1:
             return
 
         # Everything up until the last one can always go...
         for token in tokens[:-1]:
-            # print("calling cbFunc(%s)" % (token.decode('utf-8')[:11]))
             if self.isbinary:
                 # we send bytes
                 self.reactor.callLater(0, self.cbFunc, token)
@@ -127,17 +117,13 @@ class LDMProductReceiver(basic.LineReceiver):
         self.productBuffer.truncate()
         self.productBuffer.write(tokens[-1])
 
-    def connectionLost(self, reason):
-        """Fired when STDIN is closed"""
-        raise NotImplementedError
-
     def process_data(self, data):
         """callback function, either str or bytes depending on isbinary"""
         raise NotImplementedError
 
     def lineReceived(self, line):
         """needless override to make pylint happy"""
-        pass
+        log.msg(line)
 
 
 class LDMProductFactory(stdio.StandardIO):
