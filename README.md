@@ -49,7 +49,7 @@ Short Flag | Long Flag | Description
 
 key | default | description
 --- | ---- | ---
-pywwa_dedup | false | Set to `true` for pyWWA/pyLDM to dedup products.
+pywwa_dedup | false | Set to `true` for pyWWA to dedup products.
 pywwa_email_limit | 10 | Number of debug emails an individual ingestor is permitted to send within 60 minutes of time
 pywwa_lsr_url | - | URL Base for the LSR App
 pywwa_metar_url | - | URL Base for METAR reports.

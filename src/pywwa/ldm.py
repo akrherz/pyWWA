@@ -2,10 +2,10 @@
 
 # 3rd Party
 from pyiem.util import LOG
-from pyldm import ldmbridge
 from twisted.internet import reactor, task
 
 # Local
+from pywwa import ldmbridge
 from pywwa.common import SETTINGS, email_error, shutdown
 
 

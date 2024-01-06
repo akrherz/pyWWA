@@ -1,7 +1,5 @@
 # dev build for now
 git+https://github.com/akrherz/pyIEM.git
-# LDM bridge
-git+https://github.com/akrherz/pyLDM.git
 # memcached
 txyam2
 # non-twisted xmpp usage
