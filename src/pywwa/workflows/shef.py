@@ -606,6 +606,7 @@ def main2(_res):
 
 @click.command()
 @common.disable_xmpp
+@click.option("--custom-arg", "-c", type=str, help="Differentiate pqact job")
 @common.init
 def main(*args, **kwargs):
     """We startup."""
