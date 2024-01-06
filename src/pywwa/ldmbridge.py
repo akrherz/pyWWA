@@ -74,7 +74,7 @@ class LDMProductReceiver(basic.LineReceiver):
         # Trim trailing empty lines
         while lines and lines[-1].strip() == "":
             lines.pop()
-        if not lines:
+        if len(lines) < 2:
             log.msg("ERROR: filter_product culled entire product (no data?)")
             return
         lines[1] = lines[1][:3]
