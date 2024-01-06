@@ -1,6 +1,0 @@
-# dev build for now
-git+https://github.com/akrherz/pyIEM.git
-# memcached
-txyam2
-# non-twisted xmpp usage
-xmpppy

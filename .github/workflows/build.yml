@@ -49,9 +49,8 @@ jobs:
     - name: Install and Test
       run: |
         set -e
-        # pip install from requirements.txt
-        python -m pip install -r pip_requirements.txt
-        python -m pip install . --no-deps
+        python -m pip install git+https://github.com/akrherz/pyIEM.git
+        python -m pip install .
         cp settings.json-template settings.json
         # This is a bit brittle, but loads some data
         python util/ugcs_update.py fz08mr23 2023 3 08
