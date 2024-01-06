@@ -6,10 +6,9 @@ import re
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
+import click
 from pyiem.nws import product
 from pyiem.util import LOG
-
-# 3rd Party
 from twisted.internet import reactor
 from twisted.mail import smtp
 
@@ -124,12 +123,10 @@ def real_process(data) -> product.TextProduct:
     return prod
 
 
-def main():
+@click.command()
+@common.disable_xmpp
+@common.init
+def main(*args, **kwargs):
     """Go Main Go."""
-    common.main(with_jabber=False)
     bridge(process_data)
     reactor.run()
-
-
-if __name__ == "__main__":
-    main()

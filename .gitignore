@@ -17,3 +17,4 @@ util/rabbitmq.json
 coverage.xml
 .eggs/
 parsers/pywwa.egg-info/
+build/

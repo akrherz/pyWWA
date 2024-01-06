@@ -1,5 +1,6 @@
 """ Aviation Product Parser! """
 # 3rd Party
+import click
 from pyiem.nws.products.sigmet import parser
 from pyiem.util import LOG
 from twisted.internet import reactor
@@ -80,15 +81,12 @@ def onready(_res):
     MESOSITE.close()
 
 
-def main():
+@click.command()
+@click.option("--daryl", is_flag=True, help="Run Daryl's test")
+@common.init
+def main(*args, **kwargs):
     """Fire things up."""
-    common.main()
     df = MESOSITE.runInteraction(load_database)
     df.addCallback(onready)
     df.addErrback(common.shutdown)
     reactor.run()
-
-
-if __name__ == "__main__":
-    # Go
-    main()

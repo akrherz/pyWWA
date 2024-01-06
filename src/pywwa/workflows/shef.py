@@ -9,6 +9,7 @@ from zoneinfo import ZoneInfo
 
 # 3rd Party
 # pylint: disable=no-name-in-module
+import click
 from psycopg.errors import DeadlockDetected
 from pyiem.models.shef import SHEFElement
 from pyiem.nws.products.shef import parser
@@ -603,16 +604,13 @@ def main2(_res):
     df4.addErrback(common.email_error)
 
 
-def main():
+@click.command()
+@common.disable_xmpp
+@common.init
+def main(*args, **kwargs):
     """We startup."""
-    common.main(with_jabber=False)
-
     # Load the station metadata before we fire up the ingesting
     df = MESOSITEDB.runInteraction(load_stations)
     df.addCallback(main2)
     df.addErrback(common.shutdown)
     reactor.run()
-
-
-if __name__ == "__main__":
-    main()

@@ -11,6 +11,7 @@ with watches.  Lets try to explain
     product_issue <- When was this product issued by the NWS
 """
 # 3rd Party
+import click
 from pyiem.nws.products.vtec import parser as vtecparser
 from pyiem.nws.ugc import UGCProvider
 from pyiem.util import LOG
@@ -77,13 +78,10 @@ def step2(_dummy, text_product):
         common.send_message(plain, html, xtra)
 
 
-def main():
+@click.command()
+@common.init
+def main(*args, **kwargs):
     """Go Main Go."""
-    common.main()
     load_nwsli(NWSLI_DICT)
     bridge(process_data)
     reactor.run()
-
-
-if __name__ == "__main__":
-    main()

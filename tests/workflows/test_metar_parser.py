@@ -6,7 +6,7 @@ import pytest
 import pywwa
 from pyiem.util import utc
 from pywwa.testing import get_example_file
-from pywwa.workflows import metar_parser
+from pywwa.workflows import metar
 
 
 def create_entries(cursor):
@@ -27,9 +27,9 @@ def create_entries(cursor):
 
 def test_api():
     """Test that we can load things to ignore."""
-    metar_parser.load_ignorelist()
-    metar_parser.cleandb()
-    metar_parser.ready(None)
+    metar.load_ignorelist()
+    metar.cleandb()
+    metar.ready(None)
 
 
 @pytest.mark.parametrize("database", ["iem"])
@@ -37,7 +37,7 @@ def test_processor(cursor):
     """Test basic parsing."""
     create_entries(cursor)
     data = get_example_file("METAR.txt")
-    pywwa.CTX.utcnow = utc(2011, 11, 25, 14)
+    pywwa.CTX["utcnow"] = utc(2011, 11, 25, 14)
     metadata = {"iemid": -1, "tzname": "America/Chicago"}
-    for mtr in metar_parser.process_data(data).metars:
-        metar_parser.do_db(cursor, mtr, metadata)
+    for mtr in metar.process_data(data).metars:
+        metar.do_db(cursor, mtr, metadata)

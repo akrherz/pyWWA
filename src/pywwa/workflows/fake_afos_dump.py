@@ -2,9 +2,8 @@
 # Stdlib
 import re
 
+import click
 from pyiem.nws.product import TextProduct
-
-# 3rd Party
 from twisted.internet import reactor
 
 # Local
@@ -104,12 +103,9 @@ def really_process_data(txn, data):
     return tp
 
 
-def main():
+@click.command()
+@common.init
+def main(*args, **kwargs):
     """Go Main Go."""
-    common.main()
     bridge(really_process_data, dbpool=get_database("afos"))
     reactor.run()
-
-
-if __name__ == "__main__":
-    main()

@@ -5,7 +5,7 @@ so we take what data we find in this product and overwrite the database
 storage of what we got from the automated observations
 """
 # Local
-from pywwa.workflows.cli_parser import main
+from pywwa.workflows.cli import main
 
 if __name__ == "__main__":
     # Do Stuff

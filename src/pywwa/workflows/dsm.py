@@ -2,6 +2,7 @@
 from zoneinfo import ZoneInfo
 
 # 3rd Party
+import click
 from pyiem.nws.products.dsm import parser
 from pyiem.util import LOG, get_dbconnc
 from twisted.internet import reactor
@@ -42,16 +43,13 @@ def real_parser(txn, data):
         common.email_error("\n".join(prod.warnings), data)
 
 
-def main():
+@click.command()
+@common.init
+def main(*args, **kwargs):
     """build things up."""
-    common.main(with_jabber=False)
     # sync
     pgconn, cursor = get_dbconnc("mesosite")
     load_stations(cursor)
     pgconn.close()
     bridge(real_parser, dbpool=get_database("iem"))
     reactor.run()
-
-
-if __name__ == "__main__":
-    main()

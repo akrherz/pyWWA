@@ -32,5 +32,5 @@ def test_email_error():
     """Test that we can email an error."""
     common.EMAIL_TIMESTAMPS = []
     common.email_error(None, None)
-    common.pywwa.CTX.disable_email = True
+    common.pywwa.CTX["disable_email"] = True
     common.email_error(None, None)

@@ -1,5 +1,6 @@
 """ XTEUS Product Parser! """
 # 3rd Party
+import click
 from pyiem.nws.products.xteus import parser
 from twisted.internet import reactor
 
@@ -25,13 +26,9 @@ def process_data(data):
     return prod
 
 
-def main():
+@click.command()
+@common.init
+def main(*args, **kwargs):
     """Fire things up."""
-    common.main()
     bridge(process_data)
     reactor.run()
-
-
-if __name__ == "__main__":
-    # Go
-    main()

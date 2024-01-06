@@ -1,6 +1,7 @@
 """ SPC Watch (SAW, SEL, WWP) Ingestor """
 
 # 3rd Party
+import click
 from pyiem.nws.product import TextProduct
 from pyiem.nws.products import parser
 from pyiem.util import LOG
@@ -82,15 +83,12 @@ def real_process(txn, raw) -> TextProduct:
     return prod
 
 
-def main():
+@click.command()
+@common.init
+def main(*args, **kwargs):
     """Go Main Go"""
-    common.main()
     bridge(real_process, dbpool=get_database("postgis"))
     lc = LoopingCall(process_queue)
     df = lc.start(15, now=False)
     df.addErrback(common.email_error)
     reactor.run()
-
-
-if __name__ == "__main__":
-    main()

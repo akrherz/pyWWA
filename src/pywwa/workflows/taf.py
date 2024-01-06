@@ -1,6 +1,7 @@
 """ TAF Ingestor """
 
 # 3rd Party
+import click
 from pyiem.nws.products.taf import parser
 from twisted.internet import reactor
 
@@ -23,12 +24,9 @@ def real_process(txn, raw):
         common.email_error("\n\n".join(prod.warnings), prod.text)
 
 
-def main():
+@click.command()
+@common.init
+def main(*args, **kwargs):
     """Go Main Go"""
-    common.main()
     bridge(real_process, dbpool=get_database("asos"))
     reactor.run()  # @UndefinedVariable
-
-
-if __name__ == "__main__":
-    main()

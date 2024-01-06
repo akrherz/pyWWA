@@ -1,7 +1,8 @@
-"""Parse CF6 text products."""
+"""Parse FD text products."""
 
 # 3rd Party
-from pyiem.nws.products.cf6 import parser
+import click
+from pyiem.nws.products.fd import parser
 from twisted.internet import reactor
 
 # Local
@@ -9,7 +10,7 @@ from pywwa import common
 from pywwa.database import get_database
 from pywwa.ldm import bridge
 
-DBPOOL = get_database("iem")
+DBPOOL = get_database("asos", cp_max=2)
 
 
 def processor(txn, text):
@@ -22,13 +23,10 @@ def processor(txn, text):
     return prod
 
 
-def main():
+@click.command()
+@common.disable_xmpp
+@common.init
+def main(*args, **kwargs):
     """Go Main Go."""
-    common.main(with_jabber=False)
     bridge(processor, dbpool=DBPOOL)
     reactor.run()
-
-
-if __name__ == "__main__":
-    # Do Stuff
-    main()

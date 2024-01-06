@@ -5,6 +5,7 @@ from io import BytesIO
 from zoneinfo import ZoneInfo
 
 # 3rd Party
+import click
 from metpy.io.nexrad import Level3File
 from pyiem.util import LOG
 from twisted.internet import reactor
@@ -184,15 +185,12 @@ def errback(res):
     reactor.stop()
 
 
-def main():
+@click.command()
+@common.init
+def main(*args, **kwargs):
     """Go Main Go"""
-    common.main(with_jabber=False)
     mesosite = get_database("mesosite")
     df = mesosite.runInteraction(load_station_table)
     df.addCallback(on_ready, mesosite)
     df.addErrback(errback)
     reactor.run()
-
-
-if __name__ == "__main__":
-    main()

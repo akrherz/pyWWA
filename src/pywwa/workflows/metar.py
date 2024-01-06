@@ -8,11 +8,10 @@ So let us document it here for my own sanity.
 # stdlib
 from datetime import timezone
 
+import click
 from pyiem.nws.products import metarcollect
 from pyiem.util import LOG, get_properties
 from twisted.internet import reactor
-
-# 3rd Party
 from twisted.internet.task import LoopingCall
 
 # Local
@@ -163,14 +162,11 @@ def ready(_):
     lc.start(720)
 
 
-def main():
+@click.command()
+@common.init
+def main(*args, **kwargs):
     """Run once at startup"""
-    common.main()
     df = MESOSITEDB.runInteraction(load_metar_stations, NWSLI_PROVIDER)
     df.addCallback(ready)
     df.addErrback(LOG.error)
     reactor.run()  # @UndefinedVariable
-
-
-if __name__ == "__main__":
-    main()

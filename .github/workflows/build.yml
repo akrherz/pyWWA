@@ -51,8 +51,7 @@ jobs:
         set -e
         # pip install from requirements.txt
         python -m pip install -r pip_requirements.txt
-        python -m pip install codecov
-        python -m pip install . --upgrade
+        python -m pip install . --no-deps
         cp settings.json-template settings.json
         # This is a bit brittle, but loads some data
         python util/ugcs_update.py fz08mr23 2023 3 08

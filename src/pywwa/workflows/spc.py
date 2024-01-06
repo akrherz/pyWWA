@@ -1,7 +1,8 @@
-"""WPC Geo Products Parser!"""
+"""SPC Geo Products Parser!"""
 
 # 3rd Party
-from pyiem.nws.products.ero import parser
+import click
+from pyiem.nws.products.spcpts import parser
 from pyiem.util import LOG
 from twisted.internet import reactor
 
@@ -16,6 +17,7 @@ WAITFOR = 20
 def real_parser(txn, buf):
     """Actually process"""
     prod = parser(buf)
+    # spc.draw_outlooks()
     if common.dbwrite_enabled():
         prod.sql(txn)
     if prod.warnings:
@@ -33,12 +35,9 @@ def do_jabber(prod):
     )
 
 
-def main():
+@click.command()
+@common.init
+def main(*args, **kwargs):
     """Go Main Go."""
-    common.main()
     bridge(real_parser, dbpool=get_database("postgis"), cb2=do_jabber)
-    reactor.run()  # @UndefinedVariable
-
-
-if __name__ == "__main__":
-    main()
+    reactor.run()

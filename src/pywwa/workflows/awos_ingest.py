@@ -1,6 +1,7 @@
 """Reuse code from metar_parser."""
 
 # 3rd party
+import click
 from pyiem.util import LOG, utc
 from twisted.internet import reactor
 from twisted.internet.endpoints import TCP4ServerEndpoint
@@ -8,7 +9,7 @@ from twisted.internet.protocol import Factory
 from twisted.protocols.basic import LineReceiver
 
 # local
-from pywwa.workflows import metar_parser
+from pywwa.workflows import metar
 
 from .. import common
 from ..database import get_database, load_metar_stations
@@ -44,20 +45,22 @@ def process_line(line):
         "METAR \r\r\n"
         f"{line}\r\r\n"
     )
-    metar_parser.real_processor(text)
+    metar.real_processor(text)
 
 
 def ready(_):
     """Do what we need to do."""
     endpoint = TCP4ServerEndpoint(reactor, 4000)
     endpoint.listen(AWOSFactory())
-    metar_parser.cleandb()
+    metar.cleandb()
 
 
-def main():
+@click.command()
+@common.disable_xmpp
+@common.init
+def main(*args, **kwargs):
     """Run once at startup"""
-    common.main()
-    df = IEMDB.runInteraction(load_metar_stations, metar_parser.NWSLI_PROVIDER)
+    df = IEMDB.runInteraction(load_metar_stations, metar.NWSLI_PROVIDER)
     df.addCallback(ready)
     df.addErrback(LOG.error)
     reactor.run()

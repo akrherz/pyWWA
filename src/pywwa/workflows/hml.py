@@ -1,6 +1,7 @@
 """ HML parser! """
 
 # 3rd Party
+import click
 from pyiem.nws.products.hml import parser as hmlparser
 from twisted.internet import reactor
 
@@ -19,12 +20,10 @@ def real_parser(txn, buf):
         common.email_error("\n".join(prod.warnings), buf)
 
 
-def main():
+@click.command()
+@common.disable_xmpp
+@common.init
+def main(*args, **kwargs):
     """Go Main Go."""
-    common.main(with_jabber=False)
     bridge(real_parser, dbpool=get_database("hml"))
     reactor.run()  # @UndefinedVariable
-
-
-if __name__ == "__main__":
-    main()

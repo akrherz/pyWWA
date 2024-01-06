@@ -1,5 +1,6 @@
 """SPS product ingestor"""
 # 3rd Party
+import click
 from pyiem.nws.products.sps import parser
 from pyiem.nws.ugc import UGCProvider
 from pyiem.util import LOG
@@ -36,13 +37,10 @@ def real_process(txn, raw):
         common.email_error("\n\n".join(prod.warnings), prod.text)
 
 
-def main():
+@click.command()
+@common.init
+def main(*args, **kwargs):
     """Go Main Go."""
-    common.main()
     load_nwsli(NWSLI_DICT)
     bridge(real_process, dbpool=POSTGIS)
     reactor.run()
-
-
-if __name__ == "__main__":
-    main()

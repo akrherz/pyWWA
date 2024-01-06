@@ -6,6 +6,7 @@ import pickle
 from zoneinfo import ZoneInfo
 
 # 3rd Party
+import click
 from pyiem import reference
 from pyiem.nws.products.lsr import parser as lsrparser
 from pyiem.util import LOG, utc
@@ -84,14 +85,11 @@ def real_processor(txn, text):
         raise Exception("No LSRs parsed!", text)
 
 
-def main():
+@click.command()
+@common.init
+def main(*args, **kwargs):
     """Go Main Go."""
-    common.main()
     reactor.callLater(0, loaddb)
     bridge(real_processor, dbpool=get_database("postgis"))
     reactor.callLater(20, cleandb)
     reactor.run()
-
-
-if __name__ == "__main__":
-    main()

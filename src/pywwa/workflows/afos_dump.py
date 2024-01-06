@@ -1,5 +1,6 @@
 """AFOS Database Workflow."""
 # 3rd Party
+import click
 from pyiem.nws import product
 from pyiem.util import LOG
 from twisted.internet import reactor
@@ -97,13 +98,10 @@ def real_parser(txn, buf):
     return nws
 
 
-def main():
+@click.command()
+@common.disable_xmpp
+@common.init
+def main(*args, **kwargs):
     """Fire up our workflow."""
-    common.main(with_jabber=False)
     bridge(process_data)
     reactor.run()  # @UndefinedVariable
-
-
-# See how we are called.
-if __name__ == "__main__":
-    main()

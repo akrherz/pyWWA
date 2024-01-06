@@ -1,6 +1,7 @@
 """ MOS Data Ingestor, why not? """
 
 # 3rd Party
+import click
 from pyiem.nws.products.mos import parser
 from twisted.internet import reactor
 
@@ -40,12 +41,10 @@ def real_process(text):
     df.addErrback(common.email_error, text)
 
 
-def main():
+@click.command()
+@common.disable_xmpp
+@common.init
+def main(*args, **kwargs):
     """Go Main Go."""
-    common.main(with_jabber=False)
     bridge(process_data)
     reactor.run()
-
-
-if __name__ == "__main__":
-    main()

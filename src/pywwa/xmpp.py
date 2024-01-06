@@ -31,7 +31,7 @@ ILLEGAL_XML_CHARS_RE = re.compile(
 
 def make_jabber_client(resource_prefix=None):
     """Generate a jabber client, please"""
-    if pywwa.CTX.disable_xmpp:
+    if pywwa.CTX["disable_xmpp"]:
         LOG.info("XMPP disabled via command line.")
         pywwa.JABBER = NOOPXMPP()
         return pywwa.JABBER

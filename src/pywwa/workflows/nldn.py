@@ -2,9 +2,8 @@
 # stdlib
 from io import BytesIO
 
+import click
 from pyiem.nws.products.nldn import parser
-
-# 3rd Party
 from twisted.internet import reactor
 
 # Local
@@ -33,12 +32,10 @@ def real_process(buf):
         DBPOOL.runInteraction(np.sql)
 
 
-def main():
+@click.command()
+@common.disable_xmpp
+@common.init
+def main(*args, **kwargs):
     """Go Main"""
-    common.main(with_jabber=False)
     bridge(process_data, isbinary=True, product_end=b"NLDN")
     reactor.run()  # @UndefinedVariable
-
-
-if __name__ == "__main__":
-    main()

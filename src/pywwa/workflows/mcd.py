@@ -4,6 +4,7 @@
 """
 
 # 3rd Party
+import click
 from pyiem.nws.products.mcd import parser as mcdparser
 from twisted.internet import reactor
 
@@ -60,12 +61,9 @@ def real_process(txn, raw):
         common.email_error("\n".join(prod.warnings), raw)
 
 
-def main():
+@click.command()
+@common.init
+def main(*args, **kwargs):
     """Go Main Go."""
-    common.main()
     bridge(process_data)
     reactor.run()
-
-
-if __name__ == "__main__":
-    main()

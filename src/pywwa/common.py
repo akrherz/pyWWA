@@ -11,19 +11,17 @@ from email.mime.text import MIMEText
 from io import StringIO
 from syslog import LOG_LOCAL2
 
+import click
 import pyiem
 from pyiem.util import LOG, get_dbconn, utc
 from twisted.internet import reactor
 from twisted.logger import formatEvent
 from twisted.mail import smtp
 from twisted.python import failure, syslog
-
-# 3rd party
 from twisted.python import log as tplog
 
 # Local Be careful of circeref here
 import pywwa
-from pywwa.cmdline import parse_cmdline
 from pywwa.xmpp import make_jabber_client
 
 # http://bugs.python.org/issue7980
@@ -51,8 +49,8 @@ def shutdown(default=5):
         delay = 5
     else:
         delay = (
-            pywwa.CTX.shutdown_delay
-            if pywwa.CTX.shutdown_delay is not None
+            pywwa.CTX["shutdown_delay"]
+            if pywwa.CTX["shutdown_delay"] is not None
             else default
         )
     LOG.info("Shutting down in %s seconds...", delay)
@@ -61,17 +59,17 @@ def shutdown(default=5):
 
 def utcnow():
     """Return what utcnow is based on command line."""
-    return utc() if pywwa.CTX.utcnow is None else pywwa.CTX.utcnow
+    return utc() if pywwa.CTX["utcnow"] is None else pywwa.CTX["utcnow"]
 
 
 def dbwrite_enabled():
     """Is database writing not-disabled as per command line."""
-    return not pywwa.CTX.disable_dbwrite
+    return not pywwa.CTX["disable_dbwrite"]
 
 
 def replace_enabled():
     """Is -r --replace enabled."""
-    return pywwa.CTX.replace
+    return pywwa.CTX["replace"]
 
 
 def setup_syslog():
@@ -83,7 +81,7 @@ def setup_syslog():
     syslog.startLogging(
         prefix=f"pyWWA/{filename}",
         facility=LOG_LOCAL2,
-        setStdout=not pywwa.CTX.stdout_logging,
+        setStdout=not pywwa.CTX["stdout_logging"],
     )
     # pyIEM does logging via python stdlib logging, so we need to patch those
     # messages into twisted's logger.
@@ -91,7 +89,7 @@ def setup_syslog():
     sh.setFormatter(CustomFormatter())
     LOG.addHandler(sh)
     # Log stuff to stdout if we are running from command line.
-    if pywwa.CTX.stdout_logging:
+    if pywwa.CTX["stdout_logging"]:
         tplog.addObserver(lambda x: print(formatEvent(x)))
     # Allow for more verbosity when we are running this manually.
     LOG.setLevel(logging.DEBUG if sys.stdout.isatty() else logging.INFO)
@@ -180,7 +178,7 @@ def email_error(exp, message="", trimstr=100):
     ] = f"[pyWWA] {sys.argv[0].rsplit('/', maxsplit=1)[-1]} Traceback -- {hn}"
     msg["From"] = SETTINGS.get("pywwa_errors_from", "ldm@localhost")
     msg["To"] = SETTINGS.get("pywwa_errors_to", "ldm@localhost")
-    if not pywwa.CTX.disable_email:
+    if not pywwa.CTX["disable_email"]:
         df = smtp.sendmail(
             SETTINGS.get("pywwa_smtp", "smtp"), msg["From"], msg["To"], msg
         )
@@ -198,16 +196,80 @@ def send_message(plain, text, extra):
     pywwa.JABBER.send_message(plain, text, extra)
 
 
-def main(with_jabber=True):
-    """Standard workflow from our parsers.
+def parse_utcnow(text) -> datetime.datetime:
+    """Parse a string into a datetime object."""
+    if text is None:
+        return None
+    fmt = "%Y-%m-%dT%H:%M" if len(text) == 16 else "%Y-%m-%dT%H:%M:%SZ"
+    dt = datetime.datetime.strptime(text, fmt)
+    return dt.replace(tzinfo=datetime.timezone.utc)
 
-    Args:
-      with_jabber(bool): Should we setup a jabber instance?
-    """
-    # This is blocking, but necessary to make sure settings are loaded before
-    # we go on our merry way
-    pywwa.CTX = parse_cmdline(sys.argv)
-    setup_syslog()
-    load_settings()
-    if with_jabber:
-        make_jabber_client()
+
+def disable_xmpp(f):
+    """Decorator to disable XMPP."""
+    f.disable_xmpp = True
+    return f
+
+
+def init(f):
+    """Decorator to setup all things."""
+
+    @click.option(
+        "-d",
+        "--disable-dbwrite",
+        is_flag=True,
+        help="Disable writing to the database",
+    )
+    @click.option(
+        "-e",
+        "--disable-email",
+        is_flag=True,
+        help="Disable sending emails",
+    )
+    @click.option(
+        "-l",
+        "--stdout-logging",
+        is_flag=True,
+        help="Log to stdout",
+    )
+    @click.option(
+        "-r",
+        "--replace",
+        is_flag=True,
+        help="Replace existing database entries",
+    )
+    @click.option(
+        "-s",
+        "--shutdown-delay",
+        type=int,
+        help="Shutdown after N seconds",
+    )
+    @click.option(
+        "-u",
+        "--utcnow",
+        help="Define current UTC timestamp",
+        type=parse_utcnow,
+    )
+    @click.option(
+        "-x",
+        "--disable-xmpp",
+        default=getattr(f, "disable_xmppp", False),
+        is_flag=True,
+        help="Disable XMPP messaging",
+    )
+    @click.pass_context
+    def decorated_function(pass_ctx, *args, **kwargs):
+        """Decorated function."""
+        # Step 1, parse command line arguments into running context
+        pywwa.CTX.update(kwargs)
+        # Step 2, setup logging
+        setup_syslog()
+        # Step 3, load settings from database, which is blocking
+        load_settings()
+        # Step 4, setup jabber client
+        if not pywwa.CTX["disable_xmpp"]:
+            make_jabber_client()
+        # Step 5, call the function
+        return pass_ctx.invoke(f, *args, **kwargs)
+
+    return decorated_function

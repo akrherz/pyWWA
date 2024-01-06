@@ -36,7 +36,3 @@ def main():
     acursor.close()
     pgconn.commit()
     pgconn.close()
-
-
-if __name__ == "__main__":
-    main()

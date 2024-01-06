@@ -3,13 +3,19 @@
 import json
 import os
 
-# Local
-from .cmdline import parse_cmdline
-
 # Shared configuration
 SETTINGS = {}
 # Eventually updated by command line parsing
-CTX = parse_cmdline([])
+CTX_DEFAULTS = {
+    "disable_email": False,
+    "disable_dbwrite": False,
+    "replace": False,
+    "shutdown_delay": 5,
+    "stdout_logging": False,
+    "utcnow": None,
+}
+CTX = {}
+CTX.update(CTX_DEFAULTS)
 # Eventually updated to be a JABBER instance
 JABBER = None
 

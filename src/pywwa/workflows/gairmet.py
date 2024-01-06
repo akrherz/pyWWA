@@ -1,6 +1,7 @@
 """ G-AIRMET parser! """
 
 # 3rd Party
+import click
 from pyiem.nws.products.gairmet import parser
 from twisted.internet import reactor
 
@@ -19,12 +20,9 @@ def real_parser(txn, buf):
         common.email_error("\n".join(prod.warnings), buf)
 
 
-def main():
+@click.command()
+@common.init
+def main(*args, **kwargs):
     """Go Main Go."""
-    common.main()
     bridge(real_parser, dbpool=get_database("postgis"))
     reactor.run()
-
-
-if __name__ == "__main__":
-    main()

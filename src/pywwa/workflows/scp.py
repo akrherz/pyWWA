@@ -1,6 +1,7 @@
 """ NESDIS SCP Ingestor """
 
 # 3rd Party
+import click
 from pyiem.nws.products.scp import parser
 from twisted.internet import reactor
 
@@ -19,12 +20,10 @@ def real_process(txn, raw):
         common.email_error("\n".join(prod.warnings), raw)
 
 
+@click.command()
+@common.disable_xmpp
+@common.init
 def main():
     """Go Main Go"""
-    common.main(with_jabber=False)
     bridge(real_process, dbpool=get_database("asos"))
     reactor.run()
-
-
-if __name__ == "__main__":
-    main()

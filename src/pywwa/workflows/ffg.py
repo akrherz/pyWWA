@@ -1,6 +1,7 @@
 """ FFG """
 
 # 3rd Party
+import click
 from pyiem.nws.products.ffg import parser
 from pyiem.util import LOG
 from twisted.internet import reactor
@@ -24,12 +25,10 @@ def real_parser(txn, buf):
     LOG.info("FFG found %s entries for product %s", sz, ffg.get_product_id())
 
 
-def main():
+@click.command()
+@common.disable_xmpp
+@common.init
+def main(*args, **kwargs):
     """Our main method"""
-    common.main(with_jabber=False)
     bridge(real_parser, dbpool=get_database("postgis"))
     reactor.run()
-
-
-if __name__ == "__main__":
-    main()

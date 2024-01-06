@@ -6,6 +6,7 @@ storage of what we got from the automated observations
 """
 
 # 3rd Party
+import click
 from pyiem.network import Table as NetworkTable
 from pyiem.nws.products import parser
 from twisted.internet import reactor
@@ -34,13 +35,9 @@ def processor(txn, text):
     return prod
 
 
-def main():
+@click.command()
+@common.init
+def main(*args, **kwargs):
     """Go Main Go."""
-    common.main()
     bridge(processor, dbpool=DBPOOL)
     reactor.run()
-
-
-if __name__ == "__main__":
-    # Do Stuff
-    main()

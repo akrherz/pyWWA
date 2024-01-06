@@ -2,6 +2,7 @@
 # stdlib
 from datetime import timedelta
 
+import click
 from pyiem.nws.product import TextProduct
 from pyiem.nws.products import parser as productparser
 from pyiem.nws.ugc import UGCProvider
@@ -84,14 +85,10 @@ def really_process_data(txn, buf) -> TextProduct:
     return prod
 
 
-def main():
+@click.command()
+@common.init
+def main(*args, **kwargs):
     """Go Main Go."""
-    common.main()
     load_nwsli(NWSLI_DICT)
     bridge(process_data)
-
     reactor.run()
-
-
-if __name__ == "__main__":
-    main()

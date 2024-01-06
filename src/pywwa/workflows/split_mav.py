@@ -4,9 +4,8 @@ Chunk the MOS text data into easier to search values.
 # stdlib
 import re
 
+import click
 from pyiem.nws import product
-
-# 3rd Party
 from twisted.internet import reactor
 
 # Local
@@ -57,12 +56,10 @@ def real_process(txn, data):
         )
 
 
-def main():
+@click.command()
+@common.disable_xmpp
+@common.init
+def main(*args, **kwargs):
     """Go Main Go."""
-    common.main(with_jabber=False)
     bridge(real_process, dbpool=get_database("afos"))
     reactor.run()
-
-
-if __name__ == "__main__":
-    main()

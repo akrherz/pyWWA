@@ -1,6 +1,9 @@
+# This is lame, since we are pip installing pyIEM and want to have
+# all its dependencies fullfilled by conda
 dependencies:
  - affine
  - cartopy>=0.18
+ - codecov
  - cython
  - descartes
  - fiona

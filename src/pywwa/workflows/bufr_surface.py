@@ -11,6 +11,7 @@ This is a work in progress yet, notes and todo as follows:
 from datetime import timedelta
 
 # 3rd Party
+import click
 from pybufrkit.decoder import Decoder, generate_bufr_message
 from pybufrkit.renderer import NestedJsonRenderer
 from pyiem.nws.product import TextProduct
@@ -613,15 +614,12 @@ def ready(_):
     df.addErrback(common.email_error)
 
 
-def main():
+@click.command()
+@common.disable_xmpp
+@common.init
+def main(*args, **kwargs):
     """Go Main Go."""
-    common.main(with_jabber=False)
     df = MESOSITEDB.runInteraction(load_xref)
     df.addCallback(ready)
     df.addErrback(common.email_error)
     reactor.run()
-
-
-if __name__ == "__main__":
-    # Do Stuff
-    main()

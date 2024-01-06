@@ -2,10 +2,9 @@
 # stdlib
 import datetime
 
+import click
 from pyiem.nws.products.pirep import parser as pirepparser
 from pyiem.util import LOG
-
-# 3rd Party
 from twisted.internet import reactor
 
 # Local
@@ -117,15 +116,11 @@ def ready(_bogus):
     bridge(real_parser, dbpool=DBPOOL)
 
 
-def main():
+@click.command()
+@common.init
+def main(*args, **kwargs):
     """GO Main Go."""
-    common.main()
     df = DBPOOL.runInteraction(load_locs)
     df.addCallback(ready)
     df.addErrback(common.shutdown)
-
     reactor.run()
-
-
-if __name__ == "__main__":
-    main()
