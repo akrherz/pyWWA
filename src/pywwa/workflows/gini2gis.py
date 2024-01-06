@@ -54,31 +54,28 @@ def do_legacy_ir(sat, tmpfn):
     with open(f"{tmpfn}.wld", "w") as fh:
         fh.write(WORLDFILE_FORMAT % sat.metadata)
 
-    cmd = (
-        "pqinsert -i -p "
-        "'gis c %s gis/images/awips%s/%s GIS/sat/awips%s/%s png' %s.png"
-    ) % (
-        sat.metadata["valid"].strftime("%Y%m%d%H%M"),
-        sat.awips_grid(),
-        sat.current_filename().replace(".png", "_gray.png"),
-        sat.awips_grid(),
-        sat.archive_filename(),
-        tmpfn,
-    )
-    subprocess.call(cmd, shell=True)
+    tstamp = sat.metadata["valid"].strftime("%Y%m%d%H%M")
+    cmd = [
+        "pqinsert",
+        "-i",
+        "-p",
+        f"gis c {tstamp} gis/images/awips{sat.awips_grid()}/"
+        f"{sat.current_filename().replace('.png', '_gray.png')} GIS/sat/"
+        f"awips{sat.awips.grid()}/{sat.archive_filename()} png",
+        f"{tmpfn}.png",
+    ]
+    subprocess.call(cmd)
 
-    cmd = (
-        "pqinsert -i -p "
-        "'gis c %s gis/images/awips%s/%s GIS/sat/awips%s/%s wld' %s.wld"
-    ) % (
-        sat.metadata["valid"].strftime("%Y%m%d%H%M"),
-        sat.awips_grid(),
-        sat.current_filename().replace(".png", "_gray.wld"),
-        sat.awips_grid(),
-        sat.archive_filename().replace("png", "wld"),
-        tmpfn,
-    )
-    subprocess.call(cmd, shell=True)
+    cmd = [
+        "pqinsert",
+        "-i",
+        "-p",
+        f"gis c {tstamp} gis/images/awips{sat.awips_grid()}/"
+        f"{sat.current_filename().replace('.png', '_gray.wld')} GIS/sat/"
+        f"awips{sat.awips.grid()}/{sat.archive_filename()} wld",
+        f"{tmpfn}.wld",
+    ]
+    subprocess.call(cmd)
 
 
 def write_gispng(sat, tmpfn):
@@ -93,39 +90,27 @@ def write_gispng(sat, tmpfn):
         png.putpalette(tuple(gini.get_ir_ramp().ravel()))
     else:
         png = Image.fromarray(np.array(sat.data[:-1, :], np.uint8))
-    png.save("%s.png" % (tmpfn,))
+    png.save(f"{tmpfn}.png")
 
     # World File
     with open(f"{tmpfn}.wld", "w") as fh:
         fh.write(WORLDFILE_FORMAT % sat.metadata)
 
-    cmd = (
-        "pqinsert -i -p "
-        "'gis %s %s gis/images/awips%s/%s GIS/sat/awips%s/%s png' %s.png"
-    ) % (
-        get_ldm_routes(sat),
-        sat.metadata["valid"].strftime("%Y%m%d%H%M"),
-        sat.awips_grid(),
-        sat.current_filename(),
-        sat.awips_grid(),
-        sat.archive_filename(),
-        tmpfn,
-    )
-    subprocess.call(cmd, shell=True)
+    tstamp = sat.metadata["valid"].strftime("%Y%m%d%H%M")
+    cmd = [
+        "pqinsert",
+        "-i",
+        "-p",
+        f"gis {get_ldm_routes(sat)} {tstamp} gis/images/"
+        f"awips{sat.awips_grid()}/{sat.current_filename()} "
+        f"GIS/sat/awips{sat.awips_grid()}/{sat.archive_filename()} png",
+        f"{tmpfn}.png",
+    ]
+    subprocess.call(cmd)
 
-    cmd = (
-        "pqinsert -i -p "
-        "'gis %s %s gis/images/awips%s/%s GIS/sat/awips%s/%s wld' %s.wld"
-    ) % (
-        get_ldm_routes(sat),
-        sat.metadata["valid"].strftime("%Y%m%d%H%M"),
-        sat.awips_grid(),
-        sat.current_filename().replace("png", "wld"),
-        sat.awips_grid(),
-        sat.archive_filename().replace("png", "wld"),
-        tmpfn,
-    )
-    subprocess.call(cmd, shell=True)
+    cmd[3] = cmd[3].replace("png", "wld")
+    cmd[4] = cmd[4].replace("png", "wld")
+    subprocess.call(cmd)
 
 
 def write_metadata(sat, tmpfn):
@@ -138,21 +123,21 @@ def write_metadata(sat, tmpfn):
     metadata["meta"]["awips_grid"] = sat.awips_grid()
     metadata["meta"]["bird"] = sat.get_bird()
     metadata["meta"]["archive_filename"] = sat.archive_filename()
-    metafp = "%s.json" % (tmpfn,)
+    metafp = f"{tmpfn}.json"
     with open(metafp, "w") as fh:
         json.dump(metadata, fh)
 
-    cmd = (
-        "pqinsert -i -p "
-        "'gis c %s gis/images/awips%s/%s GIS/sat/%s json' %s.json"
-    ) % (
-        sat.metadata["valid"].strftime("%Y%m%d%H%M"),
-        sat.awips_grid(),
-        sat.current_filename().replace("png", "json"),
-        sat.archive_filename().replace("png", "json"),
-        tmpfn,
-    )
-    subprocess.call(cmd, shell=True)
+    tstamp = sat.metadata["valid"].strftime("%Y%m%d%H%M")
+    cmd = [
+        "pqinsert",
+        "-i",
+        "-p",
+        f"gis c {tstamp} gis/images/awips{sat.awips_grid()}/"
+        f"{sat.current_filename().replace('png', 'json')} "
+        f"GIS/sat/{sat.archive_filename().replace('png', 'json')} json",
+        f"{tmpfn}.json",
+    ]
+    subprocess.call(cmd)
     os.unlink(f"{tmpfn}.json")
 
 
@@ -198,17 +183,16 @@ def write_metadata_epsg(sat, tmpfn, epsg):
     with open(metafp, "w") as fh:
         json.dump(metadata, fh)
 
-    cmd = (
-        "pqinsert -i -p 'gis c %s gis/images/%s/goes/%s bogus json' "
-        "%s_%s.json"
-    ) % (
-        sat.metadata["valid"].strftime("%Y%m%d%H%M"),
-        epsg,
-        sat.current_filename().replace("png", "json"),
-        tmpfn,
-        epsg,
-    )
-    subprocess.call(cmd, shell=True)
+    tstamp = sat.metadata["valid"].strftime("%Y%m%d%H%M")
+    cmd = [
+        "pqinsert",
+        "-i",
+        "-p",
+        f"gis c {tstamp} gis/images/{epsg}/goes/"
+        f"{sat.current_filename().replace('png', 'json')} bogus json",
+        f"{tmpfn}_{epsg}.json",
+    ]
+    subprocess.call(cmd)
     os.unlink(f"{tmpfn}_{epsg}.json")
 
 
@@ -226,11 +210,21 @@ def gdalwarp(sat, tmpfn, epsg):
     """
     Convert imagery into some EPSG projection, typically 4326
     """
-    cmd = (
-        "gdalwarp -q -of GTiff -co 'TFW=YES' -s_srs '%s' "
-        "-t_srs 'EPSG:%s' %s.png %s_%s.tif"
-    ) % (sat.metadata["proj"].srs, epsg, tmpfn, tmpfn, epsg)
-    subprocess.call(cmd, shell=True)
+    cmd = [
+        "gdalwarp",
+        "-q",
+        "-of",
+        "GTiff",
+        "-co",
+        "TFW=YES",
+        "-s_srs",
+        sat.metadata["proj"].srs,
+        "-t_srs",
+        f"EPSG:{epsg}",
+        f"{tmpfn}.png",
+        f"{tmpfn}_{epsg}.tif",
+    ]
+    subprocess.call(cmd)
 
     # Convert file back to PNG for use and archival (smaller file)
     cmd = [
@@ -249,29 +243,20 @@ def gdalwarp(sat, tmpfn, epsg):
         logger.error("gdalwarp() convert error message: %s", output)
     os.unlink(f"{tmpfn}_{epsg}.tif")
 
-    cmd = (
-        "pqinsert -i -p 'gis c %s gis/images/%s/goes/%s bogus wld' "
-        "%s_%s.tfw"
-    ) % (
-        sat.metadata["valid"].strftime("%Y%m%d%H%M"),
-        epsg,
-        sat.current_filename().replace("png", "wld"),
-        tmpfn,
-        epsg,
-    )
-    subprocess.call(cmd, shell=True)
+    tstamp = sat.metadata["valid"].strftime("%Y%m%d%H%M")
+    cmd = [
+        "pqinsert",
+        "-i",
+        "-p",
+        f"gis c {tstamp} gis/images/{epsg}/goes/"
+        f"{sat.current_filename().replace('png', 'wld')} bogus wld",
+        f"{tmpfn}_{epsg}.tfw",
+    ]
+    subprocess.call(cmd)
 
-    cmd = (
-        "pqinsert -i -p 'gis c %s gis/images/%s/goes/%s bogus png' "
-        "%s_%s.png"
-    ) % (
-        sat.metadata["valid"].strftime("%Y%m%d%H%M"),
-        epsg,
-        sat.current_filename(),
-        tmpfn,
-        epsg,
-    )
-    subprocess.call(cmd, shell=True)
+    cmd[3] = cmd[3].replace("wld", "png")
+    cmd[4] = cmd[4].replace("wld", "png")
+    subprocess.call(cmd)
 
     os.unlink(f"{tmpfn}_{epsg}.png")
     os.unlink(f"{tmpfn}_{epsg}.tfw")

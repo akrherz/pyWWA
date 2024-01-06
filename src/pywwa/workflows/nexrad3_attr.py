@@ -44,10 +44,11 @@ def process_data(data):
 def process(bio):
     """Process our data, please"""
     l3 = Level3File(bio)
-    ctx = {}
-    ctx["nexrad"] = l3.siteID
-    ctx["ts"] = l3.metadata["vol_time"].replace(tzinfo=ZoneInfo("UTC"))
-    ctx["lines"] = []
+    ctx = {
+        "nexrad": l3.siteID,
+        "ts": l3.metadata["vol_time"].replace(tzinfo=ZoneInfo("UTC")),
+        "lines": [],
+    }
     if not hasattr(l3, "graph_pages"):
         LOG.info("%s %s has no graph_pages", ctx["nexrad"], ctx["ts"])
         return ctx
@@ -140,9 +141,8 @@ def really_process(txn, ctx):
 
         cosaz = math.cos(d["azimuth"] * math.pi / 180.0)
         sinaz = math.sin(d["azimuth"] * math.pi / 180.0)
-        mylat = cenlat + (cosaz * (d["range"] * 1000.0) / latscale)
-        mylon = cenlon + (sinaz * (d["range"] * 1000.0) / lonscale)
-        d["geom"] = "SRID=4326;POINT(%s %s)" % (mylon, mylat)
+        d["lat"] = cenlat + (cosaz * (d["range"] * 1000.0) / latscale)
+        d["lon"] = cenlon + (sinaz * (d["range"] * 1000.0) / lonscale)
         d["valid"] = ctx["ts"]
 
         for table in [
@@ -153,7 +153,8 @@ def really_process(txn, ctx):
                 INSERT into {table} (nexrad, storm_id, geom, azimuth,
                 range, tvs, meso, posh, poh, max_size, vil, max_dbz,
                 max_dbz_height, top, drct, sknt, valid)
-                values (%(nexrad)s, %(storm_id)s, ST_GeomFromEWKT(%(geom)s),
+                values (%(nexrad)s, %(storm_id)s,
+                ST_Point(%(lon)s, %(lat)s, 4326),
                 %(azimuth)s, %(range)s, %(tvs)s, %(meso)s, %(posh)s,
                 %(poh)s, %(max_size)s, %(vil)s, %(max_dbz)s,
                 %(max_dbz_height)s, %(top)s, %(drct)s, %(sknt)s, %(valid)s)
