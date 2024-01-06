@@ -1,5 +1,10 @@
 name: Install and Test
-on: [push]
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
 jobs:
   build-linux:
     defaults:
@@ -49,7 +54,6 @@ jobs:
     - name: Install and Test
       run: |
         set -e
-        python -m pip install git+https://github.com/akrherz/pyIEM.git
         python -m pip install .
         cp settings.json-template settings.json
         # This is a bit brittle, but loads some data

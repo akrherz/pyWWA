@@ -32,6 +32,8 @@ dependencies:
  - psycopg
  # Transient via pyIEM
  - pyarrow
+ # So much of other things here are redundant
+ - pyiem
  # BUFR processing
  - pybufrkit
  # Models
