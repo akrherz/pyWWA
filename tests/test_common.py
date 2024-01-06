@@ -6,6 +6,18 @@ from pyiem.util import utc
 from pywwa import common
 
 
+def test_setup_syslog():
+    """API exercice."""
+    common.pywwa.CTX["stdout_logging"] = True
+    common.setup_syslog()
+
+
+def test_parse_utcnow():
+    """Test that we can parse utcnow."""
+    assert common.parse_utcnow("2017-01-01T12:00").year == 2017
+    assert common.parse_utcnow(None) is None
+
+
 def test_init_decorator():
     """Test the init decorator."""
 
