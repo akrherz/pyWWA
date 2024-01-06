@@ -27,7 +27,7 @@ class LDMProductReceiver(basic.LineReceiver):
             to b'\r\r\n\003'
         """
         self.bytes_received = 0
-        pe = kwargs.get("product_end", None)
+        pe = kwargs.get("product_end")
         self.product_end = b"\r\r\n\003" if pe is None else pe
         self.productBuffer = BytesIO()
         # this puts twisted out of the pure line receiver mode

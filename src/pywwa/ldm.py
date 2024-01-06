@@ -12,10 +12,10 @@ from pywwa.common import SETTINGS, email_error, shutdown
 class MyProductIngestor(ldmbridge.LDMProductReceiver):
     """I receive products from ldmbridge and process them 1 by 1 :)"""
 
-    def __init__(self, callback, isbinary=False):
+    def __init__(self, callback, isbinary=False, **kwargs):
         """Constructor."""
         dedup = SETTINGS.get("pywwa_dedup", "false").lower() == "true"
-        super().__init__(isbinary=isbinary, dedup=dedup)
+        super().__init__(isbinary=isbinary, dedup=dedup, **kwargs)
         self.local_callback = callback
 
     def connectionLost(self, reason):
