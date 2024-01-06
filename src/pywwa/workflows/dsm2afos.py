@@ -5,8 +5,7 @@ import sys
 
 from pyiem.nws import product
 
-# 3rd Party
-from pyiem.util import get_dbconnc
+from pywwa.database import get_dbconnc
 
 
 def main():

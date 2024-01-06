@@ -13,7 +13,7 @@ from syslog import LOG_LOCAL2
 
 import click
 import pyiem
-from pyiem.util import LOG, get_dbconn, utc
+from pyiem.util import LOG, utc
 from twisted.internet import reactor
 from twisted.logger import formatEvent
 from twisted.mail import smtp
@@ -22,6 +22,7 @@ from twisted.python import log as tplog
 
 # Local Be careful of circeref here
 import pywwa
+from pywwa.database import get_dbconn
 from pywwa.xmpp import make_jabber_client
 
 # http://bugs.python.org/issue7980

@@ -2,12 +2,36 @@
 
 # 3rd Party
 from psycopg.rows import dict_row
+from pyiem.database import get_dbconn as pyiem_get_dbconn
+from pyiem.database import get_dbconnc as pyiem_get_dbconnc
 from pyiem.nws import nwsli
-from pyiem.util import LOG, get_dbconn
+from pyiem.util import LOG
 from twisted.enterprise import adbapi
 
 # Local
-from pywwa import CONFIG
+from pywwa import SETTINGS
+
+
+def get_dbconnc(dbname):
+    """wrapper to pyiem to get the database connection right."""
+    opts = SETTINGS.get("dbxref", {}).get(dbname, {})
+    return pyiem_get_dbconnc(
+        dbname=opts.get("database", dbname),
+        host=opts.get("host", f"iemdb-{dbname}.local"),
+        user=opts.get("user", "ldm"),
+        port=opts.get("port", 5432),
+    )
+
+
+def get_dbconn(dbname):
+    """wrapper to pyiem to get the database connection right."""
+    opts = SETTINGS.get("dbxref", {}).get(dbname, {})
+    return pyiem_get_dbconn(
+        dbname=opts.get("database", dbname),
+        host=opts.get("host", f"iemdb-{dbname}.local"),
+        user=opts.get("user", "ldm"),
+        port=opts.get("port", 5432),
+    )
 
 
 def get_database(dbname, cp_max=1, module_name="psycopg"):
@@ -18,8 +42,7 @@ def get_database(dbname, cp_max=1, module_name="psycopg"):
       cp_max (int): The maximum number of connections to make to the database
       module_name (str): The python module to use for the ConnectionPool
     """
-    # Check to see if we have a `settings.json` override
-    opts = CONFIG.get(dbname, {})
+    opts = SETTINGS.get("dbxref", {}).get(dbname, {})
     return adbapi.ConnectionPool(
         module_name,
         dbname=opts.get("database", dbname),

@@ -67,9 +67,9 @@ the library attempts to connect to a database by the same `name` on a hostname
 called `iemdb-name.local`.  Passwords should be set by the standard `~/.pgpass`
 file.
 
-The `settings.json` file provides a means to override this behaviour.  For
+The `dbxref.json` file provides a means to override this behaviour.  For
 example, if your "postgis" database is actually called "henry" and on a server
-named "pgserv", you would set the following in the `settings.json` file:
+named "pgserv", you would set the following in the `dbxref.json` file:
 
 ```json
 {
@@ -80,25 +80,26 @@ named "pgserv", you would set the following in the `settings.json` file:
 }
 ```
 
+``pyWWA`` looks for this file either at your cwd or ``PYWWA_HOME`` variable.
+
 ## Logging
 
 These parsers emit logs to the syslog `LOCAL2` facility via a wild mixture of
 Twisted Python and Stdlib Python log statements.
 
-## Locating the settings.json file
+## Locating the ``pywwa_settings.json`` file
 
-This is a bit of a hack yet within the codebase, but some crude logic is used
-attempting to figure out where the `pyWWA/settings.json` file resides.  Since
-the various scripts could be getting executed from various current working
-directories, the code checks the following locations.
+This library attempts to locate a file named ``pywwa_settings.json``, which
+contains various settings important to this library.  The library will search
+the following paths in this order until it finds the file.
 
-1. The file `pyWWA/settings.json` exists from the `cwd`
+1. current working directory
+2. environment variable `PYWWA_HOME`
+3. $HOME/etc
+4. $HOME/pyWWA
 
-2. The `cwd` of the process.
-
-3. One directory up from the calling script.
-
-4. Two directories up from the calling script.
+If this file is not found, the library still should function, but makes a lot
+of assumptions!
 
 ## Development Notes
 

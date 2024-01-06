@@ -2,7 +2,7 @@
 import os
 
 import pytest
-from pyiem.database import get_dbconnc
+from pywwa.database import get_dbconnc
 from pywwa.testing import get_example_filepath
 from pywwa.workflows import bufr_surface
 

@@ -55,7 +55,7 @@ jobs:
       run: |
         set -e
         python -m pip install .
-        cp settings.json-template settings.json
+        cp pywwa_settings.json-example pywwa_settings.json
         # This is a bit brittle, but loads some data
         python util/ugcs_update.py fz08mr23 2023 3 08
         python util/merge_hvtec_nwsli.py hvtec_list.20230627.csv

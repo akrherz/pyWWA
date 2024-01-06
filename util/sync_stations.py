@@ -1,7 +1,7 @@
 """Get station updates from IEM Webservice."""
 # Third Party
 import requests
-from pyiem.util import get_dbconnc
+from pywwa.database import get_dbconnc
 
 
 def main():

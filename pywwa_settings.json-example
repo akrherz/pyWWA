@@ -1,0 +1,16 @@
+{
+    "dbxref":{
+        "postgis": {
+            "database": "postgis",
+            "host": "iemdb-postgis.local",
+            "port": 5432,
+            "user": "ldm"
+        },
+        "mesosite": {
+            "database": "mesosite",
+            "host": "iemdb-mesosite.local",
+            "port": 5432,
+            "user": "ldm"
+        }
+    },
+}

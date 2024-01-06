@@ -21,7 +21,8 @@ import sys
 
 # 3rd Party
 import requests
-from pyiem.util import get_dbconnc, logger
+from pyiem.util import logger
+from pywwa.database import get_dbconnc
 
 LOG = logger()
 

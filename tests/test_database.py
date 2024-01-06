@@ -2,7 +2,6 @@
 
 # Third Party
 from psycopg.rows import dict_row
-from pyiem.util import get_dbconn
 
 # Local
 from pywwa import database
@@ -15,7 +14,7 @@ def test_database():
 
 def test_load_metar_stations():
     """Test loading of METAR stations."""
-    pgconn = get_dbconn("mesosite")
+    pgconn = database.get_dbconn("mesosite")
     cursor = pgconn.cursor(row_factory=dict_row)
     database.load_metar_stations(cursor, {})
     pgconn.close()

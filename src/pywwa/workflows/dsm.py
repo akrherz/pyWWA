@@ -4,12 +4,12 @@ from zoneinfo import ZoneInfo
 # 3rd Party
 import click
 from pyiem.nws.products.dsm import parser
-from pyiem.util import LOG, get_dbconnc
+from pyiem.util import LOG
 from twisted.internet import reactor
 
 # Local
 from pywwa import common
-from pywwa.database import get_database
+from pywwa.database import get_database, get_dbconnc
 from pywwa.ldm import bridge
 
 # database timezones to cache

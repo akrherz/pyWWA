@@ -3,8 +3,9 @@
 import re
 import sys
 
-# 3rd Party
-from pyiem.util import get_dbconnc, utc
+from pyiem.util import utc
+
+from pywwa.database import get_dbconnc
 
 
 def main():

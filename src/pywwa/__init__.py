@@ -5,6 +5,7 @@ import os
 
 # Shared configuration
 SETTINGS = {}
+SETTINGS_FN = "pywwa_settings.json"
 # Eventually updated by command line parsing
 CTX_DEFAULTS = {
     "disable_email": False,
@@ -28,15 +29,17 @@ def get_data_filepath(filename):
     return testfn
 
 
-def load_config() -> dict:
+def load_settings():
     """Attempt to locate our configuration file."""
-    basedir = os.environ.get("PYWWA_HOME", os.getcwd())
-    testfn = os.path.join(basedir, "settings.json")
-    if not os.path.isfile(testfn):
-        return {}
-    with open(testfn, encoding="utf-8") as fh:
-        res = json.load(fh)
-    return res
-
-
-CONFIG = load_config()
+    dirpaths = [
+        os.getcwd(),
+        os.environ.get("PYWWA_HOME"),
+        os.path.join(os.path.expanduser("~"), "etc"),
+        os.path.join(os.path.expanduser("~"), "pyWWA"),
+    ]
+    for dirpath in dirpaths:
+        testfn = os.path.join(dirpath, SETTINGS_FN)
+        if not os.path.isfile(testfn):
+            continue
+        with open(testfn, encoding="utf-8") as fh:
+            SETTINGS.update(json.load(fh))

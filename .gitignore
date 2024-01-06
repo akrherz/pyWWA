@@ -7,7 +7,7 @@
 /last.nts
 /cfg.ini
 /logs
-/settings.json
+/dbxref.json
 parsers/gemglb.nts
 parsers/last.nts
 util/rabbitmq.json

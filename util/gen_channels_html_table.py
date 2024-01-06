@@ -10,7 +10,8 @@ from pyiem.nws.products.cwa import parser as cwaparser
 from pyiem.nws.products.vtec import parser as vtec_parser
 from pyiem.nws.ugc import UGC
 from pyiem.reference import prodDefinitions
-from pyiem.util import get_dbconnc, logger
+from pyiem.util import logger
+from pywwa.database import get_dbconnc
 
 PARSERS = {
     "CWA": cwaparser,

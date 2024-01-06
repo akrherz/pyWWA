@@ -4,7 +4,8 @@
 import datetime
 
 import requests
-from pyiem.util import get_dbconn, logger
+from pyiem.util import logger
+from pywwa.database import get_dbconn
 
 
 def main():
