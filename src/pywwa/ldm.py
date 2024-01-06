@@ -55,8 +55,8 @@ def bridge(callback, dbpool=None, isbinary=False, product_end=None, cb2=None):
         defer.addErrback(LOG.error)
 
     proto = MyProductIngestor(
-        nodbproxy if dbpool is None else dbproxy, isbinary=isbinary
+        nodbproxy if dbpool is None else dbproxy,
+        isbinary=isbinary,
+        product_end=product_end,
     )
-    if product_end is not None:
-        proto.product_end = product_end
     return ldmbridge.LDMProductFactory(proto)

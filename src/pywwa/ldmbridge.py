@@ -15,17 +15,20 @@ class LDMProductReceiver(basic.LineReceiver):
 
     reactor = None
     product_start = b"\001"
-    product_end = b"\r\r\n\003"
 
-    def __init__(self, dedup=False, isbinary=False):
+    def __init__(self, dedup=False, isbinary=False, **kwargs):
         """Constructor
 
         Args:
           dedup (boolean): should we attempt to filter out duplicates
           isbinary (boolean): should we not attempt bytes decoding
             process_data will either return a string and bytes
+          product_end (bytes): what is the end of a product from LDM, defaults
+            to b'\r\r\n\003'
         """
         self.bytes_received = 0
+        pe = kwargs.get("product_end", None)
+        self.product_end = b"\r\r\n\003" if pe is None else pe
         self.productBuffer = BytesIO()
         # this puts twisted out of the pure line receiver mode
         self.setRawMode()
