@@ -8,13 +8,10 @@
 /cfg.ini
 /logs
 /dbxref.json
-parsers/gemglb.nts
-parsers/last.nts
 util/rabbitmq.json
 **/ridge_processor.pid
 /goes/*.nc
 .coverage
 coverage.xml
 .eggs/
-parsers/pywwa.egg-info/
 build/
