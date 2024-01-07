@@ -1,5 +1,10 @@
 name: Install and Test
-on: [push]
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
 jobs:
   build-linux:
     defaults:
@@ -49,11 +54,8 @@ jobs:
     - name: Install and Test
       run: |
         set -e
-        # pip install from requirements.txt
-        python -m pip install -r pip_requirements.txt
-        python -m pip install codecov
-        python -m pip install . --upgrade
-        cp settings.json-template settings.json
+        python -m pip install .
+        cp pywwa_settings.json-example pywwa_settings.json
         # This is a bit brittle, but loads some data
         python util/ugcs_update.py fz08mr23 2023 3 08
         python util/merge_hvtec_nwsli.py hvtec_list.20230627.csv

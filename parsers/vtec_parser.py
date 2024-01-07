@@ -11,7 +11,7 @@ with watches.  Lets try to explain
     product_issue <- When was this product issued by the NWS
 """
 # Local
-from pywwa.workflows.vtec_parser import main
+from pywwa.workflows.vtec import main
 
 if __name__ == "__main__":
     main()

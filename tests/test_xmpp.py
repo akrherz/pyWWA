@@ -45,9 +45,9 @@ def test_message_processor():
 
 def test_disabled_xmpp():
     """Test that it works when XMPP is disabled."""
-    pywwa.CTX.disable_xmpp = True
+    pywwa.CTX["disable_xmpp"] = True
     xmpp.JabberClient("root@localhost")
-    pywwa.CTX.disable_xmpp = False
+    pywwa.CTX["disable_xmpp"] = False
 
 
 def test_illegal_xml():

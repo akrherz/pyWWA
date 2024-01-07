@@ -2,15 +2,15 @@
 # 3rd party
 import pytest
 import pywwa
-from pyiem.util import get_dbconnc
+from pywwa.database import get_dbconnc
 
 
 @pytest.fixture(autouse=True)
 def setup_and_teardown():
     """Something to fix the hacky global namespace mucking I do."""
-    pywwa.CTX.utcnow = None
+    pywwa.CTX.update(pywwa.CTX_DEFAULTS)
     yield
-    pywwa.CTX.utcnow = None
+    pywwa.CTX.update(pywwa.CTX_DEFAULTS)
 
 
 @pytest.fixture(scope="function")

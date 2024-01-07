@@ -4,7 +4,7 @@ import sys
 
 # Third Party
 import requests
-from pyiem.database import get_dbconnc
+from pywwa.database import get_dbconnc
 
 SERVICE = "https://mesonet.agron.iastate.edu/geojson/network.py"
 

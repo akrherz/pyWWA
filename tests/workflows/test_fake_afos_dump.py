@@ -13,6 +13,6 @@ from pywwa.workflows import fake_afos_dump
 def test_processor(cursor):
     """Test basic parsing."""
     data = get_example_file("CWA.txt")
-    pywwa.CTX.utcnow = utc(2011, 3, 3, 6, 16)
+    pywwa.CTX["utcnow"] = utc(2011, 3, 3, 6, 16)
     tp = fake_afos_dump.really_process_data(cursor, data)
     assert tp.valid == utc(2011, 3, 3, 1, 5)

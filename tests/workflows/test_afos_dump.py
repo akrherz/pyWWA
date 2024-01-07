@@ -13,7 +13,7 @@ from pywwa.workflows import afos_dump
 def test_future_product(cursor):
     """Test exception for product from the future."""
     data = get_example_file("AFD.txt")
-    pywwa.CTX.utcnow = utc(2015, 6, 8, 11, 56)
+    pywwa.CTX["utcnow"] = utc(2015, 6, 8, 11, 56)
     with pytest.raises(Exception):
         afos_dump.real_parser(cursor, data)
 
@@ -25,7 +25,7 @@ def test_processor(cursor):
     # 0. Very latent product
     with pytest.raises(Exception):
         afos_dump.real_parser(cursor, data)
-    pywwa.CTX.utcnow = utc(2015, 6, 9, 11, 56)
+    pywwa.CTX["utcnow"] = utc(2015, 6, 9, 11, 56)
     # 1. straight through
     prod = afos_dump.real_parser(cursor, data)
     assert prod.afos == "AFDDMX"
@@ -45,7 +45,7 @@ def test_processor(cursor):
     afos_dump.write_memcache(prod)
     afos_dump.write_memcache(None)
     # 6. Replace on
-    pywwa.CTX.replace = True
+    pywwa.CTX["replace"] = True
     afos_dump.real_parser(cursor, data)
 
 
