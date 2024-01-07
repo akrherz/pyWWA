@@ -38,6 +38,8 @@ def load_settings():
         os.path.join(os.path.expanduser("~"), "pyWWA"),
     ]
     for dirpath in dirpaths:
+        if dirpath is None:
+            continue
         testfn = os.path.join(dirpath, SETTINGS_FN)
         if not os.path.isfile(testfn):
             continue
