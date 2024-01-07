@@ -26,8 +26,8 @@ def real_parser(txn, buf):
 
 
 @click.command()
-@common.disable_xmpp
 @common.init
+@common.disable_xmpp
 def main(*args, **kwargs):
     """Our main method"""
     bridge(real_parser, dbpool=get_database("postgis"))

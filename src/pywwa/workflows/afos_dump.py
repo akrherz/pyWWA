@@ -99,8 +99,8 @@ def real_parser(txn, buf):
 
 
 @click.command()
-@common.disable_xmpp
 @common.init
+@common.disable_xmpp
 def main(*args, **kwargs):
     """Fire up our workflow."""
     bridge(process_data)

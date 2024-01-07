@@ -604,9 +604,9 @@ def main2(_res):
 
 
 @click.command()
-@common.disable_xmpp
 @click.option("--custom-arg", "-c", type=str, help="Differentiate pqact job")
 @common.init
+@common.disable_xmpp
 def main(*args, **kwargs):
     """We startup."""
     # Load the station metadata before we fire up the ingesting

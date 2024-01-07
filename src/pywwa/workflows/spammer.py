@@ -124,8 +124,8 @@ def real_process(data) -> product.TextProduct:
 
 
 @click.command()
-@common.disable_xmpp
 @common.init
+@common.disable_xmpp
 def main(*args, **kwargs):
     """Go Main Go."""
     bridge(process_data)

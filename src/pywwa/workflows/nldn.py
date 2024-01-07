@@ -33,8 +33,8 @@ def real_process(buf):
 
 
 @click.command()
-@common.disable_xmpp
 @common.init
+@common.disable_xmpp
 def main(*args, **kwargs):
     """Go Main"""
     bridge(process_data, isbinary=True, product_end=b"NLDN")

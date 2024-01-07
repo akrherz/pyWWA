@@ -53,8 +53,8 @@ def ready(_):
 
 
 @click.command()
-@common.disable_xmpp
 @common.init
+@common.disable_xmpp
 def main(*args, **kwargs):
     """Run once at startup"""
     df = IEMDB.runInteraction(load_metar_stations, metar.NWSLI_PROVIDER)

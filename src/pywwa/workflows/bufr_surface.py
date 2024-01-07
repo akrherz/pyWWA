@@ -615,8 +615,8 @@ def ready(_):
 
 
 @click.command()
-@common.disable_xmpp
 @common.init
+@common.disable_xmpp
 def main(*args, **kwargs):
     """Go Main Go."""
     df = MESOSITEDB.runInteraction(load_xref)

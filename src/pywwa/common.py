@@ -268,7 +268,10 @@ def init(f):
         # Step 3, load settings from database, which is blocking
         load_settings()
         # Step 4, setup jabber client
-        if not pywwa.CTX["disable_xmpp"]:
+        if not pywwa.CTX["disable_xmpp"] and not getattr(
+            f, "disable_xmpp", False
+        ):
+            print("Setting up XMPP client")
             make_jabber_client()
         # Step 5, call the function
         return pass_ctx.invoke(f, *args, **kwargs)

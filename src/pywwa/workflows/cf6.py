@@ -24,8 +24,8 @@ def processor(txn, text):
 
 
 @click.command()
-@common.disable_xmpp
 @common.init
+@common.disable_xmpp
 def main(*args, **kwargs):
     """Go Main Go."""
     bridge(processor, dbpool=DBPOOL)

@@ -56,8 +56,8 @@ def real_process(txn, data):
 
 
 @click.command()
-@common.disable_xmpp
 @common.init
+@common.disable_xmpp
 def main(*args, **kwargs):
     """Go Main Go."""
     bridge(real_process, dbpool=get_database("afos"))

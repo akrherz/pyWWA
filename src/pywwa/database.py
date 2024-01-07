@@ -16,7 +16,7 @@ def get_dbconnc(dbname):
     """wrapper to pyiem to get the database connection right."""
     opts = SETTINGS.get("dbxref", {}).get(dbname, {})
     return pyiem_get_dbconnc(
-        dbname=opts.get("database", dbname),
+        database=opts.get("database", dbname),
         host=opts.get("host", f"iemdb-{dbname}.local"),
         user=opts.get("user", "ldm"),
         port=opts.get("port", 5432),
@@ -27,7 +27,7 @@ def get_dbconn(dbname):
     """wrapper to pyiem to get the database connection right."""
     opts = SETTINGS.get("dbxref", {}).get(dbname, {})
     return pyiem_get_dbconn(
-        dbname=opts.get("database", dbname),
+        database=opts.get("database", dbname),
         host=opts.get("host", f"iemdb-{dbname}.local"),
         user=opts.get("user", "ldm"),
         port=opts.get("port", 5432),
