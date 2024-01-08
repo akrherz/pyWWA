@@ -4,7 +4,8 @@ import click
 from pyiem.nws import product
 from pyiem.util import LOG
 from twisted.internet import reactor
-from txyam.client import YamClient
+from twisted.internet.protocol import ClientCreator
+from twisted.protocols.memcache import MemCacheProtocol
 
 # Local
 from pywwa import common
@@ -25,8 +26,6 @@ MEMCACHE_EXCLUDE = [
     "ROB",
     "HML",
 ]
-MEMCACHE_CLIENT = YamClient(reactor, ["tcp:iem-memcached:11211"])
-MEMCACHE_CLIENT.connect()
 
 
 def process_data(data):
@@ -37,18 +36,26 @@ def process_data(data):
     defer.addErrback(LOG.error)
 
 
+def actually_write(mc, nws):
+    """Actually write."""
+    df = mc.set(
+        nws.get_product_id().encode("utf-8"),
+        nws.unixtext.replace("\001\n", "").encode("utf-8"),
+        expireTime=600,
+    )
+    df.addErrback(LOG.error)
+
+
 def write_memcache(nws):
     """write our TextProduct to memcached"""
     if nws is None:
         return
     # 10 minutes should be enough time
     LOG.debug("writing %s to memcache", nws.get_product_id())
-    df = MEMCACHE_CLIENT.set(
-        nws.get_product_id().encode("utf-8"),
-        nws.unixtext.replace("\001\n", "").encode("utf-8"),
-        expireTime=600,
+    client = ClientCreator(reactor, MemCacheProtocol).connectTCP(
+        "iem-memcached", 11211
     )
-    df.addErrback(LOG.error)
+    client.addCallback(actually_write, nws)
 
 
 def real_parser(txn, buf):
