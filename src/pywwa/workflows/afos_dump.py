@@ -4,13 +4,12 @@ import click
 from pyiem.nws import product
 from pyiem.util import LOG
 from twisted.internet import reactor
-from twisted.internet.protocol import ClientCreator
-from twisted.protocols.memcache import MemCacheProtocol
 
 # Local
 from pywwa import common
 from pywwa.database import get_database
 from pywwa.ldm import bridge
+from pywwa.memclient import write_memcache
 
 DBPOOL = get_database("afos", cp_max=5)
 MEMCACHE_EXCLUDE = [
@@ -31,31 +30,22 @@ MEMCACHE_EXCLUDE = [
 def process_data(data):
     """Process the product"""
     defer = DBPOOL.runInteraction(real_parser, data)
-    defer.addCallback(write_memcache)
+    defer.addCallback(write2memcache)
     defer.addErrback(common.email_error, data)
     defer.addErrback(LOG.error)
 
 
-def actually_write(mc, nws):
-    """Actually write."""
-    df = mc.set(
-        nws.get_product_id().encode("utf-8"),
-        nws.unixtext.replace("\001\n", "").encode("utf-8"),
-        expireTime=600,
-    )
-    df.addErrback(LOG.error)
-
-
-def write_memcache(nws):
+def write2memcache(nws):
     """write our TextProduct to memcached"""
     if nws is None:
         return
     # 10 minutes should be enough time
     LOG.debug("writing %s to memcache", nws.get_product_id())
-    client = ClientCreator(reactor, MemCacheProtocol).connectTCP(
-        "iem-memcached", 11211
+    write_memcache(
+        nws.get_product_id().encode("utf-8"),
+        nws.unixtext.replace("\001\n", "").encode("utf-8"),
+        expire=600,
     )
-    client.addCallback(actually_write, nws)
 
 
 def real_parser(txn, buf):
