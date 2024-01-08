@@ -42,20 +42,11 @@ class CustomFormatter(logging.Formatter):
         )
 
 
-def shutdown(default=5):
+def shutdown():
     """Shutdown method in given number of seconds."""
-    # Careful, default could have been passed in as an error
-    if not isinstance(default, int):
-        LOG.error(default)
-        delay = 5
-    else:
-        delay = (
-            pywwa.CTX["shutdown_delay"]
-            if pywwa.CTX["shutdown_delay"] is not None
-            else default
-        )
+    delay = pywwa.CTX["shutdown_delay"]
     LOG.info("Shutting down in %s seconds...", delay)
-    reactor.callLater(delay, reactor.callFromThread, reactor.stop)
+    reactor.callLater(delay, reactor.stop)
 
 
 def utcnow():
@@ -75,6 +66,9 @@ def replace_enabled():
 
 def setup_syslog():
     """Setup how we want syslogging to work"""
+    # I am punting on some issue the below creates within pytest
+    if SETTINGS.get("__setup_syslog", False):
+        return
     # https://stackoverflow.com/questions/13699283
     frame = inspect.stack()[-1]
     module = inspect.getmodule(frame[0])
@@ -94,6 +88,7 @@ def setup_syslog():
         tplog.addObserver(lambda x: print(formatEvent(x)))
     # Allow for more verbosity when we are running this manually.
     LOG.setLevel(logging.DEBUG if sys.stdout.isatty() else logging.INFO)
+    SETTINGS["__setup_syslog"] = True
 
 
 def load_settings():
@@ -243,6 +238,7 @@ def init(f):
         "-s",
         "--shutdown-delay",
         type=int,
+        default=5,
         help="Shutdown after N seconds",
     )
     @click.option(
@@ -258,8 +254,7 @@ def init(f):
         is_flag=True,
         help="Disable XMPP messaging",
     )
-    @click.pass_context
-    def decorated_function(pass_ctx, *args, **kwargs):
+    def decorated_function(*args, **kwargs):
         """Decorated function."""
         # Step 1, parse command line arguments into running context
         pywwa.CTX.update(kwargs)
@@ -271,9 +266,12 @@ def init(f):
         if not pywwa.CTX["disable_xmpp"] and not getattr(
             f, "disable_xmpp", False
         ):
-            print("Setting up XMPP client")
             make_jabber_client()
         # Step 5, call the function
-        return pass_ctx.invoke(f, *args, **kwargs)
+        ret = f(*args, **kwargs)
+        # Step 6, run the reactor, but account for ugliness of pytest
+        if not reactor.running:
+            reactor.run()
+        return ret
 
     return decorated_function

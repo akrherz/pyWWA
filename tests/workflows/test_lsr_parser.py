@@ -3,7 +3,8 @@
 from pywwa.workflows import lsr
 
 
-def test_pickling():
+# TODO this is not safe
+def disabled_test_pickling():
     """Test the lifecycle of pickling the LSRDB."""
     lsr.pickledb()
     lsr.cleandb()

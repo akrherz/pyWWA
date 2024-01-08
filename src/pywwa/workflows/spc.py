@@ -4,7 +4,6 @@
 import click
 from pyiem.nws.products.spcpts import parser
 from pyiem.util import LOG
-from twisted.internet import reactor
 
 # Local
 from pywwa import common
@@ -39,4 +38,3 @@ def do_jabber(prod):
 def main(*args, **kwargs):
     """Go Main Go."""
     bridge(real_parser, dbpool=get_database("postgis"), cb2=do_jabber)
-    reactor.run()

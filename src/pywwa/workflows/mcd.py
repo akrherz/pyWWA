@@ -6,7 +6,6 @@
 # 3rd Party
 import click
 from pyiem.nws.products.mcd import parser as mcdparser
-from twisted.internet import reactor
 
 # Local
 from pywwa import common
@@ -66,4 +65,3 @@ def real_process(txn, raw):
 def main(*args, **kwargs):
     """Go Main Go."""
     bridge(process_data)
-    reactor.run()

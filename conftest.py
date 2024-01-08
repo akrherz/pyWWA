@@ -4,6 +4,11 @@ import pytest
 import pywwa
 from pywwa.database import get_dbconnc
 
+# Dragons
+# pytest + twisted + click == too much magic for poor me
+# So, this effectively disables reactor.stop() from working
+pywwa.CTX_DEFAULTS["shutdown_delay"] = 1800
+
 
 @pytest.fixture(autouse=True)
 def setup_and_teardown():

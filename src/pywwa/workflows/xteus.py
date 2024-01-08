@@ -2,7 +2,6 @@
 # 3rd Party
 import click
 from pyiem.nws.products.xteus import parser
-from twisted.internet import reactor
 
 # Local
 from pywwa import common
@@ -31,4 +30,3 @@ def process_data(data):
 def main(*args, **kwargs):
     """Fire things up."""
     bridge(process_data)
-    reactor.run()

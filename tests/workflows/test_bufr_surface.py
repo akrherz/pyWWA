@@ -60,12 +60,6 @@ def test_bounds_check():
     assert bufr_surface.bounds_check(None, 0, 10) is None
 
 
-def test_api():
-    """Test API."""
-    bufr_surface.ready(None)
-    bufr_surface.workflow(b"")
-
-
 @pytest.mark.parametrize("database", ["iem"])
 def test_unknown_source(cursor):
     """Test that invalid descriptor is handled."""

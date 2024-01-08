@@ -5,8 +5,8 @@ from pyiem.util import LOG
 from twisted.internet import reactor, task
 
 # Local
-from pywwa import ldmbridge
-from pywwa.common import SETTINGS, email_error, shutdown
+from pywwa import ldmbridge, shutdown
+from pywwa.common import SETTINGS, email_error
 
 
 class MyProductIngestor(ldmbridge.LDMProductReceiver):
@@ -18,7 +18,7 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
         super().__init__(isbinary=isbinary, dedup=dedup, **kwargs)
         self.local_callback = callback
 
-    def connectionLost(self, reason):
+    def connectionLost(self, reason=None):
         """called when the connection is lost"""
         LOG.info("connectionLost: %s", reason)
         shutdown()
@@ -59,4 +59,5 @@ def bridge(callback, dbpool=None, isbinary=False, product_end=None, cb2=None):
         isbinary=isbinary,
         product_end=product_end,
     )
-    return ldmbridge.LDMProductFactory(proto)
+    ldmbridge.LDMProductFactory(proto)
+    return proto

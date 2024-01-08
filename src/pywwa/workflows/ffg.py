@@ -4,7 +4,6 @@
 import click
 from pyiem.nws.products.ffg import parser
 from pyiem.util import LOG
-from twisted.internet import reactor
 
 # Local
 from pywwa import common
@@ -31,4 +30,3 @@ def real_parser(txn, buf):
 def main(*args, **kwargs):
     """Our main method"""
     bridge(real_parser, dbpool=get_database("postgis"))
-    reactor.run()

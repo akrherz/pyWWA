@@ -73,7 +73,7 @@ def message_processor(stanza):
     LOG.info("Message from %s Body: %s", stanza["from"], body)
     if body is not None and body.lower().strip() == "shutdown":
         LOG.info("I got shutdown message, shutting down...")
-        reactor.callWhenRunning(reactor.stop)  # @UndefinedVariable
+        pywwa.shutdown()
 
 
 def raw_data_in(data):

@@ -91,4 +91,3 @@ def main(*args, **kwargs):
     reactor.callLater(0, loaddb)
     bridge(real_processor, dbpool=get_database("postgis"))
     reactor.callLater(20, cleandb)
-    reactor.run()

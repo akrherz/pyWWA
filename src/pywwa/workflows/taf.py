@@ -3,7 +3,6 @@
 # 3rd Party
 import click
 from pyiem.nws.products.taf import parser
-from twisted.internet import reactor
 
 # Local
 from pywwa import common
@@ -29,4 +28,3 @@ def real_process(txn, raw):
 def main(*args, **kwargs):
     """Go Main Go"""
     bridge(real_process, dbpool=get_database("asos"))
-    reactor.run()  # @UndefinedVariable

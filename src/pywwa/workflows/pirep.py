@@ -9,7 +9,7 @@ from twisted.internet import reactor
 
 # Local
 from pywwa import common, get_data_filepath
-from pywwa.database import get_database
+from pywwa.database import get_database, get_dbconnc
 from pywwa.ldm import bridge
 
 PIREPS = {}
@@ -110,17 +110,11 @@ def real_parser(txn, buf):
         prod.sql(txn)
 
 
-def ready(_bogus):
-    """We are ready to ingest"""
-    reactor.callLater(20, cleandb)
-    bridge(real_parser, dbpool=DBPOOL)
-
-
 @click.command()
 @common.init
 def main(*args, **kwargs):
     """GO Main Go."""
-    df = DBPOOL.runInteraction(load_locs)
-    df.addCallback(ready)
-    df.addErrback(common.shutdown)
-    reactor.run()
+    conn, cursor = get_dbconnc("mesosite")
+    load_locs(cursor)
+    conn.close()
+    bridge(real_parser, dbpool=DBPOOL)

@@ -9,9 +9,6 @@ from pyiem.nws.ugc import UGCProvider
 from pyiem.util import LOG
 from shapely.geometry import MultiPolygon
 
-# 3rd Party
-from twisted.internet import reactor
-
 # Local
 from pywwa import common
 from pywwa.database import get_database, load_nwsli
@@ -91,4 +88,3 @@ def main(*args, **kwargs):
     """Go Main Go."""
     load_nwsli(NWSLI_DICT)
     bridge(process_data)
-    reactor.run()

@@ -6,7 +6,6 @@ import re
 
 import click
 from pyiem.nws import product
-from twisted.internet import reactor
 
 # Local
 from pywwa import common
@@ -61,4 +60,3 @@ def real_process(txn, data):
 def main(*args, **kwargs):
     """Go Main Go."""
     bridge(real_process, dbpool=get_database("afos"))
-    reactor.run()
