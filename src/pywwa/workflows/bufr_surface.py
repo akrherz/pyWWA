@@ -54,11 +54,17 @@ WMO2ISO3166 = {
     "EUMS": 578,  # Norway
     "EYHM": 233,  # Estonia
     "FAPR": 710,  # South Africa
+    "FCBB": 178,  # Congo
+    "FEFF": 178,  # Congo
+    "FGSL": 686,  # Senegal
+    "FKKD": 384,  # Ivory Coast
     "FQMA": 508,  # Mozambique
     "FMEE": 262,  # Reunion
     "FNLU": 24,  # Angola
+    "FOOL": 266,  # Gabon
     "FTTJ": 120,  # Cameroon
     "FWCL": 120,  # Cameroon
+    "FZAA": 180,  # Democratic Republic of the Congo
     "GMAA": 504,  # Morocco
     "GMAG": 504,  # Morocco
     "GMDA": 504,  # Morocco

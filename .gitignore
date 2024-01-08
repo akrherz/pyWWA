@@ -16,3 +16,4 @@ util/rabbitmq.json
 coverage.xml
 .eggs/
 build/
+/dist/
