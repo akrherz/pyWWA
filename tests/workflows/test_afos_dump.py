@@ -19,6 +19,15 @@ def test_future_product(cursor):
 
 
 @pytest.mark.parametrize("database", ["afos"])
+def test_memcache_write_api(cursor):
+    """Exercise, but does not actually run the write :("""
+    data = get_example_file("AFD.txt")
+    pywwa.CTX["utcnow"] = utc(2015, 6, 9, 11, 56)
+    prod = afos_dump.real_parser(cursor, data)
+    afos_dump.write2memcache(prod)
+
+
+@pytest.mark.parametrize("database", ["afos"])
 def test_processor(cursor):
     """Test basic parsing."""
     data = get_example_file("AFD.txt")
@@ -41,9 +50,6 @@ def test_processor(cursor):
     data = data.replace("AFDDMX123", "RR1DMX")
     res = afos_dump.real_parser(cursor, data)
     assert res is None
-    # 5. Test write_memcache
-    afos_dump.write_memcache(prod)
-    afos_dump.write_memcache(None)
     # 6. Replace on
     pywwa.CTX["replace"] = True
     afos_dump.real_parser(cursor, data)

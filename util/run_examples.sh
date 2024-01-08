@@ -47,7 +47,7 @@ cat examples/nldn.bin | python parsers/nldn_parser.py $OPTS || exit 2
 
 cat examples/PIREP.txt | python parsers/pirep_parser.py $OPTS || exit 2
 
-cat examples/RR7.txt | python parsers/rr7.py $OPTS || exit 2
+cat examples/SHEF/RR7ZOB.txt | python parsers/rr7.py $OPTS || exit 2
 
 cat examples/SHEF.txt | python parsers/shef_parser.py $OPTS || exit 2
 
