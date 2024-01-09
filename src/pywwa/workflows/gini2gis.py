@@ -12,6 +12,7 @@ import tempfile
 from io import BytesIO
 from logging.handlers import SysLogHandler
 
+import click
 import numpy as np
 from PIL import Image
 from pyiem.nws import gini
@@ -271,7 +272,10 @@ def cleanup(tmpfn):
             os.unlink(f"{tmpfn}.{suffix}")
 
 
-def main():
+@click.command(help=__doc__)
+@common.init
+@common.disable_xmpp
+def main(*args, **kwargs):
     """workflow"""
     logger.info("Starting Ingest for: %s", " ".join(sys.argv))
 
@@ -299,7 +303,3 @@ def main():
         cleanup(tmpfd.name)
 
     logger.info("Done!")
-
-
-if __name__ == "__main__":
-    main()
