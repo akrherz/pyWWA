@@ -10,6 +10,8 @@ with watches.  Lets try to explain
     init_expire <- When did this product initially expire
     product_issue <- When was this product issued by the NWS
 """
+from functools import partial
+
 # 3rd Party
 import click
 from pyiem.nws.products.vtec import parser as vtecparser
@@ -19,16 +21,14 @@ from twisted.mail.smtp import SMTPSenderFactory
 
 # Local
 from pywwa import common
-from pywwa.database import get_database, load_nwsli
+from pywwa.database import get_database, get_dbconn, load_nwsli
 from pywwa.ldm import bridge
 
 SMTPSenderFactory.noisy = False
-PGCONN = get_database("postgis")
-UGC_DICT = UGCProvider()
 NWSLI_DICT = {}
 
 
-def process_data(data):
+def process_data(ugc_dict, pgconn, data):
     """Process the product"""
     # Make sure we have a trailing $$, if not report error and slap one on
     if data.find("$$") == -1:
@@ -39,7 +39,7 @@ def process_data(data):
     text_product = vtecparser(
         data,
         utcnow=common.utcnow(),
-        ugc_provider=UGC_DICT,
+        ugc_provider=ugc_dict,
         nwsli_provider=NWSLI_DICT,
     )
     # Don't parse these as they contain duplicated information
@@ -52,7 +52,7 @@ def process_data(data):
     # This is sort of ambiguous as to what is best to be done when database
     # writing is disabled.  The web workflow will likely fail as well.
     if common.dbwrite_enabled():
-        df = PGCONN.runInteraction(text_product.sql)
+        df = pgconn.runInteraction(text_product.sql)
         df.addCallback(step2, text_product)
         df.addErrback(common.email_error, text_product.unixtext)
         df.addErrback(LOG.error)
@@ -82,4 +82,5 @@ def step2(_dummy, text_product):
 def main(*args, **kwargs):
     """Go Main Go."""
     load_nwsli(NWSLI_DICT)
-    bridge(process_data)
+    ugc_dict = UGCProvider(pgconn=get_dbconn("postgis"))
+    bridge(partial(process_data, ugc_dict, get_database("postgis")))

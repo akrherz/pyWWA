@@ -1,6 +1,7 @@
 """ Generic NWS Product Parser """
 # stdlib
 from datetime import timedelta
+from functools import partial
 
 import click
 from pyiem.nws.product import TextProduct
@@ -10,21 +11,20 @@ from shapely.geometry import MultiPolygon
 
 # Local
 from pywwa import common
-from pywwa.database import get_database, load_nwsli
+from pywwa.database import get_database, get_dbconn, load_nwsli
 from pywwa.ldm import bridge
 
-UGC_DICT = UGCProvider()
 NWSLI_DICT = {}
 
 
-def process_data(txn, buf) -> TextProduct:
+def process_data(ugc_dict, txn, buf) -> TextProduct:
     """Actually do some processing"""
 
     # Create our TextProduct instance
     prod = productparser(
         buf,
         utcnow=common.utcnow(),
-        ugc_provider=UGC_DICT,
+        ugc_provider=ugc_dict,
         nwsli_provider=NWSLI_DICT,
     )
 
@@ -70,4 +70,6 @@ def process_data(txn, buf) -> TextProduct:
 def main(*args, **kwargs):
     """Go Main Go."""
     load_nwsli(NWSLI_DICT)
-    bridge(process_data, dbpool=get_database("postgis"))
+    ugc_dict = UGCProvider(pgconn=get_dbconn("postgis"))
+    func = partial(process_data, ugc_dict)
+    bridge(func, dbpool=get_database("postgis"))

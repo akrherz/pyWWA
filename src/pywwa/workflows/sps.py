@@ -1,4 +1,6 @@
 """SPS product ingestor"""
+from functools import partial
+
 # 3rd Party
 import click
 from pyiem.nws.products.sps import parser
@@ -7,15 +9,13 @@ from pyiem.util import LOG
 
 # Local
 from pywwa import common
-from pywwa.database import get_database, load_nwsli
+from pywwa.database import get_database, get_dbconn, load_nwsli
 from pywwa.ldm import bridge
 
-POSTGIS = get_database("postgis")
-UGC_DICT = UGCProvider()
 NWSLI_DICT = {}
 
 
-def real_process(txn, raw):
+def real_process(ugc_dict, txn, raw):
     """Really process!"""
     if raw.find("$$") == -1:
         LOG.info("$$ was missing from this product")
@@ -23,7 +23,7 @@ def real_process(txn, raw):
     prod = parser(
         raw,
         utcnow=common.utcnow(),
-        ugc_provider=UGC_DICT,
+        ugc_provider=ugc_dict,
         nwsli_provider=NWSLI_DICT,
     )
     if common.dbwrite_enabled():
@@ -40,5 +40,7 @@ def real_process(txn, raw):
 @common.init
 def main(*args, **kwargs):
     """Go Main Go."""
+    ugc_dict = UGCProvider(pgconn=get_dbconn("postgis"))
     load_nwsli(NWSLI_DICT)
-    bridge(real_process, dbpool=POSTGIS)
+    func = partial(real_process, ugc_dict)
+    bridge(func, dbpool=get_database("postgis"))
