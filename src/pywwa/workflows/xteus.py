@@ -11,11 +11,7 @@ from pywwa.ldm import bridge
 
 def process_data(txn, data):
     """Process the product"""
-    try:
-        prod = parser(data, utcnow=common.utcnow())
-    except Exception as myexp:
-        common.email_error(myexp, data)
-        return None
+    prod = parser(data, utcnow=common.utcnow())
     if prod.warnings:
         common.email_error("\n".join(prod.warnings), data)
     prod.sql(txn)

@@ -9,6 +9,11 @@ from pywwa.testing import get_example_file
 from pywwa.workflows import afos_dump
 
 
+def test_write2memcache():
+    """Test the memcache write."""
+    afos_dump.write2memcache(None)
+
+
 @pytest.mark.parametrize("database", ["afos"])
 def test_future_product(cursor):
     """Test exception for product from the future."""
