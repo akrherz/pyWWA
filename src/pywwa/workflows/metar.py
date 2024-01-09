@@ -164,7 +164,7 @@ def ready(_):
     lc.start(720, now=False)
 
 
-@click.command()
+@click.command(help=__doc__)
 @common.init
 def main(*args, **kwargs):
     """Run once at startup"""

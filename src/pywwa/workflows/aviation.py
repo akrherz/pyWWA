@@ -9,8 +9,6 @@ from pywwa import common, get_data_filepath
 from pywwa.database import get_database, get_dbconnc
 from pywwa.ldm import bridge
 
-DBPOOL = get_database("postgis")
-
 # Load LOCS table
 LOCS = {}
 
@@ -50,7 +48,7 @@ def load_database(txn):
     LOG.info("Loaded %s locations into LOCS", len(LOCS))
 
 
-def process_data(data):
+def process_data(txn, data):
     """Process the product"""
     try:
         prod = parser(data, nwsli_provider=LOCS, utcnow=common.utcnow())
@@ -59,13 +57,12 @@ def process_data(data):
         return None
     if prod.warnings:
         common.email_error("\n".join(prod.warnings), data)
-    defer = DBPOOL.runInteraction(prod.sql)
-    defer.addCallback(final_step, prod)
-    defer.addErrback(common.email_error, data)
+    prod.sql(txn)
+    final_step(prod)
     return prod
 
 
-def final_step(_, prod):
+def final_step(prod):
     """send messages"""
     for j in prod.get_jabbers(
         common.SETTINGS.get("pywwa_product_url", "pywwa_product_url"), ""
@@ -73,11 +70,11 @@ def final_step(_, prod):
         common.send_message(j[0], j[1], j[2])
 
 
-@click.command()
+@click.command(help=__doc__)
 @common.init
 def main(*args, **kwargs):
     """Fire things up."""
     conn, cursor = get_dbconnc("mesosite")
     load_database(cursor)
     conn.close()
-    bridge(process_data)
+    bridge(process_data, dbpool=get_database("postgis"))

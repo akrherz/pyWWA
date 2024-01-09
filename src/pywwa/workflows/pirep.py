@@ -13,7 +13,6 @@ from pywwa.database import get_database, get_dbconnc
 from pywwa.ldm import bridge
 
 PIREPS = {}
-DBPOOL = get_database("postgis")
 # Load LOCS table
 LOCS = {}
 
@@ -110,11 +109,11 @@ def real_parser(txn, buf):
         prod.sql(txn)
 
 
-@click.command()
+@click.command(help=__doc__)
 @common.init
 def main(*args, **kwargs):
     """GO Main Go."""
     conn, cursor = get_dbconnc("mesosite")
     load_locs(cursor)
     conn.close()
-    bridge(real_parser, dbpool=DBPOOL)
+    bridge(real_parser, dbpool=get_database("postgis"))

@@ -4,28 +4,20 @@ I convert raw GINI noaaport imagery into geo-referenced PNG files both in the
 'native' projection and 4326.
 """
 import json
-import logging
 import os
 import subprocess
 import sys
 import tempfile
 from io import BytesIO
-from logging.handlers import SysLogHandler
 
 import click
 import numpy as np
 from PIL import Image
 from pyiem.nws import gini
+from pyiem.util import LOG
 
 from pywwa import common
 
-logger = logging.getLogger("gini2gis")
-logger.setLevel(logging.INFO)
-handler = SysLogHandler(address="/dev/log", facility=SysLogHandler.LOG_LOCAL2)
-handler.setFormatter(
-    logging.Formatter("gini2gis[" + str(os.getpid()) + "]: %(message)s")
-)
-logger.addHandler(handler)
 WORLDFILE_FORMAT = (
     "%(dx).3f\n" "0.0\n" "0.0\n" "-%(dy).3f\n" "%(x0).3f\n" "%(y1).3f"
 )
@@ -43,13 +35,11 @@ def process_input():
     cstr.write(payload)
     cstr.seek(0)
     sat = gini.GINIZFile(cstr)
-    logger.info(str(sat))
     return sat
 
 
 def do_legacy_ir(sat, tmpfn):
     """since some are unable to process non-grayscale"""
-    logger.info("Doing legacy IR junk...")
     png = Image.fromarray(np.array(sat.data[:-1, :], np.uint8))
     png.save(f"{tmpfn}.png")
 
@@ -244,7 +234,7 @@ def gdalwarp(sat, tmpfn, epsg):
     )
     output = proc.stderr.read()
     if output != b"":
-        logger.error("gdalwarp() convert error message: %s", output)
+        LOG.error("gdalwarp() convert error message: %s", output)
     os.unlink(f"{tmpfn}_{epsg}.tif")
 
     tstamp = sat.metadata["valid"].strftime("%Y%m%d%H%M")
@@ -277,15 +267,13 @@ def cleanup(tmpfn):
 
 def workflow():
     """Go."""
-    logger.info("Starting Ingest for: %s", " ".join(sys.argv))
-
     sat = process_input()
     if sat is None:
-        logger.info("ABORT: No data found!")
+        LOG.info("ABORT: No data found!")
         return
-    logger.info("Processed archive file: %s", sat.archive_filename())
+    LOG.info("Processed archive file: %s", sat.archive_filename())
     if sat.awips_grid() is None:
-        logger.info("ABORT: Unknown awips grid!")
+        LOG.info("ABORT: Unknown awips grid!")
         return
 
     # Generate a temporary filename to use for our work
@@ -305,7 +293,7 @@ def workflow():
         # cleanup after ourself
         cleanup(tmpfd.name)
 
-    logger.info("Done!")
+    LOG.info("Done!")
 
 
 @click.command(help=__doc__)

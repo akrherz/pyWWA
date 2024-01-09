@@ -24,7 +24,7 @@ def real_process(txn, data):
         txn.execute(sql, sqlargs)
 
 
-@click.command()
+@click.command(help=__doc__)
 @common.init
 @common.disable_xmpp
 def main(*args, **kwargs):

@@ -1,4 +1,5 @@
 """test gini2gis"""
+from unittest.mock import patch
 
 import pywwa
 from pyiem.nws import gini
@@ -12,6 +13,14 @@ def make_gini():
     with open(get_example_filepath("TIGH05"), "rb") as fh:
         res = gini.GINIZFile(fh)
     return res
+
+
+def test_process_input():
+    """Test process_input by mocking sys.stdin"""
+    with patch("sys.stdin.buffer.read") as mock_read:
+        with open(get_example_filepath("TIGH05"), "rb") as fh:
+            mock_read.return_value = fh.read()
+        assert gini2gis.process_input() is not None
 
 
 def test_workflow():

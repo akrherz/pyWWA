@@ -52,7 +52,7 @@ def ready(_):
     metar.cleandb()
 
 
-@click.command()
+@click.command(help=__doc__)
 @common.init
 @common.disable_xmpp
 def main(*args, **kwargs):

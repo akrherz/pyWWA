@@ -9,7 +9,6 @@ import sys
 import traceback
 from email.mime.text import MIMEText
 from io import StringIO
-from syslog import LOG_LOCAL2
 
 import click
 import pyiem
@@ -17,7 +16,7 @@ from pyiem.util import LOG, utc
 from twisted.internet import reactor
 from twisted.logger import formatEvent
 from twisted.mail import smtp
-from twisted.python import failure, syslog
+from twisted.python import failure
 from twisted.python import log as tplog
 
 # Local Be careful of circeref here
@@ -66,11 +65,17 @@ def setup_syslog():
     frame = inspect.stack()[-1]
     module = inspect.getmodule(frame[0])
     filename = "None" if module is None else os.path.basename(module.__file__)
-    syslog.startLogging(
-        prefix=f"pyWWA/{filename}",
-        facility=LOG_LOCAL2,
-        setStdout=not pywwa.CTX["stdout_logging"],
-    )
+    # windows does not have syslog
+    try:
+        from twisted.python import syslog
+
+        syslog.startLogging(
+            prefix=f"pyWWA/{filename}",
+            facility=syslog.syslog.LOG_LOCAL2,
+            setStdout=not pywwa.CTX["stdout_logging"],
+        )
+    except ImportError:
+        LOG.info("Failed to import twisted.python.syslog")
     # pyIEM does logging via python stdlib logging, so we need to patch those
     # messages into twisted's logger.
     sh = logging.StreamHandler(stream=tplog.logfile)

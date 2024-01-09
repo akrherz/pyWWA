@@ -2,6 +2,7 @@
  Support SPC's MCD product
  Support WPC's FFG product
 """
+from functools import partial
 
 # 3rd Party
 import click
@@ -12,14 +13,12 @@ from pywwa import common
 from pywwa.database import get_database
 from pywwa.ldm import bridge
 
-DBPOOL = get_database("postgis")
 
-
-def process_data(data):
+def process_data(dbpool, data):
     """Process a chunk of data"""
     # BUG
     data = data.upper()
-    df = DBPOOL.runInteraction(real_process, data)
+    df = dbpool.runInteraction(real_process, data)
     df.addErrback(common.email_error, data)
 
 
@@ -60,8 +59,9 @@ def real_process(txn, raw):
         common.email_error("\n".join(prod.warnings), raw)
 
 
-@click.command()
+@click.command(help=__doc__)
 @common.init
 def main(*args, **kwargs):
     """Go Main Go."""
-    bridge(process_data)
+    func = partial(process_data, get_database("postgis"))
+    bridge(func)

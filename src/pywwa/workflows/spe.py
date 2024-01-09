@@ -43,7 +43,7 @@ def real_process(txn, raw):
     common.send_message(body, htmlbody, xtra)
 
 
-@click.command()
+@click.command(help=__doc__)
 @common.init
 def main(*args, **kwargs):
     """Go Main Go."""
