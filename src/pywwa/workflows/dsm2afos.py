@@ -1,18 +1,19 @@
 """Move DSM messages into the text database with the proper PIL."""
 # Local
 import re
-import sys
 
+import click
 from pyiem.nws import product
 
+from pywwa import common
 from pywwa.database import get_dbconnc
+from pywwa.ldm import bridge
 
 
-def main():
+def workflow(raw):
     """Go!"""
     pgconn, acursor = get_dbconnc("afos")
 
-    raw = sys.stdin.read()
     data = raw.replace("\r\r\n", "z")
     tokens = re.findall("(K[A-Z0-9]{3} [DM]S.*?[=N]z)", data)
 
@@ -22,9 +23,10 @@ def main():
         "INSERT into products (pil, data, source, wmo, entered) "
         "values(%s,%s,%s,%s,%s) "
     )
+    pil3 = "DSM" if nws.wmo == "CDUS27" else "MSM"
     for token in tokens:
         sqlargs = (
-            f"{sys.argv[1]}{token[1:4]}",
+            f"{pil3}{token[1:4]}",
             token.replace("z", "\n"),
             nws.source,
             nws.wmo,
@@ -35,3 +37,12 @@ def main():
     acursor.close()
     pgconn.commit()
     pgconn.close()
+    return nws
+
+
+@click.command(help=__doc__)
+@common.init
+@common.disable_xmpp
+def main(*args, **kwargs):
+    """Go Main Go."""
+    bridge(workflow)

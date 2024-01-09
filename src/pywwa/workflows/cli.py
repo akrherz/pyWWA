@@ -55,6 +55,7 @@ def load_stations():
 @common.init
 def main(*args, **kwargs):
     """Go Main Go."""
+    print("DARYL")
     df = task.deferLater(reactor, 0, load_stations)
     df.addCallback(ready)
     df.addErrback(common.email_error)
