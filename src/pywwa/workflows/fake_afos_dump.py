@@ -92,13 +92,12 @@ def really_process_data(txn, data):
         txn.execute(sql, sqlargs)
 
     # CWA is handled by cwa_parser.py
-    if tp.afos[:3] in ["FRH", "CWA"]:
-        return tp
-    jmsgs = tp.get_jabbers(
-        common.SETTINGS.get("pywwa_product_url", "pywwa_product_url")
-    )
-    for jmsg in jmsgs:
-        common.send_message(*jmsg)
+    if tp.afos[:3] not in ["FRH", "CWA"]:
+        jmsgs = tp.get_jabbers(
+            common.SETTINGS.get("pywwa_product_url", "pywwa_product_url")
+        )
+        for jmsg in jmsgs:
+            common.send_message(*jmsg)
     return tp
 
 

@@ -1,0 +1,19 @@
+033 
+NOXX42 KWNO 021852
+
+SENIOR DUTY METEOROLOGIST NWS ALERT ADMINISTRATIVE MESSAGE
+NWS NCEP CENTRAL OPERATIONS COLLEGE PARK MD
+1851Z TUE JAN 02 2024
+
+
+...NWS NETWORK INTERRUPTION - RESTORED
+
+NCO re-seated a Network fiber optic cable and network has been
+stable after ~1715Z.  NCO will continue to  monitor the circuit
+
+If users experience further issues, please contact Tech
+Control by email at nco.ops@noaa.gov or by phone at
+301-683-1518.
+
+
+Shruell/SDM/NCO/NCEP
