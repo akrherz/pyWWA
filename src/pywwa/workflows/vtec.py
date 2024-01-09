@@ -15,7 +15,6 @@ import click
 from pyiem.nws.products.vtec import parser as vtecparser
 from pyiem.nws.ugc import UGCProvider
 from pyiem.util import LOG
-from twisted.internet import reactor
 from twisted.mail.smtp import SMTPSenderFactory
 
 # Local
@@ -84,4 +83,3 @@ def main(*args, **kwargs):
     """Go Main Go."""
     load_nwsli(NWSLI_DICT)
     bridge(process_data)
-    reactor.run()

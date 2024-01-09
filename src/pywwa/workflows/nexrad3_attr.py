@@ -193,4 +193,3 @@ def main(*args, **kwargs):
     df = mesosite.runInteraction(load_station_table)
     df.addCallback(on_ready, mesosite)
     df.addErrback(errback)
-    reactor.run()

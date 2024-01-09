@@ -4,7 +4,6 @@ import re
 
 import click
 from pyiem.nws.product import TextProduct
-from twisted.internet import reactor
 
 # Local
 from pywwa import common
@@ -93,13 +92,12 @@ def really_process_data(txn, data):
         txn.execute(sql, sqlargs)
 
     # CWA is handled by cwa_parser.py
-    if tp.afos[:3] in ["FRH", "CWA"]:
-        return tp
-    jmsgs = tp.get_jabbers(
-        common.SETTINGS.get("pywwa_product_url", "pywwa_product_url")
-    )
-    for jmsg in jmsgs:
-        common.send_message(*jmsg)
+    if tp.afos[:3] not in ["FRH", "CWA"]:
+        jmsgs = tp.get_jabbers(
+            common.SETTINGS.get("pywwa_product_url", "pywwa_product_url")
+        )
+        for jmsg in jmsgs:
+            common.send_message(*jmsg)
     return tp
 
 
@@ -108,4 +106,3 @@ def really_process_data(txn, data):
 def main(*args, **kwargs):
     """Go Main Go."""
     bridge(really_process_data, dbpool=get_database("afos"))
-    reactor.run()

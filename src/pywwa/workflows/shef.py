@@ -20,7 +20,7 @@ from twisted.internet.task import LoopingCall, deferLater
 
 # Local
 from pywwa import common
-from pywwa.database import get_database
+from pywwa.database import get_database, get_dbconnc
 from pywwa.ldm import bridge
 
 # Setup Database Links
@@ -580,9 +580,15 @@ def process_accessdb():
             df.addErrback(common.email_error)
 
 
-def main2(_res):
-    """Go main Go!"""
-    LOG.info("main() fired!")
+@click.command()
+@click.option("--custom-arg", "-c", type=str, help="Differentiate pqact job")
+@common.init
+@common.disable_xmpp
+def main(*args, **kwargs):
+    """We startup."""
+    conn, cursor = get_dbconnc("mesosite")
+    load_stations(cursor)
+    conn.close()
     bridge(process_data)
 
     # Write out cached obs every couple of minutes
@@ -601,16 +607,3 @@ def main2(_res):
     lc4 = LoopingCall(process_accessdb_frontend)
     df4 = lc4.start(15, now=False)
     df4.addErrback(common.email_error)
-
-
-@click.command()
-@click.option("--custom-arg", "-c", type=str, help="Differentiate pqact job")
-@common.init
-@common.disable_xmpp
-def main(*args, **kwargs):
-    """We startup."""
-    # Load the station metadata before we fire up the ingesting
-    df = MESOSITEDB.runInteraction(load_stations)
-    df.addCallback(main2)
-    df.addErrback(common.shutdown)
-    reactor.run()

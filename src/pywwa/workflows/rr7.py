@@ -4,7 +4,6 @@ import re
 
 import click
 from pyiem.util import utc
-from twisted.internet import reactor
 
 from pywwa import common
 from pywwa.database import get_database
@@ -31,4 +30,3 @@ def real_process(txn, data):
 def main(*args, **kwargs):
     """Go"""
     bridge(real_process, dbpool=get_database("afos"))
-    reactor.run()

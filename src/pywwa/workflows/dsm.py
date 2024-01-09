@@ -5,7 +5,6 @@ from zoneinfo import ZoneInfo
 import click
 from pyiem.nws.products.dsm import parser
 from pyiem.util import LOG
-from twisted.internet import reactor
 
 # Local
 from pywwa import common
@@ -52,4 +51,3 @@ def main(*args, **kwargs):
     load_stations(cursor)
     pgconn.close()
     bridge(real_parser, dbpool=get_database("iem"))
-    reactor.run()

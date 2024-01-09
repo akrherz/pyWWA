@@ -5,7 +5,6 @@ import click
 from pyiem.nws.product import TextProduct
 from pyiem.nws.products import parser
 from pyiem.util import LOG
-from twisted.internet import reactor
 from twisted.internet.task import LoopingCall
 
 # Local
@@ -91,4 +90,3 @@ def main(*args, **kwargs):
     lc = LoopingCall(process_queue)
     df = lc.start(15, now=False)
     df.addErrback(common.email_error)
-    reactor.run()

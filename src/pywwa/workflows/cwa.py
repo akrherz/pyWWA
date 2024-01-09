@@ -3,18 +3,16 @@
 import click
 from pyiem.nws.products.cwa import parser
 from pyiem.util import LOG
-from twisted.internet import reactor
 
 # Local
 from pywwa import common, get_data_filepath
-from pywwa.database import get_database
+from pywwa.database import get_database, get_dbconnc
 from pywwa.ldm import bridge
 
 DBPOOL = get_database("postgis")
 
 # Load LOCS table
 LOCS = {}
-MESOSITE = get_database("mesosite")
 
 
 def goodline(line):
@@ -58,6 +56,7 @@ def load_database(txn):
             lat = float(line[56:60]) / 100.0
             lon = float(line[61:67]) / 100.0
             LOCS[sid] = {"lat": lat, "lon": lon}
+    LOG.info("Loaded %s locations into LOCS", len(LOCS))
 
 
 def process_data(data):
@@ -83,18 +82,11 @@ def final_step(_, prod):
         common.send_message(j[0], j[1], j[2])
 
 
-def onready(_res):
-    """Database has loaded"""
-    LOG.info("onready() called...")
-    bridge(process_data)
-    MESOSITE.close()
-
-
 @click.command()
 @common.init
 def main(*args, **kwargs):
     """Fire things up."""
-    df = MESOSITE.runInteraction(load_database)
-    df.addCallback(onready)
-    df.addErrback(common.shutdown)
-    reactor.run()
+    conn, cursor = get_dbconnc("mesosite")
+    load_database(cursor)
+    conn.close()
+    bridge(process_data)

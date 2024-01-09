@@ -3,7 +3,6 @@
 import click
 from pyiem.nws import product
 from pyiem.util import LOG
-from twisted.internet import reactor
 
 # Local
 from pywwa import common
@@ -101,4 +100,3 @@ def real_parser(txn, buf):
 def main(*args, **kwargs):
     """Fire up our workflow."""
     bridge(process_data)
-    reactor.run()  # @UndefinedVariable

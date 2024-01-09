@@ -3,7 +3,6 @@
 # 3rd Party
 import click
 from pyiem.nws.products.cf6 import parser
-from twisted.internet import reactor
 
 # Local
 from pywwa import common
@@ -29,4 +28,3 @@ def processor(txn, text):
 def main(*args, **kwargs):
     """Go Main Go."""
     bridge(processor, dbpool=DBPOOL)
-    reactor.run()

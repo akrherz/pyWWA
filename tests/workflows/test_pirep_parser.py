@@ -18,8 +18,3 @@ def test_real_parser(cursor):
 def test_load_locs(cursor):
     """Test that we can load our stations table."""
     pirep.load_locs(cursor)
-
-
-def test_ready():
-    """Test our ready method."""
-    pirep.ready(None)

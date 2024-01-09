@@ -3,6 +3,9 @@
 import json
 import os
 
+from pyiem.util import LOG
+from twisted.internet import reactor
+
 # Shared configuration
 SETTINGS = {}
 SETTINGS_FN = "pywwa_settings.json"
@@ -19,6 +22,13 @@ CTX = {}
 CTX.update(CTX_DEFAULTS)
 # Eventually updated to be a JABBER instance
 JABBER = None
+
+
+def shutdown():
+    """Shutdown method in given number of seconds."""
+    delay = CTX["shutdown_delay"]
+    LOG.info("Shutting down in %s seconds...", delay)
+    reactor.callLater(delay, reactor.stop)
 
 
 def get_data_filepath(filename):

@@ -17,7 +17,6 @@ from pybufrkit.renderer import NestedJsonRenderer
 from pyiem.nws.product import TextProduct
 from pyiem.observation import Observation
 from pyiem.util import LOG, convert_value, utc
-from twisted.internet import reactor
 from twisted.internet.task import LoopingCall
 
 # Local
@@ -628,4 +627,3 @@ def main(*args, **kwargs):
     df = MESOSITEDB.runInteraction(load_xref)
     df.addCallback(ready)
     df.addErrback(common.email_error)
-    reactor.run()

@@ -9,7 +9,6 @@ from email.mime.text import MIMEText
 import click
 from pyiem.nws import product
 from pyiem.util import LOG
-from twisted.internet import reactor
 from twisted.mail import smtp
 
 # Local
@@ -129,4 +128,3 @@ def real_process(data) -> product.TextProduct:
 def main(*args, **kwargs):
     """Go Main Go."""
     bridge(process_data)
-    reactor.run()

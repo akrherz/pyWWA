@@ -299,11 +299,6 @@ def test_load_stations(cursor):
     assert "_X_X_" not in shef.LOCS
 
 
-def test_main2():
-    """Exercise the API."""
-    shef.main2(None)
-
-
 def test_api():
     """Exercise the API."""
     shef.log_database_queue_size()

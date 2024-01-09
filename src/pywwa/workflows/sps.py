@@ -4,7 +4,6 @@ import click
 from pyiem.nws.products.sps import parser
 from pyiem.nws.ugc import UGCProvider
 from pyiem.util import LOG
-from twisted.internet import reactor
 
 # Local
 from pywwa import common
@@ -43,4 +42,3 @@ def main(*args, **kwargs):
     """Go Main Go."""
     load_nwsli(NWSLI_DICT)
     bridge(real_process, dbpool=POSTGIS)
-    reactor.run()

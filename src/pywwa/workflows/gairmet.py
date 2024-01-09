@@ -3,7 +3,6 @@
 # 3rd Party
 import click
 from pyiem.nws.products.gairmet import parser
-from twisted.internet import reactor
 
 # Local
 from pywwa import common
@@ -25,4 +24,3 @@ def real_parser(txn, buf):
 def main(*args, **kwargs):
     """Go Main Go."""
     bridge(real_parser, dbpool=get_database("postgis"))
-    reactor.run()

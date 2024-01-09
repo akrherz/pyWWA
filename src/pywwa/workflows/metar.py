@@ -161,7 +161,7 @@ def ready(_):
     lc = LoopingCall(
         MESOSITEDB.runInteraction, load_metar_stations, NWSLI_PROVIDER
     )
-    lc.start(720)
+    lc.start(720, now=False)
 
 
 @click.command()
@@ -171,4 +171,3 @@ def main(*args, **kwargs):
     df = MESOSITEDB.runInteraction(load_metar_stations, NWSLI_PROVIDER)
     df.addCallback(ready)
     df.addErrback(LOG.error)
-    reactor.run()  # @UndefinedVariable

@@ -31,7 +31,6 @@ def test_client_authd():
     xs.transport.write = mock.Mock()
     client.authd(xs)
     client.keepalive()
-    client.disconnect(xs)
 
 
 def test_message_processor():

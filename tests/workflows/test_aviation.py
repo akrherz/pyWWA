@@ -20,8 +20,6 @@ def test_processor(cursor):
     aviation.process_data(data.replace(" ORL", " ZZZ"))
     # 2. Attempt Jabber
     aviation.final_step(None, prod)
-    # 3. call onready
-    aviation.onready(None)
 
 
 @pytest.mark.parametrize("database", ["mesosite"])

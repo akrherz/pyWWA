@@ -29,7 +29,6 @@ def test_api():
     """Test that we can load things to ignore."""
     metar.load_ignorelist()
     metar.cleandb()
-    metar.ready(None)
 
 
 @pytest.mark.parametrize("database", ["iem"])

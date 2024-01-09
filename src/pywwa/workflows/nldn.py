@@ -4,7 +4,6 @@ from io import BytesIO
 
 import click
 from pyiem.nws.products.nldn import parser
-from twisted.internet import reactor
 
 # Local
 from pywwa import common
@@ -38,4 +37,3 @@ def real_process(buf):
 def main(*args, **kwargs):
     """Go Main"""
     bridge(process_data, isbinary=True, product_end=b"NLDN")
-    reactor.run()  # @UndefinedVariable
