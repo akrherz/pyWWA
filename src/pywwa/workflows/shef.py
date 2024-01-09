@@ -580,7 +580,7 @@ def process_accessdb():
             df.addErrback(common.email_error)
 
 
-@click.command()
+@click.command(help=__doc__)
 @click.option("--custom-arg", "-c", type=str, help="Differentiate pqact job")
 @common.init
 @common.disable_xmpp

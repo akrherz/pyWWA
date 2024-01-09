@@ -19,7 +19,7 @@ def real_parser(txn, buf):
         common.email_error("\n".join(prod.warnings), buf)
 
 
-@click.command()
+@click.command(help=__doc__)
 @common.init
 def main(*args, **kwargs):
     """Go Main Go."""

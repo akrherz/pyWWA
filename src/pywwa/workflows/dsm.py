@@ -42,7 +42,7 @@ def real_parser(txn, data):
         common.email_error("\n".join(prod.warnings), data)
 
 
-@click.command()
+@click.command(help=__doc__)
 @common.init
 def main(*args, **kwargs):
     """build things up."""

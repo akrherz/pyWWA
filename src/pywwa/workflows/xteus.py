@@ -8,10 +8,8 @@ from pywwa import common
 from pywwa.database import get_database
 from pywwa.ldm import bridge
 
-DBPOOL = get_database("iem")
 
-
-def process_data(data):
+def process_data(txn, data):
     """Process the product"""
     try:
         prod = parser(data, utcnow=common.utcnow())
@@ -20,13 +18,12 @@ def process_data(data):
         return None
     if prod.warnings:
         common.email_error("\n".join(prod.warnings), data)
-    defer = DBPOOL.runInteraction(prod.sql)
-    defer.addErrback(common.email_error, data)
+    prod.sql(txn)
     return prod
 
 
-@click.command()
+@click.command(help=__doc__)
 @common.init
 def main(*args, **kwargs):
     """Fire things up."""
-    bridge(process_data)
+    bridge(process_data, dbpool=get_database("iem"))

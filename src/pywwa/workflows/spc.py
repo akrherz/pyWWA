@@ -33,7 +33,7 @@ def do_jabber(prod):
     )
 
 
-@click.command()
+@click.command(help=__doc__)
 @common.init
 def main(*args, **kwargs):
     """Go Main Go."""

@@ -9,8 +9,6 @@ from pywwa import common
 from pywwa.database import get_database
 from pywwa.ldm import bridge
 
-DBPOOL = get_database("asos", cp_max=2)
-
 
 def processor(txn, text):
     """Protect the realprocessor"""
@@ -22,9 +20,9 @@ def processor(txn, text):
     return prod
 
 
-@click.command()
+@click.command(help=__doc__)
 @common.init
 @common.disable_xmpp
 def main(*args, **kwargs):
     """Go Main Go."""
-    bridge(processor, dbpool=DBPOOL)
+    bridge(processor, dbpool=get_database("asos", cp_max=2))

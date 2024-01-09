@@ -619,7 +619,7 @@ def ready(_):
     df.addErrback(common.email_error)
 
 
-@click.command()
+@click.command(help=__doc__)
 @common.init
 @common.disable_xmpp
 def main(*args, **kwargs):

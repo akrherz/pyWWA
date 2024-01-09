@@ -24,7 +24,7 @@ def real_parser(txn, buf):
     LOG.info("FFG found %s entries for product %s", sz, ffg.get_product_id())
 
 
-@click.command()
+@click.command(help=__doc__)
 @common.init
 @common.disable_xmpp
 def main(*args, **kwargs):

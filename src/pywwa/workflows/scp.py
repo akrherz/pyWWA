@@ -19,7 +19,7 @@ def real_process(txn, raw):
         common.email_error("\n".join(prod.warnings), raw)
 
 
-@click.command()
+@click.command(help=__doc__)
 @common.init
 @common.disable_xmpp
 def main(*args, **kwargs):

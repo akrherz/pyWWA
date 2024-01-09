@@ -82,7 +82,7 @@ def real_process(txn, raw) -> TextProduct:
     return prod
 
 
-@click.command()
+@click.command(help=__doc__)
 @common.init
 def main(*args, **kwargs):
     """Go Main Go"""

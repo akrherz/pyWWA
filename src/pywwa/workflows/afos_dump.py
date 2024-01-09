@@ -3,6 +3,7 @@
 import click
 from pyiem.nws import product
 from pyiem.util import LOG
+from twisted.internet import reactor
 
 # Local
 from pywwa import common
@@ -10,7 +11,6 @@ from pywwa.database import get_database
 from pywwa.ldm import bridge
 from pywwa.memclient import write_memcache
 
-DBPOOL = get_database("afos", cp_max=5)
 MEMCACHE_EXCLUDE = [
     "RR1",
     "RR2",
@@ -26,14 +26,6 @@ MEMCACHE_EXCLUDE = [
 ]
 
 
-def process_data(data):
-    """Process the product"""
-    defer = DBPOOL.runInteraction(real_parser, data)
-    defer.addCallback(write2memcache)
-    defer.addErrback(common.email_error, data)
-    defer.addErrback(LOG.error)
-
-
 def write2memcache(nws):
     """write our TextProduct to memcached"""
     if nws is None:
@@ -47,7 +39,7 @@ def write2memcache(nws):
     )
 
 
-def real_parser(txn, buf):
+def process_data(txn, buf):
     """Actually do something with the buffer, please"""
     if buf.strip() == "":
         return None
@@ -90,13 +82,13 @@ def real_parser(txn, buf):
     )
     if nws.afos[:3] in MEMCACHE_EXCLUDE:
         return None
-
+    reactor.callLater(0, write2memcache, nws)
     return nws
 
 
-@click.command()
+@click.command(help=__doc__)
 @common.init
 @common.disable_xmpp
 def main(*args, **kwargs):
     """Fire up our workflow."""
-    bridge(process_data)
+    bridge(process_data, dbpool=get_database("afos", cp_max=5))
