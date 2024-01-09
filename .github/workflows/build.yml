@@ -23,6 +23,8 @@ jobs:
 
     - name: Add /etc/hosts entries
       run: |
+        set -x
+        sudo cp /etc/hosts /etc/hosts.save
         cat .github/workflows/etchosts.txt | sudo tee -a /etc/hosts
 
     # setup conda-forge with micromamba
@@ -70,6 +72,47 @@ jobs:
         export PATH=$PATH:$(pwd)/tests/bin
         coverage run --source=pywwa setup.py test
         coverage xml
+
+    - name: Run console scripts without database
+      run: |
+        set -x
+        set -e
+        sudo systemctl stop postgresql@15-main.service
+        sudo cp /etc/hosts.save /etc/hosts
+        pywwa-parse-afos-dump --help
+        pywwa-parse-aviation --help
+        pywwa-parse-bufr-surface --help
+        pywwa-parse-cf6 --help
+        pywwa-parse-cli --help
+        pywwa-parse-dsm --help
+        pywwa-parse-dsm2afos --help
+        pywwa-parse-ero --help
+        pywwa-parse-fake-afos-dump --help
+        pywwa-parse-fd --help
+        pywwa-parse-ffg --help
+        pywwa-parse-gairmet --help
+        pywwa-parse-generic --help
+        pywwa-parse-gini2gis --help
+        pywwa-parse-hml --help
+        pywwa-parse-lsr --help
+        pywwa-parse-mcd --help
+        pywwa-parse-metar --help
+        pywwa-parse-mos --help
+        pywwa-parse-nexrad3-attr --help
+        pywwa-parse-nldn --help
+        pywwa-parse-pirep --help
+        pywwa-parse-rr7 --help
+        pywwa-parse-scp --help
+        pywwa-parse-shef --help
+        pywwa-parse-spc --help
+        pywwa-parse-spe --help
+        pywwa-parse-split-mav --help
+        pywwa-parse-sps --help
+        pywwa-parse-taf --help
+        pywwa-parse-vtec --help
+        pywwa-parse-watch --help
+        pywwa-parse-xteus --help
+        pywwa-spammer --help
 
     - name: Upload coverage to Codecov
       if: ${{ env.PYTHON_VERSION == '3.11' }}

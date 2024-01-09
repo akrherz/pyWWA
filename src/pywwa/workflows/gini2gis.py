@@ -12,6 +12,7 @@ import tempfile
 from io import BytesIO
 from logging.handlers import SysLogHandler
 
+import click
 import numpy as np
 from PIL import Image
 from pyiem.nws import gini
@@ -36,7 +37,10 @@ def process_input():
     @return GINIZFile instance
     """
     cstr = BytesIO()
-    cstr.write(getattr(sys.stdin, "buffer", sys.stdin).read())
+    payload = getattr(sys.stdin, "buffer", sys.stdin).read()
+    if len(payload) < 100:
+        return None
+    cstr.write(payload)
     cstr.seek(0)
     sat = gini.GINIZFile(cstr)
     logger.info(str(sat))
@@ -271,11 +275,14 @@ def cleanup(tmpfn):
             os.unlink(f"{tmpfn}.{suffix}")
 
 
-def main():
-    """workflow"""
+def workflow():
+    """Go."""
     logger.info("Starting Ingest for: %s", " ".join(sys.argv))
 
     sat = process_input()
+    if sat is None:
+        logger.info("ABORT: No data found!")
+        return
     logger.info("Processed archive file: %s", sat.archive_filename())
     if sat.awips_grid() is None:
         logger.info("ABORT: Unknown awips grid!")
@@ -301,5 +308,9 @@ def main():
     logger.info("Done!")
 
 
-if __name__ == "__main__":
-    main()
+@click.command(help=__doc__)
+@common.init
+@common.disable_xmpp
+def main(*args, **kwargs):
+    """workflow"""
+    workflow()

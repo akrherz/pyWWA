@@ -16,7 +16,7 @@ cat examples/CLIANN.txt | python parsers/cli_parser.py $OPTS || exit 2
 
 cat examples/CWA.txt | python parsers/cwa_parser.py $OPTS -u 2022-03-03T12:00 || exit 2
 
-cat examples/DSM.txt | python parsers/dsm2afos.py DSM || exit 2
+cat examples/DSM.txt | python parsers/dsm2afos.py || exit 2
 
 cat examples/DSM.txt | python parsers/dsm_parser.py $OPTS || exit 2
 
