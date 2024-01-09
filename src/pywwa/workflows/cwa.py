@@ -1,5 +1,4 @@
 """ CWA Product Parser! """
-from functools import partial
 
 # 3rd Party
 import click
@@ -59,27 +58,17 @@ def load_database(txn):
     LOG.info("Loaded %s locations into LOCS", len(LOCS))
 
 
-def process_data(dbpool, data):
+def process_data(txn, data):
     """Process the product"""
-    try:
-        prod = parser(data, nwsli_provider=LOCS, utcnow=common.utcnow())
-    except Exception as myexp:
-        common.email_error(myexp, data)
-        return None
+    prod = parser(data, nwsli_provider=LOCS, utcnow=common.utcnow())
     if prod.warnings:
         common.email_error("\n".join(prod.warnings), data)
-    defer = dbpool.runInteraction(prod.sql)
-    defer.addCallback(final_step, prod)
-    defer.addErrback(common.email_error, data)
-    return prod
-
-
-def final_step(_, prod):
-    """send messages"""
+    prod.sql(txn)
     for j in prod.get_jabbers(
         common.SETTINGS.get("pywwa_product_url", "pywwa_product_url"), ""
     ):
         common.send_message(j[0], j[1], j[2])
+    return prod
 
 
 @click.command(help=__doc__)
@@ -89,5 +78,4 @@ def main(*args, **kwargs):
     conn, cursor = get_dbconnc("mesosite")
     load_database(cursor)
     conn.close()
-    func = partial(process_data, get_database("postgis"))
-    bridge(func)
+    bridge(process_data, dbpool=get_database("postgis"))
