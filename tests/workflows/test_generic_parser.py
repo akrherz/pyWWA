@@ -14,9 +14,7 @@ def test_aww(cursor):
     """Test AWW parser."""
     data = get_example_file("AWW.txt")
     pywwa.CTX["utcnow"] = utc(2022, 9, 9, 21, 34)
-    prod = generic.really_process_data(cursor, data)
+    prod = generic.process_data(cursor, data)
     assert not prod.warnings
-    prod = generic.really_process_data(
-        cursor, data.replace("092245", "0z0z0z")
-    )
+    prod = generic.process_data(cursor, data.replace("092245", "0z0z0z"))
     assert prod.warnings
