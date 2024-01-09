@@ -37,7 +37,10 @@ def process_input():
     @return GINIZFile instance
     """
     cstr = BytesIO()
-    cstr.write(getattr(sys.stdin, "buffer", sys.stdin).read())
+    payload = getattr(sys.stdin, "buffer", sys.stdin).read()
+    if len(payload) < 100:
+        return None
+    cstr.write(payload)
     cstr.seek(0)
     sat = gini.GINIZFile(cstr)
     logger.info(str(sat))
@@ -272,14 +275,14 @@ def cleanup(tmpfn):
             os.unlink(f"{tmpfn}.{suffix}")
 
 
-@click.command(help=__doc__)
-@common.init
-@common.disable_xmpp
-def main(*args, **kwargs):
-    """workflow"""
+def workflow():
+    """Go."""
     logger.info("Starting Ingest for: %s", " ".join(sys.argv))
 
     sat = process_input()
+    if sat is None:
+        logger.info("ABORT: No data found!")
+        return
     logger.info("Processed archive file: %s", sat.archive_filename())
     if sat.awips_grid() is None:
         logger.info("ABORT: Unknown awips grid!")
@@ -303,3 +306,11 @@ def main(*args, **kwargs):
         cleanup(tmpfd.name)
 
     logger.info("Done!")
+
+
+@click.command(help=__doc__)
+@common.init
+@common.disable_xmpp
+def main(*args, **kwargs):
+    """workflow"""
+    workflow()

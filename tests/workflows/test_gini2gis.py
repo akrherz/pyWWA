@@ -18,4 +18,4 @@ def test_workflow():
     """Test the workflow."""
     pywwa.CTX["utcnow"] = utc(2021, 9, 16, 18)
     gini2gis.process_input = make_gini
-    gini2gis.main()
+    gini2gis.workflow()
