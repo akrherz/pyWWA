@@ -1,5 +1,6 @@
 """Test pywwa.xmpp"""
 
+import mock
 import pywwa
 from pywwa import xmpp
 from twisted.words.xish import domish, xmlstream
@@ -20,6 +21,16 @@ def test_raw_data_out():
     """Test the raw data out method."""
     xmpp.raw_data_out(b"hello")
     xmpp.raw_data_out(" ")
+
+
+def test_client_authd():
+    """Test the authd method."""
+    client = xmpp.JabberClient("root@localhost")
+    xs = xmlstream.XmlStream()
+    xs.transport = mock.Mock()
+    xs.transport.write = mock.Mock()
+    client.authd(xs)
+    client.keepalive()
 
 
 def test_message_processor():

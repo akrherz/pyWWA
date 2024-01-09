@@ -5,6 +5,7 @@ import pkgutil
 import pytest
 import pywwa.workflows
 from click.testing import CliRunner
+from pywwa.workflows.cli import main as cli_main
 
 
 def find_mains():
@@ -28,6 +29,15 @@ def test_exercise_api(mainmethod):
     """Exercise the main() method via click."""
     runner = CliRunner()
     result = runner.invoke(mainmethod, ["-x"])
+    if result.exception:
+        raise result.exception
+    assert result.exit_code == 0
+
+
+def test_cli_with_jabber():
+    """Test the CLI main function."""
+    runner = CliRunner()
+    result = runner.invoke(cli_main)
     if result.exception:
         raise result.exception
     assert result.exit_code == 0

@@ -42,13 +42,6 @@ class CustomFormatter(logging.Formatter):
         )
 
 
-def shutdown():
-    """Shutdown method in given number of seconds."""
-    delay = pywwa.CTX["shutdown_delay"]
-    LOG.info("Shutting down in %s seconds...", delay)
-    reactor.callLater(delay, reactor.stop)
-
-
 def utcnow():
     """Return what utcnow is based on command line."""
     return utc() if pywwa.CTX["utcnow"] is None else pywwa.CTX["utcnow"]
