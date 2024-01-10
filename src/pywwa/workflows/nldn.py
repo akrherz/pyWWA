@@ -1,6 +1,5 @@
 """ NLDN """
 # stdlib
-from functools import partial
 from io import BytesIO
 
 import click
@@ -12,21 +11,14 @@ from pywwa.database import get_database
 from pywwa.ldm import bridge
 
 
-def process_data(dbpool, data):
-    """Actual ingestor"""
-    if data == b"":
-        return
-    try:
-        real_process(dbpool, data)
-    except Exception as myexp:
-        common.email_error(myexp, data)
-
-
-def real_process(dbpool, buf):
+def process_data(txn, buf):
     """The real processor of the raw data, fun!"""
-    np = parser(BytesIO(b"NLDN" + buf))
+    if buf == b"":
+        return None
+    prod = parser(BytesIO(b"NLDN" + buf))
     if common.dbwrite_enabled():
-        dbpool.runInteraction(np.sql)
+        prod.sql(txn)
+    return prod
 
 
 @click.command(help=__doc__)
@@ -34,5 +26,9 @@ def real_process(dbpool, buf):
 @common.disable_xmpp
 def main(*args, **kwargs):
     """Go Main"""
-    func = partial(process_data, get_database("nldn"))
-    bridge(func, isbinary=True, product_end=b"NLDN")
+    bridge(
+        process_data,
+        isbinary=True,
+        product_end=b"NLDN",
+        dbpool=get_database("nldn"),
+    )
