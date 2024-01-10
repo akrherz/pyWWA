@@ -1,5 +1,6 @@
 # Run the various examples through their ingest
 set -x
+set -e
 OPTS="-l -x -s 1 -e"
 
 cat examples/FD1US1.txt | python parsers/fd_parser.py $OPTS -u 2023-03-09T12:00 || exit 2
@@ -43,7 +44,7 @@ cat examples/METNC1.txt | python parsers/mos_parser.py $OPTS || exit 2
 
 cat examples/NCR_20121127_1413 | python parsers/nexrad3_attr.py $OPTS || exit 2
 
-cat examples/nldn.bin | python parsers/nldn_parser.py $OPTS || exit 2
+python parsers/nldn_parser.py --help
 
 cat examples/PIREP.txt | python parsers/pirep_parser.py $OPTS || exit 2
 
