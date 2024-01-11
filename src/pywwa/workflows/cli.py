@@ -10,11 +10,10 @@ from functools import partial
 import click
 from pyiem.network import Table as NetworkTable
 from pyiem.nws.products import parser
-from pyiem.util import LOG
 from twisted.internet import reactor, task
 
 # Local
-from pywwa import common
+from pywwa import LOG, common
 from pywwa.database import get_database, get_dbconnc
 from pywwa.ldm import bridge
 

@@ -7,11 +7,10 @@ from zoneinfo import ZoneInfo
 # 3rd Party
 import click
 from metpy.io.nexrad import Level3File
-from pyiem.util import LOG
 from twisted.internet import reactor
 
 # Local
-from pywwa import common
+from pywwa import LOG, common
 from pywwa.database import get_database
 from pywwa.ldm import bridge
 

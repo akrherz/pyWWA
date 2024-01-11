@@ -2,10 +2,9 @@
 # 3rd Party
 import click
 from pyiem.nws.products.sigmet import parser
-from pyiem.util import LOG
 
 # Local
-from pywwa import common, get_data_filepath
+from pywwa import LOG, common, get_data_filepath
 from pywwa.database import get_database, get_dbconnc
 from pywwa.ldm import bridge
 

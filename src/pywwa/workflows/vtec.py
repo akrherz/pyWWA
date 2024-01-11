@@ -16,11 +16,10 @@ from functools import partial
 import click
 from pyiem.nws.products.vtec import parser as vtecparser
 from pyiem.nws.ugc import UGCProvider
-from pyiem.util import LOG
 from twisted.mail.smtp import SMTPSenderFactory
 
 # Local
-from pywwa import common
+from pywwa import LOG, common
 from pywwa.database import get_database, get_dbconn, load_nwsli
 from pywwa.ldm import bridge
 

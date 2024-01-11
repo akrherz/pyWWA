@@ -14,9 +14,8 @@ import click
 import numpy as np
 from PIL import Image
 from pyiem.nws import gini
-from pyiem.util import LOG
 
-from pywwa import common
+from pywwa import LOG, common
 
 WORLDFILE_FORMAT = (
     "%(dx).3f\n" "0.0\n" "0.0\n" "-%(dy).3f\n" "%(x0).3f\n" "%(y1).3f"

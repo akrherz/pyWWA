@@ -5,11 +5,10 @@ from psycopg.rows import dict_row
 from pyiem.database import get_dbconn as pyiem_get_dbconn
 from pyiem.database import get_dbconnc as pyiem_get_dbconnc
 from pyiem.nws import nwsli
-from pyiem.util import LOG
 from twisted.enterprise import adbapi
 
 # Local
-from pywwa import SETTINGS
+from pywwa import LOG, SETTINGS
 
 
 def get_dbconnc(dbname):

@@ -8,11 +8,11 @@ import pickle
 import click
 from pyiem import reference
 from pyiem.nws.products.lsr import parser as lsrparser
-from pyiem.util import LOG, utc
+from pyiem.util import utc
 from twisted.internet import reactor
 
 # Local
-from pywwa import common
+from pywwa import LOG, common
 from pywwa.database import get_database
 from pywwa.ldm import bridge
 

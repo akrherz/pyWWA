@@ -4,11 +4,10 @@ import datetime
 
 import click
 from pyiem.nws.products.pirep import parser as pirepparser
-from pyiem.util import LOG
 from twisted.internet import reactor
 
 # Local
-from pywwa import common, get_data_filepath
+from pywwa import LOG, common, get_data_filepath
 from pywwa.database import get_database, get_dbconnc
 from pywwa.ldm import bridge
 

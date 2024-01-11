@@ -4,10 +4,9 @@ from zoneinfo import ZoneInfo
 # 3rd Party
 import click
 from pyiem.nws.products.dsm import parser
-from pyiem.util import LOG
 
 # Local
-from pywwa import common
+from pywwa import LOG, common
 from pywwa.database import get_database, get_dbconnc
 from pywwa.ldm import bridge
 

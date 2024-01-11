@@ -6,7 +6,7 @@ import re
 
 # Third Party
 import treq
-from pyiem.util import LOG, utc
+from pyiem.util import utc
 from twisted.internet import reactor
 from twisted.internet.defer import inlineCallbacks
 from twisted.internet.task import LoopingCall
@@ -17,11 +17,10 @@ from twisted.words.xish import domish, xpath
 from twisted.words.xish.xmlstream import STREAM_END_EVENT
 
 # Local
-import pywwa
+from pywwa import CTX, LOG, SETTINGS, shutdown
 
 # http://stackoverflow.com/questions/7016602
 webclient._HTTP11ClientFactory.noisy = False  # skipcq: PYL-W0212
-SETTINGS = pywwa.SETTINGS
 # create a regular expression that matches any illegal XML character
 # http://stackoverflow.com/questions/1707890
 ILLEGAL_XML_CHARS_RE = re.compile(
@@ -31,10 +30,10 @@ ILLEGAL_XML_CHARS_RE = re.compile(
 
 def make_jabber_client(resource_prefix=None):
     """Generate a jabber client, please"""
-    if pywwa.CTX["disable_xmpp"]:
+    if CTX["disable_xmpp"]:
         LOG.info("XMPP disabled via command line.")
-        pywwa.JABBER = NOOPXMPP()
-        return pywwa.JABBER
+        CTX["JABBER"] = NOOPXMPP()
+        return CTX["JABBER"]
 
     if resource_prefix is None:
         # Inspect the calling stack to determine the script name that is
@@ -51,20 +50,20 @@ def make_jabber_client(resource_prefix=None):
         myjid, SETTINGS.get("pywwa_jabber_password", "secret")
     )
 
-    pywwa.JABBER = JabberClient(myjid)
+    CTX["JABBER"] = JabberClient(myjid)
 
-    factory.addBootstrap("//event/stream/authd", pywwa.JABBER.authd)
+    factory.addBootstrap("//event/stream/authd", CTX["JABBER"].authd)
     factory.addBootstrap("//event/client/basicauth/invaliduser", debug)
     factory.addBootstrap("//event/client/basicauth/authfailed", debug)
     factory.addBootstrap("//event/stream/error", debug)
-    factory.addBootstrap(xmlstream.STREAM_END_EVENT, pywwa.JABBER.disconnect)
+    factory.addBootstrap(xmlstream.STREAM_END_EVENT, CTX["JABBER"].disconnect)
 
     reactor.connectTCP(
         SETTINGS.get("pywwa_jabber_host", "localhost"),  # @UndefinedVariable
         5222,
         factory,
     )
-    return pywwa.JABBER
+    return CTX["JABBER"]
 
 
 def message_processor(stanza):
@@ -73,7 +72,7 @@ def message_processor(stanza):
     LOG.info("Message from %s Body: %s", stanza["from"], body)
     if body is not None and body.lower().strip() == "shutdown":
         LOG.info("I got shutdown message, shutting down...")
-        pywwa.shutdown()
+        shutdown()
 
 
 def raw_data_in(data):

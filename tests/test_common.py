@@ -1,12 +1,12 @@
 """Test pywwa.common"""
 
 from pyiem.util import utc
-from pywwa import common
+from pywwa import CTX, common
 
 
 def test_setup_syslog():
     """API exercice."""
-    common.pywwa.CTX["stdout_logging"] = True
+    CTX["stdout_logging"] = True
     common.setup_syslog()
 
 
@@ -34,5 +34,5 @@ def test_email_error():
     """Test that we can email an error."""
     common.EMAIL_TIMESTAMPS = []
     common.email_error(None, None)
-    common.pywwa.CTX["disable_email"] = True
+    CTX["disable_email"] = True
     common.email_error(None, None)

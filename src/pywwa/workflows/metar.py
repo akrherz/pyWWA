@@ -10,12 +10,12 @@ from datetime import timezone
 
 import click
 from pyiem.nws.products import metarcollect
-from pyiem.util import LOG, get_properties
+from pyiem.util import get_properties
 from twisted.internet import reactor
 from twisted.internet.task import LoopingCall
 
 # Local
-from pywwa import SETTINGS, common
+from pywwa import LOG, SETTINGS, common
 from pywwa.database import get_database, load_metar_stations
 from pywwa.ldm import bridge
 

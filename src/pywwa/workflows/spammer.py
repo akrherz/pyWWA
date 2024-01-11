@@ -8,11 +8,10 @@ from email.mime.text import MIMEText
 
 import click
 from pyiem.nws import product
-from pyiem.util import LOG
 from twisted.mail import smtp
 
 # Local
-from pywwa import common
+from pywwa import LOG, common
 from pywwa.ldm import bridge
 
 IOWA_WFOS = ["KDMX", "KDVN", "KARX", "KFSD", "KOAX"]
