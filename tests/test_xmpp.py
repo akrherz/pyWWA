@@ -45,7 +45,7 @@ def test_message_processor():
 def test_disabled_xmpp():
     """Test that it works when XMPP is disabled."""
     pywwa.CTX["disable_xmpp"] = True
-    xmpp.JabberClient("root@localhost")
+    assert isinstance(xmpp.make_jabber_client(), xmpp.NOOPXMPP)
     pywwa.CTX["disable_xmpp"] = False
 
 
@@ -68,6 +68,7 @@ def test_send_message():
             "twitter_media": "http://thiswillfail.lazz/bogus",
         },
     )
+    client.disconnect(None)
 
 
 def test_client():
