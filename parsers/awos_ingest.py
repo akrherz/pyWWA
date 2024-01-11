@@ -2,8 +2,8 @@
 
 # 3rd party
 import click
-from pyiem.util import LOG, utc
-from pywwa import common
+from pyiem.util import utc
+from pywwa import LOG, common
 from pywwa.database import get_database, load_metar_stations
 from pywwa.workflows import metar
 from twisted.internet import reactor

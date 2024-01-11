@@ -2,11 +2,10 @@
 # 3rd Party
 import click
 from pyiem.nws import product
-from pyiem.util import LOG
 from twisted.internet import reactor
 
 # Local
-from pywwa import common
+from pywwa import LOG, common
 from pywwa.database import get_database
 from pywwa.ldm import bridge
 from pywwa.memclient import write_memcache

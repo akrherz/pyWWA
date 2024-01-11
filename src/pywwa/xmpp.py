@@ -6,7 +6,7 @@ import re
 
 # Third Party
 import treq
-from pyiem.util import LOG, utc
+from pyiem.util import utc
 from twisted.internet import reactor
 from twisted.internet.defer import inlineCallbacks
 from twisted.internet.task import LoopingCall
@@ -17,11 +17,10 @@ from twisted.words.xish import domish, xpath
 from twisted.words.xish.xmlstream import STREAM_END_EVENT
 
 # Local
-import pywwa
+from pywwa import LOG, SETTINGS
 
 # http://stackoverflow.com/questions/7016602
 webclient._HTTP11ClientFactory.noisy = False  # skipcq: PYL-W0212
-SETTINGS = pywwa.SETTINGS
 # create a regular expression that matches any illegal XML character
 # http://stackoverflow.com/questions/1707890
 ILLEGAL_XML_CHARS_RE = re.compile(

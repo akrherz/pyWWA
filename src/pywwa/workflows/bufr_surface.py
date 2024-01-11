@@ -16,11 +16,11 @@ from pybufrkit.decoder import Decoder, generate_bufr_message
 from pybufrkit.renderer import NestedJsonRenderer
 from pyiem.nws.product import TextProduct
 from pyiem.observation import Observation
-from pyiem.util import LOG, convert_value, utc
+from pyiem.util import convert_value, utc
 from twisted.internet.task import LoopingCall
 
 # Local
-from pywwa import common
+from pywwa import LOG, common
 from pywwa.database import get_database
 from pywwa.ldm import bridge
 

@@ -1,10 +1,14 @@
 """pyWWA local module."""
 # stdlib
 import json
+import logging
 import os
 
-from pyiem.util import LOG
 from twisted.internet import reactor
+
+# Default logging configuration
+LOG = logging.getLogger("pywwa")
+LOG.addHandler(logging.NullHandler())
 
 # Shared configuration
 SETTINGS = {}

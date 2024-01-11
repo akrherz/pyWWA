@@ -5,10 +5,9 @@ from functools import partial
 import click
 from pyiem.nws.products.sps import parser
 from pyiem.nws.ugc import UGCProvider
-from pyiem.util import LOG
 
 # Local
-from pywwa import common
+from pywwa import LOG, common
 from pywwa.database import get_database, get_dbconn, load_nwsli
 from pywwa.ldm import bridge
 

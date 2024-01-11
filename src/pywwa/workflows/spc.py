@@ -3,10 +3,9 @@
 # 3rd Party
 import click
 from pyiem.nws.products.spcpts import parser
-from pyiem.util import LOG
 
 # Local
-from pywwa import common
+from pywwa import LOG, common
 from pywwa.database import get_database
 from pywwa.ldm import bridge
 

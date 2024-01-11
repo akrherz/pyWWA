@@ -14,12 +14,12 @@ from psycopg.errors import DeadlockDetected
 from pyiem.models.shef import SHEFElement
 from pyiem.nws.products.shef import parser
 from pyiem.observation import Observation
-from pyiem.util import LOG, convert_value, utc
+from pyiem.util import convert_value, utc
 from twisted.internet import reactor
 from twisted.internet.task import LoopingCall, deferLater
 
 # Local
-from pywwa import common
+from pywwa import LOG, common
 from pywwa.database import get_database, get_dbconnc
 from pywwa.ldm import bridge
 

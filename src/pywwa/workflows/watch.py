@@ -4,11 +4,10 @@
 import click
 from pyiem.nws.product import TextProduct
 from pyiem.nws.products import parser
-from pyiem.util import LOG
 from twisted.internet.task import LoopingCall
 
 # Local
-from pywwa import common
+from pywwa import LOG, common
 from pywwa.database import get_database
 from pywwa.ldm import bridge
 
