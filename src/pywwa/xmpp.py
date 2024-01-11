@@ -7,8 +7,8 @@ import re
 # Third Party
 import treq
 from pyiem.util import LOG, utc
-from treq.response import _Response
 from twisted.internet import reactor
+from twisted.internet.defer import inlineCallbacks
 from twisted.internet.task import LoopingCall
 from twisted.web import client as webclient
 from twisted.words.protocols.jabber import client as jclient
@@ -175,6 +175,7 @@ class JabberClient:
         LOG.info("SETTING authenticated to false!")
         self.authenticated = False
 
+    @inlineCallbacks
     def send_message(self, body, html, xtra):
         """
         Send a message to nwsbot.  This message should have
@@ -213,39 +214,13 @@ class JabberClient:
             else:
                 xelem[key] = xtra[key]
 
-        def _reallysend(*_args, **_kwargs):
-            """Do it!"""
-            # So send_message may be getting called from 'threads' and the
-            # writing of data to the transport is not thread safe, so we must
-            # ensure that this gets called from the main thread
-            reactor.callFromThread(
-                self.xmlstream.send,
-                message,  # @UndefinedVariable
-            )
-
-        def _ensure200(res):
-            """Ensure that we got a HTTP 200 from this request."""
-            if isinstance(res, _Response):
-                # belt and suspenders
-                try:
-                    if res.original.code == 200:
-                        # All good
-                        reactor.callFromThread(self.xmlstream.send, message)
-                        return
-                except Exception as exp:
-                    LOG.info(exp)
-            LOG.info("HTTP request failed %s, stripping twitter_media", res)
-            # Nervous
-            del xelem["twitter_media"]
-            reactor.callFromThread(self.xmlstream.send, message)
-
         # If we have twitter_media, we want to attempt to get the content
         # cached before iembot asks for it a million times
         url = xtra.get("twitter_media")
-        if url is None:
-            _reallysend()
-            return
-        # Careful here
-        d = treq.get(url, timeout=120)
-        d.addBoth(_ensure200)
-        d.addErrback(LOG.error)
+        if url is not None:
+            try:
+                # https leaks memory twisted/treq/issues/380
+                _r = yield treq.get(url.replace("https", "http"), timeout=120)
+            except Exception as exp:
+                LOG.info("twitter_media request for %s failed: %s", url, exp)
+        reactor.callFromThread(self.xmlstream.send, message)
