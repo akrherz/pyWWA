@@ -65,7 +65,7 @@ def test_send_message():
         {
             "channels": ["XX", "YY"],
             "t": "x",
-            "twitter_media": "http://localhost/bogus",
+            "twitter_media": "http://thiswillfail.lazz/bogus",
         },
     )
 
