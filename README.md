@@ -37,7 +37,7 @@ their execution.
 
 Short Flag | Long Flag | Description
 --- | --- | ---
--c | --custom-arg | Pass arbitrary strings to the parser. (pywwa-parser-shef)
+-c | --custom-arg | Pass arbitrary strings to the parser. (pywwa-parse-shef)
 -d | --disable-dbwrite | Turn off any database writing.  The script still may attempt read access to initialize tables.
 -e | --disable-email | Disable sending any emails.
 -l | --stdout-logging | Emit any log message to stdout.
