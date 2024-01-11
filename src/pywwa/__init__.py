@@ -22,10 +22,9 @@ CTX_DEFAULTS = {
     "stdout_logging": False,
     "utcnow": None,
 }
-CTX = {}
+# hold reference to jabber client
+CTX = {"JABBER": None}
 CTX.update(CTX_DEFAULTS)
-# Eventually updated to be a JABBER instance
-JABBER = None
 
 
 def shutdown():

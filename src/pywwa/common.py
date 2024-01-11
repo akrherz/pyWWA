@@ -183,10 +183,10 @@ def email_error(exp, message="", trimstr=100):
 
 def send_message(plain, text, extra):
     """Helper to connect with running JABBER instance."""
-    if pywwa.JABBER is None:
+    if CTX["JABBER"] is None:
         LOG.info("failed to send as pywwa.JABBER is None, not setup?")
         return
-    pywwa.JABBER.send_message(plain, text, extra)
+    CTX["JABBER"].send_message(plain, text, extra)
 
 
 def parse_utcnow(text) -> datetime.datetime:
