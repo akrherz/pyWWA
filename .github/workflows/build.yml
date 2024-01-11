@@ -57,7 +57,6 @@ jobs:
       run: |
         set -e
         python -m pip install .
-        python -m pip install pytest-twisted
         cp pywwa_settings.json-example pywwa_settings.json
         # This is a bit brittle, but loads some data
         python util/ugcs_update.py fz08mr23 2023 3 08

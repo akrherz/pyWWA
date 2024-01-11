@@ -43,6 +43,8 @@ dependencies:
  - pytest
  - pytest-mpl
  - pytest-runner
+ # For testing
+ - pytest-twisted
  - rasterstats
  # util scripts
  - requests

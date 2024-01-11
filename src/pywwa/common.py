@@ -22,7 +22,6 @@ from twisted.python import log as tplog
 # Local Be careful of circeref here
 from pywwa import CTX, LOG, SETTINGS
 from pywwa.database import get_dbconn
-from pywwa.xmpp import make_jabber_client
 
 # http://bugs.python.org/issue7980
 datetime.datetime.strptime("2013", "%Y")
@@ -261,6 +260,8 @@ def init(f):
         load_settings()
         # Step 4, setup jabber client
         if not CTX["disable_xmpp"] and not getattr(f, "disable_xmpp", False):
+            from pywwa.xmpp import make_jabber_client
+
             make_jabber_client()
         # Step 5, call the function
         ret = f(*args, **kwargs)
