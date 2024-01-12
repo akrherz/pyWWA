@@ -146,7 +146,17 @@ def test_230926_rr8krf(cursor):
     CTX["utcnow"] = utc(2023, 9, 26, 18)
     prod = shef.process_data(get_example_file("SHEF/RR8KRF.txt"))
     for element in prod.data:
-        shef.insert_raw_inbound(cursor, element)
+        args = (
+            element.station,
+            element.valid,
+            element.varname(),
+            element.num_value,
+            element.depth,
+            element.unit_convention,
+            element.dv_interval,
+            element.qualifier,
+        )
+        shef.insert_raw_inbound(cursor, args)
 
 
 def test_bad_element_in_current_queue():

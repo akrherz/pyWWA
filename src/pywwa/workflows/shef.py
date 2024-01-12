@@ -347,22 +347,13 @@ def process_site(prod, sid, data):
         process_site_time(prod, sid, tstamp, data[tstamp])
 
 
-def insert_raw_inbound(cursor, element: SHEFElement) -> int:
+def insert_raw_inbound(cursor, args) -> int:
     """Do the database insertion."""
     cursor.execute(
         "INSERT into raw_inbound (station, valid, key, value, depth, "
         "unit_convention, dv_interval, qualifier) "
         "VALUES(%s, %s, %s, %s, %s, %s, %s, %s)",
-        (
-            element.station,
-            element.valid,
-            element.varname(),
-            element.num_value,
-            element.depth,
-            element.unit_convention,
-            element.dv_interval,
-            element.qualifier,
-        ),
+        args,
     )
     return cursor.rowcount
 
@@ -372,8 +363,18 @@ def update_current_queue(element: SHEFElement, product_id: str):
     # We only want observations
     if element.type != "R":
         return
-    defer = CTX["HADSDB"].runInteraction(insert_raw_inbound, element)
-    defer.addErrback(common.email_error, f"prod: {product_id} {element}")
+    args = (
+        element.station,
+        element.valid,
+        element.varname(),
+        element.num_value,
+        element.depth,
+        element.unit_convention,
+        element.dv_interval,
+        element.qualifier,
+    )
+    defer = CTX["HADSDB"].runInteraction(insert_raw_inbound, args)
+    defer.addErrback(common.email_error, f"prod: {product_id}")
     defer.addErrback(LOG.error)
 
     key = f"{element.station}|{element.varname()}|{element.depth}"
