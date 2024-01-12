@@ -19,14 +19,9 @@ from twisted.internet import reactor
 from twisted.internet.task import LoopingCall, deferLater
 
 # Local
-from pywwa import LOG, common
+from pywwa import CTX, LOG, common
 from pywwa.database import get_database, get_dbconnc
 from pywwa.ldm import bridge
-
-# Setup Database Links
-ACCESSDB = get_database("iem", module_name="psycopg", cp_max=20)
-HADSDB = get_database("hads", module_name="psycopg", cp_max=20)
-MESOSITEDB = get_database("mesosite", cp_max=1)
 
 # a form for IDs we will log as unknown
 NWSLIRE = re.compile("^[A-Z]{4}[0-9]$")
@@ -116,6 +111,20 @@ class MyDict(dict):
 
 
 MAPPING = MyDict()
+
+
+def load_stations_fe(blocking=False):
+    """Load station metadata, sync is if we use defers."""
+    if blocking:
+        conn, cursor = get_dbconnc("mesosite")
+        load_stations(cursor)
+        cursor.close()
+        conn.close()
+    else:
+        dbpool = get_database("mesosite", cp_max=1)
+        df = dbpool.runInteraction(load_stations)
+        df.addErrback(common.email_error)
+        df.addBoth(lambda _: dbpool.close())
 
 
 def load_stations(txn):
@@ -255,13 +264,14 @@ def save_current() -> int:
             skipped += 1
             continue
         cnt += 1
-        (sid, varname, _depth) = k.split("|")
+        # GH215 somehow sid has a | in it, maybe
+        (sid, varname, _depth) = k.split("|", 2)
         # This is unlikely, but still GIGO sometimes :/
         if len(varname) != 7:
             LOG.info("Got varname of '%s' somehow? %s", varname, mydict)
             continue
 
-        d2 = ACCESSDB.runOperation(
+        d2 = CTX["ACCESSDB"].runOperation(
             "INSERT into current_shef(station, valid, physical_code, "
             "duration, source, type, extremum, probability, value, depth, "
             "dv_interval, unit_convention, qualifier, product_id) "
@@ -337,22 +347,13 @@ def process_site(prod, sid, data):
         process_site_time(prod, sid, tstamp, data[tstamp])
 
 
-def insert_raw_inbound(cursor, element: SHEFElement) -> int:
+def insert_raw_inbound(cursor, args) -> int:
     """Do the database insertion."""
     cursor.execute(
         "INSERT into raw_inbound (station, valid, key, value, depth, "
         "unit_convention, dv_interval, qualifier) "
         "VALUES(%s, %s, %s, %s, %s, %s, %s, %s)",
-        (
-            element.station,
-            element.valid,
-            element.varname(),
-            element.num_value,
-            element.depth,
-            element.unit_convention,
-            element.dv_interval,
-            element.qualifier,
-        ),
+        args,
     )
     return cursor.rowcount
 
@@ -362,8 +363,18 @@ def update_current_queue(element: SHEFElement, product_id: str):
     # We only want observations
     if element.type != "R":
         return
-    defer = HADSDB.runInteraction(insert_raw_inbound, element)
-    defer.addErrback(common.email_error, f"prod: {product_id} {element}")
+    args = (
+        element.station,
+        element.valid,
+        element.varname(),
+        element.num_value,
+        element.depth,
+        element.unit_convention,
+        element.dv_interval,
+        element.qualifier,
+    )
+    defer = CTX["HADSDB"].runInteraction(insert_raw_inbound, args)
+    defer.addErrback(common.email_error, f"prod: {product_id}")
     defer.addErrback(LOG.error)
 
     key = f"{element.station}|{element.varname()}|{element.depth}"
@@ -487,8 +498,8 @@ def log_database_queue_size():
     """Log how much backlog has accumulated."""
     LOG.info(
         "dbpool queuesz[hads:%s, access:%s]",
-        HADSDB.threadpool._queue.qsize(),  # skipcq: PYL-W0212
-        ACCESSDB.threadpool._queue.qsize(),  # skipcq: PYL-W0212
+        CTX["HADSDB"].threadpool._queue.qsize(),  # skipcq: PYL-W0212
+        CTX["ACCESSDB"].threadpool._queue.qsize(),  # skipcq: PYL-W0212
     )
 
 
@@ -505,7 +516,7 @@ def write_access_records_eb(err, records: list, iemid, entry: ACCESSDB_ENTRY):
         df = deferLater(
             reactor,
             jitter,
-            ACCESSDB.runInteraction,
+            CTX["ACCESSDB"].runInteraction,
             write_access_records,
             records,
             iemid,
@@ -541,7 +552,9 @@ def process_data(text):
             UNKNOWN[sid] = True
             if NWSLIRE.match(sid) is not None:
                 LOG.info("Unknown NWSLIish site: %s %s", sid, product_id)
-                HADSDB.runInteraction(enter_unknown, sid, product_id, "")
+                CTX["HADSDB"].runInteraction(
+                    enter_unknown, sid, product_id, ""
+                )
     return prod
 
 
@@ -565,7 +578,7 @@ def process_accessdb():
             # Get a reference and delete it from the dict
             records.append((localts, entry.records.pop(localts)))
         if records:
-            df = ACCESSDB.runInteraction(
+            df = CTX["ACCESSDB"].runInteraction(
                 write_access_records,
                 records,
                 iemid,
@@ -580,30 +593,49 @@ def process_accessdb():
             df.addErrback(common.email_error)
 
 
+def build_context():
+    """Build up things necessary for this to run."""
+    load_stations_fe(True)
+
+    # Construct the needed database pools
+    CTX["ACCESSDB"] = get_database("iem", module_name="psycopg", cp_max=20)
+    CTX["HADSDB"] = get_database("hads", module_name="psycopg", cp_max=20)
+
+    # Add some looping calls
+    CTX["LCLIST"].extend(
+        [
+            # write out cached obs to IEMAccess
+            LoopingCall(lc_proxy, save_current).start(131, now=False),
+            # Run a logged diagnostic on how busy the database pools are
+            LoopingCall(lc_proxy, log_database_queue_size).start(
+                61, now=False
+            ),
+            # Reload the station table every 12 hours
+            LoopingCall(lc_proxy, load_stations_fe).start(
+                60 * 60 * 12, now=False
+            ),
+            # Process entries in ACCESSDB_QUEUE
+            LoopingCall(lc_proxy, process_accessdb_frontend).start(
+                15, now=False
+            ),
+        ]
+    )
+
+
+def lc_proxy(f):
+    """Ensure that we don't have an uncaught exception."""
+    try:
+        f()
+    except Exception as exp:
+        common.email_error(exp, f.__name__)
+        LOG.exception(exp)
+
+
 @click.command(help=__doc__)
 @click.option("--custom-arg", "-c", type=str, help="Differentiate pqact job")
 @common.init
 @common.disable_xmpp
 def main(*args, **kwargs):
     """We startup."""
-    conn, cursor = get_dbconnc("mesosite")
-    load_stations(cursor)
-    conn.close()
+    build_context()
     bridge(process_data)
-
-    # Write out cached obs every couple of minutes
-    lc = LoopingCall(save_current)
-    df = lc.start(131, now=False)
-    df.addErrback(common.email_error)
-    # Log a diagnostic on how things are processing.
-    lc2 = LoopingCall(log_database_queue_size)
-    df2 = lc2.start(61, now=False)
-    df2.addErrback(common.email_error)
-    # Reload stations every 12 hours
-    lc3 = LoopingCall(MESOSITEDB.runInteraction, load_stations)
-    df3 = lc3.start(60 * 60 * 12, now=False)
-    df3.addErrback(common.email_error)
-    # Process entries in ACCESSDB_QUEUE
-    lc4 = LoopingCall(process_accessdb_frontend)
-    df4 = lc4.start(15, now=False)
-    df4.addErrback(common.email_error)

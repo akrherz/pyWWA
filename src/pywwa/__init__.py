@@ -23,7 +23,10 @@ CTX_DEFAULTS = {
     "utcnow": None,
 }
 # hold reference to jabber client
-CTX = {"JABBER": None}
+CTX = {
+    "JABBER": None,  # Jabber client
+    "LCLIST": [],  # List of twisted LoopingCall objects
+}
 CTX.update(CTX_DEFAULTS)
 
 

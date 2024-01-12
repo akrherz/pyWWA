@@ -9,12 +9,15 @@ import mock
 import pytest
 
 # Local
-import pywwa
 from psycopg.errors import DeadlockDetected
 from pyiem.util import utc
+from pywwa import CTX
 from pywwa.testing import get_example_file
 from pywwa.workflows import shef
 from twisted.python.failure import Failure
+
+# Ensure that we have a database to work with
+shef.build_context()
 
 
 def run_interaction(cursor, sql, args):
@@ -63,7 +66,7 @@ def test_missing_value():
             "pedts": 1,
         }
     }
-    pywwa.CTX["utcnow"] = utc(2023, 10, 28, 3, 40)
+    CTX["utcnow"] = utc(2023, 10, 28, 3, 40)
     shef.process_data(get_example_file("SHEF/RRSNMC.txt"))
 
 
@@ -78,7 +81,7 @@ def test_midnight():
             "pedts": 1,
         }
     }
-    pywwa.CTX["utcnow"] = utc(2022, 11, 10, 12)
+    CTX["utcnow"] = utc(2022, 11, 10, 12)
     payload = get_example_file("SHEF/RR1.txt").replace("1150", "0600")
     shef.process_data(payload)
     assert shef.ACCESSDB_QUEUE[-99].records[utc(2022, 11, 10, 5, 59)]
@@ -95,10 +98,10 @@ def test_old_dcpdata():
             "pedts": 1,
         }
     }
-    pywwa.CTX["utcnow"] = utc(2022, 11, 10, 12)
+    CTX["utcnow"] = utc(2022, 11, 10, 12)
     shef.process_data(get_example_file("SHEF/RR1.txt"))
     # rewind to 2021
-    pywwa.CTX["utcnow"] = utc(2021, 11, 10, 12)
+    CTX["utcnow"] = utc(2021, 11, 10, 12)
     shef.process_data(get_example_file("SHEF/RR1.txt"))
 
 
@@ -110,21 +113,21 @@ def test_get_localtime():
 
 def test_231027_rr8msr_novariable():
     """Test this found in the wild."""
-    pywwa.CTX["utcnow"] = utc(2023, 10, 19, 15)
+    CTX["utcnow"] = utc(2023, 10, 19, 15)
     prod = shef.process_data(get_example_file("SHEF/RR8MSR.txt"))
     assert not prod.data
 
 
 def test_empty_product():
     """Exercise the API."""
-    pywwa.CTX["utcnow"] = utc(2023, 9, 15, 13)
+    CTX["utcnow"] = utc(2023, 9, 15, 13)
     prod = shef.process_data(get_example_file("SHEF/RR7KRF.txt"))
     assert not prod.data and not prod.warnings
 
 
 def test_enter_unknown_populates():
     """Test that processing a SHEF file with an unknown actually populates."""
-    pywwa.CTX["utcnow"] = utc(2023, 9, 26, 18)
+    CTX["utcnow"] = utc(2023, 9, 26, 18)
     payload = get_example_file("SHEF/RR8KRF.txt").replace("PLMW4", "ZZZW4")
     shef.process_data(payload)
     assert shef.UNKNOWN["ZZZW4"]
@@ -140,10 +143,20 @@ def test_enter_unknown(cursor):
 @pytest.mark.parametrize("database", ["hads"])
 def test_230926_rr8krf(cursor):
     """Test a smallint error this found in production."""
-    pywwa.CTX["utcnow"] = utc(2023, 9, 26, 18)
+    CTX["utcnow"] = utc(2023, 9, 26, 18)
     prod = shef.process_data(get_example_file("SHEF/RR8KRF.txt"))
     for element in prod.data:
-        shef.insert_raw_inbound(cursor, element)
+        args = (
+            element.station,
+            element.valid,
+            element.varname(),
+            element.num_value,
+            element.depth,
+            element.unit_convention,
+            element.dv_interval,
+            element.qualifier,
+        )
+        shef.insert_raw_inbound(cursor, args)
 
 
 def test_bad_element_in_current_queue():
@@ -157,7 +170,7 @@ def test_bad_element_in_current_queue():
 def test_omit_report(cursor):
     """Test that the report is omitted..."""
     shef.CURRENT_QUEUE.clear()
-    pywwa.CTX["utcnow"] = utc(2023, 5, 12, 18)
+    CTX["utcnow"] = utc(2023, 5, 12, 18)
     cursor.execute(
         "INSERT into stations(id, network, tzname, iemid) VALUES "
         "('CORM6', 'MS_DCP', 'America/Chicago', -99)"
@@ -192,14 +205,14 @@ def test_omit_report(cursor):
     assert row["max_tmpf"] == 84
     assert row["report"] == ans
 
-    shef.ACCESSDB.runOperation = partial(run_interaction, cursor)
+    CTX["ACCESSDB"].runOperation = partial(run_interaction, cursor)
     assert shef.save_current() == 7
     assert shef.save_current() == 0
 
 
 def test_process_site_eb():
     """Test that the errorback works without any side effects."""
-    pywwa.CTX["utcnow"] = utc(2017, 8, 15, 14)
+    CTX["utcnow"] = utc(2017, 8, 15, 14)
     shef.process_data(get_example_file("RR7.txt"))
     entry = shef.ACCESSDB_ENTRY(
         station="", network="", tzinfo=ZoneInfo("America/Chicago"), records={}
@@ -233,7 +246,7 @@ def test_checkvars():
         },
     }
     payload = get_example_file("SHEF/RR1.txt")
-    pywwa.CTX["utcnow"] = utc(2022, 11, 10, 12)
+    CTX["utcnow"] = utc(2022, 11, 10, 12)
     for repl in ["TX", "HG", "SF", "PPH"]:
         shef.process_data(payload.replace("/TX", f"/{repl}"))
     shef.process_data(payload.replace("RR1", "RR3"))
@@ -243,7 +256,7 @@ def test_checkvars():
 
 def test_restructure_data_eightchar_id():
     """Test that we omit a greather than 8 char station ID."""
-    pywwa.CTX["utcnow"] = utc(2017, 8, 15, 13)
+    CTX["utcnow"] = utc(2017, 8, 15, 13)
     prod = shef.process_data(get_example_file("RR7.txt"))
     res = shef.restructure_data(prod)
     assert all(len(x) <= 8 for x in res.keys())
@@ -251,18 +264,18 @@ def test_restructure_data_eightchar_id():
 
 def test_restructure_data_future():
     """Ensure that data from the future stays out!"""
-    pywwa.CTX["utcnow"] = utc(2017, 8, 14)
+    CTX["utcnow"] = utc(2017, 8, 14)
     prod = shef.process_data(get_example_file("RR7.txt"))
     res = shef.restructure_data(prod)
     assert len(res.keys()) == 0
-    pywwa.CTX["utcnow"] = utc()
+    CTX["utcnow"] = utc()
     res = shef.restructure_data(prod)
     assert len(res.keys()) == 0
 
 
 def test_process_data():
     """Test that we can really_process a product!"""
-    pywwa.CTX["utcnow"] = utc(2020, 9, 15)
+    CTX["utcnow"] = utc(2020, 9, 15)
     prod = shef.process_data(get_example_file("RR7.txt"))
     assert prod.get_product_id() == "202009151244-KWOH-SRUS27-RRSKRF"
 
@@ -299,6 +312,21 @@ def test_load_stations(cursor):
     assert "_X_X_" not in shef.LOCS
 
 
+def test_load_stations_fe():
+    """Test the blocking frontend."""
+    shef.load_stations_fe(True)
+    shef.load_stations_fe(False)
+
+
 def test_api():
     """Exercise the API."""
     shef.log_database_queue_size()
+
+
+def test_lc_proxy_failure():
+    """Call something that fails."""
+
+    def _failure():
+        raise Exception("Hi Daryl")
+
+    shef.lc_proxy(_failure)
