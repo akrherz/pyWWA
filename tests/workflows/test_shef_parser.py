@@ -11,7 +11,7 @@ import pytest
 # Local
 from psycopg.errors import DeadlockDetected
 from pyiem.util import utc
-from pywwa import CTX
+from pywwa import CTX, SETTINGS
 from pywwa.testing import get_example_file
 from pywwa.workflows import shef
 from twisted.python.failure import Failure
@@ -72,7 +72,7 @@ def test_missing_value():
 
 def test_exclude():
     """Test the exclusion logic."""
-    CTX["pywwa_shef_afos_exclude"] = "RRXXXX"
+    SETTINGS["pywwa_shef_afos_exclude"] = "RRXXXX"
     shef.build_context()
     payload = get_example_file("SHEF/RR1.txt").replace("RR1DSM", "RRXXXX")
     prod = shef.process_data(payload)

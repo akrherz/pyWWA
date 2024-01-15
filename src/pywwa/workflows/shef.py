@@ -19,7 +19,7 @@ from twisted.internet import reactor
 from twisted.internet.task import LoopingCall, deferLater
 
 # Local
-from pywwa import CTX, LOG, common
+from pywwa import CTX, LOG, SETTINGS, common
 from pywwa.database import get_database, get_dbconnc
 from pywwa.ldm import bridge
 
@@ -602,8 +602,8 @@ def process_accessdb():
 
 def build_context():
     """Build up things necessary for this to run."""
-    if "pywwa_shef_afos_exclude" in CTX:
-        AFOS_EXCLUDE.extend(CTX["pywwa_shef_afos_exclude"].split(","))
+    if "pywwa_shef_afos_exclude" in SETTINGS:
+        AFOS_EXCLUDE.extend(SETTINGS["pywwa_shef_afos_exclude"].split(","))
         LOG.info("AFOS_EXCLUDE: %s", AFOS_EXCLUDE)
     load_stations_fe(True)
 
