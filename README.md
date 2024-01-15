@@ -55,6 +55,7 @@ pywwa_lsr_url | - | URL Base for the LSR App
 pywwa_metar_url | - | URL Base for METAR reports.
 pywwa_product_url | - | URL Base for simple text product viewer
 pywwa_river_url | - | URL Base for the River App
+pywwa_shef_afos_exclude | - | List of AFOS PILs to exclude from SHEF ingest.
 pywwa_vtec_url | - | URL Base for the VTEC App
 pywwa_watch_url | - | URL Base for the Watch App
 

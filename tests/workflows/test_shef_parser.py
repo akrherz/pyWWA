@@ -70,6 +70,15 @@ def test_missing_value():
     shef.process_data(get_example_file("SHEF/RRSNMC.txt"))
 
 
+def test_exclude():
+    """Test the exclusion logic."""
+    CTX["pywwa_shef_afos_exclude"] = "RRXXXX"
+    shef.build_context()
+    payload = get_example_file("SHEF/RR1.txt").replace("RR1DSM", "RRXXXX")
+    prod = shef.process_data(payload)
+    assert not prod.data
+
+
 def test_midnight():
     """Test that a midnight report gets moved back one minute."""
     shef.LOCS["AISI4"] = {
