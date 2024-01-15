@@ -23,6 +23,9 @@ from pywwa import CTX, LOG, common
 from pywwa.database import get_database, get_dbconnc
 from pywwa.ldm import bridge
 
+# A list of AFOS IDs that we will exclude
+AFOS_EXCLUDE = []
+
 # a form for IDs we will log as unknown
 NWSLIRE = re.compile("^[A-Z]{4}[0-9]$")
 
@@ -532,6 +535,10 @@ def process_data(text):
     prod = parser(text, utcnow=common.utcnow())
     if prod.warnings:
         common.email_error("\n".join(prod.warnings), prod.unixtext)
+    if prod.afos in AFOS_EXCLUDE:
+        LOG.info("Skipping AFOS: %s due to in AFOS_EXCLUDE", prod.afos)
+        prod.data = []
+        return prod
     if not prod.data:
         return prod
     product_id = prod.get_product_id()
@@ -595,6 +602,9 @@ def process_accessdb():
 
 def build_context():
     """Build up things necessary for this to run."""
+    if "pywwa_shef_afos_exclude" in CTX:
+        AFOS_EXCLUDE.extend(CTX["pywwa_shef_afos_exclude"].split(","))
+        LOG.info("AFOS_EXCLUDE: %s", AFOS_EXCLUDE)
     load_stations_fe(True)
 
     # Construct the needed database pools
