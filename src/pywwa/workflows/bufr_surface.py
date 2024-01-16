@@ -20,171 +20,13 @@ from pyiem.util import convert_value, utc
 from twisted.internet.task import LoopingCall
 
 # Local
-from pywwa import LOG, common
+from pywwa import LOG, common, get_data_filepath
 from pywwa.database import get_database
 from pywwa.ldm import bridge
 
 MESOSITEDB = get_database("mesosite", cp_max=1)
 IEMDB = get_database("iem", cp_max=1)
-# Github Copilot did 99% of the work here, hopefully it is right!
-WMO2ISO3166 = {
-    "AMMC": 12,  # Algeria
-    "BABJ": 156,  # China
-    "BIRK": 352,  # Iceland
-    "CWAO": 124,  # Canada
-    "DAMM": 682,  # Saudi Arabia
-    "DEMS": 276,  # Germany
-    "DKPY": 208,  # Denmark
-    "DRRN": 562,  # Niger
-    "DXXX": 768,  # Senegal
-    "EBUM": 56,  # Belgium
-    "EBWM": 56,  # Belgium
-    "EDZW": 276,  # Germany
-    "EEMH": 233,  # Estonia
-    "EFKL": 246,  # Finland
-    "EGGR": 826,  # United Kingdom
-    "EGRR": 826,  # United Kingdom
-    "EHDB": 528,  # Netherlands
-    "EIDB": 372,  # Ireland
-    "EKMI": 208,  # Denmark
-    "ELLX": 442,  # Luxembourg
-    "ENMI": 578,  # Norway
-    "ESWI": 752,  # Sweden
-    "EUMS": 578,  # Norway
-    "EYHM": 233,  # Estonia
-    "FAPR": 710,  # South Africa
-    "FCBB": 178,  # Congo
-    "FEFF": 178,  # Congo
-    "FGSL": 686,  # Senegal
-    "FKKD": 384,  # Ivory Coast
-    "FQMA": 508,  # Mozambique
-    "FMEE": 262,  # Reunion
-    "FNLU": 24,  # Angola
-    "FOOL": 266,  # Gabon
-    "FTTJ": 120,  # Cameroon
-    "FWCL": 120,  # Cameroon
-    "FZAA": 180,  # Democratic Republic of the Congo
-    "GMAA": 504,  # Morocco
-    "GMAG": 504,  # Morocco
-    "GMDA": 504,  # Morocco
-    "GMFB": 504,  # Morocco
-    "GMFM": 504,  # Morocco
-    "GMFC": 504,  # Morocco
-    "GMFF": 504,  # Morocco
-    "GMFI": 504,  # Morocco
-    "GMFK": 504,  # Morocco
-    "GMFO": 504,  # Morocco
-    "GMFZ": 504,  # Morocco
-    "GMMA": 504,  # Morocco
-    "GMMB": 504,  # Morocco
-    "GMMC": 504,  # Morocco
-    "GMME": 504,  # Morocco
-    "GMMG": 504,  # Morocco
-    "GMMI": 504,  # Morocco
-    "GMMK": 504,  # Morocco
-    "GMMN": 504,  # Morocco
-    "GMMO": 504,  # Morocco
-    "GMMP": 504,  # Morocco
-    "GMMS": 504,  # Morocco
-    "GMMW": 504,  # Morocco
-    "GMMX": 504,  # Morocco
-    "GMMZ": 504,  # Morocco
-    "GMSE": 504,  # Morocco
-    "GMSM": 504,  # Morocco
-    "GMTA": 504,  # Morocco
-    "GMTF": 504,  # Morocco
-    "GMTI": 504,  # Morocco
-    "GMTL": 504,  # Morocco
-    "GMTN": 504,  # Morocco
-    "GMTT": 504,  # Morocco
-    "GOOY": 686,  # Senegal
-    "GVAC": 132,  # Cape Verde
-    "HABP": 356,  # India
-    "HECA": 818,  # Egypt
-    "HKNC": 404,  # Kenya
-    "KNES": 840,  # United States
-    "KWBC": 840,  # United States
-    "KWNB": 840,  # United States
-    "KWNO": 840,  # United States
-    "LCLK": 196,  # Cyprus
-    "LDZM": 705,  # Slovenia
-    "LEMM": 724,  # Spain
-    "LFPW": 250,  # France
-    "LGAT": 300,  # Greece
-    "LIIB": 380,  # Italy
-    "LLBD": 376,  # Israel
-    "LJLM": 705,  # Slovenia
-    "LOWM": 40,  # Austria
-    "LPMG": 620,  # Portugal
-    "LQSM": 760,  # Syria
-    "LSSW": 756,  # Switzerland
-    "LTAA": 792,  # Turkey
-    "LYBM": 688,  # Montenegro
-    "LYPG": 688,  # Montenegro
-    "LZIB": 703,  # Slovak Republic
-    "MDAB": 214,  # Dominican Republic
-    "MDBH": 214,  # Dominican Republic
-    "MDCY": 214,  # Dominican Republic
-    "MDJB": 214,  # Dominican Republic
-    "MDLR": 214,  # Dominican Republic
-    "MDPC": 214,  # Dominican Republic
-    "MDPP": 214,  # Dominican Republic
-    "MDSD": 214,  # Dominican Republic
-    "MDST": 214,  # Dominican Republic
-    "MDWO": 214,  # Dominican Republic
-    "MJSK": 484,  # Mexico
-    "NCRG": 554,  # New Zealand
-    "NFFN": 242,  # Fiji
-    "NFTF": 548,  # New Caledonia
-    "NLWW": 548,  # New Caledonia
-    "NTAA": 258,  # French Polynesia
-    "NWBB": 548,  # New Caledonia
-    "NVVV": 548,  # New Caledonia
-    "NZKL": 554,  # New Zealand
-    "OEJD": 682,  # Saudi Arabia
-    "OKPR": 203,  # Czech Republic
-    "OPKC": 586,  # Pakistan
-    "PANC": 840,  # United States
-    "RKSL": 410,  # South Korea
-    "RJTD": 392,  # Japan
-    "RUHB": 643,  # Russia
-    "RUML": 643,  # Russia
-    "RUMS": 643,  # Russia
-    "RUNW": 643,  # Russia
-    "SABM": 32,  # Argentina
-    "SAWB": 32,  # Argentina
-    "SCSC": 152,  # Chile
-    "SGAS": 858,  # Uruguay
-    "SKBO": 170,  # Colombia
-    "SBBR": 76,  # Brazil
-    "SEQU": 218,  # Ecuador
-    "SLLP": 68,  # Bolivia
-    "SOCA": 74,  # French Guiana
-    "SOWR": 724,  # Spain
-    "SPIM": 604,  # Peru
-    "SUMU": 858,  # Uruguay
-    "TBPB": 52,  # Barbados
-    "TLPC": 662,  # Saint Lucia
-    "TLPL": 662,  # Saint Lucia
-    "UAST": 398,  # Kazakhstan
-    "UKMS": 804,  # Ukraine
-    "UMMN": 643,  # Russia
-    "UMRR": 643,  # Russia
-    "UTTW": 860,  # Uzbekistan
-    "VBRR": 764,  # Thailand
-    "VCCC": 144,  # Sri Lanka
-    "VDPP": 764,  # Thailand
-    "VGDC": 826,  # United Kingdom
-    "VHHH": 344,  # Hong Kong
-    "VMMC": 344,  # Hong Kong
-    "VNNN": 704,  # Vietnam
-    "VRMM": 462,  # Maldives
-    "VTBB": 764,  # Thailand
-    "WIIX": 360,  # Indonesia
-    "WSSS": 702,  # Singapore
-    "YRBK": 36,  # Australia
-    "ZATI": 156,  # China
-}
+WMO2ISO3166 = {}
 UNKNOWNS = []
 WIGOS = {}
 NETWORK = "WMO_BUFR_SRF"
@@ -611,6 +453,17 @@ def workflow(prodbytes, cursor=None, mcursor=None):
     return prod, datalists
 
 
+def load_wmo2iso3166():
+    """Build cross reference."""
+    with open(get_data_filepath("wmo2iso3166.tbl")) as fh:
+        for line in fh:
+            if line.startswith("#"):
+                continue
+            tokens = line.split()
+            WMO2ISO3166[tokens[0]] = tokens[1]
+    LOG.info("Loaded %s WMO2ISO3166 entries", len(WMO2ISO3166))
+
+
 def ready(_):
     """Callback once we are ready."""
     bridge(workflow, isbinary=True)
@@ -624,6 +477,7 @@ def ready(_):
 @common.disable_xmpp
 def main(*args, **kwargs):
     """Go Main Go."""
+    load_wmo2iso3166()
     df = MESOSITEDB.runInteraction(load_xref)
     df.addCallback(ready)
     df.addErrback(common.email_error)
