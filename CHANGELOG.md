@@ -16,5 +16,6 @@ AFOS identifiers (ie RTPMEG).
 
 - [SHEF] Ensure looping calls don't quit running and ensure that `save_current`
 does not error with GIGO from #215.
+- Fix xmpp client responses for ping and version requests #220.
 
 ## **1.4.0** (9 Jan 2024)
