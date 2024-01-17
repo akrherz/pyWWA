@@ -186,6 +186,7 @@ def errback(res):
 
 @click.command(help=__doc__)
 @common.init
+@common.disable_xmpp
 def main(*args, **kwargs):
     """Go Main Go"""
     mesosite = get_database("mesosite")
