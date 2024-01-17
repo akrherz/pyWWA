@@ -5,16 +5,15 @@ import os
 import re
 
 # Third Party
+import pyiem
 import treq
 from pyiem.util import utc
 from twisted.internet import reactor
 from twisted.internet.defer import inlineCallbacks
-from twisted.internet.task import LoopingCall
 from twisted.web import client as webclient
 from twisted.words.protocols.jabber import client as jclient
 from twisted.words.protocols.jabber import jid, xmlstream
 from twisted.words.xish import domish, xpath
-from twisted.words.xish.xmlstream import STREAM_END_EVENT
 
 # Local
 from pywwa import CTX, LOG, SETTINGS, shutdown
@@ -85,12 +84,15 @@ def raw_data_in(data):
     LOG.info("RECV %s", data)
 
 
-def debug(elem):
+def debug(mixed):
     """
     Debug method
     @param elem twisted.works.xish
     """
-    LOG.info(elem.toXml().encode("utf-8"))
+    if isinstance(mixed, domish.Element):
+        LOG.info(mixed.toXml().encode("utf-8"))
+    else:
+        LOG.info(mixed)
 
 
 def raw_data_out(data):
@@ -150,22 +152,45 @@ class JabberClient:
 
         # Process Messages
         self.xmlstream.addObserver("/message/body", message_processor)
+        # Process IQ Requests
+        self.xmlstream.addObserver("/iq", self.iq_processor)
 
         # Send initial presence
         presence = domish.Element(("jabber:client", "presence"))
         presence.addElement("status").addContent("Online")
         self.xmlstream.send(presence)
 
-        # Whitespace ping to keep our connection happy
-        lc = LoopingCall(self.keepalive)
-        lc.start(60)
-        self.xmlstream.addObserver(STREAM_END_EVENT, lambda _: lc.stop())
-
-    def keepalive(self):
-        """
-        Send whitespace ping to the server every so often
-        """
-        self.xmlstream.send(" ")
+    def iq_processor(self, iq):
+        """Process an IQ request"""
+        child_el = iq.firstChildElement()
+        if iq.getAttribute("type") != "get":
+            LOG.info("Unhandled IQ req of type %s", iq.getAttribute("type"))
+            return
+        # Handle pings
+        if child_el.name == "ping":
+            pong = domish.Element((None, "iq"))
+            pong["type"] = "result"
+            pong["to"] = iq["from"]
+            pong["from"] = iq["to"]
+            pong["id"] = iq["id"]
+            self.xmlstream.send(pong)
+            return
+        # Handle <query xmlns="jabber:iq:version"/>
+        if child_el.name == "query" and child_el.uri == "jabber:iq:version":
+            query = domish.Element((None, "iq"))
+            query["type"] = "result"
+            query["to"] = iq["from"]
+            query["from"] = iq["to"]
+            query["id"] = iq["id"]
+            query.addElement("query", "jabber:iq:version")
+            query.firstChildElement().addElement("name").addContent(
+                self.myjid.resource
+            )
+            query.firstChildElement().addElement("version").addContent(
+                pyiem.__version__
+            )
+            self.xmlstream.send(query)
+            return
 
     def disconnect(self, _xs):
         """
