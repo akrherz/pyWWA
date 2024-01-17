@@ -14,6 +14,7 @@ AFOS identifiers (ie RTPMEG).
 
 ### Bug Fixes
 
+- Correct xmpp client resource setting by removing invalid `rstrip()`.
 - [SHEF] Ensure looping calls don't quit running and ensure that `save_current`
 does not error with GIGO from #215.
 - Fix xmpp client responses for ping and version requests #220.
