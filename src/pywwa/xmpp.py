@@ -37,8 +37,8 @@ def make_jabber_client(resource_prefix=None):
     if resource_prefix is None:
         # Inspect the calling stack to determine the script name that is
         # calling us, so we can use that as the resource prefix
-        frames = inspect.stack()
-        resource_prefix = os.path.basename(frames[-1].filename).rstrip(".py")
+        fs = inspect.stack()
+        resource_prefix = os.path.basename(fs[-1].filename).removesuffix(".py")
 
     myjid = jid.JID(
         f"{SETTINGS.get('pywwa_jabber_username', 'iembot_ingest')}@"
