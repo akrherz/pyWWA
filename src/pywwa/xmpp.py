@@ -163,9 +163,6 @@ class JabberClient:
     def iq_processor(self, iq):
         """Process an IQ request"""
         child_el = iq.firstChildElement()
-        if iq.getAttribute("type") != "get":
-            LOG.info("Unhandled IQ req of type %s", iq.getAttribute("type"))
-            return
         # Handle pings
         if child_el.name == "ping":
             pong = domish.Element((None, "iq"))
