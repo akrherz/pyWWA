@@ -1,8 +1,7 @@
 """Test pywwa.xmpp"""
 
 import mock
-import pywwa
-from pywwa import xmpp
+from pywwa import CTX, xmpp
 from twisted.words.protocols.jabber import jid
 from twisted.words.xish import domish, xmlstream
 
@@ -45,9 +44,9 @@ def test_message_processor():
 
 def test_disabled_xmpp():
     """Test that it works when XMPP is disabled."""
-    pywwa.CTX["disable_xmpp"] = True
+    CTX["disable_xmpp"] = True
     assert isinstance(xmpp.make_jabber_client(), xmpp.NOOPXMPP)
-    pywwa.CTX["disable_xmpp"] = False
+    CTX["disable_xmpp"] = False
 
 
 def test_illegal_xml():
