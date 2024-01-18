@@ -20,6 +20,7 @@ def process_data(txn, data):
 
 @click.command(help=__doc__)
 @common.init
+@common.disable_xmpp
 def main(*args, **kwargs):
     """Fire things up."""
     bridge(process_data, dbpool=get_database("iem"))
