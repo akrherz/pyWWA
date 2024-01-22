@@ -5,3 +5,7 @@ filterwarnings = ["ignore:numpy.ndarray size changed:RuntimeWarning"]
 select = ["E", "F", "I", "T"]
 target-version = "py39"
 line-length = 79
+
+[tool.ruff.per-file-ignores]
+"goes/*.py" = ["T201"]
+"util/*.py" = ["T201"]

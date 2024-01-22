@@ -81,7 +81,7 @@ def setup_syslog():
     LOG.addHandler(sh)
     # Log stuff to stdout if we are running from command line.
     if CTX["stdout_logging"]:
-        tplog.addObserver(lambda x: print(formatEvent(x)))
+        tplog.addObserver(lambda x: sys.stdout.write(formatEvent(x) + "\n"))
     # Allow for more verbosity when we are running this manually.
     LOG.setLevel(logging.DEBUG if sys.stdout.isatty() else logging.INFO)
     SETTINGS["__setup_syslog"] = True
