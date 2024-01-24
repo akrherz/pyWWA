@@ -9,6 +9,7 @@ import json
 import os
 import subprocess
 import tempfile
+import warnings
 from copy import deepcopy
 from datetime import timezone
 
@@ -25,6 +26,9 @@ from pyiem.util import (
     utc,
 )
 
+# Stop warnings about pyogrio usage of errors=ignore in to_datetime
+# https://github.com/geopandas/pyogrio/issues/344
+warnings.simplefilter("ignore", FutureWarning)
 LOG = logger()
 # No akami
 BASEURI = "https://origin.wpc.ncep.noaa.gov/exper/eromap/geojson/"

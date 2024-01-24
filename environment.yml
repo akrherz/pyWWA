@@ -38,6 +38,8 @@ dependencies:
  - pybufrkit
  # Models
  - pydantic
+ # Used by wpc_ero_geojson
+ - pyogrio
  # gini reader
  - pyproj
  - pytest
