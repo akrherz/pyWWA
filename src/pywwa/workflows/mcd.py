@@ -2,7 +2,6 @@
  Support SPC's MCD product
  Support WPC's FFG product
 """
-from functools import partial
 
 # 3rd Party
 import click
@@ -12,14 +11,6 @@ from pyiem.nws.products.mcd import parser as mcdparser
 from pywwa import common
 from pywwa.database import get_database
 from pywwa.ldm import bridge
-
-
-def process_data(dbpool, data):
-    """Process a chunk of data"""
-    # BUG
-    data = data.upper()
-    df = dbpool.runInteraction(real_process, data)
-    df.addErrback(common.email_error, data)
 
 
 def find_cwsus(txn, prod):
@@ -45,23 +36,23 @@ def real_process(txn, raw):
     """ "
     Actually process a single MCD
     """
-    prod = mcdparser(raw)
+    prod = mcdparser(raw.upper())
     prod.cwsus = find_cwsus(txn, prod)
 
-    j = prod.get_jabbers(
+    jmsgs = prod.get_jabbers(
         common.SETTINGS.get("pywwa_product_url", "pywwa_product_url")
     )
-    if len(j) == 1:
-        common.send_message(j[0][0], j[0][1], j[0][2])
+    for j in jmsgs:
+        common.send_message(j[0], j[1], j[2])
     if common.dbwrite_enabled():
         prod.database_save(txn)
     if prod.warnings:
         common.email_error("\n".join(prod.warnings), raw)
+    return prod
 
 
 @click.command(help=__doc__)
 @common.init
 def main(*args, **kwargs):
     """Go Main Go."""
-    func = partial(process_data, get_database("postgis"))
-    bridge(func)
+    bridge(real_process, dbpool=get_database("postgis"))
