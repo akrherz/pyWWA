@@ -9,11 +9,6 @@ from pywwa.testing import get_example_file
 from pywwa.workflows import afos_dump
 
 
-def test_write2memcache():
-    """Test the memcache write."""
-    afos_dump.write2memcache(None)
-
-
 @pytest.mark.parametrize("database", ["afos"])
 def test_future_product(cursor):
     """Test exception for product from the future."""
@@ -29,7 +24,7 @@ def test_memcache_write_api(cursor):
     data = get_example_file("AFD.txt")
     pywwa.CTX["utcnow"] = utc(2015, 6, 9, 11, 56)
     prod = afos_dump.process_data(cursor, data)
-    afos_dump.write2memcache(prod)
+    afos_dump.write2memcache(prod.get_product_id(), prod.unixtext)
 
 
 @pytest.mark.parametrize("database", ["afos"])
