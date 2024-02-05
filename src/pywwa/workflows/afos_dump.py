@@ -25,15 +25,13 @@ MEMCACHE_EXCLUDE = [
 ]
 
 
-def write2memcache(nws):
+def write2memcache(product_id: str, text: str):
     """write our TextProduct to memcached"""
-    if nws is None:
-        return
     # 10 minutes should be enough time
-    LOG.debug("writing %s to memcache", nws.get_product_id())
+    LOG.debug("writing %s to memcache", product_id)
     write_memcache(
-        nws.get_product_id().encode("utf-8"),
-        nws.unixtext.replace("\001\n", "").encode("utf-8"),
+        product_id.encode("utf-8"),
+        text.replace("\001\n", "").encode("utf-8"),
         expire=600,
     )
 
@@ -81,7 +79,7 @@ def process_data(txn, buf):
     )
     if nws.afos[:3] in MEMCACHE_EXCLUDE:
         return None
-    reactor.callLater(0, write2memcache, nws)
+    reactor.callLater(0, write2memcache, nws.get_product_id(), nws.unixtext)
     return nws
 
 
