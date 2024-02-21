@@ -6,6 +6,9 @@ from pywwa.database import get_dbconnc
 from pywwa.testing import get_example_filepath
 from pywwa.workflows import bufr_surface
 
+# Hmmmm
+bufr_surface.load_wmo2iso3166()
+
 
 def sync_workflow(cursor, buffn) -> int:
     """Run twice through workflow, eh"""
