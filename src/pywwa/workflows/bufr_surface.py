@@ -219,7 +219,7 @@ def render_members(members, msgs):
             elif "members" in member:
                 render_members(member["members"], msgs)
             else:
-                LOG.debug("Dead end", member)
+                LOG.debug("Dead end %s", member)
         else:
             LOG.debug(member)
             msgs.append(member)
