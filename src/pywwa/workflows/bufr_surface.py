@@ -219,7 +219,7 @@ def render_members(members, msgs):
             elif "members" in member:
                 render_members(member["members"], msgs)
             else:
-                LOG.debug("Dead end", member)
+                LOG.debug("Dead end %s", member)
         else:
             LOG.debug(member)
             msgs.append(member)
@@ -336,17 +336,13 @@ def datalist2iemob_data(datalist, source) -> dict:
             continue
     if "year" not in data:
         return {}
-    try:
-        data["valid"] = utc(
-            data["year"],
-            data["month"],
-            data["day"],
-            data.get("hour", 0),  # Unsure if this is too forgiving
-            data.get("minute", 0),
-        )
-    except ValueError as exp:
-        LOG.info("ValueError in utc(): %s %s", data, exp)
-        return {}
+    data["valid"] = utc(
+        data["year"],
+        data["month"],
+        data["day"],
+        data.get("hour", 0),  # Unsure if this is too forgiving
+        data.get("minute", 0),
+    )
     # Attempt to compute a station ID
     if "001125" in data:
         data["sid"] = (

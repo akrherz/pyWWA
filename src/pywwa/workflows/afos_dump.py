@@ -1,10 +1,9 @@
 """AFOS Database Workflow."""
-# 3rd Party
+
 import click
 from pyiem.nws import product
 from twisted.internet import reactor
 
-# Local
 from pywwa import LOG, common
 from pywwa.database import get_database
 from pywwa.ldm import bridge
@@ -79,7 +78,8 @@ def process_data(txn, buf):
     )
     if nws.afos[:3] in MEMCACHE_EXCLUDE:
         return None
-    reactor.callLater(0, write2memcache, nws.get_product_id(), nws.unixtext)
+    # We are on a thread, so we need to send this back to the main thread
+    reactor.callFromThread(write2memcache, nws.get_product_id(), nws.unixtext)
     return nws
 
 
