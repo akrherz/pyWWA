@@ -106,6 +106,7 @@ GEN_PRODUCTS = [
     dict(afos="AWU", directive="10-1701", channels=S2),
     dict(afos="AWW", directive="10-1701", channels=S2),
     dict(afos="AVA", directive="10-1701", channels=S2),
+    dict(afos="AVG", directive="10-1701", channels=S2),
     dict(afos="AVW", directive="10-1701", channels=S2),
     dict(afos="AQA", directive="10-1701", channels=S2),
     dict(afos="BLU", directive="10-1701", channels=S2),

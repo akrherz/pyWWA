@@ -1,0 +1,53 @@
+016 
+FWUS45 KPIH 221057
+AVGPIH
+
+Avalanche Weather Guidance
+National Weather Service Pocatello ID
+357 AM MST Thu Feb 22 2024
+
+.DISCUSSION...
+
+* Sawtooth Avalanche Center...
+
+Quiet conditions are forecast today and Friday as weak high pressure
+ridging slowly builds into the region. Days will lean mild, nights
+will fall well before freezing in the mountains, and winds will
+generally remain very light with gusts to about 15 MPH at the 
+peaks. A significant winter storm, with snow and strong winds,
+remains on tap starting Sunday afternoon or evening, peaking Monday.
+
+* Bridger-Teton and Gallatin Avalanche Centers...
+
+Relatively quiet conditions are forecast today and Friday as weak 
+high pressure ridging slowly builds into the region. Days will lean 
+mild, nights will fall well before freezing in the mountains, and 
+winds will generally remain very light with gusts to about 20 MPH 
+at the peaks. A few light snow showers will remain possible today 
+and tonight with very little accumulation, and there is a slight
+risk of some light freezing drizzle (mostly at lower elevations)
+this evening into Friday morning. A significant winter storm, with 
+snow and strong winds, remains on tap starting Sunday night, 
+peaking Monday.
+
+* Utah Avalanche Center...
+
+Quiet conditions are forecast today and Friday as weak high pressure
+ridging slowly builds into the region. Days will lean mild, nights
+will fall well before freezing in the mountains, and winds will
+generally remain very light with gusts to about 15 MPH at the 
+peaks. A significant winter storm, with snow and strong winds,
+remains on tap starting Sunday night or Monday morning. 
+
+...truncated by daryl...
+
+$$
+
+--- Precip Type Codes ---
+
+CODE   TYPE
+ T     Thunderstorms
+ R     Rain
+ S     Snow
+ I     Sleet
+ Z     Freezing Rain
