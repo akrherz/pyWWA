@@ -58,7 +58,8 @@ jobs:
     - name: Install and Test
       run: |
         set -e
-        python -m pip install .
+        set -x
+        python -m pip install . -vv --no-deps
         cp pywwa_settings.json-example pywwa_settings.json
         # This is a bit brittle, but loads some data
         python util/ugcs_update.py fz08mr23 2023 3 08
