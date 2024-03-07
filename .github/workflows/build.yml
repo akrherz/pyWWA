@@ -20,6 +20,8 @@ jobs:
       PYTHON_VERSION: ${{ matrix.PYTHON_VERSION }}
     steps:
     - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
 
     - name: Add /etc/hosts entries
       run: |
