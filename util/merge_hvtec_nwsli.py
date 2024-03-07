@@ -93,7 +93,7 @@ def main(argv) -> int:
         args = (
             nwsli,
             river_name,
-            proximity,
+            proximity[:16],
             name,
             state,
             giswkt,
