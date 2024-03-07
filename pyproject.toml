@@ -9,3 +9,6 @@ line-length = 79
 [tool.ruff.lint.per-file-ignores]
 "goes/*.py" = ["T201"]
 "util/*.py" = ["T201"]
+
+[tool.setuptools_scm]
+# can be empty if no extra settings are needed, presence enables setuptools_scm
