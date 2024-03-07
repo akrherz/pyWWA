@@ -1,36 +1,45 @@
 [build-system]
-requires = ["setuptools", "wheel", "setuptools_scm"]
 build-backend = "setuptools.build_meta"
+requires = [
+  "setuptools",
+  "setuptools_scm",
+  "wheel",
+]
 
 [project]
-dynamic = ["version"]
+dynamic = [
+  "version",
+]
 name = "pywwa"
 authors = [
     {name = "daryl herzmann", email = "akrherz@gmail.com"},
 ]
-keywords = ["meteorology", "nws"]
+keywords = [
+  "meteorology",
+  "nws",
+]
 include_package_data = true
 license = {"text" = "Apache"}
 description = "A suite of parsers and utils for NWS products."
 dependencies = [
-    "click",
-    "geopandas",
-    "metpy",
-    "metar >=1.7.0",
-    "netCDF4",
-    "numpy",
-    "pandas",
-    "pint",
-    "psycopg",
-    "pybufrkit",
-    "pyiem",
-    "pymemcache",
-    "pyproj",
-    "requests",
-    "shapely",
-    "sqlalchemy",
-    "treq",
-    "twisted",
+  "click",
+  "geopandas",
+  "metar>=1.7",
+  "metpy",
+  "netCDF4",
+  "numpy",
+  "pandas",
+  "pint",
+  "psycopg",
+  "pybufrkit",
+  "pyiem",
+  "pymemcache",
+  "pyproj",
+  "requests",
+  "shapely",
+  "sqlalchemy",
+  "treq",
+  "twisted",
 ]
 
 [tool.pytest.ini_options]
@@ -84,6 +93,11 @@ pywwa-parse-vtec = "pywwa.workflows.vtec:main"
 pywwa-parse-watch = "pywwa.workflows.watch:main"
 pywwa-parse-xteus = "pywwa.workflows.xteus:main"
 pywwa-spammer = "pywwa.workflows.spammer:main"
-
+[project.urls]
+Changelog = "https://github.com/akrherz/pyWWA/blob/main/CHANGELOG.md"
+Documentation = "https://github.com/akrherz/pyWWA"
+Homepage = "https://mesonet.agron.iastate.edu"
+Issues = "https://github.com/akrherz/pyWWA/issues"
+Repository = "https://github.com/akrherz/pyWWA.git"
 [tool.setuptools_scm]
 version_scheme = "post-release"
