@@ -11,6 +11,8 @@ All notable changes to this library are documented in this file.
 
 ### Bug Fixes
 
+- Correct `get_example_filepath` logic to assume `pwd` for location of examples.
+
 ## **1.5.0** (7 Mar 2024)
 
 ### API Changes
