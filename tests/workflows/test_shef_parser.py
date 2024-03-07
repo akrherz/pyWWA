@@ -269,7 +269,7 @@ def test_restructure_data_eightchar_id():
     CTX["utcnow"] = utc(2017, 8, 15, 13)
     prod = shef.process_data(get_example_file("RR7.txt"))
     res = shef.restructure_data(prod)
-    assert all(len(x) <= 8 for x in res.keys())
+    assert all(len(x) <= 8 for x in res)
 
 
 def test_restructure_data_future():
@@ -277,10 +277,10 @@ def test_restructure_data_future():
     CTX["utcnow"] = utc(2017, 8, 14)
     prod = shef.process_data(get_example_file("RR7.txt"))
     res = shef.restructure_data(prod)
-    assert len(res.keys()) == 0
+    assert len(res) == 0
     CTX["utcnow"] = utc()
     res = shef.restructure_data(prod)
-    assert len(res.keys()) == 0
+    assert len(res) == 0
 
 
 def test_process_data():
