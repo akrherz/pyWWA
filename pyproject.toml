@@ -53,9 +53,6 @@ line-length = 79
 "goes/*.py" = ["T201"]
 "util/*.py" = ["T201"]
 
-[tool.setuptools.packages.find]
-where = "src"
-
 [project.scripts]
 pywwa-parse-afos-dump = "pywwa.workflows.afos_dump:main"
 pywwa-parse-aviation = "pywwa.workflows.aviation:main"
