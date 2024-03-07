@@ -1,5 +1,5 @@
-"""Utility script to generate the HTML used for IEMBot Channel Documentation
-"""
+"""Utility script to generate the HTML used for IEMBot Channel Documentation"""
+
 import os
 import re
 import sys

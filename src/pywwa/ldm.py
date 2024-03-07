@@ -1,4 +1,4 @@
-""" Unidata LDM pqact bridge."""
+"""Unidata LDM pqact bridge."""
 
 # 3rd Party
 from twisted.internet import reactor, task

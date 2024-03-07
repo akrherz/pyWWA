@@ -1,4 +1,5 @@
 """Exercise the rr7 workflow."""
+
 import pytest
 from pywwa.testing import get_example_file
 from pywwa.workflows import rr7

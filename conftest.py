@@ -1,4 +1,5 @@
 """For testing."""
+
 # 3rd party
 import pytest
 from pywwa import CTX, CTX_DEFAULTS

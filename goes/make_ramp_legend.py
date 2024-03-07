@@ -1,4 +1,5 @@
 """Generate a color ramp image, please."""
+
 import sys
 
 import netCDF4

@@ -1,4 +1,5 @@
-""" XTEUS Product Parser! """
+"""XTEUS Product Parser!"""
+
 # 3rd Party
 import click
 from pyiem.nws.products.xteus import parser

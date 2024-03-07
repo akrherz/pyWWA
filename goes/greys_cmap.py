@@ -1,4 +1,5 @@
 """Produce a greys cmap."""
+
 from pyiem.plot.use_agg import plt
 
 

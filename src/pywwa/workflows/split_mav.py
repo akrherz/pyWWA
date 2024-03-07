@@ -1,6 +1,7 @@
 """
 Chunk the MOS text data into easier to search values.
 """
+
 # stdlib
 import re
 

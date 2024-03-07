@@ -1,4 +1,5 @@
 """Process ridge exchange messages that contain imagery."""
+
 import datetime
 import json
 import os

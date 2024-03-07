@@ -1,4 +1,5 @@
 """Move DSM messages into the text database with the proper PIL."""
+
 # Local
 import re
 

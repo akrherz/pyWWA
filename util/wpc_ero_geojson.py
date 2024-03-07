@@ -5,6 +5,7 @@
 
 https://origin.wpc.ncep.noaa.gov/exper/eromap/geojson/
 """
+
 import json
 import os
 import subprocess

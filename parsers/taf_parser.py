@@ -1,4 +1,5 @@
-""" NESDIS TAF Ingestor """
+"""NESDIS TAF Ingestor"""
+
 # Local
 from pywwa.workflows.taf import main
 

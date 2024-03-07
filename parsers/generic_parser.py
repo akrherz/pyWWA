@@ -1,4 +1,5 @@
-""" Generic NWS Product Parser """
+"""Generic NWS Product Parser"""
+
 # Local
 from pywwa.workflows.generic import main
 

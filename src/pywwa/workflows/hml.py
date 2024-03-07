@@ -1,4 +1,4 @@
-""" HML parser! """
+"""HML parser!"""
 
 # 3rd Party
 import click

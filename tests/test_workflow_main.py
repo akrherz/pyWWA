@@ -1,4 +1,5 @@
 """Test the CLI main function on all workflows."""
+
 import importlib
 import pkgutil
 

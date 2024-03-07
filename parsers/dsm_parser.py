@@ -1,4 +1,5 @@
-""" ASOS Daily Summary Message Parser ingestor """
+"""ASOS Daily Summary Message Parser ingestor"""
+
 # Local
 from pywwa.workflows.dsm import main
 

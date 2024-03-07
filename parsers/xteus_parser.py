@@ -1,4 +1,5 @@
-""" XTEUS Parser! """
+"""XTEUS Parser!"""
+
 # Local
 from pywwa.workflows.xteus import main
 

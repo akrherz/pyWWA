@@ -1,4 +1,5 @@
 """Test cli_parser."""
+
 # 3rd Party
 import pytest
 

@@ -1,4 +1,5 @@
-""" Aviation Product Parser! """
+"""Aviation Product Parser!"""
+
 # 3rd Party
 import click
 from pyiem.nws.products.sigmet import parser

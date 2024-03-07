@@ -1,4 +1,5 @@
-""" HML parser! """
+"""HML parser!"""
+
 # Local
 from pywwa.workflows.hml import main
 

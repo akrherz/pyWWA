@@ -16,6 +16,7 @@ hvtec_nwsli table:
  state      | character(2)           |
  geom       | geometry               |
 """
+
 # stdlib
 import sys
 

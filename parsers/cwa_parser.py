@@ -1,4 +1,5 @@
-""" CWA Parser! """
+"""CWA Parser!"""
+
 # Local
 from pywwa.workflows.cwa import main
 

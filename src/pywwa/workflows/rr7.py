@@ -1,4 +1,5 @@
 """Split RR7 products, for some reason!"""
+
 # stdlib
 import re
 

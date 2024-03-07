@@ -1,4 +1,4 @@
-""" Test pywwa.ldm """
+"""Test pywwa.ldm"""
 
 # Local
 from pywwa.ldm import bridge

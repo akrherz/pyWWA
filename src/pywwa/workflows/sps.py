@@ -1,4 +1,5 @@
 """SPS product ingestor"""
+
 from functools import partial
 
 # 3rd Party

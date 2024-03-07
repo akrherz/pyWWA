@@ -6,6 +6,6 @@ lint.select = ["E", "F", "I", "T"]
 target-version = "py39"
 line-length = 79
 
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
 "goes/*.py" = ["T201"]
 "util/*.py" = ["T201"]

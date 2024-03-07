@@ -1,4 +1,5 @@
 """Test shef_parser."""
+
 import datetime
 from functools import partial
 from zoneinfo import ZoneInfo

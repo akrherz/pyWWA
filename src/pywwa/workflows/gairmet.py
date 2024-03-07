@@ -1,4 +1,4 @@
-""" G-AIRMET parser! """
+"""G-AIRMET parser!"""
 
 # 3rd Party
 import click

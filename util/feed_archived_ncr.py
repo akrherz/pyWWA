@@ -1,8 +1,9 @@
 """Feed archived NCR data to nexrad3_attr.py , should be run like
 
- python util/feed_archived_ncr.py NEXRAD YYYY MM
-   | YYYY=2009 MM=01 python nexrad3_attr.py
+python util/feed_archived_ncr.py NEXRAD YYYY MM
+  | YYYY=2009 MM=01 python nexrad3_attr.py
 """
+
 import datetime
 import glob
 import os

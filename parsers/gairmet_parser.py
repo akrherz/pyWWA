@@ -1,4 +1,5 @@
-""" G-AIRMET parser! """
+"""G-AIRMET parser!"""
+
 # Local
 from pywwa.workflows.gairmet import main
 

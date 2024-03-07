@@ -1,4 +1,5 @@
-""" SPC Watch Ingestor """
+"""SPC Watch Ingestor"""
+
 # Local
 from pywwa.workflows.watch import main
 

@@ -1,6 +1,7 @@
 """
 Handle things that need emailed to me for my situational awareness.
 """
+
 # stdlib
 import re
 from email.mime.multipart import MIMEMultipart

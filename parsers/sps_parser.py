@@ -1,4 +1,5 @@
 """SPS product ingestor"""
+
 # Local
 from pywwa.workflows.sps import main
 

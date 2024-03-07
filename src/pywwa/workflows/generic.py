@@ -1,4 +1,5 @@
-""" Generic NWS Product Parser """
+"""Generic NWS Product Parser"""
+
 # stdlib
 from datetime import timedelta
 from functools import partial

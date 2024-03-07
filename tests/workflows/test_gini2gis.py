@@ -1,4 +1,5 @@
 """test gini2gis"""
+
 from unittest.mock import patch
 
 import pywwa

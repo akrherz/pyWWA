@@ -1,4 +1,4 @@
-""" SPC Watch (SAW, SEL, WWP) Ingestor """
+"""SPC Watch (SAW, SEL, WWP) Ingestor"""
 
 # 3rd Party
 import click

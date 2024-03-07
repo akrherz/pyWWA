@@ -1,4 +1,4 @@
-""" TAF Ingestor """
+"""TAF Ingestor"""
 
 # 3rd Party
 import click

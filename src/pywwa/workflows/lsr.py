@@ -1,4 +1,5 @@
-""" LSR product ingestor """
+"""LSR product ingestor"""
+
 # Stdlib
 import datetime
 import os

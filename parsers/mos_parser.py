@@ -1,4 +1,5 @@
-""" MOS Data Ingestor, why not? """
+"""MOS Data Ingestor, why not?"""
+
 # Local
 from pywwa.workflows.mos import main
 

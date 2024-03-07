@@ -1,4 +1,5 @@
 """SPENES product ingestor"""
+
 # stdlib
 import re
 
