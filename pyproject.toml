@@ -1,3 +1,46 @@
+[build-system]
+build-backend = "setuptools.build_meta"
+requires = [
+  "setuptools",
+  "setuptools_scm",
+  "wheel",
+]
+
+[project]
+dynamic = [
+  "version",
+]
+name = "pywwa"
+authors = [
+    {name = "daryl herzmann", email = "akrherz@gmail.com"},
+]
+keywords = [
+  "meteorology",
+  "nws",
+]
+license = {"text" = "Apache"}
+description = "A suite of parsers and utils for NWS products."
+dependencies = [
+  "click",
+  "geopandas",
+  "metar>=1.7",
+  "metpy",
+  "netCDF4",
+  "numpy",
+  "pandas",
+  "pint",
+  "psycopg",
+  "pybufrkit",
+  "pyiem",
+  "pymemcache",
+  "pyproj",
+  "requests",
+  "shapely",
+  "sqlalchemy",
+  "treq",
+  "twisted",
+]
+
 [tool.pytest.ini_options]
 filterwarnings = ["ignore:numpy.ndarray size changed:RuntimeWarning"]
 
@@ -10,5 +53,47 @@ line-length = 79
 "goes/*.py" = ["T201"]
 "util/*.py" = ["T201"]
 
+[project.scripts]
+pywwa-parse-afos-dump = "pywwa.workflows.afos_dump:main"
+pywwa-parse-aviation = "pywwa.workflows.aviation:main"
+pywwa-parse-bufr-surface = "pywwa.workflows.bufr_surface:main"
+pywwa-parse-cf6 = "pywwa.workflows.cf6:main"
+pywwa-parse-cli = "pywwa.workflows.cli:main"
+pywwa-parse-cwa = "pywwa.workflows.cwa:main"
+pywwa-parse-dsm = "pywwa.workflows.dsm:main"
+pywwa-parse-dsm2afos = "pywwa.workflows.dsm2afos:main"
+pywwa-parse-ero = "pywwa.workflows.ero:main"
+pywwa-parse-fake-afos-dump = "pywwa.workflows.fake_afos_dump:main"
+pywwa-parse-fd = "pywwa.workflows.fd:main"
+pywwa-parse-ffg = "pywwa.workflows.ffg:main"
+pywwa-parse-gairmet = "pywwa.workflows.gairmet:main"
+pywwa-parse-generic = "pywwa.workflows.generic:main"
+pywwa-parse-gini2gis = "pywwa.workflows.gini2gis:main"
+pywwa-parse-hml = "pywwa.workflows.hml:main"
+pywwa-parse-lsr = "pywwa.workflows.lsr:main"
+pywwa-parse-mcd = "pywwa.workflows.mcd:main"
+pywwa-parse-metar = "pywwa.workflows.metar:main"
+pywwa-parse-mos = "pywwa.workflows.mos:main"
+pywwa-parse-nexrad3-attr = "pywwa.workflows.nexrad3_attr:main"
+pywwa-parse-nldn = "pywwa.workflows.nldn:main"
+pywwa-parse-pirep = "pywwa.workflows.pirep:main"
+pywwa-parse-rr7 = "pywwa.workflows.rr7:main"
+pywwa-parse-scp = "pywwa.workflows.scp:main"
+pywwa-parse-shef = "pywwa.workflows.shef:main"
+pywwa-parse-spc = "pywwa.workflows.spc:main"
+pywwa-parse-spe = "pywwa.workflows.spe:main"
+pywwa-parse-split-mav = "pywwa.workflows.split_mav:main"
+pywwa-parse-sps = "pywwa.workflows.sps:main"
+pywwa-parse-taf = "pywwa.workflows.taf:main"
+pywwa-parse-vtec = "pywwa.workflows.vtec:main"
+pywwa-parse-watch = "pywwa.workflows.watch:main"
+pywwa-parse-xteus = "pywwa.workflows.xteus:main"
+pywwa-spammer = "pywwa.workflows.spammer:main"
+[project.urls]
+Changelog = "https://github.com/akrherz/pyWWA/blob/main/CHANGELOG.md"
+Documentation = "https://github.com/akrherz/pyWWA"
+Homepage = "https://mesonet.agron.iastate.edu"
+Issues = "https://github.com/akrherz/pyWWA/issues"
+Repository = "https://github.com/akrherz/pyWWA.git"
 [tool.setuptools_scm]
-# can be empty if no extra settings are needed, presence enables setuptools_scm
+version_scheme = "post-release"

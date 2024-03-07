@@ -1,17 +1,12 @@
 """Utility Functions."""
 
 # stdlib
-import inspect
 import os
 
 
 def get_example_filepath(filename):
     """Return a full filepath."""
-    # File is relative to calling file?
-    callingfn = os.path.abspath(inspect.stack()[1].filename)
-    return os.path.join(
-        os.path.dirname(callingfn), "..", "..", "examples", filename
-    )
+    return f"{os.getcwd()}/examples/{filename}"
 
 
 def get_example_file(filename):
