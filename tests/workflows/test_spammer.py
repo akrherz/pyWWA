@@ -1,4 +1,5 @@
 """Test spammer."""
+
 import base64
 
 from pyiem.nws.product import TextProduct

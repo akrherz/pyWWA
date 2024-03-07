@@ -1,4 +1,5 @@
-""" NESDIS SCP Ingestor """
+"""NESDIS SCP Ingestor"""
+
 # Local
 from pywwa.workflows.scp import main
 

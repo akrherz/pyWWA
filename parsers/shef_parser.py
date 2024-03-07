@@ -1,4 +1,5 @@
 """SHEF product ingestor."""
+
 # Local
 from pywwa.workflows.shef import main
 

@@ -6,6 +6,9 @@ lint.select = ["E", "F", "I", "T"]
 target-version = "py39"
 line-length = 79
 
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
 "goes/*.py" = ["T201"]
 "util/*.py" = ["T201"]
+
+[tool.setuptools_scm]
+# can be empty if no extra settings are needed, presence enables setuptools_scm

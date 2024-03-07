@@ -10,6 +10,7 @@ with watches.  Lets try to explain
     init_expire <- When did this product initially expire
     product_issue <- When was this product issued by the NWS
 """
+
 from functools import partial
 
 # 3rd Party

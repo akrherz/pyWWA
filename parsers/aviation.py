@@ -1,4 +1,5 @@
-""" Aviation Product Parser! """
+"""Aviation Product Parser!"""
+
 # Local
 from pywwa.workflows.aviation import main
 

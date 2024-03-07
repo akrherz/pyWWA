@@ -1,6 +1,7 @@
 """
-  Compare our PIREPs data against what is at aviation wx JSON service
+Compare our PIREPs data against what is at aviation wx JSON service
 """
+
 import datetime
 
 import requests

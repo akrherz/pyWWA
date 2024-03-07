@@ -4,6 +4,7 @@
    appears CONUS goes west goes to just -112 east?
 2. gdal_merge.py: combine these two with the west file last (on top)
 """
+
 import datetime
 import json
 import os

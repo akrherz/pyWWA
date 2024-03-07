@@ -1,4 +1,5 @@
-""" PIREP parser! """
+"""PIREP parser!"""
+
 # stdlib
 import datetime
 

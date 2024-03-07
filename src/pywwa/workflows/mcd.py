@@ -1,6 +1,6 @@
 """
- Support SPC's MCD product
- Support WPC's FFG product
+Support SPC's MCD product
+Support WPC's FFG product
 """
 
 # 3rd Party

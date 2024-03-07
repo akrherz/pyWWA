@@ -1,4 +1,5 @@
 """SHEF product ingestor."""
+
 # stdlib
 import datetime
 import random

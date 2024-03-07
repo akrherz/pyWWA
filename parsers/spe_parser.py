@@ -1,4 +1,5 @@
 """SPENES product ingestor"""
+
 # Local
 from pywwa.workflows.spe import main
 

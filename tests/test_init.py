@@ -1,4 +1,5 @@
 """Test pywwa/__init__.py"""
+
 import os
 import shutil
 

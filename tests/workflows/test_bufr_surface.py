@@ -1,4 +1,5 @@
 """Test bufr_surface workflow."""
+
 import os
 
 import pytest

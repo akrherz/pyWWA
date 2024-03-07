@@ -1,4 +1,5 @@
 """Get station updates from IEM Webservice."""
+
 # Third Party
 import requests
 from pywwa.database import get_dbconnc

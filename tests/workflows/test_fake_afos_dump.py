@@ -1,4 +1,5 @@
 """Test fake_afos_dump."""
+
 # 3rd Party
 import pytest
 

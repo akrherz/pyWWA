@@ -1,4 +1,5 @@
-""" NLDN """
+"""NLDN"""
+
 # Local
 from pywwa.workflows.nldn import main
 

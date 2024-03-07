@@ -1,4 +1,5 @@
-""" ASOS Daily Summary Message Parser ingestor """
+"""ASOS Daily Summary Message Parser ingestor"""
+
 from zoneinfo import ZoneInfo
 
 # 3rd Party

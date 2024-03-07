@@ -4,6 +4,7 @@ The CLI report has lots of good data that is hard to find in other products,
 so we take what data we find in this product and overwrite the database
 storage of what we got from the automated observations
 """
+
 from functools import partial
 
 # 3rd Party

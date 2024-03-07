@@ -1,4 +1,5 @@
-""" MOS Data Ingestor, why not? """
+"""MOS Data Ingestor, why not?"""
+
 # 3rd Party
 import click
 from pyiem.nws.products.mos import parser

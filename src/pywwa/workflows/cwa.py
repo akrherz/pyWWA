@@ -1,4 +1,4 @@
-""" CWA Product Parser! """
+"""CWA Product Parser!"""
 
 # 3rd Party
 import click

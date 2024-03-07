@@ -3,6 +3,7 @@
 I convert raw GINI noaaport imagery into geo-referenced PNG files both in the
 'native' projection and 4326.
 """
+
 import json
 import os
 import subprocess

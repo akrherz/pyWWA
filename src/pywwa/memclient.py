@@ -1,4 +1,5 @@
 """A memcache client that is meant to be run from a thread within twisted."""
+
 import threading
 
 from pymemcache.client import Client

@@ -1,4 +1,5 @@
 """test import failure via a mock."""
+
 import sys
 
 import pywwa

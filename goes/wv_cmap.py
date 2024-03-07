@@ -1,4 +1,5 @@
 """Hackery."""
+
 import matplotlib.colors as mpcolors
 
 # Make colormap (based off of

@@ -1,4 +1,5 @@
 """Archive MADIS files."""
+
 import glob
 import os
 import subprocess

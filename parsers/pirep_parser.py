@@ -1,4 +1,5 @@
-""" PIREP parser! """
+"""PIREP parser!"""
+
 # Local
 from pywwa.workflows.pirep import main
 

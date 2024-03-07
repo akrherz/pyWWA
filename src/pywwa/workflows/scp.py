@@ -1,4 +1,4 @@
-""" NESDIS SCP Ingestor """
+"""NESDIS SCP Ingestor"""
 
 # 3rd Party
 import click

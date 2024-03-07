@@ -1,4 +1,5 @@
-""" FFG """
+"""FFG"""
+
 # Local
 from pywwa.workflows.ffg import main
 

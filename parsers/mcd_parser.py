@@ -1,7 +1,8 @@
 """
- Support SPC's MCD product
- Support WPC's FFG product
+Support SPC's MCD product
+Support WPC's FFG product
 """
+
 # Local
 from pywwa.workflows.mcd import main
 

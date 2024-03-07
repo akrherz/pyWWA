@@ -16,6 +16,7 @@ hvtec_nwsli table:
  state      | character(2)           |
  geom       | geometry               |
 """
+
 # stdlib
 import sys
 
@@ -92,7 +93,7 @@ def main(argv) -> int:
         args = (
             nwsli,
             river_name,
-            proximity,
+            proximity[:16],
             name,
             state,
             giswkt,

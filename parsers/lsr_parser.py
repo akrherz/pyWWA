@@ -1,4 +1,5 @@
-""" LSR product ingestor """
+"""LSR product ingestor"""
+
 # Local
 from pywwa.workflows.lsr import main
 

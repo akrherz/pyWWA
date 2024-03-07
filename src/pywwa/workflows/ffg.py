@@ -1,4 +1,4 @@
-""" FFG """
+"""FFG"""
 
 # 3rd Party
 import click

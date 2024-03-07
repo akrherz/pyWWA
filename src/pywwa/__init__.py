@@ -1,4 +1,5 @@
 """pyWWA local module."""
+
 # stdlib
 import json
 import logging

@@ -1,4 +1,5 @@
 """Make a file on disk appear more noaaport-ish."""
+
 import sys
 
 from pyiem.util import noaaport_text

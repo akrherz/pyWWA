@@ -1,4 +1,5 @@
 """XMPP/Jabber Client Interface and Support."""
+
 # stdlib
 import inspect
 import os
@@ -23,7 +24,7 @@ webclient._HTTP11ClientFactory.noisy = False  # skipcq: PYL-W0212
 # create a regular expression that matches any illegal XML character
 # http://stackoverflow.com/questions/1707890
 ILLEGAL_XML_CHARS_RE = re.compile(
-    "[\x00-\x08\x0b\x0c\x0e-\x1F\uD800-\uDFFF\uFFFE\uFFFF]", re.UNICODE
+    "[\x00-\x08\x0b\x0c\x0e-\x1f\ud800-\udfff\ufffe\uffff]", re.UNICODE
 )
 
 
