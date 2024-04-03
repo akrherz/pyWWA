@@ -75,8 +75,8 @@ def main(network):
                 {"iemid": iemid},
             )
 
-            for row in res:
-                key = f"{row[0]:%d%H%M}"
+            for row2 in res:
+                key = f"{row2[0]:%d%H%M}"
                 if key in awx:
                     awx.pop(key)
             if awx:
@@ -93,7 +93,7 @@ def main(network):
             "pywwa-parse-metar",
             "-x",
             "-s",
-            "600",
+            "120",
         ],
         stdin=subprocess.PIPE,
     ) as proc:
