@@ -15,7 +15,7 @@ def test_future_product(cursor):
     """Test exception for product from the future."""
     data = get_example_file("AFD.txt")
     pywwa.CTX["utcnow"] = utc(2015, 6, 8, 11, 56)
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError):
         afos_dump.process_data(cursor, data)
 
 
@@ -33,7 +33,7 @@ def test_processor(cursor):
     """Test basic parsing."""
     data = get_example_file("AFD.txt")
     # 0. Very latent product
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError):
         afos_dump.process_data(cursor, data)
     pywwa.CTX["utcnow"] = utc(2015, 6, 9, 11, 56)
     # 1. straight through
@@ -41,8 +41,8 @@ def test_processor(cursor):
     assert prod.afos == "AFDDMX"
     # 2. Corrupt the AFOS
     data = data.replace("AFDDMX", "AFDDMX123")
-    with pytest.raises(Exception):
-        afos_dump.rprocess_data(cursor, data)
+    with pytest.raises(ValueError):
+        afos_dump.process_data(cursor, data)
     # 3. Corrupt the AFOS and WMO source
     data = data.replace("KDMX", "QQQQ")
     res = afos_dump.process_data(cursor, data)

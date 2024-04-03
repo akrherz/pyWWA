@@ -45,7 +45,13 @@ dependencies = [
 filterwarnings = ["ignore:numpy.ndarray size changed:RuntimeWarning"]
 
 [tool.ruff]
-lint.select = ["E", "F", "I", "T"]
+lint.select = [
+    "B",  # bugbear
+    "E",
+    "F",
+    "I",
+    "T",
+]
 target-version = "py39"
 line-length = 79
 
