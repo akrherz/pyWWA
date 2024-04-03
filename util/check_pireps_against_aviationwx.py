@@ -64,7 +64,7 @@ def main():
                 )
             del mine[key]
 
-    for key, item in mine.items():
+    for _, item in mine.items():
         if item[0] < floor:
             continue
         log.info("AVWX MISS %s %s", item[0], item[3])

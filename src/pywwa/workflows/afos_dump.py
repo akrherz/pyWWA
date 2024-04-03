@@ -48,15 +48,15 @@ def process_data(txn, buf):
     if not common.replace_enabled():
         delta = (nws.valid - utcnow).total_seconds()
         if delta < (-180 * 86400):  # 180 days
-            raise Exception(f"Very Latent Product! {nws.valid}")
+            raise ValueError(f"Very Latent Product! {nws.valid}")
         if delta > (6 * 3600):  # Six Hours
-            raise Exception(f"Product from the future! {nws.valid}")
+            raise ValueError(f"Product from the future! {nws.valid}")
     if nws.warnings:
         common.email_error("\n".join(nws.warnings), buf)
     if nws.afos is None:
         if nws.source[0] not in ["K", "P"]:
             return None
-        raise Exception("TextProduct.afos is null")
+        raise ValueError("TextProduct.afos is null")
 
     if common.replace_enabled():
         args = [nws.afos.strip(), nws.source, nws.valid]
