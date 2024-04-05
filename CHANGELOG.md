@@ -12,6 +12,7 @@ All notable changes to this library are documented in this file.
 ### Bug Fixes
 
 - Correct `get_example_filepath` logic to assume `pwd` for location of examples.
+- Swallow BUFR situation of year==0, which is likely some climatology product?
 
 ## **1.5.0** (7 Mar 2024)
 

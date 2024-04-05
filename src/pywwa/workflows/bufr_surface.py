@@ -335,7 +335,7 @@ def datalist2iemob_data(datalist, source) -> dict:
         if msg["id"] == "011043" and displacement >= -10:
             data["gust_drct"] = bounds_check(msg["value"], 0, 360)
             continue
-    if "year" not in data:
+    if "year" not in data or data["year"] == 0:
         return {}
     data["valid"] = utc(
         data["year"],
