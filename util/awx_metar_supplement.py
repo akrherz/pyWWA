@@ -51,14 +51,21 @@ def main(network):
                 "https://aviationweather.gov/cgi-bin/data/metar.php?"
                 f"ids={st4}&hours=48&order=id%2C-obs&sep=true"
             )
-            req = client.get(url, timeout=10)
-            if req.status_code == 429:
-                LOG.info("Got 429, cooling jets for 5 seconds.")
-                time.sleep(5)
-                req = client.get(url, timeout=10)
-            if req.status_code != 200:
-                LOG.warning(f"Failed to fetch {st4} {req.status_code}")
-                continue
+            attempt = 0
+            while attempt < 3:
+                attempt += 1
+                try:
+                    req = client.get(url, timeout=20)
+                    if req.status_code == 429:
+                        LOG.info("Got 429, cooling jets for 5 seconds.")
+                        time.sleep(5)
+                        continue
+                    if req.status_code != 200:
+                        LOG.warning(f"Failed to fetch {st4} {req.status_code}")
+                        continue
+                    break
+                except Exception as exp:
+                    LOG.info("Failed to fetch %s: %s", st4, exp)
             awx = {}
             for line in req.text.split("\n"):
                 if line.strip() == "":
