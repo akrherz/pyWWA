@@ -15,17 +15,12 @@ from copy import deepcopy
 from datetime import timezone
 
 import geopandas as gpd
+import httpx
 import pandas as pd
-import requests
 import xmpp
+from pyiem.database import get_dbconn, get_sqlalchemy_conn
 from pyiem.nws.products import ero
-from pyiem.util import (
-    get_dbconn,
-    get_properties,
-    get_sqlalchemy_conn,
-    logger,
-    utc,
-)
+from pyiem.util import get_properties, logger, utc
 
 # Stop warnings about pyogrio usage of errors=ignore in to_datetime
 # https://github.com/geopandas/pyogrio/issues/344
@@ -81,7 +76,20 @@ def compute_cycle(day, valid):
 
 def fetch_ero(day) -> gpd.GeoDataFrame:
     """Get the ERO from the WPC website."""
-    gdf = gpd.read_file(f"{BASEURI}Day{day}_Latest.geojson", engine="pyogrio")
+    # origin is IDP, www is akamai
+    gdf = None
+    for prefix in ["origin", "www"]:
+        url = BASEURI.replace("origin", prefix)
+        try:
+            gdf = gpd.read_file(
+                f"{url}Day{day}_Latest.geojson", engine="pyogrio"
+            )
+            break
+        except Exception as exp:
+            LOG.info("Failed to fetch %s: %s", url, exp)
+    if gdf is None:
+        LOG.warning("Failed to fetch Day%s", day)
+        return None, None
     # Uppercase all the column names
     gdf.columns = [x.upper() if x != "geometry" else x for x in gdf.columns]
     cols = ["ISSUE_TIME", "START_TIME", "END_TIME"]
@@ -281,7 +289,7 @@ def send_jabber(gdf, issue, day):
         try:
             LOG.info("Fetching %s", xtra["twitter_media"])
             # 30 seconds found to be not quite enough
-            requests.get(xtra["twitter_media"], timeout=45)
+            httpx.get(xtra["twitter_media"], timeout=45)
         except Exception as exp:
             print(exp)
         msg.addChild(node=xbot)
