@@ -7,6 +7,9 @@ All notable changes to this library are documented in this file.
 
 ### API Changes
 
+- Change AFOS database save to not include windows carriage return nor the
+start of product ``\001`` control character.
+
 ### New Features
 
 ### Bug Fixes

@@ -204,6 +204,18 @@ def disable_xmpp(f):
     return f
 
 
+def afosclean(text: str) -> str:
+    """Clean a string for AFOS database storage.
+
+    Removes the \r \001 and \003 characters, trims whitespace and
+    slaps one \n at the end of the string.
+    """
+    return (
+        text.replace("\r", "").replace("\001", "").replace("\003", "").strip()
+        + "\n"
+    )
+
+
 def init(f):
     """Decorator to setup all things."""
 
