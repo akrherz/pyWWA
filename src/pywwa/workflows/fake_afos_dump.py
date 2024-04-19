@@ -83,7 +83,7 @@ def really_process_data(txn, data):
 
     sqlargs = (
         tp.afos,
-        tp.text,
+        common.afosclean(tp.text),
         tp.source,
         tp.wmo,
         tp.valid.strftime("%Y-%m-%d %H:%M+00"),

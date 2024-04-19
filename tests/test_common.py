@@ -4,6 +4,12 @@ from pyiem.util import utc
 from pywwa import CTX, common
 
 
+def test_afosclean():
+    """Test that we strip things right."""
+    instr = "\001\r\r\n000 \r\r\nDARYL\r\r"
+    assert common.afosclean(instr) == "000 \nDARYL\n"
+
+
 def test_setup_syslog():
     """API exercice."""
     CTX["stdout_logging"] = True

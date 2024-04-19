@@ -74,7 +74,14 @@ def process_data(txn, buf):
     txn.execute(
         "INSERT into products (pil, data, entered, "
         "source, wmo, bbb) VALUES(%s, %s, %s, %s, %s, %s)",
-        (nws.afos.strip(), nws.text, nws.valid, nws.source, nws.wmo, nws.bbb),
+        (
+            nws.afos.strip(),
+            common.afosclean(nws.text),
+            nws.valid,
+            nws.source,
+            nws.wmo,
+            nws.bbb,
+        ),
     )
     if nws.afos[:3] in MEMCACHE_EXCLUDE:
         return None
