@@ -4,7 +4,7 @@
 import sys
 
 # Third Party
-import requests
+import httpx
 from pywwa.database import get_dbconnc
 
 SERVICE = "https://mesonet.agron.iastate.edu/geojson/network.py"
@@ -15,7 +15,7 @@ def main(argv):
     pgconn, cursor = get_dbconnc("mesosite")
     network = argv[1]
 
-    req = requests.get(f"{SERVICE}?network={network}")
+    req = httpx.get(f"{SERVICE}?network={network}")
     jdata = req.json()
     for feat in jdata["features"]:
         site = feat["properties"]

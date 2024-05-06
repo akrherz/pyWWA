@@ -21,7 +21,7 @@ hvtec_nwsli table:
 import sys
 
 # 3rd Party
-import requests
+import httpx
 from pyiem.util import logger
 from pywwa.database import get_dbconnc
 
@@ -41,7 +41,7 @@ def main(argv) -> int:
     uri = f"https://www.weather.gov/media/vtec/{fn}"
 
     LOG.info(" - Fetching file: %s", uri)
-    req = requests.get(uri, timeout=30)
+    req = httpx.get(uri, timeout=30)
     if req.status_code != 200:
         LOG.info("Got status_code %s for %s", req.status_code, uri)
         return 1

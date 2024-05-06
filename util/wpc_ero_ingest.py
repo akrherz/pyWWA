@@ -8,7 +8,7 @@ import os
 import subprocess
 import tempfile
 
-import requests
+import httpx
 from pyiem.nws.product import TextProduct
 from pyiem.util import (
     exponential_backoff,
@@ -39,7 +39,7 @@ def run(cursor, fn, ttaaii, awipsid):
     current = utc(1980)
     if cursor.rowcount > 0:
         current = cursor.fetchone()[0]
-    req = exponential_backoff(requests.get, f"{BASEURL}/{fn}", timeout=30)
+    req = exponential_backoff(httpx.get, f"{BASEURL}/{fn}", timeout=30)
     if req is None or req.status_code != 200:
         LOG.info("failed to fetch %s", fn)
         return
