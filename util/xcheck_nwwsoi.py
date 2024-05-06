@@ -4,7 +4,7 @@
 import sys
 
 # third party
-import requests
+import httpx
 from pyiem.nws.product import TextProduct
 
 
@@ -20,7 +20,7 @@ def main(argv):
                 continue
             pid = prod.get_product_id()
             uri = f"https://mesonet.agron.iastate.edu/api/1/nwstext/{pid}"
-            req = requests.get(uri)
+            req = httpx.get(uri)
             if req.status_code != 200:
                 print(uri)
 

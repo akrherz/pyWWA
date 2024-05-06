@@ -1,7 +1,7 @@
 """Get station updates from IEM Webservice."""
 
 # Third Party
-import requests
+import httpx
 from pywwa.database import get_dbconnc
 
 
@@ -9,7 +9,7 @@ def main():
     """Go Main Go."""
     pgconn, cursor = get_dbconnc("mesosite")
 
-    req = requests.get("http://mesonet.agron.iastate.edu/json/stations.php")
+    req = httpx.get("http://mesonet.agron.iastate.edu/json/stations.php")
     jdata = req.json()
     for site in jdata["stations"]:
         if site["network"].find("ASOS") == -1:

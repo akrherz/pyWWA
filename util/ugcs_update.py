@@ -33,7 +33,7 @@ import sys
 import zipfile
 
 import geopandas as gpd
-import requests
+import httpx
 from pyiem.util import get_sqlalchemy_conn, logger, utc
 from pywwa.database import get_dbconnc
 from shapely.geometry import MultiPolygon
@@ -56,7 +56,7 @@ def do_download(zipfn):
             "https://www.weather.gov/source/gis/Shapefiles/"
             f"{'County' if zipfn.startswith('c_') else 'WSOM'}/{zipfn}"
         )
-        req = requests.get(url, timeout=60)
+        req = httpx.get(url, timeout=60)
         LOG.info("Downloading %s ...", url)
         if req.status_code != 200:
             LOG.warning("Download %s failed, got %s", zipfn, req.status_code)

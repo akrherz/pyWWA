@@ -3,7 +3,7 @@
 import sys
 import tempfile
 
-import requests
+import httpx
 
 
 def wrap(data):
@@ -37,7 +37,7 @@ def main(argv):
         "year=%s&wfo=%s&phenomena=%s&eventid=%s&significance=%s"
     ) % (year, wfo, phenomena, eventid, significance)
 
-    req = requests.get(uri)
+    req = httpx.get(uri)
     process(req.json())
 
 

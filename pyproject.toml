@@ -34,7 +34,6 @@ dependencies = [
   "pyiem",
   "pymemcache",
   "pyproj",
-  "requests",
   "shapely",
   "sqlalchemy",
   "treq",

@@ -4,7 +4,7 @@ Compare our PIREPs data against what is at aviation wx JSON service
 
 import datetime
 
-import requests
+import httpx
 from pyiem.util import logger
 from pywwa.database import get_dbconn
 
@@ -15,7 +15,7 @@ def main():
     pgconn = get_dbconn("postgis")
     cursor = pgconn.cursor()
 
-    avwx = requests.get("http://aviationweather.gov/gis/scripts/AirepJSON.php")
+    avwx = httpx.get("http://aviationweather.gov/gis/scripts/AirepJSON.php")
     avwx = avwx.json()
 
     mine = {}
