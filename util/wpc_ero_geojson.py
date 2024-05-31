@@ -142,13 +142,19 @@ def send_to_ldm(gdf, meta, maxissue, day, cycle):
     with open(tmpfn.name, "w", encoding="utf-8") as tmpfh:
         json.dump(jdict, tmpfh)
 
-    cmd = (
-        f"pqinsert -i -p 'data ac {maxissue:%Y%m%d%H%M} gis/geojson/wpc_ero/"
-        f"eroday{day}.geojson GIS/wpc_ero/eroday{day}_{cycle}z.geojson "
-        f"geojson' {tmpfn.name}"
-    )
-    LOG.info(cmd)
-    subprocess.call(cmd, shell=True)
+    cmd = [
+        "pqinsert",
+        "-i",
+        "-p",
+        (
+            f"data ac {maxissue:%Y%m%d%H%M} gis/geojson/wpc_ero/"
+            f"eroday{day}.geojson GIS/wpc_ero/eroday{day}_{cycle}z.geojson "
+            "geojson"
+        ),
+        tmpfn.name,
+    ]
+    LOG.info(" ".join(cmd))
+    subprocess.call(cmd)
     os.unlink(tmpfn.name)
 
 
