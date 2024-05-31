@@ -2,30 +2,38 @@
 build-backend = "setuptools.build_meta"
 requires = [
   "setuptools",
-  "setuptools_scm",
+  "setuptools-scm",
   "wheel",
 ]
 
 [project]
-dynamic = [
-  "version",
-]
 name = "pywwa"
-authors = [
-    {name = "daryl herzmann", email = "akrherz@gmail.com"},
-]
+description = "A suite of parsers and utils for NWS products."
 keywords = [
   "meteorology",
   "nws",
 ]
-license = {"text" = "Apache"}
-description = "A suite of parsers and utils for NWS products."
+license = { "text" = "Apache" }
+authors = [
+  { name = "daryl herzmann", email = "akrherz@gmail.com" },
+]
+classifiers = [
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+]
+dynamic = [
+  "version",
+]
 dependencies = [
   "click",
   "geopandas",
   "metar>=1.7",
   "metpy",
-  "netCDF4",
+  "netcdf4",
   "numpy",
   "pandas",
   "pint",
@@ -40,65 +48,69 @@ dependencies = [
   "twisted",
 ]
 
-[tool.pytest.ini_options]
-filterwarnings = ["ignore:numpy.ndarray size changed:RuntimeWarning"]
+urls.Changelog = "https://github.com/akrherz/pyWWA/blob/main/CHANGELOG.md"
+urls.Documentation = "https://github.com/akrherz/pyWWA"
+urls.Homepage = "https://mesonet.agron.iastate.edu"
+urls.Issues = "https://github.com/akrherz/pyWWA/issues"
+urls.Repository = "https://github.com/akrherz/pyWWA.git"
+scripts.pywwa-parse-afos-dump = "pywwa.workflows.afos_dump:main"
+scripts.pywwa-parse-aviation = "pywwa.workflows.aviation:main"
+scripts.pywwa-parse-bufr-surface = "pywwa.workflows.bufr_surface:main"
+scripts.pywwa-parse-cf6 = "pywwa.workflows.cf6:main"
+scripts.pywwa-parse-cli = "pywwa.workflows.cli:main"
+scripts.pywwa-parse-cwa = "pywwa.workflows.cwa:main"
+scripts.pywwa-parse-dsm = "pywwa.workflows.dsm:main"
+scripts.pywwa-parse-dsm2afos = "pywwa.workflows.dsm2afos:main"
+scripts.pywwa-parse-ero = "pywwa.workflows.ero:main"
+scripts.pywwa-parse-fake-afos-dump = "pywwa.workflows.fake_afos_dump:main"
+scripts.pywwa-parse-fd = "pywwa.workflows.fd:main"
+scripts.pywwa-parse-ffg = "pywwa.workflows.ffg:main"
+scripts.pywwa-parse-gairmet = "pywwa.workflows.gairmet:main"
+scripts.pywwa-parse-generic = "pywwa.workflows.generic:main"
+scripts.pywwa-parse-gini2gis = "pywwa.workflows.gini2gis:main"
+scripts.pywwa-parse-hml = "pywwa.workflows.hml:main"
+scripts.pywwa-parse-lsr = "pywwa.workflows.lsr:main"
+scripts.pywwa-parse-mcd = "pywwa.workflows.mcd:main"
+scripts.pywwa-parse-metar = "pywwa.workflows.metar:main"
+scripts.pywwa-parse-mos = "pywwa.workflows.mos:main"
+scripts.pywwa-parse-nexrad3-attr = "pywwa.workflows.nexrad3_attr:main"
+scripts.pywwa-parse-nldn = "pywwa.workflows.nldn:main"
+scripts.pywwa-parse-pirep = "pywwa.workflows.pirep:main"
+scripts.pywwa-parse-rr7 = "pywwa.workflows.rr7:main"
+scripts.pywwa-parse-scp = "pywwa.workflows.scp:main"
+scripts.pywwa-parse-shef = "pywwa.workflows.shef:main"
+scripts.pywwa-parse-spc = "pywwa.workflows.spc:main"
+scripts.pywwa-parse-spe = "pywwa.workflows.spe:main"
+scripts.pywwa-parse-split-mav = "pywwa.workflows.split_mav:main"
+scripts.pywwa-parse-sps = "pywwa.workflows.sps:main"
+scripts.pywwa-parse-taf = "pywwa.workflows.taf:main"
+scripts.pywwa-parse-vtec = "pywwa.workflows.vtec:main"
+scripts.pywwa-parse-watch = "pywwa.workflows.watch:main"
+scripts.pywwa-parse-xteus = "pywwa.workflows.xteus:main"
+scripts.pywwa-spammer = "pywwa.workflows.spammer:main"
+
+[tool.setuptools_scm]
+version_scheme = "post-release"
 
 [tool.ruff]
-lint.select = [
-    "B",  # bugbear
-    "E",
-    "F",
-    "I",
-    "T",
-]
 target-version = "py39"
 line-length = 79
 
-[tool.ruff.lint.per-file-ignores]
-"goes/*.py" = ["T201"]
-"util/*.py" = ["T201"]
+lint.select = [
+  "B", # bugbear
+  "E",
+  "F",
+  "I",
+  "T",
+]
+lint.per-file-ignores."goes/*.py" = [
+  "T201",
+]
+lint.per-file-ignores."util/*.py" = [
+  "T201",
+]
 
-[project.scripts]
-pywwa-parse-afos-dump = "pywwa.workflows.afos_dump:main"
-pywwa-parse-aviation = "pywwa.workflows.aviation:main"
-pywwa-parse-bufr-surface = "pywwa.workflows.bufr_surface:main"
-pywwa-parse-cf6 = "pywwa.workflows.cf6:main"
-pywwa-parse-cli = "pywwa.workflows.cli:main"
-pywwa-parse-cwa = "pywwa.workflows.cwa:main"
-pywwa-parse-dsm = "pywwa.workflows.dsm:main"
-pywwa-parse-dsm2afos = "pywwa.workflows.dsm2afos:main"
-pywwa-parse-ero = "pywwa.workflows.ero:main"
-pywwa-parse-fake-afos-dump = "pywwa.workflows.fake_afos_dump:main"
-pywwa-parse-fd = "pywwa.workflows.fd:main"
-pywwa-parse-ffg = "pywwa.workflows.ffg:main"
-pywwa-parse-gairmet = "pywwa.workflows.gairmet:main"
-pywwa-parse-generic = "pywwa.workflows.generic:main"
-pywwa-parse-gini2gis = "pywwa.workflows.gini2gis:main"
-pywwa-parse-hml = "pywwa.workflows.hml:main"
-pywwa-parse-lsr = "pywwa.workflows.lsr:main"
-pywwa-parse-mcd = "pywwa.workflows.mcd:main"
-pywwa-parse-metar = "pywwa.workflows.metar:main"
-pywwa-parse-mos = "pywwa.workflows.mos:main"
-pywwa-parse-nexrad3-attr = "pywwa.workflows.nexrad3_attr:main"
-pywwa-parse-nldn = "pywwa.workflows.nldn:main"
-pywwa-parse-pirep = "pywwa.workflows.pirep:main"
-pywwa-parse-rr7 = "pywwa.workflows.rr7:main"
-pywwa-parse-scp = "pywwa.workflows.scp:main"
-pywwa-parse-shef = "pywwa.workflows.shef:main"
-pywwa-parse-spc = "pywwa.workflows.spc:main"
-pywwa-parse-spe = "pywwa.workflows.spe:main"
-pywwa-parse-split-mav = "pywwa.workflows.split_mav:main"
-pywwa-parse-sps = "pywwa.workflows.sps:main"
-pywwa-parse-taf = "pywwa.workflows.taf:main"
-pywwa-parse-vtec = "pywwa.workflows.vtec:main"
-pywwa-parse-watch = "pywwa.workflows.watch:main"
-pywwa-parse-xteus = "pywwa.workflows.xteus:main"
-pywwa-spammer = "pywwa.workflows.spammer:main"
-[project.urls]
-Changelog = "https://github.com/akrherz/pyWWA/blob/main/CHANGELOG.md"
-Documentation = "https://github.com/akrherz/pyWWA"
-Homepage = "https://mesonet.agron.iastate.edu"
-Issues = "https://github.com/akrherz/pyWWA/issues"
-Repository = "https://github.com/akrherz/pyWWA.git"
-[tool.setuptools_scm]
-version_scheme = "post-release"
+[tool.pytest.ini_options]
+filterwarnings = [
+  "ignore:numpy.ndarray size changed:RuntimeWarning",
+]
