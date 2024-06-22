@@ -11,6 +11,8 @@ All notable changes to this library are documented in this file.
 
 ### Bug Fixes
 
+- Trim log and emailed message when product is binary (#243).
+
 ## **1.6.0** (6 May 2024)
 
 ### API Changes

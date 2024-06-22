@@ -140,6 +140,8 @@ def email_error(exp, message="", trimstr=100):
     if isinstance(message, str):
         LOG.info(message[:trimstr])
     else:
+        # Message is bytes and likely not all that useful, so repr and trim it
+        message = repr(message)[:trimstr]
         LOG.info(message)
 
     # Logic to prevent email bombs
