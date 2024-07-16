@@ -253,6 +253,7 @@ def workflow(argv, cursor):
     countnew = 0
     countdups = 0
     for ugc, row in gdf.iterrows():
+        name = row["NAME"].strip().replace("&", " and ")
         if ugc in postgis.index:
             postgis.at[ugc, "covered"] = True
             # Some very small number, good enough
@@ -270,13 +271,13 @@ def workflow(argv, cursor):
                     current["area2163"],
                     row["area2163"],
                 )
-            elif row["NAME"] != current["name"]:
+            elif name != current["name"]:
                 dirty = True
                 LOG.debug(
                     "%s updating due to name change %s -> %s",
                     ugc,
                     current["name"],
-                    row["NAME"],
+                    name,
                 )
             elif row[wfocol] != current["wfo"]:
                 dirty = True
@@ -304,7 +305,7 @@ def workflow(argv, cursor):
             "ST_Multi(ST_SetSRID(ST_GeomFromEWKT(%s),4326)), %s)",
             (
                 ugc,
-                row["NAME"].strip(),
+                name,
                 row["STATE"],
                 "1980-01-01" if res == 0 else valid,
                 row[wfocol],
