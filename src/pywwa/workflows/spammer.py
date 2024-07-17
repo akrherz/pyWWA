@@ -89,6 +89,9 @@ def real_process(data) -> product.TextProduct:
         subject = prod.afos
         if prod.afos[:3] == "ADM":
             subject = f"ADMIN NOTICE {prod.afos[3:]}"
+        elif prod.afos == "AFDMPX":
+            subject = f"AFD {prod.source}"
+            msg["To"] = "wilke127@gmail.com"
         elif prod.afos[:3] == "PNS" and prod.afos != "PNSWSH":
             if prod.unixtext.upper().find("DAMAGE SURVEY") == -1:
                 return None
