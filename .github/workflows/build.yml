@@ -10,7 +10,7 @@ jobs:
     defaults:
       run:
         # Ensures environment gets sourced right
-        shell: bash -l {0}  
+        shell: bash -l -e {0}  
     name: Python (${{ matrix.PYTHON_VERSION }})
     runs-on: ubuntu-latest
     strategy:
@@ -25,7 +25,6 @@ jobs:
 
     - name: Add /etc/hosts entries
       run: |
-        set -x
         sudo cp /etc/hosts /etc/hosts.save
         cat .github/workflows/etchosts.txt | sudo tee -a /etc/hosts
 
@@ -57,7 +56,6 @@ jobs:
 
     - name: Install and Test
       run: |
-        set -e
         set -x
         python -m pip install . -vv --no-deps
         cp pywwa_settings.json-example pywwa_settings.json
@@ -77,7 +75,6 @@ jobs:
     - name: Run console scripts without database
       run: |
         set -x
-        set -e
         sudo systemctl stop postgresql@15-main.service
         sudo cp /etc/hosts.save /etc/hosts
         pywwa-parse-afos-dump --help
