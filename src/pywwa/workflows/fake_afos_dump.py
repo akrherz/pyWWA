@@ -45,6 +45,8 @@ def compute_afos(textprod):
     ttaaii = textprod.wmo
     if ttaaii[:4] == "NOXX":
         afos = f"ADM{textprod.source[1:]}"
+    elif ttaaii.startswith("UB"):
+        afos = "PIREP"
     elif ttaaii in GMET:
         afos = GMET[ttaaii]
     elif MIS.match(ttaaii):
