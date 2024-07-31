@@ -5,9 +5,18 @@ import pytest
 
 # Local
 import pywwa
+from pyiem.nws.products.pirep import Pirep
 from pyiem.util import utc
 from pywwa.testing import get_example_file
 from pywwa.workflows import fake_afos_dump
+
+
+def test_fake_pirep():
+    """Test fake PIREP."""
+    tp = Pirep(get_example_file("PIREP.txt"), utcnow=utc(2024, 7, 9, 0, 0))
+    assert tp.afos is None
+    fake_afos_dump.compute_afos(tp)
+    assert tp.afos == "PIREP"
 
 
 @pytest.mark.parametrize("database", ["afos"])
