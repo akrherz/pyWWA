@@ -1,9 +1,10 @@
 """Test pywwa.xmpp"""
 
 import mock
-from pywwa import CTX, xmpp
 from twisted.words.protocols.jabber import jid
 from twisted.words.xish import domish, xmlstream
+
+from pywwa import CTX, xmpp
 
 
 def test_raw_data_in():

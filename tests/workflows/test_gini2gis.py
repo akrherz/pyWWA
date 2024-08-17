@@ -2,9 +2,10 @@
 
 from unittest.mock import patch
 
-import pywwa
 from pyiem.nws import gini
 from pyiem.util import utc
+
+import pywwa
 from pywwa.testing import get_example_filepath
 from pywwa.workflows import gini2gis
 

@@ -2,6 +2,7 @@
 
 # 3rd party
 import pytest
+
 from pywwa import CTX, CTX_DEFAULTS
 from pywwa.database import get_dbconnc
 

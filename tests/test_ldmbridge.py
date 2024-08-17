@@ -4,6 +4,7 @@ import datetime
 
 import mock
 import pytest
+
 from pywwa import ldmbridge
 
 

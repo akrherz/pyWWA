@@ -35,8 +35,9 @@ import zipfile
 import geopandas as gpd
 import httpx
 from pyiem.util import get_sqlalchemy_conn, logger, utc
-from pywwa.database import get_dbconnc
 from shapely.geometry import MultiPolygon
+
+from pywwa.database import get_dbconnc
 
 # Some strangely encoded WFOs need to be rectified
 WFO_XREF = {

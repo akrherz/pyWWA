@@ -2,11 +2,11 @@
 
 # 3rd Party
 import pytest
+from pyiem.nws.products.pirep import Pirep
+from pyiem.util import utc
 
 # Local
 import pywwa
-from pyiem.nws.products.pirep import Pirep
-from pyiem.util import utc
 from pywwa.testing import get_example_file
 from pywwa.workflows import fake_afos_dump
 

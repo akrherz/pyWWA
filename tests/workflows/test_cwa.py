@@ -1,6 +1,7 @@
 """parse CWA"""
 
 import pytest
+
 from pywwa.database import get_dbconnc
 from pywwa.testing import get_example_file
 from pywwa.workflows import cwa

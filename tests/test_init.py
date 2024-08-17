@@ -4,6 +4,7 @@ import os
 import shutil
 
 import pytest
+
 import pywwa
 
 

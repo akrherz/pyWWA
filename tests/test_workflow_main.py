@@ -4,8 +4,9 @@ import importlib
 import pkgutil
 
 import pytest
-import pywwa.workflows
 from click.testing import CliRunner
+
+import pywwa.workflows
 from pywwa.workflows.cli import main as cli_main
 
 

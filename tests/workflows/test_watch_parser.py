@@ -1,6 +1,7 @@
 """Test the parsers/watch_parser.py module."""
 
 import pytest
+
 from pywwa.testing import get_example_file
 from pywwa.workflows import watch
 

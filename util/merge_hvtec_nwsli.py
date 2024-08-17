@@ -23,6 +23,7 @@ import sys
 # 3rd Party
 import httpx
 from pyiem.util import logger
+
 from pywwa.database import get_dbconnc
 
 LOG = logger()
