@@ -8,6 +8,6 @@ tar -czf ${yyyymmdd}.tgz ${yyyymmdd}??.txt
 rm -f ${yyyymmdd}??.txt
 
 rpath="/stage/NWWSOI/${yyyy}"
-rsync -a --remove-source-files --rsync-path "mkdir -p $rpath && rsync" ${yyyymmdd}.tgz meteor_ldm@metl60.agron.iastate.edu:$rpath
+rsync -a --remove-source-files --rsync-path "mkdir -p $rpath && rsync" ${yyyymmdd}.tgz meteor_ldm@akrherz-desktop.agron.iastate.edu:$rpath
 
 # END

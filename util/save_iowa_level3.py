@@ -44,7 +44,7 @@ def run(date):
         "rsync --remove-source-files -a --rsync-path "
         f'"mkdir -p {rpath} && rsync" '
         f"/mesonet/tmp/???_{yyyymmdd}.tgz "
-        f"meteor_ldm@metl60.agron.iastate.edu:{rpath}"
+        f"meteor_ldm@akrherz-desktop.agron.iastate.edu:{rpath}"
     )
     LOG.debug(cmd)
     subprocess.call(cmd, shell=True)

@@ -8,7 +8,7 @@ from datetime import date, timedelta
 from pyiem.util import logger
 
 LOG = logger()
-HOST = "metl60.agron.iastate.edu"
+HOST = "akrherz-desktop.agron.iastate.edu"
 
 
 def process(mydir, valid):
