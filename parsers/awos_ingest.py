@@ -3,13 +3,14 @@
 # 3rd party
 import click
 from pyiem.util import utc
-from pywwa import LOG, common
-from pywwa.database import get_database, load_metar_stations
-from pywwa.workflows import metar
 from twisted.internet import reactor
 from twisted.internet.endpoints import TCP4ServerEndpoint
 from twisted.internet.protocol import Factory
 from twisted.protocols.basic import LineReceiver
+
+from pywwa import LOG, common
+from pywwa.database import get_database, load_metar_stations
+from pywwa.workflows import metar
 
 IEMDB = get_database("iem")
 ASOSDB = get_database("asos")

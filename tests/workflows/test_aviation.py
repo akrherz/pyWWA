@@ -2,11 +2,11 @@
 
 # 3rd Party
 import pytest
+from pyiem.database import get_dbconnc
+from pyiem.util import utc
 
 # Local
 import pywwa
-from pyiem.database import get_dbconnc
-from pyiem.util import utc
 from pywwa.testing import get_example_file
 from pywwa.workflows import aviation
 

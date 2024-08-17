@@ -12,10 +12,11 @@ import pytest
 # Local
 from psycopg.errors import DeadlockDetected
 from pyiem.util import utc
+from twisted.python.failure import Failure
+
 from pywwa import CTX, SETTINGS
 from pywwa.testing import get_example_file
 from pywwa.workflows import shef
-from twisted.python.failure import Failure
 
 # Ensure that we have a database to work with
 shef.build_context()

@@ -1,6 +1,7 @@
 """Test (legacy) ERO parsing."""
 
 import pytest
+
 from pywwa.testing import get_example_file
 from pywwa.workflows import ero
 

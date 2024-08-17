@@ -1,6 +1,7 @@
 """test mos workflow"""
 
 import pytest
+
 from pywwa.testing import get_example_file
 from pywwa.workflows.mos import process_data
 

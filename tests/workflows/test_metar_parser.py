@@ -2,10 +2,10 @@
 
 # 3rd Party
 import pytest
+from pyiem.util import utc
 
 # Local
 import pywwa
-from pyiem.util import utc
 from pywwa.testing import get_example_file
 from pywwa.workflows import metar
 

@@ -1,6 +1,7 @@
 """Test pywwa.common"""
 
 from pyiem.util import utc
+
 from pywwa import CTX, common
 
 

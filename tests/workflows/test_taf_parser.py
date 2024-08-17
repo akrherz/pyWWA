@@ -2,6 +2,7 @@
 
 # 3rd Party
 import pytest
+
 from pywwa.testing import get_example_file
 
 # Local

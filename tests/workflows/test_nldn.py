@@ -3,6 +3,7 @@
 import warnings
 
 import pytest
+
 from pywwa.testing import get_example_filepath
 from pywwa.workflows.nldn import process_data
 
