@@ -14,8 +14,7 @@ from pywwa.workflows import fake_afos_dump
 def test_fake_pirep():
     """Test fake PIREP."""
     tp = Pirep(get_example_file("PIREP.txt"), utcnow=utc(2024, 7, 9, 0, 0))
-    assert tp.afos is None
-    fake_afos_dump.compute_afos(tp)
+    # pyiem now sets the afos value when it is none to PIREP
     assert tp.afos == "PIREP"
 
 
