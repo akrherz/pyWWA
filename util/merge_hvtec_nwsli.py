@@ -36,15 +36,15 @@ def main(argv) -> int:
         return 1
 
     dbconn, cursor = get_dbconnc("postgis")
-    LOG.info(" - Connected to database: postgis")
+    LOG.warning(" - Connected to database: postgis")
 
     fn = argv[1]
     uri = f"https://www.weather.gov/media/vtec/{fn}"
 
-    LOG.info(" - Fetching file: %s", uri)
+    LOG.warning(" - Fetching file: %s", uri)
     req = httpx.get(uri, timeout=30)
     if req.status_code != 200:
-        LOG.info("Got status_code %s for %s", req.status_code, uri)
+        LOG.warning("Got status_code %s for %s", req.status_code, uri)
         return 1
     updated = 0
     new = 0
@@ -54,7 +54,7 @@ def main(argv) -> int:
             continue
         tokens = line.strip().split(",")
         if len(tokens) != 7:
-            LOG.info(
+            LOG.warning(
                 " + Linenum %s had %s tokens, instead of 7\n%s",
                 linenum + 1,
                 len(tokens),
@@ -64,7 +64,7 @@ def main(argv) -> int:
             continue
         (nwsli, river_name, proximity, name, state, lat, lon) = tokens
         if "\\N" in [lat, lon] or "" in [lat, lon]:
-            LOG.info(
+            LOG.warning(
                 " + Linenum %s [%s] had a null lat/lon\n%s",
                 linenum + 1,
                 nwsli,
@@ -73,7 +73,7 @@ def main(argv) -> int:
             bad += 1
             continue
         if len(nwsli) != 5:
-            LOG.info(
+            LOG.warning(
                 ' + Linenum %s had a NWSLI "%s" not of 5 character length\n%s',
                 linenum + 1,
                 nwsli,
@@ -103,7 +103,9 @@ def main(argv) -> int:
 
     cursor.close()
     dbconn.commit()
-    LOG.info(" - DONE! %s updated %s new, %s bad entries", updated, new, bad)
+    LOG.warning(
+        " - DONE! %s updated %s new, %s bad entries", updated, new, bad
+    )
     return 0
 
 
