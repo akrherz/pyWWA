@@ -31,6 +31,7 @@ dependencies:
  # geoplot usage
  - pillow
  - pint
+ - pip
  - psycopg
  # Transient via pyIEM
  - pyarrow
