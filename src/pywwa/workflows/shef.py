@@ -482,7 +482,9 @@ def process_site_time(prod, sid, ts, elements: List[SHEFElement]):
     record["data"]["report"] = report
 
 
-def write_access_records(accesstxn, records: [], iemid, entry: ACCESSDB_ENTRY):
+def write_access_records(
+    accesstxn, records: List, iemid, entry: ACCESSDB_ENTRY
+):
     """Batch the records to to prevent deadlocks, maybe!"""
     for localts, record in records:
         write_access_record(accesstxn, record, iemid, localts, entry)
