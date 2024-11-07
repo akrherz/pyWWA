@@ -14,14 +14,14 @@ from pywwa.ldm import bridge
 
 def real_process(txn, raw):
     """Do work please"""
-    sqlraw = raw.replace("\015\015\012", "\n")
+    _sqlraw = raw.replace("\015\015\012", "\n")
     prod = product.TextProduct(raw, utcnow=common.utcnow())
 
     product_id = prod.get_product_id()
     if common.dbwrite_enabled():
         txn.execute(
-            "INSERT into text_products(product, product_id) values (%s,%s)",
-            (sqlraw, product_id),
+            "INSERT into text_products(product_id) values (%s)",
+            (product_id,),
         )
 
     tokens = re.findall("ATTN (WFOS|RFCS)(.*)", raw)
