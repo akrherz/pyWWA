@@ -5,11 +5,13 @@ import re
 
 import click
 from pyiem.nws.product import TextProduct
+from twisted.internet import reactor
 
 # Local
 from pywwa import common
 from pywwa.database import get_database
 from pywwa.ldm import bridge
+from pywwa.workflows.afos_dump import write2memcache
 
 CWA = re.compile("^FA(AK|HI|US)2([1-6])$")
 MIS = re.compile("^FA(AK|HI|US)20$")
@@ -101,6 +103,9 @@ def really_process_data(txn, data):
         )
         for jmsg in jmsgs:
             common.send_message(*jmsg)
+
+    # We are on a thread, so we need to send this back to the main thread
+    reactor.callFromThread(write2memcache, tp.get_product_id(), tp.unixtext)
     return tp
 
 
