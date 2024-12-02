@@ -39,7 +39,7 @@ def work():
     fp = f"ot0003_{now:%Y%m%d%H%M}.dat"
     with open(fp, "w") as fh:
         fh.write(
-            f"104,{now:%Y},{now:%j},{now:%%H%M},{data[0]}, "
+            f"104,{now:%Y},{now:%j},{now:%H%M},{data[0]}, "
             f"{data[1]}, {data[2]}, {data[3]},11.34\n"
         )
     subprocess.call(["/home/meteor_ldm/bin/pqinsert", fp])
