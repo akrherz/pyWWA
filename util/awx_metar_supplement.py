@@ -109,6 +109,17 @@ def main(network):
         proc.stdin.close()
         proc.wait()
 
+    # Insert into LDM for archival
+    subprocess.call(
+        [
+            "pqinsert",
+            "-p",
+            f"data a {utc():%Y%m%d%H%M} text/supp_metars_via_avwxgov.txt "
+            "text/supp_metars_via_avwxgov.txt txt",
+            FN,
+        ],
+    )
+
 
 if __name__ == "__main__":
     main()
