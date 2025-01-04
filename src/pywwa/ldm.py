@@ -5,7 +5,7 @@ from twisted.enterprise.adbapi import ConnectionPool
 from twisted.internet import reactor, task
 
 # Local
-from pywwa import LOG, ldmbridge
+from pywwa import LOG, ldmbridge, shutdown
 from pywwa.common import SETTINGS, email_error
 
 
@@ -21,7 +21,7 @@ class MyProductIngestor(ldmbridge.LDMProductReceiver):
     def connectionLost(self, reason=None):
         """called when the connection is lost"""
         LOG.info("STDIN Closed: %s, reactor.stop() in 1 second.", reason)
-        reactor.callLater(1, reactor.stop)
+        shutdown()
 
     def process_data(self, data):
         """Override below."""
@@ -79,7 +79,7 @@ def bridge(
                 waiting,
             )
             if waiting == 0:
-                reactor.callLater(1, reactor.stop)
+                shutdown()
             else:
                 reactor.callLater(10, _connectionLost, _reason)
 
