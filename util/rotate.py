@@ -3,6 +3,7 @@
 import gzip
 import os
 import sys
+from io import BytesIO
 
 BASE = "/mesonet/ldmdata/"
 
@@ -24,11 +25,15 @@ def main(argv):
             if os.path.isfile(oldfp):
                 os.rename(oldfp, newfp)
 
-        with open(f"{BASE}/{fnbase}0.{fmt}", "wb") as fh:
-            fh.write(data)
+        with BytesIO(data) as bio:
+            # Write out the compressed version verbatim
+            with open(f"{BASE}/{fnbase}0.{fmt}", "wb") as fh:
+                fh.write(bio.getvalue())
 
-        with gzip.open(f"{BASE}/{fnbase}0.{fmt}", "rb") as fh:
-            data = fh.read()
+            # Create the uncompressed version
+            bio.seek(0)
+            with gzip.open(bio, "rb") as fh:
+                data = fh.read()
         fmt = "tif"
 
     for i in range(10, -1, -1):
