@@ -104,12 +104,13 @@ lint.select = [
   "ERA", # commented out code
   "F",   # pyflakes
   # "FIX",  # FIXME
-  "G",   # logging-format
-  "I",   # isort
-  "NPY", # numpy
-  "PLW", # pylint-warning
-  "T",   # print
-  "W",   # pycodestyle
+  "G",    # logging-format
+  "I",    # isort
+  "NPY",  # numpy
+  "PLW",  # pylint-warning
+  "S324", # security
+  "T",    # print
+  "W",    # pycodestyle
 ]
 lint.per-file-ignores."goes/*.py" = [
   "T201",
