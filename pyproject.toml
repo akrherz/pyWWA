@@ -98,11 +98,19 @@ target-version = "py39"
 line-length = 79
 
 lint.select = [
-  "B", # bugbear
-  "E",
-  "F",
-  "I",
-  "T",
+  "A",   # builtins
+  "B",   # bugbear
+  "E",   # pycodestyle
+  "ERA", # commented out code
+  "F",   # pyflakes
+  # "FIX",  # FIXME
+  "G",    # logging-format
+  "I",    # isort
+  "NPY",  # numpy
+  "PLW",  # pylint-warning
+  "S324", # security
+  "T",    # print
+  "W",    # pycodestyle
 ]
 lint.per-file-ignores."goes/*.py" = [
   "T201",

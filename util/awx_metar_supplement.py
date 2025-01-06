@@ -61,7 +61,7 @@ def main(network):
                         time.sleep(5)
                         continue
                     if req.status_code != 200:
-                        LOG.warning(f"Failed to fetch {st4} {req.status_code}")
+                        LOG.warning("Failure %s %s", st4, req.status_code)
                         continue
                     break
                 except Exception as exp:

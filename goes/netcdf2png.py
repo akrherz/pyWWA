@@ -185,12 +185,10 @@ def main(argv):
             # we double back with the netcdf read statement above closing.
             if "IN_CLOSE_WRITE" not in type_names:
                 continue
-            # LOG.debug("fn: %s type_names: %s", fn, type_names)
             if not fn.endswith(".nc") or fn.find(bird) == -1:
                 continue
             ncfn = f"{watch_path}/{fn}"
             try:
-                # LOG.debug("Processing %s", ncfn)
                 process(ncfn)
             except Exception as exp:
                 # Full disk will cause grief

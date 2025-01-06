@@ -82,8 +82,9 @@ class LDMProductReceiver(basic.LineReceiver):
         clean = "\015\015\012".join(lines)
         # first 11 characters should not be included in hex, like LDM does
         # hashlib works on bytes
-        # skipcq: PTC-W1003
-        digest = hashlib.md5(clean[11:].encode("utf-8")).hexdigest()
+        digest = hashlib.md5(
+            clean[11:].encode("utf-8"), usedforsecurity=False
+        ).hexdigest()
         if digest in self.cache:
             log.msg(f"DUP! {','.join(lines[1:5])}")
         else:

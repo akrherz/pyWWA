@@ -64,5 +64,3 @@ cmap = mpcolors.LinearSegmentedColormap.from_list("mycmap", colorList)
 for i in range(256):
     c = cmap(i / 255.0)
     print("%.2f %.0f %.0f %.0f" % (i, c[0] * 255, c[1] * 255, c[2] * 255))
-# vmax = 54.4
-# vmin = -109.

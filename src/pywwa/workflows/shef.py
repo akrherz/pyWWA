@@ -200,7 +200,6 @@ def restructure_data(prod):
     """Create a nicer data structure for future processing."""
     mydata = {}
     # Step 1: Restructure and do some cleaning
-    # se == SHEFElement
     old = []
     utcnow = common.utcnow()
     for se in prod.data:
