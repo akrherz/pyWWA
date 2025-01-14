@@ -38,10 +38,7 @@ def process_line(line):
     """Process a line of METAR data!"""
     # create a faked noaaport text product
     text = (
-        "000 \r\r\n"
-        f"SAUS43 KISU {utc():%d%H%M}\r\r\n"
-        "METAR \r\r\n"
-        f"{line}\r\r\n"
+        f"000 \r\r\nSAUS43 KISU {utc():%d%H%M}\r\r\nMETAR \r\r\n{line}\r\r\n"
     )
     metar.real_processor(text)
 

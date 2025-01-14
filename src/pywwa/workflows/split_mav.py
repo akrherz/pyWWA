@@ -19,9 +19,7 @@ def real_process(txn, data):
     prod = product.TextProduct(data)
     # replicate functionality in pyiem/nws/products/mos.py
     header = (
-        "000 \n"
-        f"{prod.wmo} {prod.source} {prod.valid:%d%H%M}\n"
-        f"{prod.afos}\n"
+        f"000 \n{prod.wmo} {prod.source} {prod.valid:%d%H%M}\n{prod.afos}\n"
     )
     raw = prod.unixtext + "\n"
     # Since we only do realtime processing, this is OK, I hope
