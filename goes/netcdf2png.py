@@ -140,12 +140,7 @@ def process(ncfn):
     )
     with open(tmpfd.name, "w", encoding="utf8") as fh:
         fh.write(
-            "PROJECTION\n"
-            "proj=geos\n"
-            f"h={h}\n"
-            f"lon_0={lon_0}\n"
-            f"sweep={swa}\n"
-            "END\n"
+            f"PROJECTION\nproj=geos\nh={h}\nlon_0={lon_0}\nsweep={swa}\nEND\n"
         )
     subprocess.call(
         f"pqinsert -i -p '{pqstr.replace('png', 'msinc')}' {tmpfd.name}",

@@ -18,9 +18,7 @@ from pyiem.nws import gini
 
 from pywwa import LOG, common
 
-WORLDFILE_FORMAT = (
-    "%(dx).3f\n" "0.0\n" "0.0\n" "-%(dy).3f\n" "%(x0).3f\n" "%(y1).3f"
-)
+WORLDFILE_FORMAT = "%(dx).3f\n0.0\n0.0\n-%(dy).3f\n%(x0).3f\n%(y1).3f"
 
 
 def process_input():
@@ -144,7 +142,7 @@ def write_mapserver_metadata(sat, tmpfn, epsg):
             f"""
   METADATA
     "wms_title" "{sat.get_bird()} {sat.get_sector()} {sat.get_channel()} \
- valid {sat.metadata['valid']:%Y-%m-%dT%H:%M:%SZ} UTC"
+ valid {sat.metadata["valid"]:%Y-%m-%dT%H:%M:%SZ} UTC"
     "wms_srs"   "EPSG:4326 EPSG:26915 EPSG:900913 EPSG:3857"
     "wms_extent" "-126 24 -66 50"
   END
