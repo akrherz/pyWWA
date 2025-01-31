@@ -26,6 +26,8 @@ def handler(fnbase: str, fmt: str, bio: BytesIO):
         with gzip.open(bio, "rb") as fh:
             data = fh.read()
         fmt = "tif"
+    else:
+        data = bio.getvalue()
 
     for i in range(10, -1, -1):
         oldfp = f"{BASE}/{fnbase}{i}.{fmt}"
