@@ -31,13 +31,16 @@ python ugcs_update.py z_05fe14a 2014 02 05
 import os
 import sys
 import zipfile
+from datetime import datetime, timezone
 
+import click
 import geopandas as gpd
 import httpx
-from pyiem.util import get_sqlalchemy_conn, logger, utc
+import pandas as pd
+from psycopg.rows import dict_row
+from pyiem.database import get_sqlalchemy_conn, sql_helper
+from pyiem.util import logger
 from shapely.geometry import MultiPolygon
-
-from pywwa.database import get_dbconnc
 
 # Some strangely encoded WFOs need to be rectified
 WFO_XREF = {
@@ -101,102 +104,109 @@ def new_poly(geo):
 def db_fixes(cursor, valid):
     """Fix some issues in the database"""
     for year in [2000, 2005, 2010, 2015, 2020]:
-        cursor.execute(
-            "with pops as (select gid, coalesce(sum(population), 0) as pop "
-            f"from ugcs u LEFT JOIN gpw{year} g on "
-            "st_contains(u.geom, g.geom) where "
-            f"u.gpw_population_{year} is null GROUP by gid) "
-            f"update ugcs u SET gpw_population_{year} = pop FROM pops p "
-            "WHERE u.gid = p.gid"
+        table = f"gpw{year}"
+        col = f"gpw_population_{year}"
+        res = cursor.execute(
+            sql_helper(
+                """
+    with pops as (
+        select gid, coalesce(sum(population), 0) as pop
+        from ugcs u LEFT JOIN {table} g on st_contains(u.geom, g.geom) where
+        u.{col} is null GROUP by gid)
+    update ugcs u SET {col} = pop FROM pops p WHERE u.gid = p.gid""",
+                table=table,
+                col=col,
+            )
         )
-        LOG.info("Set %s rows for gpw_population_%s", cursor.rowcount, year)
+        LOG.info("Set %s rows for gpw_population_%s", res.rowcount, year)
 
-    cursor.execute(
-        "update ugcs SET geom = st_makevalid(geom) where end_ts is null "
-        "and not st_isvalid(geom) and begin_ts = %s",
-        (valid,),
+    res = cursor.execute(
+        sql_helper("""
+    update ugcs SET geom = st_makevalid(geom) where end_ts is null
+    and not st_isvalid(geom) and begin_ts = :begin"""),
+        {"begin": valid},
     )
-    LOG.info("Fixed %s entries that were ST_Invalid()", cursor.rowcount)
+    LOG.info("Fixed %s entries that were ST_Invalid()", res.rowcount)
 
-    cursor.execute(
-        """
+    res = cursor.execute(
+        sql_helper("""
         UPDATE ugcs SET simple_geom = ST_Multi(
             ST_Buffer(ST_SnapToGrid(geom, 0.01), 0)
         ),
         centroid = ST_Centroid(geom),
         area2163 = ST_area( ST_transform(geom, 2163) ) / 1000000.0
-        WHERE begin_ts = %s or area2163 is null
-    """,
-        (valid,),
+        WHERE begin_ts = :valid or area2163 is null
+    """),
+        {
+            "valid": valid,
+        },
     )
-    LOG.info(
-        "Updated simple_geom,centroid,area2163 for %s rows", cursor.rowcount
-    )
+    LOG.info("Updated simple_geom,centroid,area2163 for %s rows", res.rowcount)
 
     # Check the last step that we don't have empty geoms, which happened once
     def _check():
         """Do the check."""
-        cursor.execute(
-            """
+        return cursor.execute(
+            sql_helper("""
             SELECT end_ts from ugcs
-            where begin_ts = %s and (
+            where begin_ts = :valid and (
                 simple_geom is null or
                 ST_IsEmpty(simple_geom) or
                 ST_Area(simple_geom) / ST_Area(geom) < 0.9
             )
-        """,
-            (valid,),
+        """),
+            {
+                "valid": valid,
+            },
         )
 
-    _check()
-    if cursor.rowcount > 0:
+    res = _check()
+    if res.rowcount > 0:
         LOG.info(
             "%s rows with empty, too small simple_geom, decreasing tolerance",
-            cursor.rowcount,
+            res.rowcount,
         )
-        cursor.execute(
-            """
+        res = cursor.execute(
+            sql_helper("""
             UPDATE ugcs
             SET simple_geom = ST_Multi(
                 ST_Buffer(ST_SnapToGrid(geom, 0.0001), 0)
             )
-            WHERE begin_ts = %s and (
+            WHERE begin_ts = :valid and (
                 simple_geom is null or
                 ST_IsEmpty(simple_geom) or
                 ST_Area(simple_geom) / ST_Area(geom) < 0.9
             )
-        """,
-            (valid,),
+        """),
+            {
+                "valid": valid,
+            },
         )
-        _check()
-        if cursor.rowcount > 0:
+        res = _check()
+        if res.rowcount > 0:
             LOG.info(
                 "Found %s rows with empty simple_geom, FIXME SOMEHOW!",
-                cursor.rowcount,
+                res.rowcount,
             )
 
 
 def truncate(cursor, valid, ugc, source):
     """Stop the bleeding."""
-    cursor.execute(
-        "UPDATE ugcs SET end_ts = %s WHERE ugc = %s and end_ts is null "
-        "and source = %s",
-        (valid, ugc, source),
+    res = cursor.execute(
+        sql_helper("""
+    UPDATE ugcs SET end_ts = :valid WHERE ugc = :ugc and end_ts is null
+    and source = :source"""),
+        {
+            "valid": valid,
+            "ugc": ugc,
+            "source": source,
+        },
     )
-    return cursor.rowcount
+    return res.rowcount
 
 
-def workflow(argv, cursor):
-    """Go Main Go"""
-    # NWS correspondence indicates the date on the website is assumed to be
-    # an implementation time at 18 z of that date.
-    valid = utc(int(argv[2]), int(argv[3]), int(argv[4]), 18)
-    zipfn = f"{argv[1]}.zip"
-    shpfn = do_download(zipfn)
-    # track domain
-    source = zipfn[:2].replace("_", "")
-    LOG.info("Processing, using '%s' as the database source", source)
-
+def read_shapefile(shpfn: str) -> pd.DataFrame:
+    """Standardized stuff."""
     df = gpd.read_file(shpfn)
     # Ensure CRS is set
     df["geometry"] = df["geometry"].set_crs("EPSG:4326", allow_override=True)
@@ -205,6 +215,17 @@ def workflow(argv, cursor):
         sys.exit()
     # make all columns upper
     df.columns = [x.upper() if x != "geometry" else x for x in df.columns]
+    return df
+
+
+def workflow(pgconn, dt, filename):
+    """Go Main Go"""
+    zipfn = f"{filename}.zip"
+    shpfn = do_download(zipfn)
+    # track domain
+    source = zipfn[:2].replace("_", "")
+    LOG.info("Processing, using '%s' as the database source", source)
+    df = read_shapefile(shpfn)
     # Compute the ugc column
     if zipfn[:2] in ("mz", "oz", "hz"):
         df["STATE"] = ""
@@ -223,14 +244,13 @@ def workflow(argv, cursor):
     if df["ugc"].isna().all():
         LOG.info("Abort as all ugcs are null")
         sys.exit()
-    with get_sqlalchemy_conn("postgis") as pgconn:
-        postgis = gpd.read_postgis(
-            "SELECT * from ugcs where end_ts is null and source = %s",
-            pgconn,
-            params=(source,),
-            geom_col="geom",
-            index_col="ugc",
-        )
+    postgis = gpd.read_postgis(
+        "SELECT * from ugcs where end_ts is null and source = %s",
+        pgconn,
+        params=(source,),
+        geom_col="geom",
+        index_col="ugc",
+    )
     postgis["covered"] = False
     LOG.info(
         "Loaded %s '%s' type rows from the database",
@@ -258,7 +278,7 @@ def workflow(argv, cursor):
         if ugc in postgis.index:
             postgis.at[ugc, "covered"] = True
             # Some very small number, good enough
-            current = postgis.loc[ugc]
+            current = postgis.loc[str(ugc)]
             if isinstance(current, gpd.GeoDataFrame):
                 LOG.info("abort, more than one %s found in postgis", ugc)
                 sys.exit()
@@ -292,7 +312,7 @@ def workflow(argv, cursor):
                 countdups += 1
                 continue
 
-        res = truncate(cursor, valid, ugc, source)
+        res = truncate(pgconn, dt, ugc, source)
         LOG.info(
             "%s creating new entry for %s",
             "Truncating old" if res > 0 else "",
@@ -300,7 +320,7 @@ def workflow(argv, cursor):
         )
 
         # Finally, insert the new geometry
-        cursor.execute(
+        pgconn.execute(
             "INSERT into ugcs (ugc, name, state, begin_ts, wfo, geom, "
             "source) VALUES (%s, %s, %s, %s, %s, "
             "ST_Multi(ST_SetSRID(ST_GeomFromEWKT(%s),4326)), %s)",
@@ -308,7 +328,7 @@ def workflow(argv, cursor):
                 ugc,
                 name,
                 row["STATE"],
-                "1980-01-01" if res == 0 else valid,
+                "1980-01-01" if res == 0 else dt,
                 row[wfocol],
                 new_poly(row["geometry"]).wkt,
                 source,
@@ -318,28 +338,32 @@ def workflow(argv, cursor):
 
     for ugc, _row in postgis[~postgis["covered"]].iterrows():
         LOG.info("%s not found in update, truncating.", ugc)
-        truncate(cursor, valid, ugc, source)
+        truncate(pgconn, dt, ugc, source)
 
     LOG.info("NEW: %s Dups: %s", countnew, countdups)
 
-    db_fixes(cursor, valid)
+    db_fixes(pgconn, dt)
 
 
-def main(argv):
+@click.command()
+@click.option(
+    "--date",
+    "dt",
+    required=True,
+    type=click.DateTime(),
+    help="Date of the data",
+)
+@click.option("--filename", required=True, help="Zip file name (no extension)")
+def main(dt: datetime, filename: str) -> None:
     """Go Main Go"""
-    if len(argv) != 5:
-        LOG.info("ERROR: You need to specify the file date to download + date")
-        LOG.info("Example:  python ugcs_update.py z_01dec10 2010 12 01")
-        sys.exit(0)
-
-    pgconn, cursor = get_dbconnc("postgis")
-    workflow(argv, cursor)
-    cursor.close()
-    pgconn.commit()
-    pgconn.close()
+    # Assumption is 18 UTC implementation timestamp
+    dt = dt.replace(hour=18, tzinfo=timezone.utc)
+    with get_sqlalchemy_conn("postgis") as pgconn:
+        pgconn.row_factory = dict_row
+        workflow(pgconn, dt, filename)
+        pgconn.commit()
     LOG.info("Done!")
 
 
 if __name__ == "__main__":
-    # Get the name of the file we wish to download
-    main(sys.argv)
+    main()
