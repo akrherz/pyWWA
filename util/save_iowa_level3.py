@@ -1,8 +1,8 @@
 """Save our local NEXRAD level 3 RADARs to staging."""
 
-import datetime
 import os
 import subprocess
+from datetime import date, datetime, timedelta
 
 from pyiem.util import logger
 
@@ -10,9 +10,9 @@ LOG = logger()
 NEXRADS = "DMX DVN OAX ARX FSD MPX EAX ABR UDX".split()
 
 
-def run(date):
+def run(dt: datetime):
     """Process this date please"""
-    yyyymmdd = date.strftime("%Y%m%d")
+    yyyymmdd = dt.strftime("%Y%m%d")
     for nexrad in NEXRADS:
         mydir = f"/data/gempak/nexrad/NIDS/{nexrad}"
         if not os.path.isdir(mydir):
@@ -39,7 +39,7 @@ def run(date):
                 stderr.decode("ascii", "ignore"),
             )
 
-    rpath = f"/stage/IowaNexrad3/{date:%Y/%m}"
+    rpath = f"/stage/IowaNexrad3/{dt:%Y/%m}"
     cmd = (
         "rsync --remove-source-files -a --rsync-path "
         f'"mkdir -p {rpath} && rsync" '
@@ -52,7 +52,7 @@ def run(date):
 
 def main():
     """Go Main Go"""
-    yesterday = datetime.date.today() - datetime.timedelta(days=1)
+    yesterday = date.today() - timedelta(days=1)
     run(yesterday)
 
 

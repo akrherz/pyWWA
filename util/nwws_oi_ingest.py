@@ -1,7 +1,5 @@
 """Ingest data from NWWS-OI."""
-# stdlb
 
-# Third Party
 from pyiem.util import get_properties, utc
 from twisted.internet import reactor
 from twisted.internet.task import LoopingCall

@@ -7,9 +7,8 @@ import time
 import click
 import httpx
 import pandas as pd
-from pyiem.database import get_sqlalchemy_conn
+from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.util import logger, utc
-from sqlalchemy import text
 from tqdm import tqdm
 
 LOG = logger()
@@ -24,9 +23,10 @@ def main(network):
     with get_sqlalchemy_conn("mesosite") as conn:
         # don't do online check as awx may have data we don't
         stations = pd.read_sql(
-            text(
-                f"select iemid, id, network from stations where {nlim} "
-                "order by id ASC"
+            sql_helper(
+                "select iemid, id, network from stations where {nlim} "
+                "order by id ASC",
+                nlim=nlim,
             ),
             conn,
             params={"network": network},
@@ -72,7 +72,7 @@ def main(network):
                     continue
                 awx[line[5:11]] = f"{line}="
             res = conn.execute(
-                text(
+                sql_helper(
                     "select valid at time zone 'UTC' as v from current_log "
                     "WHERE iemid = :iemid and "
                     "valid > now() - '50 hours'::interval "
