@@ -63,7 +63,7 @@ jobs:
         python -m pip install . -vv --no-deps
         cp pywwa_settings.json-example pywwa_settings.json
         # This is a bit brittle, but loads some data
-        python util/ugcs_update.py fz08mr23 2023 3 08
+        python util/ugcs_update.py --filename=fz08mr23 --date=2023-03-08
         python util/merge_hvtec_nwsli.py hvtec.list.20241009.csv
         python util/copy_iem_network.py MN_ASOS
         python util/copy_iem_network.py NY_COOP
