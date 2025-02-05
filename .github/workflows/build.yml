@@ -53,6 +53,10 @@ jobs:
         environment-name: prod
         cache-environment: true
 
+    - name: Install Python requirements from pip
+      run: |
+        python -m pip install -r pip_requirements.txt
+
     - name: Install and Test
       run: |
         set -x
