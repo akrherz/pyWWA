@@ -166,7 +166,7 @@ def db_fixes(cursor, valid):
             "%s rows with empty, too small simple_geom, decreasing tolerance",
             res.rowcount,
         )
-        res = cursor.execute(
+        cursor.execute(
             sql_helper("""
             UPDATE ugcs
             SET simple_geom = ST_Multi(
