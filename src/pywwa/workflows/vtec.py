@@ -15,13 +15,14 @@ from functools import partial
 
 # 3rd Party
 import click
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.nws.products.vtec import parser as vtecparser
 from pyiem.nws.ugc import UGCProvider
 from twisted.mail.smtp import SMTPSenderFactory
 
 # Local
 from pywwa import LOG, common
-from pywwa.database import get_database, get_dbconn, load_nwsli
+from pywwa.database import get_database, load_nwsli
 from pywwa.ldm import bridge
 
 SMTPSenderFactory.noisy = False
@@ -82,5 +83,6 @@ def step2(_dummy, text_product):
 def main(*args, **kwargs):
     """Go Main Go."""
     load_nwsli(NWSLI_DICT)
-    ugc_dict = UGCProvider(pgconn=get_dbconn("postgis"))
+    with get_sqlalchemy_conn("postgis") as conn:
+        ugc_dict = UGCProvider(pgconn=conn)
     bridge(partial(process_data, ugc_dict, get_database("postgis")))

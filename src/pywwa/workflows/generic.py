@@ -5,6 +5,7 @@ from datetime import timedelta
 from functools import partial
 
 import click
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.nws.product import TextProduct
 from pyiem.nws.products import parser as productparser
 from pyiem.nws.ugc import UGCProvider
@@ -12,7 +13,7 @@ from shapely.geometry import MultiPolygon
 
 # Local
 from pywwa import common
-from pywwa.database import get_database, get_dbconn, load_nwsli
+from pywwa.database import get_database, load_nwsli
 from pywwa.ldm import bridge
 
 NWSLI_DICT = {}
@@ -71,6 +72,7 @@ def process_data(ugc_dict, txn, buf) -> TextProduct:
 def main(*args, **kwargs):
     """Go Main Go."""
     load_nwsli(NWSLI_DICT)
-    ugc_dict = UGCProvider(pgconn=get_dbconn("postgis"))
+    with get_sqlalchemy_conn("postgis") as conn:
+        ugc_dict = UGCProvider(pgconn=conn)
     func = partial(process_data, ugc_dict)
     bridge(func, dbpool=get_database("postgis"))
