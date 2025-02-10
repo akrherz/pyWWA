@@ -4,12 +4,13 @@ from functools import partial
 
 # 3rd Party
 import click
+from pyiem.database import get_sqlalchemy_conn
 from pyiem.nws.products.sps import parser
 from pyiem.nws.ugc import UGCProvider
 
 # Local
 from pywwa import LOG, common
-from pywwa.database import get_database, get_dbconn, load_nwsli
+from pywwa.database import get_database, load_nwsli
 from pywwa.ldm import bridge
 
 NWSLI_DICT = {}
@@ -40,7 +41,8 @@ def real_process(ugc_dict, txn, raw):
 @common.init
 def main(*args, **kwargs):
     """Go Main Go."""
-    ugc_dict = UGCProvider(pgconn=get_dbconn("postgis"))
+    with get_sqlalchemy_conn("postgis") as conn:
+        ugc_dict = UGCProvider(pgconn=conn)
     load_nwsli(NWSLI_DICT)
     func = partial(real_process, ugc_dict)
     bridge(func, dbpool=get_database("postgis"))
