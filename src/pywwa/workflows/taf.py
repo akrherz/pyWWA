@@ -24,8 +24,9 @@ def real_process(txn, raw):
     jmsgs = prod.get_jabbers(baseurl)
     # The downstream workflow needs to have these TAF messages available within
     # the AFOS database, so we add some delay here.
+    # 15 seconds wasn't enough?
     for mess, htmlmess, xtra in jmsgs:
-        reactor.callLater(15, common.send_message, mess, htmlmess, xtra)
+        reactor.callLater(30, common.send_message, mess, htmlmess, xtra)
     if prod.warnings:
         common.email_error("\n\n".join(prod.warnings), prod.text)
 
