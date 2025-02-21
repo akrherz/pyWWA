@@ -69,7 +69,7 @@ def damage_survey_pns(prod):
 
 def real_process(data) -> product.TextProduct:
     """Go!"""
-    prod = product.TextProduct(data)
+    prod = product.TextProduct(data, ugc_provider={})
     if prod.afos == "ADMNES":
         LOG.warning("Dumping %s on the floor", prod.get_product_id())
         return None

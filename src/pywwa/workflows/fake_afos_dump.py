@@ -76,7 +76,9 @@ def compute_afos(textprod):
 
 def really_process_data(txn, data):
     """We are called with a hard coded AFOS PIL"""
-    tp = TextProduct(data, utcnow=common.utcnow(), parse_segments=False)
+    tp = TextProduct(
+        data, ugc_provider={}, utcnow=common.utcnow(), parse_segments=False
+    )
     if tp.afos is None:
         compute_afos(tp)
 

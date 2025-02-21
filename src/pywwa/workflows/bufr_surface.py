@@ -428,7 +428,9 @@ def workflow(prodbytes, cursor=None, mcursor=None):
         return None, None
     # Gleaning some data from the LDM product can be useful downstream
     header = prodbytes[:pos].decode("ascii")
-    prod = TextProduct(header, utcnow=common.utcnow(), parse_segments=False)
+    prod = TextProduct(
+        header, ugc_provider={}, utcnow=common.utcnow(), parse_segments=False
+    )
     # Trim LDM product to just the BUFR content
     meat = prodbytes[pos:]
     datalists = []

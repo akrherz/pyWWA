@@ -15,7 +15,7 @@ def main(argv):
         for token in fh.read().decode("ascii", "ignore").split("\003"):
             if len(token) < 10:
                 continue
-            prod = TextProduct(token)
+            prod = TextProduct(token, ugc_provider={})
             if prod.afos is None:
                 continue
             pid = prod.get_product_id()
