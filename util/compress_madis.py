@@ -53,7 +53,7 @@ def process(mydir, valid):
 def main():
     """Go Main Go."""
     valid = date.today() - timedelta(days=1)
-    for mydir in ["mesonet", "hfmetar", "mesonet1", "metar"]:
+    for mydir in ["mesonet", "hfmetar", "mesonet1", "metar", "rwis1"]:
         process(mydir, valid)
 
 
