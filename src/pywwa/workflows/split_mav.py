@@ -16,7 +16,7 @@ from pywwa.ldm import bridge
 
 def real_process(txn, data):
     """Go!"""
-    prod = product.TextProduct(data)
+    prod = product.TextProduct(data, ugc_provider={})
     # replicate functionality in pyiem/nws/products/mos.py
     header = (
         f"000 \n{prod.wmo} {prod.source} {prod.valid:%d%H%M}\n{prod.afos}\n"

@@ -18,7 +18,7 @@ def workflow(raw):
     data = raw.replace("\r\r\n", "z")
     tokens = re.findall("(K[A-Z0-9]{3} [DM]S.*?[=N]z)", data)
 
-    nws = product.TextProduct(raw)
+    nws = product.TextProduct(raw, ugc_provider={})
 
     sql = (
         "INSERT into products (pil, data, source, wmo, entered) "

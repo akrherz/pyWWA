@@ -41,7 +41,9 @@ def process_data(txn, buf):
         return None
     utcnow = common.utcnow()
 
-    nws = product.TextProduct(buf, utcnow=utcnow, parse_segments=False)
+    nws = product.TextProduct(
+        buf, ugc_provider={}, utcnow=utcnow, parse_segments=False
+    )
 
     # When we are in realtime processing, do not consider old data, typically
     # when a WFO fails to update the date in their MND

@@ -46,7 +46,7 @@ def run(cursor, fn, ttaaii, awipsid):
     data = "\n".join(["000 ", f"{ttaaii} KWNH 010000", awipsid, ""]) + req.text
     # Sometimes we get a NUL character somehow, so we remove it!
     data = data.replace("\000", "")
-    tp = TextProduct(data, parse_segments=False)
+    tp = TextProduct(data, parse_segments=False, ugc_provider={})
     LOG.debug("For %s current: %s, tp.valid: %s", awipsid, current, tp.valid)
     if tp.valid <= current:
         return
