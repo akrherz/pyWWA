@@ -13,7 +13,11 @@ HOST = "akrherz-desktop.agron.iastate.edu"
 
 def process(mydir, valid):
     """Do the necessary work."""
-    os.chdir(f"/mesonet/data/madis/{mydir}")
+    fulldir = f"/mesonet/data/madis/{mydir}"
+    if not os.path.isdir(fulldir):
+        LOG.info("Directory %s does not exist", fulldir)
+        return
+    os.chdir(fulldir)
     # Collapse files down.
     for hr in range(0, 24):
         i = 300
@@ -53,7 +57,7 @@ def process(mydir, valid):
 def main():
     """Go Main Go."""
     valid = date.today() - timedelta(days=1)
-    for mydir in ["mesonet", "hfmetar", "mesonet1", "metar", "rwis1"]:
+    for mydir in ["hfmetar", "mesonet1", "metar", "rwis1"]:
         process(mydir, valid)
 
 
