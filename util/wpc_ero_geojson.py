@@ -3,7 +3,7 @@
   - Ingest GeoJSON into database.
   - Submit to LDM for archival.
 
-https://origin.wpc.ncep.noaa.gov/exper/eromap/geojson/
+https://www.wpc.ncep.noaa.gov/exper/eromap/geojson/
 """
 
 import json
@@ -26,8 +26,8 @@ from pyiem.util import get_properties, logger, utc
 # https://github.com/geopandas/pyogrio/issues/344
 warnings.simplefilter("ignore", FutureWarning)
 LOG = logger()
-# No akami
-BASEURI = "https://origin.wpc.ncep.noaa.gov/exper/eromap/geojson/"
+# Only akami allowed
+BASEURI = "https://www.wpc.ncep.noaa.gov/exper/eromap/geojson/"
 JABBER = {
     "connection": None,
     "to": None,
