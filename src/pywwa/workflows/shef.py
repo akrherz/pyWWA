@@ -59,6 +59,7 @@ P60D = datetime.timedelta(days=60)
 
 
 DIRECTMAP = {
+    "EPDZ": "et_inch",
     "HGIZ": "rstage",
     "HPIZ": "rstage",
     "HTIZ": "rstage",
