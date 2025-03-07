@@ -258,6 +258,7 @@ GEN_PRODUCTS = [
     dict(afos="RVF", directive="10-912", channels=S2),
     dict(afos="RWS", directive="10-1701", channels=S2),
     dict(afos="RVS", directive="10-1701", channels=S2),
+    dict(afos="SAB", directive="10-1701", channels=S2),
     dict(afos="STF", directive="10-1701", channels=S2),
     dict(afos="SPS", directive="10-517", channels=[C3, C3p, C3S, C6, C9]),
     dict(afos="SRF", directive="10-1701", channels=S2),
