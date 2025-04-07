@@ -59,7 +59,9 @@ def load_database(txn):
 
 def process_data(txn, data):
     """Process the product"""
-    prod = parser(data, nwsli_provider=LOCS, utcnow=common.utcnow())
+    prod = parser(
+        data, nwsli_provider=LOCS, utcnow=common.utcnow(), ugc_provider={}
+    )
     if prod.warnings:
         common.email_error("\n".join(prod.warnings), data)
     prod.sql(txn)

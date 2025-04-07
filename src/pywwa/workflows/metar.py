@@ -81,6 +81,7 @@ def real_processor(text):
         text,
         utcnow=common.utcnow(),
         nwsli_provider=NWSLI_PROVIDER,
+        ugc_provider={},
     )
     if collect.warnings:
         common.email_error("\n".join(collect.warnings), collect.unixtext)

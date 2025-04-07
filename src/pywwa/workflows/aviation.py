@@ -51,7 +51,9 @@ def load_database(txn):
 def process_data(txn, data):
     """Process the product"""
     try:
-        prod = parser(data, nwsli_provider=LOCS, utcnow=common.utcnow())
+        prod = parser(
+            data, nwsli_provider=LOCS, utcnow=common.utcnow(), ugc_provider={}
+        )
     except Exception as myexp:
         common.email_error(myexp, data)
         return None

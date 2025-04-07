@@ -21,7 +21,9 @@ from pywwa.ldm import bridge
 
 def processor(nt, txn, text):
     """Protect the realprocessor"""
-    prod = parser(text, nwsli_provider=nt.sts, utcnow=common.utcnow())
+    prod = parser(
+        text, nwsli_provider=nt.sts, utcnow=common.utcnow(), ugc_provider={}
+    )
     # Run through database save now
     prod.sql(txn)
     jres = prod.get_jabbers(

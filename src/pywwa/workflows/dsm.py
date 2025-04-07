@@ -34,7 +34,7 @@ def load_stations(txn):
 
 def real_parser(txn, data):
     """Please process some data"""
-    prod = parser(data, utcnow=common.utcnow())
+    prod = parser(data, utcnow=common.utcnow(), ugc_provider={})
     prod.tzlocalize(STATIONS)
     if common.dbwrite_enabled():
         prod.sql(txn)
