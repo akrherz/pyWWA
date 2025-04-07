@@ -13,6 +13,7 @@ from io import StringIO
 
 import click
 import pyiem
+from pybufrkit.bufr import log as bufrlog
 from pyiem.util import utc
 from twisted.internet import reactor
 from twisted.mail import smtp
@@ -102,6 +103,9 @@ def setup_syslog():
     # Create the handler and set the formatter
     twisted_handler = TwistedLogHandler()
     twisted_handler.setFormatter(CustomFormatter())
+
+    # Prevent some noisy INFO messages from pybufrkit
+    bufrlog.setLevel(logging.WARNING)
 
     root_logger = logging.getLogger()  # Get the root logger
     root_logger.setLevel(loglvl)
