@@ -1,5 +1,6 @@
 """Ingest data from NWWS-OI."""
 
+from pyiem.nws.product import TextProduct
 from pyiem.util import get_properties, utc
 from twisted.internet import reactor
 from twisted.internet.task import LoopingCall
@@ -8,6 +9,8 @@ from twisted.words.protocols.jabber import client, error, xmlstream
 from twisted.words.protocols.jabber.jid import JID
 from twisted.words.xish import domish
 from twisted.words.xish.xmlstream import STREAM_END_EVENT
+
+MUC_ROOM = "nwws@conference.nwws-oi.weather.gov"
 
 
 class Client:
@@ -40,7 +43,7 @@ class Client:
         """authedn..."""
         self.outstanding_pings = []
         presence = domish.Element(("jabber:client", "presence"))
-        presence["to"] = "nwws@conference.nwws-oi.weather.gov/daryl.herzmann"
+        presence["to"] = f"{MUC_ROOM}/daryl.herzmann_{utc():%Y%m%d%H%M}"
         self.xmlstream.send(presence)
         lc = LoopingCall(self.housekeeping)
         lc.start(60)
@@ -107,6 +110,12 @@ class Client:
         if noaaport[-1] != "\n":
             noaaport = noaaport + "\r\r\n"
         noaaport = noaaport + "\003"
+        try:
+            tp = TextProduct(noaaport, parse_segments=False, ugc_provider={})
+            if tp.afos is not None and tp.afos.startswith(("TOR", "SVR")):
+                print(utc(), tp.get_product_id())
+        except Exception as exp:
+            print(f"Failed to parse: {exp}")
         # Someday perhaps fix the ldm sequence number is only 3 char
         with open(f"/mesonet/tmp/nwwsoi/{utc():%Y%m%d%H}.txt", "ab") as fh:
             fh.write(noaaport.encode("utf-8"))
