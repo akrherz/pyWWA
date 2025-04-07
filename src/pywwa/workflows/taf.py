@@ -10,7 +10,7 @@ from pywwa.ldm import bridge
 
 def real_process(txn, raw):
     """Process the product, please"""
-    prod = parser(raw, utcnow=common.utcnow())
+    prod = parser(raw, utcnow=common.utcnow(), ugc_provider={})
     if common.dbwrite_enabled():
         prod.sql(txn)
     baseurl = common.SETTINGS.get("pywwa_product_url", "pywwa_product_url")
