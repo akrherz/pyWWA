@@ -11,6 +11,8 @@ All notable changes to this library are documented in this file.
 
 ### Bug Fixes
 
+- Correct log setup for messages coming from pyIEM and pyWWA.
+
 ## **1.7.0** (6 Jan 2025)
 
 ### API Changes
