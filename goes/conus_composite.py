@@ -48,13 +48,16 @@ def call(cmd):
 def run(valid, channel, tmpname):
     """Do work."""
     tiles = []
-    for bird in [16, 17, 18]:
+    for bird in [16, 17, 18, 19]:
         fnbase = "%s/channel%02i/GOES-%s_C%02i" % (
             PATH,
             channel,
             bird,
             channel,
         )
+        if not os.path.isfile(f"{fnbase}.json"):
+            LOG.info("Missing %s.json", fnbase)
+            continue
         with open(f"{fnbase}.json", encoding="utf8") as fp:
             info = json.load(fp)
         ts = datetime.datetime.strptime(info["meta"]["valid"], ISO).replace(
