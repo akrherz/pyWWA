@@ -535,7 +535,7 @@ def write_access_records_eb(err, records: list, iemid, entry: ACCESSDB_ENTRY):
 
 def process_data(text):
     """Callback when text is received."""
-    prod = parser(text, utcnow=common.utcnow())
+    prod = parser(text, utcnow=common.utcnow(), ugc_provider={})
     if prod.warnings:
         common.email_error("\n".join(prod.warnings), prod.unixtext)
     if prod.afos in AFOS_EXCLUDE:
