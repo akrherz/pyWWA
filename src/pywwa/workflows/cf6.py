@@ -12,7 +12,7 @@ from pywwa.ldm import bridge
 
 def processor(txn, text):
     """Protect the realprocessor"""
-    prod = parser(text, utcnow=common.utcnow())
+    prod = parser(text, utcnow=common.utcnow(), ugc_provider={})
     if common.dbwrite_enabled():
         prod.sql(txn)
     if prod.warnings:

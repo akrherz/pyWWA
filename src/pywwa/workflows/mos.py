@@ -12,7 +12,7 @@ from pywwa.ldm import bridge
 
 def process_data(txn, text):
     """The real processor of the raw data, fun!"""
-    prod = parser(text, utcnow=common.utcnow())
+    prod = parser(text, utcnow=common.utcnow(), ugc_provider={})
     if not common.dbwrite_enabled():
         return
     if prod.warnings:

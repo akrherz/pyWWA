@@ -12,7 +12,7 @@ from pywwa.ldm import bridge
 
 def real_parser(txn, buf):
     """I'm gonna do the heavy lifting here"""
-    prod = parser(buf)
+    prod = parser(buf, ugc_provider={})
     if common.dbwrite_enabled():
         prod.sql(txn)
     if prod.warnings:

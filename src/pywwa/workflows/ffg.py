@@ -12,7 +12,7 @@ from pywwa.ldm import bridge
 
 def real_parser(txn, buf):
     """callback func"""
-    ffg = parser(buf)
+    ffg = parser(buf, ugc_provider={})
     if ffg.afos == "FFGMPD":
         return
     if common.dbwrite_enabled():

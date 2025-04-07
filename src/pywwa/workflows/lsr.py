@@ -59,7 +59,7 @@ def pickledb():
 
 def real_processor(txn, text):
     """Lets actually process!"""
-    prod = lsrparser(text)
+    prod = lsrparser(text, ugc_provider={})
 
     for lsr in prod.lsrs:
         if lsr.typetext.upper() not in reference.lsr_events:
