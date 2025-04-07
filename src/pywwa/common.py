@@ -15,7 +15,6 @@ import click
 import pyiem
 from pyiem.util import utc
 from twisted.internet import reactor
-from twisted.logger import formatEvent
 from twisted.mail import smtp
 from twisted.python import failure
 from twisted.python import log as tplog
@@ -60,31 +59,55 @@ def setup_syslog():
     # I am punting on some issue the below creates within pytest
     if SETTINGS.get("__setup_syslog", False):
         return
+
+    loglvl = logging.DEBUG if sys.stdout.isatty() else logging.INFO
+
     # https://stackoverflow.com/questions/13699283
     frame = inspect.stack()[-1]
     module = inspect.getmodule(frame[0])
-    filename = "None" if module is None else os.path.basename(module.__file__)
+    filename = (
+        "None" if module is None else os.path.basename(str(module.__file__))
+    )
+    # Set the system name for Twisted logs
+    system_name = filename.replace("pywwa-parse-", "")
+
+    # Log stuff to stdout if we are running from command line.
+    if CTX["stdout_logging"]:
+        tplog.addObserver(tplog.FileLogObserver(sys.stdout).emit)
+
     # windows does not have syslog
     try:
         from twisted.python import syslog
 
         syslog.startLogging(
-            prefix=f"pyWWA/{filename}",
+            prefix="pyWWA",
             facility=syslog.syslog.LOG_LOCAL2,
             setStdout=not CTX["stdout_logging"],
         )
-    except ImportError:
-        LOG.info("Failed to import twisted.python.syslog")
-    # pyIEM does logging via python stdlib logging, so we need to patch those
-    # messages into twisted's logger.
-    sh = logging.StreamHandler(stream=tplog.logfile)
-    sh.setFormatter(CustomFormatter())
-    LOG.addHandler(sh)
-    # Log stuff to stdout if we are running from command line.
-    if CTX["stdout_logging"]:
-        tplog.addObserver(lambda x: sys.stdout.write(formatEvent(x) + "\n"))
-    # Allow for more verbosity when we are running this manually.
-    LOG.setLevel(logging.DEBUG if sys.stdout.isatty() else logging.INFO)
+    except ImportError as exp:
+        tplog.msg("Failed to import twisted.python.syslog", system=system_name)
+        tplog.err(exp, system=system_name)
+
+    # Add a handler to forward pyIEM logs to Twisted's logging system
+    class TwistedLogHandler(logging.Handler):
+        """Custom handler to forward logs to Twisted's logging system."""
+
+        def emit(self, record):
+            # Use the logging formatter to format the record
+            msg = self.format(record)
+            tplog.msg(
+                msg, logLevel=record.levelname.lower(), system=system_name
+            )
+
+    # Create the handler and set the formatter
+    twisted_handler = TwistedLogHandler()
+    twisted_handler.setFormatter(CustomFormatter())
+
+    root_logger = logging.getLogger()  # Get the root logger
+    root_logger.setLevel(loglvl)
+    root_logger.addHandler(twisted_handler)
+
+    # Prevent a double setup of syslog
     SETTINGS["__setup_syslog"] = True
 
 
