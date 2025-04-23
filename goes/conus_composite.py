@@ -27,21 +27,22 @@ def filtermsg(buf):
     return "Point outside of projection" in text
 
 
-def call(cmd):
+def call(cmd: list):
     """Wrapper around subprocess."""
-    LOG.debug(cmd)
+    strcmd = " ".join(cmd)
+    LOG.info(strcmd)
     proc = subprocess.Popen(
-        cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+        cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE
     )
     stdout = proc.stdout.read()
     stderr = proc.stderr.read()
     if stdout != b"":
         if not filtermsg(stdout):
-            LOG.warning(cmd)
+            LOG.warning(strcmd)
             LOG.warning(stdout)
     if stderr != b"":
         if not filtermsg(stderr):
-            LOG.warning(cmd)
+            LOG.warning(strcmd)
             LOG.warning(stderr)
 
 
@@ -49,12 +50,7 @@ def run(valid, channel, tmpname):
     """Do work."""
     tiles = []
     for bird in [16, 17, 18, 19]:
-        fnbase = "%s/channel%02i/GOES-%s_C%02i" % (
-            PATH,
-            channel,
-            bird,
-            channel,
-        )
+        fnbase = f"{PATH}/channel{channel:02.0f}/GOES-{bird}_C{channel:02.0f}"
         if not os.path.isfile(f"{fnbase}.json"):
             LOG.info("Missing %s.json", fnbase)
             continue
@@ -64,43 +60,67 @@ def run(valid, channel, tmpname):
             tzinfo=ZoneInfo("UTC")
         )
         if (valid - ts) > datetime.timedelta(hours=6):
+            LOG.info("Skipping %s, too old", fnbase)
             continue
         # step 1
         fn = f"{tmpname}_{bird}.tif"
         tiles.append(fn)
-        cmd = (
-            "gdalwarp -q -s_srs '%s' -t_srs 'EPSG:4326' -te %s %s %s %s "
-            f"-tr 0.04 0.04 -of GTiff %s.png {fn}"
-        ) % (
+        cmd = [
+            "gdalwarp",
+            "-q",
+            "-s_srs",
             info["meta"]["proj4str"],
-            -140 if bird in [17, 18] else -113.1,
-            22,
-            -112.9 if bird in [17, 18] else -60,
-            52,
-            fnbase,
-        )
+            "-t_srs",
+            "EPSG:4326",
+            "-te",
+            "-140" if bird in [17, 18] else "-113.1",
+            "22",
+            "-112.9" if bird in [17, 18] else "-60",
+            "52",
+            "-tr",
+            "0.04",
+            "0.04",
+            "-of",
+            "GTiff",
+            f"{fnbase}.png",
+            fn,
+        ]
         call(cmd)
 
     if not tiles:
         LOG.warning("No data found for tiling...")
         return
-    cmd = (
-        "gdal_merge.py -q -o %s.tif -of GTiff -ps 0.04 0.04 "
-        "-ul_lr -130 52 -60 22 %s"
-    ) % (tmpname, " ".join(tiles))
+    cmd = [
+        "gdal_merge.py",
+        "-q",
+        "-o",
+        f"{tmpname}.tif",
+        "-of",
+        "GTiff",
+        "-ps",
+        "0.04",
+        "0.04",
+        "-ul_lr",
+        "-130",
+        "52",
+        "-60",
+        "22",
+        *tiles,
+    ]
     call(cmd)
 
     # GIS/sat/conus_goes_vis4km_1045.tif
-    cmd = (
-        "pqinsert -i -p 'gis ac %s gis/images/4326/sat/conus_goes_%s4km.tif "
-        "GIS/sat/conus_goes_%s4km_%s.tif tif' %s.tif"
-    ) % (
-        valid.strftime("%Y%m%d%H%M"),
-        LOOKUP[channel],
-        LOOKUP[channel],
-        valid.strftime("%H%M"),
-        tmpname,
-    )
+    cmd = [
+        "pqinsert",
+        "-i",
+        "-p",
+        (
+            f"gis ac {valid:%Y%m%d%H%M} "
+            f"gis/images/4326/sat/conus_goes_{LOOKUP[channel]}4km.tif "
+            f"GIS/sat/conus_goes_{LOOKUP[channel]}4km_{valid:%H%M}.tif tif"
+        ),
+        f"{tmpname}.tif",
+    ]
     call(cmd)
 
 
@@ -114,7 +134,7 @@ def main(argv):
                 run(valid, channel, tmpfd.name)
             except Exception as exp:
                 LOG.exception(exp)
-        for part in ["", "_16", "_17", "_18"]:
+        for part in ["", "_16", "_17", "_18", "_19"]:
             fn = f"{tmpfd.name}{part}.tif"
             if not os.path.isfile(fn):
                 continue
