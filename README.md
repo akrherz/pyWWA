@@ -6,7 +6,7 @@ are intended to be run from [Unidata LDM](https://github.com/Unidata/LDM)'s
 `pqact` process.  This repo is used by the
 [IEM](https://mesonet.agron.iastate.edu) to ingest NWS products and data.
 
-Python 3.9+ is supported by this library.
+Python 3.10+ is supported by this library.
 
 ## Installation
 

@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        PYTHON_VERSION: ["3.9", "3.11", "3.12"]
+        PYTHON_VERSION: ["3.10", "3.11", "3.13"]
     env:
       PYTHON_VERSION: ${{ matrix.PYTHON_VERSION }}
     steps:
@@ -117,10 +117,8 @@ jobs:
         pywwa-spammer --help
 
     - name: Upload coverage to Codecov
-      if: ${{ env.PYTHON_VERSION == '3.12' }}
+      if: ${{ env.PYTHON_VERSION == '3.13' }}
       uses: codecov/codecov-action@v4
-      env:
-        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
       with:
         file: coverage.xml
         fail_ci_if_error: true

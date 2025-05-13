@@ -7,6 +7,8 @@ All notable changes to this library are documented in this file.
 
 ### API Changes
 
+- Bump minimum python to 3.10
+
 ### New Features
 
 ### Bug Fixes
