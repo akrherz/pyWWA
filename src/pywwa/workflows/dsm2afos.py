@@ -16,13 +16,13 @@ def workflow(raw):
     pgconn, acursor = get_dbconnc("afos")
 
     data = raw.replace("\r\r\n", "z")
-    tokens = re.findall("(K[A-Z0-9]{3} [DM]S.*?[=N]z)", data)
+    tokens = re.findall("([A-Z0-9]{4} [DM]S.*?[=N]z)", data)
 
     nws = product.TextProduct(raw, ugc_provider={})
 
     sql = (
-        "INSERT into products (pil, data, source, wmo, entered) "
-        "values(%s,%s,%s,%s,%s) "
+        "INSERT into products (pil, data, source, wmo, entered, bbb) "
+        "values(%s,%s,%s,%s,%s,%s) "
     )
     pil3 = "DSM" if nws.wmo == "CDUS27" else "MSM"
     for token in tokens:
@@ -32,6 +32,7 @@ def workflow(raw):
             nws.source,
             nws.wmo,
             nws.valid.strftime("%Y-%m-%d %H:%M+00"),
+            nws.bbb,
         )
         acursor.execute(sql, sqlargs)
 

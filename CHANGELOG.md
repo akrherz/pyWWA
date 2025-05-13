@@ -11,6 +11,7 @@ All notable changes to this library are documented in this file.
 
 ### Bug Fixes
 
+- Allow non-K sites through faked DSM AFOS creator.
 - Correct log setup for messages coming from pyIEM and pyWWA.
 - Populate all AFOS database fields for RR7 workflow.
 
