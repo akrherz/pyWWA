@@ -2,11 +2,12 @@
 
 import datetime
 from functools import partial
-from zoneinfo import ZoneInfo
 
 # 3rd Party
 # pylint: disable=no-member-in-module
-import mock
+from unittest import mock
+from zoneinfo import ZoneInfo
+
 import pytest
 
 # Local

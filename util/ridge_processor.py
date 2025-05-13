@@ -12,7 +12,7 @@ import pika
 def get_rabbitmqconn():
     """Load the configuration."""
     fn = os.sep.join([os.path.dirname(__file__), "rabbitmq.json"])
-    with open(fn, "r", encoding="utf-8") as fh:
+    with open(fn, encoding="utf-8") as fh:
         config = json.load(fh)
     return pika.BlockingConnection(
         pika.ConnectionParameters(

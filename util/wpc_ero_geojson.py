@@ -129,7 +129,7 @@ def send_to_ldm(gdf, meta, maxissue, day, cycle):
         else:
             gdf.to_file(tmpfn.name, driver="GeoJSON")
     # Hack back in some properties
-    with open(tmpfn.name, "r", encoding="utf-8") as tmpfh:
+    with open(tmpfn.name, encoding="utf-8") as tmpfh:
         jdict = json.load(tmpfh)
     jdict["iem_properties"] = meta.to_dict()
     for key, value in jdict["iem_properties"].items():

@@ -1,6 +1,7 @@
 """Test pywwa.xmpp"""
 
-import mock
+from unittest import mock
+
 from twisted.words.protocols.jabber import jid
 from twisted.words.xish import domish, xmlstream
 

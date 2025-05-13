@@ -1,7 +1,5 @@
 """Alaska CWF/OFF Parser that generates Fake VTEC."""
 
-from typing import Optional
-
 import click
 from psycopg.connection import Transaction
 from pyiem.nws.product import TextProduct
@@ -47,7 +45,7 @@ def get_current(txn: Transaction, nws: TextProduct) -> dict:
     return current
 
 
-def compute_ps(headline: str) -> tuple[Optional[str], Optional[str]]:
+def compute_ps(headline: str) -> tuple[str | None, str | None]:
     """Figure out the phenomena and significance from the headline."""
     for key in HEADLINE2VTEC:
         if headline.startswith(key):
@@ -56,7 +54,7 @@ def compute_ps(headline: str) -> tuple[Optional[str], Optional[str]]:
     return None, None
 
 
-def process_data(txn: Transaction, buf: str) -> Optional[TextProduct]:
+def process_data(txn: Transaction, buf: str) -> TextProduct | None:
     """Actually do something with the buffer, please"""
     if buf.strip() == "":
         return None
