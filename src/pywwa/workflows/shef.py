@@ -5,7 +5,6 @@ import datetime
 import random
 import re
 from collections import namedtuple
-from typing import List
 from zoneinfo import ZoneInfo
 
 # 3rd Party
@@ -312,7 +311,7 @@ def get_localtime(sid, ts):
     return ts.astimezone(LOCS[sid][_network]["tzinfo"])
 
 
-def get_network(prod, sid, data: List[SHEFElement]) -> str:
+def get_network(prod, sid, data: list[SHEFElement]) -> str:
     """Logic for figuring out network in face of ambiguity.
 
     Note: This sid should already be in LOCS, so we are only either taking
@@ -397,7 +396,7 @@ def update_current_queue(element: SHEFElement, product_id: str):
     cur["dirty"] = True
 
 
-def process_site_time(prod, sid, ts, elements: List[SHEFElement]):
+def process_site_time(prod, sid, ts, elements: list[SHEFElement]):
     """Ingest for IEMAccess."""
     network = get_network(prod, sid, elements)
     if network is None or network in DOUBLEBACKED_NETWORKS:
@@ -483,7 +482,7 @@ def process_site_time(prod, sid, ts, elements: List[SHEFElement]):
 
 
 def write_access_records(
-    accesstxn, records: List, iemid, entry: ACCESSDB_ENTRY
+    accesstxn, records: list, iemid, entry: ACCESSDB_ENTRY
 ):
     """Batch the records to to prevent deadlocks, maybe!"""
     for localts, record in records:
