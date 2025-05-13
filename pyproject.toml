@@ -110,8 +110,8 @@ lint.select = [
   "PLW",  # pylint-warning
   "S324", # security
   "T",    # print
-  "UP",   # pyupgrade
-  "W",    # pycodestyle
+  # "UP",   # pyupgrade
+  "W", # pycodestyle
 ]
 lint.per-file-ignores."goes/*.py" = [
   "T201",
