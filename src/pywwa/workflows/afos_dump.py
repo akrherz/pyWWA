@@ -1,7 +1,7 @@
 """AFOS Database Workflow."""
 
 import click
-from pyiem.nws import product
+from pyiem.wmo import WMOProduct
 from twisted.internet import reactor
 
 from pywwa import LOG, common
@@ -30,7 +30,7 @@ def write2memcache(product_id: str, text: str):
     LOG.debug("writing %s to memcache", product_id)
     write_memcache(
         product_id.encode("utf-8"),
-        text.replace("\001\n", "").encode("utf-8"),
+        text.encode("utf-8"),
         expire=600,
     )
 
@@ -41,9 +41,7 @@ def process_data(txn, buf):
         return None
     utcnow = common.utcnow()
 
-    nws = product.TextProduct(
-        buf, ugc_provider={}, utcnow=utcnow, parse_segments=False
-    )
+    nws = WMOProduct(buf, utcnow=utcnow)
 
     # When we are in realtime processing, do not consider old data, typically
     # when a WFO fails to update the date in their MND
@@ -61,15 +59,15 @@ def process_data(txn, buf):
         raise ValueError("TextProduct.afos is null")
 
     if common.replace_enabled():
-        args = [nws.afos.strip(), nws.source, nws.valid]
-        bbb = ""
-        if nws.bbb:
-            bbb = " and bbb = %s "
-            args.append(nws.bbb)
         txn.execute(
             "DELETE from products where pil = %s and source = %s and "
-            f"entered = %s {bbb}",
-            args,
+            "entered = %s and bbb is not distinct from %s",
+            (
+                nws.afos,
+                nws.source,
+                nws.valid,
+                nws.bbb,
+            ),
         )
         LOG.info("Removed %s rows for %s", txn.rowcount, nws.get_product_id())
 
@@ -78,7 +76,7 @@ def process_data(txn, buf):
         "source, wmo, bbb) VALUES(%s, %s, %s, %s, %s, %s)",
         (
             nws.afos.strip(),
-            common.afosclean(nws.text),
+            nws.unixtext,
             nws.valid,
             nws.source,
             nws.wmo,

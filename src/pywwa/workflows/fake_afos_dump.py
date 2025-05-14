@@ -42,9 +42,9 @@ NHC = {
 }
 
 
-def compute_afos(textprod):
+def compute_afos(textprod: TextProduct):
     """Our hackery to assign a fake AFOS pil to a product without AFOS"""
-    ttaaii = textprod.wmo
+    ttaaii: str = textprod.wmo
     if ttaaii[:4] == "NOXX":
         afos = f"ADM{textprod.source[1:]}"
     elif ttaaii.startswith("UB"):
@@ -77,7 +77,7 @@ def compute_afos(textprod):
 def really_process_data(txn, data):
     """We are called with a hard coded AFOS PIL"""
     tp = TextProduct(
-        data, ugc_provider={}, utcnow=common.utcnow(), parse_segments=False
+        data, utcnow=common.utcnow(), ugc_provider={}, parse_segments=False
     )
     if tp.afos is None:
         compute_afos(tp)
@@ -89,7 +89,7 @@ def really_process_data(txn, data):
 
     sqlargs = (
         tp.afos,
-        common.afosclean(tp.text),
+        tp.unixtext,
         tp.source,
         tp.wmo,
         tp.valid.strftime("%Y-%m-%d %H:%M+00"),
