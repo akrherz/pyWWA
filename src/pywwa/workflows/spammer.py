@@ -32,7 +32,7 @@ def process_data(data):
 def damage_survey_pns(prod):
     """Glean out things, hopefully."""
     subject = f"Damage Survey PNS from {prod.source}"
-    plain = prod.unixtext[2:]
+    plain = prod.unixtext
     ffs = {}
     url = (
         f"https://mesonet.agron.iastate.edu/p.php?pid={prod.get_product_id()}"
@@ -76,10 +76,8 @@ def real_process(data) -> product.TextProduct:
 
     # Strip off stuff at the top
     msg = MIMEMultipart("alternative")
-    msgtext = MIMEText(prod.unixtext[2:], "plain", "utf-8")
-    msghtml = MIMEText(
-        f"<p><pre>{prod.unixtext[2:]}</pre></p>", "html", "utf-8"
-    )
+    msgtext = MIMEText(prod.unixtext, "plain", "utf-8")
+    msghtml = MIMEText(f"<p><pre>{prod.unixtext}</pre></p>", "html", "utf-8")
     # some products have no AWIPS ID, sigh
     subject = prod.wmo
     msg["To"] = "akrherz@iastate.edu"
