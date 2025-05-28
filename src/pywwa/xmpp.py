@@ -56,6 +56,7 @@ def make_jabber_client(resource_prefix=None):
     factory.addBootstrap("//event/client/basicauth/invaliduser", debug)
     factory.addBootstrap("//event/client/basicauth/authfailed", debug)
     factory.addBootstrap("//event/stream/error", debug)
+    factory.addBootstrap(xmlstream.INIT_FAILED_EVENT, debug)
     factory.addBootstrap(xmlstream.STREAM_END_EVENT, CTX["JABBER"].disconnect)
 
     reactor.connectTCP(
