@@ -15,6 +15,7 @@ All notable changes to this library are documented in this file.
 
 - Add fake afos entries for UZ(NT|PA|PN) for REPNT3.
 - Allow non-K sites through faked DSM AFOS creator.
+- Fix XMPP/Jabber client login/workflow.
 - Correct log setup for messages coming from pyIEM and pyWWA.
 - Populate all AFOS database fields for RR7 workflow.
 

@@ -9,11 +9,13 @@ import re
 import pyiem
 import treq
 from pyiem.util import utc
-from twisted.internet import reactor
+from twisted.internet import reactor as theReactor
 from twisted.internet.defer import inlineCallbacks
+from twisted.names.srvconnect import SRVConnector
 from twisted.web import client as webclient
 from twisted.words.protocols.jabber import client as jclient
-from twisted.words.protocols.jabber import jid, xmlstream
+from twisted.words.protocols.jabber import xmlstream
+from twisted.words.protocols.jabber.jid import JID
 from twisted.words.xish import domish, xpath
 
 # Local
@@ -41,28 +43,15 @@ def make_jabber_client(resource_prefix=None):
         fs = inspect.stack()
         resource_prefix = os.path.basename(fs[-1].filename).removesuffix(".py")
 
-    myjid = jid.JID(
+    myjid = JID(
         f"{SETTINGS.get('pywwa_jabber_username', 'iembot_ingest')}@"
         f"{SETTINGS.get('pywwa_jabber_domain', 'localhost')}/"
         f"{resource_prefix}_{utc():%Y%m%d%H%M%S}"
     )
-    factory = jclient.XMPPClientFactory(
-        myjid, SETTINGS.get("pywwa_jabber_password", "secret")
-    )
-
-    CTX["JABBER"] = JabberClient(myjid)
-
-    factory.addBootstrap("//event/stream/authd", CTX["JABBER"].authd)
-    factory.addBootstrap("//event/client/basicauth/invaliduser", debug)
-    factory.addBootstrap("//event/client/basicauth/authfailed", debug)
-    factory.addBootstrap("//event/stream/error", debug)
-    factory.addBootstrap(xmlstream.INIT_FAILED_EVENT, debug)
-    factory.addBootstrap(xmlstream.STREAM_END_EVENT, CTX["JABBER"].disconnect)
-
-    reactor.connectTCP(
-        SETTINGS.get("pywwa_jabber_host", "localhost"),  # @UndefinedVariable
-        5222,
-        factory,
+    CTX["JABBER"] = JabberClient(
+        theReactor,
+        myjid,
+        SETTINGS.get("pywwa_jabber_password", "secret"),
     )
     return CTX["JABBER"]
 
@@ -126,12 +115,13 @@ class JabberClient:
     to nwsbot
     """
 
-    def __init__(self, myjid):
+    def __init__(self, reactor, myjid: JID, secret):
         """
         Constructor
 
         @param jid twisted.words.jid object
         """
+        self.reactor = reactor
         self.myjid = myjid
         self.xmlstream = None
         self.authenticated = False
@@ -139,8 +129,41 @@ class JabberClient:
             f"{SETTINGS.get('bot.username', 'iembot')}@"
             f"{SETTINGS.get('pywwa_jabber_domain', 'localhost')}"
         )
+        f = jclient.XMPPClientFactory(myjid, secret)
+        # Important, we need to capture the xmlstream so to handle errors
+        f.addBootstrap(xmlstream.STREAM_CONNECTED_EVENT, self.connected)
+        # Send initial presence so that we are `online`
+        f.addBootstrap(xmlstream.STREAM_AUTHD_EVENT, self.authd)
+        f.addBootstrap(xmlstream.STREAM_END_EVENT, self.disconnect)
+        f.addBootstrap(xmlstream.INIT_FAILED_EVENT, self.init_failed)
+        SRVConnector(
+            reactor, "xmpp-client", myjid.host, f, defaultPort=5222
+        ).connect()
 
-    def authd(self, xstream):
+    def init_failed(self, failure):
+        """
+        Called when we fail to initialize the connection
+        @param failure twisted.python.failure.Failure
+        """
+        LOG.error("Failed to initialize XMPP connection: %s", failure)
+        if self.xmlstream is not None:
+            self.xmlstream.sendFooter()
+
+    def connected(self, xstream: xmlstream.XmlStream):
+        """
+        Callbacked once we are connected to the server
+        @param xs twisted.words.xish.xmlstream
+        """
+        LOG.info("Connected to %s", self.myjid.host)
+        self.xmlstream = xstream
+        self.xmlstream.rawDataInFn = raw_data_in
+        self.xmlstream.rawDataOutFn = raw_data_out
+        # Process Messages
+        self.xmlstream.addObserver("/message/body", message_processor)
+        # Process IQ Requests
+        self.xmlstream.addObserver("/iq", self.iq_processor)
+
+    def authd(self, _xstream):
         """
         Callbacked once authentication succeeds
         @param xs twisted.words.xish.xmlstream
@@ -148,23 +171,17 @@ class JabberClient:
         LOG.info("Logged in as %s", self.myjid)
         self.authenticated = True
 
-        self.xmlstream = xstream
-        self.xmlstream.rawDataInFn = raw_data_in
-        self.xmlstream.rawDataOutFn = raw_data_out
-
-        # Process Messages
-        self.xmlstream.addObserver("/message/body", message_processor)
-        # Process IQ Requests
-        self.xmlstream.addObserver("/iq", self.iq_processor)
-
         # Send initial presence
         presence = domish.Element(("jabber:client", "presence"))
         presence.addElement("status").addContent("Online")
         self.xmlstream.send(presence)
 
-    def iq_processor(self, iq):
+    def iq_processor(self, iq: domish.Element):
         """Process an IQ request"""
         child_el = iq.firstChildElement()
+        # This is fine, not all IQs have children
+        if child_el is None:
+            return
         # Handle pings
         if child_el.name == "ping":
             pong = domish.Element((None, "iq"))
@@ -196,6 +213,7 @@ class JabberClient:
         Called when we are disconnected from the server, I guess
         """
         LOG.info("SETTING authenticated to false!")
+        self.xmlstream = None
         self.authenticated = False
 
     @inlineCallbacks
@@ -208,7 +226,7 @@ class JabberClient:
         """
         if not self.authenticated:
             LOG.info("No Connection, Lets wait and try later...")
-            reactor.callLater(
+            self.reactor.callLater(
                 3,
                 self.send_message,
                 body,
@@ -246,4 +264,4 @@ class JabberClient:
                 _r = yield treq.get(url.replace("https", "http"), timeout=120)
             except Exception as exp:
                 LOG.info("twitter_media request for %s failed: %s", url, exp)
-        reactor.callFromThread(self.xmlstream.send, message)
+        self.reactor.callFromThread(self.xmlstream.send, message)
