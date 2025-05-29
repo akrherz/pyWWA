@@ -2,10 +2,17 @@
 
 from unittest import mock
 
+import pytest
 from twisted.words.protocols.jabber import jid
 from twisted.words.xish import domish, xmlstream
 
 from pywwa import CTX, xmpp
+
+
+@pytest.fixture(autouse=True)
+def reactor():
+    """Fixture"""
+    return mock.Mock()
 
 
 def test_raw_data_in():
@@ -26,12 +33,13 @@ def test_raw_data_out():
     xmpp.raw_data_out(" ")
 
 
-def test_client_authd():
+def test_client_authd(reactor):
     """Test the authd method."""
-    client = xmpp.JabberClient("root@localhost")
+    client = xmpp.JabberClient(reactor, jid.JID("root@localhost"), "secret")
     xs = xmlstream.XmlStream()
     xs.transport = mock.Mock()
     xs.transport.write = mock.Mock()
+    client.connected(xs)
     client.authd(xs)
 
 
@@ -56,9 +64,9 @@ def test_illegal_xml():
     assert xmpp.ILLEGAL_XML_CHARS_RE.sub("", "\003hello") == "hello"
 
 
-def test_send_message():
+def test_send_message(reactor):
     """Test the sending of messages."""
-    client = xmpp.JabberClient("root@localhost")
+    client = xmpp.JabberClient(reactor, jid.JID("root@localhost"), "secret")
     client.authenticated = True
     client.xmlstream = xmlstream.XmlStream()
     client.send_message(
@@ -73,9 +81,9 @@ def test_send_message():
     client.disconnect(None)
 
 
-def test_client():
+def test_client(reactor):
     """Test that we can use the JabberClient."""
-    client = xmpp.JabberClient("root@localhost")
+    client = xmpp.JabberClient(reactor, jid.JID("root@localhost"), "secret")
     assert client.routerjid
 
 
@@ -85,9 +93,9 @@ def test_make_jabber_client():
     assert client.myjid.resource is not None
 
 
-def test_iq_ping():
+def test_iq_ping(reactor):
     """Test the response to an IQ ping request."""
-    client = xmpp.JabberClient("root@localhost")
+    client = xmpp.JabberClient(reactor, jid.JID("root@localhost"), "secret")
     client.xmlstream = xmlstream.XmlStream()
     client.xmlstream.transport = mock.Mock()
     client.xmlstream.transport.write = mock.Mock()
@@ -100,12 +108,13 @@ def test_iq_ping():
     client.iq_processor(ping)
 
 
-def test_iq_version():
+def test_iq_version(reactor):
     """Test the response to IQ version request."""
-    client = xmpp.JabberClient(jid.JID("root@localhost/meme"))
+    client = xmpp.JabberClient(reactor, jid.JID("root@localhost/me"), "secret")
     xs = xmlstream.XmlStream()
     xs.transport = mock.Mock()
     xs.transport.write = mock.Mock()
+    client.connected(xs)
     client.authd(xs)
     iq = domish.Element(("jabber:client", "iq"))
     iq["from"] = "iembot@localhost"
