@@ -138,6 +138,7 @@ CCL9            Outlook (South)                  SK CA  5144 -10700     0  0
 CCM3            Sevogle                          -- CA  4719  -6616     0  0
 CCM4            Port Au Choix                    -- CA  5069  -5733     0  0
 CCN2            Grand Manan                      -- CA  4471  -6680     0  0
+CCN4            Conn                             ON CA  4403  -8049     0  0
 CCP2            Exploits Valley Botwood          -- CA  4906  -5545     0  0
 CCP3            Chute St Philippe                QB CA  4666  -7525     0  0
 CCP4            Port Hope Simpson                -- CA  5253  -5629     0  0
@@ -488,6 +489,7 @@ CNT7            Picton                           -- CA  4399  -7714     0  0
 CNW3            Bancroft                         -- CA  4507  -7788     0  0
 CNS4            Alexandria                       -- CA  4533  -7463     0  0
 CNU4            Belleville                       -- CA  4419  -7731     0  0
+CNU6            Huntsville Seaplane Base         ON CA  4532  -7926     0  0
 CNU8            Markham                          -- CA  4394  -7962     0  0
 CNV4            Hawkesbury                       ON CA  4562  -7465     0  0
 CNV6            Orillia/Lake St John             ON CA  4468  -7932     0  0
@@ -690,6 +692,7 @@ CYEA            Empress                          AB CA  5093 -11001     0  0
 ## CYEC
 CYEE            MIDLAND                          -- CA  4468  -7993     0  0
 CYEM            Manitowaning                     ON CA  4584  -8186     0  0
+CYEP            Edmonton Parkland                AB CA  5347 -11382     0  0
 CYES            Edmundston                       NB CA  4749  -6848     0  0
 CYEU            Eureka Man                       -- CA  7999  -8581     0  0
 CYFA            Fort Albany                      ON CA  5220  -8170     0  0
