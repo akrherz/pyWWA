@@ -11,7 +11,6 @@ import treq
 from pyiem.util import utc
 from twisted.internet import reactor as theReactor
 from twisted.internet.defer import inlineCallbacks
-from twisted.names.srvconnect import SRVConnector
 from twisted.web import client as webclient
 from twisted.words.protocols.jabber import client as jclient
 from twisted.words.protocols.jabber import xmlstream
@@ -136,9 +135,11 @@ class JabberClient:
         f.addBootstrap(xmlstream.STREAM_AUTHD_EVENT, self.authd)
         f.addBootstrap(xmlstream.STREAM_END_EVENT, self.disconnect)
         f.addBootstrap(xmlstream.INIT_FAILED_EVENT, self.init_failed)
-        SRVConnector(
-            reactor, "xmpp-client", myjid.host, f, defaultPort=5222
-        ).connect()
+
+        # It is difficult to hardcode the SRV record, so we use old style
+        xmpp_host = SETTINGS.get("pywwa_jabber_host", myjid.host)
+        xmpp_port = int(SETTINGS.get("pywwa_jabber_port", 5222))
+        reactor.connectTCP(xmpp_host, xmpp_port, f)
 
     def init_failed(self, failure):
         """
