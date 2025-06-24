@@ -102,6 +102,10 @@ def fetch_ero(day) -> gpd.GeoDataFrame:
     if gdf.empty:
         LOG.info("Empty GeoJSON for day %s", day)
         return None, None
+    # Merge geometries
+    gdf = gdf.dissolve(
+        by=gdf.columns.difference(["geometry"]).to_list(), as_index=False
+    )
     # Some value add properties that are useful for downstream processing
     gdf["day"] = day
     gdf["threshold"] = ""
@@ -173,7 +177,7 @@ def get_threshold(threshold):
     return None
 
 
-def save_df(cursor, gdf, meta, day, cycle):
+def save_df(cursor, gdf: pd.DataFrame, meta, day, cycle):
     """Save to the database."""
     # Create the identifier for this outlook
     cursor.execute(
