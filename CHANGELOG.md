@@ -11,6 +11,8 @@ All notable changes to this library are documented in this file.
 
 ### New Features
 
+- Create Faked AFOS identifiers for CDUS27 `DSM`.
+
 ### Bug Fixes
 
 - Add fake afos entries for UZ(NT|PA|PN) for REPNT3.
