@@ -11,6 +11,16 @@ from pywwa.testing import get_example_file
 from pywwa.workflows import fake_afos_dump
 
 
+@pytest.mark.parametrize("database", ["afos"])
+def test_DSM(cursor):
+    """Test fake DSM."""
+    tp = fake_afos_dump.really_process_data(
+        cursor, get_example_file("DSM.txt")
+    )
+    # pyiem now sets the afos value when it is none to PIREP
+    assert tp.afos == "DSMZME"
+
+
 def test_fake_pirep():
     """Test fake PIREP."""
     tp = Pirep(get_example_file("PIREP.txt"), utcnow=utc(2024, 7, 9, 0, 0))

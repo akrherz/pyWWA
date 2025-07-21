@@ -50,6 +50,8 @@ def compute_afos(textprod: TextProduct):
     ttaaii: str = textprod.wmo
     if ttaaii[:4] == "NOXX":
         afos = f"ADM{textprod.source[1:]}"
+    elif ttaaii == "CDUS27":
+        afos = f"DSM{textprod.source[1:]}"
     elif ttaaii.startswith("UB"):
         afos = "PIREP"
     elif ttaaii in GMET:
@@ -102,7 +104,7 @@ def really_process_data(txn, data):
         txn.execute(sql, sqlargs)
 
     # CWA is handled by cwa_parser.py
-    if tp.afos[:3] not in ["FRH", "CWA"]:
+    if tp.afos[:3] not in ["FRH", "CWA", "DSM"]:
         jmsgs = tp.get_jabbers(
             common.SETTINGS.get("pywwa_product_url", "pywwa_product_url")
         )
