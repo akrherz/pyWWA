@@ -13,8 +13,7 @@ from pywwa.workflows import gini2gis
 def make_gini():
     """Generate a GINI file."""
     with open(get_example_filepath("TIGH05"), "rb") as fh:
-        res = gini.GINIZFile(fh)
-    return res
+        return gini.GINIZFile(fh)
 
 
 def test_process_input():

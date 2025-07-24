@@ -14,5 +14,4 @@ def get_example_file(filename):
     fullpath = get_example_filepath(filename)
     # Need to ensure that CRCRLF remain intact
     with open(fullpath, "rb") as fh:
-        data = fh.read().decode("utf-8")
-    return data
+        return fh.read().decode("utf-8")

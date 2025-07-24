@@ -108,6 +108,7 @@ lint.select = [
   "I",    # isort
   "NPY",  # numpy
   "PLW",  # pylint-warning
+  "RET",  # return statements
   "S324", # security
   "T",    # print
   # "UP",   # pyupgrade
