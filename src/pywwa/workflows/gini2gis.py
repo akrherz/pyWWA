@@ -32,8 +32,7 @@ def process_input():
         return None
     cstr.write(payload)
     cstr.seek(0)
-    sat = gini.GINIZFile(cstr)
-    return sat
+    return gini.GINIZFile(cstr)
 
 
 def do_legacy_ir(sat, tmpfn):
