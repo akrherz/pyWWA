@@ -12,6 +12,7 @@ All notable changes to this library are documented in this file.
 ### New Features
 
 - Create Faked AFOS identifiers for CDUS27 `DSM`.
+- Support Vaisala ASCII TSV NLDN data.
 
 ### Bug Fixes
 
