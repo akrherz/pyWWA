@@ -1,6 +1,6 @@
 """Test the ldmbrige."""
 
-import datetime
+from datetime import datetime, timezone
 from unittest import mock
 
 import pytest
@@ -20,8 +20,8 @@ def test_lineReceived():
     proto = ldmbridge.LDMProductReceiver(dedup=True)
     proto.reactor = mock.Mock()
     proto.process_data = mock.Mock()
-    proto.cache["test"] = datetime.datetime.utcnow()
-    proto.cache["test2"] = datetime.datetime(2007, 1, 1, 12, 14)
+    proto.cache["test"] = datetime.now(timezone.utc)
+    proto.cache["test2"] = datetime(2007, 1, 1, 12, 14)
     proto.clean_cache()
     proto.filter_product(r"test\r\r\ntest\r\r\ntest\x17\r\r\n\r\r\n")
     proto.filter_product(r"\r\r\n\r\r\n\r\r\n")
