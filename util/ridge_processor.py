@@ -100,12 +100,16 @@ def run():
     connection = get_rabbitmqconn()
     channel = connection.channel()
 
+    # Declare the exchange
     channel.exchange_declare(
         "ridgeProductExchange", exchange_type="fanout", durable=True
     )
-    result = channel.queue_declare("ridgeProductExchange", exclusive=True)
+
+    # Create an exclusive, auto-delete queue for this consumer
+    result = channel.queue_declare(queue="", exclusive=True)
     queue_name = result.method.queue
 
+    # Bind the queue to the exchange
     channel.queue_bind(exchange="ridgeProductExchange", queue=queue_name)
 
     channel.basic_consume(queue_name, generate_image, auto_ack=True)
