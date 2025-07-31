@@ -39,7 +39,7 @@ def generate_image(_ch, _method, properties, body):
     lowerRightLat = float(properties.headers["lowerRightLat"])
     lowerRightLon = float(properties.headers["lowerRightLon"])
     # Convert Java ticks into local time
-    gts = datetime(1970, 1, 1) + timedelta(seconds=(ticks / 1000))
+    gts = datetime(1970, 1, 1) + timedelta(seconds=ticks / 1000)
     gts = gts.replace(tzinfo=timezone.utc)
     utcnow = datetime.now(timezone.utc)
     routes = "ac"
