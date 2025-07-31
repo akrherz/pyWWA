@@ -1,11 +1,9 @@
 """A Twisted Python bridge for pqact exec'd processing"""
 
-# stdlib
-import datetime
 import hashlib
+from datetime import datetime, timedelta, timezone
 from io import BytesIO
 
-# twisted imports
 from twisted.internet import stdio
 from twisted.protocols import basic
 from twisted.python import log
@@ -42,7 +40,7 @@ class LDMProductReceiver(basic.LineReceiver):
 
     def clean_cache(self):
         """Cull old cache every 90 seconds"""
-        threshold = datetime.datetime.utcnow() - datetime.timedelta(hours=4)
+        threshold = datetime.now(timezone.utc) - timedelta(hours=4)
         # loop safety with this
         for digest in list(self.cache):
             if self.cache[digest] < threshold:
@@ -88,7 +86,7 @@ class LDMProductReceiver(basic.LineReceiver):
         if digest in self.cache:
             log.msg(f"DUP! {','.join(lines[1:5])}")
         else:
-            self.cache[digest] = datetime.datetime.utcnow()
+            self.cache[digest] = datetime.now(timezone.utc)
             self.process_data(clean + "\015\015\012")
 
     def rawDataReceived(self, data):

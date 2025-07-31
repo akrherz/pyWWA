@@ -1,7 +1,6 @@
 """PIREP parser!"""
 
-# stdlib
-import datetime
+from datetime import datetime, timedelta, timezone
 
 import click
 from pyiem.nws.products.pirep import parser as pirepparser
@@ -21,7 +20,7 @@ def cleandb():
     """To keep LSRDB from growing too big, we clean it out
     Lets hold 1 days of data!
     """
-    thres = datetime.datetime.utcnow() - datetime.timedelta(hours=24 * 1)
+    thres = datetime.now(timezone.utc) - timedelta(hours=24 * 1)
     init_size = len(PIREPS.keys())
     # loop safety
     for key in list(PIREPS):
@@ -100,7 +99,7 @@ def real_parser(txn, buf):
     for report in prod.reports:
         if report.text in PIREPS:
             report.is_duplicate = True
-        PIREPS[report.text] = datetime.datetime.utcnow()
+        PIREPS[report.text] = datetime.now(timezone.utc)
 
     j = prod.get_jabbers("unused")
     if prod.warnings:
