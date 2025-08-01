@@ -12,7 +12,7 @@ import subprocess
 import tempfile
 import warnings
 from copy import deepcopy
-from datetime import timezone
+from datetime import datetime, timezone
 
 import geopandas as gpd
 import httpx
@@ -74,7 +74,7 @@ def compute_cycle(day, valid):
     return -1
 
 
-def fetch_ero(day) -> gpd.GeoDataFrame:
+def fetch_ero(day: int, last_issue: datetime) -> gpd.GeoDataFrame:
     """Get the ERO from the WPC website."""
     # origin is IDP, www is akamai
     gdf = None
@@ -88,7 +88,11 @@ def fetch_ero(day) -> gpd.GeoDataFrame:
         except Exception as exp:
             LOG.info("Failed to fetch %s: %s", url, exp)
     if gdf is None:
-        LOG.warning("Failed to fetch Day%s", day)
+        # Swallow transient errors until we are very stale
+        lvl = LOG.info
+        if (utc() - last_issue).total_seconds() > 86_400:
+            lvl = LOG.warning
+        lvl("Failed to fetch Day%s", day)
         return None, None
     # Uppercase all the column names
     gdf.columns = [x.upper() if x != "geometry" else x for x in gdf.columns]
@@ -327,7 +331,7 @@ def main():
                 tzinfo=timezone.utc
             )
         # Fetch ERO
-        gdf, meta = fetch_ero(day)
+        gdf, meta = fetch_ero(day, last_issue)
         if gdf is None:
             continue
         # Compare with what we have, abort if same or older
