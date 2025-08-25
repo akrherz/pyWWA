@@ -82,7 +82,7 @@ VTEC_PRODUCTS = [
         channels=[C2, C3, C3p, C4, C5, C6],
         notes=(
             "This product does not get routed to the "
-            '<span class="badge">&lt;wfo&gt;</span> '
+            '<span class="badge bg-light text-dark">&lt;wfo&gt;</span> '
             "channel.  This is because the product is very frequently "
             "issued for offices with marine zones."
         ),
@@ -327,15 +327,20 @@ def do_generic(fh):
     fh.write(
         """
     <h3>NWS Local Office / National Products</h3>
-    <table class="table table-bordered table-condensed">
-    <thead>
-    <tr><td></td><th>AFOS PIL + Product Name</th><th>Directive</th>
-    <th>Channel Templates Used</th></tr>
+    <div class="table-responsive">
+    <table class="table table-bordered table-sm">
+    <thead class="table-light">
+    <tr>
+      <th scope="col" class="text-center"> </th>
+      <th scope="col">AFOS PIL + Product Name</th>
+      <th scope="col">Directive</th>
+      <th scope="col">Channel Templates Used</th>
+    </tr>
     </thead>
     """
     )
     for entry in GEN_PRODUCTS:
-        afos = entry["afos"]
+        afos: str = entry["afos"]
         if afos == "":
             continue
         try:
@@ -361,12 +366,23 @@ def do_generic(fh):
                 channels.append(channel)
         channels.sort()
         fh.write(
-            """<tr><td>
-<a id="channel_%s" class="btn btn-small" role="button"
- href="javascript: revdiv('%s');"><i class="fa fa-plus"></i></a>
-        </td><td>%s (%s)</td><td><a href="%s">%s</a></td><td>%s</td></tr>
-        <tr><td colspan="4"><div id="%s" style="display:none;">
-        <dl class="dl-horizontal">
+            """<tr>
+  <td class="text-center align-middle">
+    <button class="btn btn-sm" type="button"
+      data-bs-toggle="collapse" data-bs-target="#channel_%s"
+      aria-expanded="false">
+      <i class="bi bi-plus-lg" aria-hidden="true"></i>
+      <span class="visually-hidden">Toggle details</span>
+    </button>
+  </td>
+  <td>%s (%s)</td>
+  <td><a href="%s">%s</a></td>
+  <td>%s</td>
+</tr>
+<tr>
+  <td colspan="4">
+    <div id="channel_%s" class="collapse">
+    <dl class="row mb-0">
         %s
         <dt>Example Raw Text:</dt>
 <dd><a href="https://mesonet.agron.iastate.edu/p.php?pid=%s">View Text</a></dd>
@@ -380,14 +396,13 @@ def do_generic(fh):
         """
             % (
                 afos,
-                afos,
                 SPECIAL.get(afos, prodDefinitions.get(afos, afos)),
                 afos,
                 D[entry["directive"]],
                 entry["directive"],
                 " ".join(
                     [
-                        '<span class="badge">%s</span>' % (s,)
+                        f'<span class="badge bg-light text-dark">{s}</span>'
                         for s in entry["channels"]
                     ]
                 ),
@@ -397,14 +412,17 @@ def do_generic(fh):
                 else "",
                 v.get_product_id(),
                 " ".join(
-                    ['<span class="badge">%s</span>' % (s,) for s in channels]
+                    [
+                        f'<span class="badge bg-light text-dark">{s}</span>'
+                        for s in channels
+                    ]
                 ),
                 jmsg,
                 tweet,
             )
         )
 
-    fh.write("""</table>""")
+    fh.write("""</table></div>""")
 
 
 def do_vtec(fh):
@@ -412,10 +430,15 @@ def do_vtec(fh):
     fh.write(
         """
     <h3>NWS Products with P-VTEC and/or H-VTEC Included</h3>
-    <table class="table table-bordered table-condensed">
-    <thead>
-    <tr><td></td><th>AFOS PIL + Product Name</th><th>Directive</th>
-    <th>Channel Templates Used</th></tr>
+    <div class="table-responsive">
+    <table class="table table-bordered table-sm">
+    <thead class="table-light">
+    <tr>
+      <th scope="col" class="text-center"> </th>
+      <th scope="col">AFOS PIL + Product Name</th>
+      <th scope="col">Directive</th>
+      <th scope="col">Channel Templates Used</th>
+    </tr>
     </thead>
     """
     )
@@ -442,12 +465,23 @@ def do_vtec(fh):
                     channels.append(channel)
         channels.sort()
         fh.write(
-            """<tr><td>
-        <a id="channel_%s" class="btn btn-small" role="button"
- href="javascript: revdiv('%s');"><i class="fa fa-plus"></i></a>
-        </td><td>%s (%s)</td><td><a href="%s">%s</a></td><td>%s</td></tr>
-        <tr><td colspan="4"><div id="%s" style="display:none;">
-        <dl class="dl-horizontal">
+            """<tr>
+  <td class="text-center align-middle">
+    <button class="btn btn-sm" type="button"
+      data-bs-toggle="collapse" data-bs-target="#channel_%s"
+      aria-expanded="false">
+      <i class="bi bi-plus-lg" aria-hidden="true"></i>
+      <span class="visually-hidden">Toggle details</span>
+    </button>
+  </td>
+  <td>%s (%s)</td>
+  <td><a href="%s">%s</a></td>
+  <td>%s</td>
+</tr>
+<tr>
+  <td colspan="4">
+    <div id="channel_%s" class="collapse">
+    <dl class="row mb-0">
         %s
         <dt>Example Raw Text:</dt>
 <dd><a href="https://mesonet.agron.iastate.edu/p.php?pid=%s">View Text</a></dd>
@@ -461,14 +495,13 @@ def do_vtec(fh):
         """
             % (
                 afos,
-                afos,
                 prodDefinitions.get(afos, afos),
                 afos,
                 D[entry["directive"]],
                 entry["directive"],
                 " ".join(
                     [
-                        '<span class="badge">%s</span>' % (s,)
+                        f'<span class="badge bg-light text-dark">{s}</span>'
                         for s in entry["channels"]
                     ]
                 ),
@@ -478,34 +511,23 @@ def do_vtec(fh):
                 else "",
                 v.get_product_id(),
                 " ".join(
-                    ['<span class="badge">%s</span>' % (s,) for s in channels]
+                    [
+                        f'<span class="badge bg-light text-dark">{s}</span>'
+                        for s in channels
+                    ]
                 ),
                 jmsg,
                 tweet,
             )
         )
 
-    fh.write("""</table>""")
+    fh.write("""</table></div>""")
 
 
 def main():
     """Do Something Fun"""
     load_dicts()
     with open(CHANNELSFN, "w", encoding="utf-8") as fh:
-        fh.write(
-            """
-        <style>
-        .badge {
-            background-color: #EEEEEE;
-            color: #000;
-        }
-        .dl-horizontal dt {
-            white-space: normal;
-            padding-bottom: 10px;
-        }
-        </style>
-        """
-        )
         do_vtec(fh)
         do_generic(fh)
 
