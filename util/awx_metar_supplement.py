@@ -41,33 +41,38 @@ def main(network):
         # create faked noaaport header
         fh.write(b"000 \r\r\n")
         fh.write(f"SAUS70 KISU {utc():%d%H%M}\r\r\n".encode("ascii"))
-        for iemid, row in tqdm(
+        progress = tqdm(
             stations.iterrows(),
             disable=not sys.stdout.isatty(),
             total=len(stations.index),
-        ):
+        )
+        for iemid, row in progress:
             st4 = row["id"] if len(row["id"]) == 4 else f"K{row['id']}"
             url = (
-                "https://aviationweather.gov/cgi-bin/data/metar.php?"
-                f"ids={st4}&hours=48&order=id%2C-obs&sep=true"
+                "https://aviationweather.gov/api/data/metar?"
+                f"ids={st4}&format=raw&hours=36"
             )
             attempt = 0
             while attempt < 3:
                 attempt += 1
                 try:
-                    req = client.get(url, timeout=20)
-                    if req.status_code == 429:
+                    resp = client.get(url, timeout=20)
+                    if resp.status_code == 204:
+                        progress.write(f"No data for {st4}")
+                        break
+                    if resp.status_code == 429:
                         LOG.info("Got 429, cooling jets for 5 seconds.")
                         time.sleep(5)
                         continue
-                    if req.status_code != 200:
-                        LOG.warning("Failure %s %s", st4, req.status_code)
+                    if resp.status_code != 200:
+                        print(resp.text)
+                        LOG.warning("Failure %s %s", st4, resp.status_code)
                         continue
                     break
                 except Exception as exp:
                     LOG.info("Failed to fetch %s: %s", st4, exp)
             awx = {}
-            for line in req.text.split("\n"):
+            for line in resp.text.split("\n"):
                 if line.strip() == "":
                     continue
                 awx[line[5:11]] = f"{line}="
