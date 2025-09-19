@@ -58,14 +58,19 @@ def main(network):
                 try:
                     resp = client.get(url, timeout=20)
                     if resp.status_code == 204:
-                        progress.write(f"No data for {st4}")
+                        if sys.stdout.isatty():
+                            progress.write(f"No data for {st4}")
                         break
-                    if resp.status_code == 429:
-                        LOG.info("Got 429, cooling jets for 5 seconds.")
+                    # 429 is a backoff warning
+                    # 502 is a broken proxy service
+                    if resp.status_code in [429, 502]:
+                        LOG.info(
+                            "Got %s, cooling jets for 5 seconds.",
+                            resp.status_code,
+                        )
                         time.sleep(5)
                         continue
                     if resp.status_code != 200:
-                        print(resp.text)
                         LOG.warning("Failure %s %s", st4, resp.status_code)
                         continue
                     break
