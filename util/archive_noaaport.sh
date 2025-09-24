@@ -12,7 +12,7 @@ tar -czf ${yyyymmdd}.tgz ${yyyymmdd}??.txt
 rm -f ${yyyymmdd}??.txt
 mkdir -p /mesonet/ARCHIVE/raw/noaaport/$yyyy
 
-rpath="/stage/NOAAPortText/${yyyy}/${mm}"
+rpath="/offline/NOAAPortText/${yyyy}/${mm}"
 rsync -a --rsync-path "mkdir -p $rpath && rsync" ${yyyymmdd}.tgz meteor_ldm@akrherz-desktop.agron.iastate.edu:$rpath
 
 mv ${yyyymmdd}.tgz /mesonet/ARCHIVE/raw/noaaport/$yyyy/
