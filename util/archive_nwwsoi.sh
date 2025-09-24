@@ -7,7 +7,7 @@ cd /mesonet/tmp/nwwsoi/
 tar -czf ${yyyymmdd}.tgz ${yyyymmdd}??.txt
 rm -f ${yyyymmdd}??.txt
 
-rpath="/stage/NWWSOI/${yyyy}"
+rpath="/offline/NWWSOI/${yyyy}"
 rsync -a --remove-source-files --rsync-path "mkdir -p $rpath && rsync" ${yyyymmdd}.tgz meteor_ldm@akrherz-desktop.agron.iastate.edu:$rpath
 
 # END
