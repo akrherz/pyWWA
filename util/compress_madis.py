@@ -41,15 +41,15 @@ def process(mydir, valid):
     if not files:
         LOG.info("No gzip files found for %s", mydir)
         return
-    # rsync
+    remotedir = f" /offline/iemoffline/madis/{mydir}/{valid:%Y}"
     cmd = [
         "rsync",
         "-a",
         "--remove-source-files",
         "--rsync-path",
-        f"mkdir -p /stage/iemoffline/madis/{mydir}/{valid:%Y} && rsync",
+        f"mkdir -p {remotedir} && rsync",
         *files,
-        f"{HOST}:/stage/iemoffline/madis/{mydir}/{valid:%Y}/",
+        f"{HOST}:{remotedir}/",
     ]
     subprocess.call(cmd)
 
