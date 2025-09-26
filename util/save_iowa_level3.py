@@ -39,7 +39,7 @@ def run(dt: datetime):
                 stderr.decode("ascii", "ignore"),
             )
 
-    rpath = f"/stage/IowaNexrad3/{dt:%Y/%m}"
+    rpath = f"/offline/IowaNexrad3/{dt:%Y/%m}"
     cmd = (
         "rsync --remove-source-files -a --rsync-path "
         f'"mkdir -p {rpath} && rsync" '
