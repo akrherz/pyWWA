@@ -41,7 +41,7 @@ def process(mydir, valid):
     if not files:
         LOG.info("No gzip files found for %s", mydir)
         return
-    remotedir = f" /offline/iemoffline/madis/{mydir}/{valid:%Y}"
+    remotedir = f"/offline/iemoffline/madis/{mydir}/{valid:%Y}"
     cmd = [
         "rsync",
         "-a",
