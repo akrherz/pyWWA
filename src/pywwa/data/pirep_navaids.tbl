@@ -137,6 +137,7 @@ CCH3            Canmore Heliport                 -- CA  5109 -11535     0  0
 CCH4            Charlottetown                    -- CA  5277  -5611     0  0
 CCI9            Cortes Island                    -- CA  5002 -12498     0  0
 CCK3            Grand Falls                      -- CA  4708  -6769     0  0
+CCL2            Candle Lake Airpark              SK CA  5377 -10531     0  0
 CCL3            Christina Lake                   -- CA  5563 -11075     0  0
 CCL9            Outlook (South)                  SK CA  5144 -10700     0  0
 CCM3            Sevogle                          -- CA  4719  -6616     0  0
@@ -542,6 +543,7 @@ CPN3            Moose Factory                    ON CA  5125  -8062     0  0
 CPN5            Listowel                         -- CA  4374  -8099     0  0
 CPP8            Montreal Passport Helico         QB CA  4572  -7359     0  0
 CPQ3            Niagra Falls Heliport            ON CA  4312  -7908     0  0
+## CPR2
 CPR3            Palmerston                       -- CA  4385  -8078     0  0
 CPR5            Woodstock                        -- CA  4311  -8082     0  0
 CPR7            Wingham                          -- CA  4387  -8129     0  0
@@ -726,6 +728,7 @@ CYGD            Goderich                         -- CA  4377  -8171     0  0
 CYGM            Gimli                            MB CA  5063  -9704     0  0
 CYGO            Gods Lake Narrows                MB CA  5456  -9449     0  0
 CYGZ            Grise Fiord                      NU CA  7643  -8291     0  0
+CYHB            Hudson Bay                       SK CA  5282 -10231     0  0
 CYHC            Vancouver Habour                 -- CA  4939 -12311     0  0
 CYHF            Hearst Rene Fontaine             ON CA  4971  -8369     0  0
 CYHN            Hornepayne                       ON CA  4919  -8476     0  0
