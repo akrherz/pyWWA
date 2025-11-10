@@ -7,6 +7,7 @@ import logging
 import os
 import socket
 import sys
+import threading
 import traceback
 from email.mime.text import MIMEText
 from io import StringIO
@@ -27,6 +28,7 @@ from pywwa.database import get_dbconn
 # http://bugs.python.org/issue7980
 datetime.datetime.strptime("2013", "%Y")
 EMAIL_TIMESTAMPS = []
+EMAIL_TIMESTAMPS_LOCK = threading.Lock()
 
 
 class CustomFormatter(logging.Formatter):
@@ -126,23 +128,28 @@ def load_settings():
         cursor.close()
 
 
-def should_email():
+def should_email() -> bool:
     """Prevent email bombs
 
     Use the setting `pywwa_email_limit` to threshold the number of emails
     permitted within the past hour
 
-    @return boolean if we should email or not
+    Returns:
+        bool: True if an email should be sent, False if not
     """
-    EMAIL_TIMESTAMPS.insert(0, utc())
-    delta = EMAIL_TIMESTAMPS[0] - EMAIL_TIMESTAMPS[-1]
-    email_limit = int(SETTINGS.get("pywwa_email_limit", 10))
-    if len(EMAIL_TIMESTAMPS) < email_limit:
-        return True
-    while len(EMAIL_TIMESTAMPS) > email_limit:
-        EMAIL_TIMESTAMPS.pop()
+    with EMAIL_TIMESTAMPS_LOCK:
+        # Insert current timestamp into the beginning of the list
+        EMAIL_TIMESTAMPS.insert(0, utc())
+        # Figure out the amount of time from now to the end of the list
+        delta = EMAIL_TIMESTAMPS[0] - EMAIL_TIMESTAMPS[-1]
+        # Figure out the allowed limit over the hour interval
+        email_limit = int(SETTINGS.get("pywwa_email_limit", 10))
+        if len(EMAIL_TIMESTAMPS) < email_limit:
+            return True
+        while len(EMAIL_TIMESTAMPS) > email_limit:
+            EMAIL_TIMESTAMPS.pop()
 
-    return delta > datetime.timedelta(hours=1)
+        return delta > datetime.timedelta(hours=1)
 
 
 def email_error(exp, message="", trimstr=100):
