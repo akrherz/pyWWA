@@ -14,7 +14,6 @@ from pywwa.ldm import bridge
 
 def real_process(txn, raw):
     """Do work please"""
-    _sqlraw = raw.replace("\015\015\012", "\n")
     prod = product.TextProduct(raw, ugc_provider={}, utcnow=common.utcnow())
 
     product_id = prod.get_product_id()
