@@ -23,8 +23,8 @@ def handler(fnbase: str, fmt: str, bio: BytesIO):
 
         # Create the uncompressed version
         bio.seek(0)
-        with gzip.open(bio, "rb") as fh:
-            data = fh.read()
+        with gzip.open(bio, "rb") as gzfp:
+            data = gzfp.read()
         fmt = "tif"
     else:
         data = bio.getvalue()
