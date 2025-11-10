@@ -320,6 +320,7 @@ def load_dicts():
     nwsli_dict["MLU"] = NWSLI("MLU", lat=32.52, lon=-92.03)
     nwsli_dict["IGB"] = NWSLI("MLU", lat=33.48, lon=-88.52)
     nwsli_dict["MEI"] = NWSLI("MLU", lat=32.38, lon=-88.80)
+    pgconn.close()
 
 
 def do_generic(fh):
