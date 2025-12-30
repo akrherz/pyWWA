@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        PYTHON_VERSION: ["3.10", "3.11", "3.13"]
+        PYTHON_VERSION: ["3.10", "3.13", "3.14"]
     env:
       PYTHON_VERSION: ${{ matrix.PYTHON_VERSION }}
     steps:
@@ -47,7 +47,6 @@ jobs:
         condarc: |
           channels:
             - conda-forge
-            - defaults
         create-args: >-
           python=${{ env.PYTHON_VERSION }}
         environment-name: prod
@@ -63,7 +62,7 @@ jobs:
         python -m pip install . -vv --no-deps
         cp pywwa_settings.json-example pywwa_settings.json
         # This is a bit brittle, but loads some data
-        python util/ugcs_update.py --filename=fz08mr23 --date=2023-03-08
+        python util/ugcs_update.py --filename=fz18mr25 --date=2025-03-18
         python util/merge_hvtec_nwsli.py hvtec.list.20251006.csv
         python util/copy_iem_network.py MN_ASOS
         python util/copy_iem_network.py NY_COOP
@@ -117,7 +116,7 @@ jobs:
         pywwa-spammer --help
 
     - name: Upload coverage to Codecov
-      if: ${{ env.PYTHON_VERSION == '3.13' }}
+      if: ${{ env.PYTHON_VERSION == '3.14' }}
       uses: codecov/codecov-action@v5
       with:
         file: coverage.xml
