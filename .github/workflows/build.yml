@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        PYTHON_VERSION: ["3.10", "3.11", "3.13"]
+        PYTHON_VERSION: ["3.10", "3.13", "3.14"]
     env:
       PYTHON_VERSION: ${{ matrix.PYTHON_VERSION }}
     steps:
@@ -47,7 +47,6 @@ jobs:
         condarc: |
           channels:
             - conda-forge
-            - defaults
         create-args: >-
           python=${{ env.PYTHON_VERSION }}
         environment-name: prod
@@ -117,7 +116,7 @@ jobs:
         pywwa-spammer --help
 
     - name: Upload coverage to Codecov
-      if: ${{ env.PYTHON_VERSION == '3.13' }}
+      if: ${{ env.PYTHON_VERSION == '3.14' }}
       uses: codecov/codecov-action@v5
       with:
         file: coverage.xml
