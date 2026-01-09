@@ -60,6 +60,12 @@ def process_data(txn: Transaction, buf: str) -> TextProduct | None:
         return None
 
     nws = TextProduct(buf, utcnow=common.utcnow())
+    # Current understanding from
+    # https://mesonet.agron.iastate.edu/wx/afos/p.php?pil=PNSWSH&e=202512082135
+    # is that Juneau is now using MWW VTEC (actually 8 Jan 2026)
+    if nws.source == "PAJK" and nws.valid.year >= 2026:
+        LOG.info("Skipping Juneau product")
+        return None
     wfo = nws.source[1:]
     # VTEC storage does not cross year boundaries, at this time
     table = f"warnings_{nws.valid.year}"
