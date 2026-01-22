@@ -7,6 +7,9 @@ yyyymmdd=$(date --date "$1 day ago" +'%Y%m%d')
 yyyy=$(date --date "$1 day ago" +'%Y')
 mm=$(date --date "$1 day ago" +'%m')
 
+# Our pqact can't fix all the bad products
+/opt/miniconda3/envs/prod/bin/python clean_noaaport_text.py || exit 1
+
 cd /mesonet/tmp/offline/text/
 tar -czf ${yyyymmdd}.tgz ${yyyymmdd}??.txt
 rm -f ${yyyymmdd}??.txt
