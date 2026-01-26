@@ -42,6 +42,7 @@ NHC = {
     "URPN13": "REPPN3",
     "UZPN13": "REPPN3",  # checking with NHC
     "URPN14": "REPPNS",
+    "UZGL01": "UZGL01",  # email to NHC about this
 }
 
 
