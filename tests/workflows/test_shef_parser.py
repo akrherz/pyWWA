@@ -2,17 +2,15 @@
 
 import datetime
 from functools import partial
-
-# 3rd Party
-# pylint: disable=no-member-in-module
 from unittest import mock
 from zoneinfo import ZoneInfo
 
 import pytest
-
-# Local
+import pytest_twisted
 from psycopg.errors import DeadlockDetected
 from pyiem.util import utc
+from twisted.internet import reactor
+from twisted.internet.task import deferLater
 from twisted.python.failure import Failure
 
 from pywwa import CTX, SETTINGS
@@ -49,6 +47,58 @@ def sync_workflow(prod, cursor):
             )
     # Just exercise the API
     shef.process_accessdb_frontend()
+
+
+@pytest_twisted.inlineCallbacks
+def test_gh316_rr3_correction():
+    """Test that a RR3 Correction properly happens?"""
+
+    def _delete_raw_inbound(txn):
+        """Delete any prior data."""
+        txn.execute("delete from raw_inbound where station = 'LCHM5'")
+        return txn.rowcount
+
+    def _check_entry(txn):
+        txn.execute(
+            "select value from raw_inbound where station = 'LCHM5' and "
+            "key = 'SWIRZZZ' order by updated desc"
+        )
+        return txn.fetchall()
+
+    def _check_access_entry(txn):
+        txn.execute(
+            "select value from current_shef where station = 'LCHM5' and "
+            "physical_code = 'SW'"
+        )
+        return txn.fetchall()
+
+    result = yield CTX["HADSDB"].runInteraction(_delete_raw_inbound)
+    print(result)
+
+    CTX["utcnow"] = utc(2026, 2, 3, 16)
+    shef.process_data(get_example_file("SHEF/RR3MPX_1.txt"))
+    shef.process_data(get_example_file("SHEF/RR3MPX_2.txt"))
+    # Update iemaccess current_shef
+    updated = yield shef.save_current()
+    assert updated == 7
+    # Check 0: Ensure the HADSDB queue is done
+    attempt = 0
+    while CTX["HADSDB"].threadpool._queue.qsize() > 0:
+        attempt += 1
+        print("Waiting for HADSDB queue to drain...")
+        yield deferLater(reactor, 0.1, lambda: None)
+        if attempt > 30:
+            pytest.fail("HADSDB queue did not drain in time")
+
+    # Check 2: Assume accessdb is updated by now :/
+    result = yield CTX["ACCESSDB"].runInteraction(_check_access_entry)
+    assert result[0]["value"] is None
+    # Check 3: Ensure the value in the current_queue is None
+    assert shef.CURRENT_QUEUE["LCHM5|SWIRZZZ|None"]["value"] is None
+    # Check 4: Check what is in raw_inbound
+    result = yield CTX["HADSDB"].runInteraction(_check_entry)
+    assert len(result) == 2
+    assert result[0]["value"] is None
 
 
 def test_accessdb_exception():
