@@ -1,7 +1,9 @@
 """For testing."""
 
-# 3rd party
+import sys
+
 import pytest
+from twisted.python import log
 
 from pywwa import CTX, CTX_DEFAULTS
 from pywwa.database import get_dbconnc
@@ -10,6 +12,7 @@ from pywwa.database import get_dbconnc
 # pytest + twisted + click == too much magic for poor me
 # So, this effectively disables reactor.stop() from working
 CTX_DEFAULTS["shutdown_delay"] = 1800
+log.startLogging(sys.stdout)
 
 
 @pytest.fixture(autouse=True)
