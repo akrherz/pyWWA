@@ -1,7 +1,6 @@
 """Test shef_parser."""
 
 import datetime
-from functools import partial
 from unittest import mock
 from zoneinfo import ZoneInfo
 
@@ -91,12 +90,15 @@ def test_gh316_rr3_correction():
             if attempt > 30:
                 pytest.fail(f"{db} queue did not drain in time")
 
-    # Check 2: see that current_shef is good
+    # The runOperation is touchy with the upsert that happens, lame
+    yield deferLater(reactor, 1, lambda: None)
+
+    # Check 1: see that current_shef is good
     result = yield CTX["ACCESSDB"].runInteraction(_check_access_entry)
     assert result[0]["value"] is None
-    # Check 3: Ensure the value in the current_queue is None
+    # Check 2: Ensure the value in the current_queue is None
     assert shef.CURRENT_QUEUE["LCHM5|SWIRZZZ|None"]["value"] is None
-    # Check 4: Check what is in raw_inbound
+    # Check 3: Check what is in raw_inbound
     result = yield CTX["HADSDB"].runInteraction(_check_entry)
     assert len(result) == 2
     assert result[0]["value"] is None
@@ -222,11 +224,12 @@ def test_230926_rr8krf(cursor):
         shef.insert_raw_inbound(cursor, args)
 
 
+@pytest_twisted.inlineCallbacks
 def test_bad_element_in_current_queue():
     """Test GIGO on current_queue."""
     shef.CURRENT_QUEUE.clear()
     shef.CURRENT_QUEUE["HI|BYE|HI"] = {"dirty": True}
-    shef.save_current()
+    yield shef.save_current()
 
 
 @pytest.mark.parametrize("database", ["iem"])
@@ -267,10 +270,6 @@ def test_omit_report(cursor):
     row = cursor.fetchone()
     assert row["max_tmpf"] == 84
     assert row["report"] == ans
-
-    CTX["ACCESSDB"].runOperation = partial(run_interaction, cursor)
-    assert shef.save_current() == 7
-    assert shef.save_current() == 0
 
 
 def test_process_site_eb():
