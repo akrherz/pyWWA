@@ -83,14 +83,15 @@ def test_gh316_rr3_correction():
     assert updated == 7
     # Check 0: Ensure the HADSDB queue is done
     attempt = 0
-    while CTX["HADSDB"].threadpool._queue.qsize() > 0:
-        attempt += 1
-        print("Waiting for HADSDB queue to drain...")
-        yield deferLater(reactor, 0.1, lambda: None)
-        if attempt > 30:
-            pytest.fail("HADSDB queue did not drain in time")
+    for db in ["HADSDB", "ACCESSDB"]:
+        while CTX[db].threadpool._queue.qsize() > 0:
+            attempt += 1
+            print(f"Waiting for {db} queue to drain...")
+            yield deferLater(reactor, 0.1, lambda: None)
+            if attempt > 30:
+                pytest.fail(f"{db} queue did not drain in time")
 
-    # Check 2: Assume accessdb is updated by now :/
+    # Check 2: see that current_shef is good
     result = yield CTX["ACCESSDB"].runInteraction(_check_access_entry)
     assert result[0]["value"] is None
     # Check 3: Ensure the value in the current_queue is None
