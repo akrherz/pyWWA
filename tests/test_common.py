@@ -1,5 +1,6 @@
 """Test pywwa.common"""
 
+import pytest_twisted
 from pyiem.util import utc
 
 from pywwa import CTX, common
@@ -31,9 +32,10 @@ def test_should_email():
     assert not common.email_error(None, None)
 
 
+@pytest_twisted.inlineCallbacks
 def test_email_error():
     """Test that we can email an error."""
     common.EMAIL_TIMESTAMPS = []
-    common.email_error(None, None)
+    yield common.email_error(None, None)
     CTX["disable_email"] = True
-    common.email_error(None, None)
+    yield common.email_error(None, None)

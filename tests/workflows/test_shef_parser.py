@@ -1,18 +1,15 @@
 """Test shef_parser."""
 
 import datetime
-from functools import partial
-
-# 3rd Party
-# pylint: disable=no-member-in-module
 from unittest import mock
 from zoneinfo import ZoneInfo
 
 import pytest
-
-# Local
+import pytest_twisted
 from psycopg.errors import DeadlockDetected
 from pyiem.util import utc
+from twisted.internet import reactor
+from twisted.internet.task import deferLater
 from twisted.python.failure import Failure
 
 from pywwa import CTX, SETTINGS
@@ -49,6 +46,62 @@ def sync_workflow(prod, cursor):
             )
     # Just exercise the API
     shef.process_accessdb_frontend()
+
+
+@pytest_twisted.inlineCallbacks
+def test_gh316_rr3_correction():
+    """Test that a RR3 Correction properly happens?"""
+
+    def _delete_raw_inbound(txn):
+        """Delete any prior data."""
+        txn.execute("delete from raw_inbound where station = 'LCHM5'")
+        return txn.rowcount
+
+    def _check_entry(txn):
+        txn.execute(
+            "select value from raw_inbound where station = 'LCHM5' and "
+            "key = 'SWIRZZZ' order by updated desc"
+        )
+        return txn.fetchall()
+
+    def _check_access_entry(txn):
+        txn.execute(
+            "select value from current_shef where station = 'LCHM5' and "
+            "physical_code = 'SW'"
+        )
+        return txn.fetchall()
+
+    result = yield CTX["HADSDB"].runInteraction(_delete_raw_inbound)
+    print(result)
+
+    CTX["utcnow"] = utc(2026, 2, 3, 16)
+    shef.process_data(get_example_file("SHEF/RR3MPX_1.txt"))
+    shef.process_data(get_example_file("SHEF/RR3MPX_2.txt"))
+    # Update iemaccess current_shef
+    updated = yield shef.save_current()
+    assert updated == 7
+    # Check 0: Ensure the HADSDB queue is done
+    attempt = 0
+    for db in ["HADSDB", "ACCESSDB"]:
+        while CTX[db].threadpool._queue.qsize() > 0:
+            attempt += 1
+            print(f"Waiting for {db} queue to drain...")
+            yield deferLater(reactor, 0.1, lambda: None)
+            if attempt > 30:
+                pytest.fail(f"{db} queue did not drain in time")
+
+    # The runOperation is touchy with the upsert that happens, lame
+    yield deferLater(reactor, 1, lambda: None)
+
+    # Check 1: see that current_shef is good
+    result = yield CTX["ACCESSDB"].runInteraction(_check_access_entry)
+    assert result[0]["value"] is None
+    # Check 2: Ensure the value in the current_queue is None
+    assert shef.CURRENT_QUEUE["LCHM5|SWIRZZZ|None"]["value"] is None
+    # Check 3: Check what is in raw_inbound
+    result = yield CTX["HADSDB"].runInteraction(_check_entry)
+    assert len(result) == 2
+    assert result[0]["value"] is None
 
 
 def test_accessdb_exception():
@@ -171,11 +224,12 @@ def test_230926_rr8krf(cursor):
         shef.insert_raw_inbound(cursor, args)
 
 
+@pytest_twisted.inlineCallbacks
 def test_bad_element_in_current_queue():
     """Test GIGO on current_queue."""
     shef.CURRENT_QUEUE.clear()
     shef.CURRENT_QUEUE["HI|BYE|HI"] = {"dirty": True}
-    shef.save_current()
+    yield shef.save_current()
 
 
 @pytest.mark.parametrize("database", ["iem"])
@@ -216,10 +270,6 @@ def test_omit_report(cursor):
     row = cursor.fetchone()
     assert row["max_tmpf"] == 84
     assert row["report"] == ans
-
-    CTX["ACCESSDB"].runOperation = partial(run_interaction, cursor)
-    assert shef.save_current() == 7
-    assert shef.save_current() == 0
 
 
 def test_process_site_eb():

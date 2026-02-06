@@ -1,11 +1,8 @@
 """Test nexrad3_attr."""
 
-# 3rd Party
 import pytest
 
 from pywwa.testing import get_example_filepath
-
-# Local
 from pywwa.workflows import nexrad3_attr
 
 
@@ -29,7 +26,7 @@ def test_process(cursor):
 def test_210910_badvil(cursor):
     """Test that a missing VIL does not cause issues."""
     with open(get_example_filepath("NCR_20210911_0023"), "rb") as fh:
-        ctx = nexrad3_attr.process(fh)
+        ctx = nexrad3_attr.process_data(fh.read())
     assert ctx["nexrad"] == "LAS"
     processed = nexrad3_attr.really_process(cursor, ctx)
     assert processed == 2

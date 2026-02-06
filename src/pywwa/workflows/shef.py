@@ -16,6 +16,7 @@ from pyiem.nws.products.shef import parser
 from pyiem.observation import Observation
 from pyiem.util import convert_value, utc
 from twisted.internet import reactor
+from twisted.internet.defer import Deferred
 from twisted.internet.task import LoopingCall, deferLater
 
 # Local
@@ -361,11 +362,13 @@ def insert_raw_inbound(cursor, args) -> int:
     return cursor.rowcount
 
 
-def update_current_queue(element: SHEFElement, product_id: str):
+def update_current_queue(
+    element: SHEFElement, product_id: str
+) -> Deferred | None:
     """Update CURRENT_QUEUE with new data."""
     # We only want observations
     if element.type != "R":
-        return
+        return None
     args = (
         element.station,
         element.valid,
@@ -385,7 +388,7 @@ def update_current_queue(element: SHEFElement, product_id: str):
         key, dict(valid=element.valid, value=element.num_value, dirty=True)
     )
     if element.valid < cur["valid"]:
-        return
+        return None
     cur["valid"] = element.valid
     cur["depth"] = element.depth
     cur["value"] = element.num_value
@@ -394,6 +397,8 @@ def update_current_queue(element: SHEFElement, product_id: str):
     cur["unit_convention"] = element.unit_convention
     cur["product_id"] = product_id
     cur["dirty"] = True
+
+    return defer
 
 
 def process_site_time(prod, sid, ts, elements: list[SHEFElement]):
@@ -532,7 +537,7 @@ def write_access_records_eb(err, records: list, iemid, entry: ACCESSDB_ENTRY):
     common.email_error(err, f"write_access_entry({entry.station}) got {err}")
 
 
-def process_data(text):
+def process_data(text: str):
     """Callback when text is received."""
     prod = parser(text, utcnow=common.utcnow(), ugc_provider={})
     if prod.warnings:

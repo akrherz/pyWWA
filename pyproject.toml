@@ -117,6 +117,9 @@ lint.select = [
 lint.per-file-ignores."goes/*.py" = [
   "T201",
 ]
+lint.per-file-ignores."tests/*.py" = [
+  "T201",
+]
 lint.per-file-ignores."util/*.py" = [
   "T201",
 ]

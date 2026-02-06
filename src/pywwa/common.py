@@ -205,11 +205,14 @@ def email_error(exp, message="", trimstr=100):
     msg["subject"] = (
         f"[pyWWA] {sys.argv[0].rsplit('/', maxsplit=1)[-1]} Traceback -- {hn}"
     )
-    msg["From"] = SETTINGS.get("pywwa_errors_from", "ldm@localhost")
-    msg["To"] = SETTINGS.get("pywwa_errors_to", "ldm@localhost")
+    msg["From"] = SETTINGS.get("pywwa_errors_from", "root@localhost")
+    msg["To"] = SETTINGS.get("pywwa_errors_to", "root@localhost")
     if not CTX["disable_email"]:
         df = smtp.sendmail(
-            SETTINGS.get("pywwa_smtp", "smtp"), msg["From"], msg["To"], msg
+            SETTINGS.get("pywwa_smtp", "localhost"),
+            msg["From"],
+            msg["To"],
+            msg,
         )
         df.addErrback(LOG.error)
     else:
