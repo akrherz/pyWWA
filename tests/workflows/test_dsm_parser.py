@@ -15,8 +15,8 @@ def test_load_stations(cursor):
     """Test station loading."""
     # Need to set one station to a bad tzname to exercise an exception
     cursor.execute(
-        "UPDATE stations SET tzname = 'BoG0S' where id = 'MSP' and "
-        "network = 'MN_ASOS'"
+        "UPDATE stations SET tzname = 'BoG0S' where id = 'DSM' and "
+        "network = 'IA_ASOS'"
     )
     assert cursor.rowcount == 1
     dsm.load_stations(cursor)

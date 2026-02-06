@@ -13,14 +13,12 @@ with watches.  Lets try to explain
 
 from functools import partial
 
-# 3rd Party
 import click
 from pyiem.database import get_sqlalchemy_conn
 from pyiem.nws.products.vtec import parser as vtecparser
 from pyiem.nws.ugc import UGCProvider
 from twisted.mail.smtp import SMTPSenderFactory
 
-# Local
 from pywwa import LOG, common
 from pywwa.database import get_database, load_nwsli
 from pywwa.ldm import bridge

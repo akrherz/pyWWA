@@ -1,16 +1,14 @@
 """XTEUS Product Parser!"""
 
-# 3rd Party
 import click
 from pyiem.nws.products.xteus import parser
 
-# Local
 from pywwa import common
 from pywwa.database import get_database
 from pywwa.ldm import bridge
 
 
-def process_data(txn, data):
+def process_data(txn, data: str):
     """Process the product"""
     prod = parser(data, utcnow=common.utcnow())
     if prod.warnings:

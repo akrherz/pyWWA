@@ -33,15 +33,15 @@ def load_station_table(txn):
     LOG.info("Station Table size %s", len(ST.keys()))
 
 
-def process_data(data):
+def process_data(data: bytes) -> dict:
     """I am called when data is ahoy"""
     bio = BytesIO()
     bio.write(data)
     bio.seek(0)
-    process(bio)
+    return process(bio)
 
 
-def process(bio):
+def process(bio: BytesIO) -> dict:
     """Process our data, please"""
     l3 = Level3File(bio)
     ctx = {
@@ -57,7 +57,7 @@ def process(bio):
             if "text" in line:
                 ctx["lines"].append(line["text"])
     df = PGCONN.runInteraction(really_process, ctx)
-    df.addErrback(common.email_error, ctx)
+    df.addErrback(common.email_error, str(ctx))
     return ctx
 
 
