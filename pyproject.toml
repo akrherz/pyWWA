@@ -47,7 +47,6 @@ dependencies = [
   "treq",
   "twisted",
 ]
-
 urls.Changelog = "https://github.com/akrherz/pyWWA/blob/main/CHANGELOG.md"
 urls.Documentation = "https://github.com/akrherz/pyWWA"
 urls.Homepage = "https://mesonet.agron.iastate.edu"
@@ -96,23 +95,18 @@ version_scheme = "post-release"
 [tool.ruff]
 target-version = "py310"
 line-length = 79
-
 lint.select = [
-  "A",   # builtins
-  "B",   # bugbear
-  "E",   # pycodestyle
-  "ERA", # commented out code
-  "F",   # pyflakes
-  # "FIX",  # FIXME
-  "G",    # logging-format
+  "A",    # builtins
+  "B",    # bugbear
+  "E",    # pycodestyle
+  "ERA",  # commented out code
+  "F",    # pyflakes
   "I",    # isort
   "NPY",  # numpy
   "PLW",  # pylint-warning
   "RET",  # return statements
   "S324", # security
   "T",    # print
-  # "UP",   # pyupgrade
-  "W", # pycodestyle
 ]
 lint.per-file-ignores."goes/*.py" = [
   "T201",
@@ -124,7 +118,7 @@ lint.per-file-ignores."util/*.py" = [
   "T201",
 ]
 
-[tool.pytest.ini_options]
-filterwarnings = [
+[tool.pytest]
+ini_options.filterwarnings = [
   "ignore:numpy.ndarray size changed:RuntimeWarning",
 ]
