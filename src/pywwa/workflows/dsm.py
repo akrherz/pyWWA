@@ -38,6 +38,12 @@ def real_parser(txn, data):
     prod.tzlocalize(STATIONS)
     if common.dbwrite_enabled():
         prod.sql(txn)
+    jres = prod.get_jabbers(
+        common.SETTINGS.get("pywwa_product_url", "pywwa_product_url")
+    )
+    for j in jres:
+        common.send_message(j[0], j[1], j[2])
+
     if prod.warnings:
         common.email_error("\n".join(prod.warnings), data)
 
