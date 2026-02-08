@@ -7,6 +7,7 @@ import sys
 from pyiem.nws.nwsli import NWSLI
 from pyiem.nws.products import parser as productparser
 from pyiem.nws.products.cwa import parser as cwaparser
+from pyiem.nws.products.dsm import parser as dsmparser
 from pyiem.nws.products.vtec import parser as vtec_parser
 from pyiem.nws.ugc import UGC
 from pyiem.reference import prodDefinitions
@@ -16,6 +17,7 @@ from pywwa.database import get_dbconnc
 
 PARSERS = {
     "CWA": cwaparser,
+    "DSM": dsmparser,
 }
 CHANNELSFN = "/home/akrherz/projects/iem/htdocs/projects/iembot/channels.html"
 LOG = logger()
@@ -121,6 +123,7 @@ GEN_PRODUCTS = [
     dict(afos="CWA", directive="10-803", channels=S2),
     dict(afos="CWF", directive="10-1701", channels=S2),
     dict(afos="DGT", directive="10-1701", channels=S2),
+    dict(afos="DSM", directive="10-1701", channels=S2),
     dict(afos="ESF", directive="10-1701", channels=S2),
     dict(afos="EQI", directive="10-1701", channels=S2),
     dict(afos="EQR", directive="10-1701", channels=S2),
@@ -350,11 +353,12 @@ def do_generic(fh):
                 ugc_provider=ugc_dict,
                 nwsli_provider=nwsli_dict,
             )
-            assert v.afos is not None
         except Exception as exp:
             LOG.info("ABORT: productparser %s failed", afos)
             LOG.exception(exp)
             sys.exit()
+        if afos != "DSM":
+            assert v.afos is not None
         j = v.get_jabbers("https://mesonet.agron.iastate.edu/p.php")
         channels = []
         _, html, xtra = j[0]
