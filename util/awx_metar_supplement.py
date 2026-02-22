@@ -78,9 +78,14 @@ def main(network):
                     LOG.info("Failed to fetch %s: %s", st4, exp)
             awx = {}
             for line in resp.text.split("\n"):
-                if line.strip() == "":
+                if st4 not in line:
                     continue
-                awx[line[5:11]] = f"{line}="
+                # Crude lookup by timestamp
+                meat = line.split(st4, maxsplit=1)[1].strip()
+                if meat[6] != "Z":
+                    LOG.warning("Unknown line `%s`", line)
+                    continue
+                awx[meat[:6]] = f"{line}="
             res = conn.execute(
                 sql_helper(
                     "select valid at time zone 'UTC' as v from current_log "
