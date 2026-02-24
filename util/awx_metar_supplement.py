@@ -82,8 +82,8 @@ def main(network):
                     continue
                 # Crude lookup by timestamp
                 meat = line.split(st4, maxsplit=1)[1].strip()
-                if meat[6] != "Z":
-                    LOG.warning("%s unparsable `%s`", st4, line)
+                if len(meat) < 8 or meat[6] != "Z":
+                    LOG.info("%s unparsable `%s`", st4, line)
                     continue
                 awx[meat[:6]] = f"{line}="
             res = conn.execute(
