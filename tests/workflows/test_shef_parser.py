@@ -49,6 +49,44 @@ def sync_workflow(prod, cursor):
 
 
 @pytest_twisted.inlineCallbacks
+def test_gh316_rr3_correction_reduex():
+    """Test another problem found with a RR3 Correction."""
+
+    def _check_access_entry(txn):
+        txn.execute(
+            "select value from current_shef where station = 'WACI4' and "
+            "physical_code = 'SW'"
+        )
+        return txn.fetchall()
+
+    CTX["utcnow"] = utc(2026, 3, 4, 16)
+    shef.process_data(get_example_file("SHEF/RR3ARX_1.txt"))
+    assert shef.CURRENT_QUEUE["WACI4|SWIRZZZ|None"]["value"] == 6.0
+    shef.process_data(get_example_file("SHEF/RR3ARX_2.txt"))
+    assert shef.CURRENT_QUEUE["WACI4|SWIRZZZ|None"]["value"] is None
+
+    # Update iemaccess current_shef
+    updated = yield shef.save_current()
+    assert updated == 4
+    # Check 0: Ensure the HADSDB queue is done
+    attempt = 0
+    for db in ["HADSDB", "ACCESSDB"]:
+        while CTX[db].threadpool._queue.qsize() > 0:
+            attempt += 1
+            print(f"Waiting for {db} queue to drain...")
+            yield deferLater(reactor, 0.1, lambda: None)
+            if attempt > 30:
+                pytest.fail(f"{db} queue did not drain in time")
+
+    # The runOperation is touchy with the upsert that happens, lame
+    yield deferLater(reactor, 1, lambda: None)
+
+    # Check 1: see that current_shef is good
+    result = yield CTX["ACCESSDB"].runInteraction(_check_access_entry)
+    assert result[0]["value"] is None
+
+
+@pytest_twisted.inlineCallbacks
 def test_gh316_rr3_correction():
     """Test that a RR3 Correction properly happens?"""
 
