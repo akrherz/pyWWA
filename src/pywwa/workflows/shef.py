@@ -366,9 +366,6 @@ def update_current_queue(
     element: SHEFElement, product_id: str
 ) -> Deferred | None:
     """Update CURRENT_QUEUE with new data."""
-    # We only want observations
-    if element.type != "R":
-        return None
     args = (
         element.station,
         element.valid,
@@ -387,16 +384,15 @@ def update_current_queue(
     cur = CURRENT_QUEUE.setdefault(
         key, dict(valid=element.valid, value=element.num_value, dirty=True)
     )
-    if element.valid < cur["valid"]:
-        return None
-    cur["valid"] = element.valid
-    cur["depth"] = element.depth
-    cur["value"] = element.num_value
-    cur["dv_interval"] = element.dv_interval
-    cur["qualifier"] = element.qualifier
-    cur["unit_convention"] = element.unit_convention
-    cur["product_id"] = product_id
-    cur["dirty"] = True
+    if element.valid >= cur["valid"]:
+        cur["valid"] = element.valid
+        cur["depth"] = element.depth
+        cur["value"] = element.num_value
+        cur["dv_interval"] = element.dv_interval
+        cur["qualifier"] = element.qualifier
+        cur["unit_convention"] = element.unit_convention
+        cur["product_id"] = product_id
+        cur["dirty"] = True
 
     return defer
 
@@ -551,8 +547,9 @@ def process_data(text: str):
     product_id = prod.get_product_id()
     # Update CURRENT_QUEUE
     time_threshold = common.utcnow() + P1H
-    for element in [e for e in prod.data if e.valid < time_threshold]:
-        update_current_queue(element, product_id)
+    for element in prod.data:
+        if element.valid < time_threshold and element.type == "R":
+            update_current_queue(element, product_id)
     # Create a nicer data structure
     mydata = restructure_data(prod)
     # Chunk thru each of the sites found and do work.
