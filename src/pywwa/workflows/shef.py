@@ -275,11 +275,34 @@ def save_current() -> int:
             LOG.info("Got varname of '%s' somehow? %s", varname, mydict)
             continue
 
+        # database unique on
+        # (station, physical_code, duration, source, type, extremum,
+        #  probability, depth, qualifier, unit_convention)
         d2 = CTX["ACCESSDB"].runOperation(
-            "INSERT into current_shef(station, valid, physical_code, "
-            "duration, source, type, extremum, probability, value, depth, "
-            "dv_interval, unit_convention, qualifier, product_id) "
-            "values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
+            """
+    INSERT into current_shef(station, valid, physical_code,
+    duration, source, type, extremum, probability, value, depth,
+    dv_interval, unit_convention, qualifier, product_id)
+    values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+    ON CONFLICT (station, physical_code, duration, source, type, extremum,
+          probability, depth, qualifier, unit_convention) do update
+    set
+      valid = EXCLUDED.valid, value = EXCLUDED.value,
+      product_id = EXCLUDED.product_id, dv_interval = EXCLUDED.dv_interval
+    where
+     current_shef.station = EXCLUDED.station and
+     current_shef.physical_code = EXCLUDED.physical_code and
+     current_shef.duration = EXCLUDED.duration and
+     current_shef.source = EXCLUDED.source and
+     current_shef.type = EXCLUDED.type and
+     current_shef.extremum = EXCLUDED.extremum and
+     current_shef.probability is not distinct from EXCLUDED.probability and
+     current_shef.depth is not distinct from EXCLUDED.depth and
+     current_shef.qualifier is not distinct from EXCLUDED.qualifier and
+     current_shef.unit_convention is not distinct from EXCLUDED.unit_convention
+     and current_shef.valid <= EXCLUDED.valid
+
+    """,
             (
                 sid,
                 mydict["valid"],
