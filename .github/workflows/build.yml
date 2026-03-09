@@ -62,7 +62,6 @@ jobs:
         python -m pip install . -vv --no-deps
         cp pywwa_settings.json-example pywwa_settings.json
         # This is a bit brittle, but loads some data
-        python util/ugcs_update.py --filename=fz18mr25 --date=2025-03-18
         python util/merge_hvtec_nwsli.py hvtec.list.20251006.csv
         python util/copy_iem_network.py MN_ASOS
         python util/copy_iem_network.py NY_COOP
@@ -72,7 +71,8 @@ jobs:
         sh util/run_examples.sh
         # get pqinsert available as a dummy command
         export PATH=$PATH:$(pwd)/tests/bin
-        python -m pytest -vv --cov=pywwa --cov-report=xml
+        python -m pytest -vv --cov=pywwa
+        python -m coverage xml
 
     - name: Run console scripts without database
       run: |
