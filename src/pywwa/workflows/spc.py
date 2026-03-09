@@ -1,10 +1,8 @@
 """SPC Geo Products Parser!"""
 
-# 3rd Party
 import click
 from pyiem.nws.products.spcpts import parser
 
-# Local
 from pywwa import LOG, common
 from pywwa.database import get_database
 from pywwa.ldm import bridge
