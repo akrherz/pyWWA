@@ -471,7 +471,7 @@ def ready(_):
     df.addErrback(common.email_error)
 
 
-@click.command(help=__doc__)
+@click.command(help="Parse BUFR surface data.")
 @common.init
 @common.disable_xmpp
 def main(*args, **kwargs):

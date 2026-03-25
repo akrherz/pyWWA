@@ -11,6 +11,8 @@ All notable changes to this library are documented in this file.
 
 ### Bug Fixes
 
+- Correct CLI help for some commands.
+
 ## **1.7.1** (23 Sep 2025)
 
 ### API Changes

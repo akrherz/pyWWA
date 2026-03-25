@@ -53,7 +53,7 @@ def load_stations():
     return nt
 
 
-@click.command(help=__doc__)
+@click.command(help="Parse CLI Text Products.")
 @common.init
 def main(*args, **kwargs):
     """Go Main Go."""

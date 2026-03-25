@@ -86,7 +86,7 @@ def process_data(txn, line: str) -> None:
     return
 
 
-@click.command(help=__doc__)
+@click.command(help="Parse NLDN csv files.")
 @common.init
 @common.disable_xmpp
 def main(*args, **kwargs):

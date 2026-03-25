@@ -76,7 +76,7 @@ def step2(_dummy, text_product):
         common.send_message(plain, html, xtra)
 
 
-@click.command(help=__doc__)
+@click.command(help="Parse text products with VTEC information.")
 @common.init
 def main(*args, **kwargs):
     """Go Main Go."""
