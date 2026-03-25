@@ -166,7 +166,7 @@ def ready(_):
     lc.start(720, now=False)
 
 
-@click.command(help=__doc__)
+@click.command(help="Parse METARs.")
 @common.init
 def main(*args, **kwargs):
     """Run once at startup"""

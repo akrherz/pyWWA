@@ -42,7 +42,7 @@ def real_process(txn, data):
         txn.execute(sql, sqlargs)
 
 
-@click.command(help=__doc__)
+@click.command(help="Parse RR7 Products.")
 @common.init
 @common.disable_xmpp
 def main(*args, **kwargs):

@@ -20,7 +20,7 @@ def process_data(txn, text):
     prod.sql(txn)
 
 
-@click.command(help=__doc__)
+@click.command(help="Parse MOS data.")
 @common.init
 @common.disable_xmpp
 def main(*args, **kwargs):
