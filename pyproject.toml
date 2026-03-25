@@ -13,7 +13,7 @@ keywords = [
   "meteorology",
   "nws",
 ]
-license = { "text" = "Apache" }
+license = { text = "Apache" }
 authors = [
   { name = "daryl herzmann", email = "akrherz@gmail.com" },
 ]
