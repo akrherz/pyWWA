@@ -485,7 +485,7 @@ def process_site_time(prod, sid, ts, elements: list[SHEFElement]):
                 record["data"][iemvar] = 0
         if iemvar in ["sknt", "gust"] and val is not None:
             # mph to knots :/
-            val = convert_value(val, "mile / hour", "knot")
+            record["data"][iemvar] = convert_value(val, "mile / hour", "knot")
         if network.find("_COOP") > 0:
             # Save COOP 'at-ob' temperature into summary table
             if iemvar == "tmpf":
