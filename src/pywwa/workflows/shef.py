@@ -282,8 +282,8 @@ def save_current() -> int:
             """
     INSERT into current_shef(station, valid, physical_code,
     duration, source, type, extremum, probability, value, depth,
-    dv_interval, unit_convention, qualifier, product_id)
-    values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+    dv_interval, unit_convention, qualifier, product_id, comment)
+    values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
     ON CONFLICT (station, physical_code, duration, source, type, extremum,
           probability, depth, qualifier, unit_convention) do update
     set
@@ -318,6 +318,7 @@ def save_current() -> int:
                 mydict["unit_convention"],
                 mydict["qualifier"],
                 mydict["product_id"],
+                mydict["narrative"],
             ),
         )
         d2.addErrback(common.email_error, "")
@@ -415,6 +416,7 @@ def update_current_queue(
         cur["qualifier"] = element.qualifier
         cur["unit_convention"] = element.unit_convention
         cur["product_id"] = product_id
+        cur["narrative"] = element.narrative
         cur["dirty"] = True
 
     return defer

@@ -9,6 +9,8 @@ All notable changes to this library are documented in this file.
 
 ### New Features
 
+- [SHEF] persist narrative/comments to `current_shef` IEMAccess storage.
+
 ### Bug Fixes
 
 - Correct CLI help for some commands.
