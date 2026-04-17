@@ -54,8 +54,8 @@ def test_gh316_rr3_correction_reduex():
 
     def _check_access_entry(txn):
         txn.execute(
-            "select value from current_shef where station = 'WACI4' and "
-            "physical_code = 'SW'"
+            "select value, comment from current_shef where station = 'WACI4' "
+            "and physical_code = 'SW'"
         )
         return txn.fetchall()
 
@@ -84,6 +84,11 @@ def test_gh316_rr3_correction_reduex():
     # Check 1: see that current_shef is good
     result = yield CTX["ACCESSDB"].runInteraction(_check_access_entry)
     assert result[0]["value"] is None
+    ans = (
+        ".AR WACI4 260304 C DH0700/PP 0.00/SF 0.0/SD 6/SW M/DC2603040720\n"
+        ": Comment made here, and here."
+    )
+    assert result[0]["comment"] == ans
 
 
 @pytest_twisted.inlineCallbacks
