@@ -288,6 +288,7 @@ def save_current() -> int:
           probability, depth, qualifier, unit_convention) do update
     set
       valid = EXCLUDED.valid, value = EXCLUDED.value,
+      comment = EXCLUDED.comment,
       product_id = EXCLUDED.product_id, dv_interval = EXCLUDED.dv_interval
     where
      current_shef.station = EXCLUDED.station and
