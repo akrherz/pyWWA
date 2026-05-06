@@ -35,8 +35,8 @@ from datetime import datetime, timezone
 
 import click
 import geopandas as gpd
-import httpx
 import pandas as pd
+import requests
 from psycopg.rows import dict_row
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.util import logger
@@ -60,7 +60,7 @@ def do_download(zipfn):
             "https://www.weather.gov/source/gis/Shapefiles/"
             f"{'County' if zipfn.startswith('c_') else 'WSOM'}/{zipfn}"
         )
-        req = httpx.get(url, timeout=60)
+        req = requests.get(url, timeout=60)
         LOG.info("Downloading %s ...", url)
         if req.status_code != 200:
             LOG.warning("Download %s failed, got %s", zipfn, req.status_code)
@@ -282,7 +282,7 @@ def workflow(pgconn, dt, filename):
         params={"source": source},
         geom_col="geom",
         index_col=None,  # We have dups at the UGC level
-    )
+    )  # type: ignore
     postgis["covered"] = False
     LOG.info(
         "Loaded %s '%s' type rows from the database",

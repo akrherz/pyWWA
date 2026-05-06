@@ -7,7 +7,7 @@ import os
 import subprocess
 from datetime import timedelta
 
-import httpx
+import requests
 from pyiem.util import logger, utc
 
 LOG = logger()
@@ -25,7 +25,7 @@ def main():
         f"netCDF/{now:%Y%m%d_%H}00.gz"
     )
     LOG.info("fetching %s", url)
-    resp = httpx.get(url, timeout=30)
+    resp = requests.get(url, timeout=30)
     if resp.status_code != 200:
         LOG.warning("failed to fetch %s", url)
         return

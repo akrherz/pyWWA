@@ -5,8 +5,8 @@ import sys
 import time
 
 import click
-import httpx
 import pandas as pd
+import requests
 from pyiem.database import get_sqlalchemy_conn, sql_helper
 from pyiem.util import logger, utc
 from tqdm import tqdm
@@ -35,7 +35,7 @@ def main(network):
     stations["found"] = 0
     with (
         open(FN, "wb") as fh,
-        httpx.Client() as client,
+        requests.Session() as client,
         get_sqlalchemy_conn("iem") as conn,
     ):
         # create faked noaaport header
