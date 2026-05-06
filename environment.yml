@@ -14,8 +14,6 @@ dependencies:
  - geopandas
  # talk to google
  - google-api-python-client
- # util scripts
- - httpx
  - imagemagick
  # templating
  - jinja2
@@ -52,6 +50,8 @@ dependencies:
  # For testing
  - pytest-twisted
  - rasterstats
+ # util scripts only
+ - requests
  # interpolation
  - scipy
  # build

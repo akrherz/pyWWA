@@ -1,10 +1,8 @@
 """Review our NWWS-OI file for deltas."""
 
-# stdlib
 import sys
 
-# third party
-import httpx
+import requests
 from pyiem.nws.product import TextProduct
 
 
@@ -20,7 +18,7 @@ def main(argv):
                 continue
             pid = prod.get_product_id()
             uri = f"https://mesonet.agron.iastate.edu/api/1/nwstext/{pid}"
-            req = httpx.get(uri)
+            req = requests.get(uri, timeout=30)
             if req.status_code != 200:
                 print(uri)
 

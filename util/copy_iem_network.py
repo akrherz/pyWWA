@@ -1,10 +1,8 @@
 """For testing purposes, copy IEM network into mesosite."""
 
-# stdlib
 import sys
 
-# Third Party
-import httpx
+import requests
 
 from pywwa.database import get_dbconnc
 
@@ -16,7 +14,7 @@ def main(argv):
     pgconn, cursor = get_dbconnc("mesosite")
     network = argv[1]
 
-    req = httpx.get(f"{SERVICE}?network={network}")
+    req = requests.get(f"{SERVICE}?network={network}")
     jdata = req.json()
     for feat in jdata["features"]:
         site = feat["properties"]

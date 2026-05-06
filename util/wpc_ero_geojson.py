@@ -15,8 +15,8 @@ from copy import deepcopy
 from datetime import datetime, timezone
 
 import geopandas as gpd
-import httpx
 import pandas as pd
+import requests
 import xmpp
 from pyiem.database import get_dbconn, get_sqlalchemy_conn
 from pyiem.nws.products import ero
@@ -303,7 +303,7 @@ def send_jabber(gdf, issue, day):
         try:
             LOG.info("Fetching %s", xtra["twitter_media"])
             # 30 seconds found to be not quite enough
-            httpx.get(xtra["twitter_media"], timeout=45)
+            requests.get(xtra["twitter_media"], timeout=45)
         except Exception as exp:
             print(exp)
         msg.addChild(node=xbot)
