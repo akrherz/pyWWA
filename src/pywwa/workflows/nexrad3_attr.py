@@ -44,6 +44,14 @@ def process_data(data: bytes) -> dict:
 def process(bio: BytesIO) -> dict:
     """Process our data, please"""
     l3 = Level3File(bio)
+    # Prevent impossible data
+    if l3.metadata["vol_time"].year < 1971:
+        LOG.warning(
+            "%s has a bad date of %s, skipping",
+            l3.siteID,
+            l3.metadata["vol_time"],
+        )
+        return {}
     ctx = {
         "nexrad": l3.siteID,
         "ts": l3.metadata["vol_time"].replace(tzinfo=ZoneInfo("UTC")),

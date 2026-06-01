@@ -6,6 +6,12 @@ from pywwa.testing import get_example_filepath
 from pywwa.workflows import nexrad3_attr
 
 
+def test_tdwr_with_1970_date():
+    """Test that we gracefully handle this situation."""
+    with open(get_example_filepath("NCR_20260601_0000_1970date"), "rb") as fh:
+        assert not nexrad3_attr.process(fh)
+
+
 @pytest.mark.parametrize("database", ["mesosite"])
 def test_load_station_table(cursor):
     """Test loading of the station table."""
