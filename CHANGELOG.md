@@ -8,6 +8,7 @@ All notable changes to this library are documented in this file.
 ### API Changes
 
 - Bump minimum python to 3.11
+- Demote unknown station in nexrad3 attribute processing to a log message.
 
 ### New Features
 
