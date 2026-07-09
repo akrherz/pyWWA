@@ -91,8 +91,10 @@ def really_process(txn, ctx):
          U8  154/126 NONE NONE     UNKNOWN       11  47 18.8  23.1  271/ 70
          J0  127/134 NONE NONE     UNKNOWN       24  51 20.2  33.9    NEW
     """
+    if ctx["nexrad"] not in ST:
+        LOG.warning("Unknown station %s", ctx["nexrad"])
+        return 0
     delete_prev_attrs(txn, ctx["nexrad"])
-
     cenlat = float(ST[ctx["nexrad"]]["lat"])
     cenlon = float(ST[ctx["nexrad"]]["lon"])
     latscale = 111137.0
