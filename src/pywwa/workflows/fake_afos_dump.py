@@ -44,6 +44,7 @@ NHC = {
     "URPN14": "REPPNS",
     "UZGL01": "UZGL01",  # email to NHC about this
 }
+ONE_TO_ONE = ["ADMN75", "SEXX01"]
 
 
 def compute_afos(textprod: TextProduct):
@@ -57,6 +58,8 @@ def compute_afos(textprod: TextProduct):
         afos = "PIREP"
     elif ttaaii in GMET:
         afos = GMET[ttaaii]
+    elif ttaaii in ONE_TO_ONE:
+        afos = ttaaii
     elif MIS.match(ttaaii):
         afos = f"MIS{textprod.source[1:]}"
     elif CWA.match(ttaaii):
