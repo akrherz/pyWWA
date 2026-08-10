@@ -10,9 +10,19 @@ from pywwa.testing import get_example_file
 from pywwa.workflows import spammer
 
 
+def test_efu():
+    """Test the handling of EFU tornadoes."""
+    prod = TextProduct(get_example_file("PNS_damage_efu.txt"), ugc_provider={})
+    res = spammer.damage_survey_pns(prod)
+    msg = base64.b64decode(res[2].get_payload()).decode("utf-8")
+    assert "<strong>(EFU)</strong>" in msg
+
+
 def test_tornado_multi():
     """Test the parsing of EF scale."""
-    prod = TextProduct(get_example_file("PNS_damage_multi2.txt"))
+    prod = TextProduct(
+        get_example_file("PNS_damage_multi2.txt"), ugc_provider={}
+    )
     res = spammer.damage_survey_pns(prod)
     pos = 0
     # Ensure order
@@ -25,7 +35,7 @@ def test_tornado_multi():
 
 def test_tornado_damage():
     """Test the parsing of EF scale."""
-    prod = TextProduct(get_example_file("PNS_damage.txt"))
+    prod = TextProduct(get_example_file("PNS_damage.txt"), ugc_provider={})
     res = spammer.damage_survey_pns(prod)
     assert "EF2" in res[0]
 
