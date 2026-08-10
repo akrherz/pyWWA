@@ -52,6 +52,7 @@ dependencies:
  - rasterstats
  # util scripts only
  - requests
+ - websockets
  # interpolation
  - scipy
  # build

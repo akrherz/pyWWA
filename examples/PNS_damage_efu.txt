@@ -1,0 +1,106 @@
+789 
+NOUS43 KDVN 101800
+PNSDVN
+IAZ040>042-051>054-063>068-076>078-087>089-098-099-ILZ001-002-007-
+009-015>018-024>026-034-035-MOZ009-010-110600-
+
+Public Information Statement
+National Weather Service Quad Cities IA/IL
+100 PM CDT Mon Aug 10 2026
+
+
+...NWS Damage Survey for 8/9/2026 Tornado Event in western Illinois...
+
+
+.5 SW Atkinson...
+
+Rating:                 EFU
+Estimated Peak Wind:    Unknown
+Path Length /statute/:  0.14 miles
+Path Width /maximum/:   Unknown
+Fatalities:             0
+Injuries:               0
+
+Start Date:             08/09/2026
+Start Time:             08:27 PM CDT
+Start Location:         4 SW Atkinson / Henry County / IL
+Start Lat/Lon:          41.3658 / -90.0728
+
+End Date:               08/09/2026
+End Time:               08:28 PM CDT
+End Location:           4 SW Atkinson / Henry County / IL
+End Lat/Lon:            41.3674 / -90.071
+
+Survey Summary:
+A short-lived EFU tornado was documented by multiple storm
+chasers southwest of Atkinson. No damage was found when
+coordinating potential surveys with EMs.
+
+.5 ENE German Corner...
+
+Rating:                 EFU
+Estimated Peak Wind:    Unknown
+Path Length /statute/:  0.17 miles
+Path Width /maximum/:   Unknown
+Fatalities:             0
+Injuries:               0
+
+Start Date:             08/09/2026
+Start Time:             08:54 PM CDT
+Start Location:         3 W Johnson Sauk Trail / Henry County / IL
+Start Lat/Lon:          41.3317 / -89.9476
+
+End Date:               08/09/2026
+End Time:               08:55 PM CDT
+End Location:           3 W Johnson Sauk Trail / Henry County / IL
+End Lat/Lon:            41.3337 / -89.9457
+
+Survey Summary:
+A short-lived EFU tornado was documented by multiple storm
+chasers southwest of Annawan. No damage was found when
+coordinating potential surveys with EMs.
+
+.3 NNE German Corner...
+
+Rating:                 EFU
+Estimated Peak Wind:    Unknown
+Path Length /statute/:  0.16 miles
+Path Width /maximum/:   Unknown
+Fatalities:             0
+Injuries:               0
+
+Start Date:             08/09/2026
+Start Time:             09:40 PM CDT
+Start Location:         3 NNE German Corner / Henry County / IL
+Start Lat/Lon:          41.3398 / -89.9971
+
+End Date:               08/09/2026
+End Time:               09:41 PM CDT
+End Location:           3 NNE German Corner / Henry County / IL
+End Lat/Lon:            41.3417 / -89.9954
+
+Survey Summary:
+A short-lived EFU tornado was documented by storm chasers
+southwest of Annawan. No damage was found when coordinating
+potential surveys with EMs.
+
+&&
+
+EF Scale: The Enhanced Fujita Scale classifies tornadoes into the
+following categories:
+
+EF0.....65 to 85 mph
+EF1.....86 to 110 mph
+EF2.....111 to 135 mph
+EF3.....136 to 165 mph
+EF4.....166 to 200 mph
+EF5.....>200 mph
+
+NOTE:
+The information in this statement is preliminary and subject to
+change pending final review of the events and publication in
+NWS Storm Data.
+
+
+$$
+ALE

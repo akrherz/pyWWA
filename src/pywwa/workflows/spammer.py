@@ -9,6 +9,7 @@ from email.mime.text import MIMEText
 
 import click
 from pyiem.nws import product
+from pyiem.nws.product import TextProduct
 from twisted.mail import smtp
 
 # Local
@@ -16,7 +17,7 @@ from pywwa import LOG, common
 from pywwa.ldm import bridge
 
 IOWA_WFOS = ["KDMX", "KDVN", "KARX", "KFSD", "KOAX"]
-EF_RE = re.compile(r"^Rating:\s*EF\s?\-?(?P<num>\d)\s*$", re.M | re.I)
+EF_RE = re.compile(r"^Rating:\s*EF\s?\-?(?P<num>[\dU])\s*$", re.M | re.I)
 
 
 def process_data(data):
@@ -29,7 +30,7 @@ def process_data(data):
         common.email_error(exp, data)
 
 
-def damage_survey_pns(prod):
+def damage_survey_pns(prod: TextProduct):
     """Glean out things, hopefully."""
     subject = f"Damage Survey PNS from {prod.source}"
     plain = prod.unixtext
@@ -42,14 +43,15 @@ def damage_survey_pns(prod):
         f"({prod.get_product_id()})</p>\n<hr>"
     )
     for token in EF_RE.findall(plain):
-        entry = ffs.setdefault(int(token), [])
+        entry = ffs.setdefault(token, [])
         entry.append(1)
     if ffs:
-        maxf = max(ffs.keys())
         table = ""
-        for ef in range(6):
+        maxf = ""
+        for ef in ["U", "0", "1", "2", "3", "4", "5"]:
             if ef not in ffs:
                 continue
+            maxf = ef
             table += f"EF-{ef} ⇒ {len(ffs[ef])}<br />\n"
         subject = f"Damage Survey PNS (Max: EF{maxf}) from {prod.source}"
         maxtext += (
