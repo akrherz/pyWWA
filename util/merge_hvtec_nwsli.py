@@ -47,7 +47,9 @@ def main(argv) -> int:
     updated = 0
     new = 0
     bad = 0
-    for linenum, line in enumerate(req.content.decode("ascii").split("\n")):
+    for linenum, line in enumerate(
+        req.content.decode("ascii", errors="ignore").split("\n")
+    ):
         if line.strip() == "":
             continue
         tokens = line.strip().split(",")
