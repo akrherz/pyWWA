@@ -13,6 +13,7 @@ All notable changes to this library are documented in this file.
 ### New Features
 
 - Add fake AFOS entries for ADMN75 and SEXX01 Earthquake products.
+- Add fake AFOS entries for Canadian SVR and TOR warnings.
 - [SHEF] persist narrative/comments to `current_shef` IEMAccess storage.
 
 ### Bug Fixes

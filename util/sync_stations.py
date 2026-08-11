@@ -9,7 +9,9 @@ def main():
     """Go Main Go."""
     pgconn, cursor = get_dbconnc("mesosite")
 
-    req = requests.get("http://mesonet.agron.iastate.edu/json/stations.php")
+    req = requests.get(
+        "http://mesonet.agron.iastate.edu/json/stations.php", timeout=30
+    )
     jdata = req.json()
     for site in jdata["stations"]:
         if site["network"].find("ASOS") == -1:
