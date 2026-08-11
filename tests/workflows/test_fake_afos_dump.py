@@ -12,6 +12,24 @@ from pywwa.workflows import fake_afos_dump
 
 
 @pytest.mark.parametrize("database", ["afos"])
+def test_canada_svr(cursor):
+    """Test Canadian SVR."""
+    data = get_example_file("canada/WUCN.txt")
+    pywwa.CTX["utcnow"] = utc(2026, 8, 11, 10, 56)
+    tp = fake_afos_dump.really_process_data(cursor, data)
+    assert tp.afos == "SVRWWG"
+
+
+@pytest.mark.parametrize("database", ["afos"])
+def test_canada_tor(cursor):
+    """Test Canadian TOR."""
+    data = get_example_file("canada/WFCN.txt")
+    pywwa.CTX["utcnow"] = utc(2026, 7, 25, 10, 56)
+    tp = fake_afos_dump.really_process_data(cursor, data)
+    assert tp.afos == "TORWWG"
+
+
+@pytest.mark.parametrize("database", ["afos"])
 def test_DSM(cursor):
     """Test fake DSM."""
     tp = fake_afos_dump.really_process_data(

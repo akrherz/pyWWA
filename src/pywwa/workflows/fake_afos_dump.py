@@ -66,6 +66,10 @@ def compute_afos(textprod: TextProduct):
         afos = f"CWA{textprod.source[1:]}"
     elif ttaaii[:4] == "FOUS":
         afos = f"FRH{ttaaii[4:]}"
+    elif ttaaii.startswith("WU"):
+        afos = f"SVR{textprod.source[1:]}"
+    elif ttaaii.startswith("WF"):
+        afos = f"TOR{textprod.source[1:]}"
     elif ttaaii[:2] == "FO" and ttaaii[2:4] in [
         "CA",
         "UE",
