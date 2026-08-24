@@ -28,7 +28,7 @@ cat examples/LWGE86.txt | python parsers/fake_afos_dump.py "${OPTS[@]}" || exit 
 
 cat examples/FFGDMX.txt | python parsers/ffg_parser.py "${OPTS[@]}" || exit 2
 
-gp="AFD ADR AFD2 ADMNFD ADR AT5 VAA TOE"
+gp="AFD AFD2 ADMNFD ADR AT5 VAA TOE"
 for fn in $gp; do
     cat "examples/${fn}.txt" | python parsers/generic_parser.py "${OPTS[@]}" || exit 2
 done
