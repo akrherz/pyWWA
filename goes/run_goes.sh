@@ -1,6 +1,5 @@
 #!/bin/bash
 # Crude restarting script
-set -eo pipefail
 
 while true; do
   python netcdf2png.py "$1"

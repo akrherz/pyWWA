@@ -12,8 +12,8 @@ mm="$(date --date "$1 day ago" +'%m')"
 /opt/miniconda3/envs/prod/bin/python clean_noaaport_text.py || exit 1
 
 cd /mesonet/tmp/offline/text/
-tar -czf "${yyyymmdd}.tgz" "${yyyymmdd}??.txt"
-rm -f "${yyyymmdd}??.txt"
+tar -czf "${yyyymmdd}.tgz" "${yyyymmdd}"??.txt
+rm -f "${yyyymmdd}"??.txt
 mkdir -p "/mesonet/ARCHIVE/raw/noaaport/$yyyy"
 
 rpath="/offline/NOAAPortText/${yyyy}/${mm}"

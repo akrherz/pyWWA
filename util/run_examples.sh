@@ -1,7 +1,7 @@
 #!/bin/bash
 # Run the various examples through their ingest
 set -x
-set -e
+set -eo pipefail
 OPTS=(-l -x -s 1 -e)
 
 cat examples/FD1US1.txt | python parsers/fd_parser.py "${OPTS[@]}" -u 2023-03-09T12:00 || exit 2
