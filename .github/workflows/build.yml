@@ -68,7 +68,7 @@ jobs:
         python util/copy_iem_network.py NWSCLI
         python util/copy_iem_network.py NEXRAD
         python util/copy_iem_network.py TWDR
-        sh util/run_examples.sh
+        bash util/run_examples.sh
         # get pqinsert available as a dummy command
         export PATH=$PATH:$(pwd)/tests/bin
         python -m pytest -vv --cov=pywwa
