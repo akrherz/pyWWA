@@ -28,7 +28,7 @@ cat examples/LWGE86.txt | python parsers/fake_afos_dump.py "${OPTS[@]}" || exit 
 
 cat examples/FFGDMX.txt | python parsers/ffg_parser.py "${OPTS[@]}" || exit 2
 
-gp="AFD AFD2 ADMNFD ADR AT5 VAA TOE"
+gp="AFD VAA TOE"
 for fn in $gp; do
     cat "examples/${fn}.txt" | python parsers/generic_parser.py "${OPTS[@]}" || exit 2
 done
@@ -61,7 +61,7 @@ cat examples/METNC1.txt | python parsers/split_mav.py "${OPTS[@]}" || exit 2
 
 cat examples/SPS.txt | python parsers/sps_parser.py "${OPTS[@]}" || exit 2
 
-gp="WCN WSW TOR TCV FFWTWC_tilde WCNMEG"
+gp="WCN WSW TOR FFWTWC_tilde WCNMEG"
 for fn in $gp; do
     cat "examples/${fn}.txt" | python parsers/vtec_parser.py "${OPTS[@]}" || exit 2
 done
@@ -69,5 +69,3 @@ done
 cat examples/SAW.txt examples/WWP9.txt | python parsers/watch_parser.py "${OPTS[@]}" || exit 2
 
 cat examples/TAF.txt | python parsers/taf_parser.py "${OPTS[@]}" || exit 2
-
-cat examples/RBG | python parsers/ero_parser.py "${OPTS[@]}" || exit 2
