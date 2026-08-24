@@ -1,13 +1,13 @@
+#!/bin/bash
 # Archive NWWS-OI data from 7 days ago
+set -eo pipefail
 
-yyyymmdd=$(date --date "7 day ago" +'%Y%m%d')
-yyyy=$(date --date "7 day ago" +'%Y')
+yyyymmdd="$(date --date "7 day ago" +'%Y%m%d')"
+yyyy="$(date --date "7 day ago" +'%Y')"
 
 cd /mesonet/tmp/nwwsoi/
-tar -czf ${yyyymmdd}.tgz ${yyyymmdd}??.txt
-rm -f ${yyyymmdd}??.txt
+tar -czf "${yyyymmdd}.tgz" "${yyyymmdd}??.txt"
+rm -f "${yyyymmdd}??.txt"
 
 rpath="/offline/NWWSOI/${yyyy}"
-rsync -a --remove-source-files --rsync-path "mkdir -p $rpath && rsync" ${yyyymmdd}.tgz meteor_ldm@akrherz-desktop.agron.iastate.edu:$rpath
-
-# END
+rsync -a --remove-source-files --rsync-path "mkdir -p $rpath && rsync" "${yyyymmdd}.tgz" meteor_ldm@akrherz-desktop.agron.iastate.edu:"$rpath"
