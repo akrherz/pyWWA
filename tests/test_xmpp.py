@@ -3,8 +3,10 @@
 from unittest import mock
 
 import pytest
+import pytest_twisted
 from twisted.words.protocols.jabber import jid
 from twisted.words.xish import domish, xmlstream
+from twisted.words.xish.domish import Element
 
 from pywwa import CTX, xmpp
 
@@ -12,7 +14,16 @@ from pywwa import CTX, xmpp
 @pytest.fixture(autouse=True)
 def reactor():
     """Fixture"""
-    return mock.Mock()
+    my = mock.Mock()
+
+    def callme(func, *args, **kwargs):
+        """Call the function if it is callable."""
+        print("callme", args)
+        return func(*args, **kwargs)
+
+    my.callFromThread = callme
+
+    return my
 
 
 def test_raw_data_in():
@@ -64,21 +75,39 @@ def test_illegal_xml():
     assert xmpp.ILLEGAL_XML_CHARS_RE.sub("", "\003hello") == "hello"
 
 
-def test_send_message(reactor):
-    """Test the sending of messages."""
-    client = xmpp.JabberClient(reactor, jid.JID("root@localhost"), "secret")
+@pytest_twisted.inlineCallbacks
+def test_gh341_double_encode(reactor):
+    """Test that messages already with html entities do not get doubled."""
+    client = xmpp.JabberClient(reactor, jid.JID("root@l"), "s")
     client.authenticated = True
-    client.xmlstream = xmlstream.XmlStream()
-    client.send_message(
-        "hello",
-        "hello",
+    client.xmlstream = mock.Mock()
+
+    captured = []
+
+    def localsend(message: Element):
+        """Local send method to capture the output."""
+        print("localsend", type(message))
+        captured.append(message)
+        print("wrote captured")
+
+    client.xmlstream.send = localsend
+    _ = yield client.send_message(
+        "This is already &gt; OK &",
+        "<strong>Likewise &lt;gt;</strong> This is already &amp; OK",
         {
             "channels": ["XX", "YY"],
-            "t": "x",
-            "twitter_media": "http://thiswillfail.lazz/bogus",
         },
     )
-    client.disconnect(None)
+    sent_message = captured[0]
+    ans = (
+        "<message xmlns='jabber:client' to='iembot@localhost' type='chat'>"
+        "<body>This is already &gt; OK &amp;</body>"
+        "<html xmlns='http://jabber.org/protocol/xhtml-im'>"
+        "<body xmlns='http://www.w3.org/1999/xhtml'>"
+        "<strong>Likewise &lt;gt;</strong> This is already &amp; OK</body>"
+        "</html><x xmlns='nwschat:nwsbot' channels='XX,YY'/></message>"
+    )
+    assert sent_message.toXml() == ans
 
 
 def test_client(reactor):
