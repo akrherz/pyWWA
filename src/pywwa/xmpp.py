@@ -1,11 +1,10 @@
 """XMPP/Jabber Client Interface and Support."""
 
-# stdlib
 import inspect
 import os
 import re
+from html import escape, unescape
 
-# Third Party
 import pyiem
 import treq
 from pyiem.util import utc
@@ -17,7 +16,6 @@ from twisted.words.protocols.jabber import xmlstream
 from twisted.words.protocols.jabber.jid import JID
 from twisted.words.xish import domish, xpath
 
-# Local
 from pywwa import CTX, LOG, SETTINGS, shutdown
 
 # http://stackoverflow.com/questions/7016602
@@ -218,7 +216,7 @@ class JabberClient:
         self.authenticated = False
 
     @inlineCallbacks
-    def send_message(self, body, html, xtra):
+    def send_message(self, body: str, html: str, xtra: dict):
         """
         Send a message to nwsbot.  This message should have
         @param body plain text variant
@@ -232,17 +230,19 @@ class JabberClient:
                 self.send_message,
                 body,
                 html,
-                xtra,  # @UndefinedVariable
+                xtra,
             )
             return
         message = domish.Element(("jabber:client", "message"))
         message["to"] = self.routerjid
         message["type"] = "chat"
 
-        body = ILLEGAL_XML_CHARS_RE.sub("", body)
+        body = escape(unescape(ILLEGAL_XML_CHARS_RE.sub("", body)))
         if html:
             html = ILLEGAL_XML_CHARS_RE.sub("", html)
-        message.addElement("body", None, body)
+        # body may already be HTML entities encoded, so we need to be careful
+        # here not to re-encode them
+        message.addElement("body").addRawXml(body)
         helem = message.addElement(
             "html", "http://jabber.org/protocol/xhtml-im"
         )
