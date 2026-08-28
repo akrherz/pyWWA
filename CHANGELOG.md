@@ -3,6 +3,17 @@
 
 All notable changes to this library are documented in this file.
 
+## Unreleased Version
+
+### API Changes
+
+- The jabber `send_message` will again use HTTPS requests, if specified, as it
+  is believed that present python 3.14 releases are not leaking memory.
+
+### New Features
+
+### Bug Fixes
+
 ## **1.7.2** (18 Jun 2026)
 
 ### API Changes
