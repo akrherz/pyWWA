@@ -76,6 +76,84 @@ def test_illegal_xml():
 
 
 @pytest_twisted.inlineCallbacks
+def test_send_message_with_twitter_media_that_fails(reactor, caplog):
+    """Test that we handle twitter_media requests that fail."""
+    client = xmpp.JabberClient(reactor, jid.JID("root@localhost"), "secret")
+    client.authenticated = True
+    client.xmlstream = mock.Mock()
+    captured = []
+
+    def localsend(message: Element):
+        """Local send method to capture the output."""
+        captured.append(message)
+
+    client.xmlstream.send = localsend
+    iem_url = "https://mesonet_invalid.agron.iastate.edu/data/mesonet.gif"
+    with caplog.at_level("INFO"):
+        yield client.send_message(
+            "body",
+            "html",
+            {
+                "channels": "XX",
+                "twitter_media": iem_url,
+            },
+        )
+    assert "mesonet_invalid" in caplog.text
+    assert captured
+
+
+@pytest_twisted.inlineCallbacks
+def test_send_message_with_twitter_media(reactor):
+    """Test that send_message handles twitter_media correctly."""
+    client = xmpp.JabberClient(reactor, jid.JID("root@localhost"), "secret")
+    client.authenticated = True
+    client.xmlstream = mock.Mock()
+    captured = []
+
+    def localsend(message: Element):
+        """Local send method to capture the output."""
+        captured.append(message)
+
+    client.xmlstream.send = localsend
+    iem_url = "https://mesonet.agron.iastate.edu/data/mesonet.gif"
+    yield client.send_message(
+        "body",
+        "html",
+        {
+            "channels": "XX",
+            "twitter_media": iem_url,
+        },
+    )
+    assert captured
+
+
+@pytest_twisted.inlineCallbacks
+def test_not_authenticated(reactor):
+    """Test the code that does the recursive retry if we are unauthed."""
+    client = xmpp.JabberClient(reactor, jid.JID("root@localhost"), "secret")
+    client.authenticated = False
+    client.xmlstream = mock.Mock()
+
+    # Goose the callLater to set us authenticated
+    def callLater(_delay, func, *args, **kwargs):
+        """Call the function immediately."""
+        client.authenticated = True
+        return func(*args, **kwargs)
+
+    client.reactor.callLater = callLater
+
+    captured = []
+
+    def localsend(message: Element):
+        """Local send method to capture the output."""
+        captured.append(message)
+
+    client.xmlstream.send = localsend
+    yield client.send_message("body", "html", {"channels": "XX"})
+    assert captured
+
+
+@pytest_twisted.inlineCallbacks
 def test_gh341_double_encode(reactor):
     """Test that messages already with html entities do not get doubled."""
     client = xmpp.JabberClient(reactor, jid.JID("root@l"), "s")

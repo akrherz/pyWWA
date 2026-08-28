@@ -216,12 +216,18 @@ class JabberClient:
         self.authenticated = False
 
     @inlineCallbacks
-    def send_message(self, body: str, html: str, xtra: dict):
+    def send_message(self, body: str, html: str, xtra: dict[str, str]):
         """
-        Send a message to nwsbot.  This message should have
-        @param body plain text variant
-        @param html html version of the message
-        @param xtra dictionary of stuff that tags along
+        Portal from workflow functions to send messages to the bot. This also
+        has a side-effect that it attempts to request the twitter_media prior
+        to relaying the message, so to warm a cache.
+
+        Args:
+            body (str): The "plain text" body to send, which needs not be HTML
+                entities encoded.
+            html (str): The HTML content of the message, this should be valid
+                HTML before arriving here.
+            xtra (dict[str, str]): Additional attributes for the message.
         """
         if not self.authenticated:
             LOG.info("No Connection, Lets wait and try later...")
@@ -261,8 +267,9 @@ class JabberClient:
         url = xtra.get("twitter_media")
         if url is not None:
             try:
-                # https leaks memory twisted/treq/issues/380
-                _r = yield treq.get(url.replace("https", "http"), timeout=120)
+                # https memory leak twisted/treq/issues/380, but python 3.14.5
+                # claims it is fixed.
+                _r = yield treq.get(url, timeout=120)
             except Exception as exp:
                 LOG.info("twitter_media request for %s failed: %s", url, exp)
         self.reactor.callFromThread(self.xmlstream.send, message)
