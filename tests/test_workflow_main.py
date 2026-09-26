@@ -26,7 +26,7 @@ def find_mains():
             yield obj
 
 
-@pytest.mark.parametrize("mainmethod", find_mains())
+@pytest.mark.parametrize("mainmethod", list(find_mains()))
 def test_exercise_api(mainmethod):
     """Exercise the main() method via click."""
     runner = CliRunner()

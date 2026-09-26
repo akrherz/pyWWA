@@ -2,21 +2,19 @@
 Chunk the MOS text data into easier to search values.
 """
 
-# stdlib
 import re
 
 import click
 from pyiem.nws import product
 
-# Local
 from pywwa import common
 from pywwa.database import get_database
 from pywwa.ldm import bridge
 
 
-def real_process(txn, data):
-    """Go!"""
-    prod = product.TextProduct(data, ugc_provider={})
+def real_process(txn, data) -> int:
+    """Process the data and return number of database inserts."""
+    prod = product.TextProduct(data, ugc_provider={}, parse_segments=False)
     # replicate functionality in pyiem/nws/products/mos.py
     header = (
         f"000 \n{prod.wmo} {prod.source} {prod.valid:%d%H%M}\n{prod.afos}\n"
@@ -25,6 +23,7 @@ def real_process(txn, data):
     # Since we only do realtime processing, this is OK, I hope
     sections = raw.split("\x1e")
 
+    inserts = 0
     for sect in sections:
         tokens = re.findall(
             r"(^[A-Z0-9_]{3,10}\s+....? V?[0-9]?\.?[0-9]?\s?....? GUIDANCE)",
@@ -51,6 +50,8 @@ def real_process(txn, data):
                 ttaaii,
             ),
         )
+        inserts += 1
+    return inserts
 
 
 @click.command(help=__doc__)

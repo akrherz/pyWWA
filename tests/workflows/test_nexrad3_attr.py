@@ -2,8 +2,15 @@
 
 import pytest
 
+from pywwa.database import get_dbconnc
 from pywwa.testing import get_example_filepath
 from pywwa.workflows import nexrad3_attr
+
+
+@pytest.fixture(autouse=True)
+def station_table(monkeypatch):
+    """Provide each test with an isolated NEXRAD station table."""
+    monkeypatch.setattr(nexrad3_attr, "ST", {})
 
 
 def test_tdwr_with_1970_date():
@@ -21,6 +28,9 @@ def test_load_station_table(cursor):
 @pytest.mark.parametrize("database", ["radar"])
 def test_process(cursor):
     """Test the processing of a level III file."""
+    mconn, mcursor = get_dbconnc("mesosite")
+    nexrad3_attr.load_station_table(mcursor)
+    mconn.close()
     with open(get_example_filepath("NCR_20121127_1413"), "rb") as fh:
         ctx = nexrad3_attr.process(fh)
     assert ctx["nexrad"] == "JAX"
@@ -29,10 +39,22 @@ def test_process(cursor):
 
 
 @pytest.mark.parametrize("database", ["radar"])
-def test_210910_badvil(cursor):
+def test_210910_badvil(cursor, monkeypatch):
     """Test that a missing VIL does not cause issues."""
+    monkeypatch.setattr(
+        nexrad3_attr, "ST", {"LAS": {"lat": 36.1699, "lon": -115.1398}}
+    )
     with open(get_example_filepath("NCR_20210911_0023"), "rb") as fh:
         ctx = nexrad3_attr.process_data(fh.read())
     assert ctx["nexrad"] == "LAS"
     processed = nexrad3_attr.really_process(cursor, ctx)
     assert processed == 2
+
+
+@pytest.mark.parametrize("database", ["radar"])
+def test_unknown_station(cursor):
+    with open(get_example_filepath("NCR_20210911_0023"), "rb") as fh:
+        ctx = nexrad3_attr.process_data(fh.read())
+    assert ctx["nexrad"] == "LAS"
+    processed = nexrad3_attr.really_process(cursor, ctx)
+    assert processed == 0
