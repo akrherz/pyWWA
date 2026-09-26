@@ -31,6 +31,7 @@ def test_process(cursor):
 @pytest.mark.parametrize("database", ["radar"])
 def test_210910_badvil(cursor):
     """Test that a missing VIL does not cause issues."""
+    nexrad3_attr.ST = {"LAS": {"lat": 36.1699, "lon": -115.1398}}
     with open(get_example_filepath("NCR_20210911_0023"), "rb") as fh:
         ctx = nexrad3_attr.process_data(fh.read())
     assert ctx["nexrad"] == "LAS"

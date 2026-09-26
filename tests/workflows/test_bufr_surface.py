@@ -53,7 +53,7 @@ def test_231208_null_bytes(cursor):
 
 
 @pytest.mark.parametrize("database", ["iem"])
-@pytest.mark.parametrize("buffn", generate_testfiles())
+@pytest.mark.parametrize("buffn", list(generate_testfiles()))
 def test_bufr_files_in_examples(cursor, buffn):
     """Parse all our examples."""
     sync_workflow(cursor, buffn)
