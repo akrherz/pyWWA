@@ -39,7 +39,7 @@ def main(network):
         get_sqlalchemy_conn("iem") as conn,
     ):
         # create faked noaaport header
-        fh.write(b"000 \r\r\n")
+        fh.write(b"\001\r\r\n000 \r\r\n")
         fh.write(f"SAUS70 KISU {utc():%d%H%M}\r\r\n".encode("ascii"))
         progress = tqdm(
             stations.iterrows(),
@@ -125,11 +125,12 @@ def main(network):
         proc.wait()
 
     # Insert into LDM for archival
+    # NOTE: The `u` causes an append so that script should be run twice
     subprocess.call(
         [
             "pqinsert",
             "-p",
-            f"data a {utc():%Y%m%d%H%M} text/supp_metars_via_avwxgov.txt "
+            f"data u {utc():%Y%m%d%H%M} text/supp_metars_via_avwxgov.txt "
             "text/supp_metars_via_avwxgov.txt txt",
             FN,
         ],
