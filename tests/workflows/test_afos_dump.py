@@ -1,13 +1,19 @@
 """Test afos_dump."""
 
-# 3rd Party
 import pytest
 from pyiem.util import utc
 
-# Local
 import pywwa
 from pywwa.testing import get_example_file
 from pywwa.workflows import afos_dump
+
+
+@pytest.mark.parametrize("database", ["afos"])
+def test_vona(cursor):
+    """Test processing VONA."""
+    data = get_example_file("VONA.txt")
+    pywwa.CTX["utcnow"] = utc(2026, 10, 16)
+    assert afos_dump.process_data(cursor, data) is not None
 
 
 @pytest.mark.parametrize("database", ["afos"])

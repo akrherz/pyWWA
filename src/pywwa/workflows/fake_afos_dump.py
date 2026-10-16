@@ -15,7 +15,6 @@ from pywwa.workflows.afos_dump import write2memcache
 
 CWA = re.compile("^FA(AK|HI|US)2([1-6])$")
 MIS = re.compile("^FA(AK|HI|US)20$")
-VONA = re.compile("^WM")
 GMET = {
     "LWGE86": "GMTIFR",
     "LWHE00": "GMTTRB",
@@ -65,8 +64,6 @@ def compute_afos(textprod: TextProduct):
         afos = f"MIS{textprod.source[1:]}"
     elif CWA.match(ttaaii):
         afos = f"CWA{textprod.source[1:]}"
-    elif VONA.match(ttaaii):
-        afos = "VONA"
     elif ttaaii[:4] == "FOUS":
         afos = f"FRH{ttaaii[4:]}"
     elif ttaaii.startswith("WU"):
