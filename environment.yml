@@ -2,6 +2,8 @@
 # all its dependencies fullfilled by conda
 dependencies:
  - affine
+ # reported at https://github.com/ywangd/pybufrkit/issues/49
+ - bitstring<5
  - cartopy>=0.18
  - codecov
  - cython
