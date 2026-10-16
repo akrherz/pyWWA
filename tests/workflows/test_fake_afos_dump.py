@@ -1,14 +1,21 @@
 """Test fake_afos_dump."""
 
-# 3rd Party
 import pytest
 from pyiem.nws.products.pirep import Pirep
 from pyiem.util import utc
 
-# Local
 import pywwa
 from pywwa.testing import get_example_file
 from pywwa.workflows import fake_afos_dump
+
+
+@pytest.mark.parametrize("database", ["afos"])
+def test_vona(cursor):
+    """Test that VONA gets assigned."""
+    data = get_example_file("VONA.txt")
+    pywwa.CTX["utcnow"] = utc(2026, 10, 17)
+    tp = fake_afos_dump.really_process_data(cursor, data)
+    assert tp.afos == "VONA"
 
 
 @pytest.mark.parametrize("database", ["afos"])

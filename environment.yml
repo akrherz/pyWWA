@@ -2,6 +2,8 @@
 # all its dependencies fullfilled by conda
 dependencies:
  - affine
+ # reported at https://github.com/ywangd/pybufrkit/issues/49
+ - bitstring<5
  - cartopy>=0.18
  - codecov
  - cython
@@ -33,8 +35,8 @@ dependencies:
  - psycopg
  # Transient via pyIEM
  - pyarrow
- # I'm lame
- # - pyiem
+ # discipline darly
+ - pyiem
  # BUFR processing
  - pybufrkit
  # Models
