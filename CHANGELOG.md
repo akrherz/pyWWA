@@ -14,6 +14,9 @@ All notable changes to this library are documented in this file.
 
 ### Bug Fixes
 
+- Improve the memclient implementation, which sadly remains a poorly scoped
+  one-off for IEM support.
+
 ## **1.7.2** (18 Jun 2026)
 
 ### API Changes
