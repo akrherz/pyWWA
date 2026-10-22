@@ -31,8 +31,12 @@ def _process_one(mc, item):
         if mc is not None:
             try:
                 mc.close()
-            except Exception:
-                pass
+            except Exception as close_exp:
+                LOG.warning(
+                    "memcache close after write failure for %s failed: %s",
+                    key,
+                    close_exp,
+                )
         return None
     return mc
 
