@@ -90,7 +90,7 @@ scripts.pywwa-spammer = "pywwa.workflows.spammer:main"
 version_scheme = "post-release"
 
 [tool.ruff]
-target-version = "py310"
+target-version = "py311"
 line-length = 79
 lint.select = [
   "A",    # builtins
