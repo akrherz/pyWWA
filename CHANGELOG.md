@@ -16,6 +16,7 @@ All notable changes to this library are documented in this file.
 
 - Improve the memclient implementation, which sadly remains a poorly scoped
   one-off for IEM support.
+- Reload station table every 24 hours within DSM parser.
 
 ## **1.7.2** (18 Jun 2026)
 
