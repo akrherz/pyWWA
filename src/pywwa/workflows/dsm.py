@@ -1,12 +1,12 @@
 """ASOS Daily Summary Message Parser ingestor"""
 
+from datetime import UTC, timedelta
 from zoneinfo import ZoneInfo
 
-# 3rd Party
 import click
 from pyiem.nws.products.dsm import parser
+from pyiem.util import utc
 
-# Local
 from pywwa import LOG, common
 from pywwa.database import get_database, get_dbconnc
 from pywwa.ldm import bridge
@@ -14,6 +14,9 @@ from pywwa.ldm import bridge
 # database timezones to cache
 TIMEZONES = {}
 STATIONS = {}
+MEMORY = {
+    "stations_loaded": utc(),
+}
 
 
 def load_stations(txn):
@@ -27,8 +30,10 @@ def load_stations(txn):
             try:
                 TIMEZONES[tzname] = ZoneInfo(tzname)
             except Exception as exp:
-                LOG.info("ZoneInfo does not like tzname: %s %s", tzname, exp)
-                TIMEZONES[tzname] = ZoneInfo("UTC")
+                LOG.warning(
+                    "ZoneInfo does not like tzname: %s %s", tzname, exp
+                )
+                TIMEZONES[tzname] = UTC
         STATIONS[station] = TIMEZONES[tzname]
 
 
@@ -47,13 +52,20 @@ def real_parser(txn, data):
     if prod.warnings:
         common.email_error("\n".join(prod.warnings), data)
 
+    # Should we reload the station table?
+    if utc() - MEMORY["stations_loaded"] > timedelta(hours=24):
+        MEMORY["stations_loaded"] = utc()
+        LOG.warning("Reloading station metadata")
+        load_stations(txn)
+
 
 @click.command(help=__doc__)
 @common.init
 def main(*args, **kwargs):
     """build things up."""
     # sync
-    pgconn, cursor = get_dbconnc("mesosite")
+    pgconn, cursor = get_dbconnc("iem")
     load_stations(cursor)
+    cursor.close()
     pgconn.close()
     bridge(real_parser, dbpool=get_database("iem"))
