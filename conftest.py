@@ -15,6 +15,12 @@ CTX_DEFAULTS["shutdown_delay"] = 1800
 log.startLogging(sys.stdout)
 
 
+@pytest.fixture
+def disable_email():
+    """Prevent parser tests from sending real email."""
+    CTX["disable_email"] = True
+
+
 @pytest.fixture(autouse=True)
 def setup_and_teardown():
     """Something to fix the hacky global namespace mucking I do."""

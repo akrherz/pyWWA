@@ -22,7 +22,7 @@ MEMORY = {
 def load_stations(txn):
     """load station metadata to build a xref."""
     txn.execute("SELECT id, tzname from stations where network ~* 'ASOS'")
-    for row in txn:
+    for row in txn.fetchall():
         # we need four char station IDs
         station = row["id"] if len(row["id"]) == 4 else f"K{row['id']}"
         tzname = row["tzname"]
