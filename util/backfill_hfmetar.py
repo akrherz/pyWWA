@@ -25,14 +25,16 @@ def main():
         f"netCDF/{now:%Y%m%d_%H}00.gz"
     )
     LOG.info("fetching %s", url)
-    resp = requests.get(url, timeout=30)
-    if resp.status_code != 200:
-        LOG.warning("failed to fetch %s", url)
+    try:
+        resp = requests.get(url, timeout=30)
+        resp.raise_for_status()
+    except requests.RequestException as exp:
+        LOG.warning("failed to fetch %s with %s", url, exp)
         return
-    with open(f"{now:%Y%m%d_%H}00.gz", "wb") as fh:
+    with open(f"{now:%Y%m%d_%H}00_partial.gz", "wb") as fh:
         fh.write(resp.content)
-    subprocess.call(["gunzip", f"{now:%Y%m%d_%H}00.gz"])
-    subprocess.call(["mv", f"{now:%Y%m%d_%H}00", testfn])
+    subprocess.call(["gunzip", f"{now:%Y%m%d_%H}00_partial.gz"])
+    subprocess.call(["mv", f"{now:%Y%m%d_%H}00_partial", testfn])
     LOG.warning("backfilled %s", testfn)
 
 
